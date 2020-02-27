@@ -1,0 +1,137 @@
+package com.ibm.cmr.create.batch.util.mq.transformer.impl;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
+import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
+
+/**
+ * Base {@link MessageTransformer} class that handles the following countries:
+ * <ul>
+ * <li>738 - Hong Kong</li>
+ * <li>736 - Macao</li>
+ * </ul>
+ * 
+ * @author JeffZAMORA
+ * 
+ */
+public abstract class GCGTransformer extends APTransformer {
+
+  public GCGTransformer(String cmrIssuingCntry) throws Exception {
+    super(cmrIssuingCntry);
+
+  }
+
+  @Override
+  protected void handleDataDefaults(MQMessageHandler handler) {
+    super.handleDataDefaults(handler);
+
+    String sellingDept = "Z2I0";
+    String ZERO4 = "0000";
+    String ZERO3 = "000";
+    handler.messageHash.put("SellBrnchOff", "738");
+    handler.messageHash.put("InstBrnchOff", "738");
+    handler.messageHash.put("EngrBrnchOff", "738");
+
+    handler.messageHash.put("AbbrLoc", "00 HK");
+
+    String repTeamMemNo = handler.cmrData.getRepTeamMemberNo();
+    if (StringUtils.isEmpty(repTeamMemNo))
+      repTeamMemNo = "";
+    if (StringUtils.isNotEmpty(repTeamMemNo))
+      repTeamMemNo = repTeamMemNo.substring(3, 4);
+
+    String subIndCd = handler.cmrData.getSubIndustryCd();
+    if (StringUtils.isEmpty(subIndCd))
+      subIndCd = "";
+    if (StringUtils.isNotEmpty(subIndCd))
+      subIndCd = subIndCd.substring(0, 1);
+
+    String mrcCode = "";
+    String isu = handler.cmrData.getIsuCd();
+    if ("32".equalsIgnoreCase(isu) || "34".equalsIgnoreCase(isu))
+      mrcCode = "3";
+    else
+      mrcCode = "2";
+
+    handler.messageHash.put("MrktRespCode", mrcCode);
+    String custSubGrp = handler.cmrData.getCustSubGrp();
+
+    // Defect 1725994 added sub scenarios for cross border new in rel2
+    if ("DUMMY".equalsIgnoreCase(custSubGrp) || "INTER".equalsIgnoreCase(custSubGrp) || "XDUMM".equalsIgnoreCase(custSubGrp)
+        || "XINT".equalsIgnoreCase(custSubGrp)) {
+      handler.messageHash.put("SellDept", sellingDept);
+      handler.messageHash.put("InstDept", sellingDept);
+      handler.messageHash.put("EngrDept", sellingDept);
+      mrcCode = "2";
+    } else if ("MKTPC".equalsIgnoreCase(custSubGrp) || "XMKTP".equalsIgnoreCase(custSubGrp)) {
+      mrcCode = "3";
+      handler.messageHash.put("SellBrnchOff", ZERO3);
+      handler.messageHash.put("InstBrnchOff", ZERO3);
+      handler.messageHash.put("EngrBrnchOff", ZERO3);
+      handler.messageHash.put("SellDept", ZERO4);
+      handler.messageHash.put("InstDept", ZERO4);
+      handler.messageHash.put("EngrDept", ZERO4);
+    } else if ("BUSPR".equalsIgnoreCase(custSubGrp) || "XBUSP".equalsIgnoreCase(custSubGrp)) {
+      String bussinessPartner = "Z" + mrcCode + "S" + repTeamMemNo;
+      handler.messageHash.put("SellDept", bussinessPartner);
+      handler.messageHash.put("InstDept", bussinessPartner);
+      handler.messageHash.put("EngrDept", bussinessPartner);
+    } else if ("NRML".equalsIgnoreCase(custSubGrp) || "CROSS".equalsIgnoreCase(custSubGrp) || "AQSTN".equalsIgnoreCase(custSubGrp)
+        || "SOFT".equalsIgnoreCase(custSubGrp) || "ASLOM".equalsIgnoreCase(custSubGrp) || "BLUMX".equalsIgnoreCase(custSubGrp)
+        || "XNRML".equalsIgnoreCase(custSubGrp) || "XAQST".equalsIgnoreCase(custSubGrp) || "XSOFT".equalsIgnoreCase(custSubGrp)
+        || "XASLM".equalsIgnoreCase(custSubGrp) || "XBLUM".equalsIgnoreCase(custSubGrp)) {
+      String bussinessPartner = subIndCd + mrcCode + "T" + repTeamMemNo;
+      handler.messageHash.put("SellDept", bussinessPartner);
+      handler.messageHash.put("InstDept", bussinessPartner);
+      handler.messageHash.put("EngrDept", bussinessPartner);
+    }
+  }
+
+  @Override
+  protected void handleAddressDefaults(MQMessageHandler handler) {
+    super.handleAddressDefaults(handler);
+    Addr addrData = handler.addrData;
+    if (addrData != null && "ZS01".equalsIgnoreCase(addrData.getId().getAddrType())) {
+      String mainAddrUse = getMainAddressUseCA();
+      handler.messageHash.put("AddrUseCA", mainAddrUse);
+    } else {
+      handler.messageHash.put("AddrUseCA", computeAddressUse(handler));
+    }
+
+    String line1 = "";
+    if (!StringUtils.isBlank(addrData.getCustNm1())) {
+      line1 += addrData.getCustNm1();
+    }
+
+    String line2 = "";
+    if (!StringUtils.isBlank(addrData.getCustNm2()) || StringUtils.isBlank(addrData.getCustNm2())) {
+      line2 = addrData.getCustNm2();
+    }
+
+    String line3 = addrData.getAddrTxt();
+    String line4 = addrData.getAddrTxt2();
+
+    handler.messageHash.put("AddrLine1", line1);
+    handler.messageHash.put("AddrLine2", line2);
+    handler.messageHash.put("AddrLine3", line3);
+    handler.messageHash.put("AddrLine4", line4);
+
+  }
+
+  @Override
+  public String getFixedAddrSeqForProspectCreation() {
+    return "A";
+  }
+
+  @Override
+  public String[] getAddressOrder() {
+    return new String[] { "ZS01" };
+  }
+
+  @Override
+  protected String getMainAddressUseCA() {
+    return "1234567ABCDEFGH";
+  }
+}

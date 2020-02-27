@@ -1,0 +1,1070 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE taglib
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+        "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+
+<!-- CMR Taglibs -->
+
+<taglib>
+  <tlib-version>1.3</tlib-version>
+  <jsp-version>1.2</jsp-version>
+  <short-name>dolphin</short-name>
+  <uri>https://cmr.ibm.com/taglib</uri>
+  <description>
+    		<![CDATA[
+    		<p>A tag library for Request CMR</p>
+    		]]>
+  </description>
+
+  <tag>
+    <name>grid</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.GridTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Renders a grid
+    </description>
+    <attribute>
+      <name>id</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The grid's ID
+      </description>
+    </attribute>
+    <attribute>
+      <name>url</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The url to connect to to retrieve the data for this
+        grid
+      </description>
+    </attribute>
+    <attribute>
+      <name>hasCheckbox</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Indicates whether the grid should have a checkbox or
+        not. Defaults to false
+      </description>
+    </attribute>
+    <attribute>
+      <name>checkBoxKeys</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Indicates whether the grid should have a checkbox or
+        not. Defaults to false
+      </description>
+    </attribute>
+    <attribute>
+      <name>span</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>How many columns should be spanned by the grid.
+        Values are 1,2,3,4,5,6, default is 6.
+      </description>
+    </attribute>
+    <attribute>
+      <name>height</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>Height of the grid in pixels (e.g. 400px). Defaults
+        to 400px
+      </description>
+    </attribute>
+    <attribute>
+      <name>usePaging</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the grid will have paging or not. Defaults to
+        true.
+      </description>
+    </attribute>
+    <attribute>
+      <name>loadOnStartup</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the grid will load on start. Defaults to true
+      </description>
+    </attribute>
+    <attribute>
+      <name>width</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>Width in pixels, of the column. Useful in modals. Defaults to the standard width
+      </description>
+    </attribute>
+    <attribute>
+      <name>useFilter</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the grid will have the filter function
+      </description>
+    </attribute>
+    <attribute>
+      <name>innerWidth</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>Width in pixels, of the column. Useful in modals. Defaults to the standard width
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>gridCol</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.GridColumnTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Registers a column on the grid
+    </description>
+    <attribute>
+      <name>field</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Field Name of the column (from the JSON return)
+      </description>
+    </attribute>
+    <attribute>
+      <name>header</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Header of column for this grid
+      </description>
+    </attribute>
+    <attribute>
+      <name>width</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Width of the column, either in px, %, or 'auto'
+      </description>
+    </attribute>
+    <attribute>
+      <name>align</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Column alignment. Can be right, left, or center. Default is left.
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>gridParam</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.GridParamTag</tag-class>
+    <description>Registers a parameter on the grid
+    </description>
+    <attribute>
+      <name>fieldId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Field ID of the column to be used as parameter
+      </description>
+    </attribute>
+    <attribute>
+      <name>value</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Static value to use as parameter. If not specified,
+        will retrieve from the form
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>formatter</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.FormatterTag</tag-class>
+    <body-content>scriptless</body-content>
+    <description>Registers a formatter for the grid column
+    </description>
+    <attribute>
+      <name>functionName</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Specify the name of the function to be used as a
+        formatter, if defined outside.
+        If this is not specified, value
+        will be from the body of the formatter
+      </description>
+    </attribute>
+  </tag>
+  <tag>
+    <name>comparator</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ComparatorTag</tag-class>
+    <body-content>scriptless</body-content>
+    <description>Registers a comparator for the grid column
+    </description>
+    <attribute>
+      <name>functionName</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Specify the name of the function to be used as a
+        comparator, if defined outside.
+        If this is not specified, value
+        will be from the body of the formatter
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>bluepages</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.BluePagesTag</tag-class>
+    <description>Renders a Blue Pages input
+    </description>
+    <attribute>
+      <name>namePath</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The field name of the name field
+      </description>
+    </attribute>
+    <attribute>
+      <name>idPath</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The field name of the intranet ID. This will be
+        hidden on the page. if not specified, a dummy input will be
+        created
+      </description>
+    </attribute>
+    <attribute>
+      <name>model</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The model's name containing the values for the
+        fields.
+      </description>
+    </attribute>
+    <attribute>
+      <name>showId</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>If a read-only ID field should be shown on screen. Defaults to false.
+      </description>
+    </attribute>
+    <attribute>
+      <name>useUID</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Whether to use UID instead of intranet ID
+      </description>
+    </attribute>
+    <attribute>
+      <name>useBothIds</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Whether to use both UID and intranet ID
+      </description>
+    </attribute>
+    <attribute>
+      <name>editableId</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Whether to use an editable text field for the ID or not
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>boxContent</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ContentTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Container for the main div for the page content</description>
+  </tag>
+
+  <tag>
+    <name>section</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.SectionTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Container for one section of the page. May hold fields,
+      buttons, etc</description>
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Adds an ID to the section
+      </description>
+    </attribute>
+    <attribute>
+      <name>hidden</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the section should be hidden by default
+      </description>
+    </attribute>
+    <attribute>
+      <name>alwaysShown</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the section should never be hidden (for
+        validations). Defaults to false.
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>row</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.RowTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Starts a new row within a section</description>
+    <attribute>
+      <name>addBackground</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the section should have a gray background.
+        Defaults to false.
+      </description>
+    </attribute>
+    <attribute>
+      <name>topPad</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>Padding, in pixels, from the previous row. Defaults to none
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>buttonsRow</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ButtonsRowTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Starts a new row within a section</description>
+  </tag>
+
+  <tag>
+    <name>column</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ColumnTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Creates a column within a row</description>
+    <attribute>
+      <name>span</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>How many columns should be spanned by the column.
+        Values are 1,2,3,4,5,6
+      </description>
+    </attribute>
+    <attribute>
+      <name>width</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>Width in pixels, of the column. Useful in modals. Defaults to the standard width
+      </description>
+    </attribute>
+    <attribute>
+      <name>containerForField</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Field ID of the label-input conained by this column
+      </description>
+    </attribute>
+    <attribute>
+      <name>forGEO</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>GEO Code where this field is used. Reference to CMR Issuing Countries under GEO_DEF table
+      </description>
+    </attribute>
+    <attribute>
+      <name>forCountry</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>CMR Issuing Country code where this field is used, if specific to a set of countries. Comma-separated codes is acceptable, no spaces
+      </description>
+    </attribute>
+    <attribute>
+      <name>exceptForCountry</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>CMR Issuing Country code where this field is NOT used, if specific to a set of countries. Comma-separated codes is acceptable, no spaces
+      </description>
+    </attribute>
+    <attribute>
+      <name>exceptForGEO</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>GEO code where this field is NOT used, if specific to a set of countries. Comma-separated codes is acceptable, no spaces
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>tabs</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.TabContainerTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Container for the main div for the page content</description>
+    <attribute>
+      <name>noPad</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the tab container will have top padding
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>tab</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.TabTag</tag-class>
+    <description>Container for the main div for the page content</description>
+    <attribute>
+      <name>id</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The tab header's Id
+      </description>
+    </attribute>
+    <attribute>
+      <name>label</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The tab's label
+      </description>
+    </attribute>
+    <attribute>
+      <name>onClick</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Javascript function to execute when the tab is
+        clicked. Defaults to 'switchTabs'
+      </description>
+    </attribute>
+    <attribute>
+      <name>active</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the tab is currently highlighted. Defaults to
+        false.
+      </description>
+    </attribute>
+    <attribute>
+      <name>sectionId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The id of the section to show when this tab is clicked
+      </description>
+    </attribute>
+    <attribute>
+      <name>gridIds</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Comma-separated list of grids that is part of this tab's section
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>note</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.NoteTag</tag-class>
+    <description>Note text tag</description>
+    <attribute>
+      <name>text</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The note's text
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>info</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.InfoTag</tag-class>
+    <description>Renders an information bubble</description>
+    <attribute>
+      <name>text</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The information text
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>modelAction</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ModelActionTag</tag-class>
+    <description>Renders the hidden items for the form's model</description>
+    <attribute>
+      <name>formName</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Name of the containing form
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>model</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ModelTag</tag-class>
+    <description>Constructs the _pagemodel variable of the model baed on
+      the name</description>
+    <attribute>
+      <name>model</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The model name from the request
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>button</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ButtonTag</tag-class>
+    <description>Tag for creating buttons</description>
+    <attribute>
+      <name>onClick</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Javascript to execute when the button is clicked
+      </description>
+    </attribute>
+    <attribute>
+      <name>label</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Label of the button
+      </description>
+    </attribute>
+    <attribute>
+      <name>highlight</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Indicates whether the button should be highlighted or
+        not. Defaults to false.
+      </description>
+    </attribute>
+    <attribute>
+      <name>pad</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Indicates whether the button should have left
+        padding, used for multiple buttons. Defaults to false.
+      </description>
+    </attribute>
+    <attribute>
+      <name>styleClass</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Additional style for the button
+      </description>
+    </attribute>
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the button
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>label</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.LabelTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Creates a label container</description>
+    <attribute>
+      <name>fieldId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the field referenced by the label.
+      </description>
+    </attribute>
+    <attribute>
+      <name>forRadioOrCheckbox</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>If the label is for a radiobutton or checkbox. Defaults to false.
+      </description>
+    </attribute>
+    <attribute>
+      <name>cssClass</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>CSS Class to use for the label
+      </description>
+    </attribute>
+    <attribute>
+      <name>pageMgrFieldId</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Field ID from the PageManager if existing
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>spinner</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.SpinnerTag</tag-class>
+    <description>Creates a spinner</description>
+    <attribute>
+      <name>fieldId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the field referenced by the spinner. Will
+        ALWAYS be suffixed with _spinner.
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>modal</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ModalTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Renders a modal on the page
+    </description>
+    <attribute>
+      <name>id</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The modal's' ID
+      </description>
+    </attribute>
+    <attribute>
+      <name>title</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The modal's title
+      </description>
+    </attribute>
+    <attribute>
+      <name>widthId</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The modal's widthId, which could be 980, 750, 570,
+        390. Defaults to 390px
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>hr</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.HrTag</tag-class>
+    <description>Renders an HR (line)</description>
+  </tag>
+
+  <tag>
+    <name>date</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.DateTag</tag-class>
+    <description>Creates a date tag</description>
+    <attribute>
+      <name>path</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Path/Field Name of the field from the model
+      </description>
+    </attribute>
+    <attribute>
+      <name>format</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Date Format to use. Defaults to System Date Format
+      </description>
+    </attribute>
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the field. Defaults to the path
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>memoLimit</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.MemoLimitTag</tag-class>
+    <description>Creates the indicator for characters remaining for text areas</description>
+    <attribute>
+      <name>fieldId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the text area to hoop to
+      </description>
+    </attribute>
+    <attribute>
+      <name>maxLength</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Maximum length of the text area contents
+      </description>
+    </attribute>
+  </tag>
+  <tag>
+    <name>search</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.SearchTag</tag-class>
+    <description>Creates the image which will open the search for code screen</description>
+    <attribute>
+      <name>fieldId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the field which will contain the code
+      </description>
+    </attribute>
+    <attribute>
+      <name>queryId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the typeahead query. This should exist in cmr-queries as TYPEAHEAD.[ID]
+      </description>
+    </attribute>
+    <attribute>
+      <name>title</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The type of the record to search for. Defaults to 'Code'
+      </description>
+    </attribute>
+    <attribute>
+      <name>textId</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID of the span or div containing the description of the code searched.
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>field</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.FieldTag</tag-class>
+    <description>Creates a field which is based on the PageManager's values.</description>
+    <attribute>
+      <name>fieldId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Field ID of the field (in FIELD_LBL / FIELD_INFO)
+      </description>
+    </attribute>
+    <attribute>
+      <name>path</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The path of the field (which should be equal to the name in the model)
+      </description>
+    </attribute>
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID
+      </description>
+    </attribute>
+    <attribute>
+      <name>size</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Maxlength
+      </description>
+    </attribute>
+    <attribute>
+      <name>tabId</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Tab ID of the tab where the field belongs to
+      </description>
+    </attribute>
+    <attribute>
+      <name>model</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Model attribute. Required for BluePages type
+      </description>
+    </attribute>
+    <attribute>
+      <name>idPath</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>ID path. Optional for BluePages type
+      </description>
+    </attribute>
+    <attribute>
+      <name>rows</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Rows. Required for Memo type
+      </description>
+    </attribute>
+    <attribute>
+      <name>cols</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Cols. Required for Memo type
+      </description>
+    </attribute>
+    <attribute>
+      <name>placeHolder</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Placeholder for text fields.
+      </description>
+    </attribute>
+    <attribute>
+      <name>dropdownFieldId</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Overrides the Field ID to use to retrieve dropdown values, if the field is a dropdown
+      </description>
+    </attribute>
+    <attribute>
+      <name>breakAfter</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Used for displaying checkboxes, will add a line break after the specified number of choices have been generated
+      </description>
+    </attribute>
+  </tag>
+  <tag>
+    <name>fieldLabel</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.FieldLabelTag</tag-class>
+    <description>Gets the label based on the Page Manager's values</description>
+    <attribute>
+      <name>fieldId</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Field ID of the field (in FIELD_LBL / FIELD_INFO)
+      </description>
+    </attribute>
+    <attribute>
+      <name>defaultLabel</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Label to use if label is not found
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>delta</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.DeltaTag</tag-class>
+    <description>Renders the delta icon showing the changed value</description>
+    <attribute>
+      <name>text</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The title/tooltip of the image
+      </description>
+    </attribute>
+    <attribute>
+      <name>oldValue</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Old value of the field
+      </description>
+    </attribute>
+    <attribute>
+      <name>code</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>Whether the value has code or not (L/R)
+      </description>
+    </attribute>
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>The ID of the icon
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>window</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.WindowTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Renders a window template
+    </description>
+  </tag>
+  <tag>
+    <name>windowClose</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.WindowCloseTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Renders the close button for windows
+    </description>
+  </tag>
+
+
+  <tag>
+    <name>view</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.ViewTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Wraps a section that should be shown for a particular view only</description>
+    <attribute>
+      <name>forGEO</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>GEO Code where this field is used. Reference to CMR Issuing Countries under GEO_DEF table
+      </description>
+    </attribute>
+    <attribute>
+      <name>forCountry</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>CMR Issuing Country code where this field is used, if specific to a set of countries. Comma-separated codes is acceptable, no spaces
+      </description>
+    </attribute>
+    <attribute>
+      <name>exceptForCountry</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>CMR Issuing Country code where this field is NOT used, Reference to CMR Issuing Countries under GEO_DEF table. Comma-seperated list is acceptable, no spaces
+      </description>
+    </attribute>
+    <attribute>
+      <name>exceptForGEO</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>GEO code where this field is NOT used, if specific to a set of countries. Comma-separated codes is acceptable, no spaces
+      </description>
+    </attribute>
+  </tag>
+
+  <!--  New tags for checklist -->
+  <tag>
+    <name>checklist</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.CheckListTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Creates a checklist table</description>
+    <attribute>
+      <name>title1</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Main Title 1
+      </description>
+    </attribute>
+    <attribute>
+      <name>title2</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Main Title 2
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>chk-section</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.CheckListSectionTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Creates a checklist questionnaire section</description>
+    <attribute>
+      <name>name</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Name of the section
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>chk-block</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.CheckListBlockTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Creates a checklist block (non-questoinnaire sections)</description>
+    <attribute>
+      <name>addSpace</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether some padding will be added. Defaults to true
+      </description>
+    </attribute>
+    <attribute>
+      <name>boldText</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the label will be in bold. Defaults to true
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>chk-lbl-field</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.CheckListLabelFieldTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Creates a line with label and field</description>
+    <attribute>
+      <name>label</name>
+      <required>true</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Label 
+      </description>
+    </attribute>
+    <attribute>
+      <name>labelWidth</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Width of the label column
+      </description>
+    </attribute>
+    <attribute>
+      <name>addSpace</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether some padding will be added. Defaults to true
+      </description>
+    </attribute>
+    <attribute>
+      <name>boldLabel</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>Whether the label will be in bold. Defaults to true
+      </description>
+    </attribute>
+  </tag>
+
+  <tag>
+    <name>chk-entry</name>
+    <tag-class>com.ibm.cio.cmr.request.ui.taglib.CheckListEntryTag</tag-class>
+    <body-content>JSP</body-content>
+    <description>Creates a checklist entry</description>
+    <attribute>
+      <name>section</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String</type>
+      <description>Section of the entry (A,B,C,D)
+      </description>
+    </attribute>
+    <attribute>
+      <name>number</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Integer</type>
+      <description>The number of the entry (1-10)
+      </description>
+    </attribute>
+    <attribute>
+      <name>dplField</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>If this is to generate the DPL Check item
+      </description>
+    </attribute>
+    <attribute>
+      <name>matchField</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.Boolean</type>
+      <description>if this is to generate the potential match item
+      </description>
+    </attribute>
+  </tag>
+
+</taglib>

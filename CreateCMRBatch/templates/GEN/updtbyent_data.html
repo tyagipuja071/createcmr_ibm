@@ -1,0 +1,24 @@
+<span class="tablehead">Request Details</span>
+<table>
+  <tr>
+    <td width="150px">Request ID:</td>
+    <td width="150px">${admin.id.reqId}</td>
+    <td width="150px">Requester:</td>
+    <td width="150px">${admin.requesterNm}</td>
+    <td width="150px">Request Type:</td>
+    <td width="150px">
+#if ( $admin.reqType == "M")
+Mass Update
+#elseif ( $admin.reqType == "N")
+Mass Create
+#elseif ( $admin.reqType == "R")
+Reactivate
+#elseif ( $admin.reqType == "D")
+Delete
+#elseif ( $admin.reqType == "E")
+Update by Enterprise #
+#end
+    </td>
+  </tr>
+
+</table>

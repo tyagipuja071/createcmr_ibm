@@ -1,0 +1,130 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:ehcache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.1.xsd
+           http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd 
+			http://www.springframework.org/schema/tx  
+			http://www.springframework.org/schema/tx/spring-tx.xsd 
+			http://www.springframework.org/schema/aop 
+			http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+			http://www.springframework.org/schema/cache 
+			http://www.springframework.org/schema/cache/spring-cache-3.1.xsd">
+
+	<!-- Scans the classpath for annotated components that will be auto-registered 
+		as Spring beans. For example @Controller and @Service. Make sure to set the 
+		correct base-package -->
+	<context:component-scan base-package="com.ibm.cio.cmr.request.controller" />
+	<context:component-scan base-package="com.ibm.cio.cmr.request.service" />
+	<context:component-scan base-package="com.ibm.cio.cmr.request.user" />
+	<context:component-scan base-package="com.ibm.cio.cmr.request.model" />
+
+	<!-- Used to tell the MVC dispatcher servlet to treat static html content 
+		different from dynamic & To serve these resources with a 1-year future expiration 
+		to ensure maximum use of the browser cache and a reduction in HTTP requests 
+		made by the browser, More here : http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-static-resources -->
+	<mvc:resources mapping="/resources/**" location="/resources/"
+		cache-period="31556926" />
+
+	<!-- below 2 lines goes with <mvc:resources> to get rid of some exceptions 
+		more : http://stackoverflow.com/questions/1483063/spring-mvc-3-and-handling-static-content-am-i-missing-something -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean id="jacksonMessageConverter"
+				class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+				<property name="supportedMediaTypes" value="application/json" />
+			</bean>
+			<bean id="marshallingHttpMessageConverter"
+				class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+				<property name="marshaller" ref="xStream" />
+				<property name="unmarshaller" ref="xStream" />
+				<property name="supportedMediaTypes" value="application/xml" />
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<mvc:default-servlet-handler
+		default-servlet-name="Spring MVC Dispatcher Servlet" />
+
+
+	<!-- Convenience subclass of UrlBasedViewResolver that supports TilesView 
+		(i.e. Tiles definitions) and custom subclasses of it. -->
+	<!-- Don't forget to set the order if you declared other ViewResolvers -->
+	<!-- See http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/servlet/view/tiles2/TilesViewResolver.html -->
+
+
+	<bean id="tilesConfigurer"
+		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/tiles-def.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="xStream" class="org.springframework.oxm.xstream.XStreamMarshaller"
+		scope="prototype">
+		<property name="autodetectAnnotations" value="true" />
+		<property name="encoding" value="UTF-8" />
+		<property name="aliases">
+			<map />
+		</property>
+		<property name="supportedClasses">
+			<list />
+		</property>
+	</bean>
+
+
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="order" value="1" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<entry key="process" value="application/xml" />
+			</map>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<!-- JSON View -->
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"></bean>
+
+				<!-- xStream XML View -->
+				<bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+					<property name="marshaller" ref="xStream" />
+				</bean>
+			</list>
+		</property>
+		<property name="ignoreAcceptHeader" value="true" />
+	</bean>
+
+	<!-- If no extension matched, use JSP view -->
+	<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="order" value="2" />
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.tiles2.TilesView" />
+	</bean>
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"
+		scope="singleton">
+		<property name="jndiName">
+			<value>jdbc/rdc</value>
+		</property>
+		<property name="cache">
+			<value>false</value>
+		</property>
+	</bean>
+	<!-- <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"> 
+		<property name="persistenceUnitName" value="RDC" /> <property name="dataSource" 
+		ref="dataSource" /> <property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" 
+		/> <property name="jpaVendorAdapter"> <bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter"> 
+		<property name="showSql" value="true" /> <property name="databasePlatform" 
+		value="org.apache.openjpa.jdbc.sql.DB2Dictionary" /> </bean> </property> 
+		</bean> -->
+
+
+</beans>

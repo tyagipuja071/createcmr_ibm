@@ -1,0 +1,27 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+<hr>
+${dataFields}
+
+<br>
+<br>
+<div class="signature">
+  A copy of the list of CMRs included on this request has been attached for reference.
+</div>
+<br>
+${signature}
+</body>
+</html>

@@ -1,0 +1,254 @@
+/**
+ * 
+ */
+package com.ibm.cio.cmr.request.service.requestentry;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
+
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
+import com.ibm.cio.cmr.request.model.requestentry.CopyAddressModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.BaseService;
+import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+
+/**
+ * @author Jeffrey Zamora
+ * 
+ */
+@Component
+public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
+
+  @Override
+  protected Logger initLogger() {
+    return Logger.getLogger(CopyAddressService.class);
+  }
+
+  @Override
+  protected void performTransaction(CopyAddressModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
+
+    this.log
+        .debug("Retrieving address [Request ID: " + model.getReqId() + " Type: " + model.getAddrType() + " Sequence: " + model.getAddrSeq() + "]");
+    String sql = ExternalizedQuery.getSql("ADDRESS.COPY.GETSOURCE");
+
+    GEOHandler handler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
+
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", model.getReqId());
+    query.setParameter("ADDR_TYPE", model.getAddrType());
+    if (StringUtils.isBlank(model.getAddrSeq()) && !(model.getCmrIssuingCntry().equals("788"))) {
+      if (model.getCmrIssuingCntry().equals(SystemLocation.SWITZERLAND)) {
+        query.setParameter("ADDR_SEQ", "00001");
+      } else {
+        query.setParameter("ADDR_SEQ", "1");
+      }
+    } else if (StringUtils.isBlank(model.getAddrSeq()) && (model.getCmrIssuingCntry().equals("788"))) {
+      String addrseq = "";
+      switch (model.getAddrType()) {
+      case "ZS01":
+        addrseq = "99901";
+        break;
+      case "ZD01":
+        addrseq = "20801";
+        break;
+      case "ZP01":
+        addrseq = "29901";
+        break;
+      case "ZI01":
+        addrseq = "20701";
+        break;
+      default:
+        addrseq = "";
+      }
+      query.setParameter("ADDR_SEQ", addrseq);
+    } else {
+      query.setParameter("ADDR_SEQ", model.getAddrSeq());
+    }
+    Addr sourceAddr = query.getSingleResult(Addr.class);
+    entityManager.detach(sourceAddr);
+
+    sql = ExternalizedQuery.getSql("ADDRESS.COPY.GETADDRESSES");
+    query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", model.getReqId());
+    query.setParameter("ADDR_TYPE", model.getAddrType());
+    query.setParameter("ADDR_SEQ", model.getAddrSeq());
+    List<String> typesToCopy = Arrays.asList(model.getCopyTypes());
+    this.log.debug("Copying address types " + typesToCopy.toString());
+    List<Addr> results = query.getResults(Addr.class);
+    List<String> copiedTypes = new ArrayList<String>();
+
+    List<String> createOnlyTypes = !StringUtils.isEmpty(model.getCreateOnly()) ? Arrays.asList(model.getCreateOnly().split("[|]"))
+        : new ArrayList<String>();
+
+    Map<String, Integer> seqMap = new HashMap<String, Integer>();
+    if (StringUtils.isNumeric(model.getAddrSeq())) {
+      seqMap.put(model.getAddrType(), StringUtils.isBlank(model.getAddrSeq()) ? 1 : Integer.parseInt(model.getAddrSeq()));
+    }
+    if (results != null) {
+
+      String sapNo = null;
+      String importInd = null;
+      String createDt = null;
+      int seq = 0;
+      for (Addr copyAddr : results) {
+
+        if (!seqMap.containsKey(copyAddr.getId().getAddrType())) {
+          seqMap.put(copyAddr.getId().getAddrType(), 0);
+        }
+        if (StringUtils.isNumeric(copyAddr.getId().getAddrSeq())) {
+          seq = seqMap.get(copyAddr.getId().getAddrType());
+          if (seq < Integer.parseInt(copyAddr.getId().getAddrSeq())) {
+            seqMap.put(copyAddr.getId().getAddrType(), Integer.parseInt(copyAddr.getId().getAddrSeq()));
+          }
+        }
+
+        sapNo = copyAddr.getSapNo();
+        importInd = copyAddr.getImportInd();
+        createDt = copyAddr.getRdcCreateDt();
+        if (typesToCopy.contains(copyAddr.getId().getAddrType()) && !createOnlyTypes.contains(copyAddr.getId().getAddrType())) {
+          sourceAddr.setId(copyAddr.getId());
+          PropertyUtils.copyProperties(copyAddr, sourceAddr);
+
+          copyAddr.setSapNo(sapNo);
+          copyAddr.setImportInd(importInd);
+          copyAddr.setRdcCreateDt(createDt);
+
+          if (handler != null) {
+            handler.doBeforeAddrSave(entityManager, copyAddr, model.getCmrIssuingCntry());
+          }
+
+          if (!"N".equals(importInd)) {
+            boolean changed = RequestUtils.isUpdated(entityManager, copyAddr, model.getCmrIssuingCntry());
+            copyAddr.setChangedIndc(changed ? "Y" : null);
+          } else {
+            copyAddr.setChangedIndc(null);
+          }
+          updateEntity(copyAddr, entityManager);
+          if (!copiedTypes.contains(copyAddr.getId().getAddrType())) {
+            copiedTypes.add(copyAddr.getId().getAddrType());
+          }
+        }
+      }
+    }
+    for (String toCopy : typesToCopy) {
+      if (!copiedTypes.contains(toCopy) && (!toCopy.equals(model.getAddrType()) || createOnlyTypes.contains(model.getAddrType()))) {
+        this.log.debug("Creating new address type " + toCopy);
+        AddrPK newPk = new AddrPK();
+        Addr newAddr = new Addr();
+        String addrSeq = null;
+        String newAddrSeq = null;
+        newPk.setReqId(model.getReqId());
+        newPk.setAddrType(toCopy);
+        if (!seqMap.containsKey(toCopy) || seqMap.get(toCopy) == 0) {
+          newPk.setAddrSeq("1");
+        } else {
+          newPk.setAddrSeq((seqMap.get(toCopy) + 1) + "");
+        }
+
+        String processingType = PageManager.getProcessingType(model.getCmrIssuingCntry(), "U");
+        if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && handler != null) {
+          AddressService addressService = new AddressService();
+          newAddrSeq = addressService.generateAddrSeqLD(entityManager, newPk.getAddrType(), model.getReqId(), model.getCmrIssuingCntry(), handler);
+        }
+
+        if (StringUtils.isEmpty(newAddrSeq)) {
+          newAddrSeq = handler.generateModifyAddrSeqOnCopy(entityManager, newPk.getAddrType(), model.getReqId(), newPk.getAddrSeq(),
+              model.getCmrIssuingCntry());
+        }
+
+        if (!StringUtils.isEmpty(newAddrSeq)) {
+          newPk.setAddrSeq(newAddrSeq);
+        }
+
+        /*
+         * if ("788".equals(model.getCmrIssuingCntry())) { if
+         * (newPk.getAddrType().equals("ZS01")) { newPk.setAddrSeq("99901"); }
+         * if (newPk.getAddrType().equals("ZI01")) { newPk.setAddrSeq("20701");
+         * } if (newPk.getAddrType().equals("ZP01")) {
+         * newPk.setAddrSeq("29901"); } if (newPk.getAddrType().equals("ZD01"))
+         * { addrSeq = generateShippingAddrSeqNLCopy(entityManager,
+         * newPk.getAddrType(), model.getReqId()); newPk.setAddrSeq(addrSeq); }
+         * }
+         */
+        PropertyUtils.copyProperties(newAddr, sourceAddr);
+        newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+        newAddr.setSapNo(null);
+        newAddr.setRdcCreateDt(null);
+        newAddr.setId(newPk);
+
+        if (handler != null) {
+          handler.doBeforeAddrSave(entityManager, newAddr, model.getCmrIssuingCntry());
+        }
+
+        createEntity(newAddr, entityManager);
+      }
+    }
+  }
+
+  @Override
+  protected List<CopyAddressModel> doSearch(CopyAddressModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
+    return null;
+  }
+
+  @Override
+  protected Addr getCurrentRecord(CopyAddressModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
+    return null;
+  }
+
+  @Override
+  protected Addr createFromModel(CopyAddressModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException {
+    return null;
+  }
+
+  // NL(788) Shipping addr seq logic should work while copying of address
+  @Deprecated
+  protected String generateShippingAddrSeqNLCopy(EntityManager entityManager, String addrType, long reqId) {
+    int addrSeq = 20800;
+    String maxAddrSeq = null;
+    String newAddrSeq = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "20800");
+
+      if (!(Integer.valueOf(maxAddrSeq) >= 20800 && Integer.valueOf(maxAddrSeq) <= 20849)) {
+        maxAddrSeq = "";
+      }
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "20800";
+      }
+      try {
+        addrSeq = Integer.parseInt(maxAddrSeq);
+      } catch (Exception e) {
+        // if returned value is invalid
+      }
+      addrSeq++;
+    }
+    newAddrSeq = Integer.toString(addrSeq);
+    return newAddrSeq;
+  }
+
+}

@@ -1,0 +1,30 @@
+<html>
+<head>
+<style>
+body {
+  font-family: Calibri;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+#if ( $admin.reqType == "C" )
+The approval request for <strong>${admin.mainCustNm1} $!{admin.mainCustNm2}</strong> with Request ID ${admin.id.reqId} sent to <strong>${approval.approverNm}</strong> has been updated. 
+#elseif ( $admin.reqType == "U" )
+The approval request for <strong>${admin.mainCustNm1} $!{admin.mainCustNm2}</strong> with Request ID ${admin.id.reqId} sent to <strong>${approval.approverNm}</strong> has been updated. 
+#else
+The approval request for Request ID ${admin.id.reqId} sent to <strong>${approval.approverNm}</strong> has been updated. 
+#end
+<br>The approval is for: ${type.title}
+<br>The approval status is now: ${approval.currentStatus}
+<br>
+<br>
+Comments:
+<br>
+$!{approval.comments} 
+<br>
+<br>
+To view the request, please click <a href="${link}">here</a>.
+
+</body>
+</html>

@@ -1,0 +1,356 @@
+img.auto-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  cursor: pointer;
+  padding-left: 5px
+}
+
+img.auto-icon-2 {
+  width: 17px;
+  height: 17px;
+  vertical-align: middle;
+  cursor: pointer;
+  padding-left: 5px
+}
+
+div.auto-desc {
+  font-size: 13px;
+  line-height: 20px;
+  border: 1px Solid #AAA;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+textarea.auto-desc {
+  font-size: 13px;
+  line-height: 20px;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", "HelvLightIBM", Arial, sans-serif;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+table.meta-table {
+  background: #EEEEEE;
+  border-radius: 10px;
+}
+
+table.meta-table th {
+  text-align: right;
+  padding-right: 10px;
+  width: 20%;
+}
+
+input.chk-warn {
+  box-shadow: 2px 2px Red;
+}
+
+input.chk-go {
+  box-shadow: 2px 2px green;
+}
+
+table.element-table th,table.element-table td {
+  text-align: center;
+  font-size: 12px;
+}
+
+table.element-table tr {
+  height: 30px !important;
+}
+
+table.element-table tr:hover {
+  background: #DDD;
+}
+
+table.element-table select {
+  border: 1px Solid #666;
+  border-radius: 4px;
+  padding: 3px;
+  font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue","HelvLightIBM",Arial,sans-serif;
+}
+
+select.auto-select  {
+  border: 1px Solid #666;
+  border-radius: 4px;
+  padding: 3px;
+  font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue","HelvLightIBM",Arial,sans-serif;
+}
+
+select.auto-select option {
+  font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue","HelvLightIBM",Arial,sans-serif !important;
+}
+
+.left {
+  text-align: left !important;
+}
+
+.cred {
+  color: red;
+}
+
+span.prefix-gbl {
+  font-size: 9px;
+  font-weight: bold;
+  padding: 1px;
+  border: 1px Solid #AAA;
+  border-radius: 2px;
+  background: rgb(205, 235, 142);
+  margin-right: 3px;
+  min-width: 10px;
+  text-align: center;
+}
+
+span.prefix-cntry {
+  font-size: 9px;
+  font-weight: bold;
+  padding: 1px;
+  border: 1px Solid #AAA;
+  border-radius: 2px;
+  background: rgb(122, 188, 255);
+  margin-right: 3px;
+  min-width: 10px;
+  text-align: center;
+}
+
+a.auto-action {
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px;
+  border: 1px Solid #AAA;
+  border-radius: 5px;
+  background: #EEE;
+  box-shadow: 2px 2px #DDD;
+  font-weight: bold;
+}
+
+a.auto-h {
+  margin-left: 10px;
+  background: white;
+  color: green;
+}
+
+a.pad {
+  margin-left: 10px;
+}
+
+div.mapping-panel {
+  width: 100%;
+  display: inline-flex;
+  padding: 20px;
+}
+
+div.to-add-panel,div.to-map-panel {
+  height: 300px;
+  overflow: auto;
+  padding: 20px;
+  width: 250px;
+  margin: 10px;
+  border: 1px Solid #333;
+  border-radius: 10px;
+}
+
+div.to-add-choice,div.to-map-choice {
+  border: 1px Solid #CCC;
+  padding: 3px;
+  margin-bottom: 2px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+div.to-map-choice {
+  background: rgb(222, 239, 255); /* Old browsers */
+  background: -moz-linear-gradient(top, rgba(222, 239, 255, 1) 0%, rgba(152, 190, 222, 1) 100% ); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, rgba(222, 239, 255, 1) 0%, rgba(152, 190, 222, 1) 100% ); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, rgba(222, 239, 255, 1) 0%, rgba(152, 190, 222, 1) 100% );
+  filter: progid : DXImageTransform.Microsoft.gradient (   startColorstr = '#deefff', endColorstr = '#98bede', GradientType = 0 ); /* IE6-9 */
+  font-size: bold;
+}
+
+div.to-add-choice:hover,div.to-map-choice:hover {
+  background: #DDD;
+}
+
+
+div.exc {
+  font-family: IBM Plex Sans, Calibri, Hellvetica;
+}
+div.exc input, div.exc th, div.exc td, div.exc select, div.exc option, div.exc h3 {
+  font-family: IBM Plex Sans, Calibri, Hellvetica;
+}
+div.exc h3 {
+  font-size: 17px;
+  font-weight: bold;
+}
+div.exc-label {
+  font-size: 13px;
+  text-align: right;
+  font-weight: bold;
+}
+div.exc-cont {
+  width: 90%;
+  padding: 10px;
+  border: 1px Solid #AAA;
+  border-radius : 10px;
+  margin-top: 20px;
+}
+table.exc-table {
+  width: 900px;
+}
+table.exc-table th, table.exc-table td {
+  font-size: 13px;
+}
+table.exc-table th {
+  padding-right: 5px;
+  text-align:right;
+  font-weight: normal;
+  height: 35px;
+}
+table.exc-table select {
+  min-width: 350px;
+}
+div.exc-header {
+  padding: 5px;
+  border: 1px Solid #BBB;
+  border-radius: 5px;
+  margin-left: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  width: 85%;
+  background: #deefff; /* Old browsers */
+  background: -moz-linear-gradient(top,  #deefff 0%, #98bede 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #deefff 0%,#98bede 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #deefff 0%,#98bede 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#deefff', endColorstr='#98bede',GradientType=0 ); /* IE6-9 */
+}
+
+select.exc-over {
+  border: 1px Solid green;
+}
+
+span.override {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  border: 1px Solid #AAA;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  background: #cdeb8e; /* Old browsers */
+  background: -moz-linear-gradient(top,  #cdeb8e 0%, #a5c956 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #cdeb8e 0%,#a5c956 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #cdeb8e 0%,#a5c956 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdeb8e', endColorstr='#a5c956',GradientType=0 ); /* IE6-9 */
+}
+
+div.exc-new {
+  border-right: 10px Solid rgb(255,128,128);
+}
+
+select.exc-deflt, select.exc-deflt option {
+  color: #666;
+}
+
+select.exc-y, select.exc-y option {
+  font-weight: bold;
+}
+
+div.exc-actions {
+  float:right;
+  margin-right: 10px;
+}
+
+div.exc-actions input {
+  font-size: 13px;
+}
+
+img.remv {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+img.exc-info {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+input.exc-save {
+  cursor: pointer;
+  width: 50px;
+  font-size: 13px;
+  border-radius : 2px;
+  border: 1px Solid #AAA;
+  background: #cdeb8e; /* Old browsers */
+  background: -moz-linear-gradient(top,  #cdeb8e 0%, #a5c956 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #cdeb8e 0%,#a5c956 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #cdeb8e 0%,#a5c956 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdeb8e', endColorstr='#a5c956',GradientType=0 ); /* IE6-9 */
+}
+input.exc-save:hover {
+background: #cdeb8b; /* Old browsers */
+background: -moz-linear-gradient(top,  #cdeb8b 0%, #cdeb8b 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top,  #cdeb8b 0%,#cdeb8b 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom,  #cdeb8b 0%,#cdeb8b 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdeb8b', endColorstr='#cdeb8b',GradientType=0 ); /* IE6-9 */
+}
+
+div.exc-none {
+  width: 100%;
+  padding-left: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+table.exc-table select.exc-addr-input {
+  width:173px !important;
+  min-width: 20px;
+}
+table.exc-table td.exc-addr-td {
+  text-align: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #555;
+  text-transform: uppercase
+}
+
+a.exc-link {
+  padding-left: 5px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+a.exc-link2 {
+  padding-left: 5px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+table.exc-table ul, table.exc-table li {
+ padding: 0;
+ padding-left: 10px;
+}
+
+span.exc-addr-span {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+span.exc-none {
+  font-size: 11px;
+  text-transform: uppercase;
+}
+hr.exc-hr {
+  width: 600px;
+  color: #666;
+}
+
+div.exc-note {
+  font-size:11px;
+  color: #111;
+  font-style: italic;
+}

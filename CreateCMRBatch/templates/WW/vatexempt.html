@@ -1,0 +1,36 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+<br>
+<span class="tablehead">Request Details</span>
+<table>
+<tr>
+    <td>End User Name:</td>
+    <td colspan="5">${admin.mainCustNm1} $!{admin.mainCustNm2}</td>
+    <td>Street Address:</td>
+    <td>$!{soldTo.addrTxt}</td>
+  </tr>
+  <tr>
+    <td>City:</td>
+    <td>$!{soldTo.city1}</td>
+    <td>Postal Code:</td>
+    <td>$!{soldTo.postCd}:</td>
+  </tr>
+</table>
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+<hr>
+
+${signature}
+</body>
+</html>

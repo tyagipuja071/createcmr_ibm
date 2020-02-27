@@ -1,0 +1,80 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+#if ( $admin.reqType == "C" || $admin.reqType == "U")
+The Non-US Addresses on this record are highlighted below:
+<br>
+#foreach( $addr in $addresses )
+#if ( $addr.landCntry != "US" )
+<br>
+<span class="tablehead">Address (${addr.id.addrType})</span>
+<table>
+  <tr>
+    <td width="150px">Landed Country:</td>
+    <td width="150px">$!{addr.landCntry}</td>
+    <td width="150px">State/Province:</th>
+    <td width="150px">$!{addr.stateProv}</td>
+  </tr>
+  <tr>
+    <td>Address:</td>
+    <td>$!{addr.addrTxt}
+    <td>Postal Code:</td>
+    <td>$!{addr.postCd}:</td>
+  </tr>
+  <tr>
+    <td>City:</td>
+    <td colspan="3">$!{addr.city1}</td>
+  </tr>
+  <tr>
+    <td>Division:</td>
+    <td>$!{addr.divn}
+    <td>Department:</td>
+    <td>$!{addr.dept}</td>
+  </tr>
+</table>  
+#end
+#end
+#else
+  This is  
+  #if ( $admin.reqType == "M" )
+  a <b>Mass Update</b> 
+  #elseif ( $admin.reqType == "N" )
+  a <b>Mass Create</b> 
+  #elseif ( $admin.reqType == "R" )
+  a <b>Reactivate</b> 
+  #elseif ( $admin.reqType == "D" )
+  a <b>Delete</b> 
+  #elseif ( $admin.reqType == "E" )
+  an <b>Update by Enterprise #</b> 
+  #end
+  request.
+<br>
+One or more records on the request contains changes to the Creation of a Customer Master Record outside US.
+#end
+<br>
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+
+#if (($admin.reqType != "C") && ($admin.reqType != "U"))
+<br>
+  A copy of the request file has been attached for reference.
+<br>
+<br>
+#end
+
+<hr>
+${dataFields}
+
+${signature}
+</body>
+</html>

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+  <persistence-unit name="RDC">
+    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+    <class>com.ibm.cio.cmr.request.entity.UserPref</class>
+    <class>com.ibm.cio.cmr.request.entity.UserPrefPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Delegate</class>
+    <class>com.ibm.cio.cmr.request.entity.DelegatePK</class>
+    <class>com.ibm.cio.cmr.request.entity.BdsTblInfo</class>
+    <class>com.ibm.cio.cmr.request.entity.BdsTblInfoPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Admin</class>
+    <class>com.ibm.cio.cmr.request.entity.AdminPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Data</class>
+    <class>com.ibm.cio.cmr.request.entity.DataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.DataRdc</class>
+    <class>com.ibm.cio.cmr.request.entity.DataRdcPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Addr</class>
+    <class>com.ibm.cio.cmr.request.entity.AddrPK</class>
+    <class>com.ibm.cio.cmr.request.entity.IntlAddr</class>
+    <class>com.ibm.cio.cmr.request.entity.IntlAddrPK</class>
+    <class>com.ibm.cio.cmr.request.entity.WfHistPK</class>
+    <class>com.ibm.cio.cmr.request.entity.WfHist</class>
+    <class>com.ibm.cio.cmr.request.entity.Attachment</class>
+    <class>com.ibm.cio.cmr.request.entity.AttachmentPK</class>
+    <class>com.ibm.cio.cmr.request.entity.FieldInfo</class>
+    <class>com.ibm.cio.cmr.request.entity.FieldInfoPK</class>
+    <class>com.ibm.cio.cmr.request.entity.FieldLbl</class>
+    <class>com.ibm.cio.cmr.request.entity.FieldLblPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Lov</class>
+    <class>com.ibm.cio.cmr.request.entity.LovPK</class>
+    <class>com.ibm.cio.cmr.request.entity.NotifList</class>
+    <class>com.ibm.cio.cmr.request.entity.NotifListPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ProcCenter</class>
+    <class>com.ibm.cio.cmr.request.entity.ProcCenterPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Scorecard</class>
+    <class>com.ibm.cio.cmr.request.entity.ScorecardPK</class>
+    <class>com.ibm.cio.cmr.request.entity.StatusDesc</class>
+    <class>com.ibm.cio.cmr.request.entity.StatusDescPK</class>
+    <class>com.ibm.cio.cmr.request.entity.StatusTrans</class>
+    <class>com.ibm.cio.cmr.request.entity.StatusTransPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ReqCmtLog</class>
+    <class>com.ibm.cio.cmr.request.entity.ReqCmtLogPK</class>
+    <class>com.ibm.cio.cmr.request.entity.UpdatedAddr</class>
+    <class>com.ibm.cio.cmr.create.entity.NotifyReq</class>
+    <class>com.ibm.cio.cmr.create.entity.NotifyReqPK</class>
+    <class>com.ibm.cio.cmr.request.entity.MassUpdt</class>
+    <class>com.ibm.cio.cmr.request.entity.MassUpdtPK</class>
+    <class>com.ibm.cio.cmr.request.entity.MassUpdtAddr</class>
+    <class>com.ibm.cio.cmr.request.entity.MassUpdtAddrPK</class>
+    <class>com.ibm.cio.cmr.request.entity.MassUpdtData</class>
+    <class>com.ibm.cio.cmr.request.entity.MassUpdtDataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.MassCreate</class>
+    <class>com.ibm.cio.cmr.request.entity.MassCreatePK</class>
+    <class>com.ibm.cio.cmr.request.entity.MassCreateData</class>
+    <class>com.ibm.cio.cmr.request.entity.MassCreateDataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.MassCreateAddr</class>
+    <class>com.ibm.cio.cmr.request.entity.MassCreateAddrPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalReq</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalReqPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalComments</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalCommentsPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalTyp</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalTypPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalHist</class>
+    <class>com.ibm.cio.cmr.request.entity.ApprovalHistPK</class>
+    <class>com.ibm.cio.cmr.request.entity.DefaultApprovals</class>
+    <class>com.ibm.cio.cmr.request.entity.DefaultApprovalsPK</class>
+    <class>com.ibm.cio.cmr.request.entity.DefaultApprovalConditions</class>
+    <class>com.ibm.cio.cmr.request.entity.DefaultApprovalConditionsPK</class>
+    <class>com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients</class>
+    <class>com.ibm.cio.cmr.request.entity.DefaultApprovalRecipientsPK</class>
+    <class>com.ibm.cio.cmr.request.entity.RequestChangeLog</class>
+    <class>com.ibm.cio.cmr.request.entity.RequestChangeLogPK</class>
+    <class>com.ibm.cio.cmr.request.entity.SystParameters</class>
+    <class>com.ibm.cio.cmr.request.entity.SystParametersPK</class>     
+    <class>com.ibm.cio.cmr.request.entity.MqIntfReqQueue</class>
+    <class>com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK</class> 
+    <class>com.ibm.cio.cmr.request.entity.SuppCntry</class>
+    <class>com.ibm.cio.cmr.request.entity.SuppCntryPK</class>
+    <class>com.ibm.cio.cmr.request.entity.CustScenarios</class>
+    <class>com.ibm.cio.cmr.request.entity.CustScenariosPK</class>
+    <class>com.ibm.cio.cmr.request.entity.AddrRdc</class>
+    <class>com.ibm.cio.cmr.request.entity.AddrRdcPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ProlifChecklist</class>
+    <class>com.ibm.cio.cmr.request.entity.ProlifChecklistPK</class>
+    <class>com.ibm.cio.cmr.request.entity.GeoContactInfo</class>
+    <class>com.ibm.cio.cmr.request.entity.GeoContactInfoPK</class>
+    <class>com.ibm.cio.cmr.request.entity.IntlAddrRdc</class>
+    <class>com.ibm.cio.cmr.request.entity.IntlAddrRdcPK</class>
+    <class>com.ibm.cio.cmr.request.entity.UserPrefCountries</class>
+    <class>com.ibm.cio.cmr.request.entity.UserPrefCountriesPK</class>
+    <class>com.ibm.cio.cmr.request.entity.MqIntfReqData</class>
+    <class>com.ibm.cio.cmr.request.entity.MqIntfReqDataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.Sadr</class>
+    <class>com.ibm.cio.cmr.request.entity.SadrPK</class> 
+    <class>com.ibm.cio.cmr.request.entity.MachinesToInstall</class>
+    <class>com.ibm.cio.cmr.request.entity.MachinesToInstallPK</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtCust</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtCustPK</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtCustExt</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtCustExtPK</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtAddr</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtAddrPK</class>
+   <!--  <class>com.ibm.cio.cmr.request.entity.CmrtAddrUse</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtAddrUsePK</class> -->
+    <class>com.ibm.cio.cmr.request.entity.CmrtAddrLink</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrtAddrLinkPK</class>
+
+    <!--  CreateCMR Automation -->
+    <class>com.ibm.cio.cmr.request.entity.AutoEngineConfig</class>
+    <class>com.ibm.cio.cmr.request.entity.AutoEngineConfigPK</class>
+    <class>com.ibm.cio.cmr.request.entity.AutoEngineMapping</class>
+    <class>com.ibm.cio.cmr.request.entity.AutoEngineMappingPK</class>
+    <class>com.ibm.cio.cmr.request.entity.AutomationData</class>
+    <class>com.ibm.cio.cmr.request.entity.AutomationDataPK</class>
+    <class>com.ibm.cio.cmr.request.entity.AutomationMatching</class>
+    <class>com.ibm.cio.cmr.request.entity.AutomationMatchingPK</class>
+    <class>com.ibm.cio.cmr.request.entity.AutomationResults</class>
+    <class>com.ibm.cio.cmr.request.entity.AutomationResultsPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ReftBrCnae</class>
+    <class>com.ibm.cio.cmr.request.entity.ReftBrCnaePK</class>
+    <class>com.ibm.cio.cmr.request.entity.ReftBrSboCollector</class>
+    <class>com.ibm.cio.cmr.request.entity.ReftBrSboCollectorPK</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrInternalTypes</class>
+    <class>com.ibm.cio.cmr.request.entity.CmrInternalTypesPK</class>
+    <class>com.ibm.cio.cmr.request.entity.GeoTaxInfo</class>
+    <class>com.ibm.cio.cmr.request.entity.GeoTaxInfoPK</class>
+    <class>com.ibm.cio.cmr.request.entity.ScenarioExceptions</class>
+    <class>com.ibm.cio.cmr.request.entity.ScenarioExceptionsPK</class>
+
+    <properties>
+      <property name="openjpa.ConnectionFactoryMode" value="local" />
+      <property name="openjpa.ConnectionRetainMode" value="always" />
+
+      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
+      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
+
+      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
+      <property name="openjpa.DataCache" value="false" />
+      <property name="openjpa.QueryCache" value="false" />
+      <property name="openjpa.Log" value="log4j" />
+      <property name="openjpa.ReadLockLevel" value="none"/>
+      <property name="openjpa.LockTimeout" value="120000"/>
+
+      <property name="openjpa.ConnectionDriverName" value="com.ibm.db2.jcc.DB2Driver" />
+      <property name="openjpa.ConnectionURL" value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=C:\\Progs\\squirrel-sql-4.0.0\\ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
+      <!-- <property name="openjpa.ConnectionURL" value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=C:\\Security\\RDC_PP.jks;sslTrustStorePassword=rdcppcer;" />     -->
+
+      <property name="openjpa.ConnectionUserName" value="rdcfvt" />
+      <property name="openjpa.ConnectionPassword" value="fvt16rdc" />
+      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
+      <property name="openjpa.ConnectionRetainMode" value="always" />
+      <!-- 
+      <property name="openjpa.ConnectionURL" value="jdbc:db2://b06acirdb005.portsmouth.uk.ibm.com:3203/eushdb2a:sslConnection=true;sslTrustStoreLocation=C:\\Security\\RDC_PP.jks;sslTrustStorePassword=rdcppcer;" />
+      <property name="openjpa.ConnectionUserName" value="rdhadm" />
+      <property name="openjpa.ConnectionPassword" value="soaked34" />
+      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
+      <property name="openjpa.ConnectionRetainMode" value="always" />
+      -->
+    </properties>
+  </persistence-unit>
+  
+  <persistence-unit name="CEDP">
+    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+    
+    <properties>
+      <property name="openjpa.ConnectionFactoryMode" value="local" />
+      <property name="openjpa.ConnectionRetainMode" value="always" />
+
+      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
+      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
+
+      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
+      <property name="openjpa.DataCache" value="false" />
+      <property name="openjpa.QueryCache" value="false" />
+      <property name="openjpa.Log" value="log4j" />
+      <property name="openjpa.ReadLockLevel" value="none"/>
+      <property name="openjpa.LockTimeout" value="120000"/>
+
+      <property name="openjpa.ConnectionDriverName" value="com.ibm.db2.jcc.DB2Driver" />
+      <property name="openjpa.ConnectionURL" value="jdbc:db2://warehouse.data.zc2.ibm.com:50001/BLUDB:sslConnection=true;sslTrustStoreLocation=C:\\Progs\\squirrel-sql-4.0.0\\ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
+
+      <property name="openjpa.ConnectionUserName" value="C_MM9J897_nomail_relay_ibm_com" />
+      <property name="openjpa.ConnectionPassword" value="findcmr4us" />
+      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
+      <property name="openjpa.ConnectionRetainMode" value="always" />
+    </properties>
+  </persistence-unit>
+
+<!--  
+  <persistence-unit name="RDC_MAIN">
+    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+
+    <properties>
+      <property name="openjpa.ConnectionFactoryMode" value="managed" />
+      <property name="openjpa.ConnectionRetainMode" value="on-demand" />
+      <property name="openjpa.ConnectionFactoryProperties"
+        value="ExceptionAction=destroy, TestOnReturn=true, TestWhileIdle=true, TestOnBorrow=true, TimeBetweenEvictionRunsMillis=300000, ValidationTimeout=240000, MaxActive=10, MaxIdle=3, MaxTotal=15, ValidationSQL='SELECT current date FROM sysibm.sysdummy1'" />
+
+      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
+      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
+
+      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
+      <property name="openjpa.DataCache" value="false" />
+      <property name="openjpa.QueryCache" value="false" />
+      <property name="openjpa.Log" value="log4j" />
+
+      <property name="openjpa.ConnectionDriverName" value="com.ibm.db2.jcc.DB2Driver" />
+      <property name="openjpa.ConnectionURL" value="jdbc:db2://b06acirdb005.portsmouth.uk.ibm.com:3333/EUSHDB2A" />
+      <property name="openjpa.ConnectionUserName" value="rdhadm" />
+      <property name="openjpa.ConnectionPassword" value="soaked34" />
+      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
+      <property name="openjpa.ConnectionRetainMode" value="always" />
+
+
+    </properties>
+  </persistence-unit>
+-->
+</persistence>

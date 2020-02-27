@@ -1,0 +1,61 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+#if ( $admin.reqType == "C" || $admin.reqType == "U")
+<table>
+  <tr>
+    <td width="150px">CMR No:</td>
+    <td width="150px">$!{data.cmrNo}</td>
+  </tr>
+  <tr>
+    <td width="150px">Misc Bill Code:</td>
+    <td width="150px">${data.miscBillCd}</td>
+  </tr>
+</table>
+#else
+  This is  
+  #if ( $admin.reqType == "M" )
+  a <b>Mass Update</b> 
+  #elseif ( $admin.reqType == "N" )
+  a <b>Mass Create</b> 
+  #elseif ( $admin.reqType == "R" )
+  a <b>Reactivate</b> 
+  #elseif ( $admin.reqType == "D" )
+  a <b>Delete</b> 
+  #elseif ( $admin.reqType == "E" )
+  an <b>Update by Enterprise #</b> 
+  #end
+  request.
+<br>
+One or more records on the request contains changes to the New/Removed COD.
+#end
+
+<br>
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+
+#if (($admin.reqType != "C") && ($admin.reqType != "U"))
+<br>
+  A copy of the request file has been attached for reference.
+<br>
+<br>
+#end
+
+<br>
+
+<hr>
+${dataFields}
+
+${signature}
+</body>
+</html>

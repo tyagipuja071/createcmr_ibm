@@ -1,0 +1,150 @@
+   <template id="758" for="UPDATE">
+  <tabs>
+    <tab name="Data" type="Data" >
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>12</width>
+          <length>6</length>
+        </column>
+        <column>
+          <label>Fiscal Code</label>
+          <dbColumn>NEW_ENTP_NAME1</dbColumn>
+          <width>20</width>
+          <length>16</length>
+        </column>
+        <column>
+          <label>VAT #/ N.PARTITA I.V.A.</label>
+          <dbColumn>VAT</dbColumn>
+          <width>20</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Tax Code/ Code IVA</label>
+          <dbColumn>SPECIAL_TAX_CD</dbColumn>
+          <width>20</width>
+          <length>1</length>
+        </column>
+        <column>
+          <label>Ident Client</label>
+          <dbColumn>OUT_CITY_LIMIT</dbColumn>
+          <width>11</width>
+          <lovId>IdentClient</lovId>
+        </column>
+        <column exactLength="true">
+          <label>Enterprise Number/CODICE ENTERPRISE</label>
+          <dbColumn>ENTERPRISE</dbColumn>
+          <width>35</width>
+          <length>6</length>
+        </column>
+        <!-- -
+        <column exactLength="true">
+          <label>Company Number</label>
+          <dbColumn>COMPANY</dbColumn>
+          <width>15</width>
+          <length>6</length>
+        </column>
+         -->
+        <column exactLength="true">
+          <label>Affiliate Number</label>
+          <dbColumn>AFFILIATE</dbColumn>
+          <width>17</width>
+          <length>6</length>
+        </column>
+        <column exactLength="true">
+          <label>Collection Code</label>
+          <dbColumn>COLLECTION_CD</dbColumn>
+          <width>30</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Sales Rep. No.</label>
+          <dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
+          <width>30</width>
+          <lovId>SalRepNameNo</lovId>
+        </column>
+        <!-- 
+        <column>
+          <label>SBO</label>
+          <dbColumn>CUST_NM1</dbColumn>
+          <width>8</width>
+          <lovId>SalesBusOff</lovId>
+        </column>
+         -->
+        <column exactLength="true">
+          <label>INAC</label>
+          <dbColumn>INAC_CD</dbColumn>
+          <width>8</width>
+          <length>4</length>
+        </column>
+        <column>
+          <label>Tipo Cliente</label>
+          <dbColumn>ENTP_UPDT_TYP</dbColumn>
+          <lovId>TipoCliente</lovId>
+        </column>
+        <column>
+          <label>Type Of Customer</label>
+          <dbColumn>CURRENCY_CD</dbColumn>
+          <lovId>CrosSubTyp</lovId>
+        </column>
+        <column>
+          <label>Codice Destinatario/Ufficio</label>
+          <dbColumn>SEARCH_TERM</dbColumn>
+          <width>10</width>
+          <length>7</length>
+        </column>
+        <column>
+          <label>PEC</label>
+          <dbColumn>EMAIL2</dbColumn>
+          <width>20</width>
+          <length>256</length>
+        </column>
+        <column>
+          <label>Indirizzo Email</label>
+          <dbColumn>EMAIL3</dbColumn>
+          <width>20</width>
+          <length>256</length>
+        </column>
+        <column>
+          <label>Industry Solution Unit (ISU)</label>
+          <dbColumn>ISU_CD</dbColumn>
+          <width>25</width>
+          <lovId>ISU</lovId>
+        </column>
+        <column>
+          <label>Client Tier</label>
+          <dbColumn>CLIENT_TIER</dbColumn>
+          <width>25</width>
+          <bdsId>ClientTier</bdsId>
+        </column>
+        <column>
+          <label>Mode of Payment</label>
+          <dbColumn>MODE_OF_PAYMENT</dbColumn>
+          <width>20</width>
+          <lovId>ModeOfPayment</lovId>
+        </column>
+        <column>
+          <label>ISIC</label>
+          <dbColumn>ISIC_CD</dbColumn>
+          <width>20</width>
+          <bdsId>ISIC</bdsId>
+        </column>
+        <column>
+          <label>Embargo Code</label>
+          <dbColumn>EMBARGO_CD</dbColumn>
+          <width>10</width>
+          <length>1</length>
+        </column>
+        <!-- 
+        <column>
+          <label>Subindustry</label>
+          <dbColumn>SUB_INDUSTRY_CD</dbColumn>
+          <width>20</width>
+          <bdsId>Subindustry</bdsId>
+        </column>
+         -->
+      </columns>
+    </tab>
+  </tabs>
+</template>

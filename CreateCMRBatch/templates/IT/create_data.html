@@ -1,0 +1,73 @@
+<div class="signature">
+  A copy of the request's full details has been attached for reference.
+</div>
+<br>
+<span class="tablehead">Request Details</span>
+<table>
+  <tr>
+    <td width="150px">Request ID:</td>
+    <td width="150px">${admin.id.reqId}</td>
+    <td width="150px">Requester:</td>
+    <td width="150px">${admin.requesterNm}</td>
+    <td width="150px">Request Type:</td>
+    <td width="150px">Create</td>
+  </tr>
+  <tr>
+    <td>Customer Name:</td>
+    <td colspan="5">${admin.mainCustNm1}</td>
+  </tr>
+  <tr>
+    <td>Customer Name Con't:</td>
+    <td colspan="5">$!{admin.mainCustNm2}</td>
+  </tr> 
+  <tr>
+    <td>Abbreviated Name:</td>
+    <td>$!{data.abbrevNm}</td>
+    <td>ISIC:</td>
+    <td>$!{data.isicCd}</td>
+    <td>Subindustry:</td>
+    <td>$!{data.subIndustryCd}</td>
+  </tr>
+  <tr>
+    <td>Fiscal Code:</td>
+    <td>$!{data.taxCd1}</td>
+    <td>VAT #/ N.PARTITA I.V.A.:</td>
+    <td>$!{data.vat}</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>ISU:</td>
+    <td>$!{data.isuCd}</td>
+    <td>INAC:</td>
+    <td>$!{data.inacCd}</td>
+  </tr>
+  <tr>
+    <td>Enterprise:</td>
+    <td>$!{data.enterprise}</td>
+    <td>Company:</td>
+    <td>$!{data.company}</td>
+    <td>Affiliate:</td>
+    <td>$!{data.affiliate}</td>
+  </tr>
+</table>
+<br>
+<span class="tablehead">Main Address (ZS01)</span>
+<table>
+  <tr>
+    <td width="150px">Landed Country:</td>
+    <td width="150px">$!{soldTo.landCntry}</td>
+    <td width="150px">State/Province:</th>
+    <td width="150px">$!{soldTo.stateProv}</td>
+  </tr>
+  <tr>
+    <td>Street:</td>
+    <td colspan="5">$!{soldTo.addrTxt}</td>
+  </tr>
+  <tr>
+    <td>City:</td>
+    <td>$!{soldTo.city1}</td>
+    <td>Postal Code:</td>
+    <td>$!{soldTo.postCd}:</td>
+  </tr>
+</table>

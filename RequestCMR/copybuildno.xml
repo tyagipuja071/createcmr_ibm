@@ -1,0 +1,24 @@
+<!--
+ Filename: copybuildno.xml
+ Description: Copies the build no from cmr-config.properties to a file on the server
+ Author: Jeffrey Zamora
+ Date: Sept 25, 2017
+-->
+<project name="Copy CMR Config Build No" default="copybuildno">
+  
+  <!-- Environment variables -->
+  <property environment="env"/>
+  <property name="target.file" value="C:/builds/buildscripts/properties/CreateCMRRelease-Build.txt" />
+  <property name="build.file" value="C:/builds/buildscripts/properties/CreateCMRRelease.txt" />
+  
+  <target name="copybuildno">
+  	<property file="src/cmr-config.properties" prefix="cmrconfig"></property>
+    <loadfile property="BUILDTS" srcfile="${build.file}"></loadfile>
+  	<echo>Build No: ${cmrconfig.BUILD}</echo>
+    <!--<echo>Release No: ${cmrconfig.RELEASE}</echo>-->
+  	<echo>RTC Build TS: ${BUILDTS}</echo>
+  	<echo>Setting Build No to B${cmrconfig.BUILD}_${BUILDTS}</echo>
+  	<echo file="${target.file}" append="false">B${cmrconfig.BUILD}_${BUILDTS}</echo>
+  </target>
+
+</project>

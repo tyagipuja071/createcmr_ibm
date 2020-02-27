@@ -1,0 +1,28 @@
+<html>
+<head>
+<style>
+body {
+  font-family: Calibri;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+#if ( $admin.reqType == "C" )
+The approval request for <strong>${admin.mainCustNm1} $!{admin.mainCustNm2}</strong> with Request ID ${admin.id.reqId} has been cancelled by ${requester}. 
+#elseif ( $admin.reqType == "U" )
+The approval request for <strong>${admin.mainCustNm1} $!{admin.mainCustNm2}</strong> with Request ID ${admin.id.reqId} has been cancelled by ${requester}. 
+#else
+The approval request for Request ID ${admin.id.reqId} has been cancelled by ${requester}. 
+#end
+<br>
+No further action is needed at the moment.
+<br>
+<br>
+Comments:
+<br>
+$!{comments} 
+<br>
+
+</body>
+</html>

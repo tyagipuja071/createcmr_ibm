@@ -1,0 +1,50 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+<br>
+
+#if (($admin.reqType != "C") && ($admin.reqType != "U"))
+This is  
+#if ( $admin.reqType == "M" )
+a <b>Mass Update</b> 
+#elseif ( $admin.reqType == "N" )
+a <b>Mass Create</b> 
+#elseif ( $admin.reqType == "R" )
+a <b>Reactivate</b> 
+#elseif ( $admin.reqType == "D" )
+a <b>Delete</b> 
+#elseif ( $admin.reqType == "E" )
+an <b>Update by Enterprise #</b> 
+#end
+request.
+<br>
+One or more records on the request contains changes to the ARBO.
+#end  
+<br>
+<br>
+
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+
+#if (($admin.reqType != "C") && ($admin.reqType != "U"))
+<br>
+  A copy of the request file has been attached for reference.
+<br>
+<br>
+#end
+
+<hr>
+${dataFields}
+
+${signature}
+</body>
+</html>

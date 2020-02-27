@@ -1,0 +1,60 @@
+<div class="signature">
+  A copy of the request's full details has been attached for reference.
+</div>
+<br>
+<span class="tablehead">Request Details</span>
+<table>
+  <tr>
+    <td width="150px">Request ID:</td>
+    <td width="150px">${admin.id.reqId}</td>
+    <td width="150px">Requester:</td>
+    <td width="150px">${admin.requesterNm}</td>
+    <td width="150px">Request Type:</td>
+    <td width="150px">Update</td>
+  </tr>
+  <tr>
+    <td>Customer Name:</td>
+    <td colspan="5">${admin.mainCustNm1}</td>
+  </tr>
+  <tr>
+    <td>Customer Name Con't:</td>
+    <td colspan="5">$!{admin.mainCustNm2}</td>
+  </tr>
+</table>
+
+<br>
+<span class="tablehead">Updated Data Fields</span>
+<table>
+  <tr>
+    <th width="150px">Field</th>
+    <th width="150px">Old Value</th>
+    <th width="150px">New Value</th>
+  </tr>
+#foreach ($updatedField in $updatedFields)
+  <tr>
+    <td>$!{updatedField.dataField}</td>
+    <td>$!{updatedField.oldData}</td>
+    <td>$!{updatedField.newData}</td>
+  </tr>
+#end  
+</table>
+<br>
+<span class="tablehead">Updated Address Fields</span>
+<table>
+  <tr>
+    <th width="150px">Address Type</th>
+    <th width="150px">SAP No.</th>
+    <th width="150px">Field</th>
+    <th width="150px">Old Data</th>
+    <th width="150px">New Data</th>
+  </tr>
+#foreach ($updatedAddrField in $updatedAddrFields)
+  <tr>
+    <td>$!{updatedAddrField.addrType}</td>
+    <td>$!{updatedAddrField.sapNumber}</td>
+    <td>$!{updatedAddrField.dataField}</td>
+    <td>$!{updatedAddrField.oldData}</td>
+    <td>$!{updatedAddrField.newData}</td>
+  </tr>
+#end  
+</table>

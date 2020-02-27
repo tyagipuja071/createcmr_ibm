@@ -1,0 +1,79 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+#if ( $admin.reqType == "C" || $admin.reqType == "U")
+<table>
+  <tr>
+    <td width="150px">CMR No:</td>
+    <td width="150px">$!{data.cmrNo}</td>
+  </tr>
+  <tr>
+    <td>Restricted To:</td>
+    <td>${data.restrictTo}</td>
+  </tr>
+  <tr>
+    <td>Mktg Dept:</td>
+    <td>${data.mktgDept}</td>
+  </tr>
+  <tr>
+    <td>Mktg AR Dept:</td>
+    <td>${data.mtkgArDept}</td>
+  </tr>
+  <tr>
+    <td>PCC Mktg Dept:</td>
+    <td>${data.pccMktgDept}</td>
+  </tr>
+  <tr>
+    <td>PCC AR Dept:</td>
+    <td>${data.pccArDept}</td>
+  </tr>
+  <tr>
+    <td>CSO Site:</td>
+    <td>${data.csoSite}</td>
+  </tr>
+</table>
+#else
+  This is  
+  #if ( $admin.reqType == "M" )
+  a <b>Mass Update</b> 
+  #elseif ( $admin.reqType == "N" )
+  a <b>Mass Create</b> 
+  #elseif ( $admin.reqType == "R" )
+  a <b>Reactivate</b> 
+  #elseif ( $admin.reqType == "D" )
+  a <b>Delete</b> 
+  #elseif ( $admin.reqType == "E" )
+  an <b>Update by Enterprise #</b> 
+  #end
+  request.
+<br>
+One or more records on the request contains changes to the Creation of a GRNT-restricted.
+#end
+<br>
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+
+#if (($admin.reqType != "C") && ($admin.reqType != "U"))
+<br>
+  A copy of the request file has been attached for reference.
+<br>
+<br>
+#end
+
+
+<hr>
+${dataFields}
+
+${signature}
+</body>
+</html>

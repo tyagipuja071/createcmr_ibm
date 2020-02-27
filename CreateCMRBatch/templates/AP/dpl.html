@@ -1,0 +1,62 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+#if ( $admin.reqType == "C" || $admin.reqType == "U")
+<table>
+  <tr>
+    <td width="150px">Request Type:</td>
+#if ( $admin.reqType == "C")
+    <td width="400px">Create</td>
+#else
+    <td width="400px">Update</td>
+#end
+  </tr>
+  <tr>
+    <td width="150px">CMR No:</td>
+    <td width="400px">$!{data.cmrNo}</td>
+  </tr>
+#if ( $admin.reqType == "C")
+  <tr>
+    <td style="vertical-align:top">Customer Name 1:</td>
+    <td>$!{admin.mainCustNm1}</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Customer Name 2:</td>
+    <td>$!{admin.mainCustNm2}</td>
+  </tr>
+#else
+  <tr>
+    <td style="vertical-align:top">Customer Name 1:</td>
+    <td>$!{admin.mainCustNm1} (from $!{admin.oldCustNm1})</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Customer Name 2:</td>
+    <td>$!{admin.mainCustNm2} (from $!{admin.oldCustNm2})</td>
+  </tr>
+#end
+  <tr>
+    <td style="vertical-align:top">Main Address:</td>
+    <td>$!{soldTo.addrTxt} $!{soldTo.addrTxt2} <br>
+                      $!{soldTo.city1} $!{soldTo.postCd} <br>
+                      ($!{soldTo.landCntry})</td>
+  </tr>
+</table>
+#end
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+<hr>
+${dataFields}
+
+${signature}
+</body>
+</html>

@@ -1,0 +1,26 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+
+CMR No: $!{data.cmrNo}
+<br>
+Current Embargo Code: $!{rdc.embargoCd}
+<br>
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+<hr>
+${dataFields}
+
+${signature}
+</body>
+</html>

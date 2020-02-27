@@ -1,0 +1,23 @@
+div.cmr-show-adv-crit {
+	background-image: -webkit-linear-gradient(top,transparent,rgba(0,0,0,0.2));
+	font-family: "Helvetica";
+	font-weight: 600;
+}
+
+div.cmr-search-tabs div.cmr-search-tab {
+	font-family: "Helvetica";
+	font-weight: 600;
+}
+
+form.ibm-row-form input{
+	width: auto !important;
+}
+
+form.ibm-row-form input.dijitArrowButtonInner {
+  width: 12px !important;
+}
+
+#cmrDetailedInformationTableContainer table tr td {
+	font-family: "Helvetica";
+}
+ 

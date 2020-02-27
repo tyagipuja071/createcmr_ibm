@@ -1,0 +1,212 @@
+package com.ibm.cio.cmr.request.automation.impl.gbl;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
+import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
+import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.TgmeCodes;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.ws.TgmeAddrStdService;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.TgmeClient;
+import com.ibm.cmr.services.client.tgme.AddressStdData;
+import com.ibm.cmr.services.client.tgme.AddressStdRequest;
+import com.ibm.cmr.services.client.tgme.AddressStdResponse;
+
+public class USAddrStdElement extends OverridingElement {
+
+  public USAddrStdElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
+    super(requestTypes, actionOnError, overrideData, stopOnError);
+    // TODO Auto-generated constructor stub
+  }
+
+  private static final Logger LOG = Logger.getLogger(TgmeAddrStdService.class);
+
+  @Override
+  public AutomationResult<OverrideOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
+      throws Exception {
+    // TODO Auto-generated method stub
+
+    LOG.debug("Connecting to the TGME (Addr Std) service...");
+    TgmeClient tgmeClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"), TgmeClient.class);
+    OverrideOutput overrides = new OverrideOutput(false);
+    tgmeClient.setUser(SystemConfiguration.getSystemProperty("cmrservices.user"));
+    tgmeClient.setPassword(SystemConfiguration.getSystemProperty("cmrservices.password"));
+    StringBuilder details = new StringBuilder();
+    long reqId = requestData.getAdmin().getId().getReqId();
+    AutomationResult<OverrideOutput> results = buildResult(reqId);
+
+    List<Addr> a = requestData.getAddresses();
+    for (Addr addr : a) {
+      String key = addr.getId().getReqId() + "_" + addr.getId().getAddrType() + "_"
+          + (addr.getId().getAddrSeq() != null ? addr.getId().getAddrSeq() : "");
+      // Calling Address Std Service
+      AddressStdRequest requestadd = new AddressStdRequest();
+      requestadd.setSystemId(SystemConfiguration.getSystemProperty("tgme.appID"));
+      requestadd.setAddressId(key);
+      requestadd.setAddressType(addr.getId().getAddrType());
+      requestadd.setCity(addr.getCity1());
+      requestadd.setCountryCode(addr.getLandCntry());
+      requestadd.setCountyCode(addr.getCounty());
+      requestadd.setPostalCode(addr.getPostCd());
+      requestadd.setStateCode(addr.getStateProv());
+      requestadd.setStateName(addr.getStdCityNm());
+      String street = addr.getAddrTxt();
+      String stateProvDesc = getStateProvDesc(entityManager, addr.getLandCntry(), addr.getStateProv());
+      if (stateProvDesc != null && stateProvDesc.contains(",")) {
+        stateProvDesc = stateProvDesc.split(",")[0];
+      }
+
+      String city = addr.getCity1();
+      if (!StringUtils.isEmpty(addr.getStdCityNm())) {
+        city = addr.getStdCityNm();
+      }
+      requestadd.setCity(city);
+
+      if (!StringUtils.isBlank(addr.getAddrTxt2())) {
+        street += " " + addr.getAddrTxt2();
+      }
+
+      if (!StringUtils.isBlank(street)) {
+        if (street.length() <= 70) {
+          requestadd.setStreet(street);
+        } else {
+          street = street.substring(0, 69);
+        }
+      }
+      requestadd.setStreet(street);
+
+      LOG.debug("Connecting to the AddressStd Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      AddressStdResponse response = tgmeClient.executeAndWrap(TgmeClient.ADDRESS_STD_APP_ID, requestadd, AddressStdResponse.class);
+      LOG.debug("Response status is " + response.getStatus());
+      if (response.getStatus() != TgmeClient.STATUS_SUCCESSFUL) {
+        throw new Exception("TGME Error");
+      }
+      // data1 holds response data from service
+      AddressStdData data1 = response.getData();
+
+      LOG.debug("Tgme Resonse code is : " + data1.getTgmeResponseCode());
+      if (StringUtils.isBlank(data1.getTgmeResponseCode())) {
+        throw new Exception("TGME Code is null, service may be down.");
+      }
+
+      TgmeCodes codeDesc = getTgmeCode(entityManager, data1.getTgmeResponseCode());
+      if (codeDesc != null) {
+        LOG.debug("Address Standardization result : " + codeDesc.getText());
+        details.append("Address Standardization result : " + codeDesc.getText() + "\n");
+      }
+
+      // create data elements for import for Street, City, and Postal Code.
+      if ("C".equalsIgnoreCase(data1.getTgmeResponseCode()) || "V".equalsIgnoreCase(data1.getTgmeResponseCode())) {
+        if (!StringUtils.isBlank(data1.getPostalCode())) {
+          LOG.debug(" Postal code is  : " + data1.getTgmeResponseCode());
+          details.append("Postal Code: " + data1.getPostalCode() + "\n");
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), data1.getPostalCode());
+        }
+
+        if (!StringUtils.isBlank(data1.getCity())) {
+          LOG.debug("City is : " + data1.getCity());
+          details.append("City: " + data1.getCity() + "\n");
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), data1.getCity());
+        }
+
+        if (!StringUtils.isBlank(data1.getStreetAddressLine1())) {
+          LOG.debug("Address is : " + data1.getStreetAddressLine1());
+          details.append("Address Line 1: " + data1.getStreetAddressLine1() + "\n");
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "ADDR_TXT", addr.getAddrTxt(), data1.getStreetAddressLine1());
+        }
+
+        if (!StringUtils.isBlank(data1.getStreetAddressLine2())) {
+          LOG.debug("Address is : " + data1.getStreetAddressLine2());
+          details.append("AddressLine 2: " + data1.getStreetAddressLine2() + "\n");
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "ADDR_TXT_2", addr.getAddrTxt2(), data1.getStreetAddressLine2());
+        }
+
+        if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
+          LOG.debug("State is : " + data1.getStateProvinceCode());
+          details.append("Stata/Province Code: " + data1.getStateProvinceCode() + "\n");
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(), data1.getStateProvinceCode());
+        }
+
+        if (!StringUtils.isBlank(data1.getStateProvinceName())) {
+          LOG.debug("State is : " + data1.getStateProvinceName());
+          details.append("Stata/Province Name: " + data1.getStateProvinceName() + "\n");
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "STD_CITY_NM", addr.getStdCityNm(), data1.getStateProvinceName());
+        }
+
+        if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
+          LOG.debug("State Code determined from TGME: " + data1.getStateProvinceCode());
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "", addr.getStateProv(), data1.getStateProvinceCode());
+        }
+
+        results.setResults("Successful Execution");
+        results.setDetails("Data for " + data1.getCity() + " under Issuing Country " + data1.getCountry() + " has been override \n");
+        results.setDetails(details.toString());
+        results.setProcessOutput(overrides);
+        results.setOnError(false);
+      } else {
+
+        results.setResults("Execution Not Performed");
+        results.setDetails("Skipping overrides for " + addr.getId().getAddrType() + "address.");
+        results.setOnError(true);
+      }
+    }
+
+    return results;
+  }
+
+  private String getStateProvDesc(EntityManager entityManager, String land1, String stateCd) {
+    try {
+      String sql = ExternalizedQuery.getSql("TGME.GETSTATEPROVDESC");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("LAND1", land1);
+      query.setParameter("STATE", stateCd);
+      query.setParameter("CODE", stateCd + "%");
+      List<Object[]> results = query.getResults(1);
+      if (results != null && results.size() > 0) {
+        Object[] record = results.get(0);
+        return (String) record[0] + "," + record[1];
+      }
+      return null;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  @Override
+  public String getProcessCode() {
+    return AutomationElementRegistry.GBL_ADDR_STD;
+  }
+
+  @Override
+  public String getProcessDesc() {
+    return "US-Address Standardization";
+  }
+
+  private TgmeCodes getTgmeCode(EntityManager entityManager, String code) {
+    String sql = ExternalizedQuery.getSql("TGME.GETCODEDESC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CD", code);
+    List<TgmeCodes> results = query.getResults(TgmeCodes.class);
+    if (!results.isEmpty()) {
+      return results.get(0);
+    }
+    return null;
+  }
+
+}

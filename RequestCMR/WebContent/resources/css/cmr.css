@@ -1,0 +1,837 @@
+div.cmr-collapse {
+	display: none !important;
+}
+
+div.cmr-main {
+	border: 1px Solid #E5E5E5;
+	padding: 10px;
+	box-shadow: 3px 3px 3px #DDDDDD;
+}
+
+div.cmr-main div.ibm-rule {
+	margin-right: 20px !important;
+}
+
+/* Hide/Show Crit */
+div.cmr-spacer {
+	display: block;
+	height: 20px;
+	width: 100%;
+}
+
+div.cmr-hide-show-crit {
+	display: table-cell;
+}
+
+div.cmr-show-adv-crit {
+	padding-left: 10px;
+	padding-right: 15px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	border: 1px Solid #DDDDDD;
+	background-image: -moz-linear-gradient(center top, transparent, rgba(0, 0, 0, 0.2)
+		);
+	background-image: -ms-linear-gradient(transparent, rgba(0, 0, 0, 0.2) );
+	text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.95);
+	width: 250px;
+	border-radius: 2px;
+	font-weight: bold;
+	font-size: 13px;
+	box-shadow: 3px 3px 3px;
+	margin-bottom: 10px;
+	cursor: pointer;
+	margin-left: 0px;
+	margin-right: 30px;
+	transition: background 0.3s ease 0s;
+	-webkit-transition: background 0.3s;
+	display: inline-block;
+	box-shadow: 3px 3px 3px;
+	width: 250px;
+}
+
+div.cmr-show-adv-crit:hover {
+	background: #E5E5E5;
+	border: 1px Solid #E5E5E5;
+}
+
+div.cmr-show-adv-crit img {
+	width: 10px;
+	height: 10px;
+	float: right;
+	padding-top: 6px;
+}
+
+div.cmr-crit-sel {
+	width: 12px;
+	border: 2px solid #000000;
+	display: inline-block;
+	height: 10px;
+	border-radius: 10px;
+	padding-bottom: 2px;
+	background: #00FF00;
+	-moz-border-radius: 10px;
+	font-size: 10px;
+	color: #000000;
+	text-align: center;
+	vertical-align: middle;
+}
+
+div.cmr-crit-unsel {
+	width: 12px;
+	border: 2px solid #000000;
+	display: inline-block;
+	height: 10px;
+	border-radius: 10px;
+	padding-bottom: 2px;
+	background: #FFFFFF;
+	-moz-border-radius: 10px;
+	font-size: 10px;
+	color: #000000;
+	text-align: center;
+	vertical-align: middle;
+}
+
+div.cmr-crit-txt {
+	display: inline-block;
+	padding-left: 5px;
+	vertical-align: middle;
+	font-size: 13px;
+}
+/* End Hide/Show Crit */
+
+/* Tabs */
+div.cmr-tabs {
+	width: 100%;
+	margin: 0;
+}
+
+div.nopad {
+  margin: 0 !important;
+}
+div.cmr-tabs div.cmr-tab-cont {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	margin-left: 0px;
+	margin-right: 0px;
+	border-bottom: 1px Solid #E5E5E5;
+}
+
+div.cmr-tabs div.cmr-tab {
+	display: inline-block;
+	/*	min-width: 60px;*/
+	border: 1px Solid #D5D5D5;
+	text-align: center;
+	padding-top: 3px;
+	padding-bottom: 10px;
+	padding-left: 9px;
+	padding-right: 14px;
+	height: 15px;
+	margin-bottom: -1px;
+	font-weight: bold;
+	font-size: 14px;
+	border-radius: 10px 10px 0 0;
+	transition: background 0.3s ease 0s;
+	-webkit-transition: background 0.3s;
+	background: #E5E5E5;
+	cursor: pointer;
+}
+
+div.cmr-tab-help {
+	float: right;
+}
+
+div.cmr-tabs div.cmr-tab:hover {
+	background: #F5F5F5;
+}
+
+div.cmr-tabs div.active {
+	border-bottom: 1px Solid #FFFFFF;
+	background: #FFFFFF;
+	cursor: default;
+}
+
+div.cmr-tabs div.active:hover {
+	background: #FFFFFF;
+}
+/* End Tabs */
+
+/* Sub section */
+div.cmr-sub {
+	border-left: 1px Solid #E5E5E5;
+	border-right: 1px Solid #E5E5E5;
+	border-bottom: 1px Solid #E5E5E5;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-top: -1px;
+	box-shadow: 3px 3px 3px #DDDDDD;
+}
+
+div.cmr-sub div.ibm-rule {
+	margin-right: 20px !important;
+}
+
+/* End Sub section */
+
+/* w3 Overrides */
+span#ibm-tooltip-0,span#ibm-tooltip-0:before,span#ibm-tooltip-0:after,span#ibm-tooltip-0:hover
+	{
+	position: relative;
+	border-bottom: none;
+}
+
+span.cmr-help {
+	float: right;
+	font-size: small;
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+span.cmr-filter-err {
+	background:
+		url('//1.www.s81c.com/common/js/dojo/1.6/dijit/themes/nihilo/images/warning.png')
+		no-repeat scroll center center transparent;
+	padding-left: 25px;
+}
+
+span.cmr-grid-tooltip {
+	color: #00649D;
+}
+
+#cmrDetailedInformationTableContainer>table>tbody>tr:nth-child(even) {
+	background-color: #eaeaea;
+}
+
+#cmrDetailedInformationTableContainer table tr td {
+	padding: 3px;
+	font-size: 13px;
+	line-height: 18px;
+}
+
+#cmrDetailedInformationTableContainer {
+	border: 1px Solid #eaeaea;
+}
+
+form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
+	font-size: 14px !important;
+	font-weight: bold !important;
+}
+/* End w3 Overrides */
+
+/* Nihilo Overrides */
+.dojoxGridFCBoxSelCol,.dojoxGridFCBoxCondition {
+	height: 60px !important;
+}
+
+.nihilo .dijitDialog {
+	background: none repeat scroll 0% 0% transparent !important;
+	border: 8px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.nihilo .dijitMenuItem:before {
+	content: none !important;
+}
+
+table.dojoxGridRowTable td {
+	font-size: 11px;
+	line-height: 18px;
+}
+
+table.dojoxGridRowTable th {
+	font-size: 11px;
+	line-height: 18px;
+}
+
+div.ibm-confidential-note {
+	color: #D9182D;
+	font-size: 14px;
+	text-align: right;
+	text-shadow: white 1px 1px 1px;
+	padding: 5px;
+}
+
+input.cmr-inline-btn {
+	background-image: -moz-linear-gradient(center top, transparent, rgba(0, 0, 0, 0.2)
+		);
+	background-image: -ms-linear-gradient(transparent, rgba(0, 0, 0, 0.2) );
+	text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.95);
+	width: 25px;
+	height: 22px;
+	border-radius: 2px;
+	font-size: 12px;
+	cursor: pointer;
+	border: 1px Solid #DDDDDD;
+}
+
+input.cmr-inline-btn:hover {
+	background: #E5E5E5;
+	border: 1px Solid #E5E5E5;
+}
+
+span.ibm-information-link {
+	letter-spacing: 0 !important;
+}
+
+span.ibm-information-link:before {
+	letter-spacing: 0 !important;
+}
+
+span.cmr-release-note {
+	font-size: 10px;
+	letter-spacing: 1px;
+}
+
+#forgotpwd {
+	width: 200px;
+	height: 100px;
+	padding: 0.5em;
+	border: 1px solid #A6C9E2;
+	color: #222222;
+	border-radius : 5px;
+	box-shadow: 3px 3px 3px #DDDDDD;
+}
+
+#forgotpwd p {
+	padding-top: 20px;
+	padding-left: 15px;
+}
+
+/** Info/Error Box Styles*/
+div.cmr-message-box-error {
+	color: #D9182D;
+}
+
+img.cmr-error-icon {
+	width: 18px;
+	height: 18px;
+	vertical-align: middle;
+	padding-right: 5px;
+}
+
+img.cmr-warn-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: baseline;
+  padding-left: 2px;
+}
+
+div.cmr-message-box-error span {
+	font-weight: bold;
+	font-size: 14px;
+}
+
+div.cmr-message-box-error ul {
+	padding-left: 10px;
+	color: #D9182D !important;
+	font-weight: normal;
+	font-size: 13px;
+	line-height: 15px;
+}
+
+div.cmr-message-box-error ul li,div.cmr-message-box-error ul li:before {
+	content: none;
+}
+
+div.cmr-message-box-error ul li:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+div.cmr-box-error {
+	color: #D9182D;
+	font-weight: bold;
+	font-family: "Helvetica";
+}
+
+img.cmr-info-icon {
+	width: 18px;
+	height: 18px;
+	vertical-align: middle;
+	padding-right: 5px;
+	margin-bottom: 3px;
+}
+
+div.cmr-box-info {
+	color: green;
+	font-weight: bold;
+	font-family: "Helvetica";
+}
+
+img.cmr-input-error-icon {
+	width: 14px;
+	height: 14px;
+	vertical-align: middle;
+	margin-bottom: 5px;
+	cursor: pointer;
+	padding-left: 4px;
+}
+
+div.cmr-tab img.cmr-input-error-icon {
+	padding-left: 4px;
+}
+
+img.cmr-w3-icon {
+	vertical-align: middle;
+}
+
+input#gridchkall {
+	margin-left: 0;
+}
+
+span.dijitPlaceHolder {
+	margin-left: 0 !important;
+}
+
+div.cmr-bg {
+	background: #EAEAEA;
+}
+
+img.cmr-info-bubble {
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+	padding-left: 4px;
+	vertical-align: sub;
+}
+
+img.cmr-grid-check {
+	width: 14px;
+	height: 14px;
+}
+
+.cmr-inline {
+	display: inline !important;
+}
+
+div.dijitDialog label {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  width: auto !important;
+}
+
+.dijitDialogPaneContent .ibm-columns {
+	padding-top: 5px;
+}
+
+div.ui-datepicker {
+	font-size: 12px;
+}
+
+img.cmr-date-icon {
+	width: 20px;
+	height: 20px;
+	vertical-align: sub;
+	padding-left: 2px;
+	cursor: pointer;
+}
+
+span.cmr-bluepages-ro {
+	margin-left: 0 !important;
+	color: gray;
+	font-size: 13px;
+	font-family: Georgia;
+	display : inline-block !important;
+}
+
+div.spacer {
+  width:100%;
+  height:20px;
+}
+/* Request Entry CSS */
+div.cmr-actions {
+  width:960px;
+  height:25px;
+  z-index: 949;
+  left: auto;
+  padding-top: 4px;
+  padding-bottom: 2px;
+  background: -moz-linear-gradient(top,#bebebe,#868686);
+  position:fixed;
+  top: 247px;
+  background: rgb(226,226,226); /* Old browsers */
+background: -moz-linear-gradient(top, rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=0 ); /* IE6-9 */
+  border-bottom: 1px Solid rgb(226,226,226);
+  border-radius: 5px;
+}
+
+
+
+div.cmr-action-dd {
+	float: right;
+	padding-right: 15px;
+}
+
+div.cmr-action-dd div.dijitButtonNode {
+	border-bottom: 1px Solid #D3D3D3 !important;
+	height: 20px !important;
+}
+
+div.cmr-action-txt {
+	text-align: center;
+	font-size: 15px;
+	font-weight: bold;
+	text-shadow: 2px 2px #DDDDDD;
+	color: #D9182D;
+}
+div#widget_yourAction span.dijitPlaceHolder {
+  color:#444444 !important;
+  font-style: normal;
+  font-weight: bold;
+  padding-left:2px;
+}
+
+input#yourAction {
+  padding-left: 2px !important;
+}
+img.cmr-proceed-icon {
+	width: 23px;
+	height: 23px;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+img.cmr-proceed2-icon {
+  width: 23px;
+  height: 23px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+img.cmr-delta-icon {
+  width: 15px;
+  height: 15px;
+  vertical-align: sub;
+  cursor: pointer;
+  margin-bottom: 1px;
+}
+
+input.cmr-grid-btn {
+	font-size: 12px;
+	border-radius: 3px;
+	background-color: #FFF;
+	border-color: #CCC rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	color: #000;
+	box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3) inset, 0px 1px 2px
+		rgba(0, 0, 0, 0.5);
+	text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.95);
+	background-image: -moz-linear-gradient(center top, transparent, rgba(0, 0, 0, 0.2)
+		);
+	background-image: -ms-linear-gradient(transparent, rgba(0, 0, 0, 0.2) );
+	cursor: pointer;
+	border: 1px solid #DBDBDB;
+	margin-left: 5px;
+	margin-top: 3px;
+	margin-bottom: 3px;
+	height: 20px;
+}
+
+input.cmr-grid-btn-h {
+  font-size: 12px;
+  border-radius: 3px;
+  background-color: rgb(54, 122, 163);
+  border-color: #CCC rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  color: #FFF;
+  box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3) inset, 0px 1px 2px
+    rgba(0, 0, 0, 0.5);
+  background-image: -moz-linear-gradient(center top, transparent, rgba(0, 0, 0, 0.2)
+    );
+  background-image: -ms-linear-gradient(transparent, rgba(0, 0, 0, 0.2) );
+  cursor: pointer;
+  border: 1px solid #555;
+  margin-left: 5px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  height: 20px;
+}
+
+input.cmr-grid-btn:hover {
+	background-image: -moz-linear-gradient(center top, rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.4) );
+	background-image: -ms-linear-gradient(rgba(255, 255, 255, 0.1),
+		rgba(0, 0, 0, 0.4) );
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+	text-shadow: 0 0 5px rgba(255, 255, 255, 0.75);
+}
+
+input.cmr-grid-btn-h:hover {
+  background-image: -moz-linear-gradient(center top, rgba(255, 255, 255, 0.1),
+    rgba(0, 0, 0, 0.4) );
+  background-image: -ms-linear-gradient(rgba(255, 255, 255, 0.1),
+    rgba(0, 0, 0, 0.4) );
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.75);
+}
+span.cmr-txtarea-limit {
+	float: right;
+	font-size: 13px;
+	color: #767676;
+	font-weight: normal;
+}
+
+input.cmr-reqentry-btn {
+	width: 100px !important;
+	height: 32px;
+	font-size: 12px !important;
+}
+
+input.cmr-address-btn {
+	width: 200px !important;
+	height: 32px;
+	font-size: 12px !important;
+}
+
+span.cmr-required-spacer {
+	width: 10px !important;
+}
+
+table.cmr-scorecard {
+  margin-top : 12px;
+}
+
+table.cmr-scorecard,table.cmr-scorecard td {
+	border: 2px Solid #666;
+	padding: 0;
+	padding-left: 3px !important;
+	font-size: 12px !important;
+}
+
+table.cmr-scorecard td.scorecard {
+  text-align: center !important;
+}
+
+table.cmr-scorecard td.scorecard img.scorecard-icon {
+  width: 16px;
+  height: 16px;  
+}
+
+div.scorecard {
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+form.ibm-column-form .ibm-columns label.cmr-radio-check-label {
+	display: inline !important;
+	padding-right: 5px !important;
+	font-weight: normal !important;
+}
+
+ul.ui-autocomplete li.ui-menu-item {
+	font-size: 13px !important;
+	padding: 5px !important;
+	padding-left: 15px !important;
+}
+
+
+ul.ui-autocomplete {
+	z-index: 9999 !important;
+}
+
+img.cmr-search-icon {
+  width:25px;
+  height:25px;
+  cursor : pointer;
+  vertical-align: middle;
+}
+
+img.cmr-remove-icon {
+  width:16px;
+  height:16px;
+  cursor : pointer;
+  vertical-align: middle;
+}
+
+div.dijitDialog label.cmr-status-cmt {
+  width: 100% !important;
+}
+
+input.cmr-disabled {
+  background: #EAEAEA !important;
+}
+
+input.cmr-readOnly {
+  background: #FFFFEE !important;
+}
+
+span.cmr-findcmr-record {
+  border: 1px Solid Green;
+  border-radius:3px;
+  color:green;
+  padding-left:5px;
+  padding-right:5px;
+  font-size:11px;
+  position: absolute;
+  right: 35px;
+  top: 28px;
+}
+span.cmr-dnb-record {
+  border: 1px Solid Blue;
+  border-radius:3px;
+  color:Blue;
+  padding-left:5px;
+  padding-right:5px;
+  font-size:11px;
+  position: absolute;
+  right: 35px;
+  top: 28px;
+}
+
+div.dijitReadOnly {
+	opacity: 1 !important;
+}
+
+
+/* Filter Bar Updates */
+.dojoxGridFBarStatus {
+  float: inherit !important;
+  font-family: Tahoma;
+}
+.dojoxGridFDTitlePane {
+  height: auto !important;
+}
+.nihilo .dijitAccordionText {
+  width: 200px !important;
+}
+
+
+.nihilo .dijitAccordionTitle, .nihilo .dijitAccordionTitleSelected {
+  height: 20px !important;
+}
+
+.nihilo .dijitAccordionTitle .dijitAccordionArrow, .nihilo .dijitAccordionTitleSelected .dijitAccordionArrow {
+  margin-bottom: 10px;
+}
+
+.dijitAccordionChildWrapper {
+  height: 170px !important;
+}
+
+.dojoxGridFBarInfoTD .dojoxGridFBarClearFilterBtn .dijitButtonNode {
+	font-family: Tahoma;
+	margin-bottom: 6px;
+}
+
+input.templateButton {
+    width: 20px;
+    height: 20px;
+    padding: 0px;
+    vertical-align: middle;
+    font-size: 10px;
+}
+
+input.addrStd {
+  font-size:12px;
+}
+
+a.translate {
+  font-size: 14px;
+  text-decoration: none;
+}
+
+a.translate:hover {
+  text-decoration: underline;
+}
+
+div.cmtlog {
+  height: 40px !important;
+}
+
+div.section-header {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  display: inline-block;
+}
+
+div.add-cmt {
+  float: right;
+  padding-top: 9px;
+}
+
+img.addr-icon {
+  width:20px;
+  height:20px;
+  cursor: pointer;
+  vertical-align: text-top;
+}
+
+img.pdf {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+  padding-bottom: 5px;
+  cursor: pointer;
+}
+
+div.embargo {
+  border: 1px Solid #D9182D;
+  border-radius : 4px;
+  padding-left: 10px;
+}
+
+img.pending-icon {
+  width:15px;
+  height:15px;
+  cursor: help;
+  vertical-align: text-top;
+  padding-left: 3px;
+}
+
+span.support-link {
+  font-size:13px;
+  color: #777777;
+  margin-left:20px;
+}
+
+img.help {
+  width:50px;
+  height:50px;
+}
+
+img.approval-icon {
+  width: 20px; 
+  height: 20px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+span.source-syst {
+  padding :2px;
+  color: White;
+  background: Green;
+  text-shadow : none;
+  border-radius: 4px;
+}
+
+div.cmr-feedback-btn {
+  cursor: pointer;
+  line-height: 50px;
+  padding-left: 20px;
+  padding-right: 20px;
+  position: fixed;
+  right: -30px;
+  top: 400px;
+  transform: rotate(-90deg);
+  z-index: 999;
+  color:white;
+  font-weight: 300 !important;
+  background-color: #367aa3 !important;
+  text-shadow : none;
+}
+
+div.cmr-quick-search-btn {
+  right: -42px;
+  top: 50%;
+  transform: rotate(-90deg);
+  z-index: 999;
+  color:white;
+  font-weight: 300 !important;
+/* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#a9db80+0,96c56f+100;Green+3D+%232 */
+background: #a9db80; /* Old browsers */
+background: -moz-linear-gradient(top,  #a9db80 0%, #96c56f 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top,  #a9db80 0%,#96c56f 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom,  #a9db80 0%,#96c56f 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a9db80', endColorstr='#96c56f',GradientType=0 ); /* IE6-9 */
+  text-shadow : none;
+}

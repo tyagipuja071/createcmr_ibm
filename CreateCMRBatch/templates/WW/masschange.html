@@ -1,0 +1,50 @@
+<html>
+${head}
+<body>
+<div class="salute">Attention: ${request.displayName}</div>
+<br>
+<br>
+<div class="description">${description}</div>
+<br>
+This is  
+#if ( $admin.reqType == "M" )
+a <b>Mass Update</b> 
+#elseif ( $admin.reqType == "N" )
+a <b>Mass Create</b> 
+#elseif ( $admin.reqType == "R" )
+a <b>Reactivate</b> 
+#elseif ( $admin.reqType == "D" )
+a <b>Delete</b> 
+#elseif ( $admin.reqType == "E" )
+an <b>Update by Enterprise #</b> 
+#end
+request.
+<br>
+#if ( $admin.reqType != "E")
+There is a total of ${numberOfRecords} records to be processed on this request.
+#else
+The request is to 
+#if ($ent.entpUpdtTyp == "A")
+Update the Legal Name of CMRs under the Company ${ent.company} and Enterprise ${ent.enterprise} to ${ent.custNm1} $!{ent.custNm2}.
+#elseif ( $ent.entpUpdtTyp == "B" )
+Move the CMRs under the Company ${ent.company} and Enterprise ${ent.enterprise} to the new Enterprise ${ent.newEntp}.
+#elseif ( $ent.entpUpdtTyp == "C" )
+Update the Enterprise Name of Enterprise ${ent.enterprise} to ${ent.newEntpName1} $!{ent.newEntpName1}.
+#end
+#end
+<br>
+<br>
+Comments provided by the requester:<br>
+$!{comments}
+
+${approvalLinks}
+
+<br>
+<br>
+<div class="signature">
+  A copy of the request file has been attached for reference.
+</div>
+<br>
+${signature}
+</body>
+</html>

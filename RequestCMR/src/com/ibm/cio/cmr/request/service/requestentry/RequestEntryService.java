@@ -1,0 +1,1365 @@
+/**
+ * 
+ */
+package com.ibm.cio.cmr.request.service.requestentry;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+import org.springframework.stereotype.Component;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.AutomationConst;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
+import com.ibm.cio.cmr.request.entity.CompoundEntity;
+import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.ProcCenter;
+import com.ibm.cio.cmr.request.entity.ProlifChecklist;
+import com.ibm.cio.cmr.request.entity.ProlifChecklistPK;
+import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.StatusTrans;
+import com.ibm.cio.cmr.request.entity.StatusTransPK;
+import com.ibm.cio.cmr.request.entity.ValidationUrl;
+import com.ibm.cio.cmr.request.model.BaseModel;
+import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
+import com.ibm.cio.cmr.request.model.code.ValidateFiscalDataModel;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
+import com.ibm.cio.cmr.request.model.requestentry.AttachmentModel;
+import com.ibm.cio.cmr.request.model.requestentry.AutoDNBDataModel;
+import com.ibm.cio.cmr.request.model.requestentry.CheckListModel;
+import com.ibm.cio.cmr.request.model.requestentry.DataModel;
+import com.ibm.cio.cmr.request.model.requestentry.NotifyListModel;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.model.requestentry.SubindustryIsicSearchModel;
+import com.ibm.cio.cmr.request.model.requestentry.ValidationUrlModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.BaseService;
+import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.service.approval.ApprovalService;
+import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.dnb.DnbData;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+
+/**
+ * Main Service for request entry
+ * 
+ * @author Jeffrey Zamora
+ * 
+ */
+@Component
+public class RequestEntryService extends BaseService<RequestEntryModel, CompoundEntity> {
+
+  private final AdminService adminService = new AdminService();
+  private final DataService dataService = new DataService();
+  private final ScorecardService scorecardService = new ScorecardService();
+  private final ApprovalService approvalService = new ApprovalService();
+  private static final String STATUS_CHG_CMT_PRE_PREFIX = "ACTION \"";
+  private static final String STATUS_CHG_CMT_MID_PREFIX = "\" changed the REQUEST STATUS to \"";
+  private static final String STATUS_CHG_CMT_POST_PREFIX = "\"<br/>";
+  private CheckListModel checklist;
+
+  @Override
+  protected Logger initLogger() {
+    return Logger.getLogger(RequestEntryService.class);
+  }
+
+  @Override
+  protected void performTransaction(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
+
+    String action = model.getAction();
+    if (CmrConstants.Save().equalsIgnoreCase(action) || "REJECT_SEARCH".equalsIgnoreCase(action) || "NO_DATA_SEARCH".equalsIgnoreCase(action)
+        || "CREATE_NEW".equalsIgnoreCase(action)) {
+      performSave(model, entityManager, request, false);
+    } else if ("DPL".equalsIgnoreCase(action)) {
+      performSave(model, entityManager, request, true);
+    } else if ("VERIFY_COMPANY".equalsIgnoreCase(action)) {
+      performSave(model, entityManager, request, true);
+    } else if ("VERIFY_SCENARIO".equalsIgnoreCase(action)) {
+      performSave(model, entityManager, request, true);
+    } else if ("OVERRIDE_DNB".equalsIgnoreCase(action)) {
+      performSave(model, entityManager, request, true);
+    } else {
+      // Claim conditionally approved request (Edit Request)
+      /*
+       * if (CmrConstants.Claim().equalsIgnoreCase(action) &&
+       * CmrConstants.APPROVAL_RESULT_COND_APPROVED
+       * .equals(model.getApprovalResult())) { ApprovalService service = new
+       * ApprovalService(); service.updateApprovals(entityManager,
+       * "EDIT_REQUEST", model.getReqId(), AppUser.getUser(request)); }
+       */
+      StatusTrans trans = getStatusTransition(entityManager, model);
+      if (trans == null) {
+        return; // no transition, no processing needed
+      }
+      if (CmrConstants.Claim().equalsIgnoreCase(action)) {
+        // 1150209: throw an error if request has been claimed already, JZ Mar
+        // 2, 2017
+        if (canClaim(entityManager, model)) {
+          throw new CmrException(MessageUtil.ERROR_CLAIMED_ALREADY);
+        }
+        performGenericAction(trans, model, entityManager, request, null);
+        RequestUtils.addToNotifyList(this, entityManager, AppUser.getUser(request), model.getReqId());
+      } else if (CmrConstants.Unlock().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null);
+      } else if (CmrConstants.Send_for_Processing().equalsIgnoreCase(action)) {
+        performSendForProcessing(trans, model, entityManager, request);
+      } else if (CmrConstants.Processing_Validation_Complete().equalsIgnoreCase(action)
+          || CmrConstants.Processing_Validation_Complete2().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null);
+      } else if (CmrConstants.Processing_Create_Up_Complete().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null);
+      } else if (CmrConstants.All_Processing_Complete().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null, null, true);
+      } else if (CmrConstants.Reject().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null, null, false);
+        processObsoleteApprovals(entityManager, model.getReqId(), AppUser.getUser(request));
+      } else if (CmrConstants.Cancel_Processing().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null);
+      } else if (CmrConstants.Create_Update_CMR().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null);
+      } else if (CmrConstants.Create_Update_Approved().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null);
+      } else if (CmrConstants.Reprocess_Checks().equalsIgnoreCase(action)) {
+        performGenericAction(trans, model, entityManager, request, null);
+      } else if (CmrConstants.Cancel_Request().equalsIgnoreCase(action)) {
+        performCancelRequest(trans, model, entityManager, request);
+      }
+    }
+  }
+
+  /**
+   * Saves the request. This method handles both Create and Update
+   * 
+   * @param model
+   * @param entityManager
+   * @param request
+   * @throws Exception
+   */
+  public void performSave(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request, boolean noScorecard) throws Exception {
+    AppUser user = AppUser.getUser(request);
+
+    GEOHandler geoHandler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
+    if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
+      String[] nameArray = geoHandler.dividingCustName1toName2(model.getMainCustNm1(), model.getMainCustNm2());
+      if (nameArray != null && nameArray.length == 2) {
+        model.setMainCustNm1(nameArray[0]);
+        model.setMainCustNm2(nameArray[1]);
+      }
+    }
+    Admin adminToUse = null;
+    if (BaseModel.STATE_NEW == model.getState()) {
+      CompoundEntity entity = createFromModel(model, entityManager, request);
+      long reqId = SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "REQ_ID");
+
+      // create the Admin record
+      Admin admin = entity.getEntity(Admin.class);
+      admin.getId().setReqId(reqId);
+      admin.setReqStatus(CmrConstants.REQUEST_STATUS.DRA.toString());
+      admin.setRequesterId(user.getIntranetId());
+      admin.setRequesterNm(user.getBluePagesName());
+      admin.setCreateTs(SystemUtil.getCurrentTimestamp());
+      admin.setLastUpdtBy(user.getIntranetId());
+      admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+      admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+      admin.setCovBgRetrievedInd(CmrConstants.YES_NO.N.toString());
+      RequestUtils.setClaimDetails(admin, request);
+      // clear cmt value as it is saved in new table .
+
+      if (geoHandler != null) {
+        geoHandler.setAdminDefaultsOnCreate(admin);
+      }
+
+      if (!PageManager.autoProcEnabled(model.getCmrIssuingCntry(), model.getReqType())) {
+        admin.setDisableAutoProc(CmrConstants.YES_NO.Y.toString());
+      }
+
+      saveAccessToken(admin, request);
+      createEntity(admin, entityManager);
+      adminToUse = admin;
+
+      // create the Data record
+      Data data = entity.getEntity(Data.class);
+      data.getId().setReqId(reqId);
+
+      if (geoHandler != null) {
+        geoHandler.setDataDefaultsOnCreate(data, entityManager);
+        geoHandler.handleImportByType(admin.getReqType(), admin, data, false);
+      }
+      createEntity(data, entityManager);
+
+      // create the Scorecard record
+      Scorecard score = entity.getEntity(Scorecard.class);
+      score.getId().setReqId(reqId);
+      if (!StringUtils.isEmpty(model.getSaveRejectScore())) {
+        String system = model.getSaveRejectScore();
+        if ("dnb".equals(system)) {
+          score.setFindDnbUsrNm(user.getBluePagesName());
+          score.setFindDnbUsrId(user.getIntranetId());
+          score.setFindDnbTs(SystemUtil.getCurrentTimestamp());
+          if ("NO_DATA_SEARCH".equals(model.getAction())) {
+            score.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
+          } else {
+            score.setFindDnbResult(CmrConstants.RESULT_REJECTED);
+          }
+        } else {
+          score.setFindCmrUsrNm(user.getBluePagesName());
+          score.setFindCmrUsrId(user.getIntranetId());
+          score.setFindCmrTs(SystemUtil.getCurrentTimestamp());
+          if ("NO_DATA_SEARCH".equals(model.getAction())) {
+            score.setFindCmrResult(CmrConstants.RESULT_NO_RESULT);
+          } else {
+            score.setFindCmrResult(CmrConstants.RESULT_REJECTED);
+          }
+        }
+      }
+      if (StringUtils.isBlank(score.getDplChkResult())) {
+        score.setDplChkResult(CmrConstants.Scorecard_Not_Done);
+        score.setFindCmrResult(CmrConstants.Scorecard_Not_Done);
+        score.setFindDnbResult(CmrConstants.Scorecard_Not_Done);
+      }
+
+      createEntity(score, entityManager);
+
+      if (geoHandler != null && geoHandler.hasChecklist(model.getCmrIssuingCntry())) {
+        saveChecklist(entityManager, reqId, user);
+      }
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, "AUTO: Request created.", CmrConstants.Save());
+      RequestUtils.addToNotifyList(this, entityManager, user, reqId);
+
+      model.setReqId(reqId);
+    } else {
+      CompoundEntity entity = getCurrentRecord(model, entityManager, request);
+      boolean clearCmrNoAndSap = false;
+      if (entity != null) {
+        Admin admin = entity.getEntity(Admin.class);
+        if (admin != null && "U".equals(admin.getReqType()) && "C".equals(model.getReqType())) {
+          clearCmrNoAndSap = true;
+        }
+        processDplReset(entityManager, model, admin);
+      }
+      copyValuesToEntity(model, entity);
+
+      if (noScorecard) {
+        Scorecard score = entity.getEntity(Scorecard.class);
+        entityManager.detach(score);
+      }
+      // detachScoreCard(entityManager, entity);
+
+      // create the Admin record
+      Admin admin = entity.getEntity(Admin.class);
+      admin.setLastUpdtBy(user.getIntranetId());
+      admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+
+      if (StringUtils.isEmpty(admin.getLockInd())) {
+        admin.setLockInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (StringUtils.isEmpty(admin.getProcessedFlag())) {
+        admin.setLockInd(CmrConstants.YES_NO.N.toString());
+      }
+      if (StringUtils.isEmpty(admin.getDisableAutoProc())) {
+        admin.setDisableAutoProc(CmrConstants.YES_NO.N.toString());
+      }
+
+      // clear cmt value as it is saved in new table .
+
+      // always clear the values when status is changed to PCP
+      if ("PCP".equals(admin.getReqStatus())) {
+        admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+        admin.setProcessedTs(null);
+      }
+      if (!PageManager.autoProcEnabled(model.getCmrIssuingCntry(), model.getReqType())) {
+        admin.setDisableAutoProc(CmrConstants.YES_NO.Y.toString());
+      }
+
+      if (geoHandler != null) {
+        geoHandler.doBeforeAdminSave(entityManager, admin, model.getCmrIssuingCntry());
+      }
+
+      saveAccessToken(admin, request);
+      updateEntity(admin, entityManager);
+
+      adminToUse = admin;
+      // create the Data record
+      Data data = entity.getEntity(Data.class);
+      if (clearCmrNoAndSap) {
+        data.setCmrNo(null);
+      }
+
+      // 1164429
+      // Will call this for mrcIsuClientTierLogic during manual creation for LA
+      if (null != geoHandler && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
+        geoHandler.setDataDefaultsOnCreate(data, entityManager);
+        geoHandler.handleImportByType(admin.getReqType(), admin, data, false);
+      }
+
+      if (geoHandler != null) {
+        geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
+      }
+      updateEntity(data, entityManager);
+      if (!noScorecard) {
+        if (!StringUtils.isEmpty(model.getSaveRejectScore())) {
+          String system = model.getSaveRejectScore();
+          Scorecard score = entity.getEntity(Scorecard.class);
+          if ("dnb".equals(system)) {
+            score.setFindDnbUsrNm(user.getBluePagesName());
+            score.setFindDnbUsrId(user.getIntranetId());
+            score.setFindDnbTs(SystemUtil.getCurrentTimestamp());
+            if ("NO_DATA_SEARCH".equals(model.getAction())) {
+              score.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
+            } else {
+              score.setFindDnbResult(CmrConstants.RESULT_REJECTED);
+            }
+          } else {
+            score.setFindCmrUsrNm(user.getBluePagesName());
+            score.setFindCmrUsrId(user.getIntranetId());
+            score.setFindCmrTs(SystemUtil.getCurrentTimestamp());
+            if ("NO_DATA_SEARCH".equals(model.getAction())) {
+              score.setFindCmrResult(CmrConstants.RESULT_NO_RESULT);
+            } else {
+              score.setFindCmrResult(CmrConstants.RESULT_REJECTED);
+            }
+          }
+          updateEntity(score, entityManager);
+        }
+      }
+
+      if (geoHandler != null && geoHandler.hasChecklist(model.getCmrIssuingCntry())) {
+        saveChecklist(entityManager, model.getReqId(), user);
+      }
+
+      if (clearCmrNoAndSap) {
+        clearCMRNoAndSap(entityManager, model.getReqId());
+      }
+      // save comment in req_cmt_log table while updating a request .
+      // save only if it is not null or not blank
+      if (null != model.getCmt() && !model.getCmt().isEmpty()) {
+        // RequestUtils.createCommentLog(this, entityManager, user,
+        // model.getReqId(), model.getCmt());
+      }
+
+    }
+
+    // compute the internal type, ensure value is saved to db first before
+    // executing
+    computeInternalType(entityManager, model, adminToUse);
+  }
+
+  public void computeInternalType(EntityManager entityManager, RequestEntryModel model, Admin adminToUse) {
+    if (adminToUse != null) {
+      String reqType = model.getReqType();
+      String cmrIssuingCountry = model.getCmrIssuingCntry();
+      CmrInternalTypes type = RequestUtils.computeInternalType(entityManager, reqType, cmrIssuingCountry, adminToUse.getId().getReqId());
+      if (type != null) {
+        adminToUse.setInternalTyp(type.getId().getInternalTyp());
+        adminToUse.setSepValInd(type.getSepValInd());
+      }
+      updateEntity(adminToUse, entityManager);
+    }
+  }
+
+  private void clearCMRNoAndSap(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("REQUESTENTRY.CLEARSAPNO"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+
+    query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("REQUESTENTRY.CLEARADDRRESULT"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+
+    query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("REQUESTENTRY.CLEARSAPNO_RDC"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+
+  }
+
+  protected void performGenericAction(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request,
+      String processingCenter) throws Exception {
+    performGenericAction(trans, model, entityManager, request, null, null, false);
+  }
+
+  protected void performGenericAction(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request,
+      String sendToId, String sendToNm, boolean complete) throws Exception {
+    performGenericAction(trans, model, entityManager, request, sendToId, sendToNm, complete, true);
+  }
+
+  /**
+   * Generic Action
+   * 
+   * @param model
+   * @param entityManager
+   * @param request
+   * @throws Exception
+   */
+  protected void performGenericAction(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request,
+      String sendToId, String sendToNm, boolean complete, boolean transitionToNext) throws Exception {
+    AppUser user = AppUser.getUser(request);
+    CompoundEntity entity = getCurrentRecord(model, entityManager, request);
+
+    Admin admin = entity.getEntity(Admin.class);
+    String lockedBy = "";
+    String lockedByNm = "";
+    String processingStatus = "";
+
+    if (LAHandler.isLACountry(model.getCmrIssuingCntry())) {
+      processDplReset(entityManager, model, admin);
+    } else {
+      processDplReset(entityManager, model, admin);
+    }
+
+    copyValuesToEntity(model, entity);
+    GEOHandler geoHandler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
+
+    // update the Admin record
+    admin = entity.getEntity(Admin.class);
+    admin.setLastUpdtBy(user.getIntranetId());
+    admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+
+    lockedBy = admin.getLockBy();
+    lockedByNm = admin.getLockByNm();
+    processingStatus = admin.getProcessedFlag();
+
+    if (transitionToNext) {
+      admin.setReqStatus(trans.getNewReqStatus());
+    }
+
+    // always clear the values when status is changed to PCP
+    if (transitionToNext && "PCP".equals(trans.getNewReqStatus())) {
+      admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+      admin.setProcessedTs(null);
+    }
+
+    if (transitionToNext) {
+      if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd())
+          && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
+        // the request is to be locked
+        RequestUtils.setClaimDetails(admin, request);
+      } else if (CmrConstants.YES_NO.N.toString().equals(trans.getNewLockedInd())
+          && CmrConstants.YES_NO.Y.toString().equals(trans.getId().getCurrLockedInd())) {
+        // request to be unlocked
+        RequestUtils.clearClaimDetails(admin);
+      }
+    }
+    if (transitionToNext && sendToId != null) {
+      admin.setLastProcCenterNm(sendToId);
+    }
+
+    if (StringUtils.isEmpty(admin.getLockInd())) {
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
+    }
+    if (StringUtils.isEmpty(admin.getProcessedFlag())) {
+      admin.setLockInd(CmrConstants.YES_NO.N.toString());
+    }
+    if (StringUtils.isEmpty(admin.getDisableAutoProc())) {
+      admin.setDisableAutoProc(CmrConstants.YES_NO.N.toString());
+    }
+    // set cmt as blank
+
+    if (!PageManager.autoProcEnabled(model.getCmrIssuingCntry(), model.getReqType())) {
+      admin.setDisableAutoProc(CmrConstants.YES_NO.Y.toString());
+    }
+
+    if (geoHandler != null) {
+      geoHandler.doBeforeAdminSave(entityManager, admin, model.getCmrIssuingCntry());
+    }
+
+    saveAccessToken(admin, request);
+    updateEntity(admin, entityManager);
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(model.getReqType()) && LAHandler.isLACountry(model.getCmrIssuingCntry())
+        && CmrConstants.Create_Update_CMR().equals(model.getAction())) {
+      LAHandler.doDPLNotDone(String.valueOf(model.getReqId()), entityManager, model.getAction(), admin, lockedBy, lockedByNm, processingStatus);
+    }
+
+    // update the Data record
+    Data data = entity.getEntity(Data.class);
+    if (geoHandler != null && LAHandler.isLACountry(model.getCmrIssuingCntry())) {
+      geoHandler.setDataDefaultsOnCreate(data, entityManager);
+      geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
+    } else if (geoHandler != null) {
+      geoHandler.doBeforeDataSave(entityManager, admin, data, model.getCmrIssuingCntry());
+    }
+    updateEntity(data, entityManager);
+
+    // check if there's a status change
+    if (transitionToNext && !trans.getId().getCurrReqStatus().equals(trans.getNewReqStatus())) {
+      String rejectReason = model.getRejectReason();
+      if (StringUtils.isEmpty(rejectReason)) {
+        rejectReason = null;
+      } else {
+        rejectReason = getRejectReason(entityManager, rejectReason);
+      }
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), sendToId, sendToNm,
+          complete, rejectReason);
+
+      // save comment in req_cmt_log table .
+      // save only if it is not null or not blank
+      if (null != model.getStatusChgCmt() && !model.getStatusChgCmt().isEmpty()) {
+        String action = model.getAction();
+        String actionDesc = getActionDescription(action, entityManager);
+        String statusDesc = getstatusDescription(trans.getNewReqStatus(), entityManager);
+        String comment = STATUS_CHG_CMT_PRE_PREFIX + actionDesc + STATUS_CHG_CMT_MID_PREFIX + statusDesc + STATUS_CHG_CMT_POST_PREFIX
+            + model.getStatusChgCmt();
+        RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+      }
+    }
+
+    if (CmrConstants.Send_for_Processing().equals(model.getAction()) && !transitionToNext) {
+      // request has been sent for processing, but will not move to next, still
+      // save the comments and workflow history
+      String wfComment = "Approvals generated/sent. Requester comments: " + model.getStatusChgCmt();
+      if (wfComment.length() > 250) {
+
+        wfComment = wfComment.substring(0, 237) + " (truncated)";
+      }
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null);
+      String action = model.getAction();
+      String actionDesc = getActionDescription(action, entityManager);
+      String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
+      String comment = STATUS_CHG_CMT_PRE_PREFIX + actionDesc + "\" generated and/or sent approvals. Request still in " + statusDesc
+          + " status until all approvals are received."
+          + (null != model.getStatusChgCmt() && !model.getStatusChgCmt().isEmpty() ? (STATUS_CHG_CMT_POST_PREFIX + model.getStatusChgCmt()) : "");
+      RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+    }
+
+    computeInternalType(entityManager, model, admin);
+
+    if (geoHandler != null && geoHandler.hasChecklist(model.getCmrIssuingCntry())) {
+      saveChecklist(entityManager, model.getReqId(), user);
+    }
+
+  }
+
+  /**
+   * Send for processing
+   * 
+   * @param trans
+   * @param model
+   * @param entityManager
+   * @param request
+   * @param processingCenter
+   * @throws Exception
+   */
+  protected void performSendForProcessing(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request)
+      throws Exception {
+    String cmrIssuingCntry = model.getCmrIssuingCntry();
+    String procCenterName = "Bratislava"; // TODO change
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.GETPROCESSINGCENTER");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cmrIssuingCntry);
+    List<ProcCenter> procCenters = query.getResults(1, ProcCenter.class);
+    if (procCenters != null && procCenters.size() > 0) {
+      procCenterName = procCenters.get(0).getProcCenterNm();
+    }
+    AppUser user = AppUser.getUser(request);
+    // make sure the latest data are here before
+    CompoundEntity entity = getCurrentRecord(model, entityManager, request);
+    copyValuesToEntity(model, entity);
+    String result = null;
+    String autoConfig = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
+    if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
+      result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+    } else {
+      this.log.info("Processor automation enabled, skipping default approvals.");
+    }
+
+    performGenericAction(trans, model, entityManager, request, procCenterName, null, false, StringUtils.isBlank(result));
+  }
+
+  /**
+   * Special unlock only for Named originator or delegate of locking user
+   * 
+   * @param model
+   * @param entityManager
+   * @param request
+   * @throws Exception
+   */
+  protected void performSpecialUnlock(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws Exception {
+    StatusTrans trans = new StatusTrans();
+    StatusTransPK pk = new StatusTransPK();
+    pk.setAction(model.getAction());
+    pk.setCurrLockedInd(CmrConstants.YES_NO.Y.toString());
+    pk.setCurrReqStatus(model.getReqStatus());
+    pk.setReqType("*");
+    trans.setId(pk);
+    trans.setNewLockedInd(CmrConstants.YES_NO.N.toString());
+    trans.setNewReqStatus(model.getReqStatus());
+    performGenericAction(trans, model, entityManager, request, null);
+  }
+
+  /**
+   * Cancel Request
+   * 
+   * @param trans
+   * @param model
+   * @param entityManager
+   * @param request
+   * @throws Exception
+   */
+  protected void performCancelRequest(StatusTrans trans, RequestEntryModel model, EntityManager entityManager, HttpServletRequest request)
+      throws Exception {
+    AppUser user = AppUser.getUser(request);
+    CompoundEntity entity = getCurrentRecord(model, entityManager, request);
+
+    Admin admin = entity.getEntity(Admin.class);
+    admin.setLastUpdtBy(user.getIntranetId());
+    admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+    admin.setReqStatus(trans.getNewReqStatus());
+    if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd()) && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
+      // the request is to be locked
+      RequestUtils.setClaimDetails(admin, request);
+    } else if (CmrConstants.YES_NO.N.toString().equals(trans.getNewLockedInd())
+        && CmrConstants.YES_NO.Y.toString().equals(trans.getId().getCurrLockedInd())) {
+      // request to be unlocked
+      RequestUtils.clearClaimDetails(admin);
+    }
+    updateEntity(admin, entityManager);
+
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null);
+
+    // save comment in req_cmt_log table .
+    // save only if it is not null or not blank
+    if (null != model.getStatusChgCmt() && !model.getStatusChgCmt().isEmpty()) {
+
+      String action = model.getAction();
+      String actionDesc = getActionDescription(action, entityManager);
+      String statusDesc = getstatusDescription(trans.getNewReqStatus(), entityManager);
+      String comment = STATUS_CHG_CMT_PRE_PREFIX + actionDesc + STATUS_CHG_CMT_MID_PREFIX + statusDesc + STATUS_CHG_CMT_POST_PREFIX
+          + model.getStatusChgCmt();
+
+      RequestUtils.createCommentLog(this, entityManager, user, model.getReqId(), comment);
+    }
+
+  }
+
+  /**
+   * Gets the {@link StatusTrans} record associated with the request status,
+   * lock ind, and the action to be taken
+   * 
+   * @param entityManager
+   * @param model
+   * @return
+   */
+  private StatusTrans getStatusTransition(EntityManager entityManager, RequestEntryModel model) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.GETNEXTSTATUS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CURR_REQ_STATUS", model.getReqStatus());
+    query.setParameter("CURR_LOCKED_IND", model.getLockInd() != null ? model.getLockInd() : CmrConstants.YES_NO.N.toString());
+    query.setParameter("ACTION", model.getAction());
+    query.setForReadOnly(true);
+    List<StatusTrans> trans = query.getResults(2, StatusTrans.class);
+    if (trans != null && trans.size() > 0) {
+      for (StatusTrans transrec : trans) {
+        if ("PPN".equals(transrec.getNewReqStatus())) {
+          // check here for any automation
+          String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
+          if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
+            this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
+            transrec.setNewReqStatus("AUT"); // set to automated processing
+          }
+        }
+        if ("*".equals(transrec.getId().getReqType())) {
+          return transrec;
+        } else if (transrec.getId().getReqType().equals(model.getReqType())) {
+          return transrec;
+        }
+      }
+    }
+    return null;
+  }
+
+  private String getRejectReason(EntityManager entityManager, String code) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.GETREJECTREASON");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CD", code);
+    List<Object[]> codes = query.getResults(1);
+    if (codes != null && codes.size() > 0) {
+      return (String) codes.get(0)[0];
+    }
+    return code;
+  }
+
+  @Override
+  protected List<RequestEntryModel> doSearch(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException {
+    CompoundEntity entity = getCurrentRecord(model, entityManager, request);
+    RequestEntryModel newModel = new RequestEntryModel();
+    copyValuesFromEntity(entity, newModel);
+    Admin admin = entity.getEntity(Admin.class);
+    if (admin != null) {
+      newModel.setProcCenter(admin.getLastProcCenterNm());
+    }
+    newModel.setState(BaseModel.STATE_EXISTING);
+    return Collections.singletonList(newModel);
+  }
+
+  @Override
+  protected CompoundEntity getCurrentRecord(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException {
+    long reqId = model.getReqId();
+    if (reqId > 0) {
+      String sql = ExternalizedQuery.getSql("REQUESTENTRY.MAIN");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      AppUser user = AppUser.getUser(request);
+      query.setParameter("REQUESTER_ID", user.getIntranetId());
+      query.setParameter("PROC_CENTER", user.getProcessingCenter());
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      List<CompoundEntity> records = query.getCompundResults(1, Admin.class, Admin.REQUEST_ENTRY_SERVICE_MAPPING);
+      if (records != null && records.size() > 0) {
+        return records.get(0);
+      }
+    }
+    return null;
+  }
+
+  @Override
+  protected CompoundEntity createFromModel(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException {
+    CompoundEntity entity = new CompoundEntity();
+    Admin admin = adminService.createFromModel(model, entityManager, request);
+    Data data = dataService.createFromModel(model, entityManager, request);
+    Scorecard scorecard = scorecardService.createFromModel(model, entityManager, request);
+    entity.addEntity(admin);
+    entity.addEntity(data);
+    entity.addEntity(scorecard);
+    return entity;
+  }
+
+  @Override
+  public void copyValuesFromEntity(CompoundEntity from, RequestEntryModel to) {
+    Admin admin = from.getEntity(Admin.class);
+    if (admin != null) {
+      adminService.copyValuesFromEntity(admin, to);
+
+    }
+    Data data = from.getEntity(Data.class);
+    if (data != null) {
+      dataService.copyValuesFromEntity(data, to);
+      if (PageManager.fromGeo("MCO", data.getCmrIssuingCntry())) {
+        this.log.debug("Getting payment mode and location no...");
+        to.setPaymentMode(data.getModeOfPayment());
+        to.setLocationNo(data.getLocationNumber());
+      }
+
+      if (PageManager.fromGeo("EMEA", "758")) {
+        this.log.debug("Getting payment mode and location no...");
+        to.setPaymentMode(data.getModeOfPayment());
+      }
+      if (PageManager.fromGeo("CEMEA", data.getCmrIssuingCntry())) {
+        this.log.debug("Getting location no...");
+        to.setLocationNo(data.getLocationNumber());
+      }
+      if (PageManager.fromGeo("NORDX", data.getCmrIssuingCntry())) {
+        this.log.debug("Getting payment mode...");
+        to.setPaymentMode(data.getModeOfPayment());
+        this.log.debug("Setting CollectionCode...");
+        to.setCollectionCd(data.getCollectionCd());
+        this.log.debug("Setting Tax Code...");
+        to.setTaxCd1(data.getTaxCd1());
+        this.log.debug("Setting Sales Rep Code...");
+        to.setRepTeamMemberNo(data.getRepTeamMemberNo());
+      }
+    }
+    Scorecard score = from.getEntity(Scorecard.class);
+    if (score != null) {
+      scorecardService.copyValuesFromEntity(score, to);
+    }
+
+    to.setClaimRole((String) from.getValue("CLAIM_ROLE"));
+    to.setOverallStatus((String) from.getValue("OVERALL_STATUS"));
+    to.setSubIndustryDesc((String) from.getValue("SUB_INDUSTRY_DESC"));
+    to.setIsicDesc((String) from.getValue("ISIC_DESC"));
+    to.setProcessingStatus((String) from.getValue("PROCESSING_STATUS"));
+    to.setCanClaim((String) from.getValue("CAN_CLAIM"));
+    to.setCanClaimAll((String) from.getValue("CAN_CLAIM_ALL"));
+    to.setAutoProcessing((String) from.getValue("AUTO_PROCESSING"));
+  }
+
+  @Override
+  public void copyValuesToEntity(RequestEntryModel from, CompoundEntity to) {
+    Admin admin = to.getEntity(Admin.class);
+    if (admin == null) {
+
+    }
+    adminService.copyValuesToEntity(from, admin);
+    Data data = to.getEntity(Data.class);
+    if (data != null) {
+      dataService.copyValuesToEntity(from, data);
+      // 1261175 -Dennis - We need to auto assign the cust type if it is an
+      // update type and for BR
+      if (LAHandler.isSSAMXBRIssuingCountry(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+        admin.setCustType(CmrConstants.DEFAULT_CUST_TYPE);
+      }
+
+      // #1267149 set countryUse from mrcCd value
+      if (LAHandler.isBRIssuingCountry(data.getCmrIssuingCntry())) {
+        if (!StringUtils.isEmpty(from.getMrcCd())) {
+          data.setCountryUse(from.getMrcCd());
+        }
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+          data.setModeOfPayment(from.getCrosSubTyp());
+        }
+      } else {
+        if (!StringUtils.isEmpty(from.getCrosSubTyp()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+          data.setModeOfPayment(from.getCrosSubTyp());
+        }
+      }
+      // only copy from UI to data if from IT
+      if (PageManager.fromGeo("EMEA", "758")) {
+        this.log.debug("Setting payment mode");
+        data.setModeOfPayment(from.getPaymentMode());
+      }
+      // only copy from UI to data if from MCO
+      if (PageManager.fromGeo("MCO", data.getCmrIssuingCntry())) {
+        this.log.debug("Setting payment mode and location no...");
+        data.setModeOfPayment(from.getPaymentMode());
+        data.setLocationNumber(from.getLocationNo());
+      }
+
+      if (PageManager.fromGeo("NORDX", data.getCmrIssuingCntry())) {
+        this.log.debug("Getting payment mode and location no...");
+        data.setModeOfPayment(from.getPaymentMode());
+        this.log.debug("Setting CollectionCode...");
+        data.setCollectionCd(from.getCollectionCd());
+        this.log.debug("Setting Tax Code...");
+        data.setTaxCd1(from.getTaxCd1());
+        this.log.debug("Setting Sales Rep Code...");
+        data.setRepTeamMemberNo(from.getRepTeamMemberNo());
+      }
+
+      // only copy from UI to data if from CEMEA
+      if (PageManager.fromGeo("CEMEA", data.getCmrIssuingCntry())) {
+        this.log.debug("Setting location no...");
+        data.setLocationNumber(from.getLocationNo());
+      }
+    }
+    Scorecard score = to.getEntity(Scorecard.class);
+    if (score != null) {
+      scorecardService.copyValuesToEntity(from, score);
+    }
+    to.setValue("CLAIM_ROLE", from.getClaimRole());
+    to.setValue("OVERALL_STATUS", from.getOverallStatus());
+    to.setValue("SUB_INDUSTRY_DESC", from.getSubIndustryDesc());
+    to.setValue("ISIC_DESC", from.getIsicDesc());
+    to.setValue("PROCESSING_STATUS", from.getProcessingStatus());
+    to.setValue("CAN_CLAIM", from.getCanClaim());
+    to.setValue("CAN_CLAIM_ALL", from.getCanClaimAll());
+    to.setValue("AUTO_PROCESSING", from.getAutoProcessing());
+  }
+
+  /**
+   * Gets the AddrStdResult for the record
+   * 
+   * @param reqid
+   * @param model
+   * @return
+   */
+  public String getAddrStdResult(long reqId) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      String sql = ExternalizedQuery.getSql("REQUESTENTRY.GETADDRSTDRESULT");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      List<Object[]> codes = query.getResults(-1);
+      List<String> strings = new ArrayList<String>();
+      for (Object object : codes) {
+        strings.add(object != null ? object.toString().trim() : null);
+      }
+
+      int yCount = 0;
+      int xCount = 0;
+      int nCount = 0;
+
+      for (String code : strings) {
+        if ("N".equals(code)) {
+          nCount++;
+        } else if ("Y".equals(code)) {
+          yCount++;
+        } else if ("X".equals(code)) {
+          xCount++;
+        }
+      }
+
+      if (nCount > 0) {
+        return CmrConstants.Scorecard_Not_Done;
+      } else if (xCount > 0) {
+        return CmrConstants.Scorecard_COMPLETED_WITH_ISSUES;
+      } else if (yCount > 0) {
+        return CmrConstants.Scorecard_COMPLETED;
+      } else {
+        return "-";
+      }
+
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+
+  }
+
+  protected String getstatusDescription(String status, EntityManager entityManager) throws CmrException {
+    String desc = null;
+    String sql = ExternalizedQuery.getSql("status_desc");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CD", status);
+
+    List<Object[]> results = query.getResults(1);
+    for (Object[] result : results) {
+      desc = (String) result[5];
+    }
+
+    return desc;
+  }
+
+  protected String getActionDescription(String action, EntityManager entityManager) throws CmrException {
+    String desc = null;
+    String sql = ExternalizedQuery.getSql("action_desc");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ACTION", action);
+
+    List<Object[]> results = query.getResults(1);
+    for (Object[] result : results) {
+      desc = (String) result[2];
+    }
+
+    return desc;
+  }
+
+  public DataModel getRdcDataModel(EntityManager entityManager, long reqId) throws Exception {
+    DataModel model = new DataModel();
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.GET_RDC_DATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    List<Data> results = query.getResults(1, Data.class);
+    if (results != null && results.size() > 0) {
+      Data data = results.get(0);
+      PropertyUtils.copyProperties(model, data);
+    }
+
+    return model;
+  }
+
+  private boolean processDplReset(EntityManager entityManager, RequestEntryModel model, Admin admin) {
+    String mName1 = StringUtils.isEmpty(model.getMainCustNm1()) ? "" : model.getMainCustNm1();
+    String mName2 = StringUtils.isEmpty(model.getMainCustNm2()) ? "" : model.getMainCustNm2();
+    String aName1 = StringUtils.isEmpty(admin.getMainCustNm1()) ? "" : admin.getMainCustNm1();
+    String aName2 = StringUtils.isEmpty(admin.getMainCustNm2()) ? "" : admin.getMainCustNm2();
+    GEOHandler handler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
+    if (handler == null || (handler != null && !handler.customerNamesOnAddress())) {
+      if (!"DPL".equals(model.getAction()) && (!StringUtils.equals(mName1, aName1) || !StringUtils.equals(mName2, aName2))) {
+        this.log.debug("Clearing DPL for " + admin.getId().getReqId());
+        AddressService.clearDplResults(entityManager, admin.getId().getReqId());
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Appends extra model entries if needed. These attributes can be accessed on
+   * the page via request.getAttribute('name') or ${name}
+   * 
+   * @param mv
+   * @param model
+   * @throws CmrException
+   */
+  public void appendExtraModelEntries(ModelAndView mv, RequestEntryModel model) throws CmrException {
+
+    mv.addObject("notif", new NotifyListModel());
+    mv.addObject("attach", new AttachmentModel());
+    mv.addObject("addressModal", new AddressModel());
+    mv.addObject("rdcaddr", new AddressModel());
+    mv.addObject("subindisic", new SubindustryIsicSearchModel());
+    mv.addObject("approval", new ApprovalResponseModel());
+    mv.addObject("fiscalDataModal", new ValidateFiscalDataModel());
+    mv.addObject("autoDnbModel", new AutoDNBDataModel());
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+
+    try {
+
+      String autoEngineIndc = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
+      mv.addObject("autoEngineIndc", autoEngineIndc);
+      DataModel rdcData = getRdcDataModel(entityManager, model.getReqId());
+      mv.addObject("rdcdata", rdcData);
+
+      /* 1970060 - automation engine */
+      mv.addObject("automationIndicator", RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry()));
+
+      GEOHandler geoHandler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
+      if (geoHandler != null) {
+        geoHandler.appendExtraModelEntries(entityManager, mv, model);
+
+        if (geoHandler.hasChecklist(model.getCmrIssuingCntry())) {
+          this.log.debug("Processing checklist");
+          ProlifChecklist pChecklist = getChecklist(entityManager, model.getReqId());
+          CheckListModel checklist = new CheckListModel();
+          if (pChecklist != null) {
+            try {
+              PropertyUtils.copyProperties(checklist, pChecklist);
+              checklist.setReqId(model.getReqId());
+            } catch (Exception e) {
+              this.log.warn("Cannot copy properties.", e);
+            }
+          } else {
+            checklist = new CheckListModel();
+          }
+
+          mv.addObject("checklist", checklist);
+        }
+      }
+    } catch (Exception e) {
+      if (e instanceof CmrException) {
+        log.error("CMR Error:" + ((CmrException) e).getMessage());
+      } else {
+        // log only unexpected errors, exclude validation errors
+        log.error("Error in processing transaction " + model, e);
+      }
+
+      // only wrap non CmrException errors
+      if (e instanceof CmrException) {
+        throw (CmrException) e;
+      } else {
+        throw new CmrException(MessageUtil.ERROR_GENERAL);
+      }
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+
+    String defltLandCntry = PageManager.getDefaultLandedCountry(model.getCmrIssuingCntry());
+    mv.addObject("defaultLandedCountry", defltLandCntry != null ? defltLandCntry.trim() : "");
+  }
+
+  public List<ValidationUrlModel> getValidationUrls(String cntryCd) throws CmrException {
+    List<ValidationUrlModel> validationUrls = new ArrayList<ValidationUrlModel>();
+    EntityManager entityManager = JpaManager.getEntityManager();
+
+    try {
+      String sql = ExternalizedQuery.getSql("REQUESTENTRY.GETVALIDATIONURLS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY_CD", cntryCd);
+
+      List<ValidationUrl> rs = query.getResults(ValidationUrl.class);
+
+      ValidationUrlModel valModel = null;
+      for (ValidationUrl val : rs) {
+        valModel = new ValidationUrlModel();
+        PropertyUtils.copyProperties(valModel, val);
+        PropertyUtils.copyProperties(valModel, val.getId());
+        if (valModel.getCntryCd() != null && "000".equals(valModel.getCntryCd().trim())) {
+          valModel.setCntryCd("WW");
+        }
+        validationUrls.add(valModel);
+      }
+
+    } catch (Exception e) {
+      // only wrap non CmrException errors
+      if (e instanceof CmrException) {
+        throw (CmrException) e;
+      } else {
+        this.log.error("Unexpected error occurred", e);
+        throw new CmrException(MessageUtil.ERROR_GENERAL);
+      }
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+    return validationUrls;
+  }
+
+  /**
+   * Checks if the request has been claimed already
+   * 
+   * @param entityManager
+   * @param reqId
+   * @return
+   */
+  private boolean canClaim(EntityManager entityManager, RequestEntryModel model) {
+    String sql = ExternalizedQuery.getSql("REQENTRY.ISCLAIMED");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", model.getReqId());
+    Object[] result = query.getSingleResult(Object[].class);
+    return "Y".equals(result[0]) || !model.getReqStatus().equals(result[1]);
+  }
+
+  /**
+   * Sets the ApprovalResult for the record
+   */
+  public void setApprovalResult(RequestEntryModel model) {
+    ApprovalService service = new ApprovalService();
+    service.setApprovalResult(model);
+  }
+
+  private void processObsoleteApprovals(EntityManager entityManager, long reqId, AppUser user) throws Exception {
+    ApprovalService service = new ApprovalService();
+    service.makeApprovalsObsolete(entityManager, reqId, user);
+  }
+
+  public void saveChecklist(EntityManager entityManager, long reqId, AppUser user) {
+    this.log.debug("Processing checklist for request " + reqId);
+    String sql = ExternalizedQuery.getSql("REQENTRY.GETCHECKLIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    ProlifChecklist checklist = query.getSingleResult(ProlifChecklist.class);
+
+    boolean create = false;
+    if (checklist == null) {
+      create = true;
+      this.log.info("Creating checklist for request..");
+      checklist = new ProlifChecklist();
+      ProlifChecklistPK chkPk = new ProlifChecklistPK();
+      chkPk.setReqId(reqId);
+      checklist.setId(chkPk);
+      checklist.setCreateBy(user.getIntranetId());
+      checklist.setCreateTs(SystemUtil.getCurrentTimestamp());
+    }
+
+    try {
+      PropertyUtils.copyProperties(checklist, this.checklist);
+    } catch (Exception e) {
+      this.log.warn("Cannot copy properties.", e);
+    }
+
+    checklist.setLastUpdtBy(user.getIntranetId());
+    checklist.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+
+    if (create) {
+      createEntity(checklist, entityManager);
+    } else {
+      updateEntity(checklist, entityManager);
+    }
+
+  }
+
+  private ProlifChecklist getChecklist(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("REQENTRY.GETCHECKLIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    return query.getSingleResult(ProlifChecklist.class);
+  }
+
+  public CheckListModel getChecklist() {
+    return checklist;
+  }
+
+  public void setChecklist(CheckListModel checklist) {
+    this.checklist = checklist;
+  }
+
+  /**
+   * Extracts the access token from the user's session and saves it on the ADMIN
+   * record. This token will be used for automated DPL searching
+   * 
+   * @param admin
+   * @param request
+   */
+  private void saveAccessToken(Admin admin, HttpServletRequest request) {
+    String accessToken = RequestUtils.getAccessToken(request);
+    if (!StringUtils.isBlank(accessToken)) {
+      admin.setCmt(accessToken);
+    }
+
+  }
+
+  /**
+   * Gets the highest dnb matches for the request
+   * 
+   * @param reqid
+   * @param model
+   * @return
+   */
+  public List<AutoDNBDataModel> getDnBMatchList(AutoDNBDataModel model, long reqId) throws Exception {
+    List<AutoDNBDataModel> resultList = new ArrayList<AutoDNBDataModel>();
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      RequestData requestData = new RequestData(entityManager, reqId);
+      Addr soldTo = requestData.getAddress("ZS01");
+      Admin admin = requestData.getAdmin();
+      Data data = requestData.getData();
+
+      // if the request is not Create, if there's no match indc, if no Dnb mtch
+      // in match indc, or matches overridde, skip
+      if (!"C".equals(admin.getReqType()) || admin.getMatchIndc() == null || !admin.getMatchIndc().contains("D")
+          || "Y".equals(admin.getMatchOverrideIndc())) {
+        this.log.debug("Skipping D&B matches..");
+        return resultList;
+      }
+      GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+      if (soldTo != null) {
+        GBGFinderRequest request = createRequest(handler, admin, data, soldTo);
+        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+            MatchingServiceClient.class);
+        client.setReadTimeout(1000 * 60 * 5);
+        this.log.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+        MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(rawResponse);
+
+        TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+        };
+        MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+
+        if (response != null && response.getMatched()) {
+          List<DnBMatchingResponse> dnbMatches = response.getMatches();
+          this.log.debug("DnB Response recieved and no. of matches found. = " + dnbMatches.size());
+          AutoDNBDataModel resultModel = null;
+          StringBuilder address = null;
+          StringBuilder ibmIsic = null;
+          int itemNo = 1;
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+
+            resultModel = new AutoDNBDataModel();
+            address = new StringBuilder();
+            ibmIsic = new StringBuilder();
+            resultModel.setItemNo(itemNo);
+            resultModel.setAutoDnbDunsNo(dnbRecord.getDunsNo());
+            resultModel.setAutoDnbMatchGrade("Confidence Code = " + dnbRecord.getConfidenceCode());
+            resultModel.setAutoDnbName(dnbRecord.getDnbName());
+            // resultModel.setAutoDnbImportedIndc(autoDnbImportedIndc);
+            address.append(dnbRecord.getDnbStreetLine1()).append("\n");
+            if (!StringUtils.isBlank(dnbRecord.getDnbStreetLine2())) {
+              address.append(dnbRecord.getDnbStreetLine2()).append("\n");
+            }
+            if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
+              address.append(dnbRecord.getDnbCity());
+            }
+            if (!StringUtils.isBlank(dnbRecord.getDnbStateProv())) {
+              address.append(", " + dnbRecord.getDnbStateProv());
+            }
+            if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
+              address.append("\n" + dnbRecord.getDnbCountry());
+            }
+            if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
+              address.append(" " + dnbRecord.getDnbPostalCode());
+            }
+            resultModel.setFullAddress(address.toString());
+
+            this.log.debug("Connecting to D&B details service..");
+            DnBCompany dnbDetailsUI = getDnBDetailsUI(dnbRecord.getDunsNo());
+            if (dnbDetailsUI != null) {
+              ibmIsic.append("ISIC =  " + dnbDetailsUI.getIbmIsic() + " (" + dnbDetailsUI.getIbmIsicDesc() + ")").append("\n");
+            }
+            resultModel.setIbmIsic(ibmIsic.toString());
+
+            resultList.add(resultModel);
+            itemNo++;
+          }
+        } else {
+          this.log.debug("No D&B record was found using advanced matching.");
+        }
+      } else {
+        this.log.debug("Missing main address on the request.");
+      }
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+    return resultList;
+  }
+
+  /**
+   * prepares and returns a dnb request based on requestData
+   * 
+   * @param handler
+   * @param admin
+   * @param data
+   * @param soldTo
+   * @return
+   */
+  private GBGFinderRequest createRequest(GEOHandler handler, Admin admin, Data data, Addr soldTo) {
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (StringUtils.isNotBlank(data.getVat())) {
+      request.setOrgId(data.getVat());
+    } else if (StringUtils.isNotBlank(soldTo.getVat())) {
+      request.setOrgId(soldTo.getVat());
+    }
+    if (soldTo != null) {
+      request.setCity(soldTo.getCity1());
+      request.setCustomerName(getCustomerName(handler, admin, soldTo));
+      request.setStreetLine1(soldTo.getAddrTxt());
+      request.setStreetLine2(soldTo.getAddrTxt2());
+      request.setLandedCountry(soldTo.getLandCntry());
+      request.setPostalCode(soldTo.getPostCd());
+      request.setStateProv(soldTo.getStateProv());
+      // request.setMinConfidence("4");
+    }
+
+    return request;
+  }
+
+  /**
+   * returns concatenated customerName from admin or address as per country
+   * settings
+   * 
+   * @param handler
+   * @param admin
+   * @param soldTo
+   * @return
+   */
+  private String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
+    String customerName = null;
+    if (!handler.customerNamesOnAddress()) {
+      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
+    } else {
+      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+    }
+    return customerName;
+  }
+
+  /**
+   * Connects to the details service and gets the details of the DUNS NO from
+   * D&B
+   * 
+   * @param dunsNo
+   * @return
+   * @throws Exception
+   */
+  private DnBCompany getDnBDetailsUI(String dunsNo) throws Exception {
+    CmrClientService service = new CmrClientService();
+    ModelMap map = new ModelMap();
+    service.getDnBDetails(map, dunsNo);
+    DnbData data = (DnbData) map.get("data");
+    if (data != null && data.getResults() != null && !data.getResults().isEmpty()) {
+      return data.getResults().get(0);
+    }
+    return null;
+  }
+
+}
