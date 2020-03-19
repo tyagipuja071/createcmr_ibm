@@ -181,7 +181,7 @@ public class SpainTransformer extends MessageTransformer {
     }
 
   }
-
+  
   @Override
   public void formatAddressLines(MQMessageHandler handler) {
     Addr addrData = handler.addrData;
@@ -595,6 +595,7 @@ public class SpainTransformer extends MessageTransformer {
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
+    formatAddressLines(dummyHandler);
     if ("N".equals(currAddr.getImportInd()) && MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
       // preferred sequence no for additional shipping
       // Mukesh:Story 1698123

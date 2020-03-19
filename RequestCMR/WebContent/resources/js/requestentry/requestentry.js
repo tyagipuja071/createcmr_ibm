@@ -76,7 +76,8 @@ function processRequestAction() {
     doSaveRequest();
 
   } else if (action == YourActions.Validate) {
-    doValidateRequest();
+    cmr.showProgress('Checking request data..');
+    window.setTimeout('doValidateRequest()', 500);
 
   } else if (action == YourActions.Claim) {
     if (approvalResult == 'Cond. Approved') {
@@ -389,8 +390,10 @@ function doValidateAndSave() {
  */
 function doValidateRequest() {
   if (FormManager.validate('frmCMR')) {
+    cmr.hideProgress();
     MessageMgr.showInfoMessage('The request has no errors.', null, true);
   } else {
+    cmr.hideProgress();
     cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
   }
 }
@@ -535,7 +538,9 @@ function commentFormatter(value, rowIndex) {
   rowData = this.grid.getItem(rowIndex);
   var cmtdata = rowData.cmt;
   if (cmtdata != null && cmtdata[0] != null) {
-    cmtdata = cmtdata[0].replace(/\n/g, '<br>');
+    cmtdata = cmtdata[0].replace(/</g, '[');
+    cmtdata = cmtdata.replace(/>/g, ']');
+    cmtdata = cmtdata.replace(/\n/g, '<br>');
   }
   return '<span style="word-wrap: break-word">' + cmtdata + '</span>';
 }
@@ -730,8 +735,8 @@ function afterConfigChange() {
   if (typeof (GEOHandler) != 'undefined') {
     GEOHandler.executeAfterConfigs();
   }
-    dnbAutoChk();
- 
+  dnbAutoChk();
+
   FormManager.ready();
 }
 
@@ -1127,7 +1132,6 @@ function doVerifyScenario() {
   FormManager.doAction('frmCMR', 'VERIFY_SCENARIO', true);
 }
 
-
 /**
  * Shows dnb matches for automation
  */
@@ -1139,10 +1143,10 @@ function dnbAutoChk() {
   var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
   var findDnbResult = FormManager.getActualValue('findDnbResult');
 
-  if(requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Accepted'){
+  if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Accepted') {
     cmr.showModal('DnbAutoCheckModal');
   }
- 
+
 }
 
 /**
@@ -1172,12 +1176,26 @@ function doOverrideDnBMatch() {
 function autoDnbImportActFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   if (rowData) {
-    return '<input type="button" class="cmr-grid-btn" value="Import Match" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    return '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
   } else {
     return '';
   }
 }
 
+function autoDnbImportConfidenceFormatter(value, rowIndex) {
+  var rowData = this.grid.getItem(rowIndex);
+  if (!value || value.indexOf('=') < 0) {
+    return '';
+  }
+  var confidence = value.substring(value.indexOf('=') + 1).trim();
+  if (confidence == 10) {
+    return '<span style="color:green; font-weight:bold; font-size:11px;" title="Confidence Code = 10">VERY HIGH</span>';
+  } else if (confidence == 9) {
+    return '<span style="color:green; font-size:11px;" title="Confidence Code = 9">HIGH</span>';
+  } else {
+    return '<span style="color:black; font-size:11px;" title="Confidence Code = ' + confidence + '">GOOD</span>';
+  }
+}
 function autoDnbImportMatch(autoDnbDunsNo, itemNo) {
   cmr.showProgress('Importing record into request..');
   dojo.xhrGet({
@@ -1213,6 +1231,8 @@ function hideModaldnb_Window() {
 
 function matchDetailsFormatterUI(value, rowIndex) {
   var str = value.replace(/\n/gim, '<br>');
-  console.log(str);
-  return value.replace(/\n/gim, '<br>');
+  if (str.indexOf('ISIC = ') >= 0) {
+    str = str.substring(str.indexOf('=') + 1).trim();
+  }
+  return str;
 }

@@ -21,8 +21,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
@@ -31,6 +33,7 @@ import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.KunnrExt;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -181,7 +184,7 @@ public class EMEAHandler extends BaseSOFHandler {
     } else {
       String cmrIssueCd = reqEntry.getCmrIssuingCntry();
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
-      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && !"862".equals(cmrIssueCd)) {
+      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
         if (source.getItems() != null) {
 
@@ -2602,6 +2605,99 @@ public class EMEAHandler extends BaseSOFHandler {
     if (SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
       autoSetAbbrevLocnAfterImport(entityManager, admin, data);
     }
+    if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())
+        || SystemLocation.SPAIN.equals(data.getCmrIssuingCntry())) {
+      autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
+    }
+  }
+
+  private void autoSetHwMasterInstallFlagAfterImport(EntityManager entityManager, Admin admin, Data data) {
+    // BATCH.GET_ADDR_FOR_SAP_NO
+    String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    List<Addr> listAddrs = query.getResults(Addr.class);
+    HashMap<String, Integer> sequences = new HashMap<String, Integer>();
+
+    if (listAddrs != null && listAddrs.size() > 0) {
+      for (Addr singleAddr : listAddrs) {
+        if (!sequences.containsKey(singleAddr.getId().getAddrSeq())) {
+          sequences.put(singleAddr.getId().getAddrSeq(), 0);
+        }
+        sequences.put(singleAddr.getId().getAddrSeq(), sequences.get(singleAddr.getId().getAddrSeq()) + 1);
+      }
+
+      for (Addr singleAddr : listAddrs) {
+        // LD.GET.HW_MASTER_INSTALL_FLAG
+        sql = ExternalizedQuery.getSql("LD.GET.HW_MASTER_INSTALL_FLAG");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("KUNNR", singleAddr.getSapNo());
+        query.setForReadOnly(true);
+        KunnrExt singleKE = query.getSingleResult(KunnrExt.class);
+
+        if (sequences.get(singleAddr.getId().getAddrSeq()) > 1) {
+          if ("ZI01".equals(singleAddr.getId().getAddrType())) {
+            if (singleKE != null) {
+              singleAddr.setHwInstlMstrFlg(singleKE.getHwInstlMstrFlg());
+            } else {
+              singleAddr.setHwInstlMstrFlg("");
+            }
+          } else {
+            singleAddr.setHwInstlMstrFlg("");
+          }
+        } else {
+          if (singleKE != null) {
+            singleAddr.setHwInstlMstrFlg(singleKE.getHwInstlMstrFlg());
+          } else {
+            singleAddr.setHwInstlMstrFlg("");
+          }
+
+        }
+
+        entityManager.merge(singleAddr);
+        entityManager.flush();
+      }
+    }
+
+    sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_RDC_FOR_SAP_NO");
+    query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    List<AddrRdc> listAddrsRdc = query.getResults(AddrRdc.class);
+
+    if (listAddrsRdc != null && listAddrsRdc.size() > 0) {
+      for (AddrRdc singleAddrRdc : listAddrsRdc) {
+        // LD.GET.HW_MASTER_INSTALL_FLAG
+        sql = ExternalizedQuery.getSql("LD.GET.HW_MASTER_INSTALL_FLAG");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("KUNNR", singleAddrRdc.getSapNo());
+        query.setForReadOnly(true);
+        KunnrExt singleKE = query.getSingleResult(KunnrExt.class);
+
+        if (sequences.get(singleAddrRdc.getId().getAddrSeq()) > 1) {
+          if ("ZI01".equals(singleAddrRdc.getId().getAddrType())) {
+            if (singleKE != null) {
+              singleAddrRdc.setHwInstlMstrFlg(singleKE.getHwInstlMstrFlg());
+            } else {
+              singleAddrRdc.setHwInstlMstrFlg("");
+            }
+          } else {
+            singleAddrRdc.setHwInstlMstrFlg("");
+          }
+        } else {
+          if (singleKE != null) {
+            singleAddrRdc.setHwInstlMstrFlg(singleKE.getHwInstlMstrFlg());
+          } else {
+            singleAddrRdc.setHwInstlMstrFlg("");
+          }
+        }
+
+        entityManager.merge(singleAddrRdc);
+        entityManager.flush();
+      }
+    }
+
   }
 
   private void autoSetAbbrevNmAfterImport(EntityManager entityManager, Admin admin, Data data) {
@@ -2766,6 +2862,10 @@ public class EMEAHandler extends BaseSOFHandler {
     if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       fields.add("ADDR_TXT_2");
       fields.add("CUST_PHONE");
+      fields.add("HW_INSTL_MSTR_FLG");
+    }
+    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
+      fields.add("HW_INSTL_MSTR_FLG");
     }
     if (SystemLocation.GREECE.equals(cmrIssuingCntry) || SystemLocation.TURKEY.equals(cmrIssuingCntry)
         || SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
@@ -3357,6 +3457,18 @@ public class EMEAHandler extends BaseSOFHandler {
         update.setDataField(PageManager.getLabel(cmrCountry, "", "TaxOffice"));
         update.setNewData(addr.getTaxOffice());
         update.setOldData(addr.getTaxOfficeOld());
+        results.add(update);
+      }
+    }
+
+    if (SystemLocation.UNITED_KINGDOM.equals(cmrCountry) || SystemLocation.IRELAND.equals(cmrCountry)) {
+      if (!equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "", "HW Master Install Flag"));
+        update.setNewData(addr.getHwInstlMstrFlg());
+        update.setOldData(addr.getHwInstlMstrFlgOld());
         results.add(update);
       }
     }

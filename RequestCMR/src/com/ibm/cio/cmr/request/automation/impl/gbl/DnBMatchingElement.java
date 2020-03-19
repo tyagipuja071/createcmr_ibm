@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -139,7 +140,8 @@ public class DnBMatchingElement extends MatchingElement {
           result.setOnError(shouldThrowError);
           result.setResults("No Matches");
           result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          // engineData.addRejectionComment("No high quality matches with D&B records. Please import from D&B search.");
+          // engineData.addRejectionComment("No high quality matches with D&B
+          // records. Please import from D&B search.");
           engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
         }
         // SKIPPED AS PER NEW REQUIREMENTS
@@ -267,6 +269,10 @@ public class DnBMatchingElement extends MatchingElement {
     }
     if (soldTo != null) {
       request.setCity(soldTo.getCity1());
+      if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+        // here for now, find a way to move to common class
+        request.setCity("SINGAPORE");
+      }
       request.setCustomerName(getCustomerName(handler, admin, soldTo));
       request.setStreetLine1(soldTo.getAddrTxt());
       request.setStreetLine2(soldTo.getAddrTxt2());
@@ -450,8 +456,8 @@ public class DnBMatchingElement extends MatchingElement {
       String[] addressInfoField = field.split("::");
       if (addressInfoField.length == 2 && addressInfoField[0].length() == 4) {
         Addr addr = requestData.getAddress(addressInfoField[0]);
-        if (Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "STATE_PROV", "LAND_CNTRY", "POST_CD").contains(
-            addressInfoField[1])) {
+        if (Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "STATE_PROV", "LAND_CNTRY", "POST_CD")
+            .contains(addressInfoField[1])) {
           setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue());
         }
       }

@@ -354,3 +354,7 @@ div.exc-note {
   color: #111;
   font-style: italic;
 }
+
+table.meta-table input {
+  font-family: IBM Plex Sans, Calibri;
+}

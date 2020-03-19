@@ -169,6 +169,9 @@ public class KunnrExt extends BaseEntity<KunnrExtPK> implements Serializable {
   @Column(name = "COV_ELG_IND")
   private String covElgInd;
 
+  @Column(name = "HW_INSTL_MSTR_FLG")
+  private String hwInstlMstrFlg;
+
   public String getGoeInd() {
     return this.goeInd;
   }
@@ -487,6 +490,14 @@ public class KunnrExt extends BaseEntity<KunnrExtPK> implements Serializable {
 
   public void setCovElgInd(String covElgInd) {
     this.covElgInd = covElgInd;
+  }
+
+  public String getHwInstlMstrFlg() {
+    return hwInstlMstrFlg;
+  }
+
+  public void setHwInstlMstrFlg(String hwInstlMstrFlg) {
+    this.hwInstlMstrFlg = hwInstlMstrFlg;
   }
 
 }

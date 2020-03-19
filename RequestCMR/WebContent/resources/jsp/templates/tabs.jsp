@@ -101,6 +101,9 @@ boolean approver = user != null && user.isApprover();
         <c:if test="${primaryTabId ==  'METRICS'}">
             <li id="METRICS_DAILY_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/daily')">Daily Totals</a></li>
             <li id="METRICS_STATS_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/stats')">Request Statistics</a></li>
+            <%if (SystemConfiguration.isAdmin(request)){ %> 
+            <li id="METRICS_USAGE_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/usage')">Web Service Usage</a></li>
+            <%} %>
         </c:if>
 
 				  

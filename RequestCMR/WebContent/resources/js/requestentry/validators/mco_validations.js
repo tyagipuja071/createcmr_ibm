@@ -40,6 +40,30 @@ function lockEmbargo() {
   }
 }
 
+function addEmbargoCodeValidatorSpain() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        
+      if (embargoCd != '' && embargoCd.length > 0) {
+          embargoCd = embargoCd.trim();
+      if((embargoCd != '' && embargoCd.length ==1) && (embargoCd == 'E' || embargoCd == 'J')){
+        return new ValidationResult(null, true);
+      }else{
+        return new ValidationResult({
+            id : 'embargoCd',
+            type : 'text',
+            name : 'embargoCd'
+          }, false, 'Please use valid value for Embargo code field.');
+         }  
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function afterConfigForMCO() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1729,4 +1753,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO);
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
+  GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
+  
 });

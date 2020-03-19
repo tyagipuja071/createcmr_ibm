@@ -47,6 +47,12 @@
             <tr>
               <th>Description:</th>
               <td>
+                <input ng-model="config.shortDesc" maxlength="60" style="width:500px">
+              </td>
+            </tr>
+            <tr>
+              <th>Details:</th>
+              <td>
                 <textarea ng-model="config.configDefn" rows="8" cols="100" class="auto-desc"></textarea>
               </td>
             </tr>
@@ -71,14 +77,29 @@
           <a class="auto-action auto-h" ng-click="saveConfig()" style="cursor:pointer">Save Configuration<img src="${resourcesPath}/images/save.png" title="Save Description" class="auto-icon"></a>
         </div>
         <div ng-if="config.edit" >
+          <table border="0" style="width:70%" class="meta-table">
+            <tr>
+              <th>Description:</th>
+              <td><input ng-model="config.shortDesc" maxlength="60" style="width:500px"></td>
+            </tr>
+          </table>
+          <br>
           <textarea ng-if="config.edit" ng-model="config.configDefn" rows="8" cols="120" class="auto-desc"></textarea>
           <br>
           <br>
           <a class="auto-action" ng-click="saveConfig()" style="cursor:pointer">Save Description<img src="${resourcesPath}/images/save.png" title="Save Description" class="auto-icon"></a>
+          <a class="auto-action" ng-click="insertConfigDetails()" style="cursor:pointer" title="Insert the list of current element configurations to the details" >Insert Elements List</a>
           <a class="auto-action" ng-click="undoSaveConfig()" style="cursor:pointer">Undo</a>
         </div>
   
         <div ng-if="existing && !config.edit" >
+          <table border="0" style="width:70%" class="meta-table">
+            <tr>
+              <th>Description:</th>
+              <td>{{config.shortDesc ? config.shortDesc : '(missing)'}}</td>
+            </tr>
+          </table>
+          <br>
           <div ng-bind-html="config.configDefnHtml" class="auto-desc"></div>
           <br>
           <table border="0" style="width:70%" class="meta-table">
@@ -96,7 +117,7 @@
             </tr>
           </table>
           <br>
-          <a class="auto-action" ng-show="existing" ng-click="editConfig()" style="cursor:pointer">Edit Description<img src="${resourcesPath}/images/addr-edit-icon.png" title="Edit Description" class="auto-icon"></a>
+          <a class="auto-action" ng-show="existing" ng-click="editConfig()" style="cursor:pointer">Edit Details<img src="${resourcesPath}/images/addr-edit-icon.png" title="Edit Description" class="auto-icon"></a>
           
           <a class="auto-action" style="margin-left:10px; color:red" ng-show="existing" ng-click="deleteConfig()" style="cursor:pointer">Delete Configuration<img src="${resourcesPath}/images/remove.png" title="Remove Configuration" class="auto-icon"></a>
         </div>

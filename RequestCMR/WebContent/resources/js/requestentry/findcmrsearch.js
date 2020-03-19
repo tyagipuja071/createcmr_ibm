@@ -169,15 +169,15 @@ window.addEventListener("message", function(e) {
             cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is a ' + (ob == '75' ? 'Prospect CMR' : (ob == 'CL' ? 'CMR Lite' : 'Inactive')) + ' record.');
             return;
           }
-          if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SWITZERLAND){
-          var issuingCntry = FormManager.getActualValue('countryUse');
-          var landCntry = result.data.countryDesc;
-          var subRegion = FormManager.getField('countryUse').displayedValue;
-          
-          if(( issuingCntry == '848'  &&  landCntry == 'Liechtenstein') ||(issuingCntry == '848LI' && landCntry == 'Switzerland') ){
-            cmr.showAlert('Addresses cannot be imported from '+landCntry+' (landed country) CMRs for issuing country '+subRegion+' .');
-            return; 
-          }
+          if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SWITZERLAND) {
+            var issuingCntry = FormManager.getActualValue('countryUse');
+            var landCntry = result.data.countryDesc;
+            var subRegion = FormManager.getField('countryUse').displayedValue;
+
+            if ((issuingCntry == '848' && landCntry == 'Liechtenstein') || (issuingCntry == '848LI' && landCntry == 'Switzerland')) {
+              cmr.showAlert('Addresses cannot be imported from ' + landCntry + ' (landed country) CMRs for issuing country ' + subRegion + ' .');
+              return;
+            }
           }
           cmr.currentCmrResult = result;
           continueUpdateCMR();
@@ -195,9 +195,9 @@ window.addEventListener("message", function(e) {
             }
             if (reqType == 'U') {
               if (result.data.addressType == 'ZS01') {
-                if((result.data.country == 'CH' && countryUse == '848LI') || (result.data.country == 'LI' && countryUse == '848')){
-                cmr.showAlert('This record with landed country '+result.data.countryDesc+' for issuing country sub Region '+dojo.byId('countryUse').value+' cannot be imported.');
-                return;
+                if ((result.data.country == 'CH' && countryUse == '848LI') || (result.data.country == 'LI' && countryUse == '848')) {
+                  cmr.showAlert('This record with landed country ' + result.data.countryDesc + ' for issuing country sub Region ' + dojo.byId('countryUse').value + ' cannot be imported.');
+                  return;
                 }
               }
             }
@@ -355,10 +355,10 @@ function findAndImportCMRs() {
     cmr.showAlert('Please input the both CMR Issuing Country and CMR Number to search for.');
     return;
   }
-  
+
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SWITZERLAND) {
     var enterCMRNo = FormManager.getActualValue('enterCMRNo');
-    
+
     var qParams = {
       ZZKV_CUSNO : enterCMRNo,
       MANDT : cmr.MANDT,
@@ -368,7 +368,7 @@ function findAndImportCMRs() {
     if (Object.keys(result).length === 0) {
       cmr.showAlert('This CMR is invalid. There were no active primary SOLD-TO found.');
       return;
-    } 
+    }
   }
 
   var hasAccepted = dojo.byId('findCMRResult_txt').innerHTML.trim() == 'Accepted';
@@ -432,11 +432,24 @@ function importDnb(result) {
     cmr.showAlert('No D&B record found.');
     return;
   }
-  cmr.showConfirm('doImportDnb()', 'D&B record for ' + cmr.importdnb.items[0].cmrName1Plain + ' will be imported by the system. The extracted data will be added to the current records. Continue?',
-      null, null, {
-        OK : 'Yes',
-        CANCEL : 'Cancel'
+  var hasSoldTo = false;
+  if (_pagemodel && _pagemodel.userRole == 'Requester') {
+    if (_allAddressData && _allAddressData.length > 0) {
+      _allAddressData.forEach(function(addr, i) {
+        if (addr.importInd && addr.addrType[0] == 'ZS01') {
+          hasSoldTo = true;
+        }
       });
+    }
+  }
+  var msg = 'D&B record for ' + cmr.importdnb.items[0].cmrName1Plain + ' will be imported by the system. The extracted data will be added to the current records. Continue?';
+  if (hasSoldTo) {
+    var msg = 'D&B record for ' + cmr.importdnb.items[0].cmrName1Plain + ' will be imported by the system. The extracted data will REPLACE the current main address on the request. Continue?';
+  }
+  cmr.showConfirm('doImportDnb()', msg, null, null, {
+    OK : 'Yes',
+    CANCEL : 'Cancel'
+  });
 }
 
 /**
@@ -451,11 +464,24 @@ function autoImportDnb(result) {
     cmr.showAlert('No D&B record found.');
     return;
   }
-  cmr.showConfirm('doImportDnb()', 'D&B record for ' + cmr.importdnb.items[0].cmrName1Plain + ' will be imported by the system. The extracted data will be added to the current records. Continue?',
-      null, null, {
-        OK : 'Yes',
-        CANCEL : 'Cancel'
+  var hasSoldTo = false;
+  if (_pagemodel && _pagemodel.userRole == 'Requester') {
+    if (_allAddressData && _allAddressData.length > 0) {
+      _allAddressData.forEach(function(addr, i) {
+        if (addr.importInd && addr.addrType[0] == 'ZS01') {
+          hasSoldTo = true;
+        }
       });
+    }
+  }
+  var msg = 'D&B record for ' + cmr.importdnb.items[0].cmrName1Plain + ' will be imported by the system. The extracted data will be added to the current records. Continue?';
+  if (hasSoldTo) {
+    var msg = 'D&B record for ' + cmr.importdnb.items[0].cmrName1Plain + ' will be imported by the system. The extracted data will REPLACE the current main address on the request. Continue?';
+  }
+  cmr.showConfirm('doImportDnb()', msg, null, null, {
+    OK : 'Yes',
+    CANCEL : 'Cancel'
+  });
 }
 
 /**
@@ -476,15 +502,16 @@ function doImportCmrs(addressOnly) {
     addrType = result.data.addressType;
     addrSeq = result.data.addressSeq;
   }
-  // to not allow records having no primary-sold to record, to be imported (for SWISS)
-  if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SWITZERLAND){
+  // to not allow records having no primary-sold to record, to be imported (for
+  // SWISS)
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SWITZERLAND) {
     var result_valid_cmr = cmr.query('CHECK_VALID_CMRS_U', {
       MANDT : cmr.MANDT,
       ZZKV_CUSNO : cmrNo
     });
-    if(result_valid_cmr.ret1 = 0 ){
-    cmr.showAlert('The cmr '+cmrNo+' cannot be imported as it doesn"t have a primary sold-to.Please enter another CMR.');
-    return;
+    if (result_valid_cmr.ret1 = 0) {
+      cmr.showAlert('The cmr ' + cmrNo + ' cannot be imported as it doesn"t have a primary sold-to.Please enter another CMR.');
+      return;
     }
   }
   cmr.showProgress('Importing records with CMR Number ' + cmrNo + '.  This process might take a while. Please wait..');

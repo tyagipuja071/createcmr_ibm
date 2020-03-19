@@ -39,11 +39,11 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 
 /**
- * @author Jeffrey Zamora
- * 
+ * @author JeffZAMORA
+ *
  */
 @Component
-public class MetricsService extends BaseSimpleService<MetricsChart> {
+public class WebSvcUsageService extends BaseSimpleService<MetricsChart> {
 
   public static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -69,31 +69,17 @@ public class MetricsService extends BaseSimpleService<MetricsChart> {
 
     String sqlKey = "METRICS.";
     switch (model.getReportType()) {
-    case "G":
-      sqlKey += "BY_GEO.";
-      break;
-    case "T":
-      sqlKey += "BY_TYPE.";
-      break;
-    case "C":
-      sqlKey += "BY_COUNTRY.";
-      break;
     case "S":
-      sqlKey += "BY_STATUS.";
+      sqlKey += "USAGE.BY_SERVICE_ID";
+      break;
+    case "N":
+      sqlKey += "USAGE.BY_SERVICE_NAME";
+      break;
+    case "P":
+      sqlKey += "USAGE.BY_PARTNER";
       break;
     default:
       throw new CmrException(new Exception("Invalid report type selected."));
-    }
-
-    switch (model.getCountType()) {
-    case "C":
-      sqlKey += "CREATED";
-      break;
-    case "P":
-      sqlKey += "PROCESSED";
-      break;
-    default:
-      throw new CmrException(new Exception("Invalid metrics type selected."));
     }
 
     chart = generateReport(entityManager, sqlKey, model, export);
@@ -107,11 +93,12 @@ public class MetricsService extends BaseSimpleService<MetricsChart> {
     sql = StringUtils.replaceOnce(sql, ":FROM", model.getDateFrom());
     sql = StringUtils.replaceOnce(sql, ":TO", model.getDateTo());
     if (!StringUtils.isEmpty(model.getGroupByGeo())) {
-      sql = StringUtils.replaceOnce(sql, ":GEO_COND",
-          " and data.CMR_ISSUING_CNTRY in (select CMR_ISSUING_CNTRY from CREQCMR.CNTRY_GEO_DEF where GEO_CD = '" + model.getGroupByGeo() + "') ");
-    } else {
-      sql = StringUtils.replaceOnce(sql, ":GEO_COND", "");
+      sql = StringUtils.replaceOnce(sql, ":SERVICE_ID", "'" + model.getGroupByGeo() + "'");
     }
+    if (!StringUtils.isEmpty(model.getCountType())) {
+      sql = StringUtils.replaceOnce(sql, ":SERVICE_NAME", "'" + model.getCountType() + "'");
+    }
+
     PreparedQuery query = new PreparedQuery(entityManager, sql);
 
     List<Object[]> results = query.getResults();
@@ -207,34 +194,20 @@ public class MetricsService extends BaseSimpleService<MetricsChart> {
       regularStyle.setWrapText(true);
       regularStyle.setVerticalAlignment(VerticalAlignment.TOP);
 
-      String title = "Requests ";
-      String fileName = "Report_";
-      switch (model.getCountType()) {
-      case "C":
-        title += "Created ";
-        fileName += "Create_";
+      String title = "";
+      String fileName = "SvcUsage_";
+      switch (model.getReportType()) {
+      case "S":
+        title += "Total Service Usage by Partners ";
+        fileName += "Totals_";
+        break;
+      case "N":
+        title += model.getCountType() + " Usage by Partners ";
+        fileName += model.getCountType().replaceAll(" ", "") + "_";
         break;
       case "P":
-        title += "Processed ";
-        fileName += "Processed_";
-        break;
-      }
-      switch (model.getReportType()) {
-      case "G":
-        title += "by GEO ";
-        fileName += "GEO_";
-        break;
-      case "C":
-        title += "by Country ";
-        fileName += "Country_";
-        break;
-      case "T":
-        title += "by Type ";
-        fileName += "Type_";
-      case "S":
-        title += "by Current Status ";
-        fileName += "Status_";
-        break;
+        title += model.getGroupByGeo() + " Usage of Services ";
+        fileName += model.getGroupByGeo() + "_";
       }
 
       title += "from " + model.getDateFrom() + " to " + model.getDateTo();

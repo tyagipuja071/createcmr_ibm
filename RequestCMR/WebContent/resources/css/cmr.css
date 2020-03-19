@@ -797,11 +797,13 @@ img.approval-icon {
 }
 
 span.source-syst {
-  padding :2px;
+  padding:2px;
   color: White;
-  background: Green;
+  font-size:10px;
+  letter-spacing: 0.5px;
   text-shadow : none;
-  border-radius: 4px;
+  border-radius: 3px;
+  background: green;
 }
 
 div.cmr-feedback-btn {

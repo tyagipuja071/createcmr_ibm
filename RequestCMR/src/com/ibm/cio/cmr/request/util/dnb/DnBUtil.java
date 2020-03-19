@@ -179,7 +179,6 @@ public class DnBUtil {
     }
     cmrRecord.setCmrCustPhone(company.getPhoneNo() != null ? company.getPhoneNo().replaceAll("[^0-9]", "") : null);
     cmrRecord.setCmrAddrTypeCode("ZS01");
-
     // org id
     String country = cmrRecord.getCmrCountryLanded();
     List<DnbOrganizationId> orgIds = company.getOrganizationIdDetails();
@@ -188,15 +187,17 @@ public class DnBUtil {
       dnbOrgIds.addAll(orgIds);
       Collections.sort(dnbOrgIds, new OrgIdComparator());
       String vat = DnBUtil.getVAT(country, dnbOrgIds);
-      // do 2 VAT checks
-      boolean vatValid = validateVAT(country, vat);
-      if (!vatValid && !vat.startsWith(country)) {
-        vatValid = validateVAT(country, country + vat);
-        if (vatValid) {
-          vat = country + vat;
+      if (!StringUtils.isBlank(vat)) {
+        // do 2 VAT checks
+        boolean vatValid = validateVAT(country, vat);
+        if (!vatValid && !vat.startsWith(country)) {
+          vatValid = validateVAT(country, country + vat);
+          if (vatValid) {
+            vat = country + vat;
+          }
         }
+        cmrRecord.setCmrVat(vat);
       }
-      cmrRecord.setCmrVat(vat);
       String taxCd1 = DnBUtil.getTaxCode1(country, dnbOrgIds);
       cmrRecord.setCmrBusinessReg(taxCd1);
       LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
@@ -370,8 +371,13 @@ public class DnBUtil {
     vatRequest.setCountry(country);
     vatRequest.setVat(vat);
 
-    ValidationResult validation = client.executeAndWrap(ValidatorClient.VAT_APP_ID, vatRequest, ValidationResult.class);
-    return validation.isSuccess();
+    try {
+      ValidationResult validation = client.executeAndWrap(ValidatorClient.VAT_APP_ID, vatRequest, ValidationResult.class);
+      return validation.isSuccess();
+    } catch (Exception e) {
+      LOG.error("Error in VAT validation", e);
+      return false;
+    }
   }
 
 }

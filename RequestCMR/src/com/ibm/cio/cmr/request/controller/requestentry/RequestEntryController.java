@@ -646,6 +646,10 @@ public class RequestEntryController extends BaseController {
       String dunsNo = record.getCmrDuns();
       // do a fresh check on details for proper formatting
       record = DnBUtil.extractRecordFromDnB(reqModel.getCmrIssuingCntry(), dunsNo, record.getCmrPostalCode());
+      if (record != null) {
+        results.setItems(new ArrayList<FindCMRRecordModel>());
+        results.getItems().add(record);
+      }
 
       ParamContainer params = new ParamContainer();
       params.addParam("reqId", reqId);

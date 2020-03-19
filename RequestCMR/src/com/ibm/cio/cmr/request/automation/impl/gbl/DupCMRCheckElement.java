@@ -18,6 +18,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
+import com.ibm.cio.cmr.request.automation.util.DuplicateChecksUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -199,7 +200,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       Addr addr = requestData.getAddress(cmrAddrType);
       for (String rdcAddrType : rdcAddrTypes) {
         if (addr != null) {
-          DuplicateCMRCheckRequest request = getRequest(data, admin, addr, rdcAddrType, vatMatchRequired);
+          DuplicateCMRCheckRequest request = getRequest(entityManager, data, admin, addr, rdcAddrType, vatMatchRequired);
           log.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
               + " for AddrType: " + cmrAddrType + "-" + rdcAddrType);
           MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
@@ -236,7 +237,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     return response;
   }
 
-  private DuplicateCMRCheckRequest getRequest(Data data, Admin admin, Addr addr, String rdcAddrType, boolean vatMatchRequired) {
+  private DuplicateCMRCheckRequest getRequest(EntityManager entityManager, Data data, Admin admin, Addr addr, String rdcAddrType,
+      boolean vatMatchRequired) {
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
     if (addr != null) {
       request.setIssuingCountry(data.getCmrIssuingCntry());
@@ -249,8 +251,10 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
       request.setCity(addr.getCity1());
+
       request.setStateProv(addr.getStateProv());
       request.setPostalCode(addr.getPostCd());
+
       if (vatMatchRequired) {
         if (StringUtils.isNotBlank(data.getVat())) {
           request.setVat(data.getVat());
@@ -259,6 +263,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
         }
       }
       request.setAddrType(rdcAddrType);
+
+      DuplicateChecksUtil.setCountrySpecificsForCMRChecks(entityManager, admin, data, addr, request);
     }
     return request;
   }
@@ -267,7 +273,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     List<DuplicateCMRCheckResponse> updated = new ArrayList<DuplicateCMRCheckResponse>();
     for (DuplicateCMRCheckResponse resp1 : global.getMatches()) {
       for (DuplicateCMRCheckResponse resp2 : iteration.getMatches()) {
-        if (resp1.getCmrNo() == resp2.getCmrNo()) {
+        if (resp1.getCmrNo().equals(resp2.getCmrNo())) {
           updated.add(resp1);
           break;
         }

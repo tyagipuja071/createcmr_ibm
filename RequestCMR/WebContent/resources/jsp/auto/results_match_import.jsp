@@ -18,7 +18,7 @@
 		name="frmCMRAutoImportMatch" class="ibm-column-form ibm-styled-form"
 		modelAttribute="matchedRecord">
 			<cmr:grid url="/auto/results/matches/import/matching_list.json"
-				id="autoResults_match_importGrid" width="510" height="400"
+				id="autoResults_match_importGrid" width="510" height="400" innerWidth="480"
 				usePaging="false">
 				<cmr:gridCol width="50px" field="itemNo" header="Item Number" />
 				<cmr:gridCol width="175px" field="matchKeyValue"

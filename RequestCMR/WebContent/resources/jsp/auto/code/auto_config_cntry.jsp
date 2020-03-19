@@ -74,7 +74,7 @@
                 </select>
               </td>
               <td width="*" class="left">
-                <a ng-if="!country.edit" style="cursor:pointer" title="{{country.configDefn}}" href="maint?configId={{country.configId}}" >{{country.configId}}</a>
+                <a ng-if="!country.edit" style="cursor:pointer" title="{{country.configDefn}}" href="maint?configId={{country.configId}}" >{{country.shortDesc ? country.shortDesc : country.configId}}</a>
                 <select ng-if="country.edit" ng-model="country.configId" style="width:90%">
                   <option ng-repeat="config in configIds" value="{{config.id}}">[{{config.id}}] - {{config.desc}}</option>
                 </select>

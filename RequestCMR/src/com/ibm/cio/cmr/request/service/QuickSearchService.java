@@ -316,7 +316,8 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     cmtPk.setCmtId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "CMT_ID"));
     cmt.setId(cmtPk);
     cmt.setReqId(reqId);
-    cmt.setCmt("Request created from Quick Search details. CMR and D&B search results were recorded accordingly.");
+    cmt.setCmt("Request created from Quick Search details. CMR and D&B search results were recorded accordingly. Search Params:\n"
+        + formatSearchParams(model));
     // save cmtlockedIn as Y default for current realese
     cmt.setCmtLockedIn(CmrConstants.CMT_LOCK_IND_YES);
     cmt.setCreateById("CreateCMR");

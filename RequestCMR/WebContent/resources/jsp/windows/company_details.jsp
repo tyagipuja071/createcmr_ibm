@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="${resourcesPath}/css/quick_search.css?${cmrv}"/>
 
 <%
+  boolean viewOnly = "Y".equals(request.getParameter("viewOnly"));
 %>
 
 <style> 
@@ -33,10 +34,12 @@
                        <span class="exp-coll-all" ng-click="expCollAll(true)">Expand All Details</span>
                        <span class="exp-coll-all" ng-click="expCollAll(false)">Collapse All Details</span>
                      </span>
+                     <%if (!viewOnly){ %>
                      <div class="det-btn">
                        <input type="button" value="Update CMR" title="Request for an Update of this CMR" ng-click="confirmImport(true)">
                        <input type="button" value="Create CMR by Model" title="Request for a new CMR modeled after this record" ng-click="confirmImport(false)">
                      </div>
+                     <%} %>
                    </em>
                  </caption>
                  <thead>
@@ -272,10 +275,12 @@
                          <span class="exp-coll-all" ng-click="expCollAll(true)">Expand All Details</span>
                          <span class="exp-coll-all" ng-click="expCollAll(false)">Collapse All Details</span>
                        </span>
+                       <%if (!viewOnly){ %>
                        <div class="det-btn">
                          <input type="button" value="Update CMR" title="Request for an Update of this CMR">
                          <input type="button" value="Create CMR by Model" title="Request for a new CMR modeled after this record">
                        </div>
+                       <%} %>
                      </td>
                    </tr>
                  </tbody>

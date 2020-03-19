@@ -179,6 +179,7 @@ public class AutoConfigService extends BaseSimpleService<Map<String, Object>> {
   private void saveConfigDefinition(EntityManager entityManager, HttpServletRequest request, Map<String, Object> outMap) {
     String configId = request.getParameter("configId");
     String configDefn = request.getParameter("configDefn");
+    String shortDesc = request.getParameter("shortDesc");
     String copyFrom = request.getParameter("copyFrom");
     boolean updateMode = "Y".equals(request.getParameter("updateMode"));
     ProcessResultModel result = new ProcessResultModel();
@@ -195,6 +196,7 @@ public class AutoConfigService extends BaseSimpleService<Map<String, Object>> {
           AutoConfigDefn definition = new AutoConfigDefn();
           definition.setId(pk);
           definition.setConfigDefn(configDefn);
+          definition.setShortDesc(shortDesc);
           definition.setLastUpdtBy(user.getIntranetId());
           definition.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
           definition.setCreateBy(user.getIntranetId());
@@ -239,6 +241,7 @@ public class AutoConfigService extends BaseSimpleService<Map<String, Object>> {
           } else {
             LOG.debug("Updating configuration " + configId);
             definition.setConfigDefn(configDefn);
+            definition.setShortDesc(shortDesc);
             definition.setLastUpdtBy(user.getIntranetId());
             definition.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
 

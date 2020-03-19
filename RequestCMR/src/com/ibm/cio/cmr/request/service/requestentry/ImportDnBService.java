@@ -182,10 +182,10 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         LOG.debug("Retrieveing CMR dunsNo [CmrDusNumber=" + mainRecord.getCmrDuns() + "]");
         data.setDunsNo(mainRecord.getCmrDuns());
       }
-      if (!StringUtils.isBlank(mainRecord.getCmrVat())) {
+      if (!StringUtils.isBlank(mainRecord.getCmrVat()) && importAddress) {
         data.setVat(mainRecord.getCmrVat());
       }
-      if (!StringUtils.isBlank(mainRecord.getCmrBusinessReg())) {
+      if (!StringUtils.isBlank(mainRecord.getCmrBusinessReg()) && importAddress) {
         data.setTaxCd1(mainRecord.getCmrBusinessReg());
       }
 
@@ -208,24 +208,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
           data.setCmrIssuingCntry(mainRecord.getCmrIssuedBy());
         }
 
-      } else if (!CmrConstants.ADDR_TYPE.ZS01.toString().equals(admin.getMainAddrType()) && importAddress) {
+      } else if (importAddress) {
         // update admin
-        if (StringUtils.isBlank(admin.getMainAddrType())) {
-          admin.setMainAddrType(mainRecord.getCmrAddrTypeCode());
-        }
-        if (StringUtils.isBlank(admin.getMainCustNm1())) {
-          int splitLength = 70;
-          int splitLength2 = 70;
-          if (geoHandler != null) {
-            splitLength = geoHandler.getName1Length();
-            splitLength2 = geoHandler.getName2Length();
-          }
-          String[] parts = splitName(mainRecord.getCmrName1Plain().trim(), mainRecord.getCmrName2Plain(), splitLength, splitLength2);
-          admin.setMainCustNm1(parts[0]);
-          admin.setMainCustNm2(parts[1]);
-        }
-
-      } else if (geoHandler != null && !geoHandler.customerNamesOnAddress() && StringUtils.isEmpty(admin.getMainCustNm1())) {
+        // if (StringUtils.isBlank(admin.getMainAddrType())) {
+        admin.setMainAddrType(mainRecord.getCmrAddrTypeCode());
+        // }
+        // if (StringUtils.isBlank(admin.getMainCustNm1())) {
         int splitLength = 70;
         int splitLength2 = 70;
         if (geoHandler != null) {
@@ -235,7 +223,22 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
         String[] parts = splitName(mainRecord.getCmrName1Plain().trim(), mainRecord.getCmrName2Plain(), splitLength, splitLength2);
         admin.setMainCustNm1(parts[0]);
         admin.setMainCustNm2(parts[1]);
+        // }
+
       }
+      // else if (geoHandler != null && !geoHandler.customerNamesOnAddress() &&
+      // importAddress) {
+      // int splitLength = 70;
+      // int splitLength2 = 70;
+      // if (geoHandler != null) {
+      // splitLength = geoHandler.getName1Length();
+      // splitLength2 = geoHandler.getName2Length();
+      // }
+      // String[] parts = splitName(mainRecord.getCmrName1Plain().trim(),
+      // mainRecord.getCmrName2Plain(), splitLength, splitLength2);
+      // admin.setMainCustNm1(parts[0]);
+      // admin.setMainCustNm2(parts[1]);
+      // }
 
       // transfer here back to model
       mainRecord.setCmrName1Plain(admin.getMainCustNm1());
@@ -320,6 +323,20 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
       // jz: 1449267 : do not import address for non-draft or update requests
       if (mainRecord != null && importAddress) {
+        // jz: delete the current sold-to first
+
+        Addr curr = getCurrSoldTo(entityManager, reqIdToUse);
+        if (curr != null) {
+          LOG.debug("Deleting current sold to address..");
+          reqEntryService.deleteEntity(curr, entityManager);
+        }
+
+        AddrRdc currRdc = getCurrSoldToRDC(entityManager, reqIdToUse);
+        if (currRdc != null) {
+          LOG.debug("Deleting current sold to (rdc) address..");
+          reqEntryService.deleteEntity(currRdc, entityManager);
+        }
+
         extractAddresses(entityManager, mainRecord, converter, reqIdToUse, reqModel);
       }
       if (geoHandler != null) {
@@ -393,6 +410,51 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     scorecard.setFindDnbResult(mainRecord != null ? CmrConstants.RESULT_ACCEPTED : CmrConstants.RESULT_NO_RESULT);
   }
 
+  private Addr getCurrSoldTo(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    return query.getSingleResult(Addr.class);
+  }
+
+  private AddrRdc getCurrSoldToRDC(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO_RDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    return query.getSingleResult(AddrRdc.class);
+  }
+
+  /**
+   * Uses the country-specific address sequence generation to get the next
+   * sold-to sequence
+   * 
+   * @param entityManager
+   * @param country
+   * @param reqId
+   * @return
+   */
+  private String getNextAddressSequence(EntityManager entityManager, String country, long reqId) {
+    String newAddrSeq = null;
+    try {
+      AddressService addrService = new AddressService();
+      GEOHandler geoHandler = RequestUtils.getGEOHandler(country);
+      String processingType = PageManager.getProcessingType(country, "U");
+      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType) && geoHandler != null) {
+        newAddrSeq = addrService.generateAddrSeqLD(entityManager, "ZS01", reqId, country, geoHandler);
+      }
+
+      if (geoHandler != null && newAddrSeq == null) {
+        newAddrSeq = geoHandler.generateAddrSeq(entityManager, "ZS01", reqId, country);
+      }
+      if (newAddrSeq == null) {
+        newAddrSeq = addrService.generateAddrSeq(entityManager, "ZS01", reqId);
+      }
+    } catch (Exception e) {
+      LOG.warn("Address sequence cannot be computed.", e);
+    }
+    return newAddrSeq;
+  }
+
   /**
    * Creates addresses (1 per line)
    * 
@@ -418,13 +480,19 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       } else {
         addrPk.setAddrType(type);
       }
-    int nextSeq = getNextSoldToSeq(entityManager, reqId);
-    addrPk.setAddrSeq(nextSeq + "");
+
+    String addrSeq = getNextAddressSequence(entityManager, reqModel.getCmrIssuingCntry(), reqId);
+    if (addrSeq == null) {
+      int nextSeq = getNextSoldToSeq(entityManager, reqId);
+      addrSeq = nextSeq + "";
+    }
+    LOG.debug("Assigning address sequence " + addrSeq);
+    addrPk.setAddrSeq(addrSeq);
     addr.setId(addrPk);
 
     addr.setCity1(cmr.getCmrCity());
     addr.setStateProv(cmr.getCmrState());
-    if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 2) {
+    if (!StringUtils.isBlank(addr.getStateProv()) && addr.getStateProv().length() > 3) {
       addr.setStateProv(null);
     }
 
@@ -509,7 +577,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     }
 
     cmr.setCmrIssuedBy(reqModel.getCmrIssuingCntry());
+
     if (converter != null) {
+      if (converter.customerNamesOnAddress()) {
+        addr.setCustNm1(cmr.getCmrName1Plain());
+        addr.setCustNm2(cmr.getCmrName2Plain());
+      }
       converter.setAddressValuesOnImport(addr, admin, cmr, null);
     }
 

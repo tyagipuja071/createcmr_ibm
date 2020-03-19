@@ -8,11 +8,13 @@
 <script>
 
 function descFormatter(value, rowIndex) {
+  if (!value){
+    return ('(missing short description)')
+  }
   return value.replace(/\n/gi,'<br>');
 }
 
 function idFormatter(value, rowIndex) {
-  console.log(value.replace(/\n/gi,'<br>'));
   return '<a href="./maint?configId='+value+'">'+value+'</a>';
 }
 function dateFormatter(value, rowIndex) {
@@ -37,14 +39,14 @@ function dateFormatter(value, rowIndex) {
   <cmr:row topPad="10">
     <cmr:column span="6">
       <cmr:grid url="/auto/config/getlist.json" id="CONFIG_LIST" span="6" height="400" useFilter="true">
-        <cmr:gridCol width="15%" field="configId" header="ID">
+        <cmr:gridCol width="20%" field="configId" header="ID">
           <cmr:formatter functionName="idFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="auto" field="configDefn" header="Description">
+        <cmr:gridCol width="auto" field="shortDesc" header="Description">
           <cmr:formatter functionName="descFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="12%" field="lastUpdtBy" header="Last Updated By" />
-        <cmr:gridCol width="12%" field="lastUpdtTs" header="Last Update Date">
+        <cmr:gridCol width="15%" field="lastUpdtBy" header="Last Updated By" />
+        <cmr:gridCol width="15%" field="lastUpdtTs" header="Last Update Date">
           <cmr:formatter functionName="dateFormatter" />
         </cmr:gridCol>
       </cmr:grid>

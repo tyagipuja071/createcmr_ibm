@@ -770,7 +770,7 @@ public class ItalyHandler extends BaseSOFHandler {
       address.setCustPhone("");
       address.setCustFax("");
     }
-    if (currentRecord.getCmrCountryLanded().equals("IT")) {
+    if ("IT".equals(currentRecord.getCmrCountryLanded())) {
       address.setStateProv(currentRecord.getCmrState());
     } else {
       address.setStateProv("");
@@ -971,15 +971,11 @@ public class ItalyHandler extends BaseSOFHandler {
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCustPrefLang("I");
-    if (data.getCustSubGrp() != null
-        && ("BUSPR".equals(data.getCustSubGrp()) || "BUSSM".equals(data.getCustSubGrp()) || "BUSVA".equals(data.getCustSubGrp()) || "CROBP"
-            .equals(data.getCustSubGrp()))) {
+    if (data.getCustSubGrp() != null && ("BUSPR".equals(data.getCustSubGrp()) || "BUSSM".equals(data.getCustSubGrp())
+        || "BUSVA".equals(data.getCustSubGrp()) || "CROBP".equals(data.getCustSubGrp()))) {
       data.setMrcCd("5");
-    } else if (data.getCustSubGrp() != null
-        && data.getIsuCd() != null
-        && "34".equals(data.getIsuCd())
-        && ("COMME".equals(data.getCustSubGrp()) || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM"
-            .equals(data.getCustSubGrp()))) {
+    } else if (data.getCustSubGrp() != null && data.getIsuCd() != null && "34".equals(data.getIsuCd()) && ("COMME".equals(data.getCustSubGrp())
+        || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM".equals(data.getCustSubGrp()))) {
       data.setMrcCd("M");
     } else {
       data.setMrcCd("2");
@@ -1026,11 +1022,8 @@ public class ItalyHandler extends BaseSOFHandler {
     setEngineeringBo(entityManager, data);
     // Story 1596166: MRC M for Commercial scenario & ISU=34
     if ("C".equals(admin.getReqType())) {
-      if (data.getCustSubGrp() != null
-          && data.getIsuCd() != null
-          && "34".equals(data.getIsuCd())
-          && ("COMME".equals(data.getCustSubGrp()) || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM"
-              .equals(data.getCustSubGrp()))) {
+      if (data.getCustSubGrp() != null && data.getIsuCd() != null && "34".equals(data.getIsuCd()) && ("COMME".equals(data.getCustSubGrp())
+          || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM".equals(data.getCustSubGrp()))) {
         data.setMrcCd("M");
       }
     }
@@ -1598,9 +1591,13 @@ public class ItalyHandler extends BaseSOFHandler {
       }
 
       if (!billingFound) {
-        if (!StringUtils.isEmpty(billing.getParentCMRNo())) {
+        String billingCmrNo = this.currentImportValues.get("Anagrafico2BillingNo");
+        if (StringUtils.isEmpty(billingCmrNo)) {
           // get from SOF/MAN
-          setBillingAddressFromLegacy(billing);
+          billing = new FindCMRRecordModel();
+          // setBillingAddressFromLegacy(billing);
+          LOG.debug("No separate billing address found, loading billing from Legacy for create type");
+          loadBillingAddressDataLD(entityManager, billing, mainRecord);
         } else {
           LOG.debug("No separate billing address found, adding a copy of installing as billing");
           // if billing is not found, add a copy of installing as billing
@@ -1794,8 +1791,8 @@ public class ItalyHandler extends BaseSOFHandler {
 
         TemplateValidation error = new TemplateValidation(name);
 
-        if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA) || !StringUtils
-            .isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
+        if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA)
+            || !StringUtils.isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
           LOG.trace("Company level fields and Billing level fields can not be filled at the same time");
           error.addError(rowIndex, "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
               "Company level fields and Billing level fields can not be filled at the same time");

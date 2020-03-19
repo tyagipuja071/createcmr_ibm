@@ -78,6 +78,7 @@ app.controller('ConfigController', [ '$scope', '$document', '$http', '$timeout',
     if (rec && rec.id) {
       $scope.config.configId = rec.id.configId;
       $scope.config.configDefn = rec.configDefn;
+      $scope.config.shortDesc = rec.shortDesc;
       $scope.config.configDefnHtml = rec.configDefn.replace(/\n/g, '<br>');
       $scope.config.createBy = rec.createBy;
       $scope.config.lastUpdtBy = rec.lastUpdtBy;
@@ -136,14 +137,18 @@ app.controller('ConfigController', [ '$scope', '$document', '$http', '$timeout',
   };
 
   $scope.saveConfig = function() {
-    if (!$scope.config.configId || !$scope.config.configDefn || $scope.config.configDefn.trim().length == 0) {
-      alert('ID and description are required');
+    if (!$scope.config.configId || !$scope.config.shortDesc || !$scope.config.configDefn || $scope.config.configDefn.trim().length == 0) {
+      alert('ID, description, and details are required');
       return;
     }
     $scope.config.configId = $scope.config.configId.toUpperCase();
     var notAllowed = $scope.config.configId.match(/[^A-Z_]/);
     if (notAllowed && notAllowed.length > 0) {
       alert('ID can only contain letters and underscores');
+      return;
+    }
+    if ($scope.config.configDefn.length > 500) {
+      alert('Details can only be up to 500 characters.');
       return;
     }
     if (!$scope.existing) {
@@ -165,7 +170,8 @@ app.controller('ConfigController', [ '$scope', '$document', '$http', '$timeout',
       handleAs : 'json',
       method : 'GET',
       content : {
-        configId : $scope.config.configId,
+        configId : $scope.config.configId.toUpperCase(),
+        shortDesc : $scope.config.shortDesc,
         configDefn : $scope.config.configDefn,
         copyFrom : $scope.config.copyFrom,
         updateMode : $scope.existing ? 'Y' : null,
@@ -196,6 +202,16 @@ app.controller('ConfigController', [ '$scope', '$document', '$http', '$timeout',
     });
   };
 
+  $scope.insertConfigDetails = function() {
+    var details = '';
+    $scope.elements.forEach(function(elem, i) {
+      details += details ? '\n' : '';
+      details += elem.processDesc.replace(/Global - /gi, '');
+    });
+    $scope.config.configDefn = $scope.config.configDefn + '\n\nElements:\n' + details;
+    $scope.$apply();
+
+  };
   $scope.deleteConfig = function() {
     if ($scope.countries && $scope.countries.length > 0) {
       alert('Countries are currently mapped to the configuration. Remove mapped countries before deleting the configuration.');
@@ -631,9 +647,10 @@ app.controller('ConfigCntryController', [ '$scope', '$document', '$http', '$time
           configDefn : rec.ret5,
           geo : rec.ret6,
           // processOnCompletion : rec.ret7 && rec.ret7 == 'Y' ? 'Yes' : 'No',
-          processOnCompletion : (rec.ret7 != null || rec.ret7 != '') ? rec.ret7 : 'N',
+          processOnCompletion : rec.ret7 ? rec.ret7 : 'N',
           edit : false,
-          exceptions : rec.ret8
+          exceptions : rec.ret8,
+          shortDesc : rec.ret9
         });
       });
     }

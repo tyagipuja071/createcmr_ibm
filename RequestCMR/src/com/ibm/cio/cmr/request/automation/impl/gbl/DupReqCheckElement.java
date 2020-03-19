@@ -16,6 +16,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
+import com.ibm.cio.cmr.request.automation.util.DuplicateChecksUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -164,7 +165,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
     for (String addrType : scenarioExceptions.getAddressTypesForDuplicateRequestCheck()) {
       Addr addr = requestData.getAddress(addrType);
       if (addr != null) {
-        ReqCheckRequest request = getRequest(data, admin, addr, scenarioExceptions);
+        ReqCheckRequest request = getRequest(entityManager, data, admin, addr, scenarioExceptions);
         LOG.debug("Executing Duplicate Request Check "
             + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI") + " for AddrType: " + addrType);
         MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.REQ_SERVICE_ID, request, MatchingResponse.class);
@@ -216,7 +217,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
     global.setMatched(updated.size() > 0);
   }
 
-  private ReqCheckRequest getRequest(Data data, Admin admin, Addr addr, ScenarioExceptionsUtil scenarioExceptions) {
+  private ReqCheckRequest getRequest(EntityManager entityManager, Data data, Admin admin, Addr addr, ScenarioExceptionsUtil scenarioExceptions) {
     ReqCheckRequest request = new ReqCheckRequest();
     request.setReqId(admin.getId().getReqId());
     if (addr != null) {
@@ -248,6 +249,8 @@ public class DupReqCheckElement extends DuplicateCheckElement {
           request.setMatchType("V");
         }
       }
+
+      DuplicateChecksUtil.setCountrySpecificsForRequestChecks(entityManager, admin, data, addr, request);
     }
     return request;
   }

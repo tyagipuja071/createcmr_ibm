@@ -4163,9 +4163,12 @@ function autoSetSBOSROnPostalCode(clientTier,currPostCd) {
       } else if ((postCode >= 36 && postCode <= 39) || postCode == 46) {
         FormManager.setValue('repTeamMemberNo', '09GKMM');
         FormManager.setValue('salesBusOffCd', 'GK');
-      }  else if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
+      }  else if ((postCode >= 41 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
         FormManager.setValue('repTeamMemberNo', '09NAMM');
         FormManager.setValue('salesBusOffCd', 'NA');
+      }  else if (postCode == 40) {
+        FormManager.setValue('repTeamMemberNo', '09NIMM');
+        FormManager.setValue('salesBusOffCd', 'NI');
       } else if ((postCode >= 50 && postCode <= 59) || (postCode == 61)) {
         FormManager.setValue('repTeamMemberNo', '09RPMM');
         FormManager.setValue('salesBusOffCd', 'RP');
@@ -5305,7 +5308,7 @@ function validateEnterpriseNumForIT() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function validateSRForIT() {
+/*function validateSRForIT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -5326,8 +5329,7 @@ function validateSRForIT() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
-
-}
+}*/
 
 function useCountryScenarioRules(scenario, name, value) {
   var cty = FormManager.getActualValue('cmrIssuingCntry');
@@ -7028,7 +7030,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.EMEA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(checkIfVATFiscalUpdatedIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateVATFiscalLengthOnIdentIT, [ SysLoc.ITALY ]);
-  GEOHandler.registerValidator(validateSRForIT, [ SysLoc.ITALY ]);
+  //GEOHandler.registerValidator(validateSRForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(addInstallingAddrValidator, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateEnterpriseNumForIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(checkIfStateProvBlankForProcIT, [ SysLoc.ITALY ], GEOHandler.ROLE_PROCESSOR, true);

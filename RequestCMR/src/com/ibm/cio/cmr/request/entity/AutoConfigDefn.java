@@ -26,91 +26,97 @@ public class AutoConfigDefn extends BaseEntity<AutoConfigDefnPK> implements Seri
   @EmbeddedId
   private AutoConfigDefnPK id;
 
+  @Override
   public AutoConfigDefnPK getId() {
     return id;
   }
 
+  @Override
   public void setId(AutoConfigDefnPK id) {
     this.id = id;
   }
-  
-  /** 
+
+  /**
    * Configuration Definition
-   */ 
+   */
   @Column(name = "CONFIG_DEFN")
   private String configDefn;
 
-  /** 
+  @Column(name = "SHORT_DESC")
+  private String shortDesc;
+
+  /**
    * Created By
-   */ 
+   */
   @Column(name = "CREATE_BY")
   private String createBy;
 
-  /** 
+  /**
    * Create Timestamp
-   */ 
+   */
   @Column(name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createTs;
 
-  /** 
+  /**
    * Last Update By
-   */ 
+   */
   @Column(name = "LAST_UPDT_BY")
   private String lastUpdtBy;
 
-  /** 
+  /**
    * Last Update Timestamp
-   */ 
+   */
   @Column(name = "LAST_UPDT_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date lastUpdtTs;
 
-  public String getConfigDefn(){
+  public String getConfigDefn() {
     return this.configDefn;
   }
 
-  public void setConfigDefn(String configDefn){
+  public void setConfigDefn(String configDefn) {
     this.configDefn = configDefn;
   }
 
-
-  public String getCreateBy(){
+  public String getCreateBy() {
     return this.createBy;
   }
 
-  public void setCreateBy(String createBy){
+  public void setCreateBy(String createBy) {
     this.createBy = createBy;
   }
 
-
-  public Date getCreateTs(){
+  public Date getCreateTs() {
     return this.createTs;
   }
 
-  public void setCreateTs(Date createTs){
+  public void setCreateTs(Date createTs) {
     this.createTs = createTs;
   }
 
-
-  public String getLastUpdtBy(){
+  public String getLastUpdtBy() {
     return this.lastUpdtBy;
   }
 
-  public void setLastUpdtBy(String lastUpdtBy){
+  public void setLastUpdtBy(String lastUpdtBy) {
     this.lastUpdtBy = lastUpdtBy;
   }
 
-
-  public Date getLastUpdtTs(){
+  public Date getLastUpdtTs() {
     return this.lastUpdtTs;
   }
 
-  public void setLastUpdtTs(Date lastUpdtTs){
+  public void setLastUpdtTs(Date lastUpdtTs) {
     this.lastUpdtTs = lastUpdtTs;
   }
 
+  public String getShortDesc() {
+    return shortDesc;
+  }
 
-
+  public void setShortDesc(String shortDesc) {
+    this.shortDesc = shortDesc;
+  }
 
 }

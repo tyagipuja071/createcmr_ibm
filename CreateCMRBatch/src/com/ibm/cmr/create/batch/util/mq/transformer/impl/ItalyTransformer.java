@@ -1397,6 +1397,12 @@ public class ItalyTransformer extends EMEATransformer {
       }
     }
 
+    if (addrData.getLandCntry().equals("IT")) {
+      legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
+    } else {
+      legacyAddr.setItCompanyProvCd("");
+    }
+    
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);

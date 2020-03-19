@@ -21,7 +21,7 @@
     
     <cmr:row>
       <cmr:column span="6">
-        <cmr:grid url="/auto/results/list.json" id="autoResultsGrid" span="6" width="1000" height="700">
+        <cmr:grid url="/auto/results/list.json" id="autoResultsGrid" span="6" width="900" height="700" innerWidth="850">
           <cmr:gridCol width="70px" field="automationResultId" header="Result ID" />
           <cmr:gridCol width="80px" field="processTyp" header="Type" >
             <cmr:formatter functionName="Automation.typeFormatter"/>

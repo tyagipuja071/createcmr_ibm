@@ -620,7 +620,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     return null;
   }
 
-  private String generateAddrSeq(EntityManager entityManager, String addrType, long reqId) {
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId) {
 
     String maxAddrSeq = null;
     int addrSeq = 0;

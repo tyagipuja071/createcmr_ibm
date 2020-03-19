@@ -61,7 +61,7 @@ form.ibm-column-form .dijitTextBox INPUT {
     });
     var _landCntryHandler = dojo.connect(FormManager.getField('countryCd'), 'onChange', function(value) {
       if (value != 'US'){
-        FormManager.readOnly('stateProv');
+        //FormManager.readOnly('stateProv');
       } else {
         FormManager.enable('stateProv');
       }
@@ -72,14 +72,25 @@ form.ibm-column-form .dijitTextBox INPUT {
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
+          var noCities = ['736', '738', '834']; // MACAO, SINGAPORE, HONG KONG
           var crit = buildSearchCriteria();
           if (!crit.cmrNo){
-            if (!crit.name || !crit.countryCd || !crit.streetAddress1 || !crit.city){
-              return new ValidationResult({
-                id : 'streetAddress1',
-                type : 'text',
-                name : 'streetAddress1'
-              }, false, 'Company Name, Country, Street, and City should be specified if CMR No. is blank.');
+            if (noCities.indexOf(crit.issuingCntry) >=0){
+              if (!crit.name || !crit.countryCd || !crit.streetAddress1){
+                return new ValidationResult({
+                  id : 'streetAddress1',
+                  type : 'text',
+                  name : 'streetAddress1'
+                }, false, 'Company Name, Country, and Street should be specified if CMR No. is blank.');
+              }
+            } else {
+              if (!crit.name || !crit.countryCd || !crit.streetAddress1 || !crit.city){
+                return new ValidationResult({
+                  id : 'streetAddress1',
+                  type : 'text',
+                  name : 'streetAddress1'
+                }, false, 'Company Name, Country, Street, and City should be specified if CMR No. is blank.');
+              }
             }
             if (crit.countryCd == 'US' && (!crit.stateProv || !crit.postCd)){
               return new ValidationResult({
@@ -244,12 +255,12 @@ form.ibm-column-form .dijitTextBox INPUT {
       <cmr:row>
         <cmr:column span="1" width="170">
           <p>
-            <cmr:label fieldId="vat">VAT#: </cmr:label>
+            <cmr:label fieldId="vat">VAT# / Business Reg #: </cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2" width="250">
           <p> 
-            <form:input path="vat" placeHolder="VAT#" dojoType="dijit.form.TextBox" maxlength="16"/>
+            <form:input path="vat" placeHolder="VAT# / Business Reg #" dojoType="dijit.form.TextBox" maxlength="16"/>
           </p>
         </cmr:column>
       </cmr:row>

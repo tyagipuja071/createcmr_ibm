@@ -186,7 +186,8 @@ public class GBGMatchingElement extends MatchingElement {
           if (!nextFound) {
             continueCheck = false;
             result.setDetails("No GBG was found using DUNS hierarchy matching and Name matching.");
-            engineData.addRejectionComment("No GBG was found using DUNS hierarchy matching and Name matching.");
+            // engineData.addRejectionComment("No GBG was found using DUNS
+            // hierarchy matching and Name matching.");
             result.setResults("No Matches");
             result.setOnError(false);
           }

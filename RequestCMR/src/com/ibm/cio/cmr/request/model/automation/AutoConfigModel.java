@@ -15,6 +15,8 @@ public class AutoConfigModel {
 
   private String configDefn;
 
+  private String shortDesc;
+
   private String createBy;
 
   private Date createTs;
@@ -69,6 +71,14 @@ public class AutoConfigModel {
 
   public void setLastUpdtTs(Date lastUpdtTs) {
     this.lastUpdtTs = lastUpdtTs;
+  }
+
+  public String getShortDesc() {
+    return shortDesc;
+  }
+
+  public void setShortDesc(String shortDesc) {
+    this.shortDesc = shortDesc;
   }
 
 }
