@@ -29,10 +29,11 @@ public class ScenarioExceptionsUtil {
   List<String> addressTypesForDuplicateRequestCheck = new ArrayList<String>();
   List<String> addressTypesForSkipChecks = new ArrayList<String>();
   Map<String, List<String>> addressTypesForDuplicateCMRCheck = new HashMap<>();
-  boolean skipDuplicateChecks = false;
-  boolean importDnbInfo = false;
-  boolean skipChecks = false;
-  boolean checkVatForDuplicates = false;
+  boolean skipDuplicateChecks;
+  boolean importDnbInfo;
+  boolean skipChecks;
+  boolean checkVATForDnB;
+  boolean skipCompanyVerification;
 
   public ScenarioExceptionsUtil(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario, String subScenario) {
 
@@ -126,14 +127,20 @@ public class ScenarioExceptionsUtil {
       setSkipDuplicateChecks("Y".equals(exceptions.getSkipDupChecksIndc()));
     }
 
+    // SkipCompanyVerificationChecksIndicator
+    if (exceptions.getSkipVerificationIndc() != null && StringUtils.isNotBlank(exceptions.getSkipVerificationIndc())
+        && !isSkipCompanyVerification()) {
+      setSkipCompanyVerification("Y".equals(exceptions.getSkipVerificationIndc()));
+    }
+
     // ImportDnbInfoIndicator
     if (exceptions.getImportDnbInfoIndc() != null && StringUtils.isNotBlank(exceptions.getImportDnbInfoIndc()) && !isImportDnbInfo()) {
       setImportDnbInfo("Y".equals(exceptions.getImportDnbInfoIndc()));
     }
 
     // CheckVatForDuplicatesIndicator
-    if (exceptions.getCheckVatIndc() != null && StringUtils.isNotBlank(exceptions.getCheckVatIndc()) && !isCheckVatForDuplicates()) {
-      setCheckVatForDuplicates("Y".equals(exceptions.getCheckVatIndc()));
+    if (exceptions.getCheckVatIndc() != null && StringUtils.isNotBlank(exceptions.getCheckVatIndc()) && !isCheckVATForDnB()) {
+      setCheckVATForDnB("Y".equals(exceptions.getCheckVatIndc()));
     }
 
     // SkipChecksIndicator
@@ -147,7 +154,7 @@ public class ScenarioExceptionsUtil {
     System.out.println("Addr Types for Duplicate CMR Checks: " + getAddressTypesForDuplicateCMRCheck().toString());
     System.out.println("Addr Types for Skip Checks: " + getAddressTypesForSkipChecks().toString());
     System.out.println("Skip Duplicate Checks Indc: " + (isSkipDuplicateChecks() ? "Y" : "N"));
-    System.out.println("Check VAT for Duplicates Indc : " + (isCheckVatForDuplicates() ? "Y" : "N"));
+    System.out.println("Check VAT for Duplicates Indc : " + (isCheckVATForDnB() ? "Y" : "N"));
     System.out.println("Skip Checks Indc: " + (isSkipChecks() ? "Y" : "N"));
     System.out.println("Import DnB info Indc: " + (isImportDnbInfo() ? "Y" : "N"));
   }
@@ -184,14 +191,6 @@ public class ScenarioExceptionsUtil {
     this.skipChecks = skipChecks;
   }
 
-  public boolean isCheckVatForDuplicates() {
-    return checkVatForDuplicates;
-  }
-
-  public void setCheckVatForDuplicates(boolean checkVatForDuplicates) {
-    this.checkVatForDuplicates = checkVatForDuplicates;
-  }
-
   public List<String> getAddressTypesForDuplicateRequestCheck() {
     return addressTypesForDuplicateRequestCheck;
   }
@@ -206,6 +205,22 @@ public class ScenarioExceptionsUtil {
 
   public void setAddressTypesForDuplicateCMRCheck(Map<String, List<String>> addressTypesForDuplicateCMRCheck) {
     this.addressTypesForDuplicateCMRCheck = addressTypesForDuplicateCMRCheck;
+  }
+
+  public boolean isSkipCompanyVerification() {
+    return skipCompanyVerification;
+  }
+
+  public void setSkipCompanyVerification(boolean skipCompanyVerification) {
+    this.skipCompanyVerification = skipCompanyVerification;
+  }
+
+  public boolean isCheckVATForDnB() {
+    return checkVATForDnB;
+  }
+
+  public void setCheckVATForDnB(boolean checkVATForDnB) {
+    this.checkVATForDnB = checkVATForDnB;
   }
 
 }

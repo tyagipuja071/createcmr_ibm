@@ -125,6 +125,7 @@ public class UpdatedAddr implements Serializable {
 
   @Column(name = "TAX_OFFICE")
   private String taxOffice;
+
   /* Old Fields */
   @Column(name = "SAP_NO_OLD")
   private String sapNoOld;
@@ -224,7 +225,7 @@ public class UpdatedAddr implements Serializable {
 
   @Column(name = "TAX_OFFICE_OLD")
   private String taxOfficeOld;
-  
+
   public String getSapNo() {
     return sapNo;
   }
@@ -348,6 +349,7 @@ public class UpdatedAddr implements Serializable {
   public void setTaxOfficeOld(String taxOfficeOld) {
     this.taxOfficeOld = taxOfficeOld;
   }
+
   public void setOffice(String office) {
     this.office = office;
   }
@@ -767,4 +769,5 @@ public class UpdatedAddr implements Serializable {
   public void setTaxOffice(String taxOffice) {
     this.taxOffice = taxOffice;
   }
+
 }

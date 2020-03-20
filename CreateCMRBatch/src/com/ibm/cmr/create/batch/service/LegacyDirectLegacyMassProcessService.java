@@ -324,6 +324,15 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       isMassUpdtDataChanges = true;
     }
+    // CMR-1728 Turkey RestrictTo and CsoSite temp used to store CoF and
+    // Economic code
+    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+      isMassUpdtDataChanges = true;
+    }
+
+    if (!StringUtils.isBlank(muData.getCsoSite())) {
+      isMassUpdtDataChanges = true;
+    }
 
     return isMassUpdtDataChanges;
   }

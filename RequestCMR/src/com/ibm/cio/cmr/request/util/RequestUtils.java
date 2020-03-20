@@ -114,7 +114,7 @@ public class RequestUtils {
    */
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, HttpServletRequest request, Admin admin,
       String cmt, String action) throws CmrException, SQLException {
-    createWorkflowHistory(service, entityManager, request, admin, cmt, action, null, null, false, null);
+    createWorkflowHistory(service, entityManager, request, admin, cmt, action, null, null, false, null, null);
   }
 
   /**
@@ -174,7 +174,7 @@ public class RequestUtils {
   }
 
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, HttpServletRequest request, Admin admin,
-      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason) throws CmrException, SQLException {
+      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd) throws CmrException, SQLException {
     AppUser user = AppUser.getUser(request);
 
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
@@ -190,6 +190,7 @@ public class RequestUtils {
     hist.setCreateTs(SystemUtil.getCurrentTimestamp());
     hist.setReqId(admin.getId().getReqId());
     hist.setRejReason(rejectReason);
+    hist.setRejReasonCd(rejReasonCd);
     // String actionDesc = getActionDescription(entityManager, action);
     String actionDesc = action != null && action.length() > 3 ? action : getActionDescription(entityManager, action);
     hist.setReqStatusAct(actionDesc);
@@ -212,7 +213,7 @@ public class RequestUtils {
   }
 
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, String user, Admin admin, String cmt,
-      String action, String sendToId, String sendToNm, boolean complete, String rejectReason) throws CmrException, SQLException {
+      String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd) throws CmrException, SQLException {
 
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
 
@@ -227,6 +228,7 @@ public class RequestUtils {
     hist.setCreateTs(SystemUtil.getCurrentTimestamp());
     hist.setReqId(admin.getId().getReqId());
     hist.setRejReason(rejectReason);
+    hist.setRejReasonCd(rejReasonCd);
     // String actionDesc = getActionDescription(entityManager, action);
     String actionDesc = action != null && action.length() > 3 ? action : getActionDescription(entityManager, action);
     hist.setReqStatusAct(actionDesc);
@@ -281,6 +283,7 @@ public class RequestUtils {
     String cmrno = "";
     String siteId = "";
     String rejectReason = history.getRejReason();
+    String rejReasonCd = history.getRejReasonCd();
     String sql = ExternalizedQuery.getSql("REQUESTENTRY.GETNOTIFLIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", history.getReqId());
@@ -304,8 +307,9 @@ public class RequestUtils {
     if (processingType == null) {
       processingType = "";
     }
-    List<String> forceSendTypes = Arrays.asList("LD"); // add to this list in
-                                                       // the future if needed
+
+    // add to this list in the future if needed
+    List<String> forceSendTypes = Arrays.asList("LD", "MD", "MA");
 
     if (!StringUtils.isBlank(admin.getSourceSystId())) {
       // for external creations, ensure that the requesterId is always notified,
@@ -345,6 +349,10 @@ public class RequestUtils {
 
     if (rejectReason == null) {
       rejectReason = "";
+    }
+    
+    if (rejReasonCd == null) {
+      rejReasonCd = "";
     }
     if (cmrno == null) {
       cmrno = "";
@@ -1155,6 +1163,21 @@ public class RequestUtils {
     }
     return "";
 
+  }
+
+  /**
+   * Checks whether automation is configued for a particular country or not
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String isDnBCountry(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.IS_DNB_COUNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    return query.getSingleResult(String.class);
   }
 
   /**

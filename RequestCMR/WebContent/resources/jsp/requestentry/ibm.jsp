@@ -316,7 +316,7 @@ dojo.addOnLoad(function(){
           </cmr:label>
           <cmr:field fieldId="DUNS" id="dunsNo" path="dunsNo" tabId="MAIN_IBM_TAB" />
           <%if (!readOnly){%>
-          <span class="cmr-bluepages-ro" title="Validate DUNS against D&B" style="font-family:Geneva, Arial, Helvetica, sans-serif;font-size:12px;" id="geoLocDescCont"><a href="javascript: checkDUNSWithDnB()">Check D&B</a></span>
+          <span class="cmr-bluepages-ro" title="Validate DUNS against D&B" style="font-family:Geneva, Arial, Helvetica, sans-serif;font-size:12px;" id="geoLocDescCont"><a href="javascript: checkDUNSWithDnB()">Open D&B Details</a></span>
           <%}%>
         </p>
       </cmr:column>

@@ -110,10 +110,11 @@ public abstract class APTransformer extends MessageTransformer {
     } else
       handler.messageHash.put("ISUChar", "");
 
-    /*String restrictInd = handler.cmrData.getRestrictInd();
-    if ("60".equalsIgnoreCase(restrictInd)) {
-      handler.messageHash.put("RestrictedInd", "60");
-    }*/
+    /*
+     * String restrictInd = handler.cmrData.getRestrictInd(); if
+     * ("60".equalsIgnoreCase(restrictInd)) {
+     * handler.messageHash.put("RestrictedInd", "60"); }
+     */
   }
 
   /**
@@ -177,28 +178,17 @@ public abstract class APTransformer extends MessageTransformer {
       handler.messageHash.put("AddrLine6", line66);
     }
 
-    String addr5 = handler.messageHash.get("AddrLine5");
-    String addr6 = handler.messageHash.get("AddrLine6");
-
-    if (addr5 == null)
-      addr5 = "";
-    if (addr6 == null)
-      addr6 = "";
-    if (handler.messageHash.get("AddrLine4").length() == 0 && "ISA".equalsIgnoreCase(geo)) {
-
-      handler.messageHash.put("AddrLine4", addr5);
-      handler.messageHash.put("AddrLine5", addr6);
-      handler.messageHash.put("AddrLine6", "");
-    }
-    if (handler.messageHash.get("AddrLine5").length() == 0 && "ISA".equalsIgnoreCase(geo)) {
-
-      handler.messageHash.put("AddrLine5", addr6);
-      handler.messageHash.put("AddrLine6", "");
-    }
-
     if ((handler.messageHash.get("AddrLine5").length() == 0 || handler.messageHash.get("AddrLine4").length() == 0) && "ASEAN".equalsIgnoreCase(geo)) {
+      String addr6 = handler.messageHash.get("AddrLine6");
+      if (addr6 == null) {
+        addr6 = "";
+      }
       handler.messageHash.put("AddrLine5", addr6);
       handler.messageHash.put("AddrLine6", "");
+    }
+
+    if ("ISA".equalsIgnoreCase(geo)) {
+      arrangeAddressLinesData(handler);
     }
 
   }
@@ -345,6 +335,29 @@ public abstract class APTransformer extends MessageTransformer {
     } catch (Exception e) {
       LOG.error("Error in completing double create request. Skipping generation and completing request", e);
       return true;
+    }
+
+  }
+
+  public void arrangeAddressLinesData(MQMessageHandler handler) {
+    String addr5 = handler.messageHash.get("AddrLine5");
+    String addr6 = handler.messageHash.get("AddrLine6");
+
+    if (addr5 == null)
+      addr5 = "";
+    if (addr6 == null)
+      addr6 = "";
+    if (handler.messageHash.get("AddrLine4").length() == 0 && handler.messageHash.get("AddrLine5").length() == 0) {
+      handler.messageHash.put("AddrLine4", addr6);
+      handler.messageHash.put("AddrLine5", "");
+      handler.messageHash.put("AddrLine6", "");
+    } else if (handler.messageHash.get("AddrLine4").length() == 0 && handler.messageHash.get("AddrLine5").length() > 0) {
+      handler.messageHash.put("AddrLine4", addr5);
+      handler.messageHash.put("AddrLine5", addr6);
+      handler.messageHash.put("AddrLine6", "");
+    } else if (handler.messageHash.get("AddrLine4").length() > 0 && handler.messageHash.get("AddrLine5").length() == 0) {
+      handler.messageHash.put("AddrLine5", addr6);
+      handler.messageHash.put("AddrLine6", "");
     }
 
   }

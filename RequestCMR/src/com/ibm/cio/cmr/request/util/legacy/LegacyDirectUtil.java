@@ -1166,31 +1166,14 @@ public class LegacyDirectUtil {
     // • Vat# >> VAT
     // • Intent. Cliente >> OUT_CITY_LIMIT
     // • Enterprise number >> ENTERPRISE
-    if (!StringUtils.isEmpty(muData.getNewEntpName1()) || !StringUtils.isEmpty(muData.getVat()) || !StringUtils.isEmpty(muData.getOutCityLimit())
-        || !StringUtils.isEmpty(muData.getEnterprise())) {
+    if (!StringUtils.isBlank(muData.getNewEntpName1()) || !StringUtils.isBlank(muData.getVat()) || !StringUtils.isBlank(muData.getOutCityLimit())
+        || !StringUtils.isBlank(muData.getEnterprise())) {
       isITCompanyLevelMassUpdateEnabled = true;
     }
 
     return isITCompanyLevelMassUpdateEnabled;
   }
 
-  /*
-   * ITALY Mass update method to determine if the mass update change is to be
-   * done from the company address and towards the billing addresses in the
-   * hierarchy only
-   */
-  private static boolean isITBillingLevelMassUpdateEnabled(MassUpdtData muData) {
-    boolean isITBillingLevelMassUpdateEnabled = false;
-
-    // Tax Code/ Code IVA >> SPECIAL_TAX_CD
-    // Collection Code >> COLLECTION_CD
-    if (!StringUtils.isEmpty(muData.getSpecialTaxCd()) || !StringUtils.isEmpty(muData.getCollectionCd())) {
-      isITBillingLevelMassUpdateEnabled = true;
-    }
-
-    return isITBillingLevelMassUpdateEnabled;
-  }
-  
   private static boolean isITCMRLevelMassUpdateEnabled(MassUpdtData muData) {
     boolean isITCMRLevelMassUpdateEnabled = false;
     /*
@@ -1218,6 +1201,23 @@ public class LegacyDirectUtil {
     }
 
     return isITCMRLevelMassUpdateEnabled;
+  }
+
+  /*
+   * ITALY Mass update method to determine if the mass update change is to be
+   * done from the company address and towards the billing addresses in the
+   * hierarchy only
+   */
+  private static boolean isITBillingLevelMassUpdateEnabled(MassUpdtData muData) {
+    boolean isITBillingLevelMassUpdateEnabled = false;
+
+    // Tax Code/ Code IVA >> SPECIAL_TAX_CD
+    // Collection Code >> COLLECTION_CD
+    if (!StringUtils.isBlank(muData.getSpecialTaxCd()) || !StringUtils.isBlank(muData.getCollectionCd())) {
+      isITBillingLevelMassUpdateEnabled = true;
+    }
+
+    return isITBillingLevelMassUpdateEnabled;
   }
 
   public static LegacyDirectObjectContainer getLegacyCustDBValues(EntityManager entityManager, String country, String cmrNo, boolean readOnly,

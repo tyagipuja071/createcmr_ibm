@@ -71,29 +71,25 @@ public class BELUXTransformer extends MessageTransformer {
     String accTeamNo = !StringUtils.isEmpty(cmrData.getSearchTerm()) ? cmrData.getSearchTerm() : "";
     String requestReason = !StringUtils.isEmpty(adminData.getReqReason()) ? adminData.getReqReason() : "";
     String billingCntry = getBillingCountry(handler);
-    String cd = ""; 
-    String subRegionCd = "";
-    
+    // String cd = "";
+    // String subRegionCd = "";
+
     boolean hasEconomicCode = !StringUtils.isEmpty(economicCode) ? true : false;
-   
+
     messageHash.put("CustIdentCode", "2");
     /**
      * Defect 1813639:BELUX - customer identity code.
      */
     String instCntry = getInstingCountry(handler);
-    String cntryStr= !StringUtils.isEmpty(billingCntry )? billingCntry : instCntry;
-    
-      if (!StringUtils.isBlank(cntryUse) && cntryUse.length() > 3) {
-        subRegionCd = cntryUse.substring(3); 
-        if(subRegionCd.equals(cntryStr) && "LU".equalsIgnoreCase(cntryStr)){
-          messageHash.put("CustIdentCode", "1"); 
-        }
-      } else { 
-          cd = BELUXHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry()); 
-          if(cd !=null && cd.equalsIgnoreCase(cntryStr) && "BE".equalsIgnoreCase(cntryStr)){
-            messageHash.put("CustIdentCode", "");
-          }
-      } 
+    String cntryStr = !StringUtils.isEmpty(billingCntry) ? billingCntry : instCntry;
+
+    if ("LU".equalsIgnoreCase(cntryStr)) {
+      messageHash.put("CustIdentCode", "1");
+    } else {
+      if ("BE".equalsIgnoreCase(cntryStr)) {
+        messageHash.put("CustIdentCode", "");
+      }
+    }
 
     messageHash.put("SourceCode", SOURCE_CODE_MAP.get(getCmrIssuingCntry()));
     messageHash.put("IMS", subIndCd);
@@ -108,10 +104,8 @@ public class BELUXTransformer extends MessageTransformer {
     // messageHash.put("LatePayCharge", "ST");
     messageHash.put("SR", accTeamNo);
     messageHash.put("EmployeeSize", "000001");
-    
+
     setVATValues(handler, messageHash, cmrData, crossBorder, addrData, update);
-    
-   
 
     if ("BKSC".equalsIgnoreCase(adminData.getReqReason()) && hasEconomicCode && update) {
       messageHash.put("EconomicCode", economicCode.replace("K", "F"));
@@ -145,7 +139,7 @@ public class BELUXTransformer extends MessageTransformer {
       messageHash.put("ModeOfPayment", "0");
       messageHash.put("CreditLimit", "");
     } else {
-      if ("BKSC".equalsIgnoreCase(requestReason)){
+      if ("BKSC".equalsIgnoreCase(requestReason)) {
         messageHash.put("ModeOfPayment", "1");
         messageHash.put("CreditLimit", "0.02");
       } else {
@@ -239,59 +233,20 @@ public class BELUXTransformer extends MessageTransformer {
     line4 = "";
     line5 = "";
 
-/*    if (hasNameCont && (hasTitle || hasFirstName || hasLastName)) {
-      line2 = nameCont;
-      line3 = "";
-      if (hasStreet || hasStreetNo) {
-        line4 = "";
-        line5 = poBox;
-      } else {
-        line4 = poBox;
-        line5 = "";
-      }
-    } else if (hasNameCont) {
-      line2 = nameCont;
-      if (hasStreet || hasStreetNo) {
-        line3 = "";
-        line4 = poBox;
-        line5 = "";
-      } else if (hasPoBox) {
-        line3 = poBox;
-        line4 = "";
-        line5 = "";
-      } else {
-        line3 = "";
-        line4 = "";
-        line5 = "";
-      }
-    } else if (hasTitle || hasFirstName || hasLastName) {
-      line2 = "";
-      if (hasStreet || hasStreetNo) {
-        line3 = "";
-        line4 = poBox;
-        line5 = "";
-      } else if (hasPoBox) {
-        line3 = poBox;
-        line4 = "";
-        line5 = "";
-      } else {
-        line3 = "";
-        line4 = "";
-        line5 = "";
-      }
-    } else {
-      if (hasStreet || hasStreetNo) {
-        line2 = "";
-        line3 = poBox;
-        line4 = "";
-        line5 = "";
-      } else {
-        line2 = poBox;
-        line3 = "";
-        line4 = "";
-        line5 = "";
-      }
-    }*/
+    /*
+     * if (hasNameCont && (hasTitle || hasFirstName || hasLastName)) { line2 =
+     * nameCont; line3 = ""; if (hasStreet || hasStreetNo) { line4 = ""; line5 =
+     * poBox; } else { line4 = poBox; line5 = ""; } } else if (hasNameCont) {
+     * line2 = nameCont; if (hasStreet || hasStreetNo) { line3 = ""; line4 =
+     * poBox; line5 = ""; } else if (hasPoBox) { line3 = poBox; line4 = "";
+     * line5 = ""; } else { line3 = ""; line4 = ""; line5 = ""; } } else if
+     * (hasTitle || hasFirstName || hasLastName) { line2 = ""; if (hasStreet ||
+     * hasStreetNo) { line3 = ""; line4 = poBox; line5 = ""; } else if
+     * (hasPoBox) { line3 = poBox; line4 = ""; line5 = ""; } else { line3 = "";
+     * line4 = ""; line5 = ""; } } else { if (hasStreet || hasStreetNo) { line2
+     * = ""; line3 = poBox; line4 = ""; line5 = ""; } else { line2 = poBox;
+     * line3 = ""; line4 = ""; line5 = ""; } }
+     */
 
     if (crossBorder)
       line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
@@ -305,26 +260,26 @@ public class BELUXTransformer extends MessageTransformer {
     }
   }
 
-  
-  protected boolean isCrossBorder(Data cmrData, MQMessageHandler handler,Addr addr) { 
-    String cntryUse = cmrData.getCountryUse(); 
-    String landCntry = addr.getLandCntry(); 
-    String cd = ""; 
+  protected boolean isCrossBorder(Data cmrData, MQMessageHandler handler, Addr addr) {
+    String cntryUse = cmrData.getCountryUse();
+    String landCntry = addr.getLandCntry();
+    String cd = "";
     String subRegionCd = "";
-   
+
     if (!StringUtils.isBlank(cntryUse) && cntryUse.length() > 3) {
-      subRegionCd = cntryUse.substring(3); 
-      return !subRegionCd.equals(landCntry); 
-      } else { 
-        cd = BELUXHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry()); 
-        return cd !=null && !cd.equals(landCntry); 
-    } 
+      subRegionCd = cntryUse.substring(3);
+      return !subRegionCd.equals(landCntry);
+    } else {
+      cd = BELUXHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry());
+      return cd != null && !cd.equals(landCntry);
+    }
   }
-  
-  /*protected boolean isCrossBorder(Addr addr) {
-    String cd = BELUXHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry());
-    return cd != null && !cd.equals(addr.getLandCntry());
-  }*/
+
+  /*
+   * protected boolean isCrossBorder(Addr addr) { String cd =
+   * BELUXHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry()); return cd != null
+   * && !cd.equals(addr.getLandCntry()); }
+   */
 
   protected String getSubRegionCode(Data cmrData, MQMessageHandler handler) {
     String cntryUse = cmrData.getCountryUse();
@@ -482,7 +437,7 @@ public class BELUXTransformer extends MessageTransformer {
       }
     return "";
   }
-  
+
   private String getInstingCountry(MQMessageHandler handler) {
     List<Addr> addrList = handler.currentAddresses;
     if (addrList != null && addrList.size() > 0)

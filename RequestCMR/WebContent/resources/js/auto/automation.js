@@ -7,8 +7,24 @@ var Automation = (function() {
   return {
     viewResults : function() {
       var reqId = FormManager.getActualValue('reqId');
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
       console.log('viewing results for ' + reqId);
-      WindowMgr.open('AUTO_RESULTS', reqId, cmr.CONTEXT_ROOT + '/auto/results/' + reqId + '?reqId=' + reqId, null, 550, true);
+      WindowMgr.open('AUTO_RESULTS', reqId, cmr.CONTEXT_ROOT + '/auto/results/' + reqId + '?cntry=' + cntry + '&reqId=' + reqId, null, 550, true);
+    },
+    getParameterByName : function(name, url) {
+      if (!url) {
+        url = window.location.href;
+      }
+      name = name.replace(/[\[\]]/g, '\\$&');
+      var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+      var results = regex.exec(url);
+      if (!results) {
+        return null;
+      }
+      if (!results[2]) {
+        return '';
+      }
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
     },
     detailsFormatter : function(value, rowIndex) {
       return value.replace(/\n/gi, '<br>');
@@ -40,31 +56,32 @@ var Automation = (function() {
     actionsFormatter : function(value, rowIndex) {
       var rowData = this.grid.getItem(rowIndex);
       var type = rowData.processTyp[0];
+      console.log('type ' + type);
       switch (type) {
       case 'D':
         var oImport = rowData.overrideImport[0];
         if (oImport == 'Y') {
-          return '<strong>Data Imported</strong>';
+          return '<span style="font-size:11px;font-weight:bold">Data Imported</span>';
         } else if (oImport == 'N') {
-          return '<input type="button" class="cmr-grid-btn" value="Import Data" onClick="importData(\'' + rowData.reqId + '\', \'' + rowData.automationResultId + '\', \'' + rowData.processCd
-              + '\')">';
+          return '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import Data" onClick="importData(\'' + rowData.reqId + '\', \'' + rowData.automationResultId + '\', \''
+              + rowData.processCd + '\')">';
         } else {
           return '';
         }
       case 'M':
         var mImport = rowData.matchImport[0];
         var failIndc = rowData.failureIndc[0];
-        if (failIndc == 'P' || failIndc == 'S') {
-          return '';
-        }
+        // if (failIndc == 'P' || failIndc == 'S') {
+        // return '';
+        // }
         if (mImport == 'Y') {
-          var val = '<strong>Match(es) Imported</strong>';
-          val += '<br><input type="button" class="cmr-grid-btn" value="View Matches" onClick="viewMatches(\'' + rowData.reqId + '\', \'' + rowData.automationResultId + '\', \'' + rowData.processCd
-              + '\', \'' + rowData.processDesc + '\')">';
+          var val = '<span style="font-size:11px;font-weight:bold">Match(es) Imported</span>';
+          val += '<br><input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="View Matches" onClick="viewMatches(\'' + rowData.reqId + '\', \'' + rowData.automationResultId
+              + '\', \'' + rowData.processCd + '\', \'' + rowData.processDesc + '\')">';
           return val;
         } else if (mImport == 'N') {
-          return '<input type="button" class="cmr-grid-btn" value="View Matches" onClick="viewMatches(\'' + rowData.reqId + '\', \'' + rowData.automationResultId + '\', \'' + rowData.processCd
-          + '\', \'' + rowData.processDesc + '\')">';
+          return '<input type="button" class="cmr-grid-btn-h"  style="font-size:11px" value="View Matches" onClick="viewMatches(\'' + rowData.reqId + '\', \'' + rowData.automationResultId + '\', \''
+              + rowData.processCd + '\', \'' + rowData.processDesc + '\')">';
         } else {
           return '';
         }
@@ -87,6 +104,7 @@ var Automation = (function() {
       }
     },
     submitForCreation : function(formName) {
+      console.log(dojo.formToObject(formName));
       cmr.showProgress('Saving request data..');
       dojo.xhrPost({
         url : cmr.CONTEXT_ROOT + '/auto/process.json',
@@ -116,7 +134,7 @@ var Automation = (function() {
     notifyActionFormatter : function(value, rowIndex) {
       var rowData = this.grid.getItem(rowIndex);
 
-      return '<input type="button" class="cmr-grid-btn" value="Notify" onClick="addToNotifList(\'' + rowData.reqId + '\')">';
+      return '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Notify" onClick="addToNotifList(\'' + rowData.reqId + '\')">';
     }
   };
 })();
@@ -132,13 +150,47 @@ function viewMatches(requestId, autoResId, processCd, processNm) {
 function matchImportFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   var oImport = rowData.importedIndc[0];
+  var keyValue = rowData.matchKeyValue[0];
+  var formattedString = '';
   if (oImport == 'Y') {
-    return '<strong>Match imported</strong>';
+    formattedString += '<strong>Match imported</strong><br>';
   } else if (oImport == 'N') {
-    return '<input type="button" class="cmr-grid-btn" value="Import Match" onClick="importMatch(\'' + rowData.automationResultId + '\', \'' + rowData.processCd + '\', \'' + rowData.itemNo + '\', \''
-        + rowData.requestId + '\')">';
+    formattedString += '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import Match" onClick="importMatch(\'' + rowData.automationResultId + '\', \'' + rowData.processCd
+        + '\', \'' + rowData.itemNo + '\', \'' + rowData.requestId + '\')"><br>';
   } else {
-    return '';
+    formattedString += '';
+  }
+  if (keyValue.indexOf('CMR_NO') >= 0 || keyValue.indexOf('REQ_ID') >= 0 || keyValue.indexOf('DUNS_NO' >= 0)) {
+    var val = keyValue.substring(keyValue.indexOf('=') + 1).trim();
+    if (keyValue.indexOf('CMR_NO') >= 0) {
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openCMRDetailsPage(\'' + val + '\')">';
+    } else if (keyValue.indexOf('REQ_ID') >= 0) {
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="showSummaryScreen(\'' + val + '\',\'C\')">';
+    } else if (keyValue.indexOf('DUNS_NO') >= 0) {
+      var dnbVal = val.substring(0, val.indexOf('\\n')).trim();
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dnbVal + '\')">';
+    }
+    if (formattedString.length > 0) {
+      return formattedString;
+    } else {
+      return '';
+    }
+  }
+}
+
+function openCMRDetailsPage(cmrNo) {
+  WindowMgr.open('COMPDET', 'CMR' + cmrNo, 'company_details?viewOnly=Y&issuingCountry=' + Automation.getParameterByName('cntry') + '&cmrNo=' + cmrNo, null, 550);
+}
+
+function openDNBDetailsPage(dunsNo) {
+  WindowMgr.open('COMPDET', 'DNB' + dunsNo, 'company_details?viewOnly=Y&issuingCountry=' + Automation.getParameterByName('cntry') + '&dunsNo=' + dunsNo, null, 550);
+}
+
+function showSummaryScreen(requestId, type) {
+  if ('C' == type || 'U' == type) {
+    WindowMgr.open('SUMMARY', requestId, 'summary?reqId=' + requestId + '&reqType=' + type);
+  } else {
+    cmr.showAlert('Request Type has not been specified yet.');
   }
 }
 
@@ -147,7 +199,7 @@ function matchDetailsFormatter(value, rowIndex) {
 }
 
 function importMatch(autoResId, procCd, itemNo, reqId) {
-  if (confirm('Importing Item No. '+itemNo+' to the request. The request details page\nwill be refreshed and all non-saved items will be lost.\nContinue with import?')) {
+  if (confirm('Importing Item No. ' + itemNo + ' to the request. The request details page\nwill be refreshed and all non-saved items will be lost.\nContinue with import?')) {
     cmr.showProgress('Importing record into request..');
     dojo.xhrGet({
       url : cmr.CONTEXT_ROOT + '/auto/results/matches/importrecord.json',
@@ -169,9 +221,8 @@ function importMatch(autoResId, procCd, itemNo, reqId) {
         } else {
           CmrGrid.refresh('autoResults_match_importGrid', cmr.CONTEXT_ROOT + '/auto/results/matches/import/matching_list.json', 'processCd=' + procCd + '&automationResultId=' + autoResId
               + '&requestId=' + reqId);
-          cmr.showAlert('Request updated with information from Item No. ' + itemNo, 'Success',
-              'hideModal_Window()', true);
-          //reload parent window
+          cmr.showAlert('Request updated with information from Item No. ' + itemNo, 'Success', 'hideModal_Window()', true);
+          // reload parent window
           opener.location.reload();
         }
       },
@@ -179,7 +230,7 @@ function importMatch(autoResId, procCd, itemNo, reqId) {
         cmr.hideProgress();
         cmr.showAlert('An error occurred while importing the record. Please contact your system administrator', 'Error');
       }
-  });
+    });
   }
 }
 
@@ -202,7 +253,11 @@ function importData(reqId, autoResId, procCd) {
       if (!data.success) {
         cmr.showAlert(data.error, 'Error');
       } else {
-        cmr.showAlert('The record with  Automation Result ID: ' + autoResId + ' and  Process Code: ' + procCd + ' and  has been imported sucessfully.', 'Success', null, true);
+        window.location.reload();
+
+        cmr.showAlert('The record with  Automation Result ID: ' + autoResId + ' and  Process Code: ' + procCd + ' and  has been imported sucessfully.', 'Success', 'hideModal_Window()', true);
+        // reload parent window
+        opener.location.reload();
       }
     },
     error : function(error, ioargs) {

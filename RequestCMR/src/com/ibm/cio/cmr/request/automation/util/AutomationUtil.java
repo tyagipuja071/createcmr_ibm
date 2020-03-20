@@ -1,18 +1,25 @@
 package com.ibm.cio.cmr.request.automation.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.geo.AustraliaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -22,7 +29,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
  * 
  * Interface to handle country specific utility methods
  * 
- * @author GarimaNarang, Roopak Chugh
+ * @author RoopakChugh
  * 
  */
 
@@ -34,8 +41,25 @@ public abstract class AutomationUtil {
       put(SystemLocation.BRAZIL, BrazilUtil.class);
       put(SystemLocation.SINGAPORE, SingaporeUtil.class);
       put(SystemLocation.AUSTRALIA, AustraliaUtil.class);
+      put(SystemLocation.GERMANY, GermanyUtil.class);
+
+      // FRANCE Sub Regions
+      put(SystemLocation.FRANCE, FranceUtil.class);
+      put(SystemLocation.ANDORRA, FranceUtil.class);
+      put(SystemLocation.VANUATU, FranceUtil.class);
+      put(SystemLocation.FRENCH_GUIANA, FranceUtil.class);
+      put(SystemLocation.FRENCH_POLYNESIA_TAHITI, FranceUtil.class);
+      put(SystemLocation.GUATEMALA, FranceUtil.class);
+      put(SystemLocation.MAYOTTE, FranceUtil.class);
+      put(SystemLocation.NEW_CALEDONIA, FranceUtil.class);
+      put(SystemLocation.WALLIS_FUTUNA, FranceUtil.class);
+      put(SystemLocation.COMOROS, FranceUtil.class);
+      put(SystemLocation.SAINT_PIERRE_MIQUELON, FranceUtil.class);
+
     }
   };
+
+  private static final List<String> VAT_CHECK_COUNTRIES = Arrays.asList(SystemLocation.BRAZIL);
 
   /**
    * returns an instance of
@@ -74,10 +98,14 @@ public abstract class AutomationUtil {
    * @param entityManager
    * @param requestData
    * @param engineData
+   * @param result
+   * @param details
+   * @param putput
+   * @param rejectionComment
    * @return
-   * 
    */
-  public abstract boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData);
+  public abstract boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output);
 
   /**
    * 
@@ -132,5 +160,92 @@ public abstract class AutomationUtil {
       validCode = "NO_RESULTS";
     }
     return validCode;
+  }
+
+  /**
+   * Returns true if issuing country is configured to perform VAT match
+   * 
+   * @param cmrIssuingCntry
+   * @return
+   */
+  public static boolean isCheckVatForDuplicates(String cmrIssuingCntry) {
+    if (StringUtils.isNotBlank(cmrIssuingCntry)) {
+      return VAT_CHECK_COUNTRIES.contains(cmrIssuingCntry);
+    }
+    return false;
+  }
+
+  /**
+   * Allows skipping company checks for scenario & updates
+   * 
+   * @param scenarioList
+   * @param skipCheckForUpdate
+   * @return
+   */
+  public static void skipCompanyCheckForScenario(RequestData requestData, AutomationEngineData engineData, List<String> scenarioList,
+      boolean skipCheckForUpdate) {
+    // get request admin and data
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+
+    String scenarioSubType = "";
+    if ("C".equals(admin.getReqType()) && data != null) {
+      scenarioSubType = data.getCustSubGrp();
+    }
+    ScenarioExceptionsUtil scenarioExceptions = null;
+    if (engineData.get("SCENARIO_EXCEPTIONS") != null) {
+      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+    }
+
+    if (scenarioExceptions != null
+        && (("C".equals(admin.getReqType()) && scenarioList.size() != 0 && scenarioSubType != null && scenarioList.contains(scenarioSubType)) || ("U"
+            .equals(admin.getReqType()) && skipCheckForUpdate))) {
+      scenarioExceptions.setSkipCompanyVerification(true);
+    }
+
+  }
+
+  /**
+   * Checks if ISIC and Subindustry is valid for specified scenario
+   * 
+   * @param scenarioList
+   * @return inValid
+   */
+
+  public static boolean isISICValidForScenario(RequestData requestData, List<String> scenarioList) {
+    boolean isInvalid = false;
+    // get request admin and data
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenarioSubType = "";
+    String isicCode = "";
+    String subindustry = "";
+    boolean isIsicValid = true;
+    boolean isSubIndValid = true;
+    if ("C".equals(admin.getReqType()) && data != null) {
+      scenarioSubType = data.getCustSubGrp();
+    }
+
+    if (data != null) {
+      isicCode = data.getIsicCd();
+      subindustry = data.getSubIndustryCd();
+    }
+
+    if (scenarioSubType != null && StringUtils.isNotBlank(scenarioSubType) && scenarioList != null && scenarioList.contains(scenarioSubType)) {
+      // check if ISIC does not contains letters
+      if (isicCode != null && StringUtils.isNotBlank(isicCode) && isicCode.matches("[0-9]*[a-zA-Z]")) {
+        isIsicValid = false;
+      }
+      // Check that Subindustry is not under Z* (any starting with Z).
+      if (subindustry != null && StringUtils.isNotBlank(subindustry) && subindustry.startsWith("Z")) {
+        isSubIndValid = false;
+      }
+
+      if (!isIsicValid || !isSubIndValid) {
+        isInvalid = true;
+      }
+    }
+
+    return isInvalid;
   }
 }

@@ -107,7 +107,7 @@ public class ImportExternalDataElement extends OverridingElement {
       } else {
         if (requestData.getAddress("ZS01") == null) {
           details.append("Main address(ZS01) not found on the request,so skipping MIDAS import.\n");
-          engineData.addRejectionComment("Main address(ZS01) not found on the request,so skipping MIDAS import.");
+          engineData.addRejectionComment("Main address(ZS01) not found on the request");
         } else if (StringUtils.isEmpty(scenarioSubType)) {
           details.append("Scenario can't be identified");
           engineData.addRejectionComment("Scenario can't be identified");

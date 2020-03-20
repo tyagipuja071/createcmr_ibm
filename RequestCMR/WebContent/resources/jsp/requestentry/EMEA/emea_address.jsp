@@ -50,7 +50,6 @@
     <cmr:field fieldId="CustomerName1" id="custNm1" path="custNm1" size="400" />
   </cmr:column>
 </cmr:row>
-
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm2">
@@ -86,6 +85,15 @@
     </p>
   </cmr:column>
   <cmr:column span="2" forCountry="726">
+    <p>
+      <cmr:label fieldId="translate">&nbsp;
+      </cmr:label>
+      Translate: 
+      <a class="translate" href="javascript: cmr.openTranslateWindow('en','el', ['custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'poBox', 'city1', 'taxOffice'])" >to Local Language</a>
+      <a class="translate" href="javascript: cmr.openTranslateWindow('el','en', ['custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'poBox', 'city1', 'taxOffice'])" >to English</a>
+    </p>
+  </cmr:column>
+    <cmr:column span="2" forCountry="862">
     <p>
       <cmr:label fieldId="translate">&nbsp;
       </cmr:label>
@@ -245,7 +253,7 @@
     </p>
   </cmr:column>
   
-  <cmr:column span="2" containerForField="Department" exceptForCountry="726,666">
+  <cmr:column span="2" containerForField="Department" exceptForCountry="726">
     <p>
       <cmr:label fieldId="dept">
         <cmr:fieldLabel fieldId="Department" />:

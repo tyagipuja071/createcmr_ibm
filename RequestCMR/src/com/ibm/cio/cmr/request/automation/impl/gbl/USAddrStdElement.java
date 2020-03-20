@@ -158,7 +158,7 @@ public class USAddrStdElement extends OverridingElement {
         results.setOnError(false);
       } else {
 
-        results.setResults("Execution Not Performed");
+        results.setResults("Skipped");
         results.setDetails("Skipping overrides for " + addr.getId().getAddrType() + "address.");
         results.setOnError(true);
       }

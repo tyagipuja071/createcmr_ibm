@@ -7,6 +7,9 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
+<%@page import="com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil" %>
+<%@page import="com.ibm.cio.cmr.request.util.geo.GEOHandler" %>
+<%@page import="com.ibm.cio.cmr.request.util.RequestUtils" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
@@ -18,6 +21,7 @@
   AppUser user = AppUser.getUser(request);
   boolean noFindCMR = user.getAuthCode() == null;
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
+  GEOHandler handler = RequestUtils.getGEOHandler(reqentry.getCmrIssuingCntry());
   boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
   Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
   if (readOnly == null) {
@@ -171,6 +175,12 @@
       <div style="padding-top: 10px">
         <cmr:button label="${ui.btn.uploadFile}" onClick="submitMassFile()" highlight="true"></cmr:button>
         <cmr:info text="${ui.info.massUplNewVer}"></cmr:info>
+      <%--1897817: ITALY - DPL check for mass update when customer name and/or customer name con't are changed	Help--%>
+      <%if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry()) && "Processor".equalsIgnoreCase(reqentry.getUserRole())) {%>
+        <cmr:button label="DPL Check" onClick="doDplCheck()" highlight="false"></cmr:button>
+        <cmr:info text="Pressing the button will generate DPL Check results for addresses that were added new Customer Names on the Mass Update template."></cmr:info>
+        
+      <%} %>
       </div>
       <input name="massTokenId" id="massTokenId" type="hidden">
     </cmr:column>
@@ -183,6 +193,14 @@
         </div>
       </cmr:column>
     </c:if>
+   <%if(handler.isNewMassUpdtTemplateSupported(reqentry.getCmrIssuingCntry())  && "Processor".equalsIgnoreCase(reqentry.getUserRole())) {%>
+       <cmr:column span="2">
+        <div style="padding-top: 12px">
+          <cmr:button label="DPL Summary" onClick="showDPLSummaryScreen()" highlight="true" id="btnDplSum"></cmr:button>
+          <cmr:info text="Pressing the button will open a pop-up to view the DPL Check summary"></cmr:info>
+        </div>
+      </cmr:column>
+   <%} %>
     <%
       } else {
     %>
@@ -251,7 +269,7 @@
     </cmr:row>
   </c:if>
   <%
-    if (!readOnly && CmrConstants.Role_Processor.equalsIgnoreCase(reqentry.getUserRole())) {
+    if (!readOnly && CmrConstants.Role_Processor.equalsIgnoreCase(reqentry.getUserRole()) && !LegacyDirectUtil.isCountryLegacyDirectEnabled(null, reqentry.getCmrIssuingCntry())) {
   %>
   <cmr:row topPad="5" addBackground="true">
     <cmr:column span="2">
@@ -279,5 +297,5 @@
   <%
     }
   %>
+  <form:hidden path="iterId" id="iterId"/>
 </form:form>
-

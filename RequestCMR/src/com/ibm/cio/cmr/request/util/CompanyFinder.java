@@ -169,7 +169,9 @@ public class CompanyFinder {
           match.setAltStreet(record.getAltStreet());
 
           match.setRevenue(record.getRevenue());
-
+          if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
+            match.setOrgIdMatch(searchModel.getVat().equals(match.getVat()) || searchModel.getTaxCd1().equals(match.getTaxCd1()));
+          }
           cmrMatches.add(match);
         }
 
@@ -295,6 +297,11 @@ public class CompanyFinder {
         cmr.setAltName(record.getCmrIntlName1() + (record.getCmrIntlName2() != null ? record.getCmrIntlName2() : ""));
         cmr.setAltStreet(record.getCmrIntlAddress() + (record.getCmrIntlName3() != null ? record.getCmrIntlName3() : ""));
         cmr.setAltCity(record.getCmrIntlCity1());
+
+        if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
+          cmr.setOrgIdMatch(searchModel.getVat().equals(cmr.getVat()) || searchModel.getTaxCd1().equals(cmr.getTaxCd1()));
+        }
+
         cmrMatches.add(cmr);
       }
     }
@@ -317,6 +324,9 @@ public class CompanyFinder {
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (StringUtils.isNotBlank(searchModel.getVat())) {
       request.setOrgId(searchModel.getVat());
+    }
+    if (StringUtils.isBlank(searchModel.getVat()) && !StringUtils.isBlank(searchModel.getTaxCd1())) {
+      request.setOrgId(searchModel.getTaxCd1());
     }
     request.setCity(searchModel.getCity());
     request.setCustomerName(searchModel.getName());
@@ -367,6 +377,7 @@ public class CompanyFinder {
           }
           match.setVat(sb.toString());
         }
+        match.setOrgIdMatch("Y".equals(record.getOrgIdMatch()));
         dnbMatches.add(match);
       }
     }

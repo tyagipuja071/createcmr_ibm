@@ -64,7 +64,7 @@ public class ATService extends TransConnService {
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private boolean massServiceMode;
   private CMRRequestContainer cmrObjects;
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02" };
   private long reQId;
   private static final String MASS_UPDATE_FAIL = "FAIL";
   private static final String MASS_UPDATE_DONE = "DONE";

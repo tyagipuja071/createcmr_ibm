@@ -46,6 +46,7 @@ public class PhilippinesTransformer extends ASEANTransformer {
 
     handler.messageHash.put("AddrLine6", line6);
     handleMove(handler, "ASEAN");
+    arrangeAddressLinesData(handler);
   }
 
 }

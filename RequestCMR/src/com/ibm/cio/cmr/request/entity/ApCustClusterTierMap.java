@@ -33,9 +33,12 @@ public class ApCustClusterTierMap extends BaseEntity<ApCustClusterTierMapPK> imp
   public void setId(ApCustClusterTierMapPK id) {
     this.id = id;
   }
-  
+
   @Column(name = "CLUSTER_DESC")
   private String clusterDesc;
+
+  @Column(name = "DEFAULT_INDC")
+  private String defaultIndc;
 
   @Column(name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
@@ -59,15 +62,14 @@ public class ApCustClusterTierMap extends BaseEntity<ApCustClusterTierMapPK> imp
     this.clusterDesc = clusterDesc;
   }
 
-
+  
   public Date getCreateTs(){
     return this.createTs;
   }
 
-  public void setCreateTs(Date createTs){
+  public void setCreateTs(Date createTs) {
     this.createTs = createTs;
   }
-
 
   public String getCreateBy(){
     return this.createBy;
@@ -77,7 +79,6 @@ public class ApCustClusterTierMap extends BaseEntity<ApCustClusterTierMapPK> imp
     this.createBy = createBy;
   }
 
-
   public Date getUpdtTs(){
     return this.updtTs;
   }
@@ -85,7 +86,6 @@ public class ApCustClusterTierMap extends BaseEntity<ApCustClusterTierMapPK> imp
   public void setUpdtTs(Date updtTs){
     this.updtTs = updtTs;
   }
-
 
   public String getUpdtBy(){
     return this.updtBy;
@@ -95,7 +95,12 @@ public class ApCustClusterTierMap extends BaseEntity<ApCustClusterTierMapPK> imp
     this.updtBy = updtBy;
   }
 
+  public String getDefaultIndc(){
+    return defaultIndc;
+  }
 
-
+  public void setDefaultIndc(String defaultIndc){
+    this.defaultIndc = defaultIndc;
+  }
 
 }

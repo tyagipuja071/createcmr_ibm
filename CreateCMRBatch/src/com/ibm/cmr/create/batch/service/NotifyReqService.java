@@ -209,7 +209,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
               admin.getRdcProcessingStatus());
         } else {
           // connect to the create cmr service for the processed records
-          if (notifyReq.getReqStatus() != null && !"".equalsIgnoreCase(notifyReq.getReqStatus()) && notifyReq.getReqStatus().equalsIgnoreCase("COM")) {
+          if (notifyReq.getReqStatus() != null && !"".equalsIgnoreCase(notifyReq.getReqStatus())
+              && notifyReq.getReqStatus().equalsIgnoreCase("COM")) {
             String result = processCreateCMRService(em, notifyReq.getReqId(), cmrServiceInput, batchAction,
                 admin.getRdcProcessingStatus() == null ? "" : admin.getRdcProcessingStatus());
 
@@ -289,7 +290,7 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
 
           admin.setReqStatus("PCP");
           String cmt = "System Action:  Status changed to 'Processing Create/Updt Pending', Request Type changed to 'Update' for further automatic processing";
-          RequestUtils.createWorkflowHistory(this, em, user, admin, cmt, FORCED_CHANGE_ACTION, null, null, false, null);
+          RequestUtils.createWorkflowHistory(this, em, user, admin, cmt, FORCED_CHANGE_ACTION, null, null, false, null, null);
 
           RequestUtils.createCommentLog(this, em, dummyuser, reqId, cmt);
         }
@@ -433,8 +434,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
             DebugUtil.printObjectAsJson(this.log, response);
           }
 
-          this.log.info("Response received from Process Service [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo()
-              + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-") + "]");
+          this.log.info("Response received from Process Service [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " Status: "
+              + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-") + "]");
 
         }
         // get the results from the service and process jason response
@@ -501,7 +502,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
             }
 
             createCommentLogAfterProcess(this, em, SystemConfiguration.getValue("BATCH_USERID"), reqId, comment.toString());
-            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(), actionWf);
+            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(),
+                actionWf);
           } else if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(response.getStatus())) {
 
             StringBuilder comment = new StringBuilder();
@@ -514,25 +516,29 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
 
             comment = comment.append(" Warning Message: " + response.getMessage());
             createCommentLogAfterProcess(this, em, SystemConfiguration.getValue("BATCH_USERID"), reqId, comment.toString());
-            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(), actionWf);
+            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(),
+                actionWf);
 
           } else if (batchAction.equalsIgnoreCase("MonitorAbortedRecords") && currentRDCProcStat.equalsIgnoreCase(CmrConstants.RDC_STATUS_ABORTED)
               && response.getStatus().equalsIgnoreCase(CmrConstants.RDC_STATUS_ABORTED)) {
             StringBuilder comment = new StringBuilder();
             comment = comment.append("RDc update processing for KUNNR " + request.getSapNo() + " failed. Error: " + response.getMessage());
             createCommentLogAfterProcess(this, em, SystemConfiguration.getValue("BATCH_USERID"), reqId, comment.toString());
-            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(), actionWf);
+            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(),
+                actionWf);
           } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(response.getStatus())) {
             StringBuilder comment = new StringBuilder();
             comment = comment.append("RDc update processing for KUNNR " + request.getSapNo() + " failed. Error: " + response.getMessage()
                 + " System will retry processing once.");
             createCommentLogAfterProcess(this, em, SystemConfiguration.getValue("BATCH_USERID"), reqId, comment.toString());
-            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(), actionWf);
+            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(),
+                actionWf);
           } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(response.getStatus())) {
             StringBuilder comment = new StringBuilder();
             comment = comment.append("RDc update processing for KUNNR " + request.getSapNo() + " failed. Error: " + response.getMessage());
             createCommentLogAfterProcess(this, em, SystemConfiguration.getValue("BATCH_USERID"), reqId, comment.toString());
-            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(), actionWf);
+            createWfHistory(this, em, reqId, adminEntityWf.getReqStatus(), SystemConfiguration.getValue("BATCH_USERID"), comment.toString(),
+                actionWf);
           }
 
           partialCommit(em);
@@ -842,7 +848,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
           CmrServiceInput cmrServiceInput = getReqParam(em, manualRec.getId().getReqId(), manualRec.getReqType(), cmrno);
           cmrServiceInput.setCmrIssuingCntry(cmrIssuingCountry);
           // connect to the create cmr service for the processed records
-          if (manualRec.getReqStatus() != null && !"".equalsIgnoreCase(manualRec.getReqStatus()) && manualRec.getReqStatus().equalsIgnoreCase("COM")) {
+          if (manualRec.getReqStatus() != null && !"".equalsIgnoreCase(manualRec.getReqStatus())
+              && manualRec.getReqStatus().equalsIgnoreCase("COM")) {
             String result = processCreateCMRService(em, manualRec.getId().getReqId(), cmrServiceInput, batchAction,
                 manualRec.getRdcProcessingStatus());
 
@@ -865,8 +872,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
         }
 
       } catch (Exception e) {
-        this.log.error("Error in processing Aborted Record " + manualRec.getId().getReqId() + " for Request ID " + manualRec.getId().getReqId()
-            + " [" + e.getMessage() + "]");
+        this.log.error("Error in processing Aborted Record " + manualRec.getId().getReqId() + " for Request ID " + manualRec.getId().getReqId() + " ["
+            + e.getMessage() + "]");
       }
     }
   }
@@ -1006,9 +1013,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
    * ((currentRDCProcStat.equalsIgnoreCase(CmrConstants.RDC_STATUS_ABORTED)) &&
    * ((((returnStatus.equalsIgnoreCase(CmrConstants.RDC_STATUS_ABORTED)) ||
    * (returnStatus .equalsIgnoreCase(CmrConstants.RDC_STATUS_NOT_COMPLETED))))))
-   * {
-   * updtAdminEntity.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED
-   * ); } else if
+   * { updtAdminEntity.setRdcProcessingStatus(CmrConstants.
+   * RDC_STATUS_NOT_COMPLETED ); } else if
    * (returnStatus.equalsIgnoreCase(CmrConstants.RDC_STATUS_COMPLETED)) {
    * updtAdminEntity.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED);
    * } } else {
@@ -1044,16 +1050,15 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
    * 
    * }
    * 
-   * catch (Exception e) {
-   * this.log.error("Error in processing Rdc tagged only  Record  for Request ID "
-   * + reqId + " [" + e.getMessage() + "]"); }
+   * catch (Exception e) { this.log.
+   * error("Error in processing Rdc tagged only  Record  for Request ID " +
+   * reqId + " [" + e.getMessage() + "]"); }
    * 
    * }
    */
 
-  public MassProcessRequest generateMassRequest(EntityManager em, long reqId, int itrId, String sysLoc,
-      MassUpdateServiceInput massUpdateServiceInput, MassProcessRequest request) throws JsonGenerationException, JsonMappingException, IOException,
-      Exception {
+  public MassProcessRequest generateMassRequest(EntityManager em, long reqId, int itrId, String sysLoc, MassUpdateServiceInput massUpdateServiceInput,
+      MassProcessRequest request) throws JsonGenerationException, JsonMappingException, IOException, Exception {
     request.setMandt(massUpdateServiceInput.getInputMandt());
     request.setReqId(massUpdateServiceInput.getInputReqId());
     request.setReqType(massUpdateServiceInput.getInputReqType());
@@ -1283,8 +1288,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
   }
 
   public MassProcessRequest generateReactivateDelRequest(EntityManager em, long reqId, int itrId, String sysLoc,
-      MassUpdateServiceInput massUpdateServiceInput, MassProcessRequest request) throws JsonGenerationException, JsonMappingException, IOException,
-      Exception {
+      MassUpdateServiceInput massUpdateServiceInput, MassProcessRequest request)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
     request.setMandt(massUpdateServiceInput.getInputMandt());
     request.setReqId(massUpdateServiceInput.getInputReqId());
     request.setReqType(massUpdateServiceInput.getInputReqType());
@@ -1381,8 +1386,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
       this.log.debug("No Application ID mapped to " + massUpdateServiceInput.getCmrIssuingCntry());
       massProcessResponse = new MassProcessResponse();
       massProcessResponse.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
-      massProcessResponse.setMsg("No application ID defined for Country: " + massUpdateServiceInput.getCmrIssuingCntry()
-          + ". Cannot process RDc records.");
+      massProcessResponse
+          .setMsg("No application ID defined for Country: " + massUpdateServiceInput.getCmrIssuingCntry() + ". Cannot process RDc records.");
     } else {
       try {
         this.massServiceClient.setReadTimeout(60 * 20 * 1000); // 20 mins
@@ -1418,8 +1423,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
       for (Admin adminEntity : adminList) {
         if (batchAction.equalsIgnoreCase("MonitorAbortedRecords")) {
           if ((currentRDCProcStat.equalsIgnoreCase(CmrConstants.RDC_STATUS_ABORTED))
-              && ((((massProcessResponse.getStatus().equalsIgnoreCase(CmrConstants.RDC_STATUS_ABORTED)) || (massProcessResponse.getStatus()
-                  .equalsIgnoreCase(CmrConstants.RDC_STATUS_NOT_COMPLETED)))))) {
+              && ((((massProcessResponse.getStatus().equalsIgnoreCase(CmrConstants.RDC_STATUS_ABORTED))
+                  || (massProcessResponse.getStatus().equalsIgnoreCase(CmrConstants.RDC_STATUS_NOT_COMPLETED)))))) {
             adminEntity.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
           } else if (massProcessResponse.getStatus().equalsIgnoreCase(CmrConstants.RDC_STATUS_COMPLETED)) {
             adminEntity.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED);
@@ -1445,9 +1450,8 @@ public class NotifyReqService extends BaseService<NotifyReqModel, NotifyReq> {
           MassUpdtEntity.setErrorTxt(record.getMessage());
           if (null != record.getStatus() && CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase((record.getStatus()))) {
             MassUpdtEntity.setRowStatusCd("RDCER");
-          } else if (null != record.getStatus()
-              && (CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(record.getStatus()) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS
-                  .equalsIgnoreCase(record.getStatus()))) {
+          } else if (null != record.getStatus() && (CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(record.getStatus())
+              || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(record.getStatus()))) {
             MassUpdtEntity.setRowStatusCd("DONE");
           }
           this.log.info("Mass Update Record Updated [Request ID: " + MassUpdtEntity.getId().getParReqId() + " CMR_NO: " + MassUpdtEntity.getCmrNo()

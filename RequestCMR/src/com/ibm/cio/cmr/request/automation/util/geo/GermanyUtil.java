@@ -1,0 +1,427 @@
+package com.ibm.cio.cmr.request.automation.util.geo;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.apache.commons.digester.Digester;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
+import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
+import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.PPSServiceClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.pps.PPSRequest;
+import com.ibm.cmr.services.client.pps.PPSResponse;
+
+public class GermanyUtil extends AutomationUtil {
+
+  private static final Logger LOG = Logger.getLogger(GermanyUtil.class);
+  private static List<DeSortlMapping> sortlMappings = new ArrayList<DeSortlMapping>();
+  private static final String MATCHING = "matching";
+  private static final String POSTAL_CD_RANGE = "postalCdRange";
+  private static final String SORTL = "SORTL";
+
+  @SuppressWarnings("unchecked")
+  public GermanyUtil() {
+    if (GermanyUtil.sortlMappings.isEmpty()) {
+      Digester digester = new Digester();
+      digester.setValidating(false);
+      digester.addObjectCreate("mappings", ArrayList.class);
+
+      digester.addObjectCreate("mappings/mapping", DeSortlMapping.class);
+
+      digester.addBeanPropertySetter("mappings/mapping/subIndustryCds", "subIndustryCds");
+      digester.addBeanPropertySetter("mappings/mapping/postalCdRanges", "postalCdRanges");
+      digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
+      digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
+      digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
+      digester.addSetNext("mappings/mapping", "add");
+      try {
+        ClassLoader loader = GermanyUtil.class.getClassLoader();
+        InputStream is = loader.getResourceAsStream("de-sortl-mapping.xml");
+        GermanyUtil.sortlMappings = (ArrayList<DeSortlMapping>) digester.parse(is);
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml.", e);
+      }
+    }
+  }
+
+  @Override
+  public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
+    Data data = requestData.getData();
+    Addr zs01 = requestData.getAddress("ZS01");
+    boolean valid = true;
+    String scenario = data.getCustSubGrp();
+    // cmr-2067 fix
+    engineData.setMatchDepartment(true);
+    if (StringUtils.isNotBlank(scenario)) {
+      switch (scenario) {
+      case "PRIPE":
+      case "IBMEM":
+        for (Addr addr : requestData.getAddresses()) {
+          String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
+          if (StringUtils.isNotBlank(custNm)
+              && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG") || custNm.contains("Co.KG")
+                  || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
+                  || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
+            engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
+            details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
+            valid = false;
+            break;
+          }
+        }
+        if (valid) {
+          String name = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+          String duplicateCMRNo = null;
+          // getting fuzzy matches on basis of name
+          try {
+            MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+                MatchingServiceClient.class);
+            DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+            request.setCustomerName(name);
+            request.setIssuingCountry(data.getCmrIssuingCntry());
+            request.setLandedCountry(zs01.getLandCntry());
+            client.setReadTimeout(1000 * 60 * 5);
+            LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+            MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(rawResponse);
+
+            TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
+            };
+
+            MatchingResponse<DuplicateCMRCheckResponse> response = mapper.readValue(json, ref);
+
+            if (response.getSuccess()) {
+              if (response.getMatched() && response.getMatches().size() > 0) {
+                duplicateCMRNo = response.getMatches().get(0).getCmrNo();
+                details.append("The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. "
+                    + duplicateCMRNo);
+                engineData.addRejectionComment("The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee")
+                    + " already has a record with CMR No. " + duplicateCMRNo);
+                valid = false;
+              } else {
+                details.append("No Duplicate CMRs were found with Name: " + name);
+              }
+              // cmr-2255 fix
+              // if (StringUtils.isBlank(duplicateCMRNo) &&
+              // scenario.equals("IBMEM")) {
+              // Person person = null;
+              // try {
+              // person = BluePagesHelper.getPersonByName(zs01.getCustNm1()
+              // + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " +
+              // zs01.getCustNm2() : ""));
+              // if (person == null) {
+              // engineData.addRejectionComment("Employee details not found in IBM BluePages.");
+              // details.append("Employee details not found in IBM BluePages.").append("\n");
+              // } else {
+              // details.append("Employee details validated with IBM BluePages for "
+              // + person.getName() + "(" + person.getEmail() + ").").append(
+              // "\n");
+              // }
+              // } catch (Exception e) {
+              // LOG.error("Not able to check name against bluepages", e);
+              // engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
+              // "Not able to check name against bluepages for scenario IBM Employee.");
+              // }
+              // }
+            }
+          } catch (Exception e) {
+            details.append("Duplicate CMR check using customer name match failed to execute.");
+            engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+          }
+        }
+        break;
+      case "BROKR":
+        // check duplicate CMR's manually
+        MatchingResponse<DuplicateCMRCheckResponse> response = null;
+        try {
+          DupCMRCheckElement cmrCheckElement = new DupCMRCheckElement(null, null, false, false);
+          response = cmrCheckElement.getMatches(entityManager, requestData, engineData);
+          // get a count of matches with match grade E1,E2, F1 or F2
+          int count = 0;
+          if (response != null && response.getSuccess()) {
+            if (response.getMatched()) {
+              LOG.debug("Duplicate CMR's found for request: " + data.getId().getReqId());
+              for (DuplicateCMRCheckResponse cmrResponse : response.getMatches()) {
+                if (cmrResponse.getMatchGrade().equals("E1") || cmrResponse.getMatchGrade().equals("E2") || cmrResponse.getMatchGrade().equals("F1")
+                    || cmrResponse.getMatchGrade().equals("F2")) {
+                  count++;
+                }
+              }
+            }
+          } else {
+            LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.");
+            details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
+            engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
+          }
+          if (count > 1) {
+            engineData.addRejectionComment("Multiple registered CMRs already found for this customer.");
+            details.append("Multiple registered CMRs already found for this customer.");
+            valid = false;
+          } else if (count == 1) {
+            details.append("Single registered CMR found for this customer.");
+          } else {
+            details.append("No registered CMRs found for this customer.");
+          }
+        } catch (Exception e) {
+          LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.", e);
+          details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
+          engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
+        }
+        break;
+      case "BUSPR":
+        if (StringUtils.isNotBlank(data.getPpsceid())) {
+          try {
+            PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+                PPSServiceClient.class);
+            client.setRequestMethod(Method.Get);
+            client.setReadTimeout(1000 * 60 * 5);
+            PPSRequest request = new PPSRequest();
+            request.setCeid(data.getPpsceid());
+            PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
+            if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+              engineData.addRejectionComment("PPS CE ID on the request is invalid.");
+              details.append("PPS CE ID on the request is invalid.");
+              valid = false;
+            } else {
+              details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.");
+            }
+          } catch (Exception e) {
+            LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
+            details.append("Not able to validate PPS CE ID using PPS Service.");
+            engineData.addNegativeCheckStatus("PPSCEID", "Not able to validate PPS CE ID using PPS Service.");
+          }
+        } else {
+          details.append("PPS CE ID not available on the request.");
+          engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
+        }
+        break;
+      case "INTIN":
+      case "INTSO":
+      case "INTAM":
+        // check value of Department under '##GermanyInternalDepartment' LOV
+        String sql = ExternalizedQuery.getSql("DE.CHECK_DEPARTMENT");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        for (Addr addr : requestData.getAddresses()) {
+          if (StringUtils.isNotBlank(addr.getDept())) {
+            query.setParameter("CD", addr.getDept());
+            String result = query.getSingleResult(String.class);
+            if (result == null) {
+              engineData.addRejectionComment("Department on the request is invalid.");
+              details.append("Department on the request is invalid for address type - " + addr.getId().getAddrType() + ".");
+              valid = false;
+            } else {
+              details.append("Department " + addr.getDept() + " validated successfully for address type - " + addr.getId().getAddrType() + ".");
+            }
+          }
+        }
+        break;
+      }
+
+      if (!scenario.equals("3PADC")) {
+        for (Addr addr : requestData.getAddresses()) {
+          String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "");
+          if (StringUtils.isNotBlank(custNm)
+              && (custNm.toUpperCase().contains("C/O") || custNm.toUpperCase().contains("C / O") || custNm.toUpperCase().contains("CARE OF"))) {
+            engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario should be for 3rd Party / Data Center.");
+            break;
+          }
+        }
+      }
+
+      String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
+      skipCompanyCheckForScenario(requestData, engineData, Arrays.asList(skipCompanyCheckList), false);
+
+    } else {
+      valid = false;
+      engineData.addRejectionComment("No Scenario found on the request");
+      details.append("No Scenario found on the request");
+    }
+    return valid;
+  }
+
+  @Override
+  public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String mainCustNm = (zs01.getCustNm1().trim() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2().trim() : "")).toUpperCase();
+    String mainStreetAddress1 = zs01.getAddrTxt().trim().toUpperCase();
+    String mainCity = zs01.getCity1().trim().toUpperCase();
+    String mainPostalCd = zs01.getPostCd().trim();
+    Iterator<Addr> it = requestData.getAddresses().iterator();
+    while (it.hasNext()) {
+      Addr addr = it.next();
+      if (!"ZS01".equals(addr.getId().getAddrType())) {
+        String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
+        if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+            && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
+          details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+          entityManager.remove(addr);
+          it.remove();
+        }
+      }
+    }
+
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && engineData.get(AutomationEngineData.COVERAGE_ID) != null) {
+      String coverageId = (String) engineData.get(AutomationEngineData.COVERAGE_ID);
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
+      details.append("Coverage calculated using Global/Domestic Buying Group.").append("\n");
+      details.append("Computed SORTL = " + coverageId).append("\n");
+      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
+      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
+      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("SEARCH_TERM", coverageId);
+      query.setForReadOnly(true);
+      List<Object[]> result = query.getResults(1);
+      if (result.size() > 0) {
+        String isuCd = (String) result.get(0)[0];
+        String clientTier = (String) result.get(0)[1];
+        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
+          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
+            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
+          }
+        }
+      }
+
+    } else {
+      HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
+          data.getClientTier());
+      LOG.debug("Calculated SORTL: " + response.get(SORTL));
+      if (StringUtils.isNotBlank(response.get(MATCHING))) {
+        switch (response.get(MATCHING)) {
+        case "Exact Match":
+        case "Nearest Match":
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
+          details.append("Coverage calculation Successful.").append("\n");
+          details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
+          details.append("Matched Rule:").append("\n");
+          details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
+          details.append("ISU = " + data.getIsuCd()).append("\n");
+          details.append("CTC = " + data.getClientTier()).append("\n");
+          details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
+          details.append("Matching: " + response.get(MATCHING));
+          break;
+        case "No Match Found":
+          engineData.addRejectionComment("Coverage cannot be computed automatically.");
+          details.append("Coverage cannot be computed automatically.").append("\n");
+          results.setResults("Coverage not calculated.");
+          results.setOnError(true);
+          break;
+        }
+      } else {
+        engineData.addRejectionComment("Coverage cannot be computed automatically.");
+        details.append("Coverage cannot be computed automatically.").append("\n");
+        results.setResults("Coverage not calculated.");
+        results.setOnError(true);
+      }
+    }
+
+    results.setProcessOutput(overrides);
+    return results;
+  }
+
+  private HashMap<String, String> getSORTLFromPostalCodeMapping(String subIndustryCd, String postCd, String isuCd, String clientTier) {
+    HashMap<String, String> response = new HashMap<String, String>();
+    response.put(MATCHING, "");
+    response.put(POSTAL_CD_RANGE, "");
+    response.put(SORTL, "");
+    if (!sortlMappings.isEmpty()) {
+      int postalCd = Integer.parseInt(postCd);
+      int distance = 1000;
+      String nearbySortl = null;
+      String nearbyPostalCdRange = null;
+      for (DeSortlMapping mapping : sortlMappings) {
+        List<String> subIndustryCds = Arrays.asList(mapping.getSubIndustryCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        if (subIndustryCds.contains(subIndustryCd) && isuCd.equals(mapping.getIsu()) && clientTier.equals(mapping.getCtc())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCdRanges())) {
+            String[] postalCodeRanges = mapping.getPostalCdRanges().replaceAll("\n", "").replaceAll(" ", "").split(",");
+            for (String postalCdRange : postalCodeRanges) {
+              String[] range = postalCdRange.split("to");
+              int start = 0;
+              int end = 0;
+              if (range.length == 2) {
+                start = Integer.parseInt(range[0]);
+                end = Integer.parseInt(range[1]);
+              } else if (range.length == 1) {
+                start = Integer.parseInt(range[0].replaceAll("x", "0"));
+                end = Integer.parseInt(range[0].replaceAll("x", "9"));
+              }
+              String postalCodeRange = start + " to " + end;
+              if (postalCd >= start && postalCd <= end) {
+                response.put(MATCHING, "Exact Match");
+                response.put(SORTL, mapping.getSortl());
+                response.put(POSTAL_CD_RANGE, postalCodeRange);
+                return response;
+              } else if (postalCd > end) {
+                int diff = postalCd - end;
+                if (diff > 0 && diff < distance) {
+                  distance = diff;
+                  nearbySortl = mapping.getSortl();
+                  nearbyPostalCdRange = postalCodeRange;
+                }
+              } else if (postalCd < start) {
+                int diff = start - postalCd;
+                if (diff > 0 && diff < distance) {
+                  distance = diff;
+                  nearbySortl = mapping.getSortl();
+                  nearbyPostalCdRange = postalCodeRange;
+                }
+              }
+            }
+          } else {
+            response.put(MATCHING, "Exact Match");
+            response.put(SORTL, mapping.getSortl());
+            response.put(POSTAL_CD_RANGE, "- No Postal Code Range Defined -");
+            return response;
+          }
+        }
+      }
+      if (StringUtils.isNotBlank(nearbySortl)) {
+        response.put(MATCHING, "Nearest Match");
+        LOG.debug("SORTL Calculated by near by postal code range logic: " + nearbySortl);
+      } else {
+        response.put(MATCHING, "No Match Found");
+      }
+      response.put(SORTL, nearbySortl);
+      response.put(POSTAL_CD_RANGE, nearbyPostalCdRange);
+      return response;
+    } else {
+      response.put(MATCHING, "No Match Found");
+      return response;
+    }
+  }
+
+}

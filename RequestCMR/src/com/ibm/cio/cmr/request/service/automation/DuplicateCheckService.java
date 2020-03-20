@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
@@ -19,7 +18,6 @@ import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilDupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.util.DuplicateContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.auto.BaseV2RequestModel;
@@ -137,22 +135,24 @@ public class DuplicateCheckService extends BaseSimpleService<DuplicateCheckModel
 
     }
 
-    else if (dupRsnChkModel != null && "DUP_CMR_RSN".equals(dupRsnChkModel.getAction())) {
-      LOG.debug("Executing Duplicte cmr reason save..");
-      RequestData requestData = new RequestData(entityManager, dupRsnChkModel.getReqId());
-      Admin admin = requestData.getAdmin();
-      admin.setDupCmrReason(dupRsnChkModel.getDupCmrRsn());
-      EntityTransaction transaction = entityManager.getTransaction();
-      try {
-        transaction.begin();
-        entityManager.merge(admin);
-        transaction.commit();
-      } catch (Exception e) {
-        if (transaction.isActive()) {
-          transaction.rollback();
-        }
-      }
-    }
+    // else if (dupRsnChkModel != null &&
+    // "DUP_CMR_RSN".equals(dupRsnChkModel.getAction())) {
+    // LOG.debug("Executing Duplicte cmr reason save..");
+    // RequestData requestData = new RequestData(entityManager,
+    // dupRsnChkModel.getReqId());
+    // Admin admin = requestData.getAdmin();
+    // admin.setDupCmrReason(dupRsnChkModel.getDupCmrRsn());
+    // EntityTransaction transaction = entityManager.getTransaction();
+    // try {
+    // transaction.begin();
+    // entityManager.merge(admin);
+    // transaction.commit();
+    // } catch (Exception e) {
+    // if (transaction.isActive()) {
+    // transaction.rollback();
+    // }
+    // }
+    // }
     return dupChkModel;
   }
 

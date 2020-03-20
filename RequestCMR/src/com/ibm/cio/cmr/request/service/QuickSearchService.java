@@ -241,11 +241,11 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     if (geoHandler != null) {
       int splitLength = geoHandler.getName1Length();
       int splitLength2 = geoHandler.getName2Length();
-      String[] parts = geoHandler.doSplitName(model.getName().toUpperCase(), "", splitLength, splitLength2);
+      String[] parts = geoHandler.doSplitName(model.getName(), "", splitLength, splitLength2);
       reqEntryModel.setMainCustNm1(parts[0]);
       reqEntryModel.setMainCustNm2(parts[1]);
     } else {
-      reqEntryModel.setMainCustNm1(model.getName().toUpperCase());
+      reqEntryModel.setMainCustNm1(model.getName());
     }
 
     RequestEntryService reqService = new RequestEntryService();
@@ -261,9 +261,9 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     AddressModel addrModel = new AddressModel();
     addrModel.setReqId(reqId);
     addrModel.setLandCntry(model.getCountryCd());
-    addrModel.setAddrTxt(model.getStreetAddress1() != null ? model.getStreetAddress1().toUpperCase() : null);
-    addrModel.setAddrTxt2(model.getStreetAddress2() != null ? model.getStreetAddress2().toUpperCase() : null);
-    addrModel.setCity1(model.getCity() != null ? model.getCity().toUpperCase() : null);
+    addrModel.setAddrTxt(model.getStreetAddress1() != null ? model.getStreetAddress1() : null);
+    addrModel.setAddrTxt2(model.getStreetAddress2() != null ? model.getStreetAddress2() : null);
+    addrModel.setCity1(model.getCity() != null ? model.getCity() : null);
     addrModel.setStateProv(model.getStateProv());
     addrModel.setPostCd(model.getPostCd());
     addrModel.setState(BaseModel.STATE_NEW);

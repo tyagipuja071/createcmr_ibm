@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -74,23 +75,29 @@ public class AutomationService extends MultiThreadedBatchService {
         if (requestData.getAdmin() == null || requestData.getData() == null) {
           throw new IllegalArgumentException("The records for reqId " + id + " cannot be found");
         }
-        if (checkAndRecover(entityManager, requestData)) {
+        if (AutomationConst.STATUS_AWAITING_REPLIES.equals(requestData.getAdmin().getReqStatus())) {
 
-          boolean proceedWithExecution = true;
+          processApprovalNextStep(entityManager, requestData, current);
 
-          if (AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY.equals(requestData.getAdmin().getReqStatus())) {
-            // check if the request should be retried
-            if (!shouldRetry(requestData.getAdmin().getLastUpdtTs(), current)) {
-              LOG.debug("Request ID " + id + " is for retry but is not yet within the retry threshold, skipping.");
-              proceedWithExecution = false;
-            }
-          }
-          if (proceedWithExecution) {
-            engine = initAutomationEngine(entityManager, requestData.getData());
-            engine.runAutomationEngine(entityManager, id, requestData);
-          }
         } else {
-          LOG.info("Request ID " + id + " has been moved to the next status as part of workflow recovery.");
+          if (checkAndRecover(entityManager, requestData)) {
+
+            boolean proceedWithExecution = true;
+
+            if (AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY.equals(requestData.getAdmin().getReqStatus())) {
+              // check if the request should be retried
+              if (!shouldRetry(requestData.getAdmin().getLastUpdtTs(), current)) {
+                LOG.debug("Request ID " + id + " is for retry but is not yet within the retry threshold, skipping.");
+                proceedWithExecution = false;
+              }
+            }
+            if (proceedWithExecution) {
+              engine = initAutomationEngine(entityManager, requestData.getData());
+              engine.runAutomationEngine(entityManager, id, requestData);
+            }
+          } else {
+            LOG.info("Request ID " + id + " has been moved to the next status as part of workflow recovery.");
+          }
         }
         LOG.debug("Committing transactions for Request " + id);
         partialCommit(entityManager);
@@ -103,6 +110,34 @@ public class AutomationService extends MultiThreadedBatchService {
     }
 
     return true;
+  }
+
+  /**
+   * Check awaiting replies requests which did not move properly to next step
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param current
+   * @throws CmrException
+   * @throws SQLException
+   */
+  private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws CmrException, SQLException {
+    Admin admin = requestData.getAdmin();
+    LOG.debug("Checking awaiting replies request " + admin.getId().getReqId() + "..");
+
+    // check if the last approval was at least 10 mins back
+    String sql = ExternalizedQuery.getSql("APPROVAL.GET_MAX_TS_APR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    Date maxDt = query.getSingleResult(Date.class);
+    Calendar cal = new GregorianCalendar();
+    cal.setTime(current);
+    cal.add(Calendar.MINUTE, -1 * 10);
+    if (maxDt.after(cal.getTime())) {
+      LOG.debug("Moving Request " + admin.getId().getReqId() + " to next step..");
+      ApprovalService approvalService = new ApprovalService();
+      approvalService.moveToNextStep(entityManager, admin);
+    }
   }
 
   /**

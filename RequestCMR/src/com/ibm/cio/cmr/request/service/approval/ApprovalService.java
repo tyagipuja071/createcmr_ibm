@@ -145,7 +145,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         break;
       case "C":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_CONDITIONALLY_APPROVED, approval, admin);
-        moveToNextStep4ConfAppr(entityManager, admin);
+        moveToNextStep(entityManager, admin);
         approval.setProcessed(true);
         approval.setActionDone(CmrConstants.YES_NO.Y.toString());
         break;
@@ -378,7 +378,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
    * @throws CmrException
    * @throws SQLException
    */
-  private void moveToNextStep(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
+  public void moveToNextStep(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
     this.log.debug("Checking if all approvals are complete for Request ID " + admin.getId().getReqId());
     String sql = ExternalizedQuery.getSql("APPROVAL.CHECKIFALLAPPROVED");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -407,7 +407,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
       appuser.setBluePagesName(user);
-      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", procCenter, procCenter, false, null);
+      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", procCenter, procCenter, false, null, null);
       RequestUtils.createCommentLog(this, entityManager, appuser, admin.getId().getReqId(), comment);
     } else {
       this.log.debug("The request is not in Draft Status and/or Pending Approvals need to be received.");
@@ -440,53 +440,10 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
       appuser.setBluePagesName(user);
-      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", null, null, false, null);
+      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", null, null, false, null, null);
       RequestUtils.createCommentLog(this, entityManager, appuser, admin.getId().getReqId(), comment);
     } else {
       this.log.debug("The request " + admin.getId().getReqId() + " is not in any automation statuses.");
-    }
-  }
-
-  /**
-   * Moves the request to the next step
-   * 
-   * @param entityManager
-   * @param admin
-   * @throws CmrException
-   * @throws SQLException
-   */
-  private void moveToNextStep4ConfAppr(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
-    this.log.debug("Checking if all approvals are complete for Request ID " + admin.getId().getReqId());
-    String sql = ExternalizedQuery.getSql("APPROVAL.CHECKIFALLAPPROVED4CONFAPPR");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", admin.getId().getReqId());
-    if (!query.exists() && PENDING_STATUSES_TO_MOVE.contains(admin.getReqStatus())) {
-      // move only if it is one of the middle statuses
-      this.log.debug("All approvals complete. Moving to next step");
-      String procCenter = null;
-      if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType())) {
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
-      } else {
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
-        procCenter = getProcessingCenter(entityManager, admin);
-        admin.setLastProcCenterNm(procCenter);
-      }
-      admin.setLockBy(null);
-      admin.setLockTs(null);
-      admin.setLockInd(CmrConstants.YES_NO.N.toString());
-      admin.setLockByNm(null);
-
-      updateEntity(admin, entityManager);
-      this.log.debug("Creating workflow history and sending notifications.");
-      String user = SystemConfiguration.getValue("BATCH_USERID");
-      String comment = "All approval requests have been approved.";
-      AppUser appuser = new AppUser();
-      appuser.setIntranetId(user);
-      appuser.setBluePagesName(user);
-      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", procCenter, procCenter, false, null);
-      RequestUtils.createCommentLog(this, entityManager, appuser, admin.getId().getReqId(), comment);
-    } else {
-      this.log.debug("The request is not in Draft Status and/or Pending Approvals need to be received.");
     }
   }
 

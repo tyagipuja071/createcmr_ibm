@@ -46,8 +46,7 @@ public class FieldComputationElement extends OverridingElement {
     if (result == null) {
       details
           .append(" Field computations logics not defined for the country " + issuingCntry + ". Sending back to processor for final calculations.");
-      engineData.addRejectionComment("Field computations logics not defined for the country " + issuingCntry
-          + ". Sending back to processor for final calculations.");
+      engineData.addRejectionComment("Field computations logics not defined for the country and needs to manually be completed." + issuingCntry);
       results.setResults("Error On Field Calculation");
       results.setOnError(true);
     } else if (result != null && !result.isOnError()) {

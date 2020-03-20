@@ -72,16 +72,6 @@ ul {
       </td>
     </tr>
     <tr>
-      <td>R4.7 b4701S</td>
-      <td>Jan 18, 2020</td>
-      <td>
-        <ul>
-          <li>CreateCMR BP Spain Deployment</li>
-          <li>Internal Defect Fixes for CreateCMR BP US</li>
-        </ul>
-      </td>
-    </tr>
-    <tr>
       <td>R4.7 b4701</td>
       <td>Nov 23, 2019</td>
       <td>

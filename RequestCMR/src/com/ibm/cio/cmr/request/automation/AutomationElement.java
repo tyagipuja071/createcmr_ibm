@@ -179,9 +179,9 @@ public abstract class AutomationElement<R extends AutomationOutput> {
    * @param reqId
    * @return
    */
-  public AutomationResult<R> createSkippedResult(long reqId) {
+  public AutomationResult<R> createSkippedResult(long reqId, String message) {
     AutomationResult<R> result = new AutomationResult<>();
-    result.setDetails("Checks skipped because of scenario exceptions and/or previous element results.");
+    result.setDetails(message);
     result.setProcessCode(getProcessCode());
     result.setOnError(false);
     result.setProcessDesc(getProcessDesc());

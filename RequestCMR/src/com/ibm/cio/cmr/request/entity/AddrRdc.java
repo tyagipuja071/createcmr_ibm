@@ -160,7 +160,7 @@ public class AddrRdc extends BaseEntity<AddrPK> implements Serializable {
 
   @Column(name = "TAX_OFFICE")
   private String taxOffice;
-  
+
   public String getBillingPstlAddr() {
     return billingPstlAddr;
   }

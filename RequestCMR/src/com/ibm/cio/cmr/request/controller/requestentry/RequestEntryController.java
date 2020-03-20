@@ -221,8 +221,8 @@ public class RequestEntryController extends BaseController {
    * @return
    */
   @RequestMapping(value = "/request")
-  public ModelAndView showRequestEntryPage(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model,
-      CheckListModel checklist) throws Exception {
+  public ModelAndView showRequestEntryPage(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model, CheckListModel checklist)
+      throws Exception {
 
     ModelAndView mv = null;
 
@@ -433,8 +433,8 @@ public class RequestEntryController extends BaseController {
       sqlId = "YOUR_ACTIONS_NEW";
     }
 
-    if (("X".equals(lockInd) || ("P".equals(claimRole) || "R".equals(claimRole) || "D".equals(claimRole))
-        || (("L".equals(claimRole) || "O".equals(claimRole)) && !sameOriginator)) && !newRequest) {
+    if (("X".equals(lockInd) || ("P".equals(claimRole) || "R".equals(claimRole) || "D".equals(claimRole)) || (("L".equals(claimRole) || "O"
+        .equals(claimRole)) && !sameOriginator)) && !newRequest) {
       request.setAttribute("yourActionsViewOnly", true);
     }
 
@@ -849,5 +849,74 @@ public class RequestEntryController extends BaseController {
       map.put("success", false);
     }
     return map;
+  }
+
+  /*
+   * Code below specifically to Single Reactivation imports
+   */
+  /**
+   * Processes importing the CMR into the Request
+   * 
+   * @param reqId
+   * @param request
+   * @param response
+   * @param model
+   * @return
+   * @throws Exception
+   */
+  @RequestMapping(value = "/request/singlereactimport")
+  public ModelAndView importSREACTRecords(HttpServletRequest request, HttpServletResponse response, ImportCMRModel model, RequestEntryModel reqModel)
+      throws Exception {
+
+    ModelAndView mv = null;
+
+    String cmrNo = model.getCmrNum();
+    long reqId = model.getReqId();
+    String cmrCntry = model.getCmrIssuingCntry();
+    String searchCntry = model.getSearchIssuingCntry();
+    String newParams = "?cmrIssuingCntry=" + cmrCntry + "&reqType=" + reqModel.getReqType();
+    try {
+      FindCMRResultModel results = service.findSingleReactCMRs(cmrNo, cmrCntry, 2000, searchCntry);
+
+      boolean noResults = false;
+      if (results == null || results.getItems() == null || results.getItems().size() == 0) {
+        LOG.debug("NO RESULTS");
+        results = new FindCMRResultModel();
+        results.setItems(new ArrayList<FindCMRRecordModel>());
+        noResults = true;
+      }
+      ParamContainer params = new ParamContainer();
+      params.addParam("reqId", reqId);
+      params.addParam("results", results);
+      params.addParam("system", model.getSystem());
+      params.addParam("model", reqModel);
+      params.addParam("searchModel", model);
+      params.addParam("skipAddress", model.isSkipAddress());
+      if (cmrService == null) {
+        cmrService = new ImportCMRService();
+      }
+      ImportCMRModel retModel = cmrService.process(request, params);
+      long reqIdNew = retModel.getReqId();
+      mv = new ModelAndView("redirect:/request" + (reqIdNew > 0 ? "/" + reqIdNew : newParams), "cmr", new ImportCMRModel());
+      mv.addObject("internalReqId", reqIdNew);
+      mv.addObject("success", true);
+      if (!noResults) {
+        MessageUtil.setInfoMessage(mv, MessageUtil.INFO_CMR_IMPORTED, cmrNo);
+      } else {
+        MessageUtil.setErrorMessage(mv, MessageUtil.INFO_NO_CMR_IMPORTED, cmrNo);
+      }
+      SystemUtil.storeToSession(request, null);
+    } catch (Exception e) {
+      SystemUtil.storeToSession(request, e);
+      LOG.error("Error in Processing CMRs", e);
+      mv = new ModelAndView("redirect:/request" + (reqId > 0 ? "/" + reqId : newParams), "cmr", new ImportCMRModel());
+      if (e instanceof CmrException) {
+        setError(e, mv);
+      } else {
+        setError(new CmrException(MessageUtil.ERROR_GENERAL), mv);
+      }
+      mv.addObject("success", false);
+    }
+    return mv;
   }
 }

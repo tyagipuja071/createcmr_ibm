@@ -39,6 +39,16 @@ public class MassUpdateModel extends BaseModel {
 
   private String custNm2;
 
+  private String custNm3;
+
+  public String getCustNm3() {
+    return custNm3;
+  }
+
+  public void setCustNm3(String custNm3) {
+    this.custNm3 = custNm3;
+  }
+
   private String restrictTo;
 
   private String isicCd;

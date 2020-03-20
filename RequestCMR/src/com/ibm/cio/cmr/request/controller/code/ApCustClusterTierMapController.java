@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,114 +22,106 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.controller.BaseController;
-import com.ibm.cio.cmr.request.model.BaseModel;
-import com.ibm.cio.cmr.request.model.code.ApCustClusterTierMapModel;
-import com.ibm.cio.cmr.request.service.code.ApCustClusterTierMapMaintService;
-import com.ibm.cio.cmr.request.service.code.ApCustClusterTierMapService;
+import com.ibm.cio.cmr.request.model.code.ApClusterMaintModel;
+import com.ibm.cio.cmr.request.model.code.ApClusterModel;
+import com.ibm.cio.cmr.request.service.code.ApClusterMaintService;
+import com.ibm.cio.cmr.request.service.code.ApClusterService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 
 /**
- * @author Anuja Srivastava
  * 
+ * @author PoojaTyagi
+ *
  */
+
 @Controller
 public class ApCustClusterTierMapController extends BaseController {
 
   @Autowired
-  private ApCustClusterTierMapMaintService maintService;
+  private ApClusterService apClusterService;
+
   @Autowired
-  private ApCustClusterTierMapService service;
+  private ApClusterMaintService apClusterMaintService;
 
-  private static final Logger LOG = Logger.getLogger(ApCustClusterTierMapController.class);
+  private static final Logger LOG = Logger.getLogger(SalesBoController.class);
 
-  @RequestMapping(value = "/code/apClusterMap", method = RequestMethod.GET)
-  public @ResponseBody ModelAndView showClusterList(HttpServletRequest request, ModelMap model) {
+  @RequestMapping(value = "/code/apCluster", method = RequestMethod.GET)
+  public @ResponseBody ModelAndView showSboMaint(HttpServletRequest request, ModelMap model) {
     AppUser user = AppUser.getUser(request);
-    if (!user.isAdmin() && !user.isCmde()) {
-      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName()
-          + ") tried accessing the maintain AP_CUST_CLUSTER_TIER_MAP Table function.");
-      ModelAndView mv = new ModelAndView("noaccess", "user", new ApCustClusterTierMapModel());
+    if (!user.isAdmin()) {
+      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Sales BO Maintenance function.");
+      ModelAndView mv = new ModelAndView("noaccess", "apClusterModel", new ApClusterModel());
       return mv;
     }
 
     // access granted
-    ModelAndView mv = new ModelAndView("apClusterMap", "apClusterMap", new ApCustClusterTierMapModel());
+    ModelAndView mv = new ModelAndView("apClusterModel", "apClusterModel", new ApClusterModel());
     setPageKeys("ADMIN", "CODE_ADMIN", mv);
     return mv;
   }
 
-  @RequestMapping(value = "/code/apClusterMapdetails")
-  public @ResponseBody ModelAndView maintainClusterMapping(HttpServletRequest request, HttpServletResponse response, ApCustClusterTierMapModel model)
+  @RequestMapping(value = "/code/apClusterMaint")
+  public @ResponseBody ModelAndView maintainSalesBo(HttpServletRequest request, HttpServletResponse response, ApClusterModel model)
       throws CmrException {
     AppUser user = AppUser.getUser(request);
-    if (!user.isAdmin() && !user.isCmde()) {
-      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the AP_CUST_CLUSTER_TIER_MAP Table function.");
-      ModelAndView mv = new ModelAndView("noaccess", "apClusterMapDetails", new ApCustClusterTierMapModel());
+    if (!user.isAdmin()) {
+      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Sales BO maintenance function.");
+      ModelAndView mv = new ModelAndView("noaccess", "apClusterModel", new ApClusterModel());
       return mv;
     }
 
     ModelAndView mv = null;
 
-    if (model.allKeysAssigned()) {
-
+    if (StringUtils.isNotEmpty(model.getIssuingCntry())) {
       if (shouldProcess(model)) {
         try {
 
-          ApCustClusterTierMapModel newModel = maintService.save(model, request);
-          mv = new ModelAndView("redirect:/code/apClusterMap", "apClusterMap", newModel);
-          // mv = new ModelAndView("test");
+          ApClusterModel newModel = apClusterMaintService.save(model, request);
+          String url = "/code/apClusterMaint?issuingCntry=" + newModel.getIssuingCntry();
+          mv = new ModelAndView("redirect:" + url, "apClusterMaintModel", newModel);
           MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECORD_SAVED, model.getRecordDescription());
-
-          if (BaseModel.ACT_DELETE.equals(model.getAction())) {
-            MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECORD_DELETED, model.getRecordDescription());
-          } else {
-            MessageUtil.setInfoMessage(mv, MessageUtil.INFO_RECORD_SAVED, model.getRecordDescription());
-          }
         } catch (Exception e) {
-          mv = new ModelAndView("apClusterMapdetails", "apClusterMapDetails", model);
-          // mv = new ModelAndView("test");
+          mv = new ModelAndView("apClusterMaintModel", "apClusterMaintModel", model);
           setError(e, mv);
         }
       } else {
-        ApCustClusterTierMapModel currentModel = new ApCustClusterTierMapModel();
-        List<ApCustClusterTierMapModel> current = maintService.search(model, request);
+        ApClusterModel currentModel = new ApClusterModel();
+        List<ApClusterModel> current = apClusterMaintService.search(model, request);
         if (current != null && current.size() > 0) {
           currentModel = current.get(0);
         }
-        mv = new ModelAndView("apClusterMapdetails", "apClusterMapDetails", currentModel);
+        if (StringUtils.isNotBlank(currentModel.getIssuingCntry())) {
+          mv = new ModelAndView("apClusterMaintModel", "apClusterMaintModel", currentModel);
+        }
       }
     }
     if (mv == null) {
-      mv = new ModelAndView("apClusterMapdetails", "apClusterMapDetails", new ApCustClusterTierMapModel());
+      mv = new ModelAndView("apClusterMaintModel", "apClusterMaintModel", new ApClusterModel());
     }
-
     setPageKeys("ADMIN", "CODE_ADMIN", mv);
     return mv;
   }
 
-  @RequestMapping(value = "/code/aplist", method = { RequestMethod.POST, RequestMethod.GET })
-  public ModelMap getapList(HttpServletRequest request, HttpServletResponse response, ApCustClusterTierMapModel model) throws CmrException {
-
-    List<ApCustClusterTierMapModel> results = service.search(model, request);
+  @RequestMapping(value = "/code/apClusterList", method = { RequestMethod.POST, RequestMethod.GET })
+  public ModelMap getAPClusterList(HttpServletRequest request, HttpServletResponse response, ApClusterModel model) throws CmrException {
+    List<ApClusterModel> results = apClusterService.search(model, request);
     return wrapAsSearchResult(results);
   }
 
-  @RequestMapping(value = "/code/apClusters/process", method = { RequestMethod.POST, RequestMethod.GET })
-  public ModelMap processApClusters(HttpServletRequest request, HttpServletResponse response, ApCustClusterTierMapModel model) throws CmrException {
+  @RequestMapping(value = "/code/apCluster/process", method = { RequestMethod.POST, RequestMethod.GET })
+  public ModelMap processAPCluster(HttpServletRequest request, HttpServletResponse response, ApClusterModel model) throws CmrException {
     ModelMap map = new ModelMap();
     try {
-      service.processTransaction(model, request);
-      if (model.getAction().equals("REMOVE_CLUSTERS")) {
+      if (model.getAction().equals("REMOVE_MAPPINGS")) {
+        apClusterService.processTransaction(model, request);
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         result.put("message", "Record(s) removed successfully");
         map.put("result", result);
-      } else {
-        map.put("success", true);
       }
     } catch (Exception e) {
-      if (model.getAction().equals("REMOVE_CLUSTERS")) {
+      if (model.getAction().equals("REMOVE_MAPPINGS")) {
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         result.put("error", "Failed to remove Mapping(s).");
@@ -137,7 +130,27 @@ public class ApCustClusterTierMapController extends BaseController {
         map.put("success", false);
         map.put("error", e.getMessage());
       }
+    }
+    return map;
+  }
 
+  @RequestMapping(value = "/code/apClusterMaint/process", method = { RequestMethod.POST, RequestMethod.GET })
+  public ModelMap processSalesBoMaint(HttpServletRequest request, HttpServletResponse response, ApClusterMaintModel model) throws CmrException {
+    ModelMap map = new ModelMap();
+    apClusterMaintService.setMaintModel(model);
+    try {
+      if (StringUtils.isNotBlank(model.getMassAction())) {
+        apClusterMaintService.processTransaction(new ApClusterModel(), request);
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("message", "Record(s) saved successfully");
+        map.put("result", result);
+      }
+    } catch (Exception e) {
+      Map<String, Object> result = new HashMap<>();
+      result.put("success", true);
+      result.put("error", "Failed to save record(s).");
+      map.put("result", result);
     }
     return map;
   }

@@ -5,7 +5,7 @@ package com.ibm.cio.cmr.request.automation;
 
 import java.util.HashMap;
 
-import com.ibm.cio.cmr.request.automation.impl.gbl.BNValidationElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.ANZBNValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLSearchElement;
@@ -54,15 +54,18 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String GBL_SCENARIO_CHECK = "GBL_SCENARIO_CHECK";
   public static final String GBL_FIELD_COMPUTE = "GBL_FIELD_COMPUTE";
   public static final String GBL_UPDATE_SWITCH = "GBL_UPDATE_SWITCH";
-  public static final String EU_VAT_VALIDATION = "EU_VAT_VALIDATION";
   public static final String GBL_DNB_CHECK = "GBL_DNB_CHECK";
-  // brazil
+  // Brazil
   public static final String BR_SCENARIO = "BR_SCENARIO";
   public static final String BR_CALCULATE = "BR_CALCULATE";
   public static final String BR_DUP_CHECK = "BR_DUP_CHECK";
   public static final String BR_IMPORT = "BR_IMPORT";
-  // AU/NZ
-  public static final String AUNZ_BUISNESS_NUMBER = "AUNZ_BUISNESS_NUMBER";
+
+  // ANZ
+  public static final String ANZ_BN_VALIDATION = "ANZ_BN_VALIDATION";
+
+  // EU
+  public static final String EU_VAT_VALIDATION = "EU_VAT_VALIDATION";
 
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
@@ -96,7 +99,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(BR_DUP_CHECK, BrazilDupCMRCheckElement.class);
     put(BR_CALCULATE, BrazilCalculateIBMElement.class);
     put(BR_IMPORT, ImportExternalDataElement.class);
-    put(AUNZ_BUISNESS_NUMBER, BNValidationElement.class);
+    put(ANZ_BN_VALIDATION, ANZBNValidationElement.class);
   }
 
   @Override

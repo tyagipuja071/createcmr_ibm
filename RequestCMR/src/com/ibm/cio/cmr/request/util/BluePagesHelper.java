@@ -155,6 +155,36 @@ public class BluePagesHelper {
 
   /**
    * Gets the Person details like Name, Country Code, Company code, CNUM by
+   * name.
+   * 
+   * @param name
+   * @return First and Last name as a single String
+   */
+  public static Map<String, String> getBluePagesDetailsByName(String name) {
+
+    BPResults bpresults = BluePages.getPersonsByNameFuzzy(name);
+
+    Map<String, String> returnMap = new HashMap<String, String>();
+
+    if (bpresults.succeeded()) {
+      if (bpresults.rows() == 1) {
+        returnMap.put(BLUEPAGES_KEY_EMP_NAME, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
+        returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_CNUM, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM));
+        returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
+        returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_NOTES_MAIL));
+
+      }
+    } else {
+      LOG.error("Error while doing Blue Pages look up ");
+      return null;
+    }
+    return returnMap;
+  }
+
+  /**
+   * Gets the Person details like Name, Country Code, Company code, CNUM by
    * intranet addr.
    * 
    * @param notesId
@@ -361,6 +391,32 @@ public class BluePagesHelper {
     if (bpPersonDetails != null) {
       Person p = new Person();
       p.setEmail(email);
+      p.setName(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_NAME));
+      p.setEmployeeId(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_CNUM));
+      p.setId(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_CNUM));
+      p.setNotesEmail(formatNotesId(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_NOTES_MAIL)));
+      if (StringUtils.isEmpty(p.getName())) {
+        return null;
+      }
+      return p;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Gets the {@link Person} object using the name
+   * 
+   * @param email
+   * @param notesId
+   * @return
+   * @throws CmrException
+   */
+  public static Person getPersonByName(String name) throws CmrException {
+    Map<String, String> bpPersonDetails = BluePagesHelper.getBluePagesDetailsByName(name);
+    if (bpPersonDetails != null) {
+      Person p = new Person();
+      p.setEmail(bpPersonDetails.get(BLUEPAGES_KEY_EMP_INTERNET_ID));
       p.setName(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_NAME));
       p.setEmployeeId(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_CNUM));
       p.setId(bpPersonDetails.get(BluePagesHelper.BLUEPAGES_KEY_EMP_CNUM));

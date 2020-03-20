@@ -79,6 +79,9 @@ var SvcUsage = (function() {
             case 'S':
               chartTitle += 'Total Service Usage by Partners';
               break;
+            case 'A':
+              chartTitle += 'Total Service Usage by Service';
+              break;
             case 'N':
               chartTitle += countType + ' Usage by Partners';
               break;

@@ -52,13 +52,12 @@ public class ScenarioCheckElement extends ValidatingElement {
           && ("CROSS".equals(scenarioSubType) || "PRIPE".equals(scenarioSubType) || "IBMEM".equals(scenarioSubType))) {
         validation.setSuccess(false);
         validation.setMessage("Scenario need review");
-        output.setDetails(LAHandler.getScenarioDescBR(scenarioSubType)
-            + " Scenario found on the request. Hence sending back to the processor for the review ");
+        output.setDetails(
+            LAHandler.getScenarioDescBR(scenarioSubType) + " Scenario found on the request. Hence sending back to the processor for the review ");
         output.setOnError(true);
-        engineData.addRejectionComment(LAHandler.getScenarioDescBR(scenarioSubType)
-            + " Scenario found on the request. Hence sending back to the processor for the review ");
-        log.debug(LAHandler.getScenarioDescBR(scenarioSubType)
-            + " Scenario found on the request. Hence sending back to the processor for the review ");
+        engineData.addRejectionComment("Non-automated Scenario" + LAHandler.getScenarioDescBR(scenarioSubType) + " Scenario found on the request");
+        log.debug(
+            LAHandler.getScenarioDescBR(scenarioSubType) + " Scenario found on the request. Hence sending back to the processor for the review ");
       } else if (scenarioSubType != null && StringUtils.isNotEmpty(scenarioSubType) && "SOFTL".equals(scenarioSubType)
           && !StringUtils.isEmpty(soldToVat) && (soldToVat.matches("0{14}") || soldToVat.matches("9{14}"))
           && (reqReason != null && StringUtils.isNotEmpty(reqReason) && !"AUCO".equalsIgnoreCase(reqReason))) {
@@ -67,8 +66,8 @@ public class ScenarioCheckElement extends ValidatingElement {
         output.setDetails(LAHandler.getScenarioDescBR(scenarioSubType)
             + " Scenario found on the request and VAT contains all 0s or 9s. Hence sending back to the processor for the review ");
         output.setOnError(true);
-        engineData.addRejectionComment(LAHandler.getScenarioDescBR(scenarioSubType)
-            + " Scenario found on the request and VAT contains all 0s or 9s. Hence sending back to the processor for the review ");
+        engineData
+            .addRejectionComment(LAHandler.getScenarioDescBR(scenarioSubType) + " Scenario found on the request and VAT contains all 0s or 9s.");
         log.debug(LAHandler.getScenarioDescBR(scenarioSubType)
             + " Scenario found on the request and VAT contains all 0s or 9s. Hence sending back to the processor for the review ");
       } else if (engineData.getNegativeCheckStatus("StateFiscalCode") != null) {
@@ -76,7 +75,7 @@ public class ScenarioCheckElement extends ValidatingElement {
         validation.setMessage("Fiscal Code empty");
         output.setDetails("Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
         output.setOnError(true);
-        engineData.addRejectionComment("Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
+        engineData.addRejectionComment("State fiscal code is empty.Enter valid fiscal code value.");
         log.debug("Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
       } else if (scenarioSubType == null || "".equals(scenarioSubType)) {
         validation.setSuccess(true);

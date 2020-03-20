@@ -578,10 +578,11 @@ var defaultLandCntry = null;
 function afterConfigChange() {
   // add special INAC value validator
   // if INAC Type = I, the code should be a number
+  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   if (_inacHandler == null) {
     _inacHandler = dojo.connect(FormManager.getField('inacType'), 'onChange', function(value) {
       var value = FormManager.getActualValue('inacType');
-      if ((value && dojo.string.trim(value) == 'I')) {
+      if (cmrCntry != '616' && (value && dojo.string.trim(value) == 'I')) {
         FormManager.addValidator('inacCd', Validators.NUMBER, [ 'INAC Code' ], 'MAIN_IBM_TAB');
       } else {
         FormManager.removeValidator('inacCd', Validators.NUMBER);
@@ -593,12 +594,12 @@ function afterConfigChange() {
   }
 
   // ensure CMR No value on the main tab
-  if (_pagemodel.reqType == 'U' && FormManager.getActualValue('cmrNo') != '') {
+  if ((_pagemodel.reqType == 'U' || _pagemodel.reqType == 'X') && FormManager.getActualValue('cmrNo') != '') {
     FormManager.setValue('enterCMRNo', FormManager.getActualValue('cmrNo'));
   }
 
   // CMR No is always read only for update types
-  if (_pagemodel.reqType == 'U' && FormManager.getActualValue('cmrNo') != '') {
+  if ((_pagemodel.reqType == 'U' || _pagemodel.reqType == 'X') && FormManager.getActualValue('cmrNo') != '') {
     FormManager.readOnly('cmrNo');
   }
 
@@ -776,11 +777,11 @@ function ensureCMRNoValue() {
   if (dojo.byId("reqId").value != '0') {
     FormManager.readOnly('reqType');
   }
-  if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('enterCMRNo') == '') {
-    if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('cmrNo') != '') {
+  if ((FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') && FormManager.getActualValue('enterCMRNo') == '') {
+    if ((FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') && FormManager.getActualValue('cmrNo') != '') {
       FormManager.setValue('enterCMRNo', FormManager.getActualValue('cmrNo'));
     }
-    if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('cmrNo') != '') {
+    if ((FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') && FormManager.getActualValue('cmrNo') != '') {
       FormManager.readOnly('cmrNo');
     }
     window.setTimeout('ensureCMRNoValue()', 1000);
@@ -816,7 +817,7 @@ function openWorkflowHistory(requestId) {
  */
 function showSummaryScreen(requestId, requestType) {
   var type = FormManager.getActualValue('reqType');
-  if ('C' == type || 'U' == type) {
+  if ('C' == type || 'U' == type || 'X' == type) {
     WindowMgr.open('SUMMARY', requestId, 'summary?reqId=' + requestId + '&reqType=' + type);
   } else {
     cmr.showAlert('Request Type has not been specified yet.');
@@ -996,13 +997,13 @@ function showChangeLog(requestId) {
 }
 
 function checkDUNSWithDnB() {
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var dunsNo = FormManager.getActualValue('dunsNo');
   if (dunsNo == '') {
     cmr.showAlert('DUNS No. on the request must be specified to perform the check.');
     return;
   }
-  cmr.showProgress('Checking D&B record with DUNS No. ' + dunsNo);
-  window.setTimeout('doCheckDUNSWithDnB()', 500);
+  WindowMgr.open('COMPDET', 'DNB' + dunsNo, 'company_details?viewOnly=Y&issuingCountry=' + issuingCntry + '&dunsNo=' + dunsNo, null, 550);
 }
 
 function doCheckDUNSWithDnB() {
@@ -1142,11 +1143,10 @@ function dnbAutoChk() {
   var matchIndc = FormManager.getActualValue('matchIndc');
   var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
   var findDnbResult = FormManager.getActualValue('findDnbResult');
-
-  if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Accepted') {
+  var userRole = FormManager.getActualValue('userRole');
+  if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Rejected' && findDnbResult != 'Accepted' && userRole != 'Viewer') {
     cmr.showModal('DnbAutoCheckModal');
   }
-
 }
 
 /**
@@ -1170,6 +1170,7 @@ function overrideDnBMatch() {
  */
 function doOverrideDnBMatch() {
   FormManager.setValue('matchOverrideIndc', 'Y');
+  FormManager.setValue('findDnbResult', 'Rejected');
   FormManager.doAction('frmCMR', 'OVERRIDE_DNB', true);
 }
 

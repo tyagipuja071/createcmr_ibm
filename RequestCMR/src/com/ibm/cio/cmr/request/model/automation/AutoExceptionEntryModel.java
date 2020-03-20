@@ -22,6 +22,7 @@ public class AutoExceptionEntryModel {
   private String importDnbInfoIndc;
   private String checkVatIndc;
   private String skipChecksIndc;
+  private String skipVerificationIndc;
   private List<String> skipAddressChecks;
   private List<AddressKeyModel> dupAddressChecks;
   private String status;
@@ -131,6 +132,14 @@ public class AutoExceptionEntryModel {
 
   public void setRegion(String region) {
     this.region = region;
+  }
+
+  public String getSkipVerificationIndc() {
+    return skipVerificationIndc;
+  }
+
+  public void setSkipVerificationIndc(String skipVerificationIndc) {
+    this.skipVerificationIndc = skipVerificationIndc;
   }
 
 }

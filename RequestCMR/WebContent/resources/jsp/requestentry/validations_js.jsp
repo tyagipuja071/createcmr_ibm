@@ -28,6 +28,9 @@
 <cmr:view forGEO="EMEA">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
+<cmr:view forCountry="758">
+  <script src="${resourcesPath}/js/requestentry/validators/sr_import.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
 
 <cmr:view forGEO="CND">
   <script src="${resourcesPath}/js/requestentry/validators/cnd_validations.js?${cmrv}" type="text/javascript"></script>

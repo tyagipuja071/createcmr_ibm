@@ -92,6 +92,7 @@
   </cmr:row>
 
   <cmr:row addBackground="false">
+  	<!-- 
     <cmr:column span="2" containerForField="EmbargoCode">
       <p>
         <cmr:label fieldId="embargoCd">
@@ -100,6 +101,24 @@
         </cmr:label>
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
+    </cmr:column>
+     -->
+    <cmr:column span="2" containerForField="OrdBlk" forCountry="618">
+      <p>
+        <cmr:label fieldId="ordBlk">
+          <cmr:fieldLabel fieldId="OrdBlk" />:
+            <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
+        </cmr:label>
+        <cmr:field path="ordBlk" id="ordBlk" fieldId="OrdBlk" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+    <cmr:column span="2" containerForField="CustClass" forCountry="618">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
+        </p>
     </cmr:column>
     <cmr:column span="2" containerForField="Phone1" exceptForCountry="618">
       <p>

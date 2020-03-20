@@ -50,7 +50,7 @@ public class TurkeyTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZD01" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZD01", "ZI01" };
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
@@ -449,8 +449,19 @@ public class TurkeyTransformer extends EMEATransformer {
       return "Install";
     case "ZD01":
       return "Ship";
+    case "ZI01":
+      return "EPL";
     default:
       return "";
+
+      // case "ZP01":
+      // return "Mail";
+      // case "ZS01":
+      // return "Install";
+      // case "ZD01":
+      // return "Ship";
+      // default:
+      // return "";
     }
   }
 
@@ -463,8 +474,19 @@ public class TurkeyTransformer extends EMEATransformer {
       return "Installing";
     case "ZD01":
       return "Shipping";
+    case "ZI01":
+      return "EPL";
     default:
       return "";
+
+      // case "ZP01":
+      // return "Mailing";
+      // case "ZS01":
+      // return "Installing";
+      // case "ZD01":
+      // return "Shipping";
+      // default:
+      // return "";
     }
   }
 
@@ -492,13 +514,27 @@ public class TurkeyTransformer extends EMEATransformer {
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
     case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING + MQMsgConstants.SOF_ADDRESS_USE_SHIPPING + MQMsgConstants.SOF_ADDRESS_USE_EPL;
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+
+      // switch (addr.getId().getAddrType()) {
+      // case MQMsgConstants.ADDR_ZP01:
+      // return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+      // case MQMsgConstants.ADDR_ZS01:
+      // return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+      // case MQMsgConstants.ADDR_ZD01:
+      // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+      // case MQMsgConstants.ADDR_ZI01:
+      // return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+      // default:
+      // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
   }
 
@@ -521,9 +557,9 @@ public class TurkeyTransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
-    if ("N".equals(currAddr.getImportInd()) && MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
-      // preferred sequence no for additional shipping
-      // Mukesh:Story 1698123
+    if ("N".equals(currAddr.getImportInd()) && MQMsgConstants.ADDR_ZP01.equals(currAddr.getId().getAddrType())) {
+      // preferred sequence no for additional mailing
+
       legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
 
     }
@@ -613,16 +649,19 @@ public class TurkeyTransformer extends EMEATransformer {
   @Override
   public void generateCMRNoByLegacy(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, CMRRequestContainer cmrObjects) {
     Data data = cmrObjects.getData();
-    String isicCd = data.getIsicCd();
-    String sbo = data.getSalesBusOffCd();
+    String custSubGrp = data.getCustSubGrp();
+    System.out.println("_custSubGrp = " + custSubGrp);
+
     LOG.debug("Set max and min range of cmrNo..");
-    if ((sbo != null && "1080810".equals(sbo)) && (isicCd != null && "0000".equals(isicCd))) {
-      generateCMRNoObj.setMin(997000);
-      generateCMRNoObj.setMax(997999);
-    }
-    if ((sbo != null && "0020200".equals(sbo)) && (isicCd != null && "0000".equals(isicCd))) {
+    // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
+    if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
       generateCMRNoObj.setMin(990000);
-      generateCMRNoObj.setMax(996999);
+      generateCMRNoObj.setMax(998899);
+      LOG.debug("that is TR INTER CMR");
+    } else {
+      generateCMRNoObj.setMin(300000);
+      generateCMRNoObj.setMax(999999);
+      LOG.debug("that is TR No INTER CMR");
     }
   }
 
@@ -913,6 +952,21 @@ public class TurkeyTransformer extends EMEATransformer {
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 
+      // CMR-2093:Turkey - Requirement for CoF (Comercial Financed) field
+      String cof = data.getCommercialFinanced();
+      if (!StringUtils.isBlank(cof)) {
+        if ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) {
+          legacyCust.setModeOfPayment(cof);
+        }
+      } else {
+        legacyCust.setModeOfPayment("");
+      }
+
+      String ecoCode = data.getEconomicCd();
+      if (!StringUtils.isBlank(ecoCode)) {
+        legacyCust.setEconomicCd(ecoCode);
+      }
+
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
         if (!StringUtils.isBlank(rdcEmbargoCd) && "E".equals(rdcEmbargoCd)) {
@@ -965,8 +1019,7 @@ public class TurkeyTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
       legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
     }
-    // legacyCust.setDistrictCd(data.getCollectionCd() != null ?
-    // data.getCollectionCd() : "");
+    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
 
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
@@ -984,9 +1037,21 @@ public class TurkeyTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
-
-    if (!StringUtils.isBlank(muData.getModeOfPayment())) {
-      cust.setModeOfPayment(muData.getModeOfPayment());
+    // CMR-1728/CMR-2093, For Turkey, we use RestrictTo to store CoF in muData
+    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+      if ("@".equals(muData.getRestrictTo())) {
+        cust.setModeOfPayment("");
+      } else {
+        cust.setModeOfPayment(muData.getRestrictTo());
+      }
+    }
+    // CMR-1728 For Turkey, we use CsoSite to store EconomicCode in muData
+    if (!StringUtils.isBlank(muData.getCsoSite())) {
+      if ("@".equals(muData.getCsoSite())) {
+        cust.setEconomicCd("");
+      } else {
+        cust.setEconomicCd(muData.getCsoSite());
+      }
     }
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")

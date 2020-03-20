@@ -13,14 +13,11 @@ import org.springframework.stereotype.Component;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.entity.SalesBranchOff;
 import com.ibm.cio.cmr.request.entity.SalesBranchOffPK;
-import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.KeyContainer;
 import com.ibm.cio.cmr.request.model.code.SalesBoModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
-import com.ibm.cio.cmr.request.user.AppUser;
-import com.ibm.cio.cmr.request.util.SystemUtil;
 
 /**
  * 
@@ -40,35 +37,7 @@ public class SalesBoService extends BaseService<SalesBoModel, SalesBranchOff> {
       if (StringUtils.isBlank(model.getAction())) {
         throw new Exception("No action defined");
       }
-      AppUser user = AppUser.getUser(request);
-      SalesBranchOff sbo = new SalesBranchOff();
-      SalesBranchOffPK sboPK = new SalesBranchOffPK();
-      sboPK.setIssuingCntry(model.getIssuingCntry());
-      sboPK.setRepTeamCd(model.getRepTeamCd());
-      sboPK.setSalesBoCd(model.getSalesBoCd());
-      sbo.setClientTier(model.getClientTier());
-      sbo.setMrcCd(StringUtils.isNotBlank(model.getMrcCd()) ? model.getMrcCd() : "");
-      sbo.setIsuCd(model.getIsuCd());
-      sbo.setSalesBoDesc(StringUtils.isNotBlank(model.getSalesBoDesc()) ? model.getSalesBoDesc() : "");
-      sbo.setId(sboPK);
-      switch (model.getAction()) {
-      case BaseModel.ACT_INSERT:
-        sbo.setCreateById(user.getIntranetId());
-        sbo.setCreateTs(SystemUtil.getCurrentTimestamp());
-        entityManager.persist(sbo);
-        break;
-      case BaseModel.ACT_DELETE:
-        sbo = entityManager.find(SalesBranchOff.class, sboPK);
-        if (sbo != null) {
-          entityManager.remove(sbo);
-        }
-        break;
-      case BaseModel.ACT_UPDATE:
-        sbo.setUpdateById(user.getIntranetId());
-        sbo.setUpdateTs(SystemUtil.getCurrentTimestamp());
-        entityManager.merge(sbo);
-        break;
-      case "REMOVE_MAPPINGS":
+      if ("REMOVE_MAPPINGS".equals(model.getAction())) {
         List<KeyContainer> keys = extractKeys(model);
         SalesBranchOff selectedSbo = null;
         String issuingCntry = null;

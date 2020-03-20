@@ -73,7 +73,7 @@ public class UpdateSwitchElement extends ValidatingElement {
           validation.setMessage("Review needed.");
           output.setDetails("IBM/Legacy codes values changed. Hence sending back to the processor for review.");
           output.setOnError(true);
-          engineData.addRejectionComment("IBM/Legacy codes values changed. Hence sending back to the processor for review.");
+          engineData.addRejectionComment("IBM/Legacy codes values changed.");
           log.debug("IBM/Legacy codes values changed. Hence sending back to the processor for review.");
         } else if (updatedAddrList != null && updatedAddrList.size() > 0) {
           ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
@@ -93,8 +93,7 @@ public class UpdateSwitchElement extends ValidatingElement {
             output.setDetails("Name/address changes made on non-critical addresses only. No processor review is needed.");
             log.debug("Name/address changes made on non-critical addresses only. No processor review is needed.");
           } else if (!"Y".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
-            engineData.addNegativeCheckStatus("UPDATE_CHECK_FAIL",
-                "Name/address changes made on critical addresses. Hence sending back to the processor for review.");
+            engineData.addNegativeCheckStatus("UPDATE_CHECK_FAIL", "Name/address changes made on critical addresses.");
             output.setDetails("Name/address changes made on critical addresses. Hence sending back to the processor for review.");
             log.debug("Name/address changes made on critical addresses. Hence sending back to the processor for review.");
           } else {
@@ -125,7 +124,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
   @Override
   public String getProcessDesc() {
-    return "Global Update Switch";
+    return "Global - Update Switch";
   }
 
   public List<UpdatedDataModel> getUpdateCustomerDataList(EntityManager entityManager, long reqId) throws CmrException {

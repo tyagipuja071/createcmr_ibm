@@ -110,8 +110,14 @@ public abstract class GCGTransformer extends APTransformer {
       line2 = addrData.getCustNm2();
     }
 
-    String line3 = addrData.getAddrTxt();
-    String line4 = addrData.getAddrTxt2();
+    String line3 = "";
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line3 = addrData.getAddrTxt();
+    }
+    String line4 = "";
+    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 = addrData.getAddrTxt2();
+    }
 
     handler.messageHash.put("AddrLine1", line1);
     handler.messageHash.put("AddrLine2", line2);

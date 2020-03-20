@@ -96,7 +96,7 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
   
   
 
-  var _TYPES = [ 'C', 'U', 'M', 'N', 'R', 'D', 'E' ];
+  var _TYPES = [ 'C', 'U', 'M', 'N', 'R', 'D', 'E', 'X' ];
   var SuppCountryService = (function() {
     return {
       saveSuppCntry : function(typeflag) {
@@ -317,6 +317,15 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
                 Update by Enterprise 
               </div>
               <input type="checkbox" id="check_E0" name="reqtype" value="0" <%=suppModel.getSuppReqType()!=null && suppModel.getSuppReqType().contains("E0") ? "checked" : ""%>> 
+              <cmr:note text="manual only" />
+              <br>
+            </span>
+            <span class="reqtype" >
+              <div class="cont">
+                <input type="checkbox" id="check_X" name="reqtype" value="X" <%=suppModel.getSuppReqType()!=null && suppModel.getSuppReqType().contains("X") ? "checked" : ""%>> 
+                Single Reactivate 
+              </div>
+              <input type="checkbox" id="check_X0" name="reqtype" value="0" <%=suppModel.getSuppReqType()!=null && suppModel.getSuppReqType().contains("X0") ? "checked" : ""%>> 
               <cmr:note text="manual only" />
               <br>
             </span>

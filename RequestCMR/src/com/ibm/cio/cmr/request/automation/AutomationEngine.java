@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
@@ -83,8 +84,7 @@ public class AutomationEngine {
   }
 
   @SuppressWarnings("unchecked")
-  private AutomationElement<?> initializeElement(String processCode, String reqTypes, String actionOnError, boolean overrideData,
-      boolean stopOnError) {
+  private AutomationElement<?> initializeElement(String processCode, String reqTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     Class<?> elementClass = AutomationElementRegistry.getInstance().get(processCode);
     if (elementClass != null) {
       try {
@@ -154,8 +154,11 @@ public class AutomationEngine {
       // determine if element is to be skipped
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
       boolean skipElement = (skipChecks || engineData.get().isSkipChecks())
-          && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType())
-              || (ProcessType.Matching.equals(element.getProcessType()) && !(element instanceof DuplicateCheckElement)));
+          && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType()) || (ProcessType.Matching
+              .equals(element.getProcessType()) && !(element instanceof DuplicateCheckElement)));
+
+      boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
+      skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
@@ -165,7 +168,9 @@ public class AutomationEngine {
         AutomationResult<?> result = null;
 
         if (skipElement) {
-          result = element.createSkippedResult(reqId);
+          result = element.createSkippedResult(reqId, "Checks skipped because of scenario exceptions and/or previous element results.");
+        } else if (skipVerification) {
+          result = element.createSkippedResult(reqId, "Company verification skipped for this request scenario.");
         } else {
           try {
             ChangeLogListener.setManager(entityManager);
@@ -237,10 +242,23 @@ public class AutomationEngine {
 
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
+    String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
 
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
     }
+
+    // check company verified info
+    if (compInfoSrc != null && StringUtils.isNotBlank(compInfoSrc)) {
+      admin.setCompVerifiedIndc("Y");
+      admin.setCompInfoSrc(compInfoSrc);
+    }
+    // check scenario verified info
+    if (scenarioVerifiedIndc != null && StringUtils.isNotBlank(scenarioVerifiedIndc)) {
+      admin.setScenarioVerifiedIndc(scenarioVerifiedIndc);
+    }
+
     if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
       if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
         // change status to retry
@@ -300,8 +318,7 @@ public class AutomationEngine {
           String cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
           createComment(entityManager, cmt, reqId, appUser);
           admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
-          createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,
-              false);
+          createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null, false);
         }
       }
       if (moveToNextStep) {

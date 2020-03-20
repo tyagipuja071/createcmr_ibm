@@ -358,4 +358,7 @@ public class MessageUtil {
   public static final int VERIFY_SCENARIO_SUCCESS = 9050;
   public static final int OVERRIDE_DNB_SUCCESS = 9051;
 
+  // Single Reactivate query Error
+  public static final int SINGLE_REACT_ERROR_QUERY = 551;
+
 }

@@ -15,13 +15,20 @@ var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 function doCMRSearch() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqId = FormManager.getActualValue('reqId');
-  var url = cmr.CONTEXT_ROOT + '/connect?system=cmr&cntry=' + cntry + '&reqId=' + reqId;
-  var specs = 'location=no,menubar=no,resizable=no,scrollbars=yes,status=no,toolbar=no,height=' + screen.height + 'px,width=' + screen.width + 'px';
-  _findCMRWin = window.open(url, 'win_findCMR', specs, true);
-  _findCMROK = false;
-  _findMode = 'cmr';
-  window.setTimeout('waitForResult()', 1000);
-  cmr.showProgress('Waiting for Find CMR Search results..');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if ("X" == reqType) {
+    console.log("Calling Single Reactivation");
+    singleReactCMRSearch(cntry, reqId);
+  } else {
+    var url = cmr.CONTEXT_ROOT + '/connect?system=cmr&cntry=' + cntry + '&reqId=' + reqId;
+    var specs = 'location=no,menubar=no,resizable=no,scrollbars=yes,status=no,toolbar=no,height=' + screen.height + 'px,width=' + screen.width + 'px';
+    _findCMRWin = window.open(url, 'win_findCMR', specs, true);
+    _findCMROK = false;
+    _findMode = 'cmr';
+    window.setTimeout('waitForResult()', 1000);
+    cmr.showProgress('Waiting for Find CMR Search results..');
+  }
 }
 
 /**

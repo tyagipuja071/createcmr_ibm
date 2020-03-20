@@ -294,7 +294,9 @@
                  <caption>
                    <em> Record Details
                      <div class="det-btn">
+                       <%if (!viewOnly){ %>
                        <input type="button" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(false)">
+                       <%} %>
                      </div>
                    </em>
                  </caption>
@@ -421,7 +423,9 @@
                   <tr>
                     <td colspan="4">
                      <div class="det-btn">
+                       <%if (!viewOnly){ %>
                        <input type="button" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(false)">
+                       <%} %>
                      </div>
                     </td>
                   </tr>

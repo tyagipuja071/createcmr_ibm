@@ -155,6 +155,9 @@ public class LegacyDirectService extends TransConnService {
         case CmrConstants.REQ_TYPE_REACTIVATE:
           processReactivate(entityManager, admin);
           break;
+        case CmrConstants.REQ_TYPE_SINGLE_REACTIVATE:
+          processSingleReactivate(entityManager, admin);
+          break;
         // case CmrConstants.REQ_TYPE_MASS_UPDATE:
         // processMassUpdate(entityManager, admin);
         // break;
@@ -175,8 +178,7 @@ public class LegacyDirectService extends TransConnService {
 
     initClient();
 
-    // now send to RDc
-    // Retrieve the PCP records and create in the Legacy DB
+    // now send to RDc Retrieve the PCP records and create in the Legacy DB
     LOG.info("Retrieving pending RDc records for processing..");
     pending = getPendingRecordsRDC(entityManager);
 
@@ -211,6 +213,9 @@ public class LegacyDirectService extends TransConnService {
           break;
         case CmrConstants.REQ_TYPE_DELETE:
           processMassReactDelChanges(entityManager, admin, data);
+          break;
+        case CmrConstants.REQ_TYPE_SINGLE_REACTIVATE:
+          processSingleReactivateRequest(entityManager, request, admin, data);
           break;
         // case CmrConstants.REQ_TYPE_MASS_UPDATE:
         // processMassUpdateRequest(entityManager, request, admin, data);
@@ -362,8 +367,7 @@ public class LegacyDirectService extends TransConnService {
       skipLegacyProcessingforCreateUpdate(entityManager, admin);
 
     } else {
-      // Story 1597678: Support temporary reactivation requests due to Embargo
-      // Code handling
+      // Story 1597678: Support temporary reactivation requests due to Embargo Code handling
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
       CMRRequestContainer tcmrObjects = prepareRequest(entityManager, admin);
       String dataEmbargoCd = tcmrObjects.getData().getEmbargoCd();
@@ -734,7 +738,28 @@ public class LegacyDirectService extends TransConnService {
     } else {
       completeReactDelRecord(entityManager, admin);
     }
+  }
+  
+  private void processSingleReactivate(EntityManager entityManager, Admin admin) throws Exception {
+    
+    LOG.debug("Started Single Reactivate processing of Request " + admin.getId().getReqId());
+    
+    processUpdate(entityManager, admin);
+    
+    // lock
+    lockRecord(entityManager, admin);
 
+    // get CreateCMR data
+    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+
+    if (admin.getRdcProcessingStatus() != null
+        && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin
+            .getRdcProcessingStatus())) && !StringUtils.isEmpty(cmrObjects.getData().getCmrNo())) {
+      skipLegacyProcessingforCreateUpdate(entityManager, admin);
+    } else {
+      // prepare legacy data, map to the values needed
+      LegacyDirectObjectContainer legacyObjects = mapRequestDataForCreate(entityManager, cmrObjects);
+    }
   }
 
   /**
@@ -1703,9 +1728,9 @@ public class LegacyDirectService extends TransConnService {
    * @throws SQLException
    */
   private void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
-    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())) {
-      admin.setDisableAutoProc("Y");// disable auto processing if error on
-                                    // processing
+    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())
+        || CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(admin.getReqType())) {
+      admin.setDisableAutoProc("Y");// disable auto processing if error on processing
     }
     // processing pending
     LOG.info("Processing error for Request ID " + admin.getId().getReqId() + ": " + errorMsg);
@@ -1718,8 +1743,7 @@ public class LegacyDirectService extends TransConnService {
     admin.setLastUpdtBy(BATCH_USER_ID);
     updateEntity(admin, entityManager);
 
-    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error", admin.getId()
-        .getReqId());
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error", admin.getId().getReqId());
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
@@ -3141,8 +3165,7 @@ public class LegacyDirectService extends TransConnService {
         break;
       }
 
-      // create comment log and workflow history entries for update type of
-      // request
+      // create comment log and workflow history entries for update type of request
       StringBuilder comment = new StringBuilder();
       if (isCompletedSuccessfully(resultCode)) {
         comment = comment.append(requestType + " in RDc successfully completed.");
@@ -3150,7 +3173,7 @@ public class LegacyDirectService extends TransConnService {
         if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
           comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
         } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
-          comment = comment.append(requestType + " in RDc aborted: " + response.getMessage() + "\nSystem will retry once.");
+          comment = comment.append(requestType + " in RDc aborted: " + response.getMessage() + "\n System will retry once.");
         } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
           comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
         } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
@@ -3193,7 +3216,174 @@ public class LegacyDirectService extends TransConnService {
       LOG.error("Error in processing Mass Request  " + admin.getId().getReqId(), e);
       addError("Mass Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
     }
+  }
+  
+  private void processSingleReactivateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
+    // Create the request
+    long reqId = admin.getId().getReqId();
+    long iterationId = admin.getIterationId();
+    String processingStatus = admin.getRdcProcessingStatus();
 
+    MassUpdateServiceInput input = prepareMassChangeInput(entityManager, admin);
+
+    MassProcessRequest singleRequest = new MassProcessRequest();
+    
+    if (input.getInputReqType() != null && (input.getInputReqType().equalsIgnoreCase("X"))) {
+      processUpdateRequest(entityManager, request, admin, data);
+    }
+
+    // set the update mass record in request
+    if (input.getInputReqType() != null && (input.getInputReqType().equalsIgnoreCase("X"))) {
+      singleRequest = prepareReactDelReq(entityManager, admin, data, input);
+    }
+
+    // call the Mass service
+    LOG.info("Sending request to Mass Service [Request ID: " + request.getReqId() + "  Type: " + request.getReqType() + "]");
+
+    LOG.trace("Request JSON:");
+    if (LOG.isTraceEnabled()) {
+      DebugUtil.printObjectAsJson(LOG, request);
+    }
+    // actual service call here
+    ProcessResponse response = null;
+    String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+    if (applicationId == null) {
+      LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
+      response = new ProcessResponse();
+      response.setReqId(request.getReqId());
+      response.setMandt(request.getMandt());
+      response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+      response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
+    } else {
+      try {
+        this.serviceClient.setReadTimeout(60 * 15 * 1000); // 15 mins
+        response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+      } catch (Exception e) {
+        LOG.error("Error when connecting to the service.", e);
+        response = new ProcessResponse();
+        response.setReqId(request.getReqId());
+        response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+        response.setMessage("A system error has occured. Setting to aborted.");
+      }
+    }
+
+    LOG.trace("Response JSON:");
+    if (LOG.isTraceEnabled()) {
+      DebugUtil.printObjectAsJson(LOG, response);
+    }
+    LOG.info("Response received from Process Service [Request ID: " + response.getReqId() + " Status: " + response.getStatus() + " Message: "
+        + (response.getMessage() != null ? response.getMessage() : "-") + "]");
+
+    if (response.getReqId() <= 0) {
+      response.setReqId(request.getReqId());
+    }
+
+    // try this get the results from the service and process jason response
+    try {
+      // update MASS_UPDT table with the error txt and row status cd
+      for (RDcRecord record : response.getRecords()) {
+        PreparedQuery updtQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_MASS_UPDT_ENTITY"));
+        updtQuery.setParameter("REQ_ID", reqId);
+        updtQuery.setParameter("ITERATION_ID", iterationId);
+        updtQuery.setParameter("CMR_NO", record.getCmrNo());
+        List<MassUpdt> updateList = updtQuery.getResults(MassUpdt.class);
+
+        for (MassUpdt massUpdt : updateList) {
+          LegacyDirectObjectContainer legacyObjects = LegacyDirectUtil.getLegacyDBValues(entityManager, data.getCmrIssuingCntry(),
+              massUpdt.getCmrNo(), false, false);
+          CmrtCust cust = legacyObjects.getCustomer();
+
+          massUpdt.setErrorTxt(record.getMessage());
+          if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(record.getStatus())) {
+            massUpdt.setRowStatusCd("RDCER");
+          } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(record.getStatus())) {
+            massUpdt.setRowStatusCd("DONE");
+            if (cust != null) {
+              LOG.info(" - completed Single Reactivate SOF Country: " + cust.getId().getSofCntryCode() + " CMR No.: " + massUpdt.getCmrNo());
+              LOG.debug("completed Setting Status=A or C based on CMR.." + massUpdt.getCmrNo());
+              if ("X".equals(admin.getReqType()))
+                cust.setStatus(LEGACY_STATUS_ACTIVE);
+              cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+            }
+          } else if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(record.getStatus())) {
+            if (cust != null) {
+              LOG.info(" - Warning Single Reactivate SOF Country: " + cust.getId().getSofCntryCode() + " CMR No.: " + massUpdt.getCmrNo());
+              LOG.debug("Warning Setting Status=A or C based on CMR.." + massUpdt.getCmrNo());
+              if ("X".equals(admin.getReqType()))
+                cust.setStatus(LEGACY_STATUS_ACTIVE);
+              cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+            }
+          }
+          LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
+              + massUpdt.getId().getSeqNo() + "]");
+          updateEntity(massUpdt, entityManager);
+        }
+      }
+      String resultCode = response.getStatus();
+
+      String requestType = "";
+      String action = "";
+      switch (admin.getReqType()) {
+      case "X":
+        action = ACTION_RDC_SINGLE_REACTIVATE;
+        requestType = "Single Reactivate";
+        break;
+      case "M":
+        action = ACTION_RDC_MASS_UPDATE;
+        requestType = "Mass Update";
+        break;
+      }
+
+      // create comment log and workflow history entries for update type of request
+      StringBuilder comment = new StringBuilder();
+      if (isCompletedSuccessfully(resultCode)) {
+        comment = comment.append(requestType + " in RDc successfully completed.");
+      } else {
+        if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
+        } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc aborted: " + response.getMessage() + "\n System will retry once.");
+        } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
+        } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc skipped: " + response.getMessage());
+        }
+      }
+
+      RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment.toString().trim());
+
+      // only update Admin record once depending on the overall status of the request
+      LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
+      if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())) {
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+      } else {
+        admin.setRdcProcessingStatus(resultCode);
+      }
+      admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
+      admin.setRdcProcessingMsg(response.getMessage());
+      if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
+        admin.setReqStatus("COM");
+      } else if ("A".equals(admin.getRdcProcessingStatus()) || "N".equals(admin.getRdcProcessingStatus())) {
+        admin.setReqStatus("PPN");
+      }
+
+      updateEntity(admin, entityManager);
+      if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
+        RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            "Some errors occurred during RDc processing. Please check request's comment log for details.", action, null, null,
+            "COM".equals(admin.getReqStatus()));
+      } else {
+        RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment.toString().trim(), action, null, null,
+            "COM".equals(admin.getReqStatus()));
+      }
+      LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+      partialCommit(entityManager);
+
+    } catch (Exception e) {
+      LOG.error("Error in processing Single Reactivate Request  " + admin.getId().getReqId(), e);
+      addError("Single Reactivate Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    }
   }
 
   public MassProcessRequest prepareReactDelReq(EntityManager entityManager, Admin admin, Data data, MassUpdateServiceInput input)
@@ -3235,7 +3425,6 @@ public class LegacyDirectService extends TransConnService {
     }
     // set updtRecordsList in request
     request.setRecords(updtRecordsList);
-
     return request;
 
   }

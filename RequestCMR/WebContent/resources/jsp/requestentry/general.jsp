@@ -18,6 +18,7 @@ AppUser user = AppUser.getUser(request);
 boolean noFindCMR = user.getAuthCode() == null;
 RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
+boolean dnbPrimary = "Y".equals(request.getAttribute("dnbPrimary"));
 Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
 if (readOnly == null){
   readOnly = false;
@@ -259,7 +260,8 @@ if (readOnly){
                 <td width="95px">${reqentry.findCmrDate}</td>
               </tr>
               <tr>
-                <td>D&B Search
+                <td>D&B Search&nbsp;<%if (!readOnly && "C".equals(reqentry.getReqType()) && dnbPrimary && "DRA".equals(reqentry.getReqStatus())){%><span class="ibm-required cmr-required-spacer">*</span>
+                    <%} %>
                   <form:hidden path="findDnbResult"/>
                 </td>
                 <td>

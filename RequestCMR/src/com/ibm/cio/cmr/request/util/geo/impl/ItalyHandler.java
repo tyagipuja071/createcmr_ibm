@@ -272,7 +272,8 @@ public class ItalyHandler extends BaseSOFHandler {
       }
     } else {
       // for updates, just import all CMRs from the current records
-      String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
+      String reqType = reqEntry.getReqType();
+      String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), reqType);
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
         LOG.debug("Importing Installing and Billing for update from CMR No. " + mainRecord.getCmrNum());
@@ -749,7 +750,7 @@ public class ItalyHandler extends BaseSOFHandler {
       address.getId().setAddrSeq(addrSeq);
     }
     // Story 1593951: iERP Site Party ID field should be part of addresses
-    if ("U".equals(admin.getReqType())) {
+    if ("U".equals(admin.getReqType()) || "X".equals(admin.getReqType())) {
       address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
     } else if ("C".equals(admin.getReqType()) && !StringUtils.isEmpty(currentRecord.getParentCMRNo())) {
       address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
@@ -859,7 +860,7 @@ public class ItalyHandler extends BaseSOFHandler {
     data.setIdentClient(identClient);
     data.setSpecialTaxCd(taxCode);
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(admin.getReqType())) {
       data.setModeOfPayment(modePayment);
     } else {
       data.setModeOfPayment("");
@@ -971,11 +972,15 @@ public class ItalyHandler extends BaseSOFHandler {
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCustPrefLang("I");
-    if (data.getCustSubGrp() != null && ("BUSPR".equals(data.getCustSubGrp()) || "BUSSM".equals(data.getCustSubGrp())
-        || "BUSVA".equals(data.getCustSubGrp()) || "CROBP".equals(data.getCustSubGrp()))) {
+    if (data.getCustSubGrp() != null
+        && ("BUSPR".equals(data.getCustSubGrp()) || "BUSSM".equals(data.getCustSubGrp()) || "BUSVA".equals(data.getCustSubGrp()) || "CROBP"
+            .equals(data.getCustSubGrp()))) {
       data.setMrcCd("5");
-    } else if (data.getCustSubGrp() != null && data.getIsuCd() != null && "34".equals(data.getIsuCd()) && ("COMME".equals(data.getCustSubGrp())
-        || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM".equals(data.getCustSubGrp()))) {
+    } else if (data.getCustSubGrp() != null
+        && data.getIsuCd() != null
+        && "34".equals(data.getIsuCd())
+        && ("COMME".equals(data.getCustSubGrp()) || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM"
+            .equals(data.getCustSubGrp()))) {
       data.setMrcCd("M");
     } else {
       data.setMrcCd("2");
@@ -1022,8 +1027,11 @@ public class ItalyHandler extends BaseSOFHandler {
     setEngineeringBo(entityManager, data);
     // Story 1596166: MRC M for Commercial scenario & ISU=34
     if ("C".equals(admin.getReqType())) {
-      if (data.getCustSubGrp() != null && data.getIsuCd() != null && "34".equals(data.getIsuCd()) && ("COMME".equals(data.getCustSubGrp())
-          || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM".equals(data.getCustSubGrp()))) {
+      if (data.getCustSubGrp() != null
+          && data.getIsuCd() != null
+          && "34".equals(data.getIsuCd())
+          && ("COMME".equals(data.getCustSubGrp()) || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM"
+              .equals(data.getCustSubGrp()))) {
         data.setMrcCd("M");
       }
     }
@@ -1204,7 +1212,7 @@ public class ItalyHandler extends BaseSOFHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
-    if ("U".equals(admin.getReqType())) {
+    if ("U".equals(admin.getReqType()) || "X".equals(admin.getReqType())) {
       String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", admin.getId().getReqId());
@@ -1791,8 +1799,8 @@ public class ItalyHandler extends BaseSOFHandler {
 
         TemplateValidation error = new TemplateValidation(name);
 
-        if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA)
-            || !StringUtils.isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
+        if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA) || !StringUtils
+            .isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
           LOG.trace("Company level fields and Billing level fields can not be filled at the same time");
           error.addError(rowIndex, "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
               "Company level fields and Billing level fields can not be filled at the same time");

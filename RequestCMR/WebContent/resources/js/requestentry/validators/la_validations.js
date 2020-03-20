@@ -2424,6 +2424,15 @@ function setLocationNumberForBR(cntry, addressMode, saving, finalSave, force) {
   }
 }
 
+function setLocNoLockedForRequesterBR() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('locationNumber');
+  } else if (role == 'PROCESSOR') {
+    FormManager.enable('locationNumber');
+  }
+}
+
 /* Register LA Validators */
 dojo.addOnLoad(function() {
   GEOHandler.LA = [ SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.BRAZIL, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR, SysLoc.GUATEMALA, SysLoc.HONDURAS,
@@ -2497,5 +2506,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAfterTemplateLoad(setMrcCdOptionalForRequester, [ SysLoc.BRAZIL ]);
   GEOHandler.addAddrFunction(setLocationNumberForBR, GEOHandler.LA);
+  GEOHandler.addAfterConfig(setLocNoLockedForRequesterBR, [ SysLoc.BRAZIL ]);
 
 });

@@ -47,5 +47,6 @@ public class MacauTransformer extends GCGTransformer {
       handler.messageHash.put("AddrLine5", handler.messageHash.get("AddrLine6"));
       handler.messageHash.put("AddrLine6", "");
     }
+    arrangeAddressLinesData(handler);
   }
 }

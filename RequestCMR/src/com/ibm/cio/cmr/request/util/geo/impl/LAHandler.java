@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -1041,9 +1042,10 @@ public class LAHandler extends GEOHandler {
         } else {
           // other customer types
           // optional for PRIPE 5COMP 5PRIP IBMEM BLUEM
-          if (StringUtils.isEmpty(data.getIbmBankNumber()) && !(CmrConstants.CUST_TYPE_5PRIP.equalsIgnoreCase(custType)
-              || CmrConstants.CUST_TYPE_5COMP.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_IBMEM.equalsIgnoreCase(custType)
-              || CmrConstants.CUST_TYPE_PRIPE.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_BLUEM.equalsIgnoreCase(custType))) {
+          if (StringUtils.isEmpty(data.getIbmBankNumber())
+              && !(CmrConstants.CUST_TYPE_5PRIP.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_5COMP.equalsIgnoreCase(custType)
+                  || CmrConstants.CUST_TYPE_IBMEM.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_PRIPE.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_BLUEM
+                    .equalsIgnoreCase(custType))) {
             data.setIbmBankNumber("34A");
           }
         }
@@ -1182,8 +1184,9 @@ public class LAHandler extends GEOHandler {
           final List<String> LstSSAMX_CreditCode_CL = Arrays.asList(SystemLocation.ARGENTINA, SystemLocation.BOLIVIA_PLURINA, SystemLocation.CHILE,
               SystemLocation.COLOMBIA, SystemLocation.ECUADOR, SystemLocation.MEXICO, SystemLocation.PERU, SystemLocation.URUGUAY,
               SystemLocation.VENEZUELA_BOLIVARIAN);
-          final List<String> LstSSAMX_CreditCode_SA = Arrays.asList(SystemLocation.COSTA_RICA, SystemLocation.DOMINICAN_REP, SystemLocation.GUATEMALA,
-              SystemLocation.HONDURAS, SystemLocation.NICARAGUA, SystemLocation.PANAMA, SystemLocation.PARAGUAY, SystemLocation.EL_SALVADOR);
+          final List<String> LstSSAMX_CreditCode_SA = Arrays.asList(SystemLocation.COSTA_RICA, SystemLocation.DOMINICAN_REP,
+              SystemLocation.GUATEMALA, SystemLocation.HONDURAS, SystemLocation.NICARAGUA, SystemLocation.PANAMA, SystemLocation.PARAGUAY,
+              SystemLocation.EL_SALVADOR);
 
           if (CmrConstants.CUST_TYPE_INTER.equalsIgnoreCase(custType) || "INIBM".equalsIgnoreCase(custType) || "INGBM".equalsIgnoreCase(custType)
               || "INTEQ".equalsIgnoreCase(custType) || "INTUS".equalsIgnoreCase(custType) || "INTOU".equalsIgnoreCase(custType)
@@ -1764,9 +1767,10 @@ public class LAHandler extends GEOHandler {
         } else {
           // other customer types
           // optional for PRIPE 5COMP 5PRIP IBMEM BLUEM
-          if (StringUtils.isEmpty(data.getIbmBankNumber()) && !(CmrConstants.CUST_TYPE_5PRIP.equalsIgnoreCase(custType)
-              || CmrConstants.CUST_TYPE_5COMP.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_IBMEM.equalsIgnoreCase(custType)
-              || CmrConstants.CUST_TYPE_PRIPE.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_BLUEM.equalsIgnoreCase(custType))) {
+          if (StringUtils.isEmpty(data.getIbmBankNumber())
+              && !(CmrConstants.CUST_TYPE_5PRIP.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_5COMP.equalsIgnoreCase(custType)
+                  || CmrConstants.CUST_TYPE_IBMEM.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_PRIPE.equalsIgnoreCase(custType) || CmrConstants.CUST_TYPE_BLUEM
+                    .equalsIgnoreCase(custType))) {
             data.setIbmBankNumber("34A");
           }
         }
@@ -2145,6 +2149,15 @@ public class LAHandler extends GEOHandler {
         addr.setCity2(".");
       }
     }
+
+    if (!StringUtils.isBlank(cmrIssuingCntry) && isBRIssuingCountry(cmrIssuingCntry) && RequestUtils.isRequesterAutomationEnabled(cmrIssuingCntry)) {
+      // set values for Location code (required on backend only)
+      AddressService addrService = new AddressService();
+      if (addr.getId().getAddrType().equals("ZS01")) {
+        addrService.updateDataForBRCreate(entityManager, null, addr);
+      }
+
+    }
   }
 
   @Override
@@ -2476,8 +2489,8 @@ public class LAHandler extends GEOHandler {
                 addrType = CmrConstants.ADDR_TYPE.ZI01.toString();
               }
 
-              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(), Long.toString(data.getId().getReqId()),
-                  addrType);
+              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(),
+                  Long.toString(data.getId().getReqId()), addrType);
               LOG.debug("***END PRINT CROS ADDR INFO***");
             }
           }
@@ -2616,8 +2629,8 @@ public class LAHandler extends GEOHandler {
                 addrType = CmrConstants.ADDR_TYPE.ZI01.toString();
               }
 
-              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(), Long.toString(data.getId().getReqId()),
-                  addrType);
+              addrSvc.updateSSAStateProvLocnCode(entityManager, cAddr.getStateCode(), cAddr.getLocationCode(),
+                  Long.toString(data.getId().getReqId()), addrType);
               LOG.debug("***END PRINT CROS ADDR INFO***");
             }
           }

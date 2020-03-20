@@ -57,7 +57,8 @@ public class DnBUtil {
                                     // Federation)
     registerDnBVATCode("CH", 28865); // Swiss Uniform Identification Number
     registerDnBVATCode("SE", 1861); // SW Business Registration Number
-    registerDnBVATCode("SG", 1386); // Singapore Registration File Number
+    registerOtherDnBCode("SG", "SG_REG_NO", 1386); // Singapore Registration
+                                                   // File Number
     registerDnBVATCode("IL", 1365); // Israel Registration Number
     registerDnBVATCode("JP", 32475); // Corporate Number
     registerDnBVATCode("CN", 22958); // Business Registration Number

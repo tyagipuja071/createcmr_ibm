@@ -92,6 +92,34 @@ function addCMRSearchValidator() {
 }
 
 /**
+ * Validator to check whether D&B search has been performed
+ */
+function addDnBSearchValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('dnbPrimary') != 'Y') {
+          return new ValidationResult(null, true);
+        }
+        var reqType = FormManager.getActualValue('reqType');
+        if (reqType == 'U') {
+          return new ValidationResult(null, true);
+        }
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        if (reqStatus != 'DRA') {
+          return new ValidationResult(null, true);
+        }
+        var result = FormManager.getActualValue('findDnbResult');
+        if (result == '' || result.toUpperCase() == 'NOT DONE') {
+          return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+/**
  * Validator whether DPL check has been performed. Should only be for processors
  */
 function addDPLCheckValidator() {
@@ -602,6 +630,7 @@ dojo.addOnLoad(function() {
       '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '618' ];
 
   GEOHandler.registerWWValidator(addCMRSearchValidator);
+  GEOHandler.registerWWValidator(addDnBSearchValidator);
   // Story 1185886 : Address Standardization is not required for LA countries
   // and Israel
   GEOHandler.skipTGMEForCountries(GEOHandler.NO_ADDR_STD);

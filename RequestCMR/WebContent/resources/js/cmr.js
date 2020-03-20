@@ -785,7 +785,7 @@ function createNewEntry() {
   if (cmr.validateNewEntry()) {
     var type = FormManager.getActualValue('newReqType');
     var cntry = FormManager.getActualValue('newReqCntry');
-    if (type == 'C' || type == 'U') {
+    if (type == 'C' || type == 'U' || type == 'X') {
       goToUrl(cmr.CONTEXT_ROOT + '/request?create=Y&newReqType=' + type + '&newReqCntry=' + cntry);
     } else {
       goToUrl(cmr.CONTEXT_ROOT + '/massrequest?create=Y&newReqType=' + type + '&newReqCntry=' + cntry);
@@ -1106,6 +1106,10 @@ var BrowserCheck = (function() {
 
 function openCISupportal() {
   CISupportal.open();
+}
+
+function openQuickSearchDirect() {
+  window.location = cmr.CONTEXT_ROOT + '/quick_search?issuingCntry=' + FormManager.getActualValue('cmrIssuingCntry');
 }
 
 function openQuickSearch() {

@@ -8,8 +8,8 @@
   
   <!-- Environment variables -->
   <property environment="env"/>
-  <property name="target.file" value="C:/builds/buildscripts/properties/CreateCMRRelease-Build.txt" />
-  <property name="build.file" value="C:/builds/buildscripts/properties/CreateCMRRelease.txt" />
+  <property name="target.file" value="C:/builds/buildscripts/properties/CreateCMR-Build.txt" />
+  <property name="build.file" value="C:/builds/buildscripts/properties/CreateCMR.txt" />
   
   <target name="copybuildno">
   	<property file="src/cmr-config.properties" prefix="cmrconfig"></property>

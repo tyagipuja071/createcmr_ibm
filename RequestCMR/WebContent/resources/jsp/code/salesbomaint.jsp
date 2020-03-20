@@ -15,9 +15,19 @@
 %>
 <script>
   dojo.addOnLoad(function() {
+    cmr.hideNode('add_sales_bo');
     dojo.connect(FormManager.getField('issuingCntry'), 'onChange', function(value) {
       var url = cmr.CONTEXT_ROOT + '/code/salesBoList.json';
       CmrGrid.refresh('sboUrlsGrid', url, 'issuingCntry=:issuingCntry');
+      var result = cmr.query('CHECK_SALES_BRANCH_OFF_RECORDS', {
+        ISSUING_CNTRY : FormManager.getActualValue('issuingCntry')
+      });
+
+      if (result != null && result.ret1 == '1') {
+        cmr.hideNode('add_sales_bo');
+      } else {
+        cmr.showNode('add_sales_bo');
+      }
     });
     FormManager.ready();
     FilteringDropdown.loadItems('issuingCntry', 'cmrIssuingCntry_spinner', 'bds', 'fieldId=CMRIssuingCountry');
@@ -29,22 +39,25 @@
   var SboService = (function() {
     return {
       addSalesBo : function() {
-        window.location = cmr.CONTEXT_ROOT + '/code/salesBoMaint';
+        var country = FormManager.getActualValue('issuingCntry');
+        if (country == null || country == '') {
+          cmr.showAlert("Please choose the issuing country from the dropdown before proceeding to add new records");
+          return;
+        }
+        window.location = cmr.CONTEXT_ROOT + '/code/salesBoMaint?issuingCntry=' + country;
       },
       linkFormatter : function(value, rowIndex) {
-        var id1 = this.grid.getItem(rowIndex).issuingCntry[0];
-        var id2 = this.grid.getItem(rowIndex).repTeamCd[0];
-        var id3 = this.grid.getItem(rowIndex).salesBoCd[0];
+        var id = this.grid.getItem(rowIndex).issuingCntry[0];
 
-        if (id1 == '' && !
+        if (id == '' && !
 <%=admin%>
   ) {
           return value;
         }
-        return '<a href="javascript: SboService.open(\'' + id1 + '\',\'' + id2 + '\',\'' + id3 + '\')">' + value + '</a>';
+        return '<a href="javascript: SboService.open(\'' + id + '\')">' + value + '</a>';
       },
-      open : function(value1, value2, value3) {
-        window.location = cmr.CONTEXT_ROOT + '/code/salesBoMaint?issuingCntry=' + encodeURIComponent(value1) + '&repTeamCd=' + encodeURIComponent(value2) + '&salesBoCd=' + encodeURIComponent(value3);
+      open : function(value) {
+        window.location = cmr.CONTEXT_ROOT + '/code/salesBoMaint?issuingCntry=' + encodeURIComponent(value);
       },
       removeSelectedMappings : function() {
         FormManager.gridHiddenAction('frmCMR', 'REMOVE_MAPPINGS', cmr.CONTEXT_ROOT + '/code/salesBo/process.json', true, refreshAfterMappingsRemove, false, 'Remove selected record(s)?');
@@ -116,12 +129,11 @@
 </cmr:boxContent>
 <cmr:section alwaysShown="true">
 	<cmr:buttonsRow>
-		<cmr:button label="Add Sales BO" onClick="SboService.addSalesBo()"
-			highlight="true" />
+		<cmr:button label="Define Mapping For Country" id="add_sales_bo"
+			onClick="SboService.addSalesBo()" highlight="true" />
 		<cmr:button label="Remove selected records"
-			onClick="SboService.removeSelectedMappings()" highlight="true"
-			pad="true" />
+			onClick="SboService.removeSelectedMappings()" highlight="true" />
 		<cmr:button label="Back to Code Maintenance Home"
-			onClick="backToCodeMaintHome()" pad="true" />
+			onClick="backToCodeMaintHome()" />
 	</cmr:buttonsRow>
 </cmr:section>

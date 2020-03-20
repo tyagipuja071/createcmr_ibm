@@ -205,8 +205,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
           admin.setDelInd(null);
           admin.setModelCmrNo(null);
-          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry()
-              : searchModel.getSearchIssuingCntry();
+          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry() : searchModel
+              .getSearchIssuingCntry();
           String desc = DropdownListController.getDescription("CMRIssuingCntry", sysLoc, sysLoc, false);
           if (StringUtils.isEmpty(desc)) {
             desc = sysLoc;
@@ -232,8 +232,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
             data.setCustSubGrp(CmrConstants.CREATE_BY_MODEL_SUB_GROUP);
           }
 
-          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry()
-              : searchModel.getSearchIssuingCntry();
+          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry() : searchModel
+              .getSearchIssuingCntry();
           String desc = DropdownListController.getDescription("CMRIssuingCntry", sysLoc, sysLoc, false);
           if (StringUtils.isEmpty(desc)) {
             desc = sysLoc;
@@ -244,7 +244,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
                 + searchModel.getQuickSearchData();
           }
           createCommentLog(reqEntryService, entityManager, "CreateCMR", reqIdToUse, comment);
-        } else if ("U".equals(reqModel.getReqType())) {
+        } else if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
 
           // clear the group and sub group first
           admin.setDelInd(null);
@@ -257,8 +257,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
             data.setCustGrp(null);
             data.setCustSubGrp(null);
           }
-          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry()
-              : searchModel.getSearchIssuingCntry();
+          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry() : searchModel
+              .getSearchIssuingCntry();
           String desc = DropdownListController.getDescription("CMRIssuingCntry", sysLoc, sysLoc, false);
           if (StringUtils.isEmpty(desc)) {
             desc = sysLoc;
@@ -570,8 +570,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
    * @throws InvocationTargetException
    * @throws NoSuchMethodException
    */
-  private void savePageData(RequestEntryModel model, Admin admin, Data data)
-      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+  private void savePageData(RequestEntryModel model, Admin admin, Data data) throws IllegalAccessException, InvocationTargetException,
+      NoSuchMethodException {
     PropertyUtils.copyProperties(admin, model);
     PropertyUtils.copyProperties(data, model);
   }
@@ -598,7 +598,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addrPk.setReqId(reqId);
       type = cmr.getCmrAddrTypeCode();
       addrPk.setAddrType(type);
-      if ("U".equals(reqModel.getReqType()) && converter != null && converter.useSeqNoFromImport()) {
+      if (("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) && converter != null && converter.useSeqNoFromImport()) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
       } else {
         if (seqMap.get(type) == null) {
@@ -608,6 +608,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         addrPk.setAddrSeq((seq + 1) + "");
         seqMap.put(type, new Integer(seq + 1));
       }
+      if ("618".equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      }
+
       addr.setId(addrPk);
 
       addr.setCity1(cmr.getCmrCity());
@@ -615,7 +619,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
       addr.setStateProv(cmr.getCmrState());
       addr.setPostCd(cmr.getCmrPostalCode());
       addr.setLandCntry(cmr.getCmrCountryLanded());
-      if ("U".equals(reqModel.getReqType())) {
+      if ("U".equals(reqModel.getReqType()) || "X".equals(reqModel.getReqType())) {
         addr.setSapNo(cmr.getCmrSapNumber());
         addr.setAddrStdResult("X");
         addr.setRdcCreateDt(cmr.getCmrRdcCreateDate());
@@ -771,8 +775,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
    * @throws CmrException
    * @throws SQLException
    */
-  public void createCommentLog(BaseService<?, ?> service, EntityManager entityManager, String user, long reqId, String cmt)
-      throws CmrException, SQLException {
+  public void createCommentLog(BaseService<?, ?> service, EntityManager entityManager, String user, long reqId, String cmt) throws CmrException,
+      SQLException {
     ReqCmtLog reqCmtLog = new ReqCmtLog();
     ReqCmtLogPK reqCmtLogpk = new ReqCmtLogPK();
     reqCmtLogpk.setCmtId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "CMT_ID"));

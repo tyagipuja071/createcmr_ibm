@@ -38,7 +38,9 @@ public class AustraliaTransformer extends ANZTransformer {
     }
 
     String line4 = "";
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+    if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 += "AT " + addrData.getAddrTxt();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt())) {
       line4 += addrData.getAddrTxt();
     }
 
@@ -125,35 +127,57 @@ public class AustraliaTransformer extends ANZTransformer {
     String stateProv = addrData.getStateProv();
     if (!update) {
       if (custType.contains("LOCAL") && stateProv.contains("NSW")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "101");
+        handler.messageHash.put("EngrBrnchOff", "101");
       } else if (custType.contains("LOCAL") && stateProv.contains("SA")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "220");
+        handler.messageHash.put("EngrBrnchOff", "220");
       } else if (custType.contains("LOCAL") && stateProv.contains("ACT")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "102");
+        handler.messageHash.put("EngrBrnchOff", "102");
       } else if (custType.contains("LOCAL") && stateProv.contains("VIC")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "215");
+        handler.messageHash.put("EngrBrnchOff", "215");
       } else if (custType.contains("LOCAL") && stateProv.contains("WA")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "102");
+        handler.messageHash.put("EngrBrnchOff", "240");
       } else if (custType.contains("LOCAL") && stateProv.contains("TAS")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "215F");
+        handler.messageHash.put("EngrBrnchOff", "215");
       } else if (custType.contains("LOCAL") && stateProv.contains("QLD")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "130");
+        handler.messageHash.put("EngrBrnchOff", "130");
       } else if (custType.contains("LOCAL") && stateProv.contains("NT")) {
-        handler.messageHash.put("EngrBrnchOff", stateProv + "125");
+        handler.messageHash.put("EngrBrnchOff", "125");
       } else if (custType.contains("CROSS")) {
         handler.messageHash.put("EngrBrnchOff", "101");
       }
     }
+
+    String inacCd = cmrData.getInacCd();
+    if ("N".equalsIgnoreCase(handler.cmrData.getInacType())) {
+      if (!StringUtils.isBlank(inacCd) && ("new".equalsIgnoreCase(inacCd))) {
+        handler.messageHash.put("NAC", "blank");
+      }
+    } else if ("I".equalsIgnoreCase(handler.cmrData.getInacType())) {
+      if (!StringUtils.isBlank(inacCd) && ("new".equalsIgnoreCase(inacCd))) {
+        handler.messageHash.put("INAC", "blank");
+      }
+    }
+
     String vat = cmrData.getVat();
     String abnNo = "";
     if (!StringUtils.isBlank(vat))
       abnNo = cmrData.getVat().substring(2);
+    String ctryText = "";
 
-    String ctryText = coGrp + sitCode + collBroff + stmtInd + dpmSrceCode + spaceBeforeABN + abnNo;
+    if (!StringUtils.isBlank(cmrData.getTaxCd2())
+        && ("012".equals(cmrData.getTaxCd2()) || "013".equals(cmrData.getTaxCd2()) || "014".equals(cmrData.getTaxCd2()))) {
+      ctryText = coGrp + sitCode + collBroff + stmtInd + dpmSrceCode + cmrData.getTaxCd2() + abnNo;
+    } else {
+      ctryText = coGrp + sitCode + collBroff + stmtInd + dpmSrceCode + spaceBeforeABN + abnNo;
+    }
 
     messageHash.put("CtryText", ctryText);
     // messageHash.put("EngrBrnchOff", ctryText);
-    messageHash.put("EngrDept", "");
+    if (!update && custType.contains("LOCAL") && stateProv.contains("TAS")) {
+      messageHash.put("EngrDept", "F");
+    } else {
+      messageHash.put("EngrDept", "");
+    }
     messageHash.put("IBMCode", cmrData.getCollectionCd());
     // messageHash.put("IBMCode", "0000");
     messageHash.put("RegionCode", "");

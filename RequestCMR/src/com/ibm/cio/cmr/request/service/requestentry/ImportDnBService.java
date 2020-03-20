@@ -476,10 +476,10 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     addrPk.setReqId(reqId);
     String type = cmr.getCmrAddrTypeCode();
     if (reqModel.getCmrIssuingCntry() != null && SystemLocation.ISRAEL.equalsIgnoreCase(reqModel.getCmrIssuingCntry())) {
-        addrPk.setAddrType("CTYA");
-      } else {
-        addrPk.setAddrType(type);
-      }
+      addrPk.setAddrType("CTYA");
+    } else {
+      addrPk.setAddrType(type);
+    }
 
     String addrSeq = getNextAddressSequence(entityManager, reqModel.getCmrIssuingCntry(), reqId);
     if (addrSeq == null) {

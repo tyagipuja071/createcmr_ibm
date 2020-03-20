@@ -99,6 +99,9 @@ public class EMEAHandler extends BaseSOFHandler {
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
 
+  // CMR-1728
+  protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address", "EPL Address" };
+
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
     LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");
@@ -196,7 +199,7 @@ public class EMEAHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !"862".equals(cmrIssueCd)) {
 
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               for (String sofUse : sofUses) {
@@ -233,6 +236,17 @@ public class EMEAHandler extends BaseSOFHandler {
                     addr.setCmrAddrSeq("00001");
                   }
 
+                  converted.add(addr);
+                }
+              }
+            }
+            if ("862".equals(cmrIssueCd)) {
+              seqNo = record.getCmrAddrSeq();
+              System.out.println("seqNo = " + seqNo);
+              if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+                addrType = record.getCmrAddrTypeCode();
+                if (!StringUtils.isEmpty(addrType)) {
+                  addr = cloneAddress(record, addrType);
                   converted.add(addr);
                 }
               }
@@ -3007,11 +3021,13 @@ public class EMEAHandler extends BaseSOFHandler {
 
   @Override
   public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZP01", "ZS01", "ZI01");
-    }
-    return null;
-  }
+	    if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
+	      return Arrays.asList("ZP01", "ZS01", "ZI01");
+	    } else if(SystemLocation.GREECE.equals(cmrIssuingCntry)) {
+	    	return Arrays.asList("ZP01", "ZS01");
+	    }
+	    return null;
+	  }
 
   @Override
   public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
@@ -3348,6 +3364,8 @@ public class EMEAHandler extends BaseSOFHandler {
       return true;
     } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
       return true;
+    } else if (SystemLocation.TURKEY.equals(issuingCountry)) {
+      return true;
     } else {
       return false;
     }
@@ -3357,6 +3375,14 @@ public class EMEAHandler extends BaseSOFHandler {
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     XSSFRow row = null;
     XSSFCell currCell = null;
+
+    /**
+     * currently Turkey don't need Dup Fills check, so temp skip the checking
+     * this part
+     */
+    if (SystemLocation.TURKEY.equals(country)) {
+      return;
+    }
     for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
 

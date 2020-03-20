@@ -70,6 +70,21 @@ function lockEmbargo() {
 }
 
 /**
+ * lock OrdBlk field
+ */
+function lockOrdBlk() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('ordBlk');
+  } else {
+    FormManager.enable('ordBlk');
+  }
+}
+
+/**
  * After config for CEMEA
  */
 function afterConfigForCEMEA() {
@@ -103,6 +118,16 @@ function afterConfigForCEMEA() {
 
   if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
     FormManager.readOnly('sensitiveFlag');
+  }
+
+  if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
+    FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('custClass');
+    } else {
+      FormManager.enable('custClass');
+    }
   }
 
   setExpediteReason();
@@ -195,7 +220,11 @@ function addHandlersForCEMEA() {
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setEnterpriseValues(value);
-      setSalesRepValues(value);
+      // CMR-2101 Austria remove ISR
+      if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
+        setSalesRepValues(value);
+      }
+      setSBOValuesForIsuCtc();// CMR-2101
     });
   }
 
@@ -213,7 +242,9 @@ function addHandlersForCEMEA() {
 
   if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
-      setSalesRepValues();
+      // CMR-2101 Austria remove ISR
+      // setSalesRepValues();
+      setSBOValuesForIsuCtc();// CMR-2101
     });
   }
 
@@ -332,8 +363,20 @@ function addAddressTypeValidator() {
 
           if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0)) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
-          } else if (cntry == SysLoc.AUSTRIA && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0)) {
-            return new ValidationResult(null, false, 'All address types are mandatory.');
+          } else if (cntry == SysLoc.AUSTRIA) {
+            var reqLob = FormManager.getActualValue('requestingLob');// request
+            // LOB=IGF
+            // will
+            // have 2
+            // additional
+            // address
+            // type to
+            // own
+            if (reqLob == 'IGF' && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0)) {
+              return new ValidationResult(null, false, 'All address types are mandatory.');
+            } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
+              return new ValidationResult(null, false, 'All address types are mandatory.');
+            }
           } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory except G Address.');
           } else if (zs01Cnt > 1) {
@@ -527,8 +570,8 @@ function addAddressFieldValidators() {
 
         if (custPhone != '') {
           val += custPhone;
-          if (val != null && val.length > 28) {
-            return new ValidationResult(null, false, 'Total computed length of Attention Person and Phone should not exceed 28 characters.');
+          if (val != null && val.length > 30) {// CMR-816
+            return new ValidationResult(null, false, 'Total computed length of Attention Person and Phone should not exceed 30 characters.');
           }
         }
         return new ValidationResult(null, true);
@@ -829,18 +872,72 @@ function setSalesRepValues(clientTier) {
 }
 
 /**
+ * CMR-2101:Austria - sets SBO based on isuCtc
+ */
+function setSBOValuesForIsuCtc() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var ims = FormManager.getActualValue('subIndustryCd');
+  var isuCtc = isuCd + clientTier;
+  var qParams = null;
+  // SBO will be based on IMS
+  if (isuCd != '') {
+    var results = null;
+    if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32N')) {
+      qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+        ISU : '%' + isuCd + clientTier + '%',
+        CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
+      };
+      results = cmr.query('GET.SBOLIST.BYISUCTC', qParams);
+    } else {
+      qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+        ISU : '%' + isuCd + clientTier + '%'
+      };
+      results = cmr.query('GET.SBOLIST.BYISU', qParams);
+    }
+    console.log("there are " + results.length + " SBO returned.");
+
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (custSubGrp == 'IBMEM' && results.length > 0) {
+      FormManager.setValue('salesBusOffCd', "099");
+    } else if (results.length > 1) {
+      FormManager.setValue('salesBusOffCd', "");
+    } else if (results.length == 1) {
+      FormManager.setValue('salesBusOffCd', results[0].ret1);
+    } else {
+      FormManager.setValue('salesBusOffCd', "");
+    }
+  }
+}
+
+/**
  * CEMEA - sets SBO based on SR value
  */
 function setSBO(repTeamMemberNo) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var role = FormManager.getActualValue('userRole');
+  /**
+   * CMR-2046 AT for update can also get SBO when change ISR
+   */
+  if (FormManager.getActualValue('reqType') != 'C' && cntry != SysLoc.AUSTRIA) {
+    return;
+  }
 
   if (cntry != SysLoc.AUSTRIA && role != GEOHandler.ROLE_PROCESSOR) {
     return;
@@ -870,8 +967,17 @@ function setSBO(repTeamMemberNo) {
       FormManager.setValue('salesBusOffCd', '');
     }
   } else {
-    FormManager.setValue('salesBusOffCd', '');
+    // CMR-2053 AT can import SBO without ISR
+    // FormManager.setValue('salesBusOffCd', '');
   }
+}
+
+// CMR-2101 SBO is required for processor
+function validateSBO() {
+  if (FormManager.getActualValue('userRole') == GEOHandler.ROLE_PROCESSOR) {
+    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+  }
+
 }
 
 /**
@@ -958,8 +1064,13 @@ function validateAbbrevNmLocn() {
   if (role == 'PROCESSOR') {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('abbrevNm', Validators.NO_SPECIAL_CHAR, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('abbrevLocn', Validators.NO_SPECIAL_CHAR, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+    /**
+     * remove special chars check for CMR-811
+     */
+    // FormManager.addValidator('abbrevNm', Validators.NO_SPECIAL_CHAR, [
+    // 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+    // FormManager.addValidator('abbrevLocn', Validators.NO_SPECIAL_CHAR, [
+    // 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   }
 }
 
@@ -1028,25 +1139,29 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
         return;
       }
       if (role == 'REQUESTER') {
-        if (abbrevNm && abbrevNm.length > 22) {
-          abbrevNm = abbrevNm.substring(0, 22);
+        if (abbrevNm && abbrevNm.length > 30) {
+          abbrevNm = abbrevNm.substring(0, 30);
         }
         if (abbrevLocn && abbrevLocn.length > 12) {
           abbrevLocn = abbrevLocn.substring(0, 12);
         }
-
         FormManager.setValue('abbrevNm', abbrevNm);
         FormManager.setValue('abbrevLocn', abbrevLocn);
+
       }
+      // CMR-837
+      changeBetachar();
     }
   }
 }
 
 function setAbbrvNmLoc() {
+  console.log("setting abbrvName and location");
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
+  // CMR-1947
+  // if (FormManager.getActualValue('reqType') != 'C') {
+  // return;
+  // }
   if (role != 'REQUESTER') {
     return;
   }
@@ -1061,8 +1176,8 @@ function setAbbrvNmLoc() {
   var abbrvNm = custNm.ret1;
   var abbrevLocn = city.ret1;
 
-  if (abbrvNm && abbrvNm.length > 22) {
-    abbrvNm = abbrvNm.substring(0, 22);
+  if (abbrvNm && abbrvNm.length > 30) {
+    abbrvNm = abbrvNm.substring(0, 30);
   }
   if (abbrevLocn && abbrevLocn.length > 12) {
     abbrevLocn = abbrevLocn.substring(0, 12);
@@ -1079,13 +1194,26 @@ function setAbbrvNmLoc() {
 function lockAbbrv() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
   if (viewOnlyPage == 'true') {
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('abbrevNm');
   } else {
     if (role == 'REQUESTER') {
       FormManager.readOnly('abbrevNm');
+      FormManager.readOnly('abbrevLocn');
+    }
+  }
+}
+// CMR-852
+function lockAbbrvLocnForScenrio() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (custSubType == 'SOFTL') {
+    if (role == 'REQUESTER' || role == 'PROCESSOR') {
+      FormManager.readOnly('abbrevLocn');
+    }
+  } else if (custSubType == 'IBMEM' || custSubType == 'COMME') {
+    if (role == 'REQUESTER') {
       FormManager.readOnly('abbrevLocn');
     }
   }
@@ -2066,6 +2194,23 @@ function cemeaCustomVATMandatory() {
   }
 
 };
+// CMR-1912 VAT should be required for Local-BP and Commercial
+function customVATMandatoryForAT() {
+  console.log('customVATMandatoryForAT ');
+
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (custSubType != null && custSubType != '' && (custSubType == 'COMME' || custSubType == 'BUSPR')) {
+    if (!dijit.byId('vatExempt').get('checked')) {
+      // Make Vat Mandatory
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      console.log("Vat is Mandatory.");
+    }
+  }
+};
 
 /*
  * 1496135: Importing G address from SOF for Update Requests jz: add local
@@ -2103,6 +2248,60 @@ function executeOnChangeOfAddrType() {
   }
   var type = FormManager.getActualValue('addrType');
   handleLocalLangCountryName(type);
+}
+
+// CMR-1962 Austria UAT #12 - 'DSW' in Abbreviated name not needed
+// function setAbbrvNmSuffix() {
+// var abbrvNm = FormManager.getActualValue('abbrevNm');
+// if (FormManager.getActualValue('reqType') == 'C') {
+// if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA &&
+// FormManager.getActualValue('requestingLob') == 'DSW') {
+// if (abbrvNm == null || abbrvNm.length == 0 || abbrvNm.lastIndexOf(" DSW") >
+// 0) {
+// return;
+// }
+// if (abbrvNm.length > 30) {
+// abbrvNm = abbrvNm.slice(0, 27) + ' DSW';
+// } else if (abbrvNm != null && abbrvNm.length > 0) {
+// abbrvNm = abbrvNm + ' DSW';
+// }
+// FormManager.setValue('abbrevNm', abbrvNm);
+// }
+// }
+// }
+// CMR-811
+function changeBetachar() {
+  var abbrvNm = FormManager.getActualValue('abbrevNm');
+  var abbrevLocn = FormManager.getActualValue('abbrevLocn');
+  if (abbrvNm.indexOf("β")) {
+    abbrvNm = abbrvNm.replace(/β/g, "ss");
+    FormManager.setValue('abbrevNm', abbrvNm);
+  }
+  if (abbrevLocn.indexOf("β")) {
+    abbrevLocn = abbrevLocn.replace(/β/g, "ss");
+    FormManager.setValue('abbrevLocn', abbrevLocn);
+  }
+
+}
+
+function handleRequestLOBChange() {
+  if (FormManager.getActualValue('reqType') == 'C') {
+    dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+      if (FormManager.getActualValue('cmrIssuingCntry') == '618' && FormManager.getActualValue('requestingLob') == 'DSW') {
+        var abbrvNm = FormManager.getActualValue('abbrevNm');
+        if (abbrvNm == null || abbrvNm.length == 0 || abbrvNm.lastIndexOf(" DSW") > 0) {
+          return;
+        } else {
+          if (abbrvNm.length > 30) {
+            abbrvNm = abbrvNm.slice(0, 27) + ' DSW';
+          } else {
+            abbrvNm = abbrvNm + ' DSW';
+            FormManager.setValue('abbrevNm', abbrvNm);
+          }
+        }
+      }
+    });
+  }
 }
 
 function handleLocalLangCountryName(type) {
@@ -2182,16 +2381,26 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addCISHandler, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
+  // CMR-801:comment out to unlock embargo code
+  // GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
+
+  // CMR-2096-Austria - "Central order block code"
+  GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
+
   GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
+
+  GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
+
   GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(phoneNoValidation, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
+  // CMR-2101 Austriathe func for Austria
+  // GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
+  // GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);
@@ -2213,11 +2422,16 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.AUSTRIA ]); // CMR-2101
   GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(resetVatExemptOnchange, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockLocationNo, [ SysLoc.AUSTRIA ]);
+
+  // GEOHandler.addAfterConfig(setAbbrvNmSuffix, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(handleRequestLOBChange, [ SysLoc.AUSTRIA ]);
+  // CMR-811
+  GEOHandler.addAfterConfig(changeBetachar, [ SysLoc.AUSTRIA ]);
 
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(validateAbbrevNmLocn, GEOHandler.CEMEA);
@@ -2252,7 +2466,9 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEMEA, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA);
-
+  // CMR-1912 Vat should be required for AT local-BP and Commercial
+  GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
   /*
    * GEOHandler.addAfterConfig(cemeaCustomVATMandatory, GEOHandler.CEMEA);
    * GEOHandler.addAfterTemplateLoad(cemeaCustomVATMandatory, GEOHandler.CEMEA);
@@ -2265,4 +2481,8 @@ dojo.addOnLoad(function() {
    */
   GEOHandler.addToggleAddrTypeFunction(toggleLocalCountryName, GEOHandler.CEMEA);
   GEOHandler.addAddrFunction(toggleLocalCountryNameOnOpen, GEOHandler.CEMEA);
+  // CMR-2101 SBO is required for processor
+  GEOHandler.registerValidator(validateSBO, [ SysLoc.AUSTRIA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(validateSBO, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(validateSBO, [ SysLoc.AUSTRIA ]);
 });

@@ -23,7 +23,6 @@ public class BrazilV2ReqModel extends BaseV2RequestModel {
   private String govType;
   private String proxiLocnNo;
   private String updateReason;
-
   private String vatEndUser;
   private String municipalFiscalCodeEndUser;
 

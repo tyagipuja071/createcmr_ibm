@@ -16,6 +16,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.DuplicateChecksUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -63,7 +64,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
 
       // check if eligible for vat matching
-      if (scenarioExceptions.isCheckVatForDuplicates()) {
+      if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
         matchType = "V";
       }
 
@@ -245,7 +246,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
           request.setScenario(data.getCustSubGrp());
         }
 
-        if (scenarioExceptions.isCheckVatForDuplicates()) {
+        if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
           request.setMatchType("V");
         }
       }

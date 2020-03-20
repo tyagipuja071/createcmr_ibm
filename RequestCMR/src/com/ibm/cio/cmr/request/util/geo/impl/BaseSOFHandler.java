@@ -104,6 +104,11 @@ public abstract class BaseSOFHandler extends GEOHandler {
       LOG.debug("Skipping SOF sequence assignment for Legacy Direct.");
       return records;
     }
+    // For AT address change.
+    if ("MA".equals(processingType)) {
+      return records;
+    }
+
     List<FindCMRRecordModel> finalList = new ArrayList<FindCMRRecordModel>();
 
     handleSOFSequenceImport(records, cmrIssuingCntry);

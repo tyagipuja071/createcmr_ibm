@@ -22,6 +22,7 @@ import org.springframework.ui.ModelMap;
 import com.ibm.cio.cmr.request.automation.AutomationElement;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
+import com.ibm.cio.cmr.request.automation.CompanyVerifier;
 import com.ibm.cio.cmr.request.automation.ProcessType;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.MatchingElement;
@@ -38,6 +39,7 @@ import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -54,19 +56,12 @@ import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
  * @author RoopakChugh
  * 
  */
-public class DnBMatchingElement extends MatchingElement {
+public class DnBMatchingElement extends MatchingElement implements CompanyVerifier {
 
   private static final Logger LOG = Logger.getLogger(DnBMatchingElement.class);
-  private static final List<String> ENABLE_VAT_ORGID = SystemConfiguration.getAsList("dnb.ORG_ID.VAT.countries");
-  private static final List<String> ENABLE_SIRET_ORGID = SystemConfiguration.getAsList("dnb.ORG_ID.SIRET.countries");
-  private static final List<String> ENABLE_SIREN_ORGID = SystemConfiguration.getAsList("dnb.ORG_ID.SIREN.countries");
-  private static final String VAT_ORG_ID_TYPE_CODE = SystemConfiguration.getSystemProperty("dnb.VAT.ORG_ID_TYPE.code");
-  private static final String SIRET_ORG_ID_TYPE_CODE = SystemConfiguration.getSystemProperty("dnb.SIRET.ORG_ID_TYPE.code");
-  private static final String SIREN_ORG_ID_TYPE_CODE = SystemConfiguration.getSystemProperty("dnb.SIREN.ORG_ID_TYPE.code");
 
   public DnBMatchingElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
-
   }
 
   @Override
@@ -77,35 +72,30 @@ public class DnBMatchingElement extends MatchingElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-    GBGFinderRequest request = createRequest(handler, admin, data, soldTo);
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
+    // COMMENTEDD BECAUSE OF CONFLICTING REQUIREMENT
+    // if (scorecard != null &&
+    // StringUtils.isNotBlank(scorecard.getFindDnbResult())
+    // && ("Accepted".equals(scorecard.getFindDnbResult()) ||
+    // "Rejected".equals(scorecard.getFindDnbResult()))) {
+    // String message = "Accepted".equals(scorecard.getFindDnbResult()) ? "D&B
+    // record has been imported into the request already."
+    // : "D&B record has been rejected already.";
+    // result.setDetails(message);
+    // result.setResults("D&B Imported");
+    // } else
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
-      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-          MatchingServiceClient.class);
-      client.setReadTimeout(1000 * 60 * 5);
-      LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
-      ObjectMapper mapper = new ObjectMapper();
-      String json = mapper.writeValueAsString(rawResponse);
-
-      TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
-      };
-      MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-
+      boolean hasValidMatches = false;
+      MatchingResponse<DnBMatchingResponse> response = getMatches(handler, requestData, engineData);
+      if (engineData.hasPositiveCheckStatus("hasValidMatches")) {
+        hasValidMatches = true;
+      }
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
-        boolean hasValidMatches = false;
-        for (DnBMatchingResponse dnbRecord : dnbMatches) {
-          if (dnbRecord.getConfidenceCode() > 7) {
-            // use 8 as threshold
-            hasValidMatches = true;
-            break;
-          }
-        }
         if (!hasValidMatches) {
           details.append("No match with confidence level 8 and above.").append("\n\n");
         }
@@ -113,25 +103,23 @@ public class DnBMatchingElement extends MatchingElement {
         if (dnbMatches.size() > 5) {
           dnbMatches = dnbMatches.subList(0, 4);
         }
-        // boolean isOrgIdMatched = false;
-        int itemNo = 1;
+        boolean isOrgIdMatched = false;
+        int itemNo = 0;
         for (DnBMatchingResponse dnbRecord : dnbMatches) {
           // Create DnB Fields Records Regardless
+          itemNo++;
           processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
-
+          if (!isOrgIdMatched) {
+            isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+          }
           // Check if element is configured to import from DNB
           if (scenarioExceptions.isImportDnbInfo()) {
             // Create Address Records only if Levenshtein Distance
             List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(handler, admin, requestData.getAddresses(), dnbRecord);
             if (eligibleAddresses.size() > 0) {
-              // SKIPPED AS PER NEW REQUIREMENTS
-              // if (!isOrgIdMatched) {
-              // isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
-              // }
               processAddressFields(dnbRecord, output, itemNo, scenarioExceptions, handler, eligibleAddresses);
             }
           }
-          itemNo++;
           engineData.put("dnbMatching", dnbRecord);
           LOG.debug(new ObjectMapper().writeValueAsString(dnbRecord));
         }
@@ -140,35 +128,15 @@ public class DnBMatchingElement extends MatchingElement {
           result.setOnError(shouldThrowError);
           result.setResults("No Matches");
           result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
-          // engineData.addRejectionComment("No high quality matches with D&B
-          // records. Please import from D&B search.");
           engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
-        }
-        // SKIPPED AS PER NEW REQUIREMENTS
-        // else if (hasValidMatches && itemNo == 0) {
-        // result.setOnError(shouldThrowError);
-        // engineData.addRejectionComment("High Quality Matches were found but
-        // none of them satisfied the levenshtien distance criteria");
-        // result.setDetails("High Quality Matches were found but none of them
-        // satisfied the levenshtien distance criteria");
-        // result.setResults("No Valid Matches");
-        // }
-        // else if (hasValidMatches && itemNo > 0 &&
-        // StringUtils.isNotBlank(request.getOrgId()) && !isOrgIdMatched
-        // &&
-        // !engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED))
-        // {
-        // result.setOnError(shouldThrowError);
-        // engineData.addRejectionComment("Input VAT does not match D&B records.
-        // Please check the provided VAT infomation.");
-        // details.append("\n\nInput VAT does not match D&B records. Please
-        // check the provided VAT infomation.");
-        // result.setDetails(details.toString().trim());
-        // result.setResults("Matches found");
-        // }
-        else {
+        } else {
           result.setResults("Matches Found");
-          details.insert(0, itemNo + " valid matches found.\n");
+          if (scenarioExceptions.isCheckVATForDnB() && !isOrgIdMatched) {
+            details.insert(0, itemNo + " High Quality matches found.\nVAT value did not match any of the high confidence D&B matches.\n");
+            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_FAIL", "VAT value did not match any of the high confidence D&B matches.");
+          } else {
+            details.insert(0, itemNo + " valid matches found.\n");
+          }
           // save the highest matched record
           if (dnbMatches != null && !dnbMatches.isEmpty()) {
             ImportDnBService dnbService = new ImportDnBService();
@@ -200,6 +168,39 @@ public class DnBMatchingElement extends MatchingElement {
       result.setOnError(true);
     }
     return result;
+  }
+
+  public MatchingResponse<DnBMatchingResponse> getMatches(GEOHandler handler, RequestData requestData, AutomationEngineData engineData)
+      throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    Addr soldTo = requestData.getAddress("ZS01");
+    GBGFinderRequest request = createRequest(handler, admin, data, soldTo);
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+    };
+
+    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+
+    List<DnBMatchingResponse> dnbMatches = response.getMatches();
+
+    for (DnBMatchingResponse dnbRecord : dnbMatches) {
+      if (dnbRecord.getConfidenceCode() > 7) {
+        // use 8 as threshold
+        engineData.addPositiveCheckStatus("hasValidMatches");
+        break;
+      }
+    }
+
+    return response;
+
   }
 
   /**
@@ -265,7 +266,11 @@ public class DnBMatchingElement extends MatchingElement {
     if (StringUtils.isNotBlank(data.getVat())) {
       request.setOrgId(data.getVat());
     } else if (StringUtils.isNotBlank(soldTo.getVat())) {
-      request.setOrgId(soldTo.getVat());
+      if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        request.setOrgId(soldTo.getVat().split("\\s")[0]);
+      } else {
+        request.setOrgId(soldTo.getVat());
+      }
     }
     if (soldTo != null) {
       request.setCity(soldTo.getCity1());
@@ -328,11 +333,12 @@ public class DnBMatchingElement extends MatchingElement {
     details.append("Org ID Matching =  " + orgIdMatch).append("\n");
 
     List<DnbOrganizationId> orgIDDetails = dnbRecord.getOrgIdDetails();
-    List<String> relevantDnbCodes = getOrganizationIdTypesList(data);
+
+    details.append("Organization IDs:\n");
     for (int i = 0; i < orgIDDetails.size(); i++) {
-      if (!relevantDnbCodes.isEmpty() && relevantDnbCodes.contains(orgIDDetails.get(i).getDnbCode())) {
-        details.append("Organization Type=" + orgIDDetails.get(i).getOrganizationIdType() + "\n");
-        details.append("Organization Id=" + orgIDDetails.get(i).getOrganizationIdCode() + "\n");
+      DnbOrganizationId orgId = orgIDDetails.get(i);
+      if (DnBUtil.isRelevant(dnbRecord.getDnbCountry(), orgId)) {
+        details.append(orgId.getOrganizationIdType() + " - " + orgId.getOrganizationIdCode() + "\n");
       }
     }
 
@@ -539,25 +545,4 @@ public class DnBMatchingElement extends MatchingElement {
     return customerName;
   }
 
-  private List<String> getOrganizationIdTypesList(Data data) {
-    String issuingCntry = data.getCmrIssuingCntry();
-    List<String> orgIdTypes = new ArrayList<String>();
-    if (ENABLE_VAT_ORGID != null && !ENABLE_VAT_ORGID.isEmpty() && ENABLE_VAT_ORGID.contains(issuingCntry)) {
-      if (StringUtils.isNotEmpty(VAT_ORG_ID_TYPE_CODE)) {
-        orgIdTypes.add(VAT_ORG_ID_TYPE_CODE);
-      }
-    }
-    if (ENABLE_SIRET_ORGID != null && !ENABLE_SIRET_ORGID.isEmpty() && ENABLE_SIRET_ORGID.contains(issuingCntry)) {
-      if (StringUtils.isNotEmpty(SIRET_ORG_ID_TYPE_CODE)) {
-        orgIdTypes.add(SIRET_ORG_ID_TYPE_CODE);
-      }
-    }
-    if (ENABLE_SIREN_ORGID != null && !ENABLE_SIREN_ORGID.isEmpty() && ENABLE_SIREN_ORGID.contains(issuingCntry)) {
-      if (StringUtils.isNotEmpty(SIREN_ORG_ID_TYPE_CODE)) {
-        orgIdTypes.add(SIREN_ORG_ID_TYPE_CODE);
-      }
-    }
-
-    return orgIdTypes;
-  }
 }
