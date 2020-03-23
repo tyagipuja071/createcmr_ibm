@@ -281,7 +281,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     // return;
     // }
     model.vat = FormManager.getActualValue('vat');
-    if (model.vat) {
+    if (model.vat) { 
       var vatRet = cmr.validateVAT(model.countryCd, model.vat);
       if (!vatRet.success) {
         var pattern = vatRet.errorPattern;
