@@ -1,5 +1,5 @@
-/bin/
-/build/
-/.apt_generated/
-/.settings/
-/WebContent/WEB-INF/classes/
+*/bin/
+*/build/
+*/.apt_generated/
+*/.settings/
+*/WebContent/WEB-INF/classes/
