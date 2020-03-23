@@ -96,7 +96,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
   public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
 
-  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mailing-Billing Address", "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
 
   // CMR-1728
@@ -2986,6 +2986,7 @@ public class EMEAHandler extends BaseSOFHandler {
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##EngineeringBo", "engineeringBo");
     map.put("##CodFlag", "creditCd");
+    map.put("##CommercialFinanced", "commercialFinanced");
     return map;
   }
 
