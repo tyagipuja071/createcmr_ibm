@@ -5,6 +5,7 @@
  */
 
 var _GBL_NO_INIT = false;
+var _dnbSearchHandler = null;
 /**
  * Validator for Address Standardization completion
  */
@@ -109,6 +110,9 @@ function addDnBSearchValidator() {
         if (reqStatus != 'DRA') {
           return new ValidationResult(null, true);
         }
+        if (isSkipDnbMatching()) {
+          return new ValidationResult(null, true);
+        }
         var result = FormManager.getActualValue('findDnbResult');
         if (result == '' || result.toUpperCase() == 'NOT DONE') {
           return new ValidationResult(null, false, 'D&B Search has not been performed yet.');
@@ -117,6 +121,63 @@ function addDnBSearchValidator() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+/**
+ * Method to check whether for a scenario dnb matching is allowed or not
+ */
+function isSkipDnbMatching() {
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGroup = FormManager.getActualValue('custSubGrp');
+  var dnbPrimary = FormManager.getActualValue("dnbPrimary");
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryUse = FormManager.getActualValue("countryUse");
+  var subRegionCd = countryUse!=null && countryUse!=null && countryUse.length>0 ? countryUse : cntry;
+  if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
+    var qParams = {
+      CNTRY : cntry,
+      CUST_TYP : custGrp,
+      CUST_SUB_TYP : custSubGroup,
+      SUBREGION_CD : cntry
+    };
+    var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+    if (result.ret1 != null && result.ret1 == "Y") {
+      return true;
+    } else {
+      qParams.CUST_SUB_GRP = "*";
+      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+      if (result.ret1 != null && result.ret1 == 'Y') {
+        return true;
+      } else {
+        qParams.CUST_GRP = "*";
+        result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+        if (result.ret1 != null && result.ret1 == 'Y') {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * universal handler to make dnb search mandatory or optional on scenario change
+ */
+function handleRequiredDnBSearch() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  if (reqId != null && reqId != '' && reqType == 'C' && reqStatus == 'DRA' && _dnbSearchHandler == null) {
+    _dnbSearchHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      if (!isSkipDnbMatching()) {
+        dojo.byId('dnbRequired').style.display = "inline";
+        dojo.byId('dnbRequiredIndc').style.display = "inline";
+      } else {
+        dojo.byId('dnbRequired').style.display = "none";
+        dojo.byId('dnbRequiredIndc').style.display = "none";
+      }
+    });
+  }
 }
 
 /**
@@ -660,6 +721,7 @@ dojo.addOnLoad(function() {
       '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693',
       '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618',
       '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848' ], true);
+  GEOHandler.addAfterConfig(handleRequiredDnBSearch,GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   GEOHandler.registerValidator(addCrossBorderValidator, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER, null, true);
 
   /* 1427121 BDS Postal COde validation */
