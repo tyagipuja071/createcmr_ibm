@@ -281,7 +281,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     // return;
     // }
     model.vat = FormManager.getActualValue('vat');
-    if (model.vat) {
+    if (model.vat) { 
       var vatRet = cmr.validateVAT(model.countryCd, model.vat);
       if (!vatRet.success) {
         var pattern = vatRet.errorPattern;
@@ -294,10 +294,10 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       }
     }
     model.taxCd1 = FormManager.getActualValue('taxCd1');
-    if (model.issuingCntry == '706' && (!model.taxCd1 || !model.vat)) {
-      cmr.showAlert('At least VAT or SIRET must be specified.');
-      return;
-    }
+//    if (model.issuingCntry == '706' && (!model.taxCd1 || !model.vat)) {
+//      cmr.showAlert('At least VAT or SIRET must be specified.');
+//      return;
+//    }
 
     var details = 'System Location: ' + model.issuingCntry;
     details += '<br>' + model.name;
