@@ -28,6 +28,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
@@ -86,10 +88,9 @@ public class GermanyUtil extends AutomationUtil {
       case "IBMEM":
         for (Addr addr : requestData.getAddresses()) {
           String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
-          if (StringUtils.isNotBlank(custNm)
-              && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG") || custNm.contains("Co.KG")
-                  || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-                  || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
+          if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
+              || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
+              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
             engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
             details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
             valid = false;
@@ -107,6 +108,7 @@ public class GermanyUtil extends AutomationUtil {
             request.setCustomerName(name);
             request.setIssuingCountry(data.getCmrIssuingCntry());
             request.setLandedCountry(zs01.getLandCntry());
+            request.setNameMatch("Y");
             client.setReadTimeout(1000 * 60 * 5);
             LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
             MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
@@ -121,39 +123,41 @@ public class GermanyUtil extends AutomationUtil {
             if (response.getSuccess()) {
               if (response.getMatched() && response.getMatches().size() > 0) {
                 duplicateCMRNo = response.getMatches().get(0).getCmrNo();
-                details.append("The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. "
-                    + duplicateCMRNo);
-                engineData.addRejectionComment("The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee")
-                    + " already has a record with CMR No. " + duplicateCMRNo);
+                details.append(
+                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo)
+                    .append("\n");
+                engineData.addRejectionComment(
+                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo);
                 valid = false;
               } else {
-                details.append("No Duplicate CMRs were found with Name: " + name);
+                details.append("No Duplicate CMRs were found.").append("\n");
               }
-              // cmr-2255 fix
-              // if (StringUtils.isBlank(duplicateCMRNo) &&
-              // scenario.equals("IBMEM")) {
-              // Person person = null;
-              // try {
-              // person = BluePagesHelper.getPersonByName(zs01.getCustNm1()
-              // + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " +
-              // zs01.getCustNm2() : ""));
-              // if (person == null) {
-              // engineData.addRejectionComment("Employee details not found in IBM BluePages.");
-              // details.append("Employee details not found in IBM BluePages.").append("\n");
-              // } else {
-              // details.append("Employee details validated with IBM BluePages for "
-              // + person.getName() + "(" + person.getEmail() + ").").append(
-              // "\n");
-              // }
-              // } catch (Exception e) {
-              // LOG.error("Not able to check name against bluepages", e);
-              // engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
-              // "Not able to check name against bluepages for scenario IBM Employee.");
-              // }
-              // }
+              if (StringUtils.isBlank(duplicateCMRNo) && scenario.equals("IBMEM")) {
+                Person person = null;
+                if (StringUtils.isNotBlank(zs01.getCustNm1())) {
+                  try {
+                    String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+                    person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName));
+                    if (person == null) {
+                      engineData.addRejectionComment("Employee details not found in IBM BluePages.");
+                      details.append("Employee details not found in IBM BluePages.").append("\n");
+                    } else {
+                      details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
+                          .append("\n");
+                    }
+                  } catch (Exception e) {
+                    LOG.error("Not able to check name against bluepages", e);
+                    engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
+                        "Not able to check name against bluepages for scenario IBM Employee.");
+                  }
+                } else {
+                  LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+                  engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+                }
+              }
             }
           } catch (Exception e) {
-            details.append("Duplicate CMR check using customer name match failed to execute.");
+            details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
             engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
           }
         }
@@ -176,19 +180,20 @@ public class GermanyUtil extends AutomationUtil {
                 }
               }
             }
+
           } else {
             LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.");
-            details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
+            details.append("Unable to perform Duplicate CMR Check for Broker scenario.").append("\n");
             engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
           }
           if (count > 1) {
             engineData.addRejectionComment("Multiple registered CMRs already found for this customer.");
-            details.append("Multiple registered CMRs already found for this customer.");
+            details.append("Multiple registered CMRs already found for this customer.").append("\n");
             valid = false;
           } else if (count == 1) {
-            details.append("Single registered CMR found for this customer.");
+            details.append("Single registered CMR found for this customer.").append("\n");
           } else {
-            details.append("No registered CMRs found for this customer.");
+            details.append("No registered CMRs found for this customer.").append("\n");
           }
         } catch (Exception e) {
           LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.", e);
@@ -208,18 +213,18 @@ public class GermanyUtil extends AutomationUtil {
             PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
             if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
               engineData.addRejectionComment("PPS CE ID on the request is invalid.");
-              details.append("PPS CE ID on the request is invalid.");
+              details.append("PPS CE ID on the request is invalid.").append("\n");
               valid = false;
             } else {
-              details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.");
+              details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
             }
           } catch (Exception e) {
             LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
-            details.append("Not able to validate PPS CE ID using PPS Service.");
+            details.append("Not able to validate PPS CE ID using PPS Service.").append("\n");
             engineData.addNegativeCheckStatus("PPSCEID", "Not able to validate PPS CE ID using PPS Service.");
           }
         } else {
-          details.append("PPS CE ID not available on the request.");
+          details.append("PPS CE ID not available on the request.").append("\n");
           engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
         }
         break;
@@ -235,10 +240,11 @@ public class GermanyUtil extends AutomationUtil {
             String result = query.getSingleResult(String.class);
             if (result == null) {
               engineData.addRejectionComment("Department on the request is invalid.");
-              details.append("Department on the request is invalid for address type - " + addr.getId().getAddrType() + ".");
+              details.append("Department on the request is invalid for address type - " + addr.getId().getAddrType() + ".").append("\n");
               valid = false;
             } else {
-              details.append("Department " + addr.getDept() + " validated successfully for address type - " + addr.getId().getAddrType() + ".");
+              details.append("Department " + addr.getDept() + " validated successfully for address type - " + addr.getId().getAddrType() + ".")
+                  .append("\n");
             }
           }
         }
@@ -256,13 +262,14 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
-      skipCompanyCheckForScenario(requestData, engineData, Arrays.asList(skipCompanyCheckList), false);
+      // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
+      // skipCompanyCheckForScenario(requestData, engineData,
+      // Arrays.asList(skipCompanyCheckList), false);
 
     } else {
       valid = false;
       engineData.addRejectionComment("No Scenario found on the request");
-      details.append("No Scenario found on the request");
+      details.append("No Scenario found on the request").append("\n");
     }
     return valid;
   }
@@ -272,10 +279,12 @@ public class GermanyUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
-    String mainCustNm = (zs01.getCustNm1().trim() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2().trim() : "")).toUpperCase();
-    String mainStreetAddress1 = zs01.getAddrTxt().trim().toUpperCase();
-    String mainCity = zs01.getCity1().trim().toUpperCase();
-    String mainPostalCd = zs01.getPostCd().trim();
+    String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
+    String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
+    String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
+    String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
+    String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
+    String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
     while (it.hasNext()) {
       Addr addr = it.next();
@@ -290,6 +299,23 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
 
+    // replace special characters from addresses.
+    for (Addr addr : requestData.getAddresses()) {
+      if (addr != null) {
+        addr.setCustNm1(replaceGermanCharacters(addr.getCustNm1()));
+        addr.setCustNm2(replaceGermanCharacters(addr.getCustNm2()));
+        addr.setAddrTxt(replaceGermanCharacters(addr.getAddrTxt()));
+        addr.setAddrTxt2(replaceGermanCharacters(addr.getAddrTxt2()));
+        addr.setCity1(replaceGermanCharacters(addr.getCity1()));
+        addr.setDept(replaceGermanCharacters(addr.getDept()));
+        addr.setOffice(replaceGermanCharacters(addr.getOffice()));
+        addr.setBldg(replaceGermanCharacters(addr.getBldg()));
+        addr.setFloor(replaceGermanCharacters(addr.getFloor()));
+        data.setAbbrevNm(replaceGermanCharacters(data.getAbbrevNm()));
+      }
+    }
+
+    // handle coverage
     if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && engineData.get(AutomationEngineData.COVERAGE_ID) != null) {
       String coverageId = (String) engineData.get(AutomationEngineData.COVERAGE_ID);
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
@@ -422,6 +448,25 @@ public class GermanyUtil extends AutomationUtil {
       response.put(MATCHING, "No Match Found");
       return response;
     }
+  }
+
+  private String replaceGermanCharacters(String input) {
+    if (StringUtils.isNotBlank(input)) {
+      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
+          .replace("ü", "ue").replaceAll("ß", "SS");
+      return str;
+
+    }
+    return null;
+  }
+
+  private String insertGermanCharacters(String input) {
+    if (StringUtils.isNotBlank(input)) {
+      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
+          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
+      return str;
+    }
+    return null;
   }
 
 }
