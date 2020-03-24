@@ -290,7 +290,7 @@ div#addTypeDiv table td, div#addTypeDiv table th {
                 </span>
               </td>
               <td>
-                <input type="checkbox" ng-model="scenario.retainValInd" ng-disabled="scenario.values.length != 1">
+                <input type="checkbox" ng-model="scenario.retainValInd" ng-disabled="scenario.values.length > 1">
               </td>
               <td>
                 <select ng-model="scenario.reqInd" ng-disabled="scenario.values.length > 1">
@@ -302,7 +302,7 @@ div#addTypeDiv table td, div#addTypeDiv table th {
                 </select>
               </td>
               <td>
-                <select ng-model="scenario.lockedIndc" ng-disabled="scenario.values.length != 1">
+                <select ng-model="scenario.lockedIndc" ng-disabled="scenario.values.length > 1">
                   <option value=""></option>
                   <option value="Y">Always Locked</option>
                   <option value="R">Locked for Requesters</option>
