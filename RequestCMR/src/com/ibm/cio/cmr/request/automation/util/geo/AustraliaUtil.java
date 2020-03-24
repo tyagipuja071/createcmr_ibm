@@ -150,7 +150,8 @@ public class AustraliaUtil extends AutomationUtil {
     // engineData.addRejectionComment("Buisness Number is not Valid.");
     // results.setOnError(true);
     // // eleResults.append("\nBuisness no. invalid.\n");
-    // details.append("\nThe information on the request does not match the information from the ABN service.\n");
+    // details.append("\nThe information on the request does not match the
+    // information from the ABN service.\n");
     // }
     // } else {
     // LOG.debug("No Response from ABN Service.");
@@ -187,8 +188,10 @@ public class AustraliaUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
-    String[] scnarioList = { "XIGF", "CROSS", "MKTPC", "BLUMX", "DUMMY", "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
-    skipCompanyCheckForScenario(requestData, engineData, Arrays.asList(scnarioList), true);
+    // String[] scnarioList = { "XIGF", "CROSS", "MKTPC", "BLUMX", "DUMMY",
+    // "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
+    // skipCompanyCheckForScenario(requestData, engineData,
+    // Arrays.asList(scnarioList), true);
     return true;
   }
 
@@ -203,8 +206,8 @@ public class AustraliaUtil extends AutomationUtil {
     System.out.println(request + request.getBusinessNumber());
 
     LOG.debug("Connecting to the BNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    AutomationResponse<?> rawResponse = client
-        .executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, request, AutomationResponse.class);
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, request,
+        AutomationResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponse);
     TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
