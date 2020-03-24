@@ -192,8 +192,6 @@ public class AustraliaUtil extends AutomationUtil {
     // "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
     // skipCompanyCheckForScenario(requestData, engineData,
     // Arrays.asList(scnarioList), true);
-    // rangoli
-    // test2
     return true;
   }
 
