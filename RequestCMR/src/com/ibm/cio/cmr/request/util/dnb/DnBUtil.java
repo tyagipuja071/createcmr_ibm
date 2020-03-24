@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util.dnb;
 
@@ -13,6 +13,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
@@ -23,12 +25,13 @@ import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.validator.VatValidateRequest;
 
 /**
  * Class that contains utilities for D&B records
- * 
+ *
  * @author JeffZAMORA
  *
  */
@@ -127,7 +130,7 @@ public class DnBUtil {
   /**
    * Creates a {@link FindCMRRecordModel} object containing the details of the
    * D&B record with the specified DUNS No.
-   * 
+   *
    * @param issuingCntry
    * @param dunsNo
    * @param postalCode
@@ -209,7 +212,7 @@ public class DnBUtil {
 
   /**
    * Gets the DnB code for the equivalent of the VAT field
-   * 
+   *
    * @param country
    * @return
    */
@@ -219,7 +222,7 @@ public class DnBUtil {
 
   /**
    * Gets the DnB code for the equivalent of the TAX_CD1 field
-   * 
+   *
    * @param country
    * @return
    */
@@ -229,7 +232,7 @@ public class DnBUtil {
 
   /**
    * Gets the mapped D&B code for the country for the given code indicator
-   * 
+   *
    * @param country
    * @param codeKey
    * @return
@@ -244,7 +247,7 @@ public class DnBUtil {
 
   /**
    * Checks if the D&B code is registered as a relevant code
-   * 
+   *
    * @param country
    * @param dnbId
    * @return
@@ -261,7 +264,7 @@ public class DnBUtil {
 
   /**
    * Checks if the D&B ID matches the registered code
-   * 
+   *
    * @param country
    * @param dnbId
    * @return
@@ -278,7 +281,7 @@ public class DnBUtil {
 
   /**
    * Extracts the relevant VAT value from the list of {@link DnbOrganizationId}
-   * 
+   *
    * @param country
    * @param ids
    * @return
@@ -290,7 +293,7 @@ public class DnBUtil {
   /**
    * Extracts the relevant TAX_CD1 value from the list of
    * {@link DnbOrganizationId}
-   * 
+   *
    * @param country
    * @param ids
    * @return
@@ -302,7 +305,7 @@ public class DnBUtil {
   /**
    * Gets the specific value from the list of {@link DnbOrganizationId} that
    * matches the codeKey
-   * 
+   *
    * @param country
    * @param codeKey
    * @param ids
@@ -319,7 +322,7 @@ public class DnBUtil {
 
   /**
    * Sets the D&B code as the VAT equivalent
-   * 
+   *
    * @param country
    * @param dnbCodeId
    */
@@ -332,7 +335,7 @@ public class DnBUtil {
 
   /**
    * Sets the D&B code as the Tax Code 1 equivalent
-   * 
+   *
    * @param country
    * @param dnbCodeId
    */
@@ -345,7 +348,7 @@ public class DnBUtil {
 
   /**
    * Sets the D&B code as an extra tracked field
-   * 
+   *
    * @param country
    * @param dnbCodeId
    */
@@ -358,7 +361,7 @@ public class DnBUtil {
 
   /**
    * Connects to VAT validation service and validates VAT
-   * 
+   *
    * @param country
    * @param vat
    * @return
@@ -379,6 +382,93 @@ public class DnBUtil {
       LOG.error("Error in VAT validation", e);
       return false;
     }
+  }
+
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   *
+   * @param handler
+   * @param admin
+   * @param addresses
+   * @param dnbRecord
+   * @return
+   */
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord) {
+
+    boolean result = true;
+
+    GEOHandler handler = RequestUtils.getGEOHandler(country);
+    if (StringUtils.isNotBlank(getCustomerName(handler, admin, addr)) && StringUtils.isNotBlank(dnbRecord.getDnbName())
+        && StringUtils.getLevenshteinDistance(getCustomerName(handler, admin, addr).toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 16) {
+      result = false;
+    }
+    String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
+    address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
+    address = address.trim();
+
+    String dnbAddress = dnbRecord.getDnbStreetLine1() != null ? dnbRecord.getDnbStreetLine1() : "";
+    dnbAddress += StringUtils.isNotBlank(dnbRecord.getDnbStreetLine2()) ? " " + dnbRecord.getDnbStreetLine2() : "";
+    dnbAddress = dnbAddress.trim();
+
+    if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
+        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8) {
+      result = false;
+    }
+    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())
+        && StringUtils.getLevenshteinDistance(addr.getPostCd().toUpperCase(), dnbRecord.getDnbPostalCode().toUpperCase()) > 2) {
+      result = false;
+    }
+    if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
+        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
+      result = false;
+    }
+
+    return result;
+  }
+
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   *
+   * @param addr
+   * @param handler
+   * @param admin
+   * @param addresses
+   * @param dnbRecord
+   * @return
+   */
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBCompany dnbRecord) {
+
+    DnBMatchingResponse dnbTemp = new DnBMatchingResponse();
+    dnbTemp.setDnbName(dnbRecord.getCompanyName());
+    dnbTemp.setDnbStreetLine1(dnbRecord.getPrimaryAddress() == null ? dnbRecord.getMailingAddress() : dnbRecord.getPrimaryAddress());
+    dnbTemp.setDnbStreetLine2(dnbRecord.getPrimaryAddress() == null ? dnbRecord.getMailingAddressCont() : dnbRecord.getPrimaryAddressCont());
+    dnbTemp.setDnbPostalCode(dnbRecord.getPrimaryAddress() == null ? dnbRecord.getMailingPostalCode() : dnbRecord.getPrimaryPostalCode());
+    dnbTemp.setDnbCity(dnbRecord.getPrimaryAddress() == null ? dnbRecord.getMailingCity() : dnbRecord.getPrimaryCity());
+
+    return closelyMatchesDnb(country, addr, admin, dnbTemp);
+  }
+
+  /**
+   * returns concatenated customerName from admin or address as per country
+   * settings
+   *
+   * @param handler
+   * @param admin
+   * @param soldTo
+   * @return
+   */
+  private static String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
+    String customerName = null;
+    if (!handler.customerNamesOnAddress()) {
+      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
+    } else {
+      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+    }
+    return customerName;
   }
 
 }
