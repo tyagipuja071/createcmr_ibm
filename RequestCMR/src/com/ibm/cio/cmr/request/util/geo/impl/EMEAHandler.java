@@ -349,8 +349,9 @@ public class EMEAHandler extends BaseSOFHandler {
               }
             }
 
-            if ((SystemLocation.GREECE.equals(record.getCmrIssuedBy()) || SystemLocation.CYPRUS.equals(record.getCmrIssuedBy()) || SystemLocation.TURKEY
-                .equals(record.getCmrIssuedBy())) && !CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+            if ((SystemLocation.GREECE.equals(record.getCmrIssuedBy()) || SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())
+                || SystemLocation.TURKEY.equals(record.getCmrIssuedBy()))
+                && !CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
               // greece/cyprus/turkey only ZS01; ZP01 and ZD01 from SOF directly
               continue;
             } else {
@@ -1607,9 +1608,8 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
 
-      if ("U".equals(admin.getReqType())
-          && (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equalsIgnoreCase(data
-              .getCmrIssuingCntry()))) {
+      if ("U".equals(admin.getReqType()) && (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(data.getCmrIssuingCntry())
+          || SystemLocation.IRELAND.equalsIgnoreCase(data.getCmrIssuingCntry()))) {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
       }
@@ -1700,9 +1700,8 @@ public class EMEAHandler extends BaseSOFHandler {
       // }
 
       // no addr std for israel
-      if ("IL".equals(currentRecord.getCmrCountryLanded())
-          && (SystemLocation.ISRAEL.equals(currentRecord.getCmrIssuedBy()) || SystemLocation.SAP_ISRAEL_SOF_ONLY.equals(currentRecord
-              .getCmrIssuedBy()))) {
+      if ("IL".equals(currentRecord.getCmrCountryLanded()) && (SystemLocation.ISRAEL.equals(currentRecord.getCmrIssuedBy())
+          || SystemLocation.SAP_ISRAEL_SOF_ONLY.equals(currentRecord.getCmrIssuedBy()))) {
         address.setAddrStdResult("X");
       }
 
@@ -3022,13 +3021,15 @@ public class EMEAHandler extends BaseSOFHandler {
 
   @Override
   public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-	    if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-	      return Arrays.asList("ZP01", "ZS01", "ZI01");
-	    } else if(SystemLocation.GREECE.equals(cmrIssuingCntry)) {
-	    	return Arrays.asList("ZP01", "ZS01");
-	    }
-	    return null;
-	  }
+    if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZP01", "ZS01", "ZI01");
+    } else if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZP01", "ZS01");
+    } else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZP01", "ZS01");
+    }
+    return null;
+  }
 
   @Override
   public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
