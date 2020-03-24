@@ -132,20 +132,24 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       switch (approval.getType()) {
       case "A":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_APPROVED, approval, admin);
-        moveToNextStep(entityManager, admin);
+        if (!"REP".equals(admin.getReqStatus())) {
+          moveToNextStep(entityManager, admin);
+        }
         approval.setProcessed(true);
         approval.setActionDone(CmrConstants.YES_NO.Y.toString());
         break;
       case "R":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_REJECTED, approval, admin);
-        moveBackToRequester(entityManager, admin);
+       // moveBackToRequester(entityManager, admin);
         // defunctCurrentApprovals(entityManager, approval, req);
         approval.setProcessed(true);
         approval.setActionDone(CmrConstants.YES_NO.Y.toString());
         break;
       case "C":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_CONDITIONALLY_APPROVED, approval, admin);
-        moveToNextStep(entityManager, admin);
+        if (!"REP".equals(admin.getReqStatus())) {
+          moveToNextStep(entityManager, admin);
+        }
         approval.setProcessed(true);
         approval.setActionDone(CmrConstants.YES_NO.Y.toString());
         break;
