@@ -912,9 +912,9 @@ function setSBOValuesForIsuCtc() {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (custSubGrp == 'IBMEM' && results.length > 0) {
       FormManager.setValue('salesBusOffCd', "099");
-    } else if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && results.length > 0) {
+    } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBP') {
       FormManager.setValue('salesBusOffCd', "080");
-    } else if ((custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'XINT' || custSubGrp == 'XISO') && results.length > 0) {
+    } else if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'XINT' || custSubGrp == 'XISO') {
       FormManager.setValue('salesBusOffCd', "000");
     } else if (results.length > 1) {
       FormManager.setValue('salesBusOffCd', "");
