@@ -187,8 +187,8 @@ public class AustraliaUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
-    String[] scnarioList = { "XIGF", "CROSS", "MKTPC", "BLUMX", "DUMMY", "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
-    skipCompanyCheckForScenario(requestData, engineData, Arrays.asList(scnarioList), true);
+    //String[] scnarioList = { "XIGF", "CROSS", "MKTPC", "BLUMX", "DUMMY", "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
+    //skipCompanyCheckForScenario(requestData, engineData, Arrays.asList(scnarioList), true);
     return true;
   }
 
