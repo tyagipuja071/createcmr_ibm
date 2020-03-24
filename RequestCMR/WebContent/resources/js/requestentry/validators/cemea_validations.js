@@ -2203,7 +2203,9 @@ function customVATMandatoryForAT() {
   }
 
   var custSubType = FormManager.getActualValue('custSubGrp');
-  if (custSubType != null && custSubType != '' && (custSubType == 'COMME' || custSubType == 'BUSPR')) {
+  if (custSubType != null && custSubType != '' && (custSubType == 'COMME' 
+	  || custSubType == 'BUSPR' || custSubType == 'XBP' || custSubType == 'XCOM' 
+	  || custSubType == 'XGOV' || custSubType == 'XISO' || custSubType == 'XINT')) {
     if (!dijit.byId('vatExempt').get('checked')) {
       // Make Vat Mandatory
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
