@@ -323,8 +323,14 @@ var SCENARIO_FIELDS = [ {
   tab : 'MAIN_CUST_TAB',
   address : false
 }, {
-  id : '##CustClassCode',
+  id : '##CustClass',
   lbl : 'Customer Class',
+  name : 'custClass',
+  tab : 'MAIN_IBM_TAB',
+  address : false
+}, {
+  id : '##CustClassCode',
+  lbl : 'Customer Class Code',
   name : 'custClassCode',
   tab : 'MAIN_IBM_TAB',
   address : false
@@ -580,19 +586,19 @@ var SCENARIO_FIELDS = [ {
   name : 'cmrNo',
   tab : 'MAIN_IBM_TAB',
   address : false
-},{
+}, {
   id : '####CrosSubTyp',
   lbl : 'Type Of Customer',
   name : 'crosSubTyp',
   tab : 'MAIN_IBM_TAB',
   address : false
-},{
+}, {
   id : '##Cluster',
   lbl : 'Cluster',
   name : 'apCustClusterId',
   tab : 'MAIN_IBM_TAB',
   address : false
-} ,{
+}, {
   id : '##IdentClient',
   lbl : 'Ident Client',
   name : 'identClient',
