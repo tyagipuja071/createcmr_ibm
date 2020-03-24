@@ -391,6 +391,8 @@ app.controller('ScenariosController', [ '$scope', '$document', '$http', '$timeou
     }, 'Scenario ' + ($scope.addMode == 'T' ? 'Type' : 'Sub-type') + ' added successfully.', $scope.successAddType);
   };
 
+  // create
+
   $scope.saveScenarios = function() {
     var error = '';
     var count = 0;
