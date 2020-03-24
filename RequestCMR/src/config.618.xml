@@ -459,7 +459,7 @@
         
       </columns>
     </tab>
-    <tab name="EPL" data="false" type="Address" typeCode="ZI01">
+    <tab name="Install At" data="false" type="Address" typeCode="ZI01">
       <columns>
         <column exactLength="true">
           <label>CMR. No</label>
