@@ -59,6 +59,23 @@ public class TurkeyTransformer extends EMEATransformer {
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
+  private static final String ADDRESS_USE_EXISTS = "Y";
+  private static final String ADDRESS_USE_NOT_EXISTS = "N";
+  private static final String ADDRESS_USE_MAILING = "1";
+  private static final String ADDRESS_USE_BILLING = "2";
+  private static final String ADDRESS_USE_INSTALLING = "3";
+  private static final String ADDRESS_USE_SHIPPING = "4";
+  private static final String ADDRESS_USE_EPL_MAILING = "5";
+  private static final String ADDRESS_USE_LIT_MAILING = "6";
+  private static final String ADDRESS_USE_COUNTRY_A = "A";
+  private static final String ADDRESS_USE_COUNTRY_B = "B";
+  private static final String ADDRESS_USE_COUNTRY_C = "C";
+  private static final String ADDRESS_USE_COUNTRY_D = "D";
+  private static final String ADDRESS_USE_COUNTRY_E = "E";
+  private static final String ADDRESS_USE_COUNTRY_F = "F";
+  private static final String ADDRESS_USE_COUNTRY_G = "G";
+  private static final String ADDRESS_USE_COUNTRY_H = "H";
+
   public static void main(String[] args) {
     String s = "TÜRKİYE";
     System.out.println(s);
@@ -230,8 +247,8 @@ public class TurkeyTransformer extends EMEATransformer {
         !StringUtils.isEmpty(addrData.getTaxOffice()) ? addrData.getTaxOffice() : "");
     // vat
     if (!MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType())) {
-      messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU", !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat()
-          : "");
+      messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU",
+          !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat() : "");
     } else {
       messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU", "");
     }
@@ -260,7 +277,7 @@ public class TurkeyTransformer extends EMEATransformer {
     // Shipping, installing, software address
     String addressType = getTargetAddressType(addrData.getId().getAddrType());
 
-    if (addressType.equalsIgnoreCase("Shipping") || addressType.equalsIgnoreCase("Installing")) {
+    if (addressType.equalsIgnoreCase("Address in local language")) {
 
       char[] problematicCharList = new char[12];
 
@@ -416,7 +433,8 @@ public class TurkeyTransformer extends EMEATransformer {
       if (!(StringUtils.isEmpty(addressDataMap.get("poBoxCity"))) && !(addressDataMap.get("poBoxCity").equals(handler.addrData.getPoBoxCity()))) {
         handler.addrData.setPoBoxCity(addressDataMap.get("poBoxCity"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxPostCd"))) && !(addressDataMap.get("poBoxPostCd").equals(handler.addrData.getPoBoxPostCd()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxPostCd")))
+          && !(addressDataMap.get("poBoxPostCd").equals(handler.addrData.getPoBoxPostCd()))) {
         handler.addrData.setPoBoxPostCd(addressDataMap.get("poBoxPostCd"));
       }
       if (!(StringUtils.isEmpty(addressDataMap.get("postCd"))) && !(addressDataMap.get("postCd").equals(handler.addrData.getPostCd()))) {
@@ -444,24 +462,24 @@ public class TurkeyTransformer extends EMEATransformer {
   public String getAddressKey(String addrType) {
     switch (addrType) {
     case "ZP01":
-      return "Mail";
+      return "Address in local language";
     case "ZS01":
-      return "Install";
+      return "Sold-To";
     case "ZD01":
-      return "Ship";
+      return "Ship-To";
     case "ZI01":
-      return "EPL";
+      return "Install-At";
     default:
       return "";
 
-      // case "ZP01":
-      // return "Mail";
-      // case "ZS01":
-      // return "Install";
-      // case "ZD01":
-      // return "Ship";
-      // default:
-      // return "";
+    // case "ZP01":
+    // return "Mail";
+    // case "ZS01":
+    // return "Install";
+    // case "ZD01":
+    // return "Ship";
+    // default:
+    // return "";
     }
   }
 
@@ -469,24 +487,24 @@ public class TurkeyTransformer extends EMEATransformer {
   public String getTargetAddressType(String addrType) {
     switch (addrType) {
     case "ZP01":
-      return "Mailing";
+      return "Address in local language";
     case "ZS01":
-      return "Installing";
+      return "Sold-To";
     case "ZD01":
-      return "Shipping";
+      return "Ship-To";
     case "ZI01":
-      return "EPL";
+      return "Install-At";
     default:
       return "";
 
-      // case "ZP01":
-      // return "Mailing";
-      // case "ZS01":
-      // return "Installing";
-      // case "ZD01":
-      // return "Shipping";
-      // default:
-      // return "";
+    // case "ZP01":
+    // return "Mailing";
+    // case "ZS01":
+    // return "Installing";
+    // case "ZD01":
+    // return "Shipping";
+    // default:
+    // return "";
     }
   }
 
@@ -514,7 +532,7 @@ public class TurkeyTransformer extends EMEATransformer {
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
     case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
@@ -524,17 +542,17 @@ public class TurkeyTransformer extends EMEATransformer {
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
 
-      // switch (addr.getId().getAddrType()) {
-      // case MQMsgConstants.ADDR_ZP01:
-      // return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-      // case MQMsgConstants.ADDR_ZS01:
-      // return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
-      // case MQMsgConstants.ADDR_ZD01:
-      // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-      // case MQMsgConstants.ADDR_ZI01:
-      // return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-      // default:
-      // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    // switch (addr.getId().getAddrType()) {
+    // case MQMsgConstants.ADDR_ZP01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+    // case MQMsgConstants.ADDR_ZS01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    // case MQMsgConstants.ADDR_ZD01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    // case MQMsgConstants.ADDR_ZI01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    // default:
+    // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
   }
 
@@ -562,6 +580,9 @@ public class TurkeyTransformer extends EMEATransformer {
 
       legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
 
+      legacyAddr.setIsAddrUseMailing("Y");
+      legacyAddr.setIsAddrUseBilling("Y");
+
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
   }
@@ -582,60 +603,75 @@ public class TurkeyTransformer extends EMEATransformer {
     String line5 = "";
     String line6 = "";
     String addrType = addrData.getId().getAddrType();
+    String phone = "";
+    String addrLineT = "";
 
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
     // line1
     line1 = addrData.getCustNm1();
     line2 = addrData.getCustNm2();
-    // line3 = addrData.getAddrTxt();
-    // line4 = addrData.getAddrTxt2();
+    line3 = addrData.getAddrTxt();
+    line4 = addrData.getAddrTxt2();
+
+    // Dept + Postal code + City
+    line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
+
+    if (!StringUtils.isBlank(addrData.getLandCntry())) {
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    }
+
+    phone = addrData.getCustPhone();
+    addrLineT = addrData.getTaxOffice();
 
     // ZS01 Installing Address
-    if (MQMsgConstants.ADDR_ZS01.equals(addrType)) {
-
-      line3 = "";
-
-      // Street
-      if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-        line4 = addrData.getAddrTxt();
-      }
-
-      // Dept + Postal code + City
-      line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
-
-      // Country Landed :"full country name" based on landed cty
-      if (!StringUtils.isBlank(addrData.getLandCntry())) {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-      }
-    }
-    // ZP01 Billing Address
-    if (MQMsgConstants.ADDR_ZP01.equals(addrType)) {
-
-      line3 = addrData.getAddrTxt();
-      line4 = addrData.getAddrTxt2();
-
-      // Dept + Postal code + City
-      line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
-
-      if (!StringUtils.isBlank(addrData.getLandCntry())) {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-      }
-    }
-
-    // Company Address
-    if (MQMsgConstants.ADDR_ZD01.equals(addrType)) {
-
-      line3 = addrData.getAddrTxt();
-      line4 = addrData.getAddrTxt2();
-
-      // Dept + Postal code + City
-      line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
-
-      if (!StringUtils.isBlank(addrData.getLandCntry())) {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-      }
-    }
+    // if (MQMsgConstants.ADDR_ZS01.equals(addrType)) {
+    //
+    // line3 = "";
+    //
+    // // Street
+    // if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+    // line4 = addrData.getAddrTxt();
+    // }
+    //
+    // // Dept + Postal code + City
+    // line5 = addrData.getDept() + " " + addrData.getPostCd() + " " +
+    // addrData.getCity1();
+    //
+    // // Country Landed :"full country name" based on landed cty
+    // if (!StringUtils.isBlank(addrData.getLandCntry())) {
+    // line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    // }
+    // }
+    // // ZP01 Billing Address
+    // if (MQMsgConstants.ADDR_ZP01.equals(addrType)) {
+    //
+    // line3 = addrData.getAddrTxt();
+    // line4 = addrData.getAddrTxt2();
+    //
+    // // Dept + Postal code + City
+    // line5 = addrData.getDept() + " " + addrData.getPostCd() + " " +
+    // addrData.getCity1();
+    //
+    // if (!StringUtils.isBlank(addrData.getLandCntry())) {
+    // line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    // }
+    // }
+    //
+    // // Company Address
+    // if (MQMsgConstants.ADDR_ZD01.equals(addrType)) {
+    //
+    // line3 = addrData.getAddrTxt();
+    // line4 = addrData.getAddrTxt2();
+    //
+    // // Dept + Postal code + City
+    // line5 = addrData.getDept() + " " + addrData.getPostCd() + " " +
+    // addrData.getCity1();
+    //
+    // if (!StringUtils.isBlank(addrData.getLandCntry())) {
+    // line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    // }
+    // }
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
@@ -643,6 +679,9 @@ public class TurkeyTransformer extends EMEATransformer {
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
     legacyAddr.setAddrLine6(line6);
+    legacyAddr.setAddrPhone(phone);
+    legacyAddr.setAddrLineT(addrLineT);
+    ;
 
   }
 
@@ -655,7 +694,7 @@ public class TurkeyTransformer extends EMEATransformer {
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
     if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(990000);
+      generateCMRNoObj.setMin(993000);
       generateCMRNoObj.setMax(998899);
       LOG.debug("that is TR INTER CMR");
     } else {
@@ -675,7 +714,7 @@ public class TurkeyTransformer extends EMEATransformer {
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setForUpdate(true);
       }
-    }
+      }
 
     legacyAddr.setForUpdate(true);
 
@@ -687,15 +726,19 @@ public class TurkeyTransformer extends EMEATransformer {
         legacyFiscalAddr.setAddrLine1(prefix + addr.getCustNm1());
       }
 
-    }
+      }
 
     if (!StringUtils.isBlank(addr.getCustNm2())) {
-      legacyAddr.setAddrLine2(addr.getCustNm2());
+      if ("@".equals(addr.getCustNm2())) {
+        legacyAddr.setAddrLine2("");
+      } else {
+        legacyAddr.setAddrLine2(addr.getCustNm2());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setAddrLine2("CL" + addr.getCustNm2());
+        if (legacyFiscalAddr != null) {
+          legacyFiscalAddr.setAddrLine2("CL" + addr.getCustNm2());
+        }
       }
-    }
+      }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
       legacyAddr.setStreet(addr.getAddrTxt());
@@ -703,15 +746,19 @@ public class TurkeyTransformer extends EMEATransformer {
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setStreet(addr.getAddrTxt());
       }
-    }
+      }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      legacyAddr.setStreetNo(addr.getAddrTxt2());
+      if ("@".equals(addr.getAddrTxt2())) {
+        legacyAddr.setStreetNo("");
+      } else {
+        legacyAddr.setStreetNo(addr.getAddrTxt2());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setStreetNo(addr.getAddrTxt2());
+        if (legacyFiscalAddr != null) {
+          legacyFiscalAddr.setStreetNo(addr.getAddrTxt2());
+        }
       }
-    }
+      }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
       legacyAddr.setCity(addr.getCity1());
@@ -719,7 +766,15 @@ public class TurkeyTransformer extends EMEATransformer {
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setCity(addr.getCity1());
       }
-    }
+      }
+
+    if (!StringUtils.isBlank(addr.getDept())) {
+      if ("@".equals(addr.getDept())) {
+        legacyAddr.setDistrict("");
+      } else {
+        legacyAddr.setDistrict(addr.getDept());
+      }
+      }
 
     if (!StringUtils.isBlank(addr.getDept())) {
       legacyAddr.setContact(addr.getDept());
@@ -727,7 +782,7 @@ public class TurkeyTransformer extends EMEATransformer {
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setContact(addr.getDept());
       }
-    }
+      }
 
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
@@ -739,7 +794,7 @@ public class TurkeyTransformer extends EMEATransformer {
       if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType()) && isCrossBorderForMass(addr, legacyAddr)) {
         handlePostCdSpecialLogic(cust, data, addr.getPostCd(), entityManager);
       }
-    }
+      }
 
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
@@ -749,39 +804,15 @@ public class TurkeyTransformer extends EMEATransformer {
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setPoBox(addr.getPoBox());
       }
-    }
-
-    boolean crossBorder = false;
-    if (!StringUtils.isEmpty(addr.getLandCntry()) && !"ES".equals(addr.getLandCntry())) {
-      crossBorder = true;
-    } else {
-      crossBorder = false;
-    }
-
-    if (!StringUtils.isBlank(addr.getLandCntry()) && crossBorder) {
-      legacyAddr.setAddrLine5(LandedCountryMap.getCountryName(addr.getLandCntry()));
-
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(LandedCountryMap.getCountryName(addr.getLandCntry()));
       }
-    }
-
-    if (!StringUtils.isBlank(addr.getCounty()) && !crossBorder) {
-      legacyAddr.setAddrLine5(addr.getCounty());
-
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(addr.getCounty());
-      }
-    }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 
-    if (legacyFiscalAddr != null) {
+      if (legacyFiscalAddr != null) {
       formatMassUpdateAddressLines(entityManager, legacyFiscalAddr, addr, true);
       legacyObjects.addAddress(legacyFiscalAddr);
     }
-
   }
 
   @Override
@@ -958,9 +989,10 @@ public class TurkeyTransformer extends EMEATransformer {
         if ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) {
           legacyCust.setModeOfPayment(cof);
         }
-      } else {
-        legacyCust.setModeOfPayment("");
       }
+      // else {
+      // legacyCust.setModeOfPayment("");
+      // }
 
       String ecoCode = data.getEconomicCd();
       if (!StringUtils.isBlank(ecoCode)) {
@@ -1019,15 +1051,15 @@ public class TurkeyTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
       legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
     }
-    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
-
+    if (!StringUtils.isEmpty(data.getCollectionCd())) {
+      legacyCust.setDistrictCd(data.getCollectionCd());
+    }
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
   }
 
   @Override
-  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
-    // default mapping for DATA and CMRTCUST
+  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) { // default
     LOG.debug("Mapping default Data values..");
 
     if (!StringUtils.isBlank(muData.getAbbrevNm())) {
@@ -1070,7 +1102,11 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      cust.setEnterpriseNo(muData.getEnterprise());
+      if ("@".equals(muData.getEnterprise())) {
+        cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getEnterprise());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {
@@ -1078,7 +1114,11 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
-      cust.setDistrictCd(muData.getCollectionCd());
+      if ("@".equals(muData.getCollectionCd())) {
+        cust.setCollectionCd("");
+      } else {
+        cust.setCollectionCd(muData.getCollectionCd());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getIsicCd())) {
@@ -1086,8 +1126,11 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      String newVat = handleVatMassUpdateChanges(muData.getVat(), cust.getVat());
-      cust.setVat(newVat);
+      if ("@".equals(muData.getCollectionCd())) {
+        cust.setVat("");
+      } else {
+        cust.setVat(muData.getVat());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getCustNm1())) {
@@ -1096,11 +1139,19 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getInacCd())) {
-      cust.setInacCd(muData.getInacCd());
+      if ("@".equals(muData.getInacCd())) {
+        cust.setInacCd("");
+      } else {
+        cust.setInacCd(muData.getInacCd());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+      if ("@".equals(muData.getMiscBillCd())) {
+        cust.setEmbargoCd("");
+      } else {
       cust.setEmbargoCd(muData.getMiscBillCd());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getOutCityLimit())) {
@@ -1121,7 +1172,6 @@ public class TurkeyTransformer extends EMEATransformer {
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
-
   }
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
@@ -1206,6 +1256,102 @@ public class TurkeyTransformer extends EMEATransformer {
       messageHash.put("NationalCust", "");
     }
 
+  }
+
+  private List<Addr> getAddrLegacy(EntityManager entityManager, String reqId) {
+    LOG.debug("Turkey -- Searching for ADDR records for Request " + reqId);
+    String sql = ExternalizedQuery.getSql("LEGACYD.GET.ADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    return query.getResults(Addr.class);
+  }
+
+  private void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+    setAddrUseFieldsToN(legacyAddr);
+    for (String use : addrUse.split("")) {
+      switch (use) {
+      case ADDRESS_USE_MAILING:
+        legacyAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_BILLING:
+        legacyAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_INSTALLING:
+        legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_SHIPPING:
+        legacyAddr.setIsAddrUseShipping(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_EPL_MAILING:
+        legacyAddr.setIsAddrUseEPL(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_LIT_MAILING:
+        legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_A:
+        legacyAddr.setIsAddressUseA(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_B:
+        legacyAddr.setIsAddressUseB(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_C:
+        legacyAddr.setIsAddressUseC(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_D:
+        legacyAddr.setIsAddressUseD(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_E:
+        legacyAddr.setIsAddressUseE(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_F:
+        legacyAddr.setIsAddressUseF(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_G:
+        legacyAddr.setIsAddressUseG(ADDRESS_USE_EXISTS);
+        break;
+      case ADDRESS_USE_COUNTRY_H:
+        legacyAddr.setIsAddressUseH(ADDRESS_USE_EXISTS);
+        break;
+      }
+    }
+  }
+
+  private void setAddrUseFieldsToN(CmrtAddr legacyAddr) {
+    legacyAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseShipping(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseEPL(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseA(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseB(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseC(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseD(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseE(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseF(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseG(ADDRESS_USE_NOT_EXISTS);
+    legacyAddr.setIsAddressUseH(ADDRESS_USE_NOT_EXISTS);
+  }
+
+  @Override
+  public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
+    long requestId = cmrObjects.getAdmin().getId().getReqId();
+    Map<String, String> addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
+
+    LOG.debug("LEGACY -- Turkey OVERRIDE transformOtherData");
+    LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
+    for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
+      modifyAddrUseFields(legacyAddr.getId().getAddrNo(), addrSeqToAddrUseMap.get(legacyAddr.getId().getAddrNo()), legacyAddr);
+    }
+  }
+
+  private Map<String, String> mapSeqNoToAddrUse(List<Addr> addrList) {
+    Map<String, String> addrSeqToAddrUseMap = new HashMap<>();
+    for (Addr addr : addrList) {
+      addrSeqToAddrUseMap.put(addr.getId().getAddrSeq(), getAddressUse(addr));
+    }
+    return addrSeqToAddrUseMap;
   }
 
 }
