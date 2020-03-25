@@ -112,6 +112,7 @@ function afterConfigForFR() {
 function setINACOnScenario() {
   var role = null;
   var reqType = FormManager.getActualValue('reqType');
+  var subGrp = FormManager.getActualValue('custSubGrp');
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -134,6 +135,10 @@ function setINACOnScenario() {
     } else if (role == 'Processor') {
       FormManager.enable('inacCd');
     }
+  }
+  if(cntryCd == 'FR' && subGrp == 'INTER'){
+	  FormManager.setValue('inacCd','');
+      FormManager.readOnly('inacCd');
   }
 }
 function setISICAndSubindustryOnScenario() {
@@ -255,7 +260,7 @@ function setSBOOnScenario() {
   if (custSubGrp == '') {
     return
   } else {
-    if (custSubGrp == 'INTSO' || custSubGrp == 'CBTSO') {
+    if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
