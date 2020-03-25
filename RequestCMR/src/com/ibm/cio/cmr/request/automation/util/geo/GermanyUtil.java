@@ -316,7 +316,9 @@ public class GermanyUtil extends AutomationUtil {
     }
 
     // handle coverage
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && engineData.get(AutomationEngineData.COVERAGE_ID) != null) {
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && engineData.get(AutomationEngineData.COVERAGE_ID) != null
+        && engineData.get(AutomationEngineData.COVERAGE_FROM) != null && ("BG_CALC".equals(engineData.get(AutomationEngineData.COVERAGE_FROM))
+            || "BG_ODM".equals(engineData.get(AutomationEngineData.COVERAGE_FROM)))) {
       String coverageId = (String) engineData.get(AutomationEngineData.COVERAGE_ID);
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
       details.append("Coverage calculated using Global/Domestic Buying Group.").append("\n");
