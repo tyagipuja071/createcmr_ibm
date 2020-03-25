@@ -55,9 +55,14 @@
           <label>SBO</label>
           <dbColumn>SALES_BO_CD</dbColumn>
           <width>15</width>
-          <length>10</length>
+          <length>3</length>
         </column>
-               
+        <column>
+          <label>Company number</label>
+          <dbColumn>ENTERPRISE</dbColumn>
+          <width>15</width>
+          <length>6</length>
+        </column>
         <column>
           <label>Order block code</label>
           <dbColumn>ORD_BLK</dbColumn>
@@ -327,7 +332,6 @@
           <width>40</width>
           <length>30</length>
         </column>
-        
         <column>
           <label>City</label>
           <dbColumn>CITY1</dbColumn>
@@ -345,21 +349,18 @@
           <width>18</width>
           <length>10</length>
         </column>
-        
         <column>
           <label>PostBox</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>20</width>
           <length>6</length>
         </column>
-        
         <column>
           <label>Phone</label>
           <dbColumn>CUST_PHONE</dbColumn>
           <width>20</width>
           <length>11</length>
         </column>
-        
         <column>
           <label>Hardware Master</label>
           <dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -377,35 +378,30 @@
           <width>20</width>
           <length>6</length>
         </column>
-        
         <column>
           <label>Address Seq. No.</label>
           <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
           <width>20</width>
           <length>15</length>
         </column>
-        
         <column>
           <label>Customer Name 1</label>
           <dbColumn>CUST_NM1</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
         <column>
           <label>Customer Name 2</label>
           <dbColumn>CUST_NM2</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
         <column>
           <label>Customer Name 3</label>
           <dbColumn>CUST_NM3</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-                
         <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
