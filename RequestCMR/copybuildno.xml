@@ -11,11 +11,11 @@
   <property name="target.file" value="${env.TARGET_BUILD_NO_FILE}" />
   
   <target name="copybuildno">
+  	<property file="src/build-no.properties" prefix="cmrconfig"></property>
+  	<property file="src/cmr-config.properties" prefix="cmrprefix"></property>
     <propertyfile file="src/build-no.properties">
       <entry key="BUILD" type="int" operation="+" value="1" pattern="0000"/>
     </propertyfile>
-  	<property file="src/build-no.properties" prefix="cmrconfig"></property>
-  	<property file="src/cmr-config.properties" prefix="cmrprefix"></property>
     <tstamp>
       <format property="build-time" pattern="yyyyMMdd_HHmm" />
     </tstamp>
