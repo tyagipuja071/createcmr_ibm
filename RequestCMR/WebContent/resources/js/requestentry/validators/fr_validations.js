@@ -136,7 +136,7 @@ function setINACOnScenario() {
       FormManager.enable('inacCd');
     }
   }
-  if(cntryCd == 'FR' && subGrp == 'INTER'){
+  if(countyCd == 'FR' && subGrp == 'INTER'){
 	  FormManager.setValue('inacCd','');
       FormManager.readOnly('inacCd');
   }
