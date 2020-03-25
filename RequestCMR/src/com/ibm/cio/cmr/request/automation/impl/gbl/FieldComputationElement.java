@@ -40,7 +40,7 @@ public class FieldComputationElement extends OverridingElement {
         Constructor<AutomationUtil> constructor = (Constructor<AutomationUtil>) handlerClass.getConstructor();
         result = constructor.newInstance().doCountryFieldComputations(entityManager, results, details, overrides, requestData, engineData);
       } catch (Exception e) {
-        log.warn("Field Computation handler for issuing country " + issuingCntry + " cannot be determined via util.");
+        log.error("Field Computation handler for issuing country " + issuingCntry + " cannot be determined via util.", e);
       }
     }
     if (result == null) {
