@@ -230,6 +230,7 @@ public class CalculateCoverageElement extends OverridingElement {
           // next elements to use it
           if (engineData.get(AutomationEngineData.COVERAGE_ID) == null) {
             engineData.put(AutomationEngineData.COVERAGE_ID, container.getFinalCoverage());
+            engineData.put(AutomationEngineData.COVERAGE_FROM, covFrom);
           }
           if (container.getBaseCoverage() != null) {
             LOG.debug("Logging Base Coverage ID: " + container.getBaseCoverage());
@@ -241,6 +242,7 @@ public class CalculateCoverageElement extends OverridingElement {
       } else if (!currCoverage.isEmpty()) {
         result.setResults("Calculated");
         details.append("Coverage calculated based only on request data. No projected Buying Group found.");
+        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       } else {
         result.setResults("Cannot Calculate");
         result.setOnError(true);

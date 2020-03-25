@@ -25,7 +25,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
 
   private static final Logger LOG = Logger.getLogger(DnBCheckElement.class);
 
-  private static final String COMPANY_VERIFIED_INDC_YES = "Y";
+  // private static final String COMPANY_VERIFIED_INDC_YES = "Y";
   public static final String RESULT_ACCEPTED = "Accepted";
   public static final String MATCH_INDC_YES = "Y";
   public static final String RESULT_REJECTED = "Rejected";
