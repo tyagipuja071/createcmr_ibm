@@ -8,17 +8,17 @@
   
   <!-- Environment variables -->
   <property environment="env"/>
-  <property name="target.file" value="C:/builds/buildscripts/properties/CreateCMR-Build.txt" />
-  <property name="build.file" value="C:/builds/buildscripts/properties/CreateCMR.txt" />
+  <property name="target.file" value="${env.TARGET_BUILD_NO_FILE}" />
   
   <target name="copybuildno">
   	<property file="src/cmr-config.properties" prefix="cmrconfig"></property>
-    <loadfile property="BUILDTS" srcfile="${build.file}"></loadfile>
+    <tstamp>
+      <format property="build-time" pattern="yyyyMMdd_HHmm" />
+    </tstamp>
   	<echo>Build No: ${cmrconfig.BUILD}</echo>
-    <!--<echo>Release No: ${cmrconfig.RELEASE}</echo>-->
-  	<echo>RTC Build TS: ${BUILDTS}</echo>
-  	<echo>Setting Build No to B${cmrconfig.BUILD}_${BUILDTS}</echo>
-  	<echo file="${target.file}" append="false">B${cmrconfig.BUILD}_${BUILDTS}</echo>
+  	<echo>Target File: ${target.file}</echo>
+  	<echo>Setting Build No to B${cmrconfig.BUILD}_${build-time}</echo>
+  	<echo file="${target.file}" append="false">B${cmrconfig.BUILD}_${build-time}</echo>
   </target>
 
 </project>
