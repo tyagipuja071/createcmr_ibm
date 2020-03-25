@@ -16,7 +16,8 @@
       <format property="build-time" pattern="yyyyMMdd_HHmm" />
     </tstamp>
   	<echo>Build No: ${cmrconfig.BUILD}</echo>
-  	<echo>RTC Build TS: ${BUILDTS}</echo>
+  	<echo>Target File: ${target.file}</echo>
+  	<echo>Target File2: ${env.TARGET_BUILD_NO_FILE}</echo>
   	<echo>Setting Build No to B${cmrconfig.BUILD}_${build-time}</echo>
   	<echo file="${target.file}" append="false">B${cmrconfig.BUILD}_${build-time}</echo>
   </target>
