@@ -132,7 +132,7 @@ function isSkipDnbMatching() {
   var dnbPrimary = FormManager.getActualValue("dnbPrimary");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
-  var subRegionCd = countryUse!=null && countryUse!=null && countryUse.length>0 ? countryUse : cntry;
+  var subRegionCd = countryUse != null && countryUse != null && countryUse.length > 0 ? countryUse : cntry;
   if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
     var qParams = {
       CNTRY : cntry,
@@ -156,6 +156,8 @@ function isSkipDnbMatching() {
         }
       }
     }
+  } else if (dnbPrimary == 'N') {
+    return true;
   }
   return false;
 }
@@ -170,11 +172,11 @@ function handleRequiredDnBSearch() {
   if (reqId != null && reqId != '' && reqType == 'C' && reqStatus == 'DRA' && _dnbSearchHandler == null) {
     _dnbSearchHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       if (!isSkipDnbMatching()) {
-        dojo.byId('dnbRequired').style.display = "inline";
-        dojo.byId('dnbRequiredIndc').style.display = "inline";
+        cmr.showNode('dnbRequired');
+        cmr.showNode('dnbRequiredIndc');
       } else {
-        dojo.byId('dnbRequired').style.display = "none";
-        dojo.byId('dnbRequiredIndc').style.display = "none";
+        cmr.hideNode('dnbRequired');
+        cmr.hideNode('dnbRequiredIndc');
       }
     });
   }
@@ -721,7 +723,7 @@ dojo.addOnLoad(function() {
       '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883', '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693',
       '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618',
       '706', '760', '758', '678', '702', '806', '846', '624', '788', '641', '848' ], true);
-  GEOHandler.addAfterConfig(handleRequiredDnBSearch,GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
+  GEOHandler.addAfterConfig(handleRequiredDnBSearch, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   GEOHandler.registerValidator(addCrossBorderValidator, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE_CRSSBORDER, null, true);
 
   /* 1427121 BDS Postal COde validation */
