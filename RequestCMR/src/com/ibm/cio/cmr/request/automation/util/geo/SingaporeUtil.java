@@ -135,8 +135,12 @@ public class SingaporeUtil extends AutomationUtil {
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
-    String[] scnarioList = { "XBLUM", "BLUMX", "MKTPC", "XMKTP", "DUMMY", "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
-    skipCompanyCheckForScenario(requestData, engineData, Arrays.asList(scnarioList), false);
+    /*
+     * String[] scnarioList = { "XBLUM", "BLUMX", "MKTPC", "XMKTP", "DUMMY",
+     * "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
+     * skipCompanyCheckForScenario(requestData, engineData,
+     * Arrays.asList(scnarioList), false);
+     */
     return true;
   }
 }
