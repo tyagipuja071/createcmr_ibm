@@ -344,7 +344,7 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-    } else {
+    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
       HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
           data.getClientTier());
       LOG.debug("Calculated SORTL: " + response.get(SORTL));
@@ -375,6 +375,9 @@ public class GermanyUtil extends AutomationUtil {
         results.setResults("Coverage not calculated.");
         results.setOnError(true);
       }
+    } else {
+      details.append("Skipped coverage calculation from 32S-PostalCode Logic.").append("\n");
+      results.setResults("Coverage calculation skipped.");
     }
 
     results.setProcessOutput(overrides);
