@@ -1089,8 +1089,23 @@ public class LegacyDirectService extends TransConnService {
         + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
     cust.setCreditCd(data.getCreditCd());
     cust.setTaxCd(data.getSpecialTaxCd());
-    cust.setSalesRepNo(data.getRepTeamMemberNo());
-    cust.setSalesGroupRep(data.getSalesTeamCd());
+
+    // CMR-2279:Turkey-ISR set based on SBO
+    if ("862".equals(data.getCmrIssuingCntry()) && data.getSalesBusOffCd() != null) {
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", data.getSalesBusOffCd());
+      q.setParameter("CNTRY", data.getCmrIssuingCntry());
+      String isr = q.getSingleResult(String.class);
+      cust.setSalesRepNo(isr);
+      cmrObjects.getData().setSalesTeamCd(isr);
+      cust.setSalesGroupRep(isr);
+      cmrObjects.getData().setInstallBranchOff(isr);
+    } else {
+      cust.setSalesRepNo(data.getSalesTeamCd());
+      cust.setSalesGroupRep(data.getSalesTeamCd());
+    }
+
     if (!StringUtils.isEmpty(data.getEnterprise())) {
       cust.setEnterpriseNo(data.getEnterprise());
     }
@@ -1313,12 +1328,27 @@ public class LegacyDirectService extends TransConnService {
     } else {
       cust.setTaxCd("");
     }
-    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-      cust.setSalesRepNo(data.getRepTeamMemberNo());
+
+    // CMR-2279:Turkey-ISR set based on SBO
+    if ("862".equals(data.getCmrIssuingCntry()) && data.getSalesBusOffCd() != null) {
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", data.getSalesBusOffCd());
+      q.setParameter("CNTRY", data.getCmrIssuingCntry());
+      String isr = q.getSingleResult(String.class);
+      cust.setSalesRepNo(isr);
+      cmrObjects.getData().setSalesTeamCd(isr);
+      cust.setSalesGroupRep(isr);
+      cmrObjects.getData().setInstallBranchOff(isr);
+    } else {
+      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+        cust.setSalesRepNo(data.getRepTeamMemberNo());
+      }
+      if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+        cust.setSalesGroupRep(data.getSalesTeamCd());
+      }
     }
-    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-      cust.setSalesGroupRep(data.getSalesTeamCd());
-    }
+
     if (!StringUtils.isBlank(data.getEnterprise())) {
       cust.setEnterpriseNo(data.getEnterprise());
     }
