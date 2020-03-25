@@ -73,7 +73,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
-    // COMMENTEDD BECAUSE OF CONFLICTING REQUIREMENT
+    // COMMENTED BECAUSE OF CONFLICTING REQUIREMENT
     // if (scorecard != null &&
     // StringUtils.isNotBlank(scorecard.getFindDnbResult())
     // && ("Accepted".equals(scorecard.getFindDnbResult()) ||
@@ -102,13 +102,15 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           dnbMatches = dnbMatches.subList(0, 4);
         }
         boolean isOrgIdMatched = false;
+        boolean vatFound = false;
         int itemNo = 0;
         for (DnBMatchingResponse dnbRecord : dnbMatches) {
           // Create DnB Fields Records Regardless
           itemNo++;
           processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
-          if (!isOrgIdMatched) {
+          if (itemNo == 1) {
             isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+            vatFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
           }
           // Check if element is configured to import from DNB
           if (scenarioExceptions.isImportDnbInfo()) {
@@ -130,9 +132,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
         } else {
           result.setResults("Matches Found");
-          if (scenarioExceptions.isCheckVATForDnB() && !isOrgIdMatched) {
-            details.insert(0, itemNo + " High Quality matches found.\nVAT value did not match any of the high confidence D&B matches.\n");
-            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_FAIL", "VAT value did not match any of the high confidence D&B matches.");
+          if (scenarioExceptions.isCheckVATForDnB() && !isOrgIdMatched && vatFound) {
+            details.insert(0, itemNo + " High Quality matches found.\nVAT value did not match with the highest confidence D&B match.\n");
+            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_FAIL", "VAT value did not match with the highest confidence D&B matche.");
           } else {
             details.insert(0, itemNo + " valid matches found.\n");
           }
