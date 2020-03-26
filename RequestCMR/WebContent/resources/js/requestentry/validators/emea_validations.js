@@ -7055,6 +7055,60 @@ function disableProcpectCmrIT(){
   }
 }
 
+/**
+ * CMR-2279:Turkey - sets SBO based on isuCtc
+ */
+function setSBOValuesForIsuCtc() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  FormManager.enable("salesBusOffCd");
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var isuCtc = isuCd + clientTier;
+  var qParams = null;
+
+  console.log("begin setSBO:"+'%' + isuCtc + '%');
+  if (isuCd != '') {
+    var results = null;
+      qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+        ISU : '%' + isuCtc + '%'
+      };
+    results = cmr.query('GET.SBOLISRIST.BYISUCTC', qParams);
+    console.log("there are " + results.length + " SBO returned.");
+
+    if (results.length == 1) {
+      console.log("results[0].ret1:"+results[0].ret1+",results[0].ret2:"+results[0].ret2);
+      FormManager.setValue('salesBusOffCd', results[0].ret1);
+    } else {
+      FormManager.setValue('salesBusOffCd', "");
+    }
+  }
+}
+
+function setSBOLogicOnISUChange(){
+  if (_isuCdHandler == null && FormManager.getField('isuCd')) {
+    _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setSBOValuesForIsuCtc();
+    });
+  }
+  if (_isuCdHandler && _isuCdHandler[0]) {
+    _isuCdHandler[0].onChange();
+  }
+  if (_clientTierHandler == null && FormManager.getField('clientTier')) {
+    _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      setSBOValuesForIsuCtc();
+    });
+  }
+  if (_clientTierHandler && _clientTierHandler[0]) {
+    _clientTierHandler[0].onChange();
+  }
+}
+
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7139,6 +7193,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
+  // CMR-2279
+  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
