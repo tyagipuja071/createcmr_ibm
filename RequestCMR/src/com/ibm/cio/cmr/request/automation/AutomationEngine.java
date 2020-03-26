@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
@@ -151,7 +152,14 @@ public class AutomationEngine {
     for (AutomationElement<?> element : this.elements) {
       ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
 
+      
+      // avoid skipping for France FieldComp. element due to SBO calc.
+      if("GBL_FIELD_COMPUTE".equals(element.getProcessCode()) && SystemLocation.FRANCE.equals(requestData.getData().getCmrIssuingCntry())){
+    	  scenarioExceptions.setSkipChecks(false);
+      }
+      
       // determine if element is to be skipped
+
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
       boolean skipElement = (skipChecks || engineData.get().isSkipChecks())
           && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType()) || (ProcessType.Matching

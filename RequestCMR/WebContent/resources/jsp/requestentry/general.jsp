@@ -260,8 +260,7 @@ if (readOnly){
                 <td width="95px">${reqentry.findCmrDate}</td>
               </tr>
               <tr>
-                <td>D&B Search&nbsp;<%if (!readOnly && "C".equals(reqentry.getReqType()) && dnbPrimary && "DRA".equals(reqentry.getReqStatus())){%><span id="dnbRequired" class="ibm-required cmr-required-spacer">*</span>
-                    <%} %>
+                <td>D&B Search&nbsp;<span id="dnbRequired" class="ibm-required cmr-required-spacer">*</span>
                   <form:hidden path="findDnbResult"/>
                 </td>
                 <td>

@@ -32,32 +32,15 @@ public class USUtil extends AutomationUtil {
     // get request admin and data
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    String[] scnarioList_schools = { "REGULAR", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV", "SCHOOL PAROCHL", "SCHOOL COLLEGE" };
-    String[] scnarioList_state = { "REGULAR", "STATE", "SPEC DIST", "COUNTY", "CITY" };
-    String customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
+    String[] scnarioList = { "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV", "SCHOOL PAROCHL", "SCHOOL COLLEGE", "STATE", "SPEC DIST",
+        "COUNTY", "CITY", "32C", "TPPS", "3CC", "SVR CONT" };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
     }
-    if ((StringUtils.containsIgnoreCase(customerName, "SCHOOL") || StringUtils.containsIgnoreCase(customerName, "COLLEGE")
-        || StringUtils.containsIgnoreCase(customerName, "UNIVERSITY") || StringUtils.containsIgnoreCase(customerName, "CHARTER"))) {
-      if (Arrays.asList(scnarioList_schools).contains(scenarioSubType)) {
-        engineData.addNegativeCheckStatus("US_SCHOOL", "Verification for Public/Private needs to be performed");
-      } else {
-        details.append("The chosen scenario is incorrect, should be Commercial or State & Local");
-        return false;
-      }
-    }
 
-    if ((StringUtils.containsIgnoreCase(customerName, "STATE") || StringUtils.containsIgnoreCase(customerName, "COUNTY")
-        || StringUtils.containsIgnoreCase(customerName, "CITY") || StringUtils.containsIgnoreCase(customerName, "COMMONWEALTH OF")
-        || StringUtils.containsIgnoreCase(customerName, "DISTRICT"))) {
-      if (Arrays.asList(scnarioList_state).contains(scenarioSubType)) {
-        engineData.addNegativeCheckStatus("US_STATE", "Verification for Public/Private needs to be performed");
-      } else {
-        details.append("The chosen scenario is incorrect, should be Commercial or State & Local");
-        return false;
-      }
+    if (Arrays.asList(scnarioList).contains(scenarioSubType)) {
+      engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Automated checks cannot be performed for this scenario.");
     }
     return true;
   }
