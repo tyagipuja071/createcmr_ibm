@@ -556,6 +556,21 @@ public class TurkeyTransformer extends EMEATransformer {
     }
   }
 
+  public String getAddressUseByType(String addrType) {
+    switch (addrType) {
+    case MQMsgConstants.ADDR_ZP01:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZS01:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    case MQMsgConstants.ADDR_ZD01:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    default:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    }
+  }
+
   @Override
   public XMLOutputter getXmlOutputter(Format format) {
     return new SingleQuoteAttributeOutputtter(format);
@@ -807,7 +822,7 @@ public class TurkeyTransformer extends EMEATransformer {
       }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
-    legacyObjects.addAddress(legacyAddr);
+    // legacyObjects.addAddress(legacyAddr);
 
       if (legacyFiscalAddr != null) {
       formatMassUpdateAddressLines(entityManager, legacyFiscalAddr, addr, true);
@@ -951,6 +966,17 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setAccAdminBo("Y60382");
       legacyCust.setCeDivision("2");
 
+      // CMR-2279:Turkey-ISR set based on SBO
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", data.getSalesBusOffCd());
+      q.setParameter("CNTRY", data.getCmrIssuingCntry());
+      String isr = q.getSingleResult(String.class);
+      legacyCust.setSalesRepNo(isr);
+      cmrObjects.getData().setSalesTeamCd(isr);
+      legacyCust.setSalesGroupRep(isr);
+      cmrObjects.getData().setInstallBranchOff(isr);
+
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
@@ -979,6 +1005,17 @@ public class TurkeyTransformer extends EMEATransformer {
           break;
         }
       }
+
+      // CMR-2279:Turkey-ISR set based on SBO
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", data.getSalesBusOffCd());
+      q.setParameter("CNTRY", data.getCmrIssuingCntry());
+      String isr = q.getSingleResult(String.class);
+      legacyCust.setSalesRepNo(isr);
+      cmrObjects.getData().setSalesTeamCd(isr);
+      legacyCust.setSalesGroupRep(isr);
+      cmrObjects.getData().setInstallBranchOff(isr);
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
@@ -1099,6 +1136,17 @@ public class TurkeyTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
       cust.setSalesRepNo(muData.getRepTeamMemberNo());
       cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+    } else {
+      // CMR-2279:Turkey-ISR set based on SBO
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", muData.getCustNm1());
+      q.setParameter("CNTRY", SystemLocation.TURKEY);
+      String isr = q.getSingleResult(String.class);
+      cust.setSalesRepNo(isr);
+      cust.setSalesGroupRep(isr);
+      cmrObjects.getMassUpdateData().setRepTeamMemberNo(isr);
+      cmrObjects.getMassUpdateData().setInstallBranchOff(isr);
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
@@ -1336,14 +1384,34 @@ public class TurkeyTransformer extends EMEATransformer {
 
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
+    String reqType = cmrObjects.getAdmin().getReqType();
     long requestId = cmrObjects.getAdmin().getId().getReqId();
-    Map<String, String> addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
 
+    Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
+    if ("M".equals(reqType)) {
+      List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+      addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList, cmrObjects.getMassUpdateAddresses());
+    } else {
+      addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
+    }
     LOG.debug("LEGACY -- Turkey OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
       modifyAddrUseFields(legacyAddr.getId().getAddrNo(), addrSeqToAddrUseMap.get(legacyAddr.getId().getAddrNo()), legacyAddr);
     }
+  }
+
+  private Map<String, String> mapSeqNoToAddrUseLegacy(List<CmrtAddr> legacyAddrList, List<MassUpdtAddr> muAddrlist) {
+    Map<String, String> addrSeqToAddrUseMap = new HashMap<>();
+    for (CmrtAddr legacyAddr : legacyAddrList) {
+      for (MassUpdtAddr muAddr : muAddrlist) {
+        if (muAddr.getAddrSeqNo().equals(legacyAddr.getId().getAddrNo())) {
+          addrSeqToAddrUseMap.put(legacyAddr.getId().getAddrNo(), getAddressUseByType(muAddr.getId().getAddrType()));
+          break;
+        }
+      }
+    }
+    return addrSeqToAddrUseMap;
   }
 
   private Map<String, String> mapSeqNoToAddrUse(List<Addr> addrList) {
