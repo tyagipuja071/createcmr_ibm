@@ -104,8 +104,9 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
 
-	protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address",
-			"Installing Address", "Shipping Address (Update)", "EPL Address" };
+	protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Billing Address",
+			"Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL Address", "Sold-To Address",
+			"Install-At Address", "Ship-To Address" };
 
 	// CMR-1728
 	protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
@@ -3111,6 +3112,73 @@ public class EMEAHandler extends BaseSOFHandler {
 	}
 
 	@Override
+	protected String getAddressTypeByUse(String addressUse) {
+		switch (addressUse) {
+		case "1":
+			return "ZP01";
+		case "2":
+			return "ZS01";
+		case "3":
+			return "ZI01";
+		case "4":
+			return "ZD01";
+		case "5":
+			return "ZS02";
+		}
+		return null;
+	}
+
+	@Override
+	public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+		String newAddrSeq = null;
+		return newAddrSeq;
+
+	}
+
+	@Override
+	public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId,
+			String oldAddrSeq, String cmrIssuingCntry) {
+		String newSeq = null;
+		return newSeq;
+	}
+
+	@Override
+	public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
+			return Arrays.asList("ZP01", "ZS01", "ZI01");
+		} else if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
+			return Arrays.asList("ZP01", "ZS01");
+		} else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
+			return Arrays.asList("ZP01", "ZS01");
+		}
+		return null;
+	}
+
+	@Override
+	public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
+			return Arrays.asList("ZD01", "ZS02");
+		}
+		return null;
+	}
+
+	@Override
+	public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
+			return Arrays.asList("ZD01", "ZI01");
+		}
+		if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
+			return Arrays.asList("ZP01");
+		}
+		return null;
+	}
+
+	@Override
+	public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
+		return null;
+	}
+
+	@Override
 	public Map<String, String> getUIFieldIdMap() {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("##OriginatorName", "originatorNm");
@@ -3176,74 +3244,8 @@ public class EMEAHandler extends BaseSOFHandler {
 		map.put("##CustomerScenarioSubType", "custSubGrp");
 		map.put("##EngineeringBo", "engineeringBo");
 		map.put("##CodFlag", "creditCd");
+		map.put("##CommercialFinanced", "commercialFinanced");
 		return map;
-	}
-
-	@Override
-	protected String getAddressTypeByUse(String addressUse) {
-		switch (addressUse) {
-		case "1":
-			return "ZP01";
-		case "2":
-			return "ZS01";
-		case "3":
-			return "ZI01";
-		case "4":
-			return "ZD01";
-		case "5":
-			return "ZS02";
-		}
-		return null;
-	}
-
-	@Override
-	public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
-		String newAddrSeq = null;
-		return newAddrSeq;
-
-	}
-
-	@Override
-	public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId,
-			String oldAddrSeq, String cmrIssuingCntry) {
-		String newSeq = null;
-		return newSeq;
-	}
-
-	@Override
-	public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZP01", "ZS01", "ZI01");
-		} else if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZP01", "ZS01");
-		} else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZP01", "ZS01");
-		}
-		return null;
-	}
-
-	@Override
-	public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZD01", "ZS02");
-		}
-		return null;
-	}
-
-	@Override
-	public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZD01", "ZI01");
-		}
-		if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZP01");
-		}
-		return null;
-	}
-
-	@Override
-	public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
-		return null;
 	}
 
 	@Override
