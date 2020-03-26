@@ -393,6 +393,9 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     if (!StringUtils.isBlank(searchParams.getVat())) {
       sb.append("\nVAT: " + searchParams.getVat().toUpperCase());
     }
+    if (!StringUtils.isBlank(searchParams.getTaxCd1())) {
+      sb.append("\nSIRET: " + searchParams.getTaxCd1().toUpperCase());
+    }
     return sb.toString();
   }
 

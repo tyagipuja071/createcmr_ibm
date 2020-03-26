@@ -283,22 +283,22 @@ public class FranceUtil extends AutomationUtil {
       case "COMME":
       case "CBMME":
         int count = 0;
-        for (Addr addr : requestData.getAddresses()) {
-          String sql = ExternalizedQuery.getSql("FR.GET_UNIQUE_ADDR_COUNT");
-          PreparedQuery query = new PreparedQuery(entityManager, sql);
-          query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
-          query.setParameter("CUST_NM1", addr.getCustNm1());
-          query.setParameter("ADDR_TXT", addr.getAddrTxt());
-          query.setParameter("CITY1", addr.getCity1());
-          count = query.getSingleResult(Integer.class);
-          if (count == 1) {
-            engineData.addRejectionComment("Multiple unique addresses found on the request.");
-            engineData.addNegativeCheckStatus("SCENARIO_EXCEPTION", "Commercial scenario needs to be reviewed.");
-            details.append("Multiple unique addresses found on the request. ").append("\n");
-            valid = false;
-            break;
-          }
-        }
+//        for (Addr addr : requestData.getAddresses()) {
+//          String sql = ExternalizedQuery.getSql("FR.GET_UNIQUE_ADDR_COUNT");
+//          PreparedQuery query = new PreparedQuery(entityManager, sql);
+//          query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
+//          query.setParameter("CUST_NM1", addr.getCustNm1());
+//          query.setParameter("ADDR_TXT", addr.getAddrTxt());
+//          query.setParameter("CITY1", addr.getCity1());
+//          count = query.getSingleResult(Integer.class);
+//          if (count == 1) {
+//            engineData.addRejectionComment("Multiple unique addresses found on the request.");
+//            engineData.addNegativeCheckStatus("SCENARIO_EXCEPTION", "Commercial scenario needs to be reviewed.");
+//            details.append("Multiple unique addresses found on the request. ").append("\n");
+//            valid = false;
+//            break;
+//          }
+//        }
         break;
       case "CHDPT":
       case "THDPT":
