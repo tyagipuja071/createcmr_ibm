@@ -350,10 +350,6 @@ var TemplateService = (function() {
                 FormManager.setValue(name, '');
               }
 
-              if (lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor')) {
-                FormManager.readOnly(name);
-              }
-
               // check the REQ_IND from scenarios and implement
               switch (required) {
               case 'R':
@@ -370,6 +366,10 @@ var TemplateService = (function() {
                 FormManager.setValue(name, '');
                 FormManager.disable(name);
                 break;
+              }
+
+              if (lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor')) {
+                FormManager.readOnly(name);
               }
 
               if (type == 'checkbox') {

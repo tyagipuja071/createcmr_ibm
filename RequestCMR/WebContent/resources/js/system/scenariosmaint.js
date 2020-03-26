@@ -244,6 +244,9 @@ app.controller('ScenariosController', [ '$scope', '$document', '$http', '$timeou
       scenario.lockedIndc = '';
       scenario.retainValInd = false;
     } else if (len == 1) {
+      if (scenario.values[0] == '~') {
+        return;
+      }
       scenario.reqInd = 'R';
     } else {
       scenario.lockedIndc = '';
