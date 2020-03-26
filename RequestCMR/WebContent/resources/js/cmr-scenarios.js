@@ -509,6 +509,12 @@ var TemplateService = (function() {
               break;
             }
 
+            if (lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor')) {
+              FormManager.readOnly(name);
+            } else {
+              FormManager.enable(name);
+            }
+
             if (type == 'checkbox') {
               if (create) {
                 var checked = (_pagemodel[name] && _pagemodel[name] == 'Y');

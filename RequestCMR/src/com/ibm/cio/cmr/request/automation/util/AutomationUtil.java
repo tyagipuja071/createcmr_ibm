@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -26,14 +27,16 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
- * 
+ *
  * Interface to handle country specific utility methods
- * 
+ *
  * @author RoopakChugh
- * 
+ *
  */
 
 public abstract class AutomationUtil {
+
+  private static final Logger LOG = Logger.getLogger(AutomationUtil.class);
 
   protected static final Map<String, Class<? extends AutomationUtil>> GEO_UTILS = new HashMap<String, Class<? extends AutomationUtil>>() {
     private static final long serialVersionUID = 1L;
@@ -63,7 +66,7 @@ public abstract class AutomationUtil {
 
   /**
    * returns an instance of
-   * 
+   *
    * @param cmrIssuingCntry
    * @return
    * @throws InstantiationException
@@ -78,9 +81,30 @@ public abstract class AutomationUtil {
   }
 
   /**
-   * 
+   * returns an instance of
+   *
+   * @param cmrIssuingCntry
+   * @return
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   */
+  public static AutomationUtil getNewCountryUtil(String cmrIssuingCntry) throws IllegalAccessException, InstantiationException {
+    if (!GEO_UTILS.containsKey(cmrIssuingCntry)) {
+      return null;
+    }
+    try {
+      Class<? extends AutomationUtil> utilClass = GEO_UTILS.get(cmrIssuingCntry);
+      return utilClass.newInstance();
+    } catch (Throwable t) {
+      LOG.warn("Automation Util for " + cmrIssuingCntry + " found but cannot be initialized.", t);
+      return null;
+    }
+  }
+
+  /**
+   *
    * Computes IBM field values specific to countries and scenarios.
-   * 
+   *
    * @param results
    * @param details
    * @param overrides
@@ -94,7 +118,7 @@ public abstract class AutomationUtil {
 
   /**
    * validates if the scenario on request is correct or not
-   * 
+   *
    * @param entityManager
    * @param requestData
    * @param engineData
@@ -108,9 +132,9 @@ public abstract class AutomationUtil {
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output);
 
   /**
-   * 
+   *
    * Gets the default cluster code for country.
-   * 
+   *
    * @param results
    * @param details
    * @param overrides
@@ -132,9 +156,9 @@ public abstract class AutomationUtil {
   }
 
   /**
-   * 
+   *
    * Validates the Cluster and SalesMan Combination.
-   * 
+   *
    * @return a) validCode = "NO_RESULTS" if no rows found on CREQCMR.REP_TEAM b)
    *         validCode = "INVALID" if cluster exist but with different SalesMan
    *         on CREQCMR.REP_TEAM c) validCode = "VALID" if cluster exist with
@@ -164,7 +188,7 @@ public abstract class AutomationUtil {
 
   /**
    * Returns true if issuing country is configured to perform VAT match
-   * 
+   *
    * @param cmrIssuingCntry
    * @return
    */
@@ -177,7 +201,7 @@ public abstract class AutomationUtil {
 
   /**
    * Allows skipping company checks for scenario & updates
-   * 
+   *
    * @param scenarioList
    * @param skipCheckForUpdate
    * @return
@@ -198,8 +222,8 @@ public abstract class AutomationUtil {
     }
 
     if (scenarioExceptions != null
-        && (("C".equals(admin.getReqType()) && scenarioList.size() != 0 && scenarioSubType != null && scenarioList.contains(scenarioSubType)) || ("U"
-            .equals(admin.getReqType()) && skipCheckForUpdate))) {
+        && (("C".equals(admin.getReqType()) && scenarioList.size() != 0 && scenarioSubType != null && scenarioList.contains(scenarioSubType))
+            || ("U".equals(admin.getReqType()) && skipCheckForUpdate))) {
       scenarioExceptions.setSkipCompanyVerification(true);
     }
 
@@ -207,7 +231,7 @@ public abstract class AutomationUtil {
 
   /**
    * Checks if ISIC and Subindustry is valid for specified scenario
-   * 
+   *
    * @param scenarioList
    * @return inValid
    */
@@ -248,4 +272,35 @@ public abstract class AutomationUtil {
 
     return isInvalid;
   }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   *
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param changes
+   * @throws Exception
+   */
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
+    return false; // false denotes no country specific runs
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   *
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param changes
+   * @throws Exception
+   */
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
+    return false; // false denotes no country specific runs
+  }
+
 }

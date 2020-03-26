@@ -234,6 +234,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     reqEntryModel.setCmrIssuingCntry(model.getIssuingCntry());
     reqEntryModel.setMainAddrType("ZS01");
     reqEntryModel.setVat(model.getVat());
+    reqEntryModel.setTaxCd1(model.getTaxCd1());
     controller.setDefaultValues(reqEntryModel, request);
     reqEntryModel.setCountryUse(model.getSubRegion());
 

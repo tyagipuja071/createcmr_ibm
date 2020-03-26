@@ -23,7 +23,7 @@
 	<div id="ibm-universal-nav">
 		<p id="ibm-site-title">
 			<em>CreateCMR
-				<span id="cmr-release-note" class="cmr-release-note">R<%=SystemConfiguration.getSystemProperty("RELEASE")%>.b<%=SystemConfiguration.getSystemProperty("BUILD")%> (<%=SystemConfiguration.getValue("SERVER_ALIAS")%>)</span>
+				<span id="cmr-release-note" class="cmr-release-note">R<%=SystemConfiguration.getSystemProperty("RELEASE")%>.b-<%=SystemConfiguration.getSystemProperty("PREFIX")%><%=SystemConfiguration.getSystemProperty("BUILD")%> (<%=SystemConfiguration.getValue("SERVER_ALIAS")%>)</span>
 				<span style="padding-left: 20% !important;"></span>
 			</em>
 		</p>

@@ -294,10 +294,10 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       }
     }
     model.taxCd1 = FormManager.getActualValue('taxCd1');
-    if (model.issuingCntry == '706' && (!model.taxCd1 || !model.vat)) {
-      cmr.showAlert('At least VAT or SIRET must be specified.');
-      return;
-    }
+    // if (model.issuingCntry == '706' && (!model.taxCd1 || !model.vat)) {
+    // cmr.showAlert('At least VAT or SIRET must be specified.');
+    // return;
+    // }
 
     var details = 'System Location: ' + model.issuingCntry;
     details += '<br>' + model.name;
@@ -316,6 +316,13 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     }
     if (model.vat) {
       details += '<br>VAT: ' + model.vat;
+    }
+    if (model.taxCd1) {
+      if (model.issuingCntry == '706') {
+        details += '<br>SIRET: ' + model.taxCd1;
+      } else {
+        details += '<br>Tax Code: ' + model.taxCd1;
+      }
     }
 
     _currQuickDet = details;
