@@ -406,6 +406,12 @@ public class LegacyDirectService extends TransConnService {
               createEntity(legacyAddr, entityManager);
             }
           }
+
+          // CMR-2279:there should be some Data updated, so update Data
+          if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+            updateEntity(cmrObjects.getData(), entityManager);
+          }
+
           partialCompleteRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
 
           if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode())) {
@@ -436,6 +442,11 @@ public class LegacyDirectService extends TransConnService {
             LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
             LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
             updateEntity(legacyCust, entityManager);
+
+            // CMR-2279:there should be some Data updated, so update Data
+            if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+              updateEntity(cmrObjects.getData(), entityManager);
+            }
 
             completeTRECRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
           }
@@ -469,6 +480,11 @@ public class LegacyDirectService extends TransConnService {
           } else if (legacyAddr.isForCreate()) {
             createEntity(legacyAddr, entityManager);
           }
+        }
+
+        // CMR-2279:there should be some Data updated, so update Data
+        if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+          updateEntity(cmrObjects.getData(), entityManager);
         }
 
         // for updates, the legacy address use records are rebuilt
@@ -1114,8 +1130,10 @@ public class LegacyDirectService extends TransConnService {
         (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "") + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
     cust.setCreditCd(data.getCreditCd());
     cust.setTaxCd(data.getSpecialTaxCd());
-    cust.setSalesRepNo(data.getRepTeamMemberNo());
+
+    cust.setSalesRepNo(data.getSalesTeamCd());
     cust.setSalesGroupRep(data.getSalesTeamCd());
+
     if (!StringUtils.isEmpty(data.getEnterprise())) {
       cust.setEnterpriseNo(data.getEnterprise());
     }
@@ -1338,12 +1356,14 @@ public class LegacyDirectService extends TransConnService {
     } else {
       cust.setTaxCd("");
     }
+
     if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
       cust.setSalesRepNo(data.getRepTeamMemberNo());
     }
     if (!StringUtils.isBlank(data.getSalesTeamCd())) {
       cust.setSalesGroupRep(data.getSalesTeamCd());
     }
+
     if (!StringUtils.isBlank(data.getEnterprise())) {
       cust.setEnterpriseNo(data.getEnterprise());
     }
