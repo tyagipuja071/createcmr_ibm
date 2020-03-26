@@ -5033,7 +5033,9 @@ function getOldValuesIT(fromAddress, scenario, scenarioChanged) {
         FormManager.setValue('isuCd',_oldISUIT);
         FormManager.setValue('clientTier',_oldCTCIT);
         FormManager.setValue('repTeamMemberNo', _oldSalesRepIT);
-        FormManager.setValue('salesBusOffCd', _oldSBOIT);
+        if(custSubType != 'LOCEN') {
+          FormManager.setValue('salesBusOffCd', _oldSBOIT);
+        }
         FormManager.setValue('inacCd',_oldINACIT);
         FormManager.setValue('affiliate',_oldAffiliateIT);
       } else {
