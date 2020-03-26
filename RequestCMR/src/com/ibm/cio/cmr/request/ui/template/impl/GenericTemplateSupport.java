@@ -90,7 +90,11 @@ public class GenericTemplateSupport extends TemplateSupport {
       // by default lock, don't affect previous logic
       lockInd = entry.getLockedIndc();
       if (StringUtils.isBlank(lockInd)) {
-        lockInd = "Y";
+        if (StringUtils.isBlank(value)) {
+          lockInd = "N";
+        } else {
+          lockInd = "Y";
+        }
       }
       parentTab = entry.getParTabId();
       addressField = !StringUtils.isBlank(addrType);
