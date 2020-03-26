@@ -1121,6 +1121,17 @@ public class TurkeyTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
       cust.setSalesRepNo(muData.getRepTeamMemberNo());
       cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+    } else {
+      // CMR-2279:Turkey-ISR set based on SBO
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", muData.getCustNm1());
+      q.setParameter("CNTRY", SystemLocation.TURKEY);
+      String isr = q.getSingleResult(String.class);
+      cust.setSalesRepNo(isr);
+      cust.setSalesGroupRep(isr);
+      cmrObjects.getMassUpdateData().setRepTeamMemberNo(isr);
+      cmrObjects.getMassUpdateData().setInstallBranchOff(isr);
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
