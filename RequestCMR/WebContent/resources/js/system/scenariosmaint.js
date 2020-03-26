@@ -240,9 +240,9 @@ app.controller('ScenariosController', [ '$scope', '$document', '$http', '$timeou
   $scope.updateTags = function(scenario) {
     var len = scenario.values.length;
     if (len == 0) {
-      //      
-      // scenario.lockedIndc = '';
-      // scenario.retainValInd = false;
+
+      scenario.lockedIndc = '';
+      scenario.retainValInd = false;
     } else if (len == 1) {
       scenario.reqInd = 'R';
     } else {
