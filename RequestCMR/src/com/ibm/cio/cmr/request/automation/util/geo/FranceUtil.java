@@ -83,6 +83,7 @@ public class FranceUtil extends AutomationUtil {
     LOG.debug("Calculated SBO: " + sBo);
     if (StringUtils.isNotBlank(sBo)) {
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sBo);
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sBo);
       details.append("Field calculation Successful.\nCalculated value for SBO: " + sBo).append("\n");
     } else {
       engineData.addRejectionComment("SBO cannot be computed automatically.");
