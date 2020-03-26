@@ -50,6 +50,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
     SuppCntry cntry = entityManager.find(SuppCntry.class, suppPk);
     boolean ifDnBAccepted = false;
     boolean ifDnBRejected = false;
+    boolean ifDnBNotRequired = false;
 
     LOG.debug("Entering DnB Check Element");
     if (requestData.getAdmin().getReqType().equalsIgnoreCase("U")) {
@@ -77,8 +78,9 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
       if (scorecard.getFindDnbResult() != null) {
         ifDnBAccepted = scorecard.getFindDnbResult().equalsIgnoreCase(RESULT_ACCEPTED) && !StringUtils.isBlank(requestData.getData().getDunsNo());
         ifDnBRejected = scorecard.getFindDnbResult().equalsIgnoreCase(RESULT_REJECTED);
+        ifDnBNotRequired = scorecard.getFindDnbResult().equalsIgnoreCase("Not Required");
       }
-      if (ifDnBAccepted == false && ifDnBRejected == false) {
+      if (!ifDnBAccepted && !ifDnBRejected && !ifDnBNotRequired) {
         if (admin.getMatchOverrideIndc() == null
             || (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && !admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES))) {
           MatchingResponse<DnBMatchingResponse> dnbMatchingResult = new MatchingResponse<DnBMatchingResponse>();
@@ -122,16 +124,16 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
         }
       } else if (ifDnBAccepted) {
         validation.setSuccess(true);
-        validation.setMessage("Duns Imported");
-        result.setDetails("DUNS record has been imported into the request.");
+        validation.setMessage("DUNS Imported");
+        result.setDetails("D&B record has been imported into the request.");
         // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
         // admin.setCompInfoSrc("D&B");
         engineData.setCompanySource("D&B");
-        LOG.debug("DUNS record has been imported into the request.");
-      } else if (ifDnBRejected) {
+        LOG.debug("D&B record has been imported into the request.");
+      } else if (ifDnBRejected || ifDnBNotRequired) {
         validation.setSuccess(true);
-        validation.setMessage("Skip DnB check");
-        result.setDetails("Skipping DnB check as D&B search found to be rejected");
+        validation.setMessage("Skipped");
+        result.setDetails("Skipping D&B check. Search rejected or not required.");
         LOG.debug("Skipping DnB check as D&B search found to be rejected");
       }
     }
@@ -140,7 +142,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
     // !cntry.getDnbPrimaryIndc().equalsIgnoreCase("Y"))) {
     else {
       validation.setSuccess(true);
-      validation.setMessage("Skip DnB check");
+      validation.setMessage("Skipped");
       result.setDetails("Skipping DnB check as D&B is not primary source for the country.");
       LOG.debug("Skipping DnB check as D&B is not primary source for the country.");
     }
