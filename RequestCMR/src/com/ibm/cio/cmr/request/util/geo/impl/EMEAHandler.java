@@ -3715,9 +3715,6 @@ public class EMEAHandler extends BaseSOFHandler {
 			String seq) {
 		String adrnr = "";
 		String sql = ExternalizedQuery.getSql("TR.GETADRNR");
-		// String sql = "SELECT KUNNR,ADRNR FROM SAPR3.KNA1 WHERE KATR6 = :KATR6
-		// AND MANDT = :MANDT AND KUNNR = :KUNNR AND KTOKD = :ADDR_TYPE AND
-		// ZZKV_SEQNO = :ADDR_SEQ AND (AUFSD <> '93' OR LOEVM <> 'X') ";
 		PreparedQuery query = new PreparedQuery(entityManager, sql);
 		query.setParameter("KATR6", SystemLocation.TURKEY);
 		query.setParameter("MANDT", mandt);
@@ -3738,8 +3735,6 @@ public class EMEAHandler extends BaseSOFHandler {
 	public Sadr getTRAddtlAddr(EntityManager entityManager, String adrnr, String mandt) {
 		Sadr sadr = new Sadr();
 		String qryAddlAddr = ExternalizedQuery.getSql("GET.TR_SADR_BY_ID");
-		// String qryAddlAddr = "SELECT S.* FROM SAPR3.SADR S WHERE ADRNR =
-		// :ADRNR AND MANDT = :MANDT AND NATIO = '4'";
 		PreparedQuery query = new PreparedQuery(entityManager, qryAddlAddr);
 		query.setParameter("ADRNR", adrnr);
 		query.setParameter("MANDT", mandt);
@@ -3768,8 +3763,6 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	private Addr getCurrentInstallingAddress(EntityManager entityManager, long reqId) {
 		String sql = ExternalizedQuery.getSql("TR.GETINSTALLING");
-		// String sql = "select * from CREQCMR.ADDR where ADDR_TYPE = 'ZS01' and
-		// REQ_ID = :REQ_ID";
 		PreparedQuery query = new PreparedQuery(entityManager, sql);
 		query.setParameter("REQ_ID", reqId);
 		query.setForReadOnly(true);
