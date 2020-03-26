@@ -951,6 +951,17 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setAccAdminBo("Y60382");
       legacyCust.setCeDivision("2");
 
+      // CMR-2279:Turkey-ISR set based on SBO
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", data.getSalesBusOffCd());
+      q.setParameter("CNTRY", data.getCmrIssuingCntry());
+      String isr = q.getSingleResult(String.class);
+      legacyCust.setSalesRepNo(isr);
+      cmrObjects.getData().setSalesTeamCd(isr);
+      legacyCust.setSalesGroupRep(isr);
+      cmrObjects.getData().setInstallBranchOff(isr);
+
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
@@ -979,6 +990,17 @@ public class TurkeyTransformer extends EMEATransformer {
           break;
         }
       }
+
+      // CMR-2279:Turkey-ISR set based on SBO
+      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      PreparedQuery q = new PreparedQuery(entityManager, sql);
+      q.setParameter("SBO", data.getSalesBusOffCd());
+      q.setParameter("CNTRY", data.getCmrIssuingCntry());
+      String isr = q.getSingleResult(String.class);
+      legacyCust.setSalesRepNo(isr);
+      cmrObjects.getData().setSalesTeamCd(isr);
+      legacyCust.setSalesGroupRep(isr);
+      cmrObjects.getData().setInstallBranchOff(isr);
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);

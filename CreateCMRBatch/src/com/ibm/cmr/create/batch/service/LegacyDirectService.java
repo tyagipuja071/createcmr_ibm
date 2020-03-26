@@ -404,6 +404,12 @@ public class LegacyDirectService extends TransConnService {
               createEntity(legacyAddr, entityManager);
             }
           }
+
+          // CMR-2279:there should be some Data updated, so update Data
+          if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+            updateEntity(cmrObjects.getData(), entityManager);
+          }
+
           partialCompleteRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
 
           if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode())) {
@@ -434,6 +440,11 @@ public class LegacyDirectService extends TransConnService {
             LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
             LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
             updateEntity(legacyCust, entityManager);
+
+            // CMR-2279:there should be some Data updated, so update Data
+            if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+              updateEntity(cmrObjects.getData(), entityManager);
+            }
 
             completeTRECRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
           }
@@ -467,6 +478,11 @@ public class LegacyDirectService extends TransConnService {
           } else if (legacyAddr.isForCreate()) {
             createEntity(legacyAddr, entityManager);
           }
+        }
+
+        // CMR-2279:there should be some Data updated, so update Data
+        if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+          updateEntity(cmrObjects.getData(), entityManager);
         }
 
         // for updates, the legacy address use records are rebuilt
@@ -1090,21 +1106,8 @@ public class LegacyDirectService extends TransConnService {
     cust.setCreditCd(data.getCreditCd());
     cust.setTaxCd(data.getSpecialTaxCd());
 
-    // CMR-2279:Turkey-ISR set based on SBO
-    if ("862".equals(data.getCmrIssuingCntry()) && data.getSalesBusOffCd() != null) {
-      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-      PreparedQuery q = new PreparedQuery(entityManager, sql);
-      q.setParameter("SBO", data.getSalesBusOffCd());
-      q.setParameter("CNTRY", data.getCmrIssuingCntry());
-      String isr = q.getSingleResult(String.class);
-      cust.setSalesRepNo(isr);
-      cmrObjects.getData().setSalesTeamCd(isr);
-      cust.setSalesGroupRep(isr);
-      cmrObjects.getData().setInstallBranchOff(isr);
-    } else {
-      cust.setSalesRepNo(data.getSalesTeamCd());
-      cust.setSalesGroupRep(data.getSalesTeamCd());
-    }
+    cust.setSalesRepNo(data.getSalesTeamCd());
+    cust.setSalesGroupRep(data.getSalesTeamCd());
 
     if (!StringUtils.isEmpty(data.getEnterprise())) {
       cust.setEnterpriseNo(data.getEnterprise());
@@ -1329,24 +1332,11 @@ public class LegacyDirectService extends TransConnService {
       cust.setTaxCd("");
     }
 
-    // CMR-2279:Turkey-ISR set based on SBO
-    if ("862".equals(data.getCmrIssuingCntry()) && data.getSalesBusOffCd() != null) {
-      String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-      PreparedQuery q = new PreparedQuery(entityManager, sql);
-      q.setParameter("SBO", data.getSalesBusOffCd());
-      q.setParameter("CNTRY", data.getCmrIssuingCntry());
-      String isr = q.getSingleResult(String.class);
-      cust.setSalesRepNo(isr);
-      cmrObjects.getData().setSalesTeamCd(isr);
-      cust.setSalesGroupRep(isr);
-      cmrObjects.getData().setInstallBranchOff(isr);
-    } else {
-      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-        cust.setSalesRepNo(data.getRepTeamMemberNo());
-      }
-      if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-        cust.setSalesGroupRep(data.getSalesTeamCd());
-      }
+    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+      cust.setSalesRepNo(data.getRepTeamMemberNo());
+    }
+    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+      cust.setSalesGroupRep(data.getSalesTeamCd());
     }
 
     if (!StringUtils.isBlank(data.getEnterprise())) {
