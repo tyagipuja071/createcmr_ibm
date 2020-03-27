@@ -173,7 +173,8 @@
         </column>
     	<column>
           <label>Tax Office</label>
-          <dbColumn>TAX_OFFICE</dbColumn>
+          <!-- we use FLOOR to store tax office -->
+          <dbColumn>FLOOR</dbColumn>
           <length>12</length>
         </column>
 		<column>
