@@ -217,7 +217,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
                 + searchModel.getQuickSearchData();
           }
           createCommentLog(reqEntryService, entityManager, "CreateCMR", reqIdToUse, comment);
-        } else if (!"U".equals(reqModel.getReqType())) {
+        } else if (!"U".equals(reqModel.getReqType()) && !"X".equals(reqModel.getReqType())) {
           // create by model
           data.setCmrNo(null);
           admin.setReqType("C");
@@ -320,6 +320,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         if (!PageManager.autoProcEnabled(data.getCmrIssuingCntry(), admin.getReqType())) {
           admin.setDisableAutoProc(CmrConstants.YES_NO.Y.toString());
         }
+        removingBlankSpaceOfData(data);
         reqEntryService.updateEntity(admin, entityManager);
         reqEntryService.updateEntity(data, entityManager);
         reqEntryService.updateEntity(scorecard, entityManager);
@@ -359,6 +360,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         if (!PageManager.autoProcEnabled(data.getCmrIssuingCntry(), admin.getReqType())) {
           admin.setDisableAutoProc(CmrConstants.YES_NO.Y.toString());
         }
+        removingBlankSpaceOfData(data);
         reqEntryService.createEntity(admin, entityManager);
         reqEntryService.createEntity(data, entityManager);
         reqEntryService.createEntity(scorecard, entityManager);
@@ -438,6 +440,36 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     }
   }
 
+  private void removingBlankSpaceOfData(Data data) {
+    LOG.debug("Removing blank spaces from data fields....");
+   data.setAbbrevLocn(!StringUtils.isEmpty(data.getAbbrevLocn()) ? data.getAbbrevLocn().trim() :""); 
+   data.setAbbrevNm(!StringUtils.isEmpty(data.getAbbrevNm()) ? data.getAbbrevNm().trim() :""); 
+   data.setAffiliate(!StringUtils.isEmpty(data.getAffiliate()) ? data.getAffiliate().trim() :""); 
+   data.setEmail2(!StringUtils.isEmpty(data.getEmail2()) ? data.getEmail2().trim() :""); 
+   data.setEmail3(!StringUtils.isEmpty(data.getEmail3()) ? data.getEmail3().trim() :""); 
+   data.setEnterprise(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise().trim() :""); 
+   data.setInacCd(!StringUtils.isEmpty(data.getInacCd()) ? data.getInacCd().trim() :""); 
+   data.setInacType(!StringUtils.isEmpty(data.getInacType()) ? data.getInacType().trim() :"");  
+   data.setTaxCd1(!StringUtils.isEmpty(data.getTaxCd1()) ? data.getTaxCd1().trim() :""); 
+   data.setTaxCd2(!StringUtils.isEmpty(data.getTaxCd2()) ? data.getTaxCd2().trim() :""); 
+   data.setVat(!StringUtils.isEmpty(data.getVat()) ? data.getVat().trim() :""); 
+   data.setCapInd(!StringUtils.isEmpty(data.getCapInd()) ? data.getCapInd().trim() :""); 
+   data.setClientTier(!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier().trim() :""); 
+   data.setCollectionCd(!StringUtils.isEmpty(data.getCollectionCd()) ? data.getCollectionCd().trim() :""); 
+   data.setCrosSubTyp(!StringUtils.isEmpty(data.getCrosSubTyp()) ? data.getCrosSubTyp().trim() :""); 
+   data.setCustClass(!StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass().trim() :""); 
+   data.setCustClass(!StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass().trim() :""); 
+   data.setHwSvcsRepTeamNo(!StringUtils.isEmpty(data.getHwSvcsRepTeamNo()) ? data.getHwSvcsRepTeamNo().trim() :""); 
+  
+   //Due to field length issue in DB
+   data.setIsicCd(!StringUtils.isEmpty(data.getIsicCd()) ? data.getIsicCd().trim().substring(0, 4) :""); 
+   
+   data.setIsuCd(!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd().trim() :""); 
+   data.setRepTeamMemberNo(!StringUtils.isEmpty(data.getRepTeamMemberNo()) ? data.getRepTeamMemberNo().trim() :""); 
+   data.setSalesBusOffCd(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd().trim() :""); 
+   data.setCompany(!StringUtils.isEmpty(data.getCompany()) ? data.getCompany().trim() :"");
+  }
+ 
   private void clearChecklistAfterImport(EntityManager entityManager, AppUser user, long reqId) {
     LOG.debug("Clearing checklist details for request..");
     String sql = ExternalizedQuery.getSql("REQENTRY.GETCHECKLIST");

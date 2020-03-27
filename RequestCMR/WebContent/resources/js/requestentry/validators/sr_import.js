@@ -42,11 +42,10 @@ function doImportSREACTRecord(result) {
 
 function continueSREACTImport(cmrCntry, cmrNo) {
   console.log("continueSREACTImport cmrCntry>>:" + cmrCntry + "cmrNo:" + cmrNo);
-  var addressOnly = true;
   var addrType = 'ZS01';
   // Import in Progress....
   cmr.showProgress('Importing  Customer record with CMR No.' + cmrNo + '. This process might take a while. Please wait..');
-  document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/singlereactimport?addressOnly=' + addressOnly + '&cmrNum=' + cmrNo + '&addrType=' + addrType
+  document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/singlereactimport?addressOnly=false&cmrNum=' + cmrNo + '&addrType=' + addrType
       + '&addrSeq=1&system=cmr&searchIssuingCntry=' + cmrCntry + '&skipAddress=false');
   document.forms['frmCMR'].submit();
 }
