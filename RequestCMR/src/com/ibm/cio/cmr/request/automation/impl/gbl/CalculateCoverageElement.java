@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.CoverageRulesFieldMap;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -137,6 +138,7 @@ public class CalculateCoverageElement extends OverridingElement {
         covFrom = "BG_ODM";
       }
 
+      CoverageContainer calculatedCoverageContainer = null;
       boolean coverageNotFound = false;
       List<CoverageContainer> coverages = null;
       boolean withCmrData = false;
@@ -190,6 +192,7 @@ public class CalculateCoverageElement extends OverridingElement {
       CoverageInput input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), data.getGbgId(), data.getBgId());
       List<Coverage> currCoverage = coverageRules.findCoverage(input);
       if (!currCoverage.isEmpty()) {
+        calculatedCoverageContainer = new CoverageContainer();
         details.append("\nCoverage IDs computed based on current data:").append("\n");
         for (Coverage cov : currCoverage) {
           String desc = getCoverageDescription(entityManager, cov.getType() + cov.getId());
@@ -197,6 +200,11 @@ public class CalculateCoverageElement extends OverridingElement {
             desc = "-no description available-";
           }
           details.append(" - " + cov.getLevel() + ": " + cov.getType() + cov.getId() + " (" + desc + ")\n");
+          if (StringUtils.isBlank(calculatedCoverageContainer.getFinalCoverage())) {
+            calculatedCoverageContainer.setFinalCoverage(cov.getType() + cov.getId());
+          } else if (StringUtils.isBlank(calculatedCoverageContainer.getBaseCoverage())) {
+            calculatedCoverageContainer.setBaseCoverage(cov.getType() + cov.getId());
+          }
         }
       }
 
@@ -225,26 +233,43 @@ public class CalculateCoverageElement extends OverridingElement {
 
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
           logCoverage(entityManager, engineData, coverageIds, details, output, input, container.getFinalCoverage(), "Final",
-              container.getFinalCoverageRules(), data.getCmrIssuingCntry());
-          // Save the first calculated coverage ID in the engine data to allow
-          // next elements to use it
-          if (engineData.get(AutomationEngineData.COVERAGE_ID) == null) {
-            engineData.put(AutomationEngineData.COVERAGE_ID, container.getFinalCoverage());
-            engineData.put(AutomationEngineData.COVERAGE_FROM, covFrom);
-          }
+              container.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
           if (container.getBaseCoverage() != null) {
             LOG.debug("Logging Base Coverage ID: " + container.getBaseCoverage());
             logCoverage(entityManager, engineData, coverageIds, details, output, input, container.getBaseCoverage(), "Base",
-                container.getBaseCoverageRules(), data.getCmrIssuingCntry());
+                container.getBaseCoverageRules(), data.getCmrIssuingCntry(), container);
+          }
+          // Save the first calculated coverage ID in the engine data to allow
+          // next elements to use it
+          if (!engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED)
+              && (StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
+            engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+            calculatedCoverageContainer = container;
           }
         }
-        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       } else if (!currCoverage.isEmpty()) {
         result.setResults("Calculated");
-        details.append("Coverage calculated based only on request data. No projected Buying Group found.");
+        details.append("Coverage calculated based only on request data. No projected Buying Group found.").append("\n");
         engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+        covFrom = "COV_REQ";
       } else {
         result.setResults("Cannot Calculate");
+        covFrom = "NONE";
+      }
+
+      // hook to perform country specific operations
+
+      // if it is the first calculated coverage, use it to do country
+      // specific coverage calculations
+      boolean hasCountryCheck = false;
+      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+      if (countryUtil != null) {
+        // hook to perform calculations and update results
+        hasCountryCheck = countryUtil.performCountrySpecificCoverageCalculations(entityManager, result, details, output, requestData, engineData,
+            covFrom, calculatedCoverageContainer);
+      }
+
+      if (!hasCountryCheck && "NONE".equals(covFrom)) {
         result.setOnError(true);
         if (coverageNotFound) {
           details.append("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
@@ -253,8 +278,8 @@ public class CalculateCoverageElement extends OverridingElement {
           details.append("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
           engineData.addRejectionComment("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
         }
-
       }
+
       result.setDetails(details.toString());
       result.setProcessOutput(output);
       return result;
@@ -282,9 +307,11 @@ public class CalculateCoverageElement extends OverridingElement {
    * @param currCovId
    * @param currCovLevel
    * @param currCovRules
+   * @param container
    */
   private void logCoverage(EntityManager entityManager, AutomationEngineData engineData, List<String> coverageIds, StringBuilder details,
-      OverrideOutput output, CoverageInput input, String currCovId, String currCovLevel, List<Rule> currCovRules, String cmrIssuingCntry) {
+      OverrideOutput output, CoverageInput input, String currCovId, String currCovLevel, List<Rule> currCovRules, String cmrIssuingCntry,
+      CoverageContainer container) {
     // boolean tempVarForPhase2 = true;
     if (!coverageIds.contains(currCovId)) {
       GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
@@ -321,8 +348,13 @@ public class CalculateCoverageElement extends OverridingElement {
               details.append(" - " + field + " " + condition.getOperation().toString() + " " + condition.getValues()
                   + (condition.getValues2() != null && !condition.getValues2().isEmpty() ? ", " + condition.getValues2() : "")).append("\n");
 
-              if (!matched && index == 1) {
-                // for now do not execute this at all, just show details
+              // Create overrides if not matched for the first rule found
+              // 1. Creates overrides for Final Coverage if it is there
+              // 2. Creates overrides for base Coverage if Final Coverage is not
+              // present
+
+              if (!matched && index == 1 && (("Final".equals(currCovLevel) && StringUtils.isNotBlank(currCovId))
+                  || ("Base".equals(currCovLevel)) && StringUtils.isBlank(container.getFinalCoverage()))) {
                 String dbField = CoverageRulesFieldMap.getDBField(cmrIssuingCntry, condition.getField());
                 if (!StringUtils.isBlank(dbField)) {
                   boolean addr = dbField.startsWith("ADDR");
