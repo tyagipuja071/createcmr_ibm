@@ -138,7 +138,7 @@ public class CalculateCoverageElement extends OverridingElement {
         covFrom = "BG_ODM";
       }
 
-      CoverageContainer calculatedCoverageContainer = null;
+      CoverageContainer calculatedCoverageContainer = new CoverageContainer();
       boolean coverageNotFound = false;
       List<CoverageContainer> coverages = null;
       boolean withCmrData = false;
@@ -192,7 +192,6 @@ public class CalculateCoverageElement extends OverridingElement {
       CoverageInput input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), data.getGbgId(), data.getBgId());
       List<Coverage> currCoverage = coverageRules.findCoverage(input);
       if (!currCoverage.isEmpty()) {
-        calculatedCoverageContainer = new CoverageContainer();
         details.append("\nCoverage IDs computed based on current data:").append("\n");
         for (Coverage cov : currCoverage) {
           String desc = getCoverageDescription(entityManager, cov.getType() + cov.getId());
