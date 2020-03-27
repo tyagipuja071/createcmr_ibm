@@ -84,6 +84,25 @@ function lockOrdBlk() {
   }
 }
 
+function orderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
+          var role = FormManager.getActualValue('userRole').toUpperCase();
+          if (role == 'PROCESSOR') {
+            if (ordBlk != '') {
+              if (ordBlk != '88' || ordBlk != '94') {
+                return new ValidationResult(null, false, 'Only blank, 88, 94 are allowed.');
+              }
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /**
  * After config for CEMEA
  */
@@ -2442,6 +2461,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(validateAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAddrFunction(addLatinCharValidator, GEOHandler.CEMEA);
+
+  GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
 
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);

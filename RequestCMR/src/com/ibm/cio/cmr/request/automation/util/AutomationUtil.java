@@ -20,6 +20,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -45,6 +46,7 @@ public abstract class AutomationUtil {
       put(SystemLocation.SINGAPORE, SingaporeUtil.class);
       put(SystemLocation.AUSTRALIA, AustraliaUtil.class);
       put(SystemLocation.GERMANY, GermanyUtil.class);
+      put(SystemLocation.UNITED_STATES, USUtil.class);
 
       // FRANCE Sub Regions
       put(SystemLocation.FRANCE, FranceUtil.class);
