@@ -175,7 +175,7 @@
           <label>Tax Office</label>
           <!-- we use FLOOR to store tax office -->
           <dbColumn>FLOOR</dbColumn>
-          <length>12</length>
+          <length>60</length>
         </column>
 		<column>
           <label>Phone #</label>
