@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
@@ -1422,4 +1423,23 @@ public class TurkeyTransformer extends EMEATransformer {
     return addrSeqToAddrUseMap;
   }
 
+  @Override
+  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
+      MassUpdtData muData, String cmr) throws Exception {
+    List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
+    MassUpdtAddr zp01Addr = new MassUpdtAddr();
+    for (MassUpdtAddr muAddr : muAddrList) {
+      if ("ZP01".equals(muAddr.getId().getAddrType())) {
+        zp01Addr = muAddr;
+        break;
+      }
+    }
+    if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
+      if ("@".equals(zp01Addr.getFloor())) {
+        custExt.setiTaxCode("");
+      } else {
+        custExt.setiTaxCode(zp01Addr.getFloor());
+      }
+    }
+  }
 }

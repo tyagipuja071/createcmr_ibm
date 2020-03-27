@@ -5276,7 +5276,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "PO_BOX":
         muaModel.setPoBox(tempVal);
         break;
-      case "FLOOR":
+      case "FLOOR":// For Tureky,used store taxOffice
         muaModel.setFloor(tempVal);
         break;
       case "BLDG":
