@@ -305,4 +305,24 @@ public abstract class AutomationUtil {
     return false; // false denotes no country specific runs
   }
 
+  /**
+   * Allows duplicate cmrs for scenario
+   *
+   * @param scenarioList
+   * @return
+   */
+  public void allowDuplicatesForScenario(AutomationEngineData engineData, RequestData requestData, List<String> scenarioList) {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+
+    String scenarioSubType = "";
+    if ("C".equals(admin.getReqType()) && data != null) {
+      scenarioSubType = data.getCustSubGrp();
+    }
+    if (!StringUtils.isBlank(scenarioSubType) && !scenarioList.isEmpty() && scenarioList.contains(scenarioSubType)) {
+      engineData.addPositiveCheckStatus("allowDuplicates");
+    }
+    LOG.debug("Allowing Duplicate CMR for reqid = " + admin.getId().getReqId());
+  }
+
 }
