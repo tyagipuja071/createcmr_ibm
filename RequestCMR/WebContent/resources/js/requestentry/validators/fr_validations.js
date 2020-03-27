@@ -140,6 +140,10 @@ function setINACOnScenario() {
 	  FormManager.setValue('inacCd','');
       FormManager.readOnly('inacCd');
   }
+  if(countyCd == 'FR' && subGrp == 'IBMEM' || subGrp == 'CBIEM' || subGrp == 'PRICU' || subGrp == 'CBICU'){
+	  FormManager.setValue('inacCd','');
+      FormManager.readOnly('inacCd');
+  }
 }
 function setISICAndSubindustryOnScenario() {
   var role = null;
@@ -197,8 +201,8 @@ function setVATOnScenario() {
   if (custSubGrp == '') {
     return
   } else {
-    if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU') {
-      FormManager.enable('vat');
+    if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
+      FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
       
     } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
@@ -265,6 +269,7 @@ function setSBOOnScenario() {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
       } else if (role == 'Processor') {
+        FormManager.setValue('salesBusOffCd','98F');
         FormManager.enable('salesBusOffCd');
       }
     } else if (custSubGrp == 'LCOEM' || custSubGrp == 'CBOEM') {
@@ -281,7 +286,10 @@ function setSBOOnScenario() {
       } else if (role == 'Processor') {
         FormManager.enable('salesBusOffCd');
       }
-    } else {
+    } else if(custSubGrp == 'PRICU' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM'){
+        FormManager.readOnly('salesBusOffCd');
+    }
+    else {
       if (countyCd == "FR" || countyCd == "KM" || countyCd == "WF") {
         FormManager.enable('salesBusOffCd');
       } else if (countyCd == "MC") {
@@ -960,12 +968,19 @@ function setDummySIRETOnCustSubGrpChange() {
         FormManager.setValue('taxCd1', dummySIRETValue); 
       }
     }
-  } else if (custSubGrp == "PRICU") {
-    if(custLocNumValue!=''){
-        dummySIRETValue = "SCxxxxxx0" + custLocNumValue;
-        FormManager.setValue('taxCd1', dummySIRETValue);
-    }
+  } 
+  
+//  else if (custSubGrp == "PRICU") {
+//    if(custLocNumValue!=''){
+//        dummySIRETValue = "SCxxxxxx0" + custLocNumValue;
+//        FormManager.setValue('taxCd1', dummySIRETValue);
+//    }
+  
+  else if(custSubGrp == 'PRICU' || custSubGrp == 'CBICU' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM'){
+	  FormManager.setValue('taxCd1', '');
+	  FormManager.readOnly('taxCd1');
   }
+
 // else{
 // FormManager.setValue('taxCd1', "");
 // }
