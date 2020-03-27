@@ -40,7 +40,7 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 
 /**
- * 
+ *
  * @author JeffZAMORA
  *
  */
@@ -74,7 +74,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
    * Calls the {@link ImportCMRService} internally via
    * {@link RequestEntryController} and imports the CMR as a create by model or
    * update request
-   * 
+   *
    * @param entityManager
    * @param request
    * @param model
@@ -125,17 +125,16 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
             scorecard.setFindDnbResult(CmrConstants.RESULT_REJECTED);
             scorecard.setFindDnbRejReason("Record Not Found");
             scorecard.setFindDnbRejCmt("CMR Results from Quick Search did not contain the required company details.");
-            scorecard.setFindDnbTs(SystemUtil.getActualTimestamp());
-            scorecard.setFindDnbUsrId(user.getIntranetId());
-            scorecard.setFindDnbUsrNm(user.getBluePagesName());
             entityManager.merge(scorecard);
           } else if (model.getMatchGrade() != null && Arrays.asList("F4", "F5", "VAT").contains(model.getMatchGrade())) {
             scorecard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
-            scorecard.setFindDnbTs(SystemUtil.getActualTimestamp());
-            scorecard.setFindDnbUsrId(user.getIntranetId());
-            scorecard.setFindDnbUsrNm(user.getBluePagesName());
-            entityManager.merge(scorecard);
+          } else {
+            scorecard.setFindDnbResult("Not Required");
           }
+          scorecard.setFindDnbTs(SystemUtil.getActualTimestamp());
+          scorecard.setFindDnbUsrId(user.getIntranetId());
+          scorecard.setFindDnbUsrNm(user.getBluePagesName());
+          entityManager.merge(scorecard);
           entityManager.flush();
         }
 
@@ -153,7 +152,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
   /**
    * Imports a D&B record using the {@link ImportDnBService} and creates a new
    * request
-   * 
+   *
    * @param entityManager
    * @param request
    * @param model
@@ -216,7 +215,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
   /**
    * Creates a brand new record from scratch using the address information
    * supplied by users
-   * 
+   *
    * @param entityManager
    * @param request
    * @param model
@@ -337,7 +336,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
   /**
    * Handles the country-specific address types to set if the address
    * information is in latin/non latin
-   * 
+   *
    * @param model
    * @param addrModel
    */
@@ -393,6 +392,9 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     }
     if (!StringUtils.isBlank(searchParams.getVat())) {
       sb.append("\nVAT: " + searchParams.getVat().toUpperCase());
+    }
+    if (!StringUtils.isBlank(searchParams.getTaxCd1())) {
+      sb.append("\nSIRET: " + searchParams.getTaxCd1().toUpperCase());
     }
     return sb.toString();
   }
