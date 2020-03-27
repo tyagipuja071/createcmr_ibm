@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -286,9 +287,12 @@ public class GermanyUtil extends AutomationUtil {
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
+    boolean removed = false;
+    details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!"ZS01".equals(addr.getId().getAddrType())) {
+        removed = true;
         String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
         if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
@@ -299,7 +303,12 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
 
+    if (!removed) {
+      details.append("No duplicate address records found on the request.").append("\n");
+    }
+
     // replace special characters from addresses.
+    details.append("Replacing German language characters from address fields if any.").append("\n");
     for (Addr addr : requestData.getAddresses()) {
       if (addr != null) {
         addr.setCustNm1(replaceGermanCharacters(addr.getCustNm1()));
@@ -315,72 +324,6 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
 
-    // handle coverage
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && engineData.get(AutomationEngineData.COVERAGE_ID) != null
-        && engineData.get(AutomationEngineData.COVERAGE_FROM) != null && ("BG_CALC".equals(engineData.get(AutomationEngineData.COVERAGE_FROM))
-            || "BG_ODM".equals(engineData.get(AutomationEngineData.COVERAGE_FROM)))) {
-      String coverageId = (String) engineData.get(AutomationEngineData.COVERAGE_ID);
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
-      details.append("Coverage calculated using Global/Domestic Buying Group.").append("\n");
-      details.append("Computed SORTL = " + coverageId).append("\n");
-      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
-      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("SEARCH_TERM", coverageId);
-      query.setForReadOnly(true);
-      List<Object[]> result = query.getResults(1);
-      if (result.size() > 0) {
-        String isuCd = (String) result.get(0)[0];
-        String clientTier = (String) result.get(0)[1];
-        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-          }
-        }
-      }
-
-    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
-      HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
-          data.getClientTier());
-      LOG.debug("Calculated SORTL: " + response.get(SORTL));
-      if (StringUtils.isNotBlank(response.get(MATCHING))) {
-        switch (response.get(MATCHING)) {
-        case "Exact Match":
-        case "Nearest Match":
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
-          details.append("Coverage calculation Successful.").append("\n");
-          details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
-          details.append("Matched Rule:").append("\n");
-          details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
-          details.append("ISU = " + data.getIsuCd()).append("\n");
-          details.append("CTC = " + data.getClientTier()).append("\n");
-          details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
-          details.append("Matching: " + response.get(MATCHING));
-          break;
-        case "No Match Found":
-          engineData.addRejectionComment("Coverage cannot be computed automatically.");
-          details.append("Coverage cannot be computed automatically.").append("\n");
-          results.setResults("Coverage not calculated.");
-          results.setOnError(true);
-          break;
-        }
-      } else {
-        engineData.addRejectionComment("Coverage cannot be computed automatically.");
-        details.append("Coverage cannot be computed automatically.").append("\n");
-        results.setResults("Coverage not calculated.");
-        results.setOnError(true);
-      }
-    } else {
-      details.append("Skipped coverage calculation from 32S-PostalCode Logic.").append("\n");
-      results.setResults("Coverage calculation skipped.");
-    }
-
-    results.setProcessOutput(overrides);
     return results;
   }
 
@@ -472,6 +415,80 @@ public class GermanyUtil extends AutomationUtil {
       return str;
     }
     return null;
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container) throws Exception {
+    Data data = requestData.getData();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String coverageId = container.getFinalCoverage();
+    details.append("\n");
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && StringUtils.isNotBlank(coverageId) && covFrom != null
+        && ("BG_CALC".equals(covFrom) || "BG_ODM".equals(engineData.get(covFrom)))) {
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
+      // details.append("Coverage calculated using Global/Domestic Buying
+      // Group.").append("\n");
+      details.append("Computed SORTL = " + coverageId).append("\n");
+      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
+      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
+      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("SEARCH_TERM", coverageId);
+      query.setForReadOnly(true);
+      List<Object[]> result = query.getResults(1);
+      if (result.size() > 0) {
+        String isuCd = (String) result.get(0)[0];
+        String clientTier = (String) result.get(0)[1];
+        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
+          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
+            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
+          }
+        }
+      }
+
+    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
+      HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
+          data.getClientTier());
+      LOG.debug("Calculated SORTL: " + response.get(SORTL));
+      if (StringUtils.isNotBlank(response.get(MATCHING))) {
+        switch (response.get(MATCHING)) {
+        case "Exact Match":
+        case "Nearest Match":
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
+          details.append("Coverage calculation Successful.").append("\n");
+          details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
+          details.append("Matched Rule:").append("\n");
+          details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
+          details.append("ISU = " + data.getIsuCd()).append("\n");
+          details.append("CTC = " + data.getClientTier()).append("\n");
+          details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
+          details.append("Matching: " + response.get(MATCHING));
+          break;
+        case "No Match Found":
+          engineData.addRejectionComment("Coverage cannot be computed automatically.");
+          details.append("Coverage cannot be computed automatically.").append("\n");
+          results.setResults("Coverage not calculated.");
+          results.setOnError(true);
+          break;
+        }
+      } else {
+        engineData.addRejectionComment("Coverage cannot be computed automatically.");
+        details.append("Coverage cannot be computed automatically.").append("\n");
+        results.setResults("Coverage not calculated.");
+        results.setOnError(true);
+      }
+    } else {
+      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
+      results.setResults("Coverage calculation skipped.");
+    }
+    return true;
   }
 
 }

@@ -134,6 +134,27 @@ public abstract class AutomationUtil {
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output);
 
   /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param results
+   * @param details
+   * @param overrides
+   * @param requestData
+   * @param engineData
+   * @param covFrom
+   * @param container
+   * @return
+   * @throws Exception
+   */
+  public boolean performCountrySpecificCoverageCalculations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container) throws Exception {
+    return false;
+  }
+
+  /**
    *
    * Gets the default cluster code for country.
    *
@@ -199,36 +220,6 @@ public abstract class AutomationUtil {
       return VAT_CHECK_COUNTRIES.contains(cmrIssuingCntry);
     }
     return false;
-  }
-
-  /**
-   * Allows skipping company checks for scenario & updates
-   *
-   * @param scenarioList
-   * @param skipCheckForUpdate
-   * @return
-   */
-  public static void skipCompanyCheckForScenario(RequestData requestData, AutomationEngineData engineData, List<String> scenarioList,
-      boolean skipCheckForUpdate) {
-    // get request admin and data
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-
-    String scenarioSubType = "";
-    if ("C".equals(admin.getReqType()) && data != null) {
-      scenarioSubType = data.getCustSubGrp();
-    }
-    ScenarioExceptionsUtil scenarioExceptions = null;
-    if (engineData.get("SCENARIO_EXCEPTIONS") != null) {
-      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
-    }
-
-    if (scenarioExceptions != null
-        && (("C".equals(admin.getReqType()) && scenarioList.size() != 0 && scenarioSubType != null && scenarioList.contains(scenarioSubType))
-            || ("U".equals(admin.getReqType()) && skipCheckForUpdate))) {
-      scenarioExceptions.setSkipCompanyVerification(true);
-    }
-
   }
 
   /**
