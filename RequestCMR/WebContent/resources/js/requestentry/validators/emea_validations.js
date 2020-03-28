@@ -2968,7 +2968,12 @@ function addHandlersForGRCYTR() {
     			  && FormManager.getActualValue('custSubGrp') == 'SPAS'){
     		  FormManager.clearValue('enterprise');
     	  } else {
-    		  setISRValues();
+    	    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY){
+    	      console.log("skip set ISR.");
+    	    }else{
+    	      setISRValues();    	      
+    	    }
+    	    
     	  }
     });
   }
@@ -3067,7 +3072,11 @@ function setClientTierAndISR(value) {
 		  FormManager.readOnly('clientTier');
 	  }	  
   } else {
-	  setISRValues();
+if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY){
+  console.log("skip set ISR.");
+    }else{
+      setISRValues();      
+    }
   }
 }
 
@@ -3518,12 +3527,12 @@ function setCustSubTypeBpGRTRCY() {
 	      FormManager.setValue('isuCd', '21');
 	    } else if (custType == 'INTER') {
 	      FormManager.readOnly('clientTier');
-	      //FormManager.setValue('clientTier', 'Z');
+	      // FormManager.setValue('clientTier', 'Z');
 	      FormManager.readOnly('isuCd');
-	      //FormManager.setValue('isuCd', '34');
+	      // FormManager.setValue('isuCd', '34');
 	    } else {
-	      //FormManager.enable('clientTier');
-	      //FormManager.enable('isuCd');
+	      // FormManager.enable('clientTier');
+	      // FormManager.enable('isuCd');
 	    }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
@@ -3546,9 +3555,13 @@ function setCustSubTypeBpGRTRCY() {
   
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE 
 		  && FormManager.getActualValue('custSubGrp') == 'SPAS'){
-	  //FormManager.clearValue('enterprise');
+	  // FormManager.clearValue('enterprise');
   } else {
-	  setISRValues();
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY){
+      console.log("skip set ISR.");
+    }else{
+      setISRValues();      
+    }
   }
 }
 
@@ -4860,9 +4873,9 @@ function autoSetAddrFieldsForIT() {
 
 function setStreetAbbrevIT() {
   var reqType = FormManager.getActualValue('reqType');
-  /*if (reqType != 'C') {
-    return new ValidationResult(null, true);
-  }*/
+  /*
+   * if (reqType != 'C') { return new ValidationResult(null, true); }
+   */
   var addrType = FormManager.getActualValue('addrType');
   if (addrType != null && (addrType == 'ZP01' || FormManager.getField('addrType_ZP01').checked)) {
     FormManager.setValue('streetAbbrev', FormManager.getActualValue('addrTxt').substring(0, 18));
@@ -4871,9 +4884,9 @@ function setStreetAbbrevIT() {
 
 function setAddrAbbrevNameIT() {
   var reqType = FormManager.getActualValue('reqType');
-  /*if (reqType != 'C') {
-    return new ValidationResult(null, true);
-  }*/
+  /*
+   * if (reqType != 'C') { return new ValidationResult(null, true); }
+   */
   var addrType = FormManager.getActualValue('addrType');
   if (addrType != null && (addrType == 'ZP01' || FormManager.getField('addrType_ZP01').checked)) {
     FormManager.setValue('addrAbbrevName', FormManager.getActualValue('custNm1').substring(0, 22));
@@ -4882,9 +4895,9 @@ function setAddrAbbrevNameIT() {
 
 function setAddrAbbrevLocnIT() {
   var reqType = FormManager.getActualValue('reqType');
-  /*if (reqType != 'C') {
-    return new ValidationResult(null, true);
-  }*/
+  /*
+   * if (reqType != 'C') { return new ValidationResult(null, true); }
+   */
   var addrType = FormManager.getActualValue('addrType');
   if (addrType != null && (addrType == 'ZP01' || FormManager.getField('addrType_ZP01').checked)) {
     FormManager.setValue('addrAbbrevLocn', FormManager.getActualValue('city1').substring(0, 12));
@@ -4896,9 +4909,9 @@ function addressLoadHandlerIT(cntry, addressMode, saving, afterValidate) {
     return;
   }
   var reqType = FormManager.getActualValue('reqType');
-  /*if (reqType != 'C') {
-    return new ValidationResult(null, true);
-  }*/
+  /*
+   * if (reqType != 'C') { return new ValidationResult(null, true); }
+   */
 
   if (_custNameITHandler == null) {
     _custNameITHandler = dojo.connect(FormManager.getField('custNm1'), 'onChange', function(value) {
