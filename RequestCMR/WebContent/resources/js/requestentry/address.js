@@ -50,7 +50,7 @@ function addrSeqFormatter(value, rowIndex) {
   if (cntry == SysLoc.ISRAEL) {
     if (reqType == 'C') {
       return 'N/A';
-    } else if (reqType == 'U' && importInd == 'N') {
+    } else if ((reqType == 'U' || reqType == 'X') && importInd == 'N') {
       return 'N/A';
     }
     return paired == '' ? value : value + '<br>(' + paired + ')';
@@ -58,7 +58,7 @@ function addrSeqFormatter(value, rowIndex) {
       || cntry == SysLoc.JAMAICA || cntry == SysLoc.SAINT_LUCIA || cntry == SysLoc.NETH_ANTILLES || cntry == SysLoc.SURINAME || cntry == SysLoc.TRINIDAD_TOBAGO) {
     if (reqType == 'C' && (status == 'COM' || status == 'PCO')) {
       return paired == '' ? 'N/A' : paired;
-    } else if (reqType == 'U' && importInd == 'Y') {
+    } else if ((reqType == 'U' || reqType == 'X') && importInd == 'Y') {
       return paired == '' ? 'N/A' : paired;
     }
     return value;
@@ -203,7 +203,7 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
   cmr.addrdetails = result;
   cmr.showModal('AddressDetailsModal');
   openAddressDetails.addrType = addrType;
-  if (nordx_cntries.indexOf(cntry) > -1 && (addrType == 'ZP02' || addrType == 'ZI01') && reqType == 'U') {
+  if (nordx_cntries.indexOf(cntry) > -1 && (addrType == 'ZP02' || addrType == 'ZI01') && (reqType == 'U' || reqType == 'X')) {
     cmr.showNode("machineSerialAddrDetails");
     setAddrDetailsForView(addrType, addrSeq);
   } else if (nordx_cntries.indexOf(cntry) > -1 || cntry == '702') {
@@ -270,7 +270,7 @@ function AddressDetailsModal_onLoad() {
         cmr.hideNode('updateButtonFromView');
       }
     }
-  } else if ('758' == FormManager.getActualValue('cmrIssuingCntry') && 'U' == FormManager.getActualValue('reqType') && 'Y' == details.ret31) {
+  } else if ('758' == FormManager.getActualValue('cmrIssuingCntry') && ('U' == FormManager.getActualValue('reqType') || 'X' == FormManager.getActualValue('reqType')) && 'Y' == details.ret31) {
     if (details.ret68 != undefined && details.ret68 != '' && details.ret68 != FormManager.getActualValue('cmrNo')) {
       cmr.hideNode('updateButtonFromView');
     }
@@ -1209,7 +1209,7 @@ function addEditAddressModal_onLoad() {
         FormManager.setValue('importInd', 'Y');
         // FormManager.removeValidator('sapNo',
         // Validators.DB('DB-SAPR3.KNA1',{mandt : cmr.MANDT}));
-        if (FormManager.getActualValue('reqType') == 'U') {
+        if (FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') {
           // set to readOnly instead of disabled
           FormManager.readOnly('sapNo');
           FormManager.readOnly('ierpSitePrtyId');
@@ -1293,7 +1293,7 @@ function addEditAddressModal_onLoad() {
   // apply template for all create scenarios, and for updates with manually
   // inputted data
   // for updates, apply to newly created addresses only
-  if (requestType != 'U' || (requestType == 'U' && (importInd == '' || importInd == 'N'))) {
+  if ((requestType != 'U' && requestType != 'X') || ((requestType == 'U' || requestType == 'X') && (importInd == '' || importInd == 'N'))) {
     var template = TemplateService.getCurrentTemplate();
     if (template) {
       TemplateService.loadAddressTemplate(template, 'reqentry', FormManager.getActualValue('addrType'));
@@ -1717,7 +1717,7 @@ function applyAddrChangesModal_onLoad() {
       // for updates, check here if there are multiple instances of the same
       // addresses
       var single = true;
-      if (reqType == 'U' && !GEOHandler.canCopyAddressType(type.ret1) && typeof (_allAddressData) != 'undefined') {
+      if ((reqType == 'U' || reqType == 'X') && !GEOHandler.canCopyAddressType(type.ret1) && typeof (_allAddressData) != 'undefined') {
         var count = 0;
         console.log('checking instances of address type ' + type.ret1);
         for ( var j = 0; j < _allAddressData.length; j++) {

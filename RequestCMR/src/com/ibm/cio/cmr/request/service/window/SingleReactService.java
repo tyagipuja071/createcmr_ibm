@@ -91,6 +91,7 @@ public class SingleReactService extends BaseSimpleService<FindCMRResultModel> {
         cmrRecord.setCmrIsu(kna1.getBrsch());
         cmrRecord.setCmrAffiliate(kna1.getKonzs());
         cmrRecord.setCmrAddrTypeCode(kna1.getKtokd());
+        cmrRecord.setCmrAddrType("");
         cmrRecord.setCmrPrefLang(kna1.getSpras());
         cmrRecord.setCmrBusinessReg(kna1.getStcd1());
         cmrRecord.setCmrShortName(kna1.getTelx1());
@@ -98,12 +99,12 @@ public class SingleReactService extends BaseSimpleService<FindCMRResultModel> {
         cmrRecord.setCmrSubIndustry(kna1.getBran1());
         cmrRecord.setCmrPpsceid(kna1.getBran3());
         cmrRecord.setCmrSitePartyID(kna1.getBran5());
-        cmrRecord.setCmrIssuedBy(kna1.getKatr6());
+        cmrRecord.setCmrIssuedBy(kna1.getKatr6());     
         cmrRecord.setCmrCapIndicator(kna1.getKatr8());
         cmrRecord.setCmrNum(kna1.getZzkvCusno());
         cmrRecord.setCmrInac(kna1.getZzkvInac());
-        cmrRecord.setCmrCompanyNo(kna1.getZzkvNode1());
-        cmrRecord.setCmrEnterpriseNumber(kna1.getZzkvNode2());
+        cmrRecord.setCmrCompanyNo(!StringUtils.isEmpty(kna1.getZzkvNode1()) ? kna1.getZzkvNode1().trim() : "");
+        cmrRecord.setCmrEnterpriseNumber(!StringUtils.isEmpty(kna1.getZzkvNode2()) ? kna1.getZzkvNode2().trim() : "");
         cmrRecord.setCmrBusinessReg(kna1.getStcd1());
         cmrRecord.setCmrLocalTax2(kna1.getStcd2());
         cmrRecord.setCmrClass(kna1.getKukla());
