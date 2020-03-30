@@ -903,6 +903,10 @@ function setSBOValuesForIsuCtc() {
     return;
   }
 
+  if ('U' == FormManager.getActualValue('reqType')) {
+    return;
+  }
+
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
