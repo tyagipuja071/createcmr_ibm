@@ -3147,7 +3147,7 @@ public class EMEAHandler extends BaseSOFHandler {
 		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
 			return Arrays.asList("ZP01", "ZS01", "ZI01");
 		} else if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZP01", "ZS01");
+		  return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01");
 		} else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
 			return Arrays.asList("ZP01", "ZS01");
 		}
