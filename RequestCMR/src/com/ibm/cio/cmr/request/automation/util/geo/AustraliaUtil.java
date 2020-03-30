@@ -192,6 +192,9 @@ public class AustraliaUtil extends AutomationUtil {
     // "XDUMM", "INTER", "XINT", "AQSTN", "XAQST", "SOFT" };
     // skipCompanyCheckForScenario(requestData, engineData,
     // Arrays.asList(scnarioList), true);
+
+    String scenarioList[] = { "NRML", "ESOSW" };
+    allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scenarioList));
     return true;
   }
 
