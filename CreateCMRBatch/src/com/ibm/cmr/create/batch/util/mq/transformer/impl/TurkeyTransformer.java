@@ -1002,16 +1002,22 @@ public class TurkeyTransformer extends EMEATransformer {
 			legacyCust.setAccAdminBo("Y60382");
 			legacyCust.setCeDivision("2");
 
-			// CMR-2279:Turkey-ISR set based on SBO
-			String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-			PreparedQuery q = new PreparedQuery(entityManager, sql);
-			q.setParameter("SBO", data.getSalesBusOffCd());
-			q.setParameter("CNTRY", data.getCmrIssuingCntry());
-			String isr = q.getSingleResult(String.class);
-			legacyCust.setSalesRepNo(isr);
-			cmrObjects.getData().setSalesTeamCd(isr);
-			legacyCust.setSalesGroupRep(isr);
-			cmrObjects.getData().setInstallBranchOff(isr);
+      // CMR-2279:Turkey-ISR set based on SBO
+      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+
+        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+        PreparedQuery q = new PreparedQuery(entityManager, sql);
+        q.setParameter("SBO", data.getSalesBusOffCd());
+        q.setParameter("CNTRY", data.getCmrIssuingCntry());
+        String isr = q.getSingleResult(String.class);
+        if (!StringUtils.isBlank(isr)) {
+          legacyCust.setSalesRepNo(isr);
+          cmrObjects.getData().setRepTeamMemberNo(isr);
+        } else {
+          legacyCust.setSalesRepNo("");
+          cmrObjects.getData().setRepTeamMemberNo("");
+        }
+      }
 
 			// extract the phone from billing as main phone
 			for (Addr addr : cmrObjects.getAddresses()) {
@@ -1042,16 +1048,22 @@ public class TurkeyTransformer extends EMEATransformer {
 				}
 			}
 
-			// CMR-2279:Turkey-ISR set based on SBO
-			String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-			PreparedQuery q = new PreparedQuery(entityManager, sql);
-			q.setParameter("SBO", data.getSalesBusOffCd());
-			q.setParameter("CNTRY", data.getCmrIssuingCntry());
-			String isr = q.getSingleResult(String.class);
-			legacyCust.setSalesRepNo(isr);
-			cmrObjects.getData().setSalesTeamCd(isr);
-			legacyCust.setSalesGroupRep(isr);
-			cmrObjects.getData().setInstallBranchOff(isr);
+      // CMR-2279:Turkey-ISR set based on SBO
+      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+
+        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+        PreparedQuery q = new PreparedQuery(entityManager, sql);
+        q.setParameter("SBO", data.getSalesBusOffCd());
+        q.setParameter("CNTRY", data.getCmrIssuingCntry());
+        String isr = q.getSingleResult(String.class);
+        if (!StringUtils.isBlank(isr)) {
+          legacyCust.setSalesRepNo(isr);
+          cmrObjects.getData().setRepTeamMemberNo(isr);
+        } else {
+          legacyCust.setSalesRepNo("");
+          cmrObjects.getData().setRepTeamMemberNo("");
+        }
+      }
 
 			String dataEmbargoCd = data.getEmbargoCd();
 			String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
@@ -1179,16 +1191,22 @@ public class TurkeyTransformer extends EMEATransformer {
 			cust.setSalesRepNo(muData.getRepTeamMemberNo());
 			cust.setSalesGroupRep(muData.getRepTeamMemberNo());
 		} else {
-			// CMR-2279:Turkey-ISR set based on SBO
-			String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-			PreparedQuery q = new PreparedQuery(entityManager, sql);
-			q.setParameter("SBO", muData.getCustNm1());
-			q.setParameter("CNTRY", SystemLocation.TURKEY);
-			String isr = q.getSingleResult(String.class);
-			cust.setSalesRepNo(isr);
-			cust.setSalesGroupRep(isr);
-			cmrObjects.getMassUpdateData().setRepTeamMemberNo(isr);
-			cmrObjects.getMassUpdateData().setInstallBranchOff(isr);
+      // CMR-2279:Turkey-ISR set based on SBO
+      if (!StringUtils.isBlank(muData.getCustNm1())) {
+
+        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+        PreparedQuery q = new PreparedQuery(entityManager, sql);
+        q.setParameter("SBO", muData.getCustNm1());
+        q.setParameter("CNTRY", SystemLocation.TURKEY);
+        String isr = q.getSingleResult(String.class);
+        if (!StringUtils.isBlank(isr)) {
+          cust.setSalesRepNo(isr);
+          cmrObjects.getMassUpdateData().setRepTeamMemberNo(isr);
+        } else {
+          cust.setSalesRepNo("");
+          cmrObjects.getMassUpdateData().setRepTeamMemberNo("");
+        }
+      }
 		}
 
 		if (!StringUtils.isBlank(muData.getEnterprise())) {
