@@ -461,7 +461,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
    data.setCustClass(!StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass().trim() :""); 
    data.setHwSvcsRepTeamNo(!StringUtils.isEmpty(data.getHwSvcsRepTeamNo()) ? data.getHwSvcsRepTeamNo().trim() :""); 
   
-   //Due to field length issue in DB
+   // Resolve Data issue (length of field ISIC_CD is 4 in db
    data.setIsicCd(!StringUtils.isEmpty(data.getIsicCd()) ? data.getIsicCd().trim().substring(0, 4) :""); 
    
    data.setIsuCd(!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd().trim() :""); 
@@ -547,7 +547,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     data.setEnterprise(record.getCmrEnterpriseNumber());
     data.setInacCd(record.getCmrInac());
     data.setInacType(record.getCmrInacType());
-    data.setIsicCd(record.getCmrIsic());
+    // Resolve Data issue (length of field ISIC_CD is 4 in db
+   // data.setIsicCd(record.getCmrIsic());
+    data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic()) ? record.getCmrIsic().trim().substring(0, 4) :"");
+    
     data.setIsuCd(record.getCmrIsu());
     data.setSearchTerm(record.getCmrSortl());
     data.setSitePartyId(record.getCmrSitePartyID());
