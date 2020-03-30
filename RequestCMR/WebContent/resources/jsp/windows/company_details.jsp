@@ -295,7 +295,7 @@
                    <em> Record Details
                      <div class="det-btn">
                        <%if (!viewOnly){ %>
-                       <input type="button" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(false)">
+                       <input type="button" ng-show="dnb.operStatusCode != 'O'" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(false)">
                        <%} %>
                      </div>
                    </em>
@@ -329,14 +329,24 @@
                     <td ng-bind-html="dnb.guOrganizationName"></td>
                   </tr>
                   <tr>
-                    <td class="dnb-label"><strong>IBM ISIC:</strong></td>
+                    <td class="dnb-label">Operating Status:</td>
                     <td>
+                      <span ng-bind-html="dnb.operStatusDesc" ng-show="dnb.operStatusCode == 'O'" style="color:red;font-weight:bold">
+                      </span>
+                      <span ng-bind-html="dnb.operStatusDesc" ng-show="dnb.operStatusCode == 'A'" style="color:green;font-weight:bold">
+                      </span>
+                      <span ng-bind-html="dnb.operStatusDesc" ng-show="dnb.operStatusCode != 'A' && dnb.operStatusCode != 'O'">
+                      </span>
+                    </td>
+                    <td class="dnb-label">Web Site:</td>
+                    <td ng-bind-html="dnb.website"></td>
+                  </tr>
+                  <tr>
+                    <td class="dnb-label"><strong>IBM ISIC:</strong></td>
+                    <td colspan="3">
                       <strong>
                         <span ng-bind-html="dnb.ibmIsic"></span> - <span ng-bind-html="dnb.ibmIsicDesc"></span>
                       </strong>
-                    </td>
-                    <td class="dnb-label">&nbsp;</td>
-                    <td class="dnb-label">&nbsp;</td>
                     </td>
                   </tr>
                   <tr>
@@ -424,7 +434,7 @@
                     <td colspan="4">
                      <div class="det-btn">
                        <%if (!viewOnly){ %>
-                       <input type="button" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(false)">
+                       <input type="button" ng-show="dnb.operStatusCode != 'O'" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(false)">
                        <%} %>
                      </div>
                     </td>
