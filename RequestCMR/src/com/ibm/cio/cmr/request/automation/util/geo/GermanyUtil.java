@@ -241,19 +241,20 @@ public class GermanyUtil extends AutomationUtil {
         // check value of Department under '##GermanyInternalDepartment' LOV
         String sql = ExternalizedQuery.getSql("DE.CHECK_DEPARTMENT");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
-        for (Addr addr : requestData.getAddresses()) {
-          if (StringUtils.isNotBlank(addr.getDept())) {
-            query.setParameter("CD", addr.getDept());
-            String result = query.getSingleResult(String.class);
-            if (result == null) {
-              engineData.addRejectionComment("Department on the request is invalid.");
-              details.append("Department on the request is invalid for address type - " + addr.getId().getAddrType() + ".").append("\n");
-              valid = false;
-            } else {
-              details.append("Department " + addr.getDept() + " validated successfully for address type - " + addr.getId().getAddrType() + ".")
-                  .append("\n");
-            }
+        String dept = data.getIbmDeptCostCenter();
+        if (StringUtils.isNotBlank(dept)) {
+          query.setParameter("CD", dept);
+          String result = query.getSingleResult(String.class);
+          if (result == null) {
+            engineData.addRejectionComment("IBM Department/Cost Center on the request is invalid.");
+            details.append("IBM Department/Cost Center on the request is invalid.").append("\n");
+            valid = false;
+          } else {
+            details.append("IBM Department/Cost Center " + dept + " validated successfully.").append("\n");
           }
+        } else {
+          details.append("IBM Department/Cost Center not provided on the request. Default Department Number(00X306) will be set.");
+          data.setIbmDeptCostCenter("00X306");
         }
         break;
       }
