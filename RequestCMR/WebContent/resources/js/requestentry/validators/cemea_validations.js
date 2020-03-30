@@ -84,6 +84,27 @@ function lockOrdBlk() {
   }
 }
 
+function orderBlockValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
+          var role = FormManager.getActualValue('userRole').toUpperCase();
+          var ordBlk = FormManager.getActualValue('ordBlk');
+          if (role == 'PROCESSOR') {
+            if (ordBlk != '') {
+              if (ordBlk == '88' || ordBlk == '94') {
+              } else {
+                return new ValidationResult(null, false, 'Only blank, 88, 94 are allowed.');
+              }
+            }
+          }
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /**
  * After config for CEMEA
  */
@@ -2207,9 +2228,8 @@ function customVATMandatoryForAT() {
   }
 
   var custSubType = FormManager.getActualValue('custSubGrp');
-  if (custSubType != null && custSubType != '' && (custSubType == 'COMME' 
-	  || custSubType == 'BUSPR' || custSubType == 'XBP' || custSubType == 'XCOM' 
-	  || custSubType == 'XGOV' || custSubType == 'XISO' || custSubType == 'XINT')) {
+  if (custSubType != null && custSubType != ''
+      && (custSubType == 'COMME' || custSubType == 'BUSPR' || custSubType == 'XBP' || custSubType == 'XCOM' || custSubType == 'XGOV' || custSubType == 'XISO' || custSubType == 'XINT')) {
     if (!dijit.byId('vatExempt').get('checked')) {
       // Make Vat Mandatory
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
@@ -2442,6 +2462,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(validateAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAddrFunction(addLatinCharValidator, GEOHandler.CEMEA);
+
+  GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
 
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
