@@ -151,8 +151,13 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   engineData.put("cmrCheckMatches", cmrCheckRecord);
                 }
                 result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("There were " + cmrCheckMatches.size() + " possible duplicate CMRs found with the same data.");
-                result.setOnError(true);
+                if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
+                  engineData.addNegativeCheckStatus("dupAllowed",
+                      "There were " + cmrCheckMatches.size() + " possible duplicate CMRs found with the same data but allowed for the scenario.");
+                } else {
+                  engineData.addRejectionComment("There were " + cmrCheckMatches.size() + " possible duplicate CMRs found with the same data.");
+                  result.setOnError(true);
+                }
                 result.setProcessOutput(output);
                 result.setDetails(details.toString().trim());
               } else {

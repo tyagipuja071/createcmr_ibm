@@ -90,9 +90,11 @@ function orderBlockValidation() {
       validate : function() {
         if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
           var role = FormManager.getActualValue('userRole').toUpperCase();
+          var ordBlk = FormManager.getActualValue('ordBlk');
           if (role == 'PROCESSOR') {
             if (ordBlk != '') {
-              if (ordBlk != '88' || ordBlk != '94') {
+              if (ordBlk == '88' || ordBlk == '94') {
+              } else {
                 return new ValidationResult(null, false, 'Only blank, 88, 94 are allowed.');
               }
             }
@@ -2226,9 +2228,8 @@ function customVATMandatoryForAT() {
   }
 
   var custSubType = FormManager.getActualValue('custSubGrp');
-  if (custSubType != null && custSubType != '' && (custSubType == 'COMME' 
-	  || custSubType == 'BUSPR' || custSubType == 'XBP' || custSubType == 'XCOM' 
-	  || custSubType == 'XGOV' || custSubType == 'XISO' || custSubType == 'XINT')) {
+  if (custSubType != null && custSubType != ''
+      && (custSubType == 'COMME' || custSubType == 'BUSPR' || custSubType == 'XBP' || custSubType == 'XCOM' || custSubType == 'XGOV' || custSubType == 'XISO' || custSubType == 'XINT')) {
     if (!dijit.byId('vatExempt').get('checked')) {
       // Make Vat Mandatory
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
