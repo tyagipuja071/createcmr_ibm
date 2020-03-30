@@ -735,11 +735,11 @@ public class TurkeyTransformer extends EMEATransformer {
 		LOG.debug("Set max and min range of cmrNo..");
 		// if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
 		if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
-			generateCMRNoObj.setMin(993000);
+			generateCMRNoObj.setMin(993110);
 			generateCMRNoObj.setMax(998899);
 			LOG.debug("that is TR INTER CMR");
 		} else {
-			generateCMRNoObj.setMin(300000);
+			generateCMRNoObj.setMin(330000);
 			generateCMRNoObj.setMax(999999);
 			LOG.debug("that is TR No INTER CMR");
 		}
@@ -1528,23 +1528,23 @@ public class TurkeyTransformer extends EMEATransformer {
 		}
 	}
 
-  @Override
-  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
-      MassUpdtData muData, String cmr) throws Exception {
-    List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-    MassUpdtAddr zp01Addr = new MassUpdtAddr();
-    for (MassUpdtAddr muAddr : muAddrList) {
-      if ("ZP01".equals(muAddr.getId().getAddrType())) {
-        zp01Addr = muAddr;
-        break;
-      }
-    }
-    if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
-      if ("@".equals(zp01Addr.getFloor())) {
-        custExt.setiTaxCode("");
-      } else {
-        custExt.setiTaxCode(zp01Addr.getFloor());
-      }
-    }
-  }
+	@Override
+	public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt,
+			CMRRequestContainer cmrObjects, MassUpdtData muData, String cmr) throws Exception {
+		List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
+		MassUpdtAddr zp01Addr = new MassUpdtAddr();
+		for (MassUpdtAddr muAddr : muAddrList) {
+			if ("ZP01".equals(muAddr.getId().getAddrType())) {
+				zp01Addr = muAddr;
+				break;
+			}
+		}
+		if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
+			if ("@".equals(zp01Addr.getFloor())) {
+				custExt.setiTaxCode("");
+			} else {
+				custExt.setiTaxCode(zp01Addr.getFloor());
+			}
+		}
+	}
 }
