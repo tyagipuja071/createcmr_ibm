@@ -41,6 +41,12 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
+
 public class GermanyUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(GermanyUtil.class);

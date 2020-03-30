@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.impl.us;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,12 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
@@ -45,6 +51,7 @@ public class USDelReacCheckElement extends ValidatingElement {
     AutomationResult<ValidationOutput> result = buildResult(admin.getId().getReqId());
     ValidationOutput output = new ValidationOutput();
     StringBuilder details = new StringBuilder();
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     if (StringUtils.isNotBlank(admin.getReqType())) {
       switch (admin.getReqType()) {
       case "R":
@@ -58,21 +65,47 @@ public class USDelReacCheckElement extends ValidatingElement {
           Date dateSixMonthsAgo = c.getTime();
           for (String cmrNo : cmrNoList) {
             // get last update ts from RDC
-            String sql = "select SHAD_UPDATE_TS from sapr3.KNA1 where ZZKV_CUSNO=:ZZKV_CUSNO and MANDT=:MANDT and KATR6=:KATR6 and ktokd='ZS01'";
+            String sql = ExternalizedQuery.getSql("AUTO.US.GET_LAST_UPD_TS_RDC");
             PreparedQuery query = new PreparedQuery(entityManager, sql);
             query.setParameter("ZZKV_CUSNO", cmrNo);
-            query.setParameter("MANDT", SystemConfiguration.getSystemProperty("MANDT"));
+            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
             query.setParameter("KATR6", data.getCmrIssuingCntry());
             query.setForReadOnly(true);
-            Date lastUpdTs = query.getSingleResult(Date.class);
-            if (lastUpdTs != null) {
-              if (lastUpdTs.before(dateSixMonthsAgo)) {
+            String rdcUpdTs = query.getSingleResult(String.class);
+            if (rdcUpdTs != null) {
+              Date lastUpdTs = formatter.parse(rdcUpdTs);
+              if (lastUpdTs != null && lastUpdTs.before(dateSixMonthsAgo)) {
                 oldCMRExist = true;
                 engineData.setScenarioVerifiedIndc("N");
                 details.append("CMR No. " + cmrNo + " updated more than 6 months ago.").append("\n");
               }
             } else {
-              // TODO VALIDATION USING US CMR
+              String url = SystemConfiguration.getValue("BATCH_SERVICES_URL");
+              String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+              String sql1 = ExternalizedQuery.getSql("AUTO.US.GET_LAST_UPD_TS_USCMR", usSchema);
+              sql1 = StringUtils.replace(sql1, ":CMR_NO", "'" + cmrNo + "'");
+              String dbId = QueryClient.USCMR_APP_ID;
+              QueryRequest queryRequest = new QueryRequest();
+              queryRequest.setSql(sql1);
+              queryRequest.setRows(1);
+              queryRequest.addField("D_CHANGE");
+              QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+
+              QueryResponse response = client.executeAndWrap(dbId, queryRequest, QueryResponse.class);
+
+              if (response.isSuccess() && response.getRecords() != null && !response.getRecords().isEmpty()) {
+                String dateString = (String) response.getRecords().get(0).get("D_CHANGE");
+                if (StringUtils.isNotBlank(dateString)) {
+                  Date usCmrDate = formatter.parse(dateString);
+                  if (usCmrDate != null && usCmrDate.before(dateSixMonthsAgo)) {
+                    oldCMRExist = true;
+                    engineData.setScenarioVerifiedIndc("N");
+                    details.append("CMR No. " + cmrNo + " updated more than 6 months ago.").append("\n");
+                  }
+                }
+              } else {
+                log.warn("Query to USCMR data base failed.");
+              }
             }
           }
 
@@ -99,16 +132,15 @@ public class USDelReacCheckElement extends ValidatingElement {
         break;
       default:
         details.append("Skipping Delete/Reactivation check");
-        result.setDetails(details.toString());
         result.setResults("Skipped");
         break;
       }
 
     }
 
-    result.setResults(output.getMessage());
-    result.setProcessOutput(output);
+    result.setDetails(details.toString());
     return result;
+
   }
 
   private List<String> getCMRNoList(EntityManager entityManager, long reqId) {
