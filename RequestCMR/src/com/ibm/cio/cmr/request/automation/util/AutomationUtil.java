@@ -74,22 +74,6 @@ public abstract class AutomationUtil {
    * @throws InstantiationException
    * @throws IllegalAccessException
    */
-  public static Class<? extends AutomationUtil> getCountrySpecificUtil(String cmrIssuingCntry) throws IllegalAccessException, InstantiationException {
-    if (GEO_UTILS.containsKey(cmrIssuingCntry)) {
-      return GEO_UTILS.get(cmrIssuingCntry);
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * returns an instance of
-   *
-   * @param cmrIssuingCntry
-   * @return
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   */
   public static AutomationUtil getNewCountryUtil(String cmrIssuingCntry) throws IllegalAccessException, InstantiationException {
     if (!GEO_UTILS.containsKey(cmrIssuingCntry)) {
       return null;
