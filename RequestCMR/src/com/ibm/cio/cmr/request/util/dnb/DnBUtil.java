@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -143,6 +144,9 @@ public class DnBUtil {
       throw new Exception("D&B record for DUNS " + dunsNo + " cannot be retrieved.");
     }
     DnBCompany company = dnb.getResults().get(0);
+    if ("O".equals(company.getOperStatusCode())) {
+      throw new CmrException(new Exception("The company is Out of Business based on D&B records."));
+    }
 
     // covert from D&B data to FindCMR model
     FindCMRRecordModel cmrRecord = new FindCMRRecordModel();

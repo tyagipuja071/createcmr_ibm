@@ -6446,6 +6446,26 @@ function toggleBPRelMemType(){
   }
 }
 
+function toggleBPRelMemTypeForTurkey(){
+  var reqType = null;
+  //var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    //role = _pagemodel.userRole.toUpperCase();
+  }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if(reqType == 'U'){
+	  FormManager.show('MembLevel', 'memLvl');
+      FormManager.show('BPRelationType', 'bpRelType');
+      FormManager.resetValidations('bpRelType');
+      FormManager.resetValidations('memLvl');
+      FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
+  }
+}
+
 function unlockINACForINTERUKI() {
   var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custType = FormManager.getActualValue('custSubGrp');
@@ -7294,7 +7314,8 @@ dojo.addOnLoad(function() {
   // CMR-2279
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
-
+  GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
+  
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);

@@ -141,6 +141,11 @@ public class SingaporeUtil extends AutomationUtil {
      * skipCompanyCheckForScenario(requestData, engineData,
      * Arrays.asList(scnarioList), false);
      */
+
+    String[] scnarioList = { "ASLOM", "NRML" };
+
+    allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
+
     return true;
   }
 }

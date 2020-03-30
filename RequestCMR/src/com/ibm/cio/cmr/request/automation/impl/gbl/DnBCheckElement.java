@@ -16,8 +16,10 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.SuppCntryPK;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
@@ -123,13 +125,33 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
           LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
         }
       } else if (ifDnBAccepted) {
-        validation.setSuccess(true);
-        validation.setMessage("DUNS Imported");
-        result.setDetails("D&B record has been imported into the request.");
-        // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
-        // admin.setCompInfoSrc("D&B");
-        engineData.setCompanySource("D&B");
-        LOG.debug("D&B record has been imported into the request.");
+
+        DnbData dnb = CompanyFinder.getDnBDetails(requestData.getData().getDunsNo());
+        boolean writeSuccess = true;
+        if (dnb != null && dnb.getResults() != null && !dnb.getResults().isEmpty()) {
+          if ("O".equals(dnb.getResults().get(0).getOperStatusCode())) {
+            result.setOnError(true);
+            validation.setSuccess(false);
+            validation.setMessage("Failed");
+            result.setDetails("Company is Out of Business based on D&B records.");
+            engineData.addRejectionComment("Company is Out of Business based on D&B records.");
+            // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
+            // admin.setCompInfoSrc("D&B");
+            engineData.setCompanySource("D&B");
+            LOG.debug("D&B record is marked as Out of Business.");
+            writeSuccess = false;
+          }
+        }
+
+        if (writeSuccess) {
+          validation.setSuccess(true);
+          validation.setMessage("DUNS Imported");
+          result.setDetails("D&B record has been imported into the request.");
+          // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
+          // admin.setCompInfoSrc("D&B");
+          engineData.setCompanySource("D&B");
+          LOG.debug("D&B record has been imported into the request.");
+        }
       } else if (ifDnBRejected || ifDnBNotRequired) {
         validation.setSuccess(true);
         validation.setMessage("Skipped");
