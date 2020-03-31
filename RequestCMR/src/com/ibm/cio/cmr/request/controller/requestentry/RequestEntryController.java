@@ -221,8 +221,8 @@ public class RequestEntryController extends BaseController {
    * @return
    */
   @RequestMapping(value = "/request")
-  public ModelAndView showRequestEntryPage(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model, CheckListModel checklist)
-      throws Exception {
+  public ModelAndView showRequestEntryPage(HttpServletRequest request, HttpServletResponse response, RequestEntryModel model,
+      CheckListModel checklist) throws Exception {
 
     ModelAndView mv = null;
 
@@ -433,8 +433,8 @@ public class RequestEntryController extends BaseController {
       sqlId = "YOUR_ACTIONS_NEW";
     }
 
-    if (("X".equals(lockInd) || ("P".equals(claimRole) || "R".equals(claimRole) || "D".equals(claimRole)) || (("L".equals(claimRole) || "O"
-        .equals(claimRole)) && !sameOriginator)) && !newRequest) {
+    if (("X".equals(lockInd) || ("P".equals(claimRole) || "R".equals(claimRole) || "D".equals(claimRole))
+        || (("L".equals(claimRole) || "O".equals(claimRole)) && !sameOriginator)) && !newRequest) {
       request.setAttribute("yourActionsViewOnly", true);
     }
 
@@ -671,7 +671,7 @@ public class RequestEntryController extends BaseController {
       SystemUtil.storeToSession(request, e);
       LOG.error("Error in Processing CMRs", e);
       mv = new ModelAndView("redirect:/request" + (reqId > 0 ? "/" + reqId : newParams), "cmr", new ImportCMRModel());
-      setError(new CmrException(MessageUtil.ERROR_GENERAL), mv);
+      setError(new CmrException(e), mv);
       mv.addObject("success", false);
     }
     return mv;
