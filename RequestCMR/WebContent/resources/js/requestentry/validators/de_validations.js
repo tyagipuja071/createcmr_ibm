@@ -114,7 +114,7 @@ function setISUValues(value) {
     return;
   }
 
-  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'IBMEM') {
+  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
 
     if (!value) {
       value = FormManager.getField('clientTier');
@@ -163,6 +163,8 @@ function setISUValues(value) {
     FormManager.readOnly('isuCd');
   } else if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
     FormManager.enable('isuCd');
+  } else if (_custSubGrp == 'CROSS') {
+    FormManager.readOnly('isuCd');
   }
 
 }
