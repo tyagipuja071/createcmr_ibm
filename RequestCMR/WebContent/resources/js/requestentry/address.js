@@ -1708,6 +1708,7 @@ function applyAddrChangesModal_onLoad() {
         break;
       }
 
+      // update TR
       if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
         break;
       }
