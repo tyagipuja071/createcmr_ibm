@@ -1,7 +1,9 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -9,6 +11,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -17,11 +20,18 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 
@@ -69,15 +79,60 @@ public class USUtil extends AutomationUtil {
 
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
-    // TODO Auto-generated method stub
-    return super.runUpdateChecksForData(entityManager, engineData, requestData, changes, validation);
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    return false;
   }
 
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    // init
+    StringBuilder details = new StringBuilder();
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypeCd");
+    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
+    // check addresses
+    if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
+      if (LEASING.equals(custTypCd) || BUSINESS_PARTNER.equals(custTypCd)) {
+        engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
+            "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
+        details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
+            + " scenario found. Processor review will be required.").append("\n");
+        validation.setMessage("Review needed");
+        validation.setSuccess(false);
+      } else {
+        List<String> addrTypesChanged = new ArrayList<String>();
+        for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+          addrTypesChanged.add(addrModel.getAddrType());
+        }
+        if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01)) {
+          closelyMatchAddressWithDnbRecords(handler, requestData, engineData, "ZS01", details, validation);
+        }
+
+        if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01)) {
+          boolean immutableAddrFound = false;
+          // TODO check if street address belongs to immutable address list
+          if (immutableAddrFound) {
+            engineData.addNegativeCheckStatus("IMMUTABLE_ADDR_FOUND", "Invoice-to address cannot be modified.");
+            details.append("Invoice-to address cannot be modified.").append("\n");
+            validation.setMessage("Review needed");
+            validation.setSuccess(false);
+          } else {
+            closelyMatchAddressWithDnbRecords(handler, requestData, engineData, "ZP01", details, validation);
+          }
+        }
+      }
+    } else
+
+    {
+      validation.setSuccess(false);
+      validation.setMessage("Unknown CustType");
+      details.append("Customer Type could not be determined. Update checks for address could not be run.").append("\n");
+      output.setOnError(true);
+    }
+    output.setDetails(details.toString());
     return true;
   }
 
@@ -144,8 +199,56 @@ public class USUtil extends AutomationUtil {
     mapUSCMR.put("cGem", cGem);
     mapUSCMR.put("usRestricTo", usRestricTo);
     mapUSCMR.put("companyNo", companyNo);
-    System.out.println(mapUSCMR);
+    // System.out.println(mapUSCMR);
     return mapUSCMR;
+  }
+
+  private void closelyMatchAddressWithDnbRecords(GEOHandler handler, RequestData requestData, AutomationEngineData engineData, String addrType,
+      StringBuilder details, ValidationOutput validation) throws Exception {
+    String addrDesc = "ZS01".equals(addrType) ? "Install-At" : "Invoice-To";
+    Addr addr = requestData.getAddress(addrType);
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(handler, requestData, engineData, addrType);
+    if (response.getSuccess()) {
+      if (response.getMatched() && !response.getMatches().isEmpty()) {
+        if (DnBUtil.hasValidMatches(response)) {
+          boolean isAddressMatched = false;
+          for (DnBMatchingResponse record : response.getMatches()) {
+            if (record.getConfidenceCode() > 7 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, record)) {
+              isAddressMatched = true;
+              break;
+            }
+          }
+          if (isAddressMatched) {
+            details.append(addrDesc + " address details matched successfully with High Quality D&B Matches.").append("\n");
+            validation.setMessage("Validated.");
+            validation.setSuccess(true);
+          } else {
+            engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType,
+                "High confidence D&B matches did not match the " + addrDesc + " address data. ");
+            details.append("High confidence D&B matches did not match the " + addrDesc + " address data.").append("\n");
+            validation.setMessage("Review needed");
+            validation.setSuccess(false);
+          }
+        } else {
+          engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No High Quality D&B Matches were found for " + addrDesc + " address.");
+          details.append("No High Quality D&B Matches were found for " + addrDesc + " address.").append("\n");
+          validation.setMessage("Review needed");
+          validation.setSuccess(false);
+        }
+      } else {
+        engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + addrType, "No D&B Matches were found for " + addrDesc + " address.");
+        details.append("No D&B Matches were found for " + addrDesc + " address.").append("\n");
+        validation.setMessage("Review needed");
+        validation.setSuccess(false);
+      }
+    } else {
+      engineData.addNegativeCheckStatus("DNB_MATCH_FAIL_" + "ZS01", "D&B Matching couldn't be performed for " + addrDesc + " address.");
+      details.append("D&B Matching couldn't be performed for " + addrDesc + " address.").append("\n");
+      validation.setMessage("Review needed");
+      validation.setSuccess(false);
+    }
   }
 
 }

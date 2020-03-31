@@ -18,6 +18,7 @@ import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.SuppCntryPK;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -86,13 +87,13 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
         if (admin.getMatchOverrideIndc() == null
             || (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && !admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES))) {
           MatchingResponse<DnBMatchingResponse> dnbMatchingResult = new MatchingResponse<DnBMatchingResponse>();
-          DnBMatchingElement dnbMatchingElement = new DnBMatchingElement(admin.getReqType(), null, false, false);
           try {
-            dnbMatchingResult = dnbMatchingElement.getMatches(handler, requestData, engineData);
+            dnbMatchingResult = DnBUtil.getMatches(handler, requestData, engineData, "ZS01");
           } catch (Exception e) {
             LOG.debug("Error on DNB Matching" + e.getMessage());
           }
-          if (dnbMatchingResult != null && engineData.hasPositiveCheckStatus("hasValidMatches")) {
+          boolean hasValidMatches = DnBUtil.hasValidMatches(dnbMatchingResult);
+          if (dnbMatchingResult != null && hasValidMatches) {
             requestData.getAdmin().setMatchIndc("D");
             validation.setSuccess(false);
             validation.setMessage("Matches found");
@@ -100,7 +101,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             result.setOnError(true);
             engineData.addRejectionComment("High confidence D&B matches were found. No override from users was recorded.");
             LOG.debug("High confidence D&B matches were found. No override from user was recorded.\n");
-          } else if (!engineData.hasPositiveCheckStatus("hasValidMatches")) {
+          } else if (!hasValidMatches) {
             validation.setSuccess(true);
             validation.setMessage("Review Needed");
             result.setDetails("Processor review is required as no high confidence D&B matches were found.");
