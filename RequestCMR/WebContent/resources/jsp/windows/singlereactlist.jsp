@@ -63,7 +63,7 @@ div.ibm-columns {
           </cmr:gridCol>
           <cmr:gridCol width="200px" field="cmrNum" header="CMR#" />
           <cmr:gridCol width="90px" field="cmrIssuedBy" header="Issuing Country" />
-          <cmr:gridCol width="70px" field="cmrCity" header="Address" />
+          <cmr:gridCol width="70px" field="cmrStreetAddress" header="Address" />
           <cmr:gridCol width="70px" field="cmrCity" header="City1" />
          <cmr:gridCol width="60px" field="cmrState" header="State/Proviance" />
           <cmr:gridCol width="60px" field="cmrPostalCode" header="Postal Code" />
