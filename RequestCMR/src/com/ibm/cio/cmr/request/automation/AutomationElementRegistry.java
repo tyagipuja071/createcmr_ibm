@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.GOEDeterminationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.ImportCMRElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.USAddrStdElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.USDuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.UpdateSwitchElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilCalculateIBMElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilDupCMRCheckElement;
@@ -70,6 +71,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
 
   // US
   public static final String US_DEL_REAC_CHECK = "US_DEL_REAC_CHECK";
+  public static final String US_DUP_CHK = "US_DUP_CHK";
 
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
@@ -111,6 +113,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
 
     // US
     put(US_DEL_REAC_CHECK, USDelReacCheckElement.class);
+    put(US_DUP_CHK, USDuplicateCheckElement.class);
   }
 
   @Override
