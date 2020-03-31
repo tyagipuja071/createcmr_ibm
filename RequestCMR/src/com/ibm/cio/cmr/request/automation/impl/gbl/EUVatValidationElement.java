@@ -1,5 +1,8 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -19,9 +22,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
-import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -32,6 +33,8 @@ import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 public class EUVatValidationElement extends ValidatingElement implements CompanyVerifier {
 
   private static final Logger LOG = Logger.getLogger(EUVatValidationElement.class);
+  private static final List<String> EU_COUNTRIES = Arrays.asList("BE", "AT", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "GB", "HR",
+      "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK");
 
   public EUVatValidationElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -50,62 +53,36 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     AutomationResult<ValidationOutput> output = buildResult(reqId);
     ValidationOutput validation = new ValidationOutput();
 
-    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     Addr zs01 = requestData.getAddress("ZS01");
     StringBuilder details = new StringBuilder();
     try {
-      AutomationResponse<VatLayerResponse> response = getVatLayerInfo(admin, data, zs01);
-      if (StringUtils.isBlank(data.getVat())) {
+      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry());
+      if (!EU_COUNTRIES.contains(landCntryForVies)) {
         validation.setSuccess(true);
-        validation.setMessage("Execution done.");
+        validation.setMessage("Skipped.");
+        output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
+        LOG.debug("Landed Country does not belong to the European Union. Skipping VAT Validation.");
+      } else if (StringUtils.isBlank(data.getVat())) {
+        validation.setSuccess(true);
+        validation.setMessage("Vat not found");
         output.setDetails("No VAT specified on the request.");
         LOG.debug("No VAT specified on the request.");
       } else {
+        AutomationResponse<VatLayerResponse> response = getVatLayerInfo(admin, data, landCntryForVies);
         if (response != null && response.isSuccess()) {
           if (response.getRecord().isValid()) {
-            boolean addressMatch = isAddressMatched(handler, admin, data, zs01, response.getRecord());
-            if (addressMatch) {
-              validation.setSuccess(true);
-              validation.setMessage("Execution done.");
-              LOG.debug("Vat and company information verified through VAT Layer.");
+            validation.setSuccess(true);
+            validation.setMessage("Execution done.");
+            LOG.debug("Vat and company information verified through VAT Layer.");
 
-              details.append("Vat and company information verified through VAT Layer.");
-              details.append("\nCompany details from VAT Layer :");
-              details.append(
-                  "\nCompany Name = " + (StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName()));
-              // REQUIRES FIX
-              // details.append("\nStreet = " +
-              // (StringUtils.isBlank(response.getRecord().getStreet()) ? "" :
-              // response.getRecord().getStreet()));
-              // details.append("\nCity = " +
-              // (StringUtils.isBlank(response.getRecord().getCity()) ? "" :
-              // response.getRecord().getCity()));
-              // details
-              // .append("\nPostal Code = " +
-              // (StringUtils.isBlank(response.getRecord().getPostalCode()) ? ""
-              // :
-              // response.getRecord().getPostalCode()));
-              // details.append(
-              // "\nCountry Name = " +
-              // (StringUtils.isBlank(response.getRecord().getCountryName()) ?
-              // ""
-              // : response.getRecord().getCountryName()));
-              // REQUIRES FIX -END
-              details
-                  .append("\nVAT number = " + (StringUtils.isBlank(response.getRecord().getVatNumber()) ? "" : response.getRecord().getVatNumber()));
-              output.setDetails(details.toString());
-              // admin.setCompVerifiedIndc("Y");
-              // admin.setCompInfoSrc("VAT Layer");
-              engineData.setCompanySource("VIES");
-              updateEntity(admin, entityManager);
-            } else {
-              validation.setSuccess(false);
-              validation.setMessage("Review needed.");
-              output.setDetails("The registered company information is not the same as the one on the request.Need review.");
-              output.setOnError(true);
-              engineData.addRejectionComment("The registered company information is not the same as the one on the request.");
-              LOG.debug("The registered company information is not the same as the one on the request.Need review.");
-            }
+            details.append("Vat and company information verified through VAT Layer.");
+            details.append("\nCompany details from VAT Layer :");
+            details.append(
+                "\nCompany Name = " + (StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName()));
+            details.append("\nVAT number = " + (StringUtils.isBlank(response.getRecord().getVatNumber()) ? "" : response.getRecord().getVatNumber()));
+            output.setDetails(details.toString());
+            engineData.setCompanySource("VIES");
+            updateEntity(admin, entityManager);
           } else {
             validation.setSuccess(false);
             validation.setMessage("Review needed.");
@@ -131,38 +108,18 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     return output;
   }
 
-  private boolean isAddressMatched(GEOHandler handler, Admin admin, Data data, Addr addr, VatLayerResponse response) {
-    boolean isMatched = true;
-    /*
-     * if (StringUtils.isNotBlank(getCustomerName(handler, admin, addr)) &&
-     * StringUtils.isNotBlank(response.getCompanyName()) &&
-     * Levenshtein.distance(getCustomerName(handler, admin, addr),
-     * response.getCompanyName()) > 4) { isMatched = false; } String address =
-     * addr.getAddrTxt() + (StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " +
-     * addr.getAddrTxt2() : "");
-     */
-    // REQUIRES FIX
-    // if (StringUtils.isNotBlank(address) &&
-    // StringUtils.isNotBlank(response.getStreet()) &&
-    // Levenshtein.distance(address, response.getStreet()) > 4) {
-    // isMatched = false;
-    // }
-    // if (StringUtils.isNotBlank(addr.getPostCd()) &&
-    // StringUtils.isNotBlank(response.getPostalCode())
-    // && Levenshtein.distance(addr.getPostCd(), response.getPostalCode()) > 4)
-    // {
-    // isMatched = false;
-    // }
-    // if (StringUtils.isNotBlank(addr.getCity1()) &&
-    // StringUtils.isNotBlank(response.getCity())
-    // && Levenshtein.distance(addr.getCity1(), response.getCity()) > 4) {
-    // isMatched = false;
-    // }
-    // REQUIRES FIX-END
-    return isMatched;
+  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry) {
+    switch (cmrIssuingCntry) {
+    case SystemLocation.FRANCE:
+      landCntry = "FR";
+      break;
+    default:
+      break;
+    }
+    return landCntry;
   }
 
-  private AutomationResponse<VatLayerResponse> getVatLayerInfo(Admin admin, Data data, Addr addr) throws Exception {
+  private AutomationResponse<VatLayerResponse> getVatLayerInfo(Admin admin, Data data, String landCntryForVies) throws Exception {
     AutomationServiceClient autoClient = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         AutomationServiceClient.class);
     autoClient.setReadTimeout(1000 * 60 * 5);
@@ -170,11 +127,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
 
     VatLayerRequest request = new VatLayerRequest();
     request.setVat(data.getVat());
-    // as France has sub-regions
-    if (SystemLocation.FRANCE.equalsIgnoreCase(data.getCmrIssuingCntry()) && addr.getLandCntry() != null) {
-      addr.setLandCntry("FR");
-    }
-    request.setCountry(StringUtils.isBlank(addr.getLandCntry()) ? "" : addr.getLandCntry());
+    request.setCountry(landCntryForVies);
 
     LOG.debug("Connecting to the EU VAT Layer Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
     AutomationResponse<?> rawResponse = autoClient.executeAndWrap(AutomationServiceClient.EU_VAT_SERVICE_ID, request, AutomationResponse.class);
@@ -184,25 +137,6 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     TypeReference<AutomationResponse<VatLayerResponse>> ref = new TypeReference<AutomationResponse<VatLayerResponse>>() {
     };
     return mapper.readValue(json, ref);
-  }
-
-  /**
-   * returns concatenated customerName from admin or address as per country
-   * settings
-   * 
-   * @param handler
-   * @param admin
-   * @param soldTo
-   * @return
-   */
-  private String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
-    String customerName = null;
-    if (!handler.customerNamesOnAddress()) {
-      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
-    } else {
-      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-    }
-    return customerName;
   }
 
   @Override
