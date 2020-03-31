@@ -76,7 +76,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     }
     $scope.orgIdSearch = false;
     var crit = buildSearchCriteria();
-    if (!crit.name || !crit.streetAddress || !crit.city) {
+    if (!crit.name || !crit.streetAddress1 || !crit.city) {
       $scope.orgIdSearch = true;
     }
     $scope.frozen = crit;

@@ -354,7 +354,10 @@
                   </tr>
                   <tr>
                     <td class="dnb-label">Address:</td>
-                    <td ng-bind-html="dnb.primaryAddress"></td>
+                    <td>
+                      <div ng-bind-html="dnb.primaryAddress"></div>
+                      <div ng-bind-html="dnb.primaryAddressCont"></div>
+                    </td>
                     <td class="dnb-label">City:</td>
                     <td ng-bind-html="dnb.primaryCity"></td>
                   </tr>
@@ -375,7 +378,10 @@
                   </tr>
                   <tr>
                     <td class="dnb-label">Address:</td>
-                    <td ng-bind-html="dnb.mailingAddress"></td>
+                    <td>
+                      <div ng-bind-html="dnb.mailingAddress"></div>
+                      <div ng-bind-html="dnb.mailingAddressCont"></div>
+                    </td>
                     <td class="dnb-label">City:</td>
                     <td ng-bind-html="dnb.mailingCity"></td>
                   </tr>
