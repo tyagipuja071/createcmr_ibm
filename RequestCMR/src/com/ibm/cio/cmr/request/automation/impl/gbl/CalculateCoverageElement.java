@@ -209,7 +209,6 @@ public class CalculateCoverageElement extends OverridingElement {
 
       input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), gbgId, bgId);
       if (coverages != null && !coverages.isEmpty()) {
-        result.setResults("Calculated");
         switch (covFrom) {
         case "BG_CALC":
           details.append("\nCoverages from Calculated Buying Group ID " + bgId + " (" + gbgId + ")" + (withCmrData ? "[from current CMRs]" : ""))
@@ -229,7 +228,6 @@ public class CalculateCoverageElement extends OverridingElement {
 
         List<String> coverageIds = new ArrayList<String>();
         for (CoverageContainer container : coverages) {
-
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
           logCoverage(entityManager, engineData, coverageIds, details, output, input, container.getFinalCoverage(), "Final",
               container.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
@@ -242,14 +240,21 @@ public class CalculateCoverageElement extends OverridingElement {
           // next elements to use it
           if (!engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED)
               && (StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
-            engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-            calculatedCoverageContainer = container;
+
+            String defaultCoverage = "";
+            if (StringUtils.isNotBlank(calculatedCoverageContainer.getFinalCoverage())
+                && !container.getFinalCoverage().equals(calculatedCoverageContainer.getFinalCoverage())
+                && !container.getFinalCoverage().equals(defaultCoverage)) {
+              result.setResults("Calculated");
+              engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+              calculatedCoverageContainer = container;
+            }
           }
         }
       } else if (!currCoverage.isEmpty()) {
-        result.setResults("Calculated");
+        result.setResults("BG Not Found");
         details.append("Coverage calculated based only on request data. No projected Buying Group found.").append("\n");
-        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+        // engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
         covFrom = "COV_REQ";
       } else {
         result.setResults("Cannot Calculate");
