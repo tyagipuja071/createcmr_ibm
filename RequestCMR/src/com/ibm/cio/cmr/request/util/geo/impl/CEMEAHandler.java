@@ -204,6 +204,16 @@ public class CEMEAHandler extends BaseSOFHandler {
 						record.setCmrAddrTypeCode("ZS02");
 					}
 
+          if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
+              && "598".equals(record.getCmrAddrSeq())) {
+            record.setCmrAddrTypeCode("ZD02");
+          }
+
+          if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+              && "599".equals(record.getCmrAddrSeq())) {
+            record.setCmrAddrTypeCode("ZP02");
+          }
+
 					// if
 					// ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())
 					// && (!"Z000000001".equals(record.getCmrTransportZone()))
