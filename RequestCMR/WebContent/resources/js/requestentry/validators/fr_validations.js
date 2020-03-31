@@ -136,7 +136,7 @@ function setINACOnScenario() {
       FormManager.enable('inacCd');
     }
   }
-  if(countyCd == 'FR' && subGrp == 'INTER'){
+  if(subGrp == 'INTER'){
 	  FormManager.setValue('inacCd','');
       FormManager.readOnly('inacCd');
   }
@@ -1997,6 +1997,20 @@ function showAffacturageOnReqReason() {
     _reqReasonHandler[0].onChange();
   }  
 }
+
+function setAbbrevNameFrDSW() {
+  var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
+    var requestingLob = FormManager.getActualValue('requestingLob');
+      if (requestingLob == 'DSW') {        
+        var abbrNm = FormManager.getActualValue('abbrevNm');
+        if(abbrevNm.includes("D3"))
+        FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
+      }     
+  });
+  if (_abbrevNmHandler && _abbrevNmHandler[0]) {
+    _abbrevNmHandler[0].onChange();
+  }  
+}
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');
@@ -2134,6 +2148,7 @@ dojo.addOnLoad(function() {
 // GEOHandler.registerValidator(addPostalCodeLengthValidator, '706' , null,
 // true);
   GEOHandler.addAfterConfig(showAffacturageOnReqReason, '706');
+  GEOHandler.addAfterConfig(setAbbrevNameFrDSW, '706');
 // GEOHandler.registerValidator(addHostingInstallCustNmValidatorOnCheckReq,
 // '706', null, true);
   GEOHandler.registerValidator(addIBMAbbrevNmValidator, '706' , null, true);

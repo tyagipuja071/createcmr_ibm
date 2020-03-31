@@ -95,10 +95,10 @@ div.ibm-columns {
     </cmr:row>
     <cmr:row>
       <cmr:column span="1" width="180">
-        <label for="cmrState">Address:</label>
+        <label for="cmrStreetAddress">Address:</label>
       </cmr:column>
       <cmr:column span="4">
-        ${record.cmrState}
+        ${record.cmrStreetAddress}
       </cmr:column>
     </cmr:row>
     <cmr:row>

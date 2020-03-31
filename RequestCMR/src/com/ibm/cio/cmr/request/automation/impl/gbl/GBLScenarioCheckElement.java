@@ -1,7 +1,5 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
-import java.lang.reflect.Constructor;
-
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
@@ -18,6 +16,11 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
 public class GBLScenarioCheckElement extends ValidatingElement {
 
   private static final Logger log = Logger.getLogger(GBLScenarioCheckElement.class);
@@ -41,7 +44,6 @@ public class GBLScenarioCheckElement extends ValidatingElement {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     String cmrIssuingCntry = data.getCmrIssuingCntry();
-    String scenario = data.getCustGrp();
 
     if ("Y".equals(admin.getScenarioVerifiedIndc())) {
       log.debug("Skip processing of element");
@@ -53,16 +55,11 @@ public class GBLScenarioCheckElement extends ValidatingElement {
       ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
       log.debug("Skip check is " + scenarioExceptions.isSkipChecks());
       // method that will perform country specific check
-      Class<? extends AutomationUtil> handlerClass = AutomationUtil.getCountrySpecificUtil(cmrIssuingCntry);
-      if (handlerClass != null) {
+      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
+      log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
+      if (countryUtil != null) {
         boolean countryCheck = false;
-        try {
-          @SuppressWarnings("unchecked")
-          Constructor<AutomationUtil> constructor = (Constructor<AutomationUtil>) handlerClass.getConstructor();
-          countryCheck = constructor.newInstance().performScenarioValidation(entityManager, requestData, engineData, result, details, output);
-        } catch (Exception e) {
-          log.warn("Scenario Validation handler for issuing country  " + cmrIssuingCntry + " cannot be determined via util.");
-        }
+        countryCheck = countryUtil.performScenarioValidation(entityManager, requestData, engineData, result, details, output);
         if (countryCheck) {
           output.setSuccess(true);
           output.setMessage("Scenario Valid");
@@ -76,10 +73,7 @@ public class GBLScenarioCheckElement extends ValidatingElement {
           details.insert(0, "Scenario Checks were not successful.\n" + (details.length() > 0 ? "Details:\n" : ""));
           result.setDetails(details.toString());
           result.setOnError(true);
-          // engineData.addRejectionComment(StringUtils.isNotBlank(rejectionComment)
-          // ? rejectionComment : "Scenario chosen is not correct");
           log.debug("Scenario chosen is not correct");
-
         }
       } else {
         engineData.addNegativeCheckStatus("SCENARIO_CHECK_FAIL", "Country Scenario check logic was not found and needs confirmation.");
