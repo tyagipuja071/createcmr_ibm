@@ -86,11 +86,11 @@
   </cmr:column>
   <cmr:column span="2" forCountry="726">
     <p>
-      <cmr:label fieldId="translate">&nbsp;
-      </cmr:label>
-      Translate: 
-      <a class="translate" href="javascript: cmr.openTranslateWindow('en','el', ['custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'poBox', 'city1', 'taxOffice'])" >to Local Language</a>
-      <a class="translate" href="javascript: cmr.openTranslateWindow('el','en', ['custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'poBox', 'city1', 'taxOffice'])" >to English</a>
+    <cmr:label fieldId="custNm4">
+      <cmr:fieldLabel fieldId="CustomerName4" />: 
+      <cmr:delta text="-" id="delta-custNm4" />
+    </cmr:label>
+    <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
     </p>
   </cmr:column>
     <cmr:column span="2" forCountry="862">

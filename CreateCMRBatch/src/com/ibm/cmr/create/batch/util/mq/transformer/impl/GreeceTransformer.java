@@ -433,10 +433,12 @@ public class GreeceTransformer extends EMEATransformer {
   }
 
   private String billingSeqKey;
+  
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
     long requestId = cmrObjects.getAdmin().getId().getReqId();
-    Map<String, String> addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
+    List<Addr> cmrAddresses = getAddrLegacy(entityManager, String.valueOf(requestId));
+    Map<String, String> addrSeqToAddrUseMap = mapSeqNoToAddrUse(cmrAddresses);
 
     LOG.debug("LEGACY -- GREECE OVERRIDE transformOtherData");
     CmrtAddr billingLegacyAddr = null;
@@ -449,13 +451,46 @@ public class GreeceTransformer extends EMEATransformer {
     }
     
     if(null != billingLegacyAddr) {
-      copyMailingFromBilling(legacyObjects, billingLegacyAddr, addrSeqToAddrUseMap.size());  
+      copyMailingFromBilling(legacyObjects, billingLegacyAddr);  
     }
+    
+    adjustCmrAddrAndLegacyAddr(entityManager, cmrAddresses, requestId, legacyObjects);
   }
   
-  private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingLegacyAddr, int seqSize) {
+  private void adjustCmrAddrAndLegacyAddr(EntityManager entityManager, List<Addr> cmrAddresses, long reqId,
+      LegacyDirectObjectContainer legacyObjects) {
+    for (Addr addr : cmrAddresses) {
+      updateAddrSeq(entityManager, reqId, addr.getId().getAddrType(), addr.getId().getAddrSeq(), incrementSeqByOne(addr.getId().getAddrSeq()), null);
+    }
+
+    for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
+      String oldSeq = legacyAddr.getId().getAddrNo();
+      legacyAddr.getId().setAddrNo(incrementSeqByOne(oldSeq));
+    }
+
+  }
+  
+  private String incrementSeqByOne(String oldSeq) {
+    oldSeq = oldSeq.replaceFirst("^0+(?!$)", "");
+    int oldSeqNum = Integer.parseInt(oldSeq);
+    return String.format("%05d", ++oldSeqNum);
+  }
+  
+  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr) {
+    String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
+    PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
+    q.setParameter("NEW_SEQ", newSeq);
+    q.setParameter("REQ_ID", reqId);
+    q.setParameter("TYPE", addrType);
+    q.setParameter("OLD_SEQ", oldSeq);
+    q.setParameter("SAP_NO", kunnr);
+    LOG.debug("GREECE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    q.executeSql();
+  }
+  
+  private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingLegacyAddr) {
     CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingLegacyAddr);
-    mailingAddr.getId().setAddrNo(String.format("%05d", ++seqSize));
+    mailingAddr.getId().setAddrNo(String.format("%05d", 0));
     modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(mailingAddr);
   }
