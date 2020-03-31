@@ -151,12 +151,6 @@ public class AutomationEngine {
     boolean hasOverrideOrMatchingApplied = false;
     for (AutomationElement<?> element : this.elements) {
       ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
-
-      
-      // avoid skipping for France FieldComp. element due to SBO calc.
-      if("GBL_FIELD_COMPUTE".equals(element.getProcessCode()) && SystemLocation.FRANCE.equals(requestData.getData().getCmrIssuingCntry())){
-    	  scenarioExceptions.setSkipChecks(false);
-      }
       
       // determine if element is to be skipped
 

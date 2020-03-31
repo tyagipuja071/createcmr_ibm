@@ -85,7 +85,7 @@ public class CompanyFinder {
           matches.addAll(searchDnB(searchModel));
         }
 
-        if (matches.isEmpty()) {
+        if (matches.isEmpty() && !StringUtils.isBlank(searchModel.getName())) {
           // try non latin if country has local lang data
           if (LOCAL_LANG_COUNTRIES.contains(searchModel.getIssuingCntry())) {
             LOG.debug("Trying non-latin search on inputs..");
@@ -124,14 +124,28 @@ public class CompanyFinder {
       DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
       request.setIssuingCountry(searchModel.getIssuingCntry());
       request.setLandedCountry(searchModel.getCountryCd());
-      request.setCustomerName(searchModel.getName());
-      request.setStreetLine1(searchModel.getStreetAddress1());
+      if (!StringUtils.isBlank(searchModel.getName())) {
+        request.setCustomerName(searchModel.getName());
+      } else if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
+        request.setCustomerName("xxxx");
+      }
+      if (!StringUtils.isBlank(searchModel.getStreetAddress1())) {
+        request.setStreetLine1(searchModel.getStreetAddress1());
+      } else if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
+        request.setStreetLine1("xxxx");
+      }
       request.setStreetLine2(StringUtils.isBlank(searchModel.getStreetAddress2()) ? "" : searchModel.getStreetAddress2());
-      request.setCity(searchModel.getCity());
+      if (!StringUtils.isBlank(searchModel.getCity())) {
+        request.setCity(searchModel.getCity());
+      } else if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
+        request.setCity("xxxx");
+      }
       request.setStateProv(searchModel.getStateProv());
       request.setPostalCode(searchModel.getPostCd());
       if (StringUtils.isNotBlank(searchModel.getVat())) {
         request.setVat(searchModel.getVat());
+      } else if (StringUtils.isNotBlank(searchModel.getTaxCd1())) {
+        request.setVat(searchModel.getTaxCd1());
       }
       request.setAddrType(addrType);
 
@@ -335,6 +349,10 @@ public class CompanyFinder {
     request.setLandedCountry(searchModel.getCountryCd());
     request.setPostalCode(searchModel.getPostCd());
     request.setStateProv(searchModel.getStateProv());
+    request.setOrgId(searchModel.getVat());
+    if (StringUtils.isBlank(request.getOrgId())) {
+      request.setOrgId(searchModel.getTaxCd1());
+    }
     request.setMinConfidence("7");
 
     LOG.debug("Connecting to D&B matching service for " + request.getLandedCountry() + " - " + request.getCustomerName());
@@ -377,6 +395,7 @@ public class CompanyFinder {
           }
           match.setVat(sb.toString());
         }
+        match.setOperStatusCode(record.getOperStatusCode());
         match.setOrgIdMatch("Y".equals(record.getOrgIdMatch()));
         dnbMatches.add(match);
       }

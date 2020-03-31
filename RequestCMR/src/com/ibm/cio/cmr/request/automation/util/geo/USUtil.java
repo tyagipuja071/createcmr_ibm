@@ -13,8 +13,15 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
 
 public class USUtil extends AutomationUtil {
 
@@ -44,4 +51,19 @@ public class USUtil extends AutomationUtil {
     }
     return true;
   }
+
+  @Override
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
+    // TODO Auto-generated method stub
+    return super.runUpdateChecksForData(entityManager, engineData, requestData, changes, validation);
+  }
+
+  @Override
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
+    // TODO Auto-generated method stub
+    return super.runUpdateChecksForAddress(entityManager, engineData, requestData, changes, validation);
+  }
+
 }
