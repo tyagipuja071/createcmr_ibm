@@ -150,7 +150,7 @@ public class DnBUtil {
   public static FindCMRRecordModel extractRecordFromDnB(String issuingCntry, String dunsNo, String postalCode) throws Exception {
     DnbData dnb = CompanyFinder.getDnBDetails(dunsNo);
     if (dnb == null || dnb.getResults() == null || dnb.getResults().isEmpty()) {
-      throw new Exception("D&B record for DUNS " + dunsNo + " cannot be retrieved.");
+      throw new CmrException(new Exception("D&B record for DUNS " + dunsNo + " cannot be retrieved. Please try another record."));
     }
     DnBCompany company = dnb.getResults().get(0);
     if ("O".equals(company.getOperStatusCode())) {
