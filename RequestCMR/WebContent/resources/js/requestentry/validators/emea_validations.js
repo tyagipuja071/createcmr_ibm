@@ -2994,9 +2994,9 @@ function setClientTierAndISR(value) {
   if (reqType != 'C') {
     return;
   }
-  /*if (!PageManager.isReadOnly()) {
-    FormManager.enable('clientTier');
-  }*/
+  /*
+   * if (!PageManager.isReadOnly()) { FormManager.enable('clientTier'); }
+   */
   if (!value) {
     value = FormManager.getActualValue('isuCd');
   }
@@ -3576,8 +3576,8 @@ function setCustSubTypeBpGRTRCY() {
 	      FormManager.readOnly('isuCd');
 	      FormManager.setValue('isuCd', '34');
 	    } else {
-	      //FormManager.enable('clientTier');
-	      //FormManager.enable('isuCd');
+	      // FormManager.enable('clientTier');
+	      // FormManager.enable('isuCd');
 	    }
   }
       
@@ -6476,10 +6476,10 @@ function toggleBPRelMemType(){
 
 function toggleBPRelMemTypeForTurkey(){
   var reqType = null;
-  //var role = null;
+  // var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
-    //role = _pagemodel.userRole.toUpperCase();
+    // role = _pagemodel.userRole.toUpperCase();
   }
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -7254,6 +7254,46 @@ function setSBOLogicOnISUChange(){
   }
 }
 
+function setISUCTCBasedScenarios(){
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isuList = FormManager.getField('isuCd').loadedStore._arrayOfAllItems;
+  
+  if(role == "REQUESTER"){
+    if(custSubGrp == 'BUSPR' || custSubGrp == 'INTER' || custSubGrp == 'XINT ' || custSubGrp == 'XBP' ){
+      FormManager.disable('isuCd');
+      FormManager.disable('clientTier');
+    }
+  }
+  
+  var valueList = new Array();
+  
+  for (var i = 0; i<isuList.length; i++){
+    valueList[i]=isuList[i].id[0];
+  }
+  
+  if(custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'GOVRN' || custSubGrp == 'OEM' || custSubGrp == 'THDPT' 
+    || custSubGrp=='XINTS' || custSubGrp=='XIGF' || custSubGrp=='XGOV' || custSubGrp=='XTP'){
+    // remove ISU=5B
+    for(var i=0;i<valueList.length;i++){
+      if('5B'==valueList[i]){
+        valueList.splice(i,1);
+      }
+    }
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), valueList);
+  }else if (custSubGrp == 'PRICU' ||custSubGrp == 'XPC'){
+    // remove ISU=5B,34
+    for(var i=0;i<valueList.length;i++){
+      if('5B'==valueList[i] || '34'==valueList[i] ){
+        valueList.splice(i,1);
+      }
+    }
+    FormManager.limitDropdownValues(FormManager.getField('isuCd'), valueList);
+  }else{
+    FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+  }
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
@@ -7343,6 +7383,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
+  // CMR-2574 ISU+CTC
+  GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
