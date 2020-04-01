@@ -101,6 +101,7 @@ public class CalculateCoverageElement extends OverridingElement {
   public AutomationResult<OverrideOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
 
+    // init
     try {
       if (coverageRules == null) {
         try {
@@ -116,13 +117,22 @@ public class CalculateCoverageElement extends OverridingElement {
       long reqId = admin.getId().getReqId();
       AutomationResult<OverrideOutput> result = buildResult(reqId);
       OverrideOutput output = new OverrideOutput(false);
+      CoverageContainer calculatedCoverageContainer = new CoverageContainer();
+      boolean coverageNotFound = false;
+      boolean isCoverageCalculated = false;
+      String negativeCheck = "";
+      List<CoverageContainer> coverages = null;
+      boolean withCmrData = false;
+      StringBuilder details = new StringBuilder();
+
+      // check if coverage rules are initialized or not
       if (this.noInit) {
         result.setProcessOutput(output);
         result.setResults("Cannot Start");
         result.setOnError(true);
         result.setDetails("Coverage calculation cannot be done because of a system configuration issue.");
+        return result;
       }
-      StringBuilder details = new StringBuilder();
 
       GBGResponse computedGbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
       String gbgId = null;
@@ -137,11 +147,6 @@ public class CalculateCoverageElement extends OverridingElement {
         gbgId = data.getGbgId();
         covFrom = "BG_ODM";
       }
-
-      CoverageContainer calculatedCoverageContainer = new CoverageContainer();
-      boolean coverageNotFound = false;
-      List<CoverageContainer> coverages = null;
-      boolean withCmrData = false;
       if (bgId != null) {
         coverages = computeCoverageFromBuyingGroup(entityManager, bgId, data.getCmrIssuingCntry());
         if (coverages == null || coverages.isEmpty()) {
@@ -188,7 +193,10 @@ public class CalculateCoverageElement extends OverridingElement {
         }
         covFrom = "COV_ODM";
       }
+      // get default coverage
+      String defaultCoverage = getDefaultCoverage(data.getCmrIssuingCntry());
 
+      // get coverage based on current request data
       CoverageInput input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), data.getGbgId(), data.getBgId());
       List<Coverage> currCoverage = coverageRules.findCoverage(input);
       if (!currCoverage.isEmpty()) {
@@ -207,6 +215,7 @@ public class CalculateCoverageElement extends OverridingElement {
         }
       }
 
+      // coverage id calculation from BG/VAT
       input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), gbgId, bgId);
       if (coverages != null && !coverages.isEmpty()) {
         switch (covFrom) {
@@ -238,24 +247,38 @@ public class CalculateCoverageElement extends OverridingElement {
           }
           // Save the first calculated coverage ID in the engine data to allow
           // next elements to use it
-          if (!engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED)
-              && (StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
-
-            String defaultCoverage = "";
-            if (StringUtils.isNotBlank(calculatedCoverageContainer.getFinalCoverage())
-                && !container.getFinalCoverage().equals(calculatedCoverageContainer.getFinalCoverage())
-                && !container.getFinalCoverage().equals(defaultCoverage)) {
-              result.setResults("Calculated");
-              engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-              calculatedCoverageContainer = container;
+          if ((StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
+            String finalCoverage = container.getFinalCoverage();
+            if (StringUtils.isNotBlank(finalCoverage)) {
+              if (!finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())
+                  && !finalCoverage.equals(calculatedCoverageContainer.getBaseCoverage()) && !finalCoverage.equals(defaultCoverage)) {
+                result.setResults("Calculated");
+                isCoverageCalculated = true;
+              } else if (finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())) {
+                result.setResults("Review Needed");
+                negativeCheck = "Calculated Coverage is same as the coverage calculated using Request Data.";
+                details.append("\nCalculated Coverage is same as the coverage calculated using Request Data.").append("\n");
+              } else if (finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())) {
+                result.setResults("Default Coverage");
+                negativeCheck = "Calculated Coverage is same as the Default Coverage. No projected Buying Group found.";
+                details.append("\nCalculated Coverage is same as the Default Coverage. No projected Buying Group found.").append("\n");
+              }
             }
+            calculatedCoverageContainer = container;
+
           }
         }
       } else if (!currCoverage.isEmpty()) {
-        result.setResults("BG Not Found");
-        details.append("Coverage calculated based only on request data. No projected Buying Group found.").append("\n");
-        // engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-        covFrom = "COV_REQ";
+        if (calculatedCoverageContainer.getFinalCoverage().equals(defaultCoverage)) {
+          result.setResults("Default Coverage");
+          details.append("\nCoverage calculated based on request data is same as the Default Coverage. No projected Buying Group found.")
+              .append("\n");
+        } else {
+          result.setResults("Calculated");
+          details.append("\nCoverage calculated based only on request data. No projected Buying Group found.").append("\n");
+          isCoverageCalculated = true;
+          covFrom = "COV_REQ";
+        }
       } else {
         result.setResults("Cannot Calculate");
         covFrom = "NONE";
@@ -273,21 +296,31 @@ public class CalculateCoverageElement extends OverridingElement {
             covFrom, calculatedCoverageContainer);
       }
 
-      if (!hasCountryCheck && "NONE".equals(covFrom)) {
-        result.setOnError(true);
-        if (coverageNotFound) {
-          details.append("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
-          engineData.addRejectionComment("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
-        } else {
-          details.append("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
-          engineData.addRejectionComment("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
+      if (!hasCountryCheck) {
+        if ("NONE".equals(covFrom)) {
+          result.setOnError(true);
+          if (coverageNotFound) {
+            details.append("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
+            engineData.addRejectionComment("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
+          } else {
+            details.append("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
+            engineData
+                .addRejectionComment("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
+          }
+        } else if (!isCoverageCalculated) {
+          engineData.addNegativeCheckStatus("COVERAGE_ERROR",
+              StringUtils.isNotBlank(negativeCheck) ? negativeCheck : "Coverage calculation requires processor review.");
+        } else if (isCoverageCalculated) {
+          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
         }
       }
 
       result.setDetails(details.toString());
       result.setProcessOutput(output);
       return result;
-    } catch (Throwable t) {
+    } catch (
+
+    Throwable t) {
       LOG.error("Error in coverage element", t);
       Admin admin = requestData.getAdmin();
       long reqId = admin.getId().getReqId();
@@ -298,6 +331,19 @@ public class CalculateCoverageElement extends OverridingElement {
 
       return result;
     }
+  }
+
+  private String getDefaultCoverage(String cmrIssuingCntry) throws Exception {
+    CoverageInput input = new CoverageInput();
+    String isoCntryCd = SystemUtil.getISOCountryCode(cmrIssuingCntry);
+    LOG.debug("System Location: " + cmrIssuingCntry + " ISO Code: " + isoCntryCd);
+    input.setCountryCode(isoCntryCd != null ? isoCntryCd : cmrIssuingCntry);
+    List<Coverage> coverages = coverageRules.findCoverage(input);
+    if (coverages != null && !coverages.isEmpty()) {
+      Coverage coverage = coverages.get(0);
+      return (coverage.getType() + coverage.getId());
+    }
+    return null;
   }
 
   /**

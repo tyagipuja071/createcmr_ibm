@@ -432,8 +432,7 @@ public class GermanyUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     String coverageId = container.getFinalCoverage();
     details.append("\n");
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && StringUtils.isNotBlank(coverageId) && covFrom != null
-        && ("BG_CALC".equals(covFrom) || "BG_ODM".equals(engineData.get(covFrom)))) {
+    if (StringUtils.isNotBlank(coverageId) && covFrom != null && ("BG_CALC".equals(covFrom) || "BG_ODM".equals(engineData.get(covFrom)))) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
       // details.append("Coverage calculated using Global/Domestic Buying
       // Group.").append("\n");
@@ -458,7 +457,7 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
-
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
       details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
       HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
@@ -477,6 +476,7 @@ public class GermanyUtil extends AutomationUtil {
           details.append("CTC = " + data.getClientTier()).append("\n");
           details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
           details.append("Matching: " + response.get(MATCHING));
+          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           break;
         case "No Match Found":
           engineData.addRejectionComment("Coverage cannot be computed automatically.");
