@@ -11,22 +11,31 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
+import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.validator.VatValidateRequest;
 
@@ -473,6 +482,82 @@ public class DnBUtil {
       customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
     }
     return customerName;
+  }
+
+  /**
+   * checks if a DnB response contains valid matches i.e., Confidence Code>7
+   * 
+   * @param response
+   * @return
+   */
+  public static boolean hasValidMatches(MatchingResponse<DnBMatchingResponse> response) {
+    if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
+      for (DnBMatchingResponse dnbRecord : response.getMatches()) {
+        if (dnbRecord.getConfidenceCode() > 7) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 
+   * gets DnB matches on the basis of input data for the provided addr type
+   * 
+   * @param handler
+   * @param requestData
+   * @param engineData
+   * @param addrType
+   * @return
+   * @throws Exception
+   */
+  public static MatchingResponse<DnBMatchingResponse> getMatches(GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      String addrType) throws Exception {
+    MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
+    Addr addr = requestData.getAddress(addrType);
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (addr != null) {
+      if (StringUtils.isNotBlank(data.getVat())) {
+        request.setOrgId(data.getVat());
+      } else if (StringUtils.isNotBlank(addr.getVat())) {
+        if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+          request.setOrgId(addr.getVat().split("\\s")[0]);
+        } else {
+          request.setOrgId(addr.getVat());
+        }
+      }
+
+      request.setCity(addr.getCity1());
+      if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+        // here for now, find a way to move to common class
+        request.setCity("SINGAPORE");
+      }
+      request.setCustomerName(getCustomerName(handler, admin, addr));
+      request.setStreetLine1(addr.getAddrTxt());
+      request.setStreetLine2(addr.getAddrTxt2());
+      request.setLandedCountry(addr.getLandCntry());
+      request.setPostalCode(addr.getPostCd());
+      request.setStateProv(addr.getStateProv());
+      request.setMinConfidence("4");
+      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          MatchingServiceClient.class);
+      client.setReadTimeout(1000 * 60 * 5);
+      LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+      };
+
+      response = mapper.readValue(json, ref);
+    }
+    return response;
   }
 
 }

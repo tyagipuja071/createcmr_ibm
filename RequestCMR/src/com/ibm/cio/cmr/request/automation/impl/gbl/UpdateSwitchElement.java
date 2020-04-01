@@ -68,7 +68,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
         boolean hasCountryLogic = false;
         if (automationUtil != null) {
-          hasCountryLogic = automationUtil.runUpdateChecksForData(entityManager, engineData, requestData, changes, validation);
+          hasCountryLogic = automationUtil.runUpdateChecksForData(entityManager, engineData, requestData, changes, output, validation);
         }
 
         // expected here that validations and negative checks done on the
@@ -118,7 +118,7 @@ public class UpdateSwitchElement extends ValidatingElement {
         } else {
           boolean hasCountryLogic = false;
           if (automationUtil != null) {
-            hasCountryLogic = automationUtil.runUpdateChecksForAddress(entityManager, engineData, requestData, changes, validation);
+            hasCountryLogic = automationUtil.runUpdateChecksForAddress(entityManager, engineData, requestData, changes, output, validation);
           }
 
           // expected here that validations and negative checks done on the
