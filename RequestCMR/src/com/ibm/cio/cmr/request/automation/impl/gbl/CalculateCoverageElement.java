@@ -250,18 +250,17 @@ public class CalculateCoverageElement extends OverridingElement {
           if ((StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
             String finalCoverage = container.getFinalCoverage();
             if (StringUtils.isNotBlank(finalCoverage)) {
-              if (!finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())
-                  && !finalCoverage.equals(calculatedCoverageContainer.getBaseCoverage()) && !finalCoverage.equals(defaultCoverage)) {
+              if (!finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage()) && !finalCoverage.equals(defaultCoverage)) {
                 result.setResults("Calculated");
                 isCoverageCalculated = true;
               } else if (finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())) {
                 result.setResults("Review Needed");
                 negativeCheck = "Calculated Coverage is same as the coverage calculated using Request Data.";
                 details.append("\nCalculated Coverage is same as the coverage calculated using Request Data.").append("\n");
-              } else if (finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())) {
+              } else if (finalCoverage.equals(defaultCoverage)) {
                 result.setResults("Default Coverage");
-                negativeCheck = "Calculated Coverage is same as the Default Coverage. No projected Buying Group found.";
-                details.append("\nCalculated Coverage is same as the Default Coverage. No projected Buying Group found.").append("\n");
+                negativeCheck = "Calculated Coverage is same as the Default Coverage.";
+                details.append("\nCalculated Coverage is same as the Default Coverage.").append("\n");
               }
             }
             calculatedCoverageContainer = container;
@@ -292,8 +291,8 @@ public class CalculateCoverageElement extends OverridingElement {
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (countryUtil != null) {
         // hook to perform calculations and update results
-        hasCountryCheck = countryUtil.performCountrySpecificCoverageCalculations(entityManager, result, details, output, requestData, engineData,
-            covFrom, calculatedCoverageContainer);
+        hasCountryCheck = countryUtil.performCountrySpecificCoverageCalculations(this, entityManager, result, details, output, requestData,
+            engineData, covFrom, calculatedCoverageContainer, isCoverageCalculated);
       }
 
       if (!hasCountryCheck) {

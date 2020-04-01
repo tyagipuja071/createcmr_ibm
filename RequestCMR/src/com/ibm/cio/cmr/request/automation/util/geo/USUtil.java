@@ -46,13 +46,13 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 public class USUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(USUtil.class);
-  private static final String COMMERCIAL = "1";
-  private static final String POWER_OF_ATTORNEY = "6";
-  private static final String FEDERAL = "4";
-  private static final String INTERNAL = "5";
-  private static final String LEASING = "3";
-  private static final String BUSINESS_PARTNER = "7";
-  private static final String STATE_LOCAL = "2";
+  public static final String COMMERCIAL = "1";
+  public static final String STATE_LOCAL = "2";
+  public static final String LEASING = "3";
+  public static final String FEDERAL = "4";
+  public static final String INTERNAL = "5";
+  public static final String POWER_OF_ATTORNEY = "6";
+  public static final String BUSINESS_PARTNER = "7";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -319,19 +319,19 @@ public class USUtil extends AutomationUtil {
       usRestricTo = (String) record.get("C_COM_RESTRCT_CODE");
       companyNo = String.valueOf(record.get("I_CO"));
       if ("P".equals(entType)) {
-        custTypCd = "6";
+        custTypCd = POWER_OF_ATTORNEY;
       } else if ("F".equals(entType)) {
-        custTypCd = "4";
+        custTypCd = FEDERAL;
       } else if ("I".equals(entType)) {
-        custTypCd = "5";
+        custTypCd = INTERNAL;
       } else if ("C".equals(entType) || StringUtils.isNotBlank(leasingCo)) {
-        custTypCd = "3";
+        custTypCd = LEASING;
       } else if (StringUtils.isNotBlank(bpAccTyp)) {
-        custTypCd = "7";
+        custTypCd = BUSINESS_PARTNER;
       } else if ("2".equals(cGem)) {
-        custTypCd = "2";
+        custTypCd = STATE_LOCAL;
       } else {
-        custTypCd = "1";
+        custTypCd = COMMERCIAL;
       }
     }
     mapUSCMR.put("custTypCd", custTypCd);

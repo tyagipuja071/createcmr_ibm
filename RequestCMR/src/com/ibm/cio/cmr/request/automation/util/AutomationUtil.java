@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -121,6 +122,7 @@ public abstract class AutomationUtil {
    * This method should be overridden by implementing classes and
    * <strong>always</strong> return true if there are country specific logic
    * 
+   * @param calculateCoverageElement
    * @param entityManager
    * @param results
    * @param details
@@ -129,12 +131,13 @@ public abstract class AutomationUtil {
    * @param engineData
    * @param covFrom
    * @param container
+   * @param isCoverageCalculated
    * @return
    * @throws Exception
    */
-  public boolean performCountrySpecificCoverageCalculations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
-      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
-      CoverageContainer container) throws Exception {
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement calculateCoverageElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     return false;
   }
 

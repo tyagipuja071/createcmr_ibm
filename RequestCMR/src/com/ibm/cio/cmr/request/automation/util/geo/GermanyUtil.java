@@ -18,6 +18,7 @@ import org.codehaus.jackson.type.TypeReference;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
@@ -425,14 +426,15 @@ public class GermanyUtil extends AutomationUtil {
   }
 
   @Override
-  public boolean performCountrySpecificCoverageCalculations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
-      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
-      CoverageContainer container) throws Exception {
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement calculateCoverageElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
     String coverageId = container.getFinalCoverage();
     details.append("\n");
-    if (StringUtils.isNotBlank(coverageId) && covFrom != null && ("BG_CALC".equals(covFrom) || "BG_ODM".equals(engineData.get(covFrom)))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
+        && ("BG_CALC".equals(covFrom) || "BG_ODM".equals(engineData.get(covFrom)))) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
       // details.append("Coverage calculated using Global/Domestic Buying
       // Group.").append("\n");
