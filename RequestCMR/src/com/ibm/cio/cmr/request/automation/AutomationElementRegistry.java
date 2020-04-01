@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilDupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ImportExternalDataElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ScenarioCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDelReacCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 
 /**
  * Registry of all {@link AutomationElement} classes with their corresponding
@@ -70,6 +71,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
 
   // US
   public static final String US_DEL_REAC_CHECK = "US_DEL_REAC_CHECK";
+  public static final String US_DUP_CHK = "US_DUP_CHK";
 
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
@@ -111,6 +113,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
 
     // US
     put(US_DEL_REAC_CHECK, USDelReacCheckElement.class);
+    put(US_DUP_CHK, USDuplicateCheckElement.class);
   }
 
   @Override

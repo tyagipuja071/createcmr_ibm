@@ -800,16 +800,16 @@ function setAbbrevNmOnCustSubGrpChange() {
   } else {
     singleIndValue = "D3";
   }
-  if (abbrevNmValue != null && abbrevNmValue.length > 19 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
-    abbrevNmValue = abbrevNmValue.substring(0, 19);
-  } else if (abbrevNmValue != null && abbrevNmValue.length < 19 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 19; i++) {
+  if (abbrevNmValue != null && abbrevNmValue.length > 18 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
+    abbrevNmValue = abbrevNmValue.substring(0, 18);
+  } else if (abbrevNmValue != null && abbrevNmValue.length < 18 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
+    for ( var i = abbrevNmValue.length; i < 18; i++) {
       abbrevNmValue += ' '; 
     }
-  } else if (abbrevNmValue != null && abbrevNmValue.length > 17 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
-    abbrevNmValue = abbrevNmValue.substring(0, 17);
-  } else if (abbrevNmValue != null && abbrevNmValue.length < 17 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 17; i++) {
+  } else if (abbrevNmValue != null && abbrevNmValue.length > 16 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
+    abbrevNmValue = abbrevNmValue.substring(0, 16);
+  } else if (abbrevNmValue != null && abbrevNmValue.length < 16 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
+    for ( var i = abbrevNmValue.length; i < 16; i++) {
       abbrevNmValue += ' '; 
     }
   }
