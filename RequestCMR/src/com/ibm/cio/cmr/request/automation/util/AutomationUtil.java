@@ -253,30 +253,36 @@ public abstract class AutomationUtil {
   /**
    * This method should be overridden by implementing classes and
    * <strong>always</strong> return true if there are country specific logic
-   *
+   * 
    * @param entityManager
    * @param engineData
    * @param requestData
    * @param changes
+   * @param output
+   * @param validation
+   * @return
    * @throws Exception
    */
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     return false; // false denotes no country specific runs
   }
 
   /**
    * This method should be overridden by implementing classes and
    * <strong>always</strong> return true if there are country specific logic
-   *
+   * 
    * @param entityManager
    * @param engineData
    * @param requestData
    * @param changes
+   * @param output
+   * @param validation
+   * @return
    * @throws Exception
    */
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, ValidationOutput validation) throws Exception {
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     return false; // false denotes no country specific runs
   }
 

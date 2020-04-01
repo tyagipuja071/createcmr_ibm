@@ -22,13 +22,13 @@ import com.ibm.cio.cmr.request.automation.impl.gbl.GOEDeterminationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.ImportCMRElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.RetrieveIBMValuesElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.USAddrStdElement;
-import com.ibm.cio.cmr.request.automation.impl.gbl.USDuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.UpdateSwitchElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilCalculateIBMElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilDupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ImportExternalDataElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ScenarioCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.us.USDelReacCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 
 /**
  * Registry of all {@link AutomationElement} classes with their corresponding
