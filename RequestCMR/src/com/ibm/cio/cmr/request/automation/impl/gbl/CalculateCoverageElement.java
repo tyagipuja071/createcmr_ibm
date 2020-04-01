@@ -48,6 +48,7 @@ import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 /**
  * @author JeffZAMORA
+ * @author RoopakChugh
  *
  */
 public class CalculateCoverageElement extends OverridingElement {
