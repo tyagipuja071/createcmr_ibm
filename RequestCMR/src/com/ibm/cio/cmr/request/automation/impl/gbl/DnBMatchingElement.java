@@ -15,7 +15,6 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.automation.AutomationElement;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -27,7 +26,6 @@ import com.ibm.cio.cmr.request.automation.impl.MatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
@@ -36,17 +34,13 @@ import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  * {@link AutomationElement} implementation for the advanced D&B matching
@@ -87,10 +81,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
-      MatchingResponse<DnBMatchingResponse> response = getMatches(handler, requestData, engineData);
-      if (engineData.hasPositiveCheckStatus("hasValidMatches")) {
-        hasValidMatches = true;
-      }
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(handler, requestData, engineData, "ZS01");
+      hasValidMatches = DnBUtil.hasValidMatches(response);
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
@@ -171,39 +163,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     return result;
   }
 
-  public MatchingResponse<DnBMatchingResponse> getMatches(GEOHandler handler, RequestData requestData, AutomationEngineData engineData)
-      throws Exception {
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-    Addr soldTo = requestData.getAddress("ZS01");
-    GBGFinderRequest request = createRequest(handler, admin, data, soldTo);
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
-    client.setReadTimeout(1000 * 60 * 5);
-    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
-    ObjectMapper mapper = new ObjectMapper();
-    String json = mapper.writeValueAsString(rawResponse);
-
-    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
-    };
-
-    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-
-    List<DnBMatchingResponse> dnbMatches = response.getMatches();
-
-    for (DnBMatchingResponse dnbRecord : dnbMatches) {
-      if (dnbRecord.getConfidenceCode() > 7) {
-        // use 8 as threshold
-        engineData.addPositiveCheckStatus("hasValidMatches");
-        break;
-      }
-    }
-
-    return response;
-
-  }
-
   /**
    * returns list of eligible addresses for which matching records can be
    * created
@@ -222,64 +181,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       }
     }
     return eligibleAddresses;
-  }
-
-  /**
-   * prepares and returns a dnb request based on requestData
-   *
-   * @param handler
-   * @param admin
-   * @param data
-   * @param soldTo
-   * @return
-   */
-  private GBGFinderRequest createRequest(GEOHandler handler, Admin admin, Data data, Addr soldTo) {
-    GBGFinderRequest request = new GBGFinderRequest();
-    request.setMandt(SystemConfiguration.getValue("MANDT"));
-    if (StringUtils.isNotBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
-    } else if (StringUtils.isNotBlank(soldTo.getVat())) {
-      if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-        request.setOrgId(soldTo.getVat().split("\\s")[0]);
-      } else {
-        request.setOrgId(soldTo.getVat());
-      }
-    }
-    if (soldTo != null) {
-      request.setCity(soldTo.getCity1());
-      if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-        // here for now, find a way to move to common class
-        request.setCity("SINGAPORE");
-      }
-      request.setCustomerName(getCustomerName(handler, admin, soldTo));
-      request.setStreetLine1(soldTo.getAddrTxt());
-      request.setStreetLine2(soldTo.getAddrTxt2());
-      request.setLandedCountry(soldTo.getLandCntry());
-      request.setPostalCode(soldTo.getPostCd());
-      request.setStateProv(soldTo.getStateProv());
-      request.setMinConfidence("4");
-    }
-
-    return request;
-  }
-
-  /**
-   * returns concatenated customerName from admin or address as per country
-   * settings
-   *
-   * @param handler
-   * @param admin
-   * @param soldTo
-   * @return
-   */
-  private String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
-    String customerName = null;
-    if (!handler.customerNamesOnAddress()) {
-      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
-    } else {
-      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-    }
-    return customerName;
   }
 
   /**
