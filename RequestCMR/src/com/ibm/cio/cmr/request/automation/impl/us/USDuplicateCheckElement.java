@@ -1,4 +1,4 @@
-package com.ibm.cio.cmr.request.automation.impl.gbl;
+package com.ibm.cio.cmr.request.automation.impl.us;
 
 import java.util.ArrayList;
 import java.util.Arrays;
