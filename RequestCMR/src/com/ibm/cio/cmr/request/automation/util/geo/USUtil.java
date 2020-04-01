@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -23,6 +24,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -80,7 +82,78 @@ public class USUtil extends AutomationUtil {
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    return false;
+    String custTypeCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
+    List<String> restrictedCodesAddition = Arrays.asList("F", "G", "C", "D", "V", "W", "X");
+    List<String> restrictedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
+    boolean hasNegativeCheck = false;
+    for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
+      if (updatedDataModel != null && !hasNegativeCheck) {
+        LOG.debug("Checking updates for : " + new ObjectMapper().writeValueAsString(updatedDataModel));
+        switch (updatedDataModel.getDataField()) {
+        case "Tax Class / Code 1":
+        case "Tax Class / Code 2":
+        case "Tax Class / Code 3":
+        case "Tax Exempt Status":
+        case "ICC Tax Class":
+        case "ICC Tax Exempt Status":
+        case "Out of City Limits":
+          boolean requesterFromTaxTeam = false;
+          // TODO check if requester is from TaxTeam
+          if (!requesterFromTaxTeam) {
+            hasNegativeCheck = true;
+          }
+          break;
+        case "CSO Site":
+        case "Marketing Department":
+        case "Marketing A/R Department":
+          // set negative check status for FEDERAL Power of Attorney and BP
+          if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || BUSINESS_PARTNER.equals(custTypeCd))) {
+            hasNegativeCheck = true;
+          }
+          break;
+        case "Miscellaneous Bill Code":
+          for (String s : updatedDataModel.getOldData().split("")) {
+            List<String> newCodes = Arrays.asList(updatedDataModel.getNewData().split(""));
+            if (!newCodes.contains(s) && !restrictedCodesRemoval.contains(s) && !hasNegativeCheck) {
+              hasNegativeCheck = true;
+              break;
+            }
+          }
+          for (String s : updatedDataModel.getNewData().split("")) {
+            List<String> oldCodes = Arrays.asList(updatedDataModel.getOldData().split(""));
+            if (!oldCodes.contains(s) && !restrictedCodesAddition.contains(s) && !hasNegativeCheck) {
+              hasNegativeCheck = true;
+              break;
+            }
+          }
+          break;
+
+        case "Abbreviated Name (TELX1)":
+        case "PCC A/R Department":
+        case "SVC A/R Office":
+        case "Size Code":
+        case "CAP Record":
+          // SKIP THESE FIELDS
+          break;
+        default:
+          // Set Negative check status for any other fields updated.
+          hasNegativeCheck = true;
+          break;
+        }
+      } else if (hasNegativeCheck) {
+        break;
+      }
+    }
+
+    if (hasNegativeCheck) {
+      engineData.addNegativeCheckStatus("RESTRICED_DATA_UPDATED", "Updated elements cannot be checked automatically.");
+      LOG.debug("Updated elements cannot be checked automatically.");
+      output.setDetails("Updated elements cannot be checked automatically.\n");
+      validation.setMessage("Review needed");
+      validation.setSuccess(false);
+    }
+
+    return true;
   }
 
   @Override
@@ -90,7 +163,7 @@ public class USUtil extends AutomationUtil {
     StringBuilder details = new StringBuilder();
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypeCd");
+    String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
     // check addresses
@@ -112,8 +185,17 @@ public class USUtil extends AutomationUtil {
         }
 
         if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01)) {
+          Addr zp01 = requestData.getAddress("ZP01");
           boolean immutableAddrFound = false;
-          // TODO check if street address belongs to immutable address list
+          List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
+              "7100 HIGHLANDS PKWY", "294 ROUTE 100", "6710 ROCKLEDGE DR");
+          String addrTxt = zp01.getAddrTxt() + (StringUtils.isNotBlank(zp01.getAddrTxt2()) ? " " + zp01.getAddrTxt2() : "");
+          for (String streetAddr : immutableAddrList) {
+            if (addrTxt.contains(streetAddr)) {
+              immutableAddrFound = true;
+              break;
+            }
+          }
           if (immutableAddrFound) {
             engineData.addNegativeCheckStatus("IMMUTABLE_ADDR_FOUND", "Invoice-to address cannot be modified.");
             details.append("Invoice-to address cannot be modified.").append("\n");
@@ -138,7 +220,7 @@ public class USUtil extends AutomationUtil {
 
   private void closelyMatchAddressWithDnbRecords(GEOHandler handler, RequestData requestData, AutomationEngineData engineData, String addrType,
       StringBuilder details, ValidationOutput validation) throws Exception {
-    String addrDesc = "ZS01".equals(addrType) ? "Install-At" : "Invoice-To";
+    String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
@@ -198,7 +280,12 @@ public class USUtil extends AutomationUtil {
     String usRestricTo = "";
     String companyNo = "";
 
-    String cmrNo = StringUtils.isBlank(admin.getModelCmrNo()) ? "" : admin.getModelCmrNo();
+    String cmrNo = "";
+    if ("C".equals(admin.getReqType())) {
+      cmrNo = StringUtils.isBlank(admin.getModelCmrNo()) ? "" : admin.getModelCmrNo();
+    } else if ("U".equals(admin.getReqType())) {
+      cmrNo = StringUtils.isNotBlank(data.getCmrNo()) ? data.getCmrNo() : "";
+    }
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
     String sql = ExternalizedQuery.getSql("AUTO.GET_CODES_USCMR", usSchema);
@@ -254,7 +341,7 @@ public class USUtil extends AutomationUtil {
     mapUSCMR.put("cGem", cGem);
     mapUSCMR.put("usRestricTo", usRestricTo);
     mapUSCMR.put("companyNo", companyNo);
-    System.out.println(mapUSCMR);
+    // System.out.println(mapUSCMR);
     return mapUSCMR;
   }
 
