@@ -268,6 +268,8 @@ function setSBOOnScenario() {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('installBranchOff');
+
       } else if (role == 'Processor') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.enable('salesBusOffCd');
