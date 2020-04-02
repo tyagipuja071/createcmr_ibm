@@ -3544,9 +3544,12 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
     } else {
-      FormManager.enable('clientTier');
-      FormManager.enable('isuCd');
-    }
+      // NOT enable ctc and isu for turkey internal and bp scenario
+      if(custType!='XINT' && custType!='XBP'){
+        FormManager.enable('clientTier');
+        FormManager.enable('isuCd');        
+      }
+    } 
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (custType == 'BUSPR') {
