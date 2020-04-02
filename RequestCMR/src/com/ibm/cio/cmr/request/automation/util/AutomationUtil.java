@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  *
@@ -307,6 +308,17 @@ public abstract class AutomationUtil {
       engineData.addPositiveCheckStatus("allowDuplicates");
     }
     LOG.debug("Allowing Duplicate CMR for reqid = " + admin.getId().getReqId());
+  }
+
+  /**
+   * Hooks to be able to manipulate the data to be sent to GBG finder services
+   * 
+   * @param entityManager
+   * @param request
+   * @param requestData
+   */
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+    // NOOP
   }
 
 }

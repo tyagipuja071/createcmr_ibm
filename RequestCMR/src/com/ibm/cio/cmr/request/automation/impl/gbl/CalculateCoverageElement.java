@@ -24,6 +24,8 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.FieldResult;
+import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
@@ -34,6 +36,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -196,24 +199,31 @@ public class CalculateCoverageElement extends OverridingElement {
       }
       // get default coverage
       String defaultCoverage = getDefaultCoverage(data.getCmrIssuingCntry());
+      boolean showCurrentCoverage = false;
+      CoverageInput input = null;
+      List<Coverage> currCoverage = new ArrayList<>();
 
-      // get coverage based on current request data
-      CoverageInput input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), data.getGbgId(), data.getBgId());
-      List<Coverage> currCoverage = coverageRules.findCoverage(input);
-      if (!currCoverage.isEmpty()) {
-        details.append("\nCoverage IDs computed based on current data:").append("\n");
-        for (Coverage cov : currCoverage) {
-          String desc = getCoverageDescription(entityManager, cov.getType() + cov.getId());
-          if (StringUtils.isBlank(desc)) {
-            desc = "-no description available-";
-          }
-          details.append(" - " + cov.getLevel() + ": " + cov.getType() + cov.getId() + " (" + desc + ")\n");
-          if (StringUtils.isBlank(calculatedCoverageContainer.getFinalCoverage())) {
-            calculatedCoverageContainer.setFinalCoverage(cov.getType() + cov.getId());
-          } else if (StringUtils.isBlank(calculatedCoverageContainer.getBaseCoverage())) {
-            calculatedCoverageContainer.setBaseCoverage(cov.getType() + cov.getId());
+      // for now don't show, CMDE doesn't want it shown
+      if (showCurrentCoverage) {
+        // get coverage based on current request data
+        input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), data.getGbgId(), data.getBgId());
+        currCoverage = coverageRules.findCoverage(input);
+        if (!currCoverage.isEmpty()) {
+          details.append("\nCoverage IDs computed based on current data:").append("\n");
+          for (Coverage cov : currCoverage) {
+            String desc = getCoverageDescription(entityManager, cov.getType() + cov.getId());
+            if (StringUtils.isBlank(desc)) {
+              desc = "-no description available-";
+            }
+            details.append(" - " + cov.getLevel() + ": " + cov.getType() + cov.getId() + " (" + desc + ")\n");
+            if (StringUtils.isBlank(calculatedCoverageContainer.getFinalCoverage())) {
+              calculatedCoverageContainer.setFinalCoverage(cov.getType() + cov.getId());
+            } else if (StringUtils.isBlank(calculatedCoverageContainer.getBaseCoverage())) {
+              calculatedCoverageContainer.setBaseCoverage(cov.getType() + cov.getId());
+            }
           }
         }
+
       }
 
       // coverage id calculation from BG/VAT
@@ -241,11 +251,18 @@ public class CalculateCoverageElement extends OverridingElement {
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
           logCoverage(entityManager, engineData, coverageIds, details, output, input, container.getFinalCoverage(), "Final",
               container.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
-          if (container.getBaseCoverage() != null) {
-            LOG.debug("Logging Base Coverage ID: " + container.getBaseCoverage());
-            logCoverage(entityManager, engineData, coverageIds, details, output, input, container.getBaseCoverage(), "Base",
-                container.getBaseCoverageRules(), data.getCmrIssuingCntry(), container);
+
+          boolean logBaseCoverage = false;
+
+          if (logBaseCoverage) {
+            // don't log base for now
+            if (container.getBaseCoverage() != null) {
+              LOG.debug("Logging Base Coverage ID: " + container.getBaseCoverage());
+              logCoverage(entityManager, engineData, coverageIds, details, output, input, container.getBaseCoverage(), "Base",
+                  container.getBaseCoverageRules(), data.getCmrIssuingCntry(), container);
+            }
           }
+
           // Save the first calculated coverage ID in the engine data to allow
           // next elements to use it
           if ((StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
@@ -312,11 +329,15 @@ public class CalculateCoverageElement extends OverridingElement {
               StringUtils.isNotBlank(negativeCheck) ? negativeCheck : "Coverage calculation requires processor review.");
         } else if (isCoverageCalculated) {
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+          if (calculatedCoverageContainer != null) {
+            engineData.put(AutomationEngineData.COVERAGE_CALCULATED, calculatedCoverageContainer.getFinalCoverage());
+          }
         }
       }
 
       result.setDetails(details.toString());
       result.setProcessOutput(output);
+      Map<FieldResultKey, FieldResult> keys = output.getData();
       return result;
     } catch (
 
@@ -367,21 +388,26 @@ public class CalculateCoverageElement extends OverridingElement {
       GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
       details.append("\nCoverage ID = " + currCovId).append(" (" + currCovLevel + ")").append("\n");
       details.append("Coverage Name = " + getCoverageDescription(entityManager, currCovId)).append("\n");
-      List<Rule> rules = coverageRules.matchWithCoverage(input, currCovId);
-      boolean matched = false;
+      List<Rule> rules = currCovRules;
+      // List<Rule> rules = coverageRules.matchWithCoverage(input, currCovId);
+      // boolean matched = false;
+      // if (rules != null && !rules.isEmpty()) {
+      // matched = true;
+      // } else {
+      // details.append("No matched coverage rules from request data. The
+      // request may need to be tweaked to align based on conditions below.")
+      // .append("\n");
+      // rules = currCovRules;
+      // }
       if (rules != null && !rules.isEmpty()) {
-        matched = true;
-      } else {
-        details.append("No matched coverage rules from request data. The request may need to be tweaked to align based on conditions below.")
-            .append("\n");
-        rules = currCovRules;
-      }
-      if (rules != null && !rules.isEmpty()) {
-        if (matched) {
-          details.append("Matched rules for Coverage ID " + currCovId + ":").append("\n");
-        } else {
-          details.append("Proposed rules for Coverage ID " + currCovId + ":").append("\n");
-        }
+        // if (matched) {
+        // details.append("Matched rules for Coverage ID " + currCovId +
+        // ":").append("\n");
+        // } else {
+        // details.append("Proposed rules for Coverage ID " + currCovId +
+        // ":").append("\n");
+        // }
+        details.append("Overrides for " + currCovId + ":").append("\n");
         int index = 1;
         String dtName = null;
         for (Rule rule : rules) {
@@ -389,22 +415,27 @@ public class CalculateCoverageElement extends OverridingElement {
           if (dtName.contains(".")) {
             dtName = dtName.substring(dtName.lastIndexOf(".") + 1);
           }
-          details.append("\nRule " + index + " = " + rule.getName()).append("\n");
-          details.append("Decision Table = " + dtName).append("\n");
-          details.append("Conditions:").append("\n");
+          // details.append("\nRule " + index + " = " +
+          // rule.getName()).append("\n");
+          // details.append("Decision Table = " + dtName).append("\n");
+          // details.append("Conditions:").append("\n");
           for (Condition condition : rule.getRuleConditions()) {
             if (!"COVERAGE".equals(condition.getField()) && !"coverageID".equals(condition.getField())) {
               String field = CoverageRulesFieldMap.getLabel(cmrIssuingCntry, condition.getField());
-              details.append(" - " + field + " " + condition.getOperation().toString() + " " + condition.getValues()
-                  + (condition.getValues2() != null && !condition.getValues2().isEmpty() ? ", " + condition.getValues2() : "")).append("\n");
+              // details.append(" - " + field + " " +
+              // condition.getOperation().toString() + " " +
+              // condition.getValues()
+              // + (condition.getValues2() != null &&
+              // !condition.getValues2().isEmpty() ? ", " +
+              // condition.getValues2() : "")).append("\n");
 
               // Create overrides if not matched for the first rule found
               // 1. Creates overrides for Final Coverage if it is there
               // 2. Creates overrides for base Coverage if Final Coverage is not
               // present
 
-              if (!matched && index == 1 && (("Final".equals(currCovLevel) && StringUtils.isNotBlank(currCovId))
-                  || ("Base".equals(currCovLevel)) && StringUtils.isBlank(container.getFinalCoverage()))) {
+              if (index == 1 && (("Final".equals(currCovLevel) && StringUtils.isNotBlank(currCovId))
+                  || ("Base".equals(currCovLevel) && StringUtils.isBlank(container.getFinalCoverage())))) {
                 String dbField = CoverageRulesFieldMap.getDBField(cmrIssuingCntry, condition.getField());
                 if (!StringUtils.isBlank(dbField)) {
                   boolean addr = dbField.startsWith("ADDR");
@@ -418,6 +449,7 @@ public class CalculateCoverageElement extends OverridingElement {
                     case "In":
                     case "StartsOrEndsWith":
                     case "Equals":
+                      details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                       output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
                       break;
                     case "StartsWith":
@@ -445,6 +477,7 @@ public class CalculateCoverageElement extends OverridingElement {
                         query.setForReadOnly(true);
                         String value = query.getSingleResult(String.class);
                         if (StringUtils.isNotBlank(value)) {
+                          details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                           output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
                         } else {
                           engineData.addNegativeCheckStatus(dbField,
@@ -543,29 +576,36 @@ public class CalculateCoverageElement extends OverridingElement {
     query.setParameter("BG_ID", bgId);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("COUNTRY", cmrIssuingCountry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCountry);
+    query.setParameter("ISO_CNTRY", isoCntry);
     query.setForReadOnly(true);
 
     LOG.debug("Getting coverages for Buying Group " + bgId + " under Country " + cmrIssuingCountry);
     List<Object[]> results = query.getResults(5);
     if (results != null && !results.isEmpty()) {
       for (Object[] coverage : results) {
-        // 0 - final coverage
-        // 1 - base coverage
-        // 3 - territory id
+        // 0 - base coverage
+        // 1 - final coverage
+        // 2 - ISU
+        // 3 - CTC
 
         CoverageContainer container = new CoverageContainer();
         container.setFinalCoverage((String) coverage[0]);
+        container.setBaseCoverage((String) coverage[0]);
+        if (!StringUtils.isBlank((String) coverage[1])) {
+          container.setFinalCoverage((String) coverage[1]);
+        }
+
         List<Rule> rule = coverageRules.findRule(container.getFinalCoverage());
         container.setFinalCoverageRules(rule);
+        rule = coverageRules.findRule(container.getBaseCoverage());
+        container.setBaseCoverageRules(rule);
 
-        if (coverage[1] != null && !StringUtils.isBlank((String) coverage[1])) {
-          container.setBaseCoverage((String) coverage[1]);
-          rule = coverageRules.findRule(container.getBaseCoverage());
-          container.setBaseCoverageRules(rule);
+        container.setIsuCd((String) coverage[2]);
+        container.setClientTierCd((String) coverage[3]);
+        if (container.getFinalCoverageRules() != null) {
+          coverages.add(container);
         }
-        container.setTerritoryId((String) coverage[2]);
-
-        coverages.add(container);
       }
     }
 
@@ -589,6 +629,9 @@ public class CalculateCoverageElement extends OverridingElement {
     query.setParameter("VAT", vat);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("COUNTRY", cmrIssuingCountry);
+    String isoCntry = PageManager.getDefaultLandedCountry(cmrIssuingCountry);
+    System.err.println("ISO: " + isoCntry);
+    query.setParameter("ISO_CNTRY", isoCntry);
     query.setForReadOnly(true);
 
     LOG.debug("Getting coverages for VAT " + vat + " under Country " + cmrIssuingCountry);
@@ -601,17 +644,23 @@ public class CalculateCoverageElement extends OverridingElement {
 
         CoverageContainer container = new CoverageContainer();
         container.setFinalCoverage((String) coverage[0]);
+        container.setBaseCoverage((String) coverage[0]);
+        if (!StringUtils.isBlank((String) coverage[1])) {
+          container.setFinalCoverage((String) coverage[1]);
+        }
+
         List<Rule> rule = coverageRules.findRule(container.getFinalCoverage());
         container.setFinalCoverageRules(rule);
+        rule = coverageRules.findRule(container.getBaseCoverage());
+        container.setBaseCoverageRules(rule);
 
-        if (coverage[1] != null && !StringUtils.isBlank((String) coverage[1])) {
-          container.setBaseCoverage((String) coverage[1]);
-          rule = coverageRules.findRule(container.getBaseCoverage());
-          container.setBaseCoverageRules(rule);
+        container.setIsuCd((String) coverage[2]);
+        container.setClientTierCd((String) coverage[3]);
+
+        if (container.getFinalCoverageRules() != null) {
+          coverages.add(container);
         }
-        container.setTerritoryId((String) coverage[2]);
 
-        coverages.add(container);
       }
     }
 
@@ -686,11 +735,6 @@ public class CalculateCoverageElement extends OverridingElement {
   @Override
   public String getProcessDesc() {
     return "Calculate Coverage";
-  }
-
-  @Override
-  public boolean isNonImportable() {
-    return true;
   }
 
 }
