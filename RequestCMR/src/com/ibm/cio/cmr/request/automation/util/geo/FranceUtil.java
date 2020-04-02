@@ -24,6 +24,8 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -37,6 +39,7 @@ import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 
@@ -82,15 +85,52 @@ public class FranceUtil extends AutomationUtil {
     if (StringUtils.isNotBlank(sBo)) {
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sBo);
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sBo);
-      details.append("Field calculation Successful.\nCalculated value for SBO: " + sBo).append("\n");
+      details.append("Calculated value for SBO: " + sBo).append("\n");
     } else {
-      engineData.addRejectionComment("SBO cannot be computed automatically.");
-      details.append("SBO cannot be computed automatically.").append("\n");
-      results.setResults("SBO not calculated.");
-      results.setOnError(true);
+      boolean computed = false;
+      // check if we need to get SBO from Coverage
+      String coverage = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
+      if (!StringUtils.isBlank(coverage)) {
+        String sortlSbo = getSBOfromCoverage(entityManager, coverage);
+        if (sortlSbo != null) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sortlSbo);
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sortlSbo);
+          computed = true;
+          details.append("Calculated value for SBO via Coverage " + coverage + ": " + sBo).append("\n");
+        }
+      }
+
+      if (!computed) {
+        engineData.addRejectionComment("SBO cannot be computed automatically.");
+        details.append("SBO cannot be computed automatically.").append("\n");
+        results.setResults("SBO not calculated.");
+        results.setOnError(true);
+      }
     }
     results.setProcessOutput(overrides);
     return results;
+  }
+
+  /**
+   * Computes the SBO by getting the SORTL most used by the COverage ID
+   * 
+   * @param entityManager
+   * @param coverage
+   * @return
+   */
+  private String getSBOfromCoverage(EntityManager entityManager, String coverage) {
+    LOG.debug("Computing SBO for Coverage " + coverage);
+    String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COVID", coverage);
+    query.setForReadOnly(true);
+    String sortl = query.getSingleResult(String.class);
+    if (sortl != null && !StringUtils.isBlank(sortl)) {
+      sortl = StringUtils.rightPad(sortl, 6, '0');
+      return sortl.substring(0, 3);
+    }
+    return null;
   }
 
   @Override
@@ -425,6 +465,16 @@ public class FranceUtil extends AutomationUtil {
     LOG.debug("addr.getCustNm2 >>>> " + addr.getCustNm2());
     LOG.debug("addr.getAddrTxt >>>> " + addr.getAddrTxt());
     return isMatched;
+  }
+
+  @Override
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+    String siret = requestData.getData().getTaxCd1();
+    if (!StringUtils.isBlank(siret) && siret.length() > 9) {
+      request.setOrgId(siret.substring(0, 9)); // SIREN
+      LOG.debug("Passing SIREN as " + request.getOrgId() + " with GBG finder priority.");
+      request.setOrgIdFirst("Y");
+    }
   }
 
 }
