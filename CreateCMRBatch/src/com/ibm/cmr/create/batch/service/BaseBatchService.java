@@ -139,6 +139,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
       LOG.info("Batch User ID: " + BATCH_USER_ID);
       if (isTransactional()) {
         ChangeLogListener.setManager(entityManager);
+        ChangeLogListener.setUser(BATCH_USER_ID);
         transaction = entityManager.getTransaction();
         transaction.begin();
       }
@@ -362,8 +363,8 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
    * @throws SQLException
    * @throws CmrException
    */
-  protected WfHist createHistory(EntityManager entityManager, String comment, String status, String action, long reqId) throws CmrException,
-      SQLException {
+  protected WfHist createHistory(EntityManager entityManager, String comment, String status, String action, long reqId)
+      throws CmrException, SQLException {
     // create workflow history record
     WfHist hist = new WfHist();
     WfHistPK histPk = new WfHistPK();
