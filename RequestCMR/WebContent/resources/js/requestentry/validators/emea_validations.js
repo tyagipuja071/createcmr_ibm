@@ -3549,7 +3549,7 @@ function setCustSubTypeBpGRTRCY() {
         FormManager.enable('clientTier');
         FormManager.enable('isuCd');        
       }
-    }
+    } 
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (custType == 'BUSPR') {
