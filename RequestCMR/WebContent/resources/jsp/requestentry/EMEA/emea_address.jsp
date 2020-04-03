@@ -93,6 +93,7 @@
     <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
     </p>
   </cmr:column>
+<!--  rollback TR address change
     <cmr:column span="2" forCountry="862">
     <p>
       <cmr:label fieldId="translate">&nbsp;
@@ -102,6 +103,7 @@
       <a class="translate" href="javascript: cmr.openTranslateWindow('el','en', ['custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'poBox', 'city1', 'taxOffice'])" >to English</a>
     </p>
   </cmr:column>
+  -->
 </cmr:row>
 
 <cmr:row>
