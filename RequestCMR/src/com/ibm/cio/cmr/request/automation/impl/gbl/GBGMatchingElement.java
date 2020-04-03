@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.MatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -66,6 +67,7 @@ public class GBGMatchingElement extends MatchingElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+    AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
 
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
@@ -103,6 +105,11 @@ public class GBGMatchingElement extends MatchingElement {
             request.setDunsNo(dnbMatching.getDunsNo());
           }
         }
+
+        if (automationUtil != null) {
+          automationUtil.tweakGBGFinderRequest(entityManager, request, requestData);
+        }
+
         MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
             MatchingServiceClient.class);
         client.setRequestMethod(Method.Get);
@@ -137,8 +144,8 @@ public class GBGMatchingElement extends MatchingElement {
               output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
                   itemNo);
             } else if (gbg.isVatMatch()) {
-              LOG.debug("Matches found via VAT matching..");
-              details.append("\n").append("Found via VAT matching:");
+              LOG.debug("Matches found via ORG ID matching..");
+              details.append("\n").append("Found via ORG ID matching:");
               output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
                   itemNo);
             } else {
