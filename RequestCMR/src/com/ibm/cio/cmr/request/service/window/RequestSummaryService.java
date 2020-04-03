@@ -288,16 +288,25 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
           // CMR-2093:Turkey - Requirement for CoF (Comercial Financed) field
-          if ("862".equals(oldData.getCmrIssuingCntry())) {
-            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CommercialFinanced"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
-              update.setNewData(getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
-              update.setOldData(getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
-              results.add(update);
-            }
-          }
+          // *abner revert begin
+          // if ("862".equals(oldData.getCmrIssuingCntry())) {
+          // if (TYPE_CUSTOMER.equals(type) &&
+          // !equals(oldData.getCommercialFinanced(),
+          // newData.getCommercialFinanced())
+          // && (geoHandler == null ||
+          // !geoHandler.skipOnSummaryUpdate(cmrCountry, "CommercialFinanced")))
+          // {
+          // update = new UpdatedDataModel();
+          // update.setDataField(PageManager.getLabel(cmrCountry,
+          // "CommercialFinanced", "-"));
+          // update.setNewData(getCodeAndDescription(newData.getCommercialFinanced(),
+          // "CommercialFinanced", cmrCountry));
+          // update.setOldData(getCodeAndDescription(oldData.getCommercialFinanced(),
+          // "CommercialFinanced", cmrCountry));
+          // results.add(update);
+          // }
+          // }
+          // *abner revert end
 
           if (TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd()) && !LAHandler.isBRIssuingCountry(cmrCountry)
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "INACCode"))) {

@@ -104,9 +104,15 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
 
-	protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Billing Address",
-			"Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL Address", "Sold-To Address",
-			"Install-At Address", "Ship-To Address" };
+  // *abner revert begin
+  // protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang
+  // Translation Sold-To", "Billing Address",
+  // "Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL
+  // Address", "Sold-To Address",
+  // "Install-At Address", "Ship-To Address" };
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mailing-Billing Address", "Billing Address", "Mailing Address",
+      "Installing Address", "Shipping Address (Update)", "EPL Address" };
+  // *abner revert end
 
 	// CMR-1728
 	protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
@@ -3244,7 +3250,9 @@ public class EMEAHandler extends BaseSOFHandler {
 		map.put("##CustomerScenarioSubType", "custSubGrp");
 		map.put("##EngineeringBo", "engineeringBo");
 		map.put("##CodFlag", "creditCd");
-		map.put("##CommercialFinanced", "commercialFinanced");
+    // *abner revert begin
+    // map.put("##CommercialFinanced", "commercialFinanced");
+    // *abner revert end
 		return map;
 	}
 
@@ -3585,9 +3593,11 @@ public class EMEAHandler extends BaseSOFHandler {
 		 * currently Turkey don't need Dup Fills check, so temp skip the
 		 * checking this part
 		 */
-		if (SystemLocation.TURKEY.equals(country)) {
-			return;
-		}
+    // *abner revert begin
+    // if (SystemLocation.TURKEY.equals(country)) {
+    // return;
+    // }
+    // *abner revert end
 		for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
 			XSSFSheet sheet = book.getSheet(name);
 
