@@ -3176,11 +3176,17 @@ public class EMEAHandler extends BaseSOFHandler {
 		if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
 			return Arrays.asList("ZP01");
 		}
+	    if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
+	        return Arrays.asList("ZD01", "ZI01");
+	    }
 		return null;
 	}
 
 	@Override
 	public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
+	    if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
+	        return Arrays.asList("5");
+	    }
 		return null;
 	}
 
