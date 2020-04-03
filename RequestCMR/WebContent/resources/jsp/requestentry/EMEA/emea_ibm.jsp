@@ -44,7 +44,10 @@
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    <cmr:view forCountry="666,726"> 
+    <!-- *abner revert begin
+    <cmr:view forCountry="666,726">
+     -->
+    <cmr:view forCountry="862,666,726"> 
       <cmr:column span="2" containerForField="ISR">
         <p>
           <cmr:label fieldId="repTeamMemberNo">
