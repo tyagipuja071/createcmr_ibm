@@ -271,7 +271,8 @@ public class CalculateCoverageElement extends OverridingElement {
 
           // Save the first calculated coverage ID in the engine data to allow
           // next elements to use it
-          if ((StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
+          if (!isCoverageCalculated
+              && (StringUtils.isNotBlank(container.getFinalCoverage()) || StringUtils.isNotBlank(container.getBaseCoverage()))) {
             String finalCoverage = container.getFinalCoverage();
             if (StringUtils.isNotBlank(finalCoverage)) {
               if (!finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage()) && !finalCoverage.equals(defaultCoverage)) {

@@ -490,6 +490,7 @@ public class FranceUtil extends AutomationUtil {
       String siren = StringUtils.isNotBlank(data.getTaxCd1())
           ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) + "%" : data.getTaxCd1() + "%") : "";
       if (StringUtils.isNotBlank(siren)) {
+        details.append("SIREN: " + siren).append("\n\n");
         List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren,
             data.getCmrIssuingCntry());
         if (coverages != null && !coverages.isEmpty()) {
@@ -498,13 +499,20 @@ public class FranceUtil extends AutomationUtil {
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
           covElement.logCoverage(entityManager, engineData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
               coverage.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
-
+        } else {
+          details.append("Coverage could not be calculated on the basis of SIREN").append("\n");
+          results.setResults("Review needed");
+          engineData.addNegativeCheckStatus("COVERAGE_ERROR", "Coverage could not be calculated on the basis of SIREN");
         }
       } else {
         details.append("SIREN/SIRET not found on the request.").append("\n");
         results.setResults("SIREN not found");
         engineData.addNegativeCheckStatus("SIREN_NOT_FOUND", "SIREN/SIRET not found on the request.");
       }
+    } else {
+      details.append("\nCoverage calculated using Global Buying Group/Buying Group.").append("\n\n");
+      results.setResults("Coverage Calculated");
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     }
 
     return true;
