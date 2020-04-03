@@ -18,16 +18,20 @@ import org.codehaus.jackson.type.TypeReference;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
@@ -37,6 +41,12 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
+
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
 
 public class GermanyUtil extends AutomationUtil {
 
@@ -86,10 +96,9 @@ public class GermanyUtil extends AutomationUtil {
       case "IBMEM":
         for (Addr addr : requestData.getAddresses()) {
           String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
-          if (StringUtils.isNotBlank(custNm)
-              && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG") || custNm.contains("Co.KG")
-                  || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-                  || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
+          if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
+              || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
+              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
             engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
             details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
             valid = false;
@@ -107,6 +116,7 @@ public class GermanyUtil extends AutomationUtil {
             request.setCustomerName(name);
             request.setIssuingCountry(data.getCmrIssuingCntry());
             request.setLandedCountry(zs01.getLandCntry());
+            request.setNameMatch("Y");
             client.setReadTimeout(1000 * 60 * 5);
             LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
             MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
@@ -121,39 +131,41 @@ public class GermanyUtil extends AutomationUtil {
             if (response.getSuccess()) {
               if (response.getMatched() && response.getMatches().size() > 0) {
                 duplicateCMRNo = response.getMatches().get(0).getCmrNo();
-                details.append("The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. "
-                    + duplicateCMRNo);
-                engineData.addRejectionComment("The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee")
-                    + " already has a record with CMR No. " + duplicateCMRNo);
+                details.append(
+                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo)
+                    .append("\n");
+                engineData.addRejectionComment(
+                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo);
                 valid = false;
               } else {
-                details.append("No Duplicate CMRs were found with Name: " + name);
+                details.append("No Duplicate CMRs were found.").append("\n");
               }
-              // cmr-2255 fix
-              // if (StringUtils.isBlank(duplicateCMRNo) &&
-              // scenario.equals("IBMEM")) {
-              // Person person = null;
-              // try {
-              // person = BluePagesHelper.getPersonByName(zs01.getCustNm1()
-              // + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " +
-              // zs01.getCustNm2() : ""));
-              // if (person == null) {
-              // engineData.addRejectionComment("Employee details not found in IBM BluePages.");
-              // details.append("Employee details not found in IBM BluePages.").append("\n");
-              // } else {
-              // details.append("Employee details validated with IBM BluePages for "
-              // + person.getName() + "(" + person.getEmail() + ").").append(
-              // "\n");
-              // }
-              // } catch (Exception e) {
-              // LOG.error("Not able to check name against bluepages", e);
-              // engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
-              // "Not able to check name against bluepages for scenario IBM Employee.");
-              // }
-              // }
+              if (StringUtils.isBlank(duplicateCMRNo) && scenario.equals("IBMEM")) {
+                Person person = null;
+                if (StringUtils.isNotBlank(zs01.getCustNm1())) {
+                  try {
+                    String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
+                    person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName));
+                    if (person == null) {
+                      engineData.addRejectionComment("Employee details not found in IBM BluePages.");
+                      details.append("Employee details not found in IBM BluePages.").append("\n");
+                    } else {
+                      details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
+                          .append("\n");
+                    }
+                  } catch (Exception e) {
+                    LOG.error("Not able to check name against bluepages", e);
+                    engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED",
+                        "Not able to check name against bluepages for scenario IBM Employee.");
+                  }
+                } else {
+                  LOG.warn("Not able to check name against bluepages, Customer Name 1 not found on the main address");
+                  engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Customer Name 1 not found on the main address");
+                }
+              }
             }
           } catch (Exception e) {
-            details.append("Duplicate CMR check using customer name match failed to execute.");
+            details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
             engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
           }
         }
@@ -176,19 +188,20 @@ public class GermanyUtil extends AutomationUtil {
                 }
               }
             }
+
           } else {
             LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.");
-            details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
+            details.append("Unable to perform Duplicate CMR Check for Broker scenario.").append("\n");
             engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
           }
           if (count > 1) {
             engineData.addRejectionComment("Multiple registered CMRs already found for this customer.");
-            details.append("Multiple registered CMRs already found for this customer.");
+            details.append("Multiple registered CMRs already found for this customer.").append("\n");
             valid = false;
           } else if (count == 1) {
-            details.append("Single registered CMR found for this customer.");
+            details.append("Single registered CMR found for this customer.").append("\n");
           } else {
-            details.append("No registered CMRs found for this customer.");
+            details.append("No registered CMRs found for this customer.").append("\n");
           }
         } catch (Exception e) {
           LOG.error("Unable to perform Duplicate CMR Check for BROKR scenario.", e);
@@ -208,18 +221,18 @@ public class GermanyUtil extends AutomationUtil {
             PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
             if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
               engineData.addRejectionComment("PPS CE ID on the request is invalid.");
-              details.append("PPS CE ID on the request is invalid.");
+              details.append("PPS CE ID on the request is invalid.").append("\n");
               valid = false;
             } else {
-              details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.");
+              details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.").append("\n");
             }
           } catch (Exception e) {
             LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
-            details.append("Not able to validate PPS CE ID using PPS Service.");
+            details.append("Not able to validate PPS CE ID using PPS Service.").append("\n");
             engineData.addNegativeCheckStatus("PPSCEID", "Not able to validate PPS CE ID using PPS Service.");
           }
         } else {
-          details.append("PPS CE ID not available on the request.");
+          details.append("PPS CE ID not available on the request.").append("\n");
           engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
         }
         break;
@@ -229,18 +242,20 @@ public class GermanyUtil extends AutomationUtil {
         // check value of Department under '##GermanyInternalDepartment' LOV
         String sql = ExternalizedQuery.getSql("DE.CHECK_DEPARTMENT");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
-        for (Addr addr : requestData.getAddresses()) {
-          if (StringUtils.isNotBlank(addr.getDept())) {
-            query.setParameter("CD", addr.getDept());
-            String result = query.getSingleResult(String.class);
-            if (result == null) {
-              engineData.addRejectionComment("Department on the request is invalid.");
-              details.append("Department on the request is invalid for address type - " + addr.getId().getAddrType() + ".");
-              valid = false;
-            } else {
-              details.append("Department " + addr.getDept() + " validated successfully for address type - " + addr.getId().getAddrType() + ".");
-            }
+        String dept = data.getIbmDeptCostCenter();
+        if (StringUtils.isNotBlank(dept)) {
+          query.setParameter("CD", dept);
+          String result = query.getSingleResult(String.class);
+          if (result == null) {
+            engineData.addRejectionComment("IBM Department/Cost Center on the request is invalid.");
+            details.append("IBM Department/Cost Center on the request is invalid.").append("\n");
+            valid = false;
+          } else {
+            details.append("IBM Department/Cost Center " + dept + " validated successfully.").append("\n");
           }
+        } else {
+          details.append("IBM Department/Cost Center not provided on the request. Default Department Number(00X306) will be set.");
+          data.setIbmDeptCostCenter("00X306");
         }
         break;
       }
@@ -256,13 +271,14 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
-      skipCompanyCheckForScenario(requestData, engineData, Arrays.asList(skipCompanyCheckList), false);
+      // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
+      // skipCompanyCheckForScenario(requestData, engineData,
+      // Arrays.asList(skipCompanyCheckList), false);
 
     } else {
       valid = false;
       engineData.addRejectionComment("No Scenario found on the request");
-      details.append("No Scenario found on the request");
+      details.append("No Scenario found on the request").append("\n");
     }
     return valid;
   }
@@ -272,14 +288,19 @@ public class GermanyUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
-    String mainCustNm = (zs01.getCustNm1().trim() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2().trim() : "")).toUpperCase();
-    String mainStreetAddress1 = zs01.getAddrTxt().trim().toUpperCase();
-    String mainCity = zs01.getCity1().trim().toUpperCase();
-    String mainPostalCd = zs01.getPostCd().trim();
+    String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
+    String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
+    String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
+    String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
+    String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
+    String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
+    boolean removed = false;
+    details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!"ZS01".equals(addr.getId().getAddrType())) {
+        removed = true;
         String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
         if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
@@ -290,66 +311,27 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
 
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && engineData.get(AutomationEngineData.COVERAGE_ID) != null) {
-      String coverageId = (String) engineData.get(AutomationEngineData.COVERAGE_ID);
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
-      details.append("Coverage calculated using Global/Domestic Buying Group.").append("\n");
-      details.append("Computed SORTL = " + coverageId).append("\n");
-      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
-      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("SEARCH_TERM", coverageId);
-      query.setForReadOnly(true);
-      List<Object[]> result = query.getResults(1);
-      if (result.size() > 0) {
-        String isuCd = (String) result.get(0)[0];
-        String clientTier = (String) result.get(0)[1];
-        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-          }
-        }
-      }
+    if (!removed) {
+      details.append("No duplicate address records found on the request.").append("\n");
+    }
 
-    } else {
-      HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
-          data.getClientTier());
-      LOG.debug("Calculated SORTL: " + response.get(SORTL));
-      if (StringUtils.isNotBlank(response.get(MATCHING))) {
-        switch (response.get(MATCHING)) {
-        case "Exact Match":
-        case "Nearest Match":
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
-          details.append("Coverage calculation Successful.").append("\n");
-          details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
-          details.append("Matched Rule:").append("\n");
-          details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
-          details.append("ISU = " + data.getIsuCd()).append("\n");
-          details.append("CTC = " + data.getClientTier()).append("\n");
-          details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
-          details.append("Matching: " + response.get(MATCHING));
-          break;
-        case "No Match Found":
-          engineData.addRejectionComment("Coverage cannot be computed automatically.");
-          details.append("Coverage cannot be computed automatically.").append("\n");
-          results.setResults("Coverage not calculated.");
-          results.setOnError(true);
-          break;
-        }
-      } else {
-        engineData.addRejectionComment("Coverage cannot be computed automatically.");
-        details.append("Coverage cannot be computed automatically.").append("\n");
-        results.setResults("Coverage not calculated.");
-        results.setOnError(true);
+    // replace special characters from addresses.
+    details.append("Replacing German language characters from address fields if any.").append("\n");
+    for (Addr addr : requestData.getAddresses()) {
+      if (addr != null) {
+        addr.setCustNm1(replaceGermanCharacters(addr.getCustNm1()));
+        addr.setCustNm2(replaceGermanCharacters(addr.getCustNm2()));
+        addr.setAddrTxt(replaceGermanCharacters(addr.getAddrTxt()));
+        addr.setAddrTxt2(replaceGermanCharacters(addr.getAddrTxt2()));
+        addr.setCity1(replaceGermanCharacters(addr.getCity1()));
+        addr.setDept(replaceGermanCharacters(addr.getDept()));
+        addr.setOffice(replaceGermanCharacters(addr.getOffice()));
+        addr.setBldg(replaceGermanCharacters(addr.getBldg()));
+        addr.setFloor(replaceGermanCharacters(addr.getFloor()));
+        data.setAbbrevNm(replaceGermanCharacters(data.getAbbrevNm()));
       }
     }
 
-    results.setProcessOutput(overrides);
     return results;
   }
 
@@ -422,6 +404,100 @@ public class GermanyUtil extends AutomationUtil {
       response.put(MATCHING, "No Match Found");
       return response;
     }
+  }
+
+  private String replaceGermanCharacters(String input) {
+    if (StringUtils.isNotBlank(input)) {
+      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
+          .replace("ü", "ue").replaceAll("ß", "SS");
+      return str;
+
+    }
+    return null;
+  }
+
+  private String insertGermanCharacters(String input) {
+    if (StringUtils.isNotBlank(input)) {
+      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
+          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
+      return str;
+    }
+    return null;
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String coverageId = container.getFinalCoverage();
+    details.append("\n");
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
+        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
+      // details.append("Coverage calculated using Global/Domestic Buying
+      // Group.").append("\n");
+      details.append("Computed SORTL = " + coverageId).append("\n");
+      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
+      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
+      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("SEARCH_TERM", coverageId);
+      query.setForReadOnly(true);
+      List<Object[]> result = query.getResults(1);
+      if (result.size() > 0) {
+        String isuCd = (String) result.get(0)[0];
+        String clientTier = (String) result.get(0)[1];
+        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
+          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
+            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
+          }
+        }
+      }
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
+      HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
+          data.getClientTier());
+      LOG.debug("Calculated SORTL: " + response.get(SORTL));
+      if (StringUtils.isNotBlank(response.get(MATCHING))) {
+        switch (response.get(MATCHING)) {
+        case "Exact Match":
+        case "Nearest Match":
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
+          details.append("Coverage calculation Successful.").append("\n");
+          details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
+          details.append("Matched Rule:").append("\n");
+          details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
+          details.append("ISU = " + data.getIsuCd()).append("\n");
+          details.append("CTC = " + data.getClientTier()).append("\n");
+          details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
+          details.append("Matching: " + response.get(MATCHING));
+          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+          break;
+        case "No Match Found":
+          engineData.addRejectionComment("Coverage cannot be computed automatically.");
+          details.append("Coverage cannot be computed automatically.").append("\n");
+          results.setResults("Coverage not calculated.");
+          results.setOnError(true);
+          break;
+        }
+      } else {
+        engineData.addRejectionComment("Coverage cannot be computed automatically.");
+        details.append("Coverage cannot be computed automatically.").append("\n");
+        results.setResults("Coverage not calculated.");
+        results.setOnError(true);
+      }
+    } else {
+      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
+      results.setResults("Coverage calculation skipped.");
+    }
+    return true;
   }
 
 }

@@ -3,12 +3,12 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -40,9 +40,9 @@ public class GreeceTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01" };
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01", "ZI01" };
 
-  private static final Logger LOG = Logger.getLogger(IsraelTransformer.class);
+  private static final Logger LOG = Logger.getLogger(GreeceTransformer.class);
 
   public static final String DEFAULT_LANDED_COUNTRY = "ES";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
@@ -267,11 +267,13 @@ public class GreeceTransformer extends EMEATransformer {
   public String getAddressKey(String addrType) {
     switch (addrType) {
     case "ZP01":
-      return "Mail";
+      return "Local Language translation of Sold";
     case "ZS01":
-      return "Install";
+      return "Sold To";
     case "ZD01":
-      return "Ship";
+      return "Ship To";
+    case "ZI01":
+      return "Install At";
     default:
       return "";
     }
@@ -281,11 +283,13 @@ public class GreeceTransformer extends EMEATransformer {
   public String getTargetAddressType(String addrType) {
     switch (addrType) {
     case "ZP01":
-      return "Mailing";
+      return "Local Language translation of Sold";
     case "ZS01":
-      return "Installing";
+      return "Sold To";
     case "ZD01":
-      return "Shipping";
+      return "Ship To";
+    case "ZI01":
+      return "Install At";
     default:
       return "";
     }
@@ -314,12 +318,16 @@ public class GreeceTransformer extends EMEATransformer {
   @Override
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
+    case MQMsgConstants.ADDR_ZP02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING + MQMsgConstants.SOF_ADDRESS_USE_SHIPPING + MQMsgConstants.SOF_ADDRESS_USE_EPL;
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -422,37 +430,61 @@ public class GreeceTransformer extends EMEATransformer {
     entityManager.merge(data);
     entityManager.flush();
   }
-
+  
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
-    long requestId = cmrObjects.getAdmin().getId().getReqId();
-    Map<String, String> addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
+    long reqId = cmrObjects.getAdmin().getId().getReqId();
+    List<Addr> addrList = cmrObjects.getAddresses();
+    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+    
+    int seqStartForRequiredAddr = 2;
+    for (int i = 0; i < addrList.size(); i++) {
+      Addr addr = addrList.get(i);
+      String addrSeq = addr.getId().getAddrSeq();
+      String addrType = addr.getId().getAddrType();
 
-    LOG.debug("LEGACY -- GREECE OVERRIDE transformOtherData");
-    LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
-    for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
-      modifyAddrUseFields(legacyAddr.getId().getAddrNo(), addrSeqToAddrUseMap.get(legacyAddr.getId().getAddrNo()), legacyAddr);
+      if (addrSeq.equals("00001")) {
+        if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+          // copy mailing from billing
+          copyMailingFromBilling(legacyObjects, legacyAddrList.get(i));
+        } 
+        updateRequiredAddresses(entityManager, reqId, addrList.get(i).getId().getAddrType(), legacyAddrList.get(i).getId().getAddrNo(),
+            changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
+      }
+      modifyAddrUseFields(getAddressUse(addr), legacyAddrList.get(i));
     }
   }
 
-  private Map<String, String> mapSeqNoToAddrUse(List<Addr> addrList) {
-    Map<String, String> addrSeqToAddrUseMap = new HashMap<>();
-    for (Addr addr : addrList) {
-      addrSeqToAddrUseMap.put(addr.getId().getAddrSeq(), getAddressUse(addr));
-    }
-    return addrSeqToAddrUseMap;
+  private void updateRequiredAddresses(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq,
+      LegacyDirectObjectContainer legacyObjects, int index) {
+    updateAddrSeq(entityManager, reqId, addrType, oldSeq, newSeq, null);
+    legacyObjects.getAddresses().get(index).getId().setAddrNo(newSeq);
   }
-
-  private List<Addr> getAddrLegacy(EntityManager entityManager, String reqId) {
-    LOG.debug("Greece -- Searching for ADDR records for Request " + reqId);
-    String sql = ExternalizedQuery.getSql("LEGACYD.GET.ADDR");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setForReadOnly(true);
-    return query.getResults(Addr.class);
+  
+  private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
+    CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+    mailingAddr.getId().setAddrNo(String.format("%05d", 1)); // should be 00001
+    modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
+    legacyObjects.getAddresses().add(mailingAddr);
   }
-
-  private void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+  
+  private String changeSeqNo(int newSeq) {
+    return String.format("%05d", newSeq);
+  }
+  
+  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr) {
+    String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
+    PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
+    q.setParameter("NEW_SEQ", newSeq);
+    q.setParameter("REQ_ID", reqId);
+    q.setParameter("TYPE", addrType);
+    q.setParameter("OLD_SEQ", oldSeq);
+    q.setParameter("SAP_NO", kunnr);
+    LOG.debug("GREECE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
+    q.executeSql();
+  }
+  
+  private void modifyAddrUseFields(String addrUse, CmrtAddr legacyAddr) {
     setAddrUseFieldsToN(legacyAddr);
     for (String use : addrUse.split("")) {
       switch (use) {
@@ -524,7 +556,7 @@ public class GreeceTransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
     LOG.debug("Set max and min range For GR...");
-    if (custSubGrp != null && "INTER".equals(custSubGrp)) {
+    if (custSubGrp != null && "INTER".equals(custSubGrp) || custSubGrp != null && "XINTR".equals(custSubGrp)) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }

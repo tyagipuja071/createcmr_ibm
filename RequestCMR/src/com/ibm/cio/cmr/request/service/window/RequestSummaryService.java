@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.service.window;
 
@@ -62,7 +62,7 @@ import com.ibm.cmr.services.client.cros.CROSTax;
 
 /**
  * @author Jeffrey Zamora
- * 
+ *
  */
 @Component
 public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel> {
@@ -71,7 +71,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
   public static final String TYPE_IBM = "IBM";
 
   @Override
-  protected RequestSummaryModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
+  public RequestSummaryModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     String sql = ExternalizedQuery.getSql("REQUEST.SUMMARY");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", params.getParam("reqId"));
@@ -99,13 +99,12 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * gets the list of Updated fields for the request's name/address data
-   * 
+   *
    * @param reqId
    * @return
    * @throws CmrException
    */
-  public List<UpdatedNameAddrModel> getUpdatedNameAddr(long reqId) throws CmrException {
-    EntityManager entityManager = JpaManager.getEntityManager();
+  public List<UpdatedNameAddrModel> getUpdatedNameAddr(EntityManager entityManager, long reqId) throws CmrException {
     try {
       List<UpdatedNameAddrModel> results = new ArrayList<UpdatedNameAddrModel>();
 
@@ -161,6 +160,20 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         LOG.error("Unexpected error occurred", e);
         throw new CmrException(MessageUtil.ERROR_GENERAL);
       }
+    }
+  }
+
+  /**
+   * gets the list of Updated fields for the request's name/address data
+   *
+   * @param reqId
+   * @return
+   * @throws CmrException
+   */
+  public List<UpdatedNameAddrModel> getUpdatedNameAddr(long reqId) throws CmrException {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      return getUpdatedNameAddr(entityManager, reqId);
     } finally {
       // empty the manager
       entityManager.clear();
@@ -170,13 +183,12 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * Gets the list of Updated fields for the request's data
-   * 
+   *
    * @param reqId
    * @return
    * @throws CmrException
    */
-  public List<UpdatedDataModel> getUpdatedData(Data newData, long reqId, String type) throws CmrException {
-    EntityManager entityManager = JpaManager.getEntityManager();
+  public List<UpdatedDataModel> getUpdatedData(EntityManager entityManager, Data newData, long reqId, String type) throws CmrException {
     try {
       List<UpdatedDataModel> results = new ArrayList<UpdatedDataModel>();
 
@@ -276,16 +288,25 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
           // CMR-2093:Turkey - Requirement for CoF (Comercial Financed) field
-          if ("862".equals(oldData.getCmrIssuingCntry())) {
-            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CommercialFinanced"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
-              update.setNewData(getCodeAndDescription(newData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
-              update.setOldData(getCodeAndDescription(oldData.getCommercialFinanced(), "CommercialFinanced", cmrCountry));
-              results.add(update);
-            }
-          }
+          // *abner revert begin
+          // if ("862".equals(oldData.getCmrIssuingCntry())) {
+          // if (TYPE_CUSTOMER.equals(type) &&
+          // !equals(oldData.getCommercialFinanced(),
+          // newData.getCommercialFinanced())
+          // && (geoHandler == null ||
+          // !geoHandler.skipOnSummaryUpdate(cmrCountry, "CommercialFinanced")))
+          // {
+          // update = new UpdatedDataModel();
+          // update.setDataField(PageManager.getLabel(cmrCountry,
+          // "CommercialFinanced", "-"));
+          // update.setNewData(getCodeAndDescription(newData.getCommercialFinanced(),
+          // "CommercialFinanced", cmrCountry));
+          // update.setOldData(getCodeAndDescription(oldData.getCommercialFinanced(),
+          // "CommercialFinanced", cmrCountry));
+          // results.add(update);
+          // }
+          // }
+          // *abner revert end
 
           if (TYPE_IBM.equals(type) && !equals(oldData.getInacCd(), newData.getInacCd()) && !LAHandler.isBRIssuingCountry(cmrCountry)
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "INACCode"))) {
@@ -550,6 +571,20 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         e.printStackTrace();
         throw new CmrException(MessageUtil.ERROR_GENERAL);
       }
+    }
+  }
+
+  /**
+   * Gets the list of Updated fields for the request's data
+   *
+   * @param reqId
+   * @return
+   * @throws CmrException
+   */
+  public List<UpdatedDataModel> getUpdatedData(Data newData, long reqId, String type) throws CmrException {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+      return getUpdatedData(entityManager, newData, reqId, type);
     } finally {
       // empty the manager
       entityManager.clear();
@@ -559,11 +594,12 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * Parses the difference between name/addresses
-   * 
+   *
    * @param addr
    * @param results
    */
-  private void parseNameAddrDiff(Map<String, String> addressTypes, UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
+  private void parseNameAddrDiff(Map<String, String> addressTypes, UpdatedAddr addr, List<UpdatedNameAddrModel> results,
+      EntityManager entityManager) {
     UpdatedNameAddrModel update = null;
     String sapNumber = addr.getSapNo();
     String addrType = addr.getId().getAddrType();
@@ -668,7 +704,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           // results.add(update);
           // }
         }
-        if (!equals(addr.getAddrTxt(), addr.getAddrTxtOld()) && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "StreetAddress1"))) {
+        if (!equals(addr.getAddrTxt(), addr.getAddrTxtOld())
+            && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "StreetAddress1"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrType(addrTypeDesc);
           update.setSapNumber(sapNumber);
@@ -695,7 +732,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setOldData(addr.getCity2Old());
           results.add(update);
         }
-        if (!equals(addr.getStateProv(), addr.getStateProvOld()) && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "StateProv"))) {
+        if (!equals(addr.getStateProv(), addr.getStateProvOld())
+            && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "StateProv"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrType(addrTypeDesc);
           update.setSapNumber(sapNumber);
@@ -777,7 +815,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setOldData(addr.getPoBoxOld());
           results.add(update);
         }
-        if (!equals(addr.getPoBoxCity(), addr.getPoBoxCityOld()) && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "POBoxCity"))) {
+        if (!equals(addr.getPoBoxCity(), addr.getPoBoxCityOld())
+            && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "POBoxCity"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrType(addrTypeDesc);
           update.setSapNumber(sapNumber);
@@ -815,7 +854,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setOldData(addr.getCustLangCdOld());
           results.add(update);
         }
-        if (!equals(addr.getCustPhone(), addr.getCustPhoneOld()) && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CustPhone"))) {
+        if (!equals(addr.getCustPhone(), addr.getCustPhoneOld())
+            && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CustPhone"))) {
           update = new UpdatedNameAddrModel();
           update.setAddrType(addrTypeDesc);
           update.setSapNumber(sapNumber);
@@ -897,7 +937,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * Checks absolute equality between the strings
-   * 
+   *
    * @param val1
    * @param val2
    * @return
@@ -917,7 +957,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * Gets the code and description value
-   * 
+   *
    * @param code
    * @param fieldId
    * @return
@@ -932,7 +972,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * Get the sold to details
-   * 
+   *
    * @param summary
    * @param summary
    */
@@ -992,7 +1032,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * Check if other address exist for request
-   * 
+   *
    * @param reqId
    * @param boolean
    */
@@ -1023,7 +1063,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
 
   /**
    * gets the list of Mass Update records
-   * 
+   *
    * @param reqId
    * @return
    * @throws CmrException
@@ -1147,7 +1187,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           massData.setStatus("Automatic Processing Completed");
         } else if (massCreate.getRowStatusCd() != null && CmrConstants.MASS_CREATE_ROW_STATUS_FAIL.equals(massCreate.getRowStatusCd().trim())) {
           massData.setStatus("Error (Automatic Processing)");
-        } else if (massCreate.getRowStatusCd() != null && CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE.equals(massCreate.getRowStatusCd().trim())) {
+        } else if (massCreate.getRowStatusCd() != null
+            && CmrConstants.MASS_CREATE_ROW_STATUS_UPDATE_FAILE.equals(massCreate.getRowStatusCd().trim())) {
           massData.setStatus("Error (Automatic Update)");
         } else if (massCreate.getRowStatusCd() != null && CmrConstants.MASS_CREATE_ROW_STATUS_READY.equals(massCreate.getRowStatusCd().trim())) {
           massData.setStatus("Ready for Processing");
@@ -1280,9 +1321,11 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       List<CROSContact> crossCntlist = new ArrayList<CROSContact>();
 
       // if (!response.isSuccess()) {
-      // LOG.error("An error has occured in retrieving contact detail values coming from the CROS query service.");
+      // LOG.error("An error has occured in retrieving contact detail values
+      // coming from the CROS query service.");
       // Exception e = new
-      // Exception("An error has occured in retrieving contact detail values coming from the CROS query service.");
+      // Exception("An error has occured in retrieving contact detail values
+      // coming from the CROS query service.");
       // throw new CmrException(e);
       // } else {
       // // get the contacts and set HM ID as type + name
@@ -1382,8 +1425,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               continue;
             }
 
-            crosContactsMap.put((crosContact.getContactCode() + crosContact.getContactNo() + (crosContact.getContactEmail() != null ? crosContact
-                .getContactEmail().toLowerCase() : "")), crosContact);
+            crosContactsMap.put((crosContact.getContactCode() + crosContact.getContactNo()
+                + (crosContact.getContactEmail() != null ? crosContact.getContactEmail().toLowerCase() : "")), crosContact);
           }
 
           if (leContacts.size() > 0) {
@@ -1419,8 +1462,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           newModel.setContactPhone(d.getContactPhone());
           newModel.setContactSeqNum(d.getContactNo());
 
-          if (!cmrContactsMap.containsKey(d.getContactCode() + d.getContactNo()
-              + (d.getContactEmail() != null ? d.getContactEmail().toLowerCase() : ""))) {
+          if (!cmrContactsMap
+              .containsKey(d.getContactCode() + d.getContactNo() + (d.getContactEmail() != null ? d.getContactEmail().toLowerCase() : ""))) {
             newModel.setRemoved("REMOVED");
           }
 

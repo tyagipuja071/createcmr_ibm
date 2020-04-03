@@ -205,7 +205,7 @@ public class MassChangeTemplate {
           validations.add(tab.validate(entityManager, book, country, maxRows));
         }
       } else if (ATUtil.isCountryATEnabled(entityManager, country)) {// CMR-800
-        String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "EPL" };// CMR-2065
+        String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };// CMR-2065
                                                                                     // installing
                                                                                     // change
                                                                                     // to

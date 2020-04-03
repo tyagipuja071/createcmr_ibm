@@ -1404,6 +1404,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrIsu(kna1.getBrsch());
           cmrRecord.setCmrAffiliate(kna1.getKonzs());
           cmrRecord.setCmrAddrTypeCode(kna1.getKtokd());
+          cmrRecord.setCmrAddrType("");
           cmrRecord.setCmrPrefLang(kna1.getSpras());
           cmrRecord.setCmrBusinessReg(kna1.getStcd1());
           cmrRecord.setCmrShortName(kna1.getTelx1());
@@ -1411,12 +1412,12 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrSubIndustry(kna1.getBran1());
           cmrRecord.setCmrPpsceid(kna1.getBran3());
           cmrRecord.setCmrSitePartyID(kna1.getBran5());
-          cmrRecord.setCmrIssuedBy(kna1.getKatr6());
+          cmrRecord.setCmrIssuedBy(kna1.getKatr6());     
           cmrRecord.setCmrCapIndicator(kna1.getKatr8());
           cmrRecord.setCmrNum(kna1.getZzkvCusno());
           cmrRecord.setCmrInac(kna1.getZzkvInac());
-          cmrRecord.setCmrCompanyNo(kna1.getZzkvNode1());
-          cmrRecord.setCmrEnterpriseNumber(kna1.getZzkvNode2());
+          cmrRecord.setCmrCompanyNo(!StringUtils.isEmpty(kna1.getZzkvNode1()) ? kna1.getZzkvNode1().trim() : "");
+          cmrRecord.setCmrEnterpriseNumber(!StringUtils.isEmpty(kna1.getZzkvNode2()) ? kna1.getZzkvNode2().trim() : "");
           cmrRecord.setCmrBusinessReg(kna1.getStcd1());
           cmrRecord.setCmrLocalTax2(kna1.getStcd2());
           cmrRecord.setCmrClass(kna1.getKukla());
@@ -1425,21 +1426,21 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrSapNumber(kna1.getId().getKunnr());
           cmrRecord.setCmrAddrSeq(kna1.getZzkvSeqno());
 
-          cmrRecord.setCmrCity(kna1.getOrt01());
-          cmrRecord.setCmrCity2(kna1.getOrt02());
-          cmrRecord.setCmrState(kna1.getRegio());
-          cmrRecord.setCmrPostalCode(kna1.getPstlz());
+          cmrRecord.setCmrCity(!StringUtils.isEmpty(kna1.getOrt01()) ? kna1.getOrt01() : "");
+          cmrRecord.setCmrCity2(!StringUtils.isEmpty(kna1.getOrt02()) ? kna1.getOrt02() : "");
+          cmrRecord.setCmrState(!StringUtils.isEmpty(kna1.getRegio()) ? kna1.getRegio() : "");
+          cmrRecord.setCmrPostalCode(!StringUtils.isEmpty(kna1.getPstlz()) ? kna1.getPstlz() : "");
 
           cmrRecord.setCmrCountyCode("");
           cmrRecord.setCmrCounty("");
-          cmrRecord.setCmrStreetAddress(kna1.getStras());
+          cmrRecord.setCmrStreetAddress(!StringUtils.isEmpty(kna1.getStras()) ? kna1.getStras() : "");
           cmrRecord.setCmrCustPhone("");
-          cmrRecord.setCmrCustFax(kna1.getTelfx());
+          cmrRecord.setCmrCustFax(!StringUtils.isEmpty(kna1.getTelfx()) ? kna1.getTelfx() : "");
           cmrRecord.setCmrBusNmLangCd("");
-          cmrRecord.setCmrTransportZone(kna1.getLzone());
-          cmrRecord.setCmrPOBox(kna1.getPfach());
-          cmrRecord.setCmrPOBoxCity(kna1.getPfort());
-          cmrRecord.setCmrPOBoxPostCode(kna1.getPstl2());
+          cmrRecord.setCmrTransportZone(!StringUtils.isEmpty(kna1.getLzone()) ? kna1.getLzone() : "");
+          cmrRecord.setCmrPOBox(!StringUtils.isEmpty(kna1.getPfach()) ? kna1.getPfach() : "");
+          cmrRecord.setCmrPOBoxCity(!StringUtils.isEmpty(kna1.getPfort()) ? kna1.getPfort() : "");
+          cmrRecord.setCmrPOBoxPostCode(!StringUtils.isEmpty(kna1.getPstl2()) ? kna1.getPstl2() : "");
           cmrRecord.setCmrBldg("");
           cmrRecord.setCmrFloor("");
           cmrRecord.setCmrOffice("");
@@ -1447,11 +1448,11 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
-          cmrRecord.setCmrIsic(kna1.getZzkvSic());
+          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? kna1.getZzkvSic() : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
-          cmrRecord.setCmrCountryLanded(kna1.getLand1());
+          cmrRecord.setCmrCountryLanded(!StringUtils.isEmpty(kna1.getLand1()) ? kna1.getLand1() : "");
           cmrRecordModels.add(cmrRecord);
         }
 

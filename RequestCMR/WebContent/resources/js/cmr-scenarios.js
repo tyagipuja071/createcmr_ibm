@@ -13,6 +13,7 @@ var TemplateService = (function() {
   var ENABLED_MANDATORY = '*';
   var READONLY_CLEARVALUE = '$';
   var EDITABLE_CLEARVALUE = '@';
+  var BLANK_CUSTOMIZABLE = "~";
   var ADDRESS_TYPES = [ 'ZS01', 'ZI01', 'ZP01', 'ZD01', 'ZS02', 'ZP02', 'CTYA', 'CTYB', 'CTYC', 'CTYD', 'CTYE', 'CTYF', 'CTYG', 'CTYH', 'EDUC', 'MAIL', 'PUBB', 'PUBS', 'STAT', 'ZF01', 'ZH01' ];
 
   var getUserRole = function() {
@@ -338,6 +339,50 @@ var TemplateService = (function() {
                   FormManager.setValue(name, '');
                 }
               }
+            } else if (values[0] == BLANK_CUSTOMIZABLE) {
+
+              // if there is no actual value, enable the field and do nothing
+              FormManager.resetValidations(name);
+              FormManager.show(name);
+              FormManager.enable(name);
+
+              if (scenarioChanged && !retainValue) {
+                FormManager.setValue(name, '');
+              }
+
+              // check the REQ_IND from scenarios and implement
+              switch (required) {
+              case 'R':
+                FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+                FormManager.enable(name);
+                break;
+              case 'O':
+                FormManager.enable(name);
+                break;
+              case 'D':
+                FormManager.readOnly(name);
+                break;
+              case 'G':
+                FormManager.setValue(name, '');
+                FormManager.disable(name);
+                break;
+              }
+
+              if (lockInd == 'Y' || (lockInd == 'R' && getUserRole() == 'Requester') || (lockInd == 'P' && getUserRole() == 'Processor')) {
+                FormManager.readOnly(name);
+              }
+
+              if (type == 'checkbox') {
+                if (FormManager.getField(name).set) {
+                  FormManager.getField(name).set('checked', false);
+                } else if (FormManager.getField(name)) {
+                  FormManager.getField(name).checked = false;
+                }
+              }
+
+              if (type == 'text' && FormManager.getField(name).store == null && 'R' == required) {
+                FormManager.addValidator(name, Validators.REQUIRED, [ label ], field.parentTab);
+              }
             } else {
 
               // jz: for single values, only RETAIN_VAL_IND and LOCK_INDC have
@@ -537,7 +582,9 @@ var TemplateService = (function() {
             }
           }
 
-          if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
+          if (FormManager.getActualValue('cmrIssuingCntry') == '724' && name == 'enterprise') {
+            // SKIP for CMR-2617 Germany
+          } else if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
             FormManager.addValidator(name, Validators.DIGIT, [ label ], field.parentTab);
           }
 

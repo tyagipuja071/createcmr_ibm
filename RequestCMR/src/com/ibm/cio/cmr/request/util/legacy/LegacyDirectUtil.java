@@ -1344,5 +1344,18 @@ public class LegacyDirectUtil {
 
     return isFisCodeUsed;
   }
-
+  public static List<CmrtAddr> checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
+    
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", country);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setForReadOnly(true);
+    List<CmrtAddr> addresses = query.getResults(CmrtAddr.class);
+    if (addresses != null) {
+      LOG.debug(">> checkLDAddress for CMR# " + cmrNo + " > " + addresses.size());
+    }
+    return addresses;
+  }
+    
 }

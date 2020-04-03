@@ -917,6 +917,11 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
           }
         }
 
+        // CMR-2279: update muData
+        if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+          updateEntity(cmrObjects.getMassUpdateData(), entityManager);
+        }
+
         if (StringUtils.isEmpty(legacyObjects.getErrTxt())) {
           massUpdt.setRowStatusCd(MASS_UPDATE_LEGACYDONE);
           massUpdt.setErrorTxt("Legacy data processing completed.\n\n");
@@ -1084,6 +1089,9 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     }
 
     transformer.transformLegacyCustomerDataMassUpdate(entityManager, cust, cmrObjects, muData);
+
+    // CMR-2279 Turkey update massUpdateData
+    updateEntity(cmrObjects.getMassUpdateData(), entityManager);
 
     if (transformer.hasCmrtCustExt()) {
       CmrtCustExt custExt = legacyObjects.getCustomerExt();

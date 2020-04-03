@@ -1,7 +1,5 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
-import java.lang.reflect.Constructor;
-
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
@@ -32,16 +30,11 @@ public class FieldComputationElement extends OverridingElement {
     StringBuilder details = new StringBuilder();
     OverrideOutput overrides = new OverrideOutput(false);
     log.debug("Entering FieldComputationElement()");
-    Class<? extends AutomationUtil> handlerClass = AutomationUtil.getCountrySpecificUtil(issuingCntry);
     AutomationResult<OverrideOutput> result = null;
-    if (handlerClass != null) {
-      try {
-        @SuppressWarnings("unchecked")
-        Constructor<AutomationUtil> constructor = (Constructor<AutomationUtil>) handlerClass.getConstructor();
-        result = constructor.newInstance().doCountryFieldComputations(entityManager, results, details, overrides, requestData, engineData);
-      } catch (Exception e) {
-        log.warn("Field Computation handler for issuing country " + issuingCntry + " cannot be determined via util.");
-      }
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(issuingCntry);
+    log.debug("Automation Util for " + issuingCntry + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
+    if (countryUtil != null) {
+      result = countryUtil.doCountryFieldComputations(entityManager, results, details, overrides, requestData, engineData);
     }
     if (result == null) {
       details

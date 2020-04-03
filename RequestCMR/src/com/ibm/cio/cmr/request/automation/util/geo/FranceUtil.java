@@ -16,11 +16,13 @@ import org.codehaus.jackson.type.TypeReference;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -39,6 +41,7 @@ import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 
@@ -83,15 +86,53 @@ public class FranceUtil extends AutomationUtil {
     LOG.debug("Calculated SBO: " + sBo);
     if (StringUtils.isNotBlank(sBo)) {
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sBo);
-      details.append("Field calculation Successful.\nCalculated value for SBO: " + sBo).append("\n");
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sBo);
+      details.append("Calculated value for SBO: " + sBo).append("\n");
     } else {
-      engineData.addRejectionComment("SBO cannot be computed automatically.");
-      details.append("SBO cannot be computed automatically.").append("\n");
-      results.setResults("SBO not calculated.");
-      results.setOnError(true);
+      boolean computed = false;
+      // check if we need to get SBO from Coverage
+      String coverage = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
+      if (!StringUtils.isBlank(coverage)) {
+        String sortlSbo = getSBOfromCoverage(entityManager, coverage);
+        if (sortlSbo != null) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sortlSbo);
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sortlSbo);
+          computed = true;
+          details.append("Calculated value for SBO via Coverage " + coverage + ": " + sBo).append("\n");
+        }
+      }
+
+      if (!computed) {
+        engineData.addRejectionComment("SBO cannot be computed automatically.");
+        details.append("SBO cannot be computed automatically.").append("\n");
+        results.setResults("SBO not calculated.");
+        results.setOnError(true);
+      }
     }
     results.setProcessOutput(overrides);
     return results;
+  }
+
+  /**
+   * Computes the SBO by getting the SORTL most used by the COverage ID
+   * 
+   * @param entityManager
+   * @param coverage
+   * @return
+   */
+  private String getSBOfromCoverage(EntityManager entityManager, String coverage) {
+    LOG.debug("Computing SBO for Coverage " + coverage);
+    String sql = ExternalizedQuery.getSql("AUTO.FR.COV.SORTL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COVID", coverage);
+    query.setForReadOnly(true);
+    String sortl = query.getSingleResult(String.class);
+    if (sortl != null && !StringUtils.isBlank(sortl)) {
+      sortl = StringUtils.rightPad(sortl, 6, '0');
+      return sortl.substring(0, 3);
+    }
+    return null;
   }
 
   @Override
@@ -282,22 +323,26 @@ public class FranceUtil extends AutomationUtil {
       case "COMME":
       case "CBMME":
         int count = 0;
-        for (Addr addr : requestData.getAddresses()) {
-          String sql = ExternalizedQuery.getSql("FR.GET_UNIQUE_ADDR_COUNT");
-          PreparedQuery query = new PreparedQuery(entityManager, sql);
-          query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
-          query.setParameter("CUST_NM1", addr.getCustNm1());
-          query.setParameter("ADDR_TXT", addr.getAddrTxt());
-          query.setParameter("CITY1", addr.getCity1());
-          count = query.getSingleResult(Integer.class);
-          if (count == 1) {
-            engineData.addRejectionComment("Multiple unique addresses found on the request.");
-            engineData.addNegativeCheckStatus("SCENARIO_EXCEPTION", "Commercial scenario needs to be reviewed.");
-            details.append("Multiple unique addresses found on the request. ").append("\n");
-            valid = false;
-            break;
-          }
-        }
+        // for (Addr addr : requestData.getAddresses()) {
+        // String sql = ExternalizedQuery.getSql("FR.GET_UNIQUE_ADDR_COUNT");
+        // PreparedQuery query = new PreparedQuery(entityManager, sql);
+        // query.setParameter("REQ_ID",
+        // requestData.getAdmin().getId().getReqId());
+        // query.setParameter("CUST_NM1", addr.getCustNm1());
+        // query.setParameter("ADDR_TXT", addr.getAddrTxt());
+        // query.setParameter("CITY1", addr.getCity1());
+        // count = query.getSingleResult(Integer.class);
+        // if (count == 1) {
+        // engineData.addRejectionComment("Multiple unique addresses found on
+        // the request.");
+        // engineData.addNegativeCheckStatus("SCENARIO_EXCEPTION", "Commercial
+        // scenario needs to be reviewed.");
+        // details.append("Multiple unique addresses found on the request.
+        // ").append("\n");
+        // valid = false;
+        // break;
+        // }
+        // }
         break;
       case "CHDPT":
       case "THDPT":
@@ -422,6 +467,55 @@ public class FranceUtil extends AutomationUtil {
     LOG.debug("addr.getCustNm2 >>>> " + addr.getCustNm2());
     LOG.debug("addr.getAddrTxt >>>> " + addr.getAddrTxt());
     return isMatched;
+  }
+
+  @Override
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+    String siret = requestData.getData().getTaxCd1();
+    if (!StringUtils.isBlank(siret) && siret.length() > 9) {
+      request.setOrgId(siret.substring(0, 9)); // SIREN
+      LOG.debug("Passing SIREN as " + request.getOrgId() + " with GBG finder priority.");
+      request.setOrgIdFirst("Y");
+    }
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    if (!isCoverageCalculated
+        || (isCoverageCalculated && !(CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom)))) {
+      details.append("\nCoverage not calculated using Global Buying Group/Buying Group. Calculating Coverage using SIREN.").append("\n\n");
+      String siren = StringUtils.isNotBlank(data.getTaxCd1())
+          ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) + "%" : data.getTaxCd1() + "%") : "";
+      if (StringUtils.isNotBlank(siren)) {
+        details.append("SIREN: " + siren).append("\n\n");
+        List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren,
+            data.getCmrIssuingCntry());
+        if (coverages != null && !coverages.isEmpty()) {
+          CoverageContainer coverage = coverages.get(0);
+          LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
+              + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
+          covElement.logCoverage(entityManager, engineData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
+              coverage.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
+        } else {
+          details.append("Coverage could not be calculated on the basis of SIREN").append("\n");
+          results.setResults("Review needed");
+          engineData.addNegativeCheckStatus("COVERAGE_ERROR", "Coverage could not be calculated on the basis of SIREN");
+        }
+      } else {
+        details.append("SIREN/SIRET not found on the request.").append("\n");
+        results.setResults("SIREN not found");
+        engineData.addNegativeCheckStatus("SIREN_NOT_FOUND", "SIREN/SIRET not found on the request.");
+      }
+    } else {
+      details.append("\nCoverage calculated using Global Buying Group/Buying Group.").append("\n\n");
+      results.setResults("Coverage Calculated");
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    }
+
+    return true;
   }
 
 }

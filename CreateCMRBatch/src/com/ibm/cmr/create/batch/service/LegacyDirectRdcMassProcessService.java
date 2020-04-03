@@ -857,6 +857,29 @@ public class LegacyDirectRdcMassProcessService extends TransConnService {
             updateEntity(admin, entityManager);
             partialCommit(entityManager);
           }
+          // CMR-2279: ISR update in massUpdtData for Turkey
+          if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+            MassUpdtDataPK muDataPK = new MassUpdtDataPK();
+            muDataPK.setIterationId(sMassUpdt.getId().getIterationId());
+            muDataPK.setParReqId(sMassUpdt.getId().getParReqId());
+            muDataPK.setSeqNo(sMassUpdt.getId().getSeqNo());
+            MassUpdtData muData = entityManager.find(MassUpdtData.class, muDataPK);
+
+            if (!StringUtils.isBlank(muData.getCustNm1())) {
+            String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+            PreparedQuery q = new PreparedQuery(entityManager, sql);
+            q.setParameter("SBO", muData.getCustNm1());
+            q.setParameter("CNTRY", SystemLocation.TURKEY);
+            String isr = q.getSingleResult(String.class);
+            if (!StringUtils.isBlank(isr)) {
+              muData.setRepTeamMemberNo(isr);
+              updateEntity(muData, entityManager);
+              } else {
+                muData.setRepTeamMemberNo("");
+                updateEntity(muData, entityManager);
+            }
+            }
+          }
 
           request.setCmrNo(sMassUpdt.getCmrNo());
           request.setMandt(SystemConfiguration.getValue("MANDT"));

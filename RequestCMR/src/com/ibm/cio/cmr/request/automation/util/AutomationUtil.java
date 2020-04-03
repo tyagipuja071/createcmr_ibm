@@ -8,9 +8,11 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -19,21 +21,25 @@ import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
- * 
+ *
  * Interface to handle country specific utility methods
- * 
+ *
  * @author RoopakChugh
- * 
+ *
  */
 
 public abstract class AutomationUtil {
+
+  private static final Logger LOG = Logger.getLogger(AutomationUtil.class);
 
   protected static final Map<String, Class<? extends AutomationUtil>> GEO_UTILS = new HashMap<String, Class<? extends AutomationUtil>>() {
     private static final long serialVersionUID = 1L;
@@ -42,6 +48,7 @@ public abstract class AutomationUtil {
       put(SystemLocation.SINGAPORE, SingaporeUtil.class);
       put(SystemLocation.AUSTRALIA, AustraliaUtil.class);
       put(SystemLocation.GERMANY, GermanyUtil.class);
+      put(SystemLocation.UNITED_STATES, USUtil.class);
 
       // FRANCE Sub Regions
       put(SystemLocation.FRANCE, FranceUtil.class);
@@ -63,24 +70,29 @@ public abstract class AutomationUtil {
 
   /**
    * returns an instance of
-   * 
+   *
    * @param cmrIssuingCntry
    * @return
    * @throws InstantiationException
    * @throws IllegalAccessException
    */
-  public static Class<? extends AutomationUtil> getCountrySpecificUtil(String cmrIssuingCntry) throws IllegalAccessException, InstantiationException {
-    if (GEO_UTILS.containsKey(cmrIssuingCntry)) {
-      return GEO_UTILS.get(cmrIssuingCntry);
-    } else {
+  public static AutomationUtil getNewCountryUtil(String cmrIssuingCntry) throws IllegalAccessException, InstantiationException {
+    if (!GEO_UTILS.containsKey(cmrIssuingCntry)) {
+      return null;
+    }
+    try {
+      Class<? extends AutomationUtil> utilClass = GEO_UTILS.get(cmrIssuingCntry);
+      return utilClass.newInstance();
+    } catch (Throwable t) {
+      LOG.warn("Automation Util for " + cmrIssuingCntry + " found but cannot be initialized.", t);
       return null;
     }
   }
 
   /**
-   * 
+   *
    * Computes IBM field values specific to countries and scenarios.
-   * 
+   *
    * @param results
    * @param details
    * @param overrides
@@ -94,7 +106,7 @@ public abstract class AutomationUtil {
 
   /**
    * validates if the scenario on request is correct or not
-   * 
+   *
    * @param entityManager
    * @param requestData
    * @param engineData
@@ -108,9 +120,32 @@ public abstract class AutomationUtil {
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output);
 
   /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
    * 
+   * @param covElement
+   * @param entityManager
+   * @param results
+   * @param details
+   * @param overrides
+   * @param requestData
+   * @param engineData
+   * @param covFrom
+   * @param container
+   * @param isCoverageCalculated
+   * @return
+   * @throws Exception
+   */
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    return false;
+  }
+
+  /**
+   *
    * Gets the default cluster code for country.
-   * 
+   *
    * @param results
    * @param details
    * @param overrides
@@ -132,9 +167,9 @@ public abstract class AutomationUtil {
   }
 
   /**
-   * 
+   *
    * Validates the Cluster and SalesMan Combination.
-   * 
+   *
    * @return a) validCode = "NO_RESULTS" if no rows found on CREQCMR.REP_TEAM b)
    *         validCode = "INVALID" if cluster exist but with different SalesMan
    *         on CREQCMR.REP_TEAM c) validCode = "VALID" if cluster exist with
@@ -164,7 +199,7 @@ public abstract class AutomationUtil {
 
   /**
    * Returns true if issuing country is configured to perform VAT match
-   * 
+   *
    * @param cmrIssuingCntry
    * @return
    */
@@ -176,38 +211,8 @@ public abstract class AutomationUtil {
   }
 
   /**
-   * Allows skipping company checks for scenario & updates
-   * 
-   * @param scenarioList
-   * @param skipCheckForUpdate
-   * @return
-   */
-  public static void skipCompanyCheckForScenario(RequestData requestData, AutomationEngineData engineData, List<String> scenarioList,
-      boolean skipCheckForUpdate) {
-    // get request admin and data
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-
-    String scenarioSubType = "";
-    if ("C".equals(admin.getReqType()) && data != null) {
-      scenarioSubType = data.getCustSubGrp();
-    }
-    ScenarioExceptionsUtil scenarioExceptions = null;
-    if (engineData.get("SCENARIO_EXCEPTIONS") != null) {
-      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
-    }
-
-    if (scenarioExceptions != null
-        && (("C".equals(admin.getReqType()) && scenarioList.size() != 0 && scenarioSubType != null && scenarioList.contains(scenarioSubType)) || ("U"
-            .equals(admin.getReqType()) && skipCheckForUpdate))) {
-      scenarioExceptions.setSkipCompanyVerification(true);
-    }
-
-  }
-
-  /**
    * Checks if ISIC and Subindustry is valid for specified scenario
-   * 
+   *
    * @param scenarioList
    * @return inValid
    */
@@ -248,4 +253,72 @@ public abstract class AutomationUtil {
 
     return isInvalid;
   }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param changes
+   * @param output
+   * @param validation
+   * @return
+   * @throws Exception
+   */
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    return false; // false denotes no country specific runs
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong> return true if there are country specific logic
+   * 
+   * @param entityManager
+   * @param engineData
+   * @param requestData
+   * @param changes
+   * @param output
+   * @param validation
+   * @return
+   * @throws Exception
+   */
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    return false; // false denotes no country specific runs
+  }
+
+  /**
+   * Allows duplicate cmrs for scenario
+   *
+   * @param scenarioList
+   * @return
+   */
+  public void allowDuplicatesForScenario(AutomationEngineData engineData, RequestData requestData, List<String> scenarioList) {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+
+    String scenarioSubType = "";
+    if ("C".equals(admin.getReqType()) && data != null) {
+      scenarioSubType = data.getCustSubGrp();
+    }
+    if (!StringUtils.isBlank(scenarioSubType) && !scenarioList.isEmpty() && scenarioList.contains(scenarioSubType)) {
+      engineData.addPositiveCheckStatus("allowDuplicates");
+    }
+    LOG.debug("Allowing Duplicate CMR for reqid = " + admin.getId().getReqId());
+  }
+
+  /**
+   * Hooks to be able to manipulate the data to be sent to GBG finder services
+   * 
+   * @param entityManager
+   * @param request
+   * @param requestData
+   */
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+    // NOOP
+  }
+
 }
