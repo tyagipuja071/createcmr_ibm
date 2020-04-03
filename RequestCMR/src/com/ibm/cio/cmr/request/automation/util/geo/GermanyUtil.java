@@ -426,7 +426,7 @@ public class GermanyUtil extends AutomationUtil {
   }
 
   @Override
-  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement calculateCoverageElement, EntityManager entityManager,
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
@@ -434,7 +434,7 @@ public class GermanyUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     details.append("\n");
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
-        && ("BG_CALC".equals(covFrom) || "BG_ODM".equals(engineData.get(covFrom)))) {
+        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
       // details.append("Coverage calculated using Global/Domestic Buying
       // Group.").append("\n");

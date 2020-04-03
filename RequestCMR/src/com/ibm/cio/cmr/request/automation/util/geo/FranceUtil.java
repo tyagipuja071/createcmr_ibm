@@ -16,11 +16,13 @@ import org.codehaus.jackson.type.TypeReference;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -475,6 +477,37 @@ public class FranceUtil extends AutomationUtil {
       LOG.debug("Passing SIREN as " + request.getOrgId() + " with GBG finder priority.");
       request.setOrgIdFirst("Y");
     }
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    if (!isCoverageCalculated
+        || (isCoverageCalculated && !(CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom)))) {
+      details.append("\nCoverage not calculated using Global Buying Group/Buying Group. Calculating Coverage using SIREN.").append("\n\n");
+      String siren = StringUtils.isNotBlank(data.getTaxCd1())
+          ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) + "%" : data.getTaxCd1() + "%") : "";
+      if (StringUtils.isNotBlank(siren)) {
+        List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren,
+            data.getCmrIssuingCntry());
+        if (coverages != null && !coverages.isEmpty()) {
+          CoverageContainer coverage = coverages.get(0);
+          LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
+              + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
+          covElement.logCoverage(entityManager, engineData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
+              coverage.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
+
+        }
+      } else {
+        details.append("SIREN/SIRET not found on the request.").append("\n");
+        results.setResults("SIREN not found");
+        engineData.addNegativeCheckStatus("SIREN_NOT_FOUND", "SIREN/SIRET not found on the request.");
+      }
+    }
+
+    return true;
   }
 
 }
