@@ -523,13 +523,13 @@ public class DnBUtil {
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
       if (StringUtils.isNotBlank(data.getVat())) {
-        request.setOrgId(data.getVat());
-      } else if (StringUtils.isNotBlank(addr.getVat())) {
         if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-          request.setOrgId(addr.getVat().split("\\s")[0]);
-        } else {
-          request.setOrgId(addr.getVat());
+          request.setOrgId(data.getVat().split("\\s")[0]);
+        } else{
+        request.setOrgId(data.getVat());
         }
+      } else if (StringUtils.isNotBlank(addr.getVat())) {
+          request.setOrgId(addr.getVat());
       }
 
       request.setCity(addr.getCity1());
