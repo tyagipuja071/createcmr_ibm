@@ -65,7 +65,7 @@ public class DnBUtil {
     registerDnBVATCode("IT", 481); // VAT Number
     registerDnBVATCode("LU", 480); // VAT Number
     registerDnBVATCode("NL", 6273); // VAT Number
-    registerDnBVATCode("IN", 32167); // Unknown
+    registerDnBVATCode("IN", 32167); // GST (Goods & Services Tax) ID
     registerDnBVATCode("RU", 1437); // Tax Registration Number (Russian
                                     // Federation)
     registerDnBVATCode("CH", 28865); // Swiss Uniform Identification Number
