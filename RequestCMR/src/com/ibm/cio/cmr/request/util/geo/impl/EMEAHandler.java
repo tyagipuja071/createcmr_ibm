@@ -3570,18 +3570,22 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	@Override
 	public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-		if (SystemLocation.SPAIN.equals(issuingCountry)) {
-			return true;
-		} else if (SystemLocation.UNITED_KINGDOM.equals(issuingCountry)) {
-			return true;
-		} else if (SystemLocation.IRELAND.equals(issuingCountry)) {
-			return true;
-		} else if (SystemLocation.TURKEY.equals(issuingCountry)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    if (SystemLocation.SPAIN.equals(issuingCountry)) {
+      return true;
+    } else if (SystemLocation.UNITED_KINGDOM.equals(issuingCountry)) {
+      return true;
+    } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
+      return true;
+    }
+    // *abner revert begin
+    // else if (SystemLocation.TURKEY.equals(issuingCountry)) {
+    // return true;
+    // }
+    // *abner revert end
+    else {
+      return false;
+    }
+  }
 
 	@Override
 	public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows,
