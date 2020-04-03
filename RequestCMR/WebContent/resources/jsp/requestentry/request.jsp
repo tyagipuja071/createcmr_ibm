@@ -97,10 +97,16 @@
   });
   
   function forceAddressValidationFromQS(){
-    if (!_allAddressData || _allAddressData.length == 0){
+    if (FilteringDropdown.pending() || !_allAddressData || _allAddressData.length == 0){
       window.setTimeout('forceAddressValidationFromQS()', 500);
     } else {
-      var soldToSeq = _allAddressData[0].addrSeq[0];
+      var soldToSeq = '1';
+      for (var i = 0; i < _allAddressData.length; i++){
+        if (_allAddressData[i].addrType == 'ZS01'){
+          soldToSeq = _allAddressData[i].addrSeq[0];
+          break;
+        }
+      }
       cmr.hideProgress();
       doUpdateAddr(FormManager.getActualValue('reqId'),'ZS01', soldToSeq, cmr.MANDT);
     }

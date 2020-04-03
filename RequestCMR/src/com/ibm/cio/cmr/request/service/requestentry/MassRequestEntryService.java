@@ -5254,6 +5254,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getCity1()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setCity1(tempVal);
+        } else {
+          muaModel.setCity1("");
         }
 
         break;
@@ -5261,6 +5263,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getPostCd()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setPostCd(tempVal);
+        } else {
+          muaModel.setPostCd("");
         }
 
         break;

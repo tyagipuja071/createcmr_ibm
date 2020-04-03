@@ -171,7 +171,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 				for (FindCMRRecordModel record : source.getItems()) {
 
 					if ((!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()))
-							&& (!"AT".equals(record.getCmrCountryLanded()))) {
+              && (!"618".equals(reqEntry.getCmrIssuingCntry()))) {
 						LOG.trace("Non Sold-to will be ignored. Will get from SOF");
 						this.rdcShippingRecords.add(record);
 						continue;
