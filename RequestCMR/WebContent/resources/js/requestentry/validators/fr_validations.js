@@ -2005,7 +2005,7 @@ function setAbbrevNameFrDSW() {
     var requestingLob = FormManager.getActualValue('requestingLob');
       if (requestingLob == 'DSW') {        
         var abbrNm = FormManager.getActualValue('abbrevNm');
-        if(abbrevNm.includes("D3"))
+        if(abbrNm.includes("D3"))
         FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
       }     
   });
