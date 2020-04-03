@@ -123,7 +123,7 @@ public abstract class AutomationUtil {
    * This method should be overridden by implementing classes and
    * <strong>always</strong> return true if there are country specific logic
    * 
-   * @param calculateCoverageElement
+   * @param covElement
    * @param entityManager
    * @param results
    * @param details
@@ -136,7 +136,7 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement calculateCoverageElement, EntityManager entityManager,
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     return false;
