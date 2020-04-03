@@ -67,17 +67,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
-    // COMMENTED BECAUSE OF CONFLICTING REQUIREMENT
-    // if (scorecard != null &&
-    // StringUtils.isNotBlank(scorecard.getFindDnbResult())
-    // && ("Accepted".equals(scorecard.getFindDnbResult()) ||
-    // "Rejected".equals(scorecard.getFindDnbResult()))) {
-    // String message = "Accepted".equals(scorecard.getFindDnbResult()) ? "D&B
-    // record has been imported into the request already."
-    // : "D&B record has been rejected already.";
-    // result.setDetails(message);
-    // result.setResults("D&B Imported");
-    // } else
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
@@ -87,47 +76,50 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
         if (!hasValidMatches) {
-          details.append("No match with confidence level 8 and above.").append("\n\n");
-        }
-
-        if (dnbMatches.size() > 5) {
-          dnbMatches = dnbMatches.subList(0, 4);
-        }
-        boolean isOrgIdMatched = false;
-        boolean vatFound = false;
-        int itemNo = 0;
-        for (DnBMatchingResponse dnbRecord : dnbMatches) {
-          // Create DnB Fields Records Regardless
-          itemNo++;
-          processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
-          if (itemNo == 1) {
-            isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
-            vatFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
-          }
-          // Check if element is configured to import from DNB
-          if (scenarioExceptions.isImportDnbInfo()) {
-            // Create Address Records only if Levenshtein Distance
-            List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
-                dnbRecord);
-            if (eligibleAddresses.size() > 0) {
-              processAddressFields(dnbRecord, output, itemNo, scenarioExceptions, handler, eligibleAddresses);
-            }
-          }
-          engineData.put("dnbMatching", dnbRecord);
-          LOG.debug(new ObjectMapper().writeValueAsString(dnbRecord));
-        }
-
-        if (!hasValidMatches) {
+          // if no valid matches - do not process records
           result.setOnError(shouldThrowError);
           result.setResults("No Matches");
           result.setDetails("No high quality matches with D&B records. Please import from D&B search.");
           engineData.addNegativeCheckStatus("DnBMatch", "No high quality matches with D&B records. Please import from D&B search.");
         } else {
-          result.setResults("Matches Found");
+          // actions to be performed only when matches with high confidence are
+          // found
+          boolean isOrgIdMatched = false;
+          boolean vatFound = false;
+          if (dnbMatches.size() > 5) {
+            dnbMatches = dnbMatches.subList(0, 4);
+          }
+          int itemNo = 0;
+
+          // process records and overrides
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            // Create DnB Fields Records Regardless
+            itemNo++;
+            processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+            if (itemNo == 1) {
+              isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+              vatFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+            }
+            // Check if element is configured to import from DNB
+            if (scenarioExceptions.isImportDnbInfo()) {
+              // Create Address Records only if Levenshtein Distance
+              List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
+                  dnbRecord);
+              if (eligibleAddresses.size() > 0) {
+                processAddressFields(dnbRecord, output, itemNo, scenarioExceptions, handler, eligibleAddresses);
+              }
+            }
+            engineData.put("dnbMatching", dnbRecord);
+            LOG.debug(new ObjectMapper().writeValueAsString(dnbRecord));
+          }
+
+          // log dnb results
           if (scenarioExceptions.isCheckVATForDnB() && !isOrgIdMatched && vatFound) {
+            result.setResults("VAT not matched");
             details.insert(0, itemNo + " High Quality matches found.\nVAT value did not match with the highest confidence D&B match.\n");
             engineData.addNegativeCheckStatus("DNB_VAT_MATCH_FAIL", "VAT value did not match with the highest confidence D&B matche.");
           } else {
+            result.setResults("Matches Found");
             details.insert(0, itemNo + " valid matches found.\n");
           }
           // save the highest matched record
@@ -145,8 +137,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
           }
           result.setDetails(details.toString().trim());
+          result.setProcessOutput(output);
         }
-        result.setProcessOutput(output);
       } else {
         result.setDetails("No D&B record was found using advanced matching.");
         engineData.addRejectionComment("No matches with D&B records. Please import from D&B search.");
