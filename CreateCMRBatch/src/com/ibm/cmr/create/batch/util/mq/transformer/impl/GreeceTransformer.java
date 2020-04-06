@@ -40,7 +40,7 @@ public class GreeceTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01", "ZI01" };
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01" };
 
   private static final Logger LOG = Logger.getLogger(GreeceTransformer.class);
 
@@ -267,13 +267,11 @@ public class GreeceTransformer extends EMEATransformer {
   public String getAddressKey(String addrType) {
     switch (addrType) {
     case "ZP01":
-      return "Local Language translation of Sold";
+      return "Mail";
     case "ZS01":
-      return "Sold To";
+      return "Install";
     case "ZD01":
-      return "Ship To";
-    case "ZI01":
-      return "Install At";
+      return "Ship";
     default:
       return "";
     }
@@ -283,13 +281,11 @@ public class GreeceTransformer extends EMEATransformer {
   public String getTargetAddressType(String addrType) {
     switch (addrType) {
     case "ZP01":
-      return "Local Language translation of Sold";
+      return "Mailing";
     case "ZS01":
-      return "Sold To";
+      return "Installing";
     case "ZD01":
-      return "Ship To";
-    case "ZI01":
-      return "Install At";
+      return "Shipping";
     default:
       return "";
     }
@@ -318,16 +314,12 @@ public class GreeceTransformer extends EMEATransformer {
   @Override
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
-    case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING + MQMsgConstants.SOF_ADDRESS_USE_SHIPPING + MQMsgConstants.SOF_ADDRESS_USE_EPL;
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
