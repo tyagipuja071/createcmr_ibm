@@ -351,7 +351,7 @@ public class GreeceTransformer extends EMEATransformer {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("CEdivision"))) {
         legacyCust.setCeDivision(dummyHandler.messageHash.get("CEdivision"));
       }
-      legacyCust.setAccAdminBo("Y60382");
+      legacyCust.setAccAdminBo("");
       // legacyCust.setCeDivision("2"); // extract the phone from billing
       // as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -418,6 +418,10 @@ public class GreeceTransformer extends EMEATransformer {
     } // other fields to be transformed is pending
     legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+    legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : "");
+    }
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
@@ -591,7 +595,7 @@ public class GreeceTransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
     LOG.debug("Set max and min range For GR...");
-    if (custSubGrp != null && "INTER".equals(custSubGrp)) {
+    if (custSubGrp != null && "INTER".equals(custSubGrp) || custSubGrp != null && "XINTR".equals(custSubGrp)) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
