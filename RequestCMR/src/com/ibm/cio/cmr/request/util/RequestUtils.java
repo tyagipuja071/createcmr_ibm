@@ -70,6 +70,8 @@ public class RequestUtils {
   private static String emailTemplate = null;
   private static String batchemailTemplate = null;
   private static final String SOURCE = "CreateCMR-BP";
+  public static final String STATUS_REJECTED = "Rejected";
+  public static final String STATUS_INPUT_REQUIRED = "Input Required";
 
   public static void refresh() {
     emailTemplate = null;
@@ -175,7 +177,8 @@ public class RequestUtils {
   }
 
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, HttpServletRequest request, Admin admin,
-      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd) throws CmrException, SQLException {
+      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd)
+      throws CmrException, SQLException {
     AppUser user = AppUser.getUser(request);
 
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
@@ -351,7 +354,7 @@ public class RequestUtils {
     if (rejectReason == null) {
       rejectReason = "";
     }
-    
+
     if (rejReasonCd == null) {
       rejReasonCd = "";
     }
@@ -449,8 +452,13 @@ public class RequestUtils {
     }
 
     if (subject.contains("{0}")) {
-      // 1048370 - add request id in the mail
-      subject = MessageFormat.format(subject, history.getReqId() + "", status);
+      if (status != null && status.equals(STATUS_REJECTED) && !StringUtils.isBlank(admin.getSourceSystId())
+          && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
+        subject = MessageFormat.format(subject, history.getReqId() + "", STATUS_INPUT_REQUIRED);
+      } else {
+        // 1048370 - add request id in the mail
+        subject = MessageFormat.format(subject, history.getReqId() + "", status);
+      }
     }
 
     String histContent = history.getCmt();
@@ -462,7 +470,6 @@ public class RequestUtils {
       String rejRes = "<tr><th style=\"text-align:left;width:200px\">Reject Reason:</th><td>{10}</td></tr>";
       if (!StringUtils.isBlank(admin.getSourceSystId()) && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
         rejRes = "<tr><th style=\"text-align:left;width:200px\">Input Required Reason:</th><td>{10}</td></tr>";
-        subject.replace("Rejected", "Input Required");
       }
       temp.insert(insertstart, rejRes);
       email = temp.toString();
@@ -481,7 +488,12 @@ public class RequestUtils {
     params.add(siteId); // {2}
     params.add(cmrno); // {3}
     params.add(type); // {4}
-    params.add(status); // {5}
+    if (status != null && status.equals(STATUS_REJECTED) && !StringUtils.isBlank(admin.getSourceSystId())
+        && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
+      params.add(STATUS_INPUT_REQUIRED);
+    } else {
+      params.add(status); // {5}
+    }
     params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
     params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
     params.add(histContent); // {8}

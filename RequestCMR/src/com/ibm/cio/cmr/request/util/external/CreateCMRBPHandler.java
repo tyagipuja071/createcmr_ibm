@@ -14,6 +14,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 
 /**
  * @author JeffZAMORA
@@ -31,7 +32,7 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
       type = "U";
     }
     String reqStatus = (String) params.get(5);
-    if ("Rejected".equalsIgnoreCase(reqStatus)) {
+    if (RequestUtils.STATUS_INPUT_REQUIRED.equalsIgnoreCase(reqStatus)) {
       reqStatus = "PRJ";
     }
 
