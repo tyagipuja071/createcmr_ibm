@@ -1034,6 +1034,9 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
     var copyToAddrH = false;
+    var abbName = FormManager.getActualValue("custNm1");
+    abbName = abbName.length > 22 ? abbName.substring(0,21): abbName;
+    FormManager.setValue('abbrevNm',abbName);
     if (copyTypes != null && copyTypes.length > 0) {
       copyTypes.forEach(function(input, i) {
         if (input.value == 'ZS01' && input.checked) {
