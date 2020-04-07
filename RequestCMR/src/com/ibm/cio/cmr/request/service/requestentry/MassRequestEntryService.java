@@ -1444,7 +1444,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         if ("PPN".equals(transrec.getNewReqStatus())) {
           String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
           if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
-            if (isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry())) {
+            if (isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
               this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
               transrec.setNewReqStatus("AUT"); // set to automated processing
             }
@@ -5579,12 +5579,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     return cd;
   }
 
-  public static boolean isRequestReactivationEnable(EntityManager entityManager, String country) {
+  public static boolean isRequestReactivationEnable(EntityManager entityManager, String country, String req) {
     int count = 0;
+    String req_typ = (!StringUtils.isBlank(req)) ? "%" + req + "%" : "";
     String sql = ExternalizedQuery.getSql("AUTOMATION.CHECK_REACTIVATION");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     /* query.setForReadOnly(true); */
     query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    query.setParameter("REQ_TYP", req_typ);
     count = query.getSingleResult(Integer.class);
     if (count >= 1)
       return true;
