@@ -294,6 +294,9 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
 
   @Column(name = "MATCH_OVERRIDE_INDC")
   private String matchOverrideIndc;
+  
+  @Column(name = "REVIEW_REQUIRED_INDC")
+  private String reviewReqIndc;
 
   @Transient
   private String saveIndAftrTempLoad;
@@ -721,5 +724,15 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   public void setMatchOverrideIndc(String matchOverrideIndc) {
     this.matchOverrideIndc = matchOverrideIndc;
   }
+
+  public String getReviewReqIndc() {
+    return reviewReqIndc;
+  }
+
+  public void setReviewReqIndc(String reviewReqIndc) {
+    this.reviewReqIndc = reviewReqIndc;
+  }
+  
+  
 
 }

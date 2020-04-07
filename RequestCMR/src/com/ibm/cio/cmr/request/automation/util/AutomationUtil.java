@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -26,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  *
@@ -121,6 +123,7 @@ public abstract class AutomationUtil {
    * This method should be overridden by implementing classes and
    * <strong>always</strong> return true if there are country specific logic
    * 
+   * @param covElement
    * @param entityManager
    * @param results
    * @param details
@@ -129,12 +132,13 @@ public abstract class AutomationUtil {
    * @param engineData
    * @param covFrom
    * @param container
+   * @param isCoverageCalculated
    * @return
    * @throws Exception
    */
-  public boolean performCountrySpecificCoverageCalculations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
-      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
-      CoverageContainer container) throws Exception {
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     return false;
   }
 
@@ -304,6 +308,17 @@ public abstract class AutomationUtil {
       engineData.addPositiveCheckStatus("allowDuplicates");
     }
     LOG.debug("Allowing Duplicate CMR for reqid = " + admin.getId().getReqId());
+  }
+
+  /**
+   * Hooks to be able to manipulate the data to be sent to GBG finder services
+   * 
+   * @param entityManager
+   * @param request
+   * @param requestData
+   */
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+    // NOOP
   }
 
 }

@@ -1437,14 +1437,17 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("CURR_REQ_STATUS", model.getReqStatus());
     query.setParameter("CURR_LOCKED_IND", model.getLockInd() != null ? model.getLockInd() : CmrConstants.YES_NO.N.toString());
     query.setParameter("ACTION", model.getAction());
+    query.setForReadOnly(true);
     List<StatusTrans> trans = query.getResults(2, StatusTrans.class);
     if (trans != null && trans.size() > 0) {
       for (StatusTrans transrec : trans) {
         if ("PPN".equals(transrec.getNewReqStatus())) {
           String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
           if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
-            this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
-            transrec.setNewReqStatus("AUT"); // set to automated processing
+            if (isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
+              this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
+              transrec.setNewReqStatus("AUT"); // set to automated processing
+            }
           }
         }
         if ("*".equals(transrec.getId().getReqType())) {
@@ -5574,5 +5577,21 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     return cd;
+  }
+
+  public static boolean isRequestReactivationEnable(EntityManager entityManager, String country, String req) {
+    int count = 0;
+    String req_typ = (!StringUtils.isBlank(req)) ? "%" + req + "%" : "";
+    String sql = ExternalizedQuery.getSql("AUTOMATION.CHECK_REACTIVATION");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    /* query.setForReadOnly(true); */
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    query.setParameter("REQ_TYP", req_typ);
+    count = query.getSingleResult(Integer.class);
+    if (count >= 1)
+      return true;
+    else
+      return false;
+
   }
 }

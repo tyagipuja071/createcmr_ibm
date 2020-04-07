@@ -268,6 +268,8 @@ function setSBOOnScenario() {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
+        FormManager.readOnly('installBranchOff');
+
       } else if (role == 'Processor') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.enable('salesBusOffCd');
@@ -1032,6 +1034,9 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
     var copyToAddrH = false;
+    var abbName = FormManager.getActualValue("custNm1");
+    abbName = abbName.length > 22 ? abbName.substring(0,21): abbName;
+    FormManager.setValue('abbrevNm',abbName);
     if (copyTypes != null && copyTypes.length > 0) {
       copyTypes.forEach(function(input, i) {
         if (input.value == 'ZS01' && input.checked) {
@@ -2003,8 +2008,12 @@ function setAbbrevNameFrDSW() {
     var requestingLob = FormManager.getActualValue('requestingLob');
       if (requestingLob == 'DSW') {        
         var abbrNm = FormManager.getActualValue('abbrevNm');
-        if(abbrevNm.includes("D3"))
-        FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
+        if(abbrNm.includes("D3")){
+          FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
+        }
+        else {
+          FormManager.setValue('abbrevNm',abbrNm.concat(" D3 DSW") ); 
+        }
       }     
   });
   if (_abbrevNmHandler && _abbrevNmHandler[0]) {

@@ -23,8 +23,17 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
 
   @Override
   public void addEmailParams(EntityManager entityManager, List<Object> params, Admin admin) {
-    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL");
-    params.add(bpURL); // {12}
+    String type = (String) params.get(4);
+    String reqId = (String) params.get(0);
+    if ("Create".equalsIgnoreCase(type)) {
+      type = "C";
+    } else if ("Update".equalsIgnoreCase(type)) {
+      type = "U";
+    }
+    String reqStatus = (String) params.get(5);
+    if ("Rejected".equalsIgnoreCase(reqStatus)) {
+      reqStatus = "PRJ";
+    }
 
     String cmrIssuingCountry = null;
     cmrIssuingCountry = getCmrIssuingCntry(entityManager, admin);
@@ -33,6 +42,9 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
+    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL") + "/request?cmrIssuingCntry=" + cmrIssuingCountry + "&reqStatus=" + reqStatus
+        + "&reqType=" + type + "&reqId=" + reqId;
+    params.add(bpURL); // {12}
 
     if (cmrIssuingCountry != null) {
       if ("897".equalsIgnoreCase(cmrIssuingCountry)) {

@@ -65,7 +65,7 @@ public class DnBUtil {
     registerDnBVATCode("IT", 481); // VAT Number
     registerDnBVATCode("LU", 480); // VAT Number
     registerDnBVATCode("NL", 6273); // VAT Number
-    registerDnBVATCode("IN", 0); // Unknown
+    registerDnBVATCode("IN", 32167); // GST (Goods & Services Tax) ID
     registerDnBVATCode("RU", 1437); // Tax Registration Number (Russian
                                     // Federation)
     registerDnBVATCode("CH", 28865); // Swiss Uniform Identification Number
@@ -523,13 +523,13 @@ public class DnBUtil {
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
       if (StringUtils.isNotBlank(data.getVat())) {
-        request.setOrgId(data.getVat());
-      } else if (StringUtils.isNotBlank(addr.getVat())) {
         if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-          request.setOrgId(addr.getVat().split("\\s")[0]);
-        } else {
-          request.setOrgId(addr.getVat());
+          request.setOrgId(data.getVat().split("\\s")[0]);
+        } else{
+        request.setOrgId(data.getVat());
         }
+      } else if (StringUtils.isNotBlank(addr.getVat())) {
+          request.setOrgId(addr.getVat());
       }
 
       request.setCity(addr.getCity1());

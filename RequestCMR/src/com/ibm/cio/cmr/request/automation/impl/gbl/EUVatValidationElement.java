@@ -22,7 +22,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
-import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -56,7 +56,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     Addr zs01 = requestData.getAddress("ZS01");
     StringBuilder details = new StringBuilder();
     try {
-      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry());
+      String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry(), data.getCountryUse());
       if (!EU_COUNTRIES.contains(landCntryForVies)) {
         validation.setSuccess(true);
         validation.setMessage("Skipped.");
@@ -108,14 +108,24 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     return output;
   }
 
-  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry) {
-    switch (cmrIssuingCntry) {
-    case SystemLocation.FRANCE:
-      landCntry = "FR";
-      break;
-    default:
-      break;
+  private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String subRegion) {
+
+    String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+
+    if (!landCntry.equals(defaultLandedCountry)) {
+      // handle cross-border and subregions
+
+      if (!EU_COUNTRIES.contains(landCntry)) {
+        // the landed country is not an EU country
+
+        if (!StringUtils.isBlank(subRegion) && subRegion.length() > 3 && subRegion.startsWith(cmrIssuingCntry)) {
+          // this is a subregion under the main country, use main country's
+          // landed country
+          return defaultLandedCountry;
+        }
+      }
     }
+
     return landCntry;
   }
 
