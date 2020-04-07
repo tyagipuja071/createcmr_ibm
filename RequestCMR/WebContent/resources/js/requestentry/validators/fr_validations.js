@@ -2008,8 +2008,12 @@ function setAbbrevNameFrDSW() {
     var requestingLob = FormManager.getActualValue('requestingLob');
       if (requestingLob == 'DSW') {        
         var abbrNm = FormManager.getActualValue('abbrevNm');
-        if(abbrNm.includes("D3"))
-        FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
+        if(abbrNm.includes("D3")){
+          FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
+        }
+        else {
+          FormManager.setValue('abbrevNm',abbrNm.concat(" D3 DSW") ); 
+        }
       }     
   });
   if (_abbrevNmHandler && _abbrevNmHandler[0]) {
