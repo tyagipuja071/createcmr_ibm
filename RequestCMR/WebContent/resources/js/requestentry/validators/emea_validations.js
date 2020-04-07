@@ -2917,7 +2917,9 @@ function addTRAddressTypeValidator() {
 
           // if (zs01Cnt == 0 || zd01Cnt == 0) {
           if (zs01Cnt == 0 || zd01Cnt == 0) {
-            return new ValidationResult(null, false, 'Installing and shipping addresses are both required.');
+            // return new ValidationResult(null, false, 'Installing and shipping
+            // addresses are both required.');
+            return new ValidationResult(null, false, 'Installing/Shipping/EPL and Mailing/Billing addresses are both required.');
           } else if (zs01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Installing/Shipping/EPL is allowed.');
           } else if (zp01Cnt > 1) {
