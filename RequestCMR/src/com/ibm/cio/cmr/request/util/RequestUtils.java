@@ -69,6 +69,7 @@ public class RequestUtils {
   private static final Logger LOG = Logger.getLogger(RequestUtils.class);
   private static String emailTemplate = null;
   private static String batchemailTemplate = null;
+  private static final String SOURCE = "CreateCMR-BP";
 
   public static void refresh() {
     emailTemplate = null;
@@ -459,6 +460,10 @@ public class RequestUtils {
       int tempstart = temp.indexOf("{5}");
       int insertstart = tempstart + 17;
       String rejRes = "<tr><th style=\"text-align:left;width:200px\">Reject Reason:</th><td>{10}</td></tr>";
+      if (!StringUtils.isBlank(admin.getSourceSystId()) && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
+        rejRes = "<tr><th style=\"text-align:left;width:200px\">Input Required Reason:</th><td>{10}</td></tr>";
+        subject.replace("Rejected", "Input Required");
+      }
       temp.insert(insertstart, rejRes);
       email = temp.toString();
     } else {
