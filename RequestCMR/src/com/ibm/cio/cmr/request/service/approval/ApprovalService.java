@@ -426,7 +426,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
    * @throws CmrException
    * @throws SQLException
    */
-  private void moveBackToRequester(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
+  public void moveBackToRequester(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
 
     if (PENDING_STATUSES_TO_RETURN.contains(admin.getReqStatus())) {
       // move only if it is one of the auto statuses

@@ -176,6 +176,7 @@ public class AutomationEngine {
         } else {
           try {
             ChangeLogListener.setManager(entityManager);
+            requestData.getAdmin().setReviewReqIndc("N");
             result = element.executeElement(entityManager, requestData, engineData.get());
             ChangeLogListener.clearManager();
           } catch (Exception e) {
@@ -188,6 +189,7 @@ public class AutomationEngine {
           }
         }
 
+        
         LOG.trace("Result for " + element.getProcessDesc() + ": " + result.getResults());
         LOG.trace(" - " + result.getDetails());
         // record the result first
@@ -195,6 +197,9 @@ public class AutomationEngine {
 
         // check processing
         if (result.isOnError()) {
+          requestData.getAdmin().setReviewReqIndc("Y");
+          LOG.debug("Setting the review Required Indc as Y.");
+          createComment(entityManager, "Request needs a review.", reqId, appUser);
           if (ActionOnError.Ignore.equals(element.getActionOnError())) {
             LOG.debug("Element " + element.getProcessDesc() + " encountered an error but was ignored.");
           } else {
