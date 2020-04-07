@@ -22,7 +22,6 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
-import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
@@ -60,22 +59,22 @@ public class TurkeyTransformer extends EMEATransformer {
 	public static final String CMR_REQUEST_STATUS_CPR = "CPR";
 	public static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
-	private static final String ADDRESS_USE_EXISTS = "Y";
-	private static final String ADDRESS_USE_NOT_EXISTS = "N";
-	private static final String ADDRESS_USE_MAILING = "1";
-	private static final String ADDRESS_USE_BILLING = "2";
-	private static final String ADDRESS_USE_INSTALLING = "3";
-	private static final String ADDRESS_USE_SHIPPING = "4";
-	private static final String ADDRESS_USE_EPL_MAILING = "5";
-	private static final String ADDRESS_USE_LIT_MAILING = "6";
-	private static final String ADDRESS_USE_COUNTRY_A = "A";
-	private static final String ADDRESS_USE_COUNTRY_B = "B";
-	private static final String ADDRESS_USE_COUNTRY_C = "C";
-	private static final String ADDRESS_USE_COUNTRY_D = "D";
-	private static final String ADDRESS_USE_COUNTRY_E = "E";
-	private static final String ADDRESS_USE_COUNTRY_F = "F";
-	private static final String ADDRESS_USE_COUNTRY_G = "G";
-	private static final String ADDRESS_USE_COUNTRY_H = "H";
+  // private static final String ADDRESS_USE_EXISTS = "Y";
+  // private static final String ADDRESS_USE_NOT_EXISTS = "N";
+  // private static final String ADDRESS_USE_MAILING = "1";
+  // private static final String ADDRESS_USE_BILLING = "2";
+  // private static final String ADDRESS_USE_INSTALLING = "3";
+  // private static final String ADDRESS_USE_SHIPPING = "4";
+  // private static final String ADDRESS_USE_EPL_MAILING = "5";
+  // private static final String ADDRESS_USE_LIT_MAILING = "6";
+  // private static final String ADDRESS_USE_COUNTRY_A = "A";
+  // private static final String ADDRESS_USE_COUNTRY_B = "B";
+  // private static final String ADDRESS_USE_COUNTRY_C = "C";
+  // private static final String ADDRESS_USE_COUNTRY_D = "D";
+  // private static final String ADDRESS_USE_COUNTRY_E = "E";
+  // private static final String ADDRESS_USE_COUNTRY_F = "F";
+  // private static final String ADDRESS_USE_COUNTRY_G = "G";
+  // private static final String ADDRESS_USE_COUNTRY_H = "H";
 
 	public static void main(String[] args) {
 		String s = "TÜRKİYE";
@@ -484,50 +483,50 @@ public class TurkeyTransformer extends EMEATransformer {
 	@Override
 	public String getAddressKey(String addrType) {
 		switch (addrType) {
-		case "ZP01":
-			return "Address in local language";
-		case "ZS01":
-			return "Sold-To";
-		case "ZD01":
-			return "Ship-To";
-		case "ZI01":
-			return "Install-At";
-		default:
-			return "";
+    // case "ZP01":
+    // return "Address in local language";
+    // case "ZS01":
+    // return "Sold-To";
+    // case "ZD01":
+    // return "Ship-To";
+    // case "ZI01":
+    // return "Install-At";
+    // default:
+    // return "";
 
-		// case "ZP01":
-		// return "Mail";
-		// case "ZS01":
-		// return "Install";
-		// case "ZD01":
-		// return "Ship";
-		// default:
-		// return "";
+    case "ZP01":
+      return "Mail";
+    case "ZS01":
+      return "Install";
+    case "ZD01":
+      return "Ship";
+    default:
+      return "";
 		}
 	}
 
 	@Override
 	public String getTargetAddressType(String addrType) {
 		switch (addrType) {
-		case "ZP01":
-			return "Address in local language";
-		case "ZS01":
-			return "Sold-To";
-		case "ZD01":
-			return "Ship-To";
-		case "ZI01":
-			return "Install-At";
-		default:
-			return "";
+    // case "ZP01":
+    // return "Address in local language";
+    // case "ZS01":
+    // return "Sold-To";
+    // case "ZD01":
+    // return "Ship-To";
+    // case "ZI01":
+    // return "Install-At";
+    // default:
+    // return "";
 
-		// case "ZP01":
-		// return "Mailing";
-		// case "ZS01":
-		// return "Installing";
-		// case "ZD01":
-		// return "Shipping";
-		// default:
-		// return "";
+    case "ZP01":
+      return "Mailing";
+    case "ZS01":
+      return "Installing";
+    case "ZD01":
+      return "Shipping";
+    default:
+      return "";
 		}
 	}
 
@@ -553,29 +552,30 @@ public class TurkeyTransformer extends EMEATransformer {
 
 	@Override
 	public String getAddressUse(Addr addr) {
-		switch (addr.getId().getAddrType()) {
-		case MQMsgConstants.ADDR_ZP01:
-			return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-		case MQMsgConstants.ADDR_ZS01:
-			return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
-		case MQMsgConstants.ADDR_ZD01:
-			return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-		case MQMsgConstants.ADDR_ZI01:
-			return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-		default:
-			return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    // switch (addr.getId().getAddrType()) {
+    // case MQMsgConstants.ADDR_ZP01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
+    // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    // case MQMsgConstants.ADDR_ZS01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    // case MQMsgConstants.ADDR_ZD01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    // case MQMsgConstants.ADDR_ZI01:
+    // return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    // default:
+    // return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
 
-		// switch (addr.getId().getAddrType()) {
-		// case MQMsgConstants.ADDR_ZP01:
-		// return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-		// case MQMsgConstants.ADDR_ZS01:
-		// return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
-		// case MQMsgConstants.ADDR_ZD01:
-		// return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-		// case MQMsgConstants.ADDR_ZI01:
-		// return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-		// default:
-		// return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    switch (addr.getId().getAddrType()) {
+    case MQMsgConstants.ADDR_ZP01:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+    case MQMsgConstants.ADDR_ZS01:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    case MQMsgConstants.ADDR_ZD01:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    default:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
 		}
 	}
 
@@ -1387,201 +1387,226 @@ public class TurkeyTransformer extends EMEATransformer {
 
 	}
 
-	private List<Addr> getAddrLegacy(EntityManager entityManager, String reqId) {
-		LOG.debug("Turkey -- Searching for ADDR records for Request " + reqId);
-		String sql = ExternalizedQuery.getSql("LEGACYD.GET.ADDR");
-		PreparedQuery query = new PreparedQuery(entityManager, sql);
-		query.setParameter("REQ_ID", reqId);
-		query.setForReadOnly(true);
-		return query.getResults(Addr.class);
-	}
+  // private List<Addr> getAddrLegacy(EntityManager entityManager, String reqId)
+  // {
+  // LOG.debug("Turkey -- Searching for ADDR records for Request " + reqId);
+  // String sql = ExternalizedQuery.getSql("LEGACYD.GET.ADDR");
+  // PreparedQuery query = new PreparedQuery(entityManager, sql);
+  // query.setParameter("REQ_ID", reqId);
+  // query.setForReadOnly(true);
+  // return query.getResults(Addr.class);
+  // }
+  //
+  // private void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr
+  // legacyAddr) {
+  // setAddrUseFieldsToN(legacyAddr);
+  // for (String use : addrUse.split("")) {
+  // switch (use) {
+  // case ADDRESS_USE_MAILING:
+  // legacyAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_BILLING:
+  // legacyAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_INSTALLING:
+  // legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_SHIPPING:
+  // legacyAddr.setIsAddrUseShipping(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_EPL_MAILING:
+  // legacyAddr.setIsAddrUseEPL(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_LIT_MAILING:
+  // legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_A:
+  // legacyAddr.setIsAddressUseA(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_B:
+  // legacyAddr.setIsAddressUseB(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_C:
+  // legacyAddr.setIsAddressUseC(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_D:
+  // legacyAddr.setIsAddressUseD(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_E:
+  // legacyAddr.setIsAddressUseE(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_F:
+  // legacyAddr.setIsAddressUseF(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_G:
+  // legacyAddr.setIsAddressUseG(ADDRESS_USE_EXISTS);
+  // break;
+  // case ADDRESS_USE_COUNTRY_H:
+  // legacyAddr.setIsAddressUseH(ADDRESS_USE_EXISTS);
+  // break;
+  // }
+  // }
+  // }
+  //
+  // private void setAddrUseFieldsToN(CmrtAddr legacyAddr) {
+  // legacyAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddrUseShipping(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddrUseEPL(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseA(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseB(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseC(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseD(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseE(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseF(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseG(ADDRESS_USE_NOT_EXISTS);
+  // legacyAddr.setIsAddressUseH(ADDRESS_USE_NOT_EXISTS);
+  // }
+  //
+  // @Override
+  // public void transformOtherData(EntityManager entityManager,
+  // LegacyDirectObjectContainer legacyObjects,
+  // CMRRequestContainer cmrObjects) {
+  // String reqType = cmrObjects.getAdmin().getReqType();
+  // long requestId = cmrObjects.getAdmin().getId().getReqId();
+  //
+  // Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
+  // if ("M".equals(reqType)) {
+  // List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+  // addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList,
+  // cmrObjects.getMassUpdateAddresses());
+  // } else {
+  // addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager,
+  // String.valueOf(requestId)));
+  // }
+  // LOG.debug("LEGACY -- Turkey OVERRIDE transformOtherData");
+  // LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
+  // for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
+  // modifyAddrUseFields(legacyAddr.getId().getAddrNo(),
+  // addrSeqToAddrUseMap.get(legacyAddr.getId().getAddrNo()),
+  // legacyAddr);
+  // }
+  // }
+  //
+  // private Map<String, String> mapSeqNoToAddrUseLegacy(List<CmrtAddr>
+  // legacyAddrList, List<MassUpdtAddr> muAddrlist) {
+  // Map<String, String> addrSeqToAddrUseMap = new HashMap<>();
+  // for (CmrtAddr legacyAddr : legacyAddrList) {
+  // for (MassUpdtAddr muAddr : muAddrlist) {
+  // if (muAddr.getAddrSeqNo().equals(legacyAddr.getId().getAddrNo())) {
+  // addrSeqToAddrUseMap.put(legacyAddr.getId().getAddrNo(),
+  // getAddressUseByType(muAddr.getId().getAddrType()));
+  // break;
+  // }
+  // }
+  // }
+  // return addrSeqToAddrUseMap;
+  // }
+  //
+  // private Map<String, String> mapSeqNoToAddrUse(List<Addr> addrList) {
+  // Map<String, String> addrSeqToAddrUseMap = new HashMap<>();
+  // for (Addr addr : addrList) {
+  // addrSeqToAddrUseMap.put(addr.getId().getAddrSeq(), getAddressUse(addr));
+  // }
+  // return addrSeqToAddrUseMap;
+  // }
 
-	private void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
-		setAddrUseFieldsToN(legacyAddr);
-		for (String use : addrUse.split("")) {
-			switch (use) {
-			case ADDRESS_USE_MAILING:
-				legacyAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_BILLING:
-				legacyAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_INSTALLING:
-				legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_SHIPPING:
-				legacyAddr.setIsAddrUseShipping(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_EPL_MAILING:
-				legacyAddr.setIsAddrUseEPL(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_LIT_MAILING:
-				legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_A:
-				legacyAddr.setIsAddressUseA(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_B:
-				legacyAddr.setIsAddressUseB(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_C:
-				legacyAddr.setIsAddressUseC(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_D:
-				legacyAddr.setIsAddressUseD(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_E:
-				legacyAddr.setIsAddressUseE(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_F:
-				legacyAddr.setIsAddressUseF(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_G:
-				legacyAddr.setIsAddressUseG(ADDRESS_USE_EXISTS);
-				break;
-			case ADDRESS_USE_COUNTRY_H:
-				legacyAddr.setIsAddressUseH(ADDRESS_USE_EXISTS);
-				break;
-			}
-		}
-	}
-
-	private void setAddrUseFieldsToN(CmrtAddr legacyAddr) {
-		legacyAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddrUseInstalling(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddrUseShipping(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddrUseEPL(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddrUseLitMailing(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseA(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseB(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseC(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseD(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseE(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseF(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseG(ADDRESS_USE_NOT_EXISTS);
-		legacyAddr.setIsAddressUseH(ADDRESS_USE_NOT_EXISTS);
-	}
-
-	@Override
-	public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects,
-			CMRRequestContainer cmrObjects) {
-		String reqType = cmrObjects.getAdmin().getReqType();
-		long requestId = cmrObjects.getAdmin().getId().getReqId();
-
-		Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
-		if ("M".equals(reqType)) {
-			List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-			addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList, cmrObjects.getMassUpdateAddresses());
-		} else {
-			addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
-		}
-		LOG.debug("LEGACY -- Turkey OVERRIDE transformOtherData");
-		LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
-		for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
-			modifyAddrUseFields(legacyAddr.getId().getAddrNo(), addrSeqToAddrUseMap.get(legacyAddr.getId().getAddrNo()),
-					legacyAddr);
-		}
-	}
-
-	private Map<String, String> mapSeqNoToAddrUseLegacy(List<CmrtAddr> legacyAddrList, List<MassUpdtAddr> muAddrlist) {
-		Map<String, String> addrSeqToAddrUseMap = new HashMap<>();
-		for (CmrtAddr legacyAddr : legacyAddrList) {
-			for (MassUpdtAddr muAddr : muAddrlist) {
-				if (muAddr.getAddrSeqNo().equals(legacyAddr.getId().getAddrNo())) {
-					addrSeqToAddrUseMap.put(legacyAddr.getId().getAddrNo(),
-							getAddressUseByType(muAddr.getId().getAddrType()));
-					break;
-				}
-			}
-		}
-		return addrSeqToAddrUseMap;
-	}
-
-	private Map<String, String> mapSeqNoToAddrUse(List<Addr> addrList) {
-		Map<String, String> addrSeqToAddrUseMap = new HashMap<>();
-		for (Addr addr : addrList) {
-			addrSeqToAddrUseMap.put(addr.getId().getAddrSeq(), getAddressUse(addr));
-		}
-		return addrSeqToAddrUseMap;
-	}
-
-	@Override
-	public boolean hasCmrtCustExt() {
-		return true;
-	}
-
-	@Override
-	public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler,
-			CmrtCustExt legacyCustExt, CMRRequestContainer cmrObjects) {
-		Data data = cmrObjects.getData();
-		boolean crossBorder = false;
-		String landedCountry = "";
-		for (Addr addr : cmrObjects.getAddresses()) {
-			// additional Address
-			if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
-				if (!StringUtils.isBlank(addr.getBldg())) {
-					// NORMABB -Abbrev Name
-					legacyCustExt.setItBillingName(
-							22 < addr.getBldg().length() ? addr.getBldg().substring(0, 22) : addr.getBldg());
-				}
-				if (!StringUtils.isBlank(addr.getCustFax())) {
-					// CITABB -City Abbrev
-					legacyCustExt.setItBillingCity(
-							12 < addr.getCustFax().length() ? addr.getCustFax().substring(0, 12) : addr.getCustFax());
-				}
-				if (!StringUtils.isBlank(addr.getDivn())) {
-					// INDABB - Street Abbrev
-					legacyCustExt.setItBillingStreet(
-							18 < addr.getDivn().length() ? addr.getDivn().substring(0, 18) : addr.getDivn());
-				}
-
-        legacyCustExt.setItBillingCustomerNo(!StringUtils.isBlank(addr.getParCmrNo()) ? addr.getParCmrNo() : "");
-
-				crossBorder = isCrossBorder(addr);
-				if (crossBorder)
-					landedCountry = addr.getLandCntry();
-			}
-		}
-
-		// IBM Tab
-		legacyCustExt.setItCompanyCustomerNo(!StringUtils.isEmpty(data.getCompany()) ? data.getCompany() : ""); // CODCP
-		legacyCustExt.setAffiliate(!StringUtils.isBlank(data.getAffiliate()) ? data.getAffiliate() : "");
-		legacyCustExt.setItCodeSSV(!StringUtils.isBlank(data.getCollectionCd()) ? data.getCollectionCd() : "");
-
-		// Customer Tab
-		legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
-		legacyCustExt.setItIVA(!StringUtils.isBlank(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
-		legacyCustExt.setItIdentClient(!StringUtils.isBlank(data.getIdentClient()) ? data.getIdentClient() : "");
-
-		// 4 new fields
-		legacyCustExt.setTipoCliente(!StringUtils.isBlank(data.getIcmsInd()) ? data.getIcmsInd() : "");
-		legacyCustExt.setCoddes(!StringUtils.isBlank(data.getHwSvcsRepTeamNo()) ? data.getHwSvcsRepTeamNo() : "");
-		legacyCustExt.setPec(!StringUtils.isBlank(data.getEmail2()) ? data.getEmail2() : "");
-		legacyCustExt.setIndEmail(!StringUtils.isBlank(data.getEmail3()) ? data.getEmail3() : "");
-
-		if (crossBorder) {
-			legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? landedCountry + data.getTaxCd1() : "");
-		}
-	}
-
-	@Override
-	public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt,
-			CMRRequestContainer cmrObjects, MassUpdtData muData, String cmr) throws Exception {
-		List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-		MassUpdtAddr zp01Addr = new MassUpdtAddr();
-		for (MassUpdtAddr muAddr : muAddrList) {
-			if ("ZP01".equals(muAddr.getId().getAddrType())) {
-				zp01Addr = muAddr;
-				break;
-			}
-		}
-		if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
-			if ("@".equals(zp01Addr.getFloor())) {
-				custExt.setiTaxCode("");
-			} else {
-				custExt.setiTaxCode(zp01Addr.getFloor());
-			}
-		}
-	}
+  // @Override
+  // public boolean hasCmrtCustExt() {
+  // return true;
+  // }
+  //
+  // @Override
+  // public void transformLegacyCustomerExtData(EntityManager entityManager,
+  // MQMessageHandler dummyHandler,
+  // CmrtCustExt legacyCustExt, CMRRequestContainer cmrObjects) {
+  // Data data = cmrObjects.getData();
+  // boolean crossBorder = false;
+  // String landedCountry = "";
+  // for (Addr addr : cmrObjects.getAddresses()) {
+  // // additional Address
+  // if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
+  // if (!StringUtils.isBlank(addr.getBldg())) {
+  // // NORMABB -Abbrev Name
+  // legacyCustExt.setItBillingName(
+  // 22 < addr.getBldg().length() ? addr.getBldg().substring(0, 22) :
+  // addr.getBldg());
+  // }
+  // if (!StringUtils.isBlank(addr.getCustFax())) {
+  // // CITABB -City Abbrev
+  // legacyCustExt.setItBillingCity(
+  // 12 < addr.getCustFax().length() ? addr.getCustFax().substring(0, 12) :
+  // addr.getCustFax());
+  // }
+  // if (!StringUtils.isBlank(addr.getDivn())) {
+  // // INDABB - Street Abbrev
+  // legacyCustExt.setItBillingStreet(
+  // 18 < addr.getDivn().length() ? addr.getDivn().substring(0, 18) :
+  // addr.getDivn());
+  // }
+  //
+  // legacyCustExt.setItBillingCustomerNo(!StringUtils.isBlank(addr.getParCmrNo())
+  // ? addr.getParCmrNo() : "");
+  //
+  // crossBorder = isCrossBorder(addr);
+  // if (crossBorder)
+  // landedCountry = addr.getLandCntry();
+  // }
+  // }
+  //
+  // // IBM Tab
+  // legacyCustExt.setItCompanyCustomerNo(!StringUtils.isEmpty(data.getCompany())
+  // ? data.getCompany() : ""); // CODCP
+  // legacyCustExt.setAffiliate(!StringUtils.isBlank(data.getAffiliate()) ?
+  // data.getAffiliate() : "");
+  // legacyCustExt.setItCodeSSV(!StringUtils.isBlank(data.getCollectionCd()) ?
+  // data.getCollectionCd() : "");
+  //
+  // // Customer Tab
+  // legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ?
+  // data.getTaxCd1() : "");
+  // legacyCustExt.setItIVA(!StringUtils.isBlank(data.getSpecialTaxCd()) ?
+  // data.getSpecialTaxCd() : "");
+  // legacyCustExt.setItIdentClient(!StringUtils.isBlank(data.getIdentClient())
+  // ? data.getIdentClient() : "");
+  //
+  // // 4 new fields
+  // legacyCustExt.setTipoCliente(!StringUtils.isBlank(data.getIcmsInd()) ?
+  // data.getIcmsInd() : "");
+  // legacyCustExt.setCoddes(!StringUtils.isBlank(data.getHwSvcsRepTeamNo()) ?
+  // data.getHwSvcsRepTeamNo() : "");
+  // legacyCustExt.setPec(!StringUtils.isBlank(data.getEmail2()) ?
+  // data.getEmail2() : "");
+  // legacyCustExt.setIndEmail(!StringUtils.isBlank(data.getEmail3()) ?
+  // data.getEmail3() : "");
+  //
+  // if (crossBorder) {
+  // legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ?
+  // landedCountry + data.getTaxCd1() : "");
+  // }
+  // }
+  //
+  // @Override
+  // public void transformLegacyCustomerExtDataMassUpdate(EntityManager
+  // entityManager, CmrtCustExt custExt,
+  // CMRRequestContainer cmrObjects, MassUpdtData muData, String cmr) throws
+  // Exception {
+  // List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
+  // MassUpdtAddr zp01Addr = new MassUpdtAddr();
+  // for (MassUpdtAddr muAddr : muAddrList) {
+  // if ("ZP01".equals(muAddr.getId().getAddrType())) {
+  // zp01Addr = muAddr;
+  // break;
+  // }
+  // }
+  // if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
+  // if ("@".equals(zp01Addr.getFloor())) {
+  // custExt.setiTaxCode("");
+  // } else {
+  // custExt.setiTaxCode(zp01Addr.getFloor());
+  // }
+  // }
+  // }
 }
