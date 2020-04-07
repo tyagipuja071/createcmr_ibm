@@ -560,6 +560,11 @@ public class FRHandler extends BaseSOFHandler {
         dummySIRETValue = "SCxxxxxx0" + custLocNumValue;
         data.setTaxCd1(dummySIRETValue);
       }
+    } else if ("IBMEM".equalsIgnoreCase(custSubGrp)) {
+      if (!StringUtils.isEmpty(custLocNumValue) || custLocNumValue != null) {
+        dummySIRETValue = "SCxxxxxx0" + custLocNumValue;
+        data.setTaxCd1(dummySIRETValue);
+      }
     }
 
     if ("CROSS".equalsIgnoreCase(custGrp)) {
@@ -845,7 +850,7 @@ public class FRHandler extends BaseSOFHandler {
           data.setTaxCd1(dummySIRETValue);
         }
       }
-    } else if ("PRICU".equalsIgnoreCase(custSubGrp)) {
+    } else if ("PRICU".equalsIgnoreCase(custSubGrp) || "IBMEM".equalsIgnoreCase(custSubGrp)) {
       if (!StringUtils.isEmpty(custLocNumValue) || custLocNumValue != null) {
         dummySIRETValue = "SCxxxxxx0" + custLocNumValue;
         data.setTaxCd1(dummySIRETValue);
