@@ -776,12 +776,11 @@ function addEnterpriseValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setFieldMandatoryForProcessor() {
+function setFieldMandatoryForProcessorPT() {
   var reqType = FormManager.getActualValue('reqType');
 
   if (typeof (_pagemodel) != 'undefined') {
     if (reqType == 'C' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
-      checkAndAddValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ]);
       checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
       checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
       checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
@@ -1611,7 +1610,16 @@ function lockRequireFieldsSpain() {
 }
 function setFieldMandatoryForProcessorSpain() {
   var reqType = FormManager.getActualValue('reqType');
+  
   if (typeof (_pagemodel) != 'undefined') {
+    if (reqType == 'C' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
+      checkAndAddValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ]);
+      checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
+      checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+      checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
+      checkAndAddValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ]);
+    }
+    
     if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_CUST_TAB');
@@ -1695,7 +1703,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
-  GEOHandler.addAfterConfig(setFieldMandatoryForProcessor, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterConfig(setFieldMandatoryForProcessorPT, [ SysLoc.PORTUGAL ]);
   // GEOHandler.addAfterConfig(setLocationNumber, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setCollectionCode, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setDistrictCode, [ SysLoc.PORTUGAL ]);
@@ -1726,7 +1734,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setFieldMandatoryForProcessorSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessorSpain, [ SysLoc.SPAIN ]);
 
-  GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessor, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessorPT, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
