@@ -125,19 +125,31 @@ public class AutomationService extends MultiThreadedBatchService {
     Admin admin = requestData.getAdmin();
     LOG.debug("Checking awaiting replies request " + admin.getId().getReqId() + "..");
 
-    // check if the last approval was at least 10 mins back
-    String sql = ExternalizedQuery.getSql("APPROVAL.GET_MAX_TS_APR");
+    // check if the last approval was at least 10 mins back -> removed for now
+    String sql = ExternalizedQuery.getSql("APPROVAL.GET_REQ_STATUS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
-    Date maxDt = query.getSingleResult(Date.class);
+    int count = query.getSingleResult(Integer.class);
+//    Date maxDt = query.getSingleResult(Date.class);
     Calendar cal = new GregorianCalendar();
     cal.setTime(current);
     cal.add(Calendar.MINUTE, -1 * 10);
-    if (maxDt.after(cal.getTime())) {
-      LOG.debug("Moving Request " + admin.getId().getReqId() + " to next step..");
-      ApprovalService approvalService = new ApprovalService();
-      approvalService.moveToNextStep(entityManager, admin);
+    ApprovalService approvalService = new ApprovalService();
+    //if (maxDt.after(cal.getTime())) {
+    if(count > 0){
+      // rejection
+      LOG.debug("Rejecting the Request " + admin.getId().getReqId() + " and moving back to requester..");
+      approvalService.moveBackToRequester(entityManager, admin);
     }
+    else{
+      LOG.debug("Moving Request " + admin.getId().getReqId() + " to next step..");
+      if("Y".equalsIgnoreCase(admin.getReviewReqIndc())){
+        LOG.debug("Setting the request status to " + admin.getId().getReqId() + " because review required indicator is set to Y.");
+        admin.setReqStatus("PPN");
+      }
+      approvalService.moveToNextStep(entityManager, admin);
+    }     
+//    }
   }
 
   /**
