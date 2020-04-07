@@ -146,6 +146,7 @@ public class AutomationService extends MultiThreadedBatchService {
       if("Y".equalsIgnoreCase(admin.getReviewReqIndc())){
         LOG.debug("Setting the request status to " + admin.getId().getReqId() + " because review required indicator is set to Y.");
         admin.setReqStatus("PPN");
+        createComment(entityManager, "Last automated checks indicated that further review is required.",admin.getId().getReqId());
       }
       approvalService.moveToNextStep(entityManager, admin);
     }     

@@ -440,7 +440,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       updateEntity(admin, entityManager);
       this.log.debug("Creating workflow history and sending notifications.");
       String user = SystemConfiguration.getValue("BATCH_USERID");
-      String comment = "An approval request has been rejected, please check the approvals and work on the needed information.";
+      String comment = "'Request has been rejected due to rejected approvals. Please check the approval comments.";
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
       appuser.setBluePagesName(user);

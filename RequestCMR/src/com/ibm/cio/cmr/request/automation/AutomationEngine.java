@@ -127,6 +127,7 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
+    String custSubGrp = requestData.getData().getCustSubGrp();
     // put the current engine data on the thread, for reuse if needed
     List<ActionOnError> actionsOnError = new ArrayList<>();
     LOG.trace("Preparing engine data..");
@@ -251,6 +252,9 @@ public class AutomationEngine {
     Data data = requestData.getData();
     String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
     String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
+    if(engineData.get().hasNegativeCheckStatus()){
+      admin.setReviewReqIndc("Y");
+    }
 
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
