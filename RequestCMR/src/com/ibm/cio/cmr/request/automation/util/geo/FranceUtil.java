@@ -103,10 +103,15 @@ public class FranceUtil extends AutomationUtil {
       }
 
       if (!computed) {
-        engineData.addRejectionComment("SBO cannot be computed automatically.");
-        details.append("SBO cannot be computed automatically.").append("\n");
-        results.setResults("SBO not calculated.");
-        results.setOnError(true);
+        if (StringUtils.isNotBlank(data.getSalesBusOffCd()) && StringUtils.isNotBlank(data.getInstallBranchOff())) {
+          details.append("SBO value already provided on the request - " + data.getSalesBusOffCd()).append("\n");
+          results.setResults("Skipped");
+        } else {
+          engineData.addRejectionComment("SBO cannot be computed automatically.");
+          details.append("SBO cannot be computed automatically.").append("\n");
+          results.setResults("SBO not calculated.");
+          results.setOnError(true);
+        }
       }
     }
     results.setProcessOutput(overrides);
