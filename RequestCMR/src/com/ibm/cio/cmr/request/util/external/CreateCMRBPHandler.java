@@ -43,8 +43,9 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
-    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL") + "/request?cmrIssuingCntry=" + cmrIssuingCountry + "&reqStatus=" + reqStatus
-        + "&reqType=" + type + "&reqId=" + reqId;
+    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL").replace("/home", "") + "/request?cmrIssuingCntry=" + cmrIssuingCountry
+        + "&reqStatus=" + reqStatus + "&reqType=" + type + "&reqId=" + reqId;
+
     params.add(bpURL); // {12}
 
     if (cmrIssuingCountry != null) {
@@ -117,7 +118,7 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
 
   }
 
-  private String getCmrIssuingCntry(EntityManager entityManager, Admin admin) {
+  public static String getCmrIssuingCntry(EntityManager entityManager, Admin admin) {
     String cmrIssuingCntry = null;
     String sql = ExternalizedQuery.getSql("BATCH.EMAILENGINE.GETCMRISSUINGCNTRY");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
