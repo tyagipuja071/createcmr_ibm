@@ -425,36 +425,6 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
 
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
   }
   if (reqType != 'C') {
     return;
@@ -790,36 +760,6 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
 
   }
 
@@ -2916,7 +2856,7 @@ function addTRAddressTypeValidator() {
           }
 
           // if (zs01Cnt == 0 || zd01Cnt == 0) {
-          if (zs01Cnt == 0 || zd01Cnt == 0) {
+          if (zs01Cnt == 0 || zp01Cnt == 0) {
             // return new ValidationResult(null, false, 'Installing and shipping
             // addresses are both required.');
             return new ValidationResult(null, false, 'Installing/Shipping/EPL and Mailing/Billing addresses are both required.');
@@ -7575,6 +7515,7 @@ dojo.addOnLoad(function() {
   // *abner revert begin
   // GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR,[SysLoc.TURKEY]);
   // GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR,[SysLoc.TURKEY]);
+  GEOHandler.addAfterConfig(addTRAddressTypeValidator, [ SysLoc.TURKEY ]);
 
   // CMR-2093
   // GEOHandler.addAfterConfig(showCommercialFinanced,[SysLoc.TURKEY]);
