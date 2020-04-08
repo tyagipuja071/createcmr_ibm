@@ -7370,6 +7370,23 @@ function setISUCTCBasedScenarios() {
   }
 }
 
+function mandatoryForBusinessPartnerCY() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    if (_custType == 'BUSPR' || _custType == 'CRBUS') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.resetValidations('ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7580,5 +7597,10 @@ dojo.addOnLoad(function() {
   //GEOHandler.addAfterConfig(setFieldsBehaviourGR,[SysLoc.GREECE]);
   //GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR,[SysLoc.GREECE]);  
   //GEOHandler.addAfterConfig(resetSubIndustryCdGR,[SysLoc.GREECE]);
+  
+  // CYPRUS Legacy
+  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
 
 });

@@ -9,6 +9,23 @@ var _oldEmbargoCd = null;
 var _oldReqReason = null;
 var _oldOrdBlk = null;
 
+function mandatoryForBusinessPartnerPT() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    if (_custType == 'BUSPR' || _custType == 'CRBUS') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.resetValidations('ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 function addMCOLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -1762,5 +1779,10 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
+  
+  // PT Legacy
+  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   
 });
