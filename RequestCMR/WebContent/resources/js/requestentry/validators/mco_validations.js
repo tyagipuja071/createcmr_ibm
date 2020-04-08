@@ -9,6 +9,23 @@ var _oldEmbargoCd = null;
 var _oldReqReason = null;
 var _oldOrdBlk = null;
 
+function mandatoryForBusinessPartnerPT() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    if (_custType == 'BUSPR' || _custType == 'CRBUS') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.resetValidations('ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 function addMCOLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -776,12 +793,11 @@ function addEnterpriseValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function setFieldMandatoryForProcessor() {
+function setFieldMandatoryForProcessorPT() {
   var reqType = FormManager.getActualValue('reqType');
 
   if (typeof (_pagemodel) != 'undefined') {
     if (reqType == 'C' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
-      checkAndAddValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ]);
       checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
       checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
       checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
@@ -1611,7 +1627,16 @@ function lockRequireFieldsSpain() {
 }
 function setFieldMandatoryForProcessorSpain() {
   var reqType = FormManager.getActualValue('reqType');
+  
   if (typeof (_pagemodel) != 'undefined') {
+    if (reqType == 'C' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
+      checkAndAddValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ]);
+      checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
+      checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+      checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
+      checkAndAddValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ]);
+    }
+    
     if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_CUST_TAB');
@@ -1695,7 +1720,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
-  GEOHandler.addAfterConfig(setFieldMandatoryForProcessor, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterConfig(setFieldMandatoryForProcessorPT, [ SysLoc.PORTUGAL ]);
   // GEOHandler.addAfterConfig(setLocationNumber, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setCollectionCode, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setDistrictCode, [ SysLoc.PORTUGAL ]);
@@ -1726,7 +1751,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setFieldMandatoryForProcessorSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessorSpain, [ SysLoc.SPAIN ]);
 
-  GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessor, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessorPT, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
@@ -1754,5 +1779,10 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
+  
+  // PT Legacy
+  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   
 });
