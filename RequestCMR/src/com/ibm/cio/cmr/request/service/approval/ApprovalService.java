@@ -36,6 +36,8 @@ import com.ibm.cio.cmr.request.entity.ApprovalReq;
 import com.ibm.cio.cmr.request.entity.ApprovalReqPK;
 import com.ibm.cio.cmr.request.entity.ApprovalTyp;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
+import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DefaultApprovalRecipients;
 import com.ibm.cio.cmr.request.entity.DefaultApprovals;
 import com.ibm.cio.cmr.request.model.approval.ApprovalCommentModel;
@@ -382,7 +384,14 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
    * @throws CmrException
    * @throws SQLException
    */
-  public void moveToNextStep(EntityManager entityManager, Admin admin) throws CmrException, SQLException {
+  public void moveToNextStep(EntityManager entityManager, Admin admin) throws CmrException, SQLException , Exception {
+    DataPK dataPk = new DataPK();
+    dataPk.setReqId(admin.getId().getReqId());
+    Data data = entityManager.find(Data.class, dataPk);
+    if (data == null) {
+        throw new Exception("Cannot locate DATA record in Approval Service's method moveToNextStep().");
+    }
+    boolean processOnCompletion = isProcessOnCompletionChk(entityManager,data.getCmrIssuingCntry(),admin.getReqType());
     this.log.debug("Checking if all approvals are complete for Request ID " + admin.getId().getReqId());
     String sql = ExternalizedQuery.getSql("APPROVAL.CHECKIFALLAPPROVED");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -395,7 +404,12 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType())) {
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
       } else {
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+        if(CmrConstants.REQUEST_STATUS.REP.equals(admin.getReqStatus()) && "N".equalsIgnoreCase(admin.getReviewReqIndc()) && processOnCompletion){
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
+        }
+        else{
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+        }
         procCenter = getProcessingCenter(entityManager, admin);
         admin.setLastProcCenterNm(procCenter);
       }
@@ -417,6 +431,30 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       this.log.debug("The request is not in Draft Status and/or Pending Approvals need to be received.");
     }
   }
+  
+  /**
+   * Checks if this country will go to processing automatically on successful
+   * execution or not
+   * 
+   * @param entityManager
+   * @param country
+   * @param reqType
+   * @return
+   */
+  private boolean isProcessOnCompletionChk(EntityManager entityManager, String country, String reqType) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_ON_COMPLETE_ACTION");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", country);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    boolean onCompleteAction = false;
+    if ("Y".equals(result) || ("C".equals(result) && "C".equals(reqType)) || ("U".equals(result) && "U".equals(reqType))) {
+      onCompleteAction = true;
+    }
+    return onCompleteAction;
+
+  }
+
 
   /**
    * Moves the request to the next step
