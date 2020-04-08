@@ -1847,7 +1847,20 @@ function applyAddrChangesModal_onLoad() {
             addressDesc = type.ret2;
           }
         }
-      } else {
+      } else if (cntry == '618') {
+    	  var reqReason = FormManager.getActualValue('reqReason');
+    	  if((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR())){
+    		  continue;
+    	  }
+		  if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+	        choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+	      } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+	        choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
+	      } else {
+	        choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
+	        addressDesc = type.ret2;
+	      }
+      }else {
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
           choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
         } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
