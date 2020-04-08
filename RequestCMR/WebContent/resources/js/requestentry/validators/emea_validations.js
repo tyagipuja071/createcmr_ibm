@@ -425,36 +425,6 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
 
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
   }
   if (reqType != 'C') {
     return;
@@ -790,36 +760,6 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
 
   }
 
@@ -2916,8 +2856,10 @@ function addTRAddressTypeValidator() {
           }
 
           // if (zs01Cnt == 0 || zd01Cnt == 0) {
-          if (zs01Cnt == 0 || zd01Cnt == 0) {
-            return new ValidationResult(null, false, 'Installing and shipping addresses are both required.');
+          if (zs01Cnt == 0 || zp01Cnt == 0) {
+            // return new ValidationResult(null, false, 'Installing and shipping
+            // addresses are both required.');
+            return new ValidationResult(null, false, 'Installing/Shipping/EPL and Mailing/Billing addresses are both required.');
           } else if (zs01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Installing/Shipping/EPL is allowed.');
           } else if (zp01Cnt > 1) {
@@ -7370,6 +7312,23 @@ function setISUCTCBasedScenarios() {
   }
 }
 
+function mandatoryForBusinessPartnerCY() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    if (_custType == 'BUSPR' || _custType == 'CRBUS') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.resetValidations('ppsceid');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7573,6 +7532,7 @@ dojo.addOnLoad(function() {
   // *abner revert begin
   // GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR,[SysLoc.TURKEY]);
   // GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR,[SysLoc.TURKEY]);
+  GEOHandler.addAfterConfig(addTRAddressTypeValidator, [ SysLoc.TURKEY ]);
 
   // CMR-2093
   // GEOHandler.addAfterConfig(showCommercialFinanced,[SysLoc.TURKEY]);
@@ -7580,5 +7540,10 @@ dojo.addOnLoad(function() {
   //GEOHandler.addAfterConfig(setFieldsBehaviourGR,[SysLoc.GREECE]);
   //GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR,[SysLoc.GREECE]);  
   //GEOHandler.addAfterConfig(resetSubIndustryCdGR,[SysLoc.GREECE]);
+  
+  // CYPRUS Legacy
+  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
 
 });

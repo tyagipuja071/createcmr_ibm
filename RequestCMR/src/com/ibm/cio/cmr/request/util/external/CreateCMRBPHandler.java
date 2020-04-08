@@ -14,6 +14,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 
 /**
  * @author JeffZAMORA
@@ -31,7 +32,7 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
       type = "U";
     }
     String reqStatus = (String) params.get(5);
-    if ("Rejected".equalsIgnoreCase(reqStatus)) {
+    if (RequestUtils.STATUS_INPUT_REQUIRED.equalsIgnoreCase(reqStatus)) {
       reqStatus = "PRJ";
     }
 
@@ -42,8 +43,9 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
-    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL") + "/request?cmrIssuingCntry=" + cmrIssuingCountry + "&reqStatus=" + reqStatus
-        + "&reqType=" + type + "&reqId=" + reqId;
+    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL").replace("/home", "") + "/request?cmrIssuingCntry=" + cmrIssuingCountry
+        + "&reqStatus=" + reqStatus + "&reqType=" + type + "&reqId=" + reqId;
+
     params.add(bpURL); // {12}
 
     if (cmrIssuingCountry != null) {
@@ -116,7 +118,7 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
 
   }
 
-  private String getCmrIssuingCntry(EntityManager entityManager, Admin admin) {
+  public static String getCmrIssuingCntry(EntityManager entityManager, Admin admin) {
     String cmrIssuingCntry = null;
     String sql = ExternalizedQuery.getSql("BATCH.EMAILENGINE.GETCMRISSUINGCNTRY");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
