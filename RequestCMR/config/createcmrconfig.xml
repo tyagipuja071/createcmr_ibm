@@ -428,7 +428,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://tdydalbpgui01.sl.bluecloud.ibm.com:20002/CMRBPPortal</value>
+    <value>https://tdydalbpgui01.sl.bluecloud.ibm.com:20002/CMRBPPortal/home</value>
   </item>
   <item>
     <id>SYSTEM_TYPE</id>
