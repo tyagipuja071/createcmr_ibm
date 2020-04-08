@@ -118,10 +118,9 @@ public class AutomationService extends MultiThreadedBatchService {
    * @param entityManager
    * @param requestData
    * @param current
-   * @throws CmrException
-   * @throws SQLException
+   * @throws Exception 
    */
-  private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws CmrException, SQLException {
+  private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws Exception {
     Admin admin = requestData.getAdmin();
     LOG.debug("Checking awaiting replies request " + admin.getId().getReqId() + "..");
 
@@ -143,10 +142,6 @@ public class AutomationService extends MultiThreadedBatchService {
     }
     else{
       LOG.debug("Moving Request " + admin.getId().getReqId() + " to next step..");
-      if("Y".equalsIgnoreCase(admin.getReviewReqIndc())){
-        LOG.debug("Setting the request status to " + admin.getId().getReqId() + " because review required indicator is set to Y.");
-        admin.setReqStatus("PPN");
-      }
       approvalService.moveToNextStep(entityManager, admin);
     }     
 //    }

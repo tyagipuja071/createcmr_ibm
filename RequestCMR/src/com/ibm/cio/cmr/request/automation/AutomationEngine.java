@@ -127,6 +127,7 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
+    String custSubGrp = requestData.getData().getCustSubGrp();
     // put the current engine data on the thread, for reuse if needed
     List<ActionOnError> actionsOnError = new ArrayList<>();
     LOG.trace("Preparing engine data..");
@@ -149,6 +150,7 @@ public class AutomationEngine {
     int lastElementIndex = 0;
 
     boolean hasOverrideOrMatchingApplied = false;
+    requestData.getAdmin().setReviewReqIndc("N");
     for (AutomationElement<?> element : this.elements) {
       ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
       
@@ -176,7 +178,6 @@ public class AutomationEngine {
         } else {
           try {
             ChangeLogListener.setManager(entityManager);
-            requestData.getAdmin().setReviewReqIndc("N");
             result = element.executeElement(entityManager, requestData, engineData.get());
             ChangeLogListener.clearManager();
           } catch (Exception e) {
@@ -251,6 +252,9 @@ public class AutomationEngine {
     Data data = requestData.getData();
     String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
     String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
+    if(engineData.get().hasNegativeCheckStatus()){
+      admin.setReviewReqIndc("Y");
+    }
 
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
@@ -322,6 +326,10 @@ public class AutomationEngine {
         } else if (actionsOnError.contains(ActionOnError.Wait)) {
           // do not change status
           moveToNextStep = false;
+          Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
+          if ((rejectComments != null && !rejectComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+            admin.setReviewReqIndc("Y");
+          }
           String cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
           createComment(entityManager, cmt, reqId, appUser);
           admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
