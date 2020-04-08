@@ -67,7 +67,7 @@ public class CmrConstants {
     /**
      * Draft
      */
-    DRA, PVA, PCR, PCO, IIP, RIP, ACU, SVA, SV2, PPN, PCP, COM
+    DRA, PVA, PCR, PCO, IIP, RIP,REP, ACU, SVA, SV2, PPN, PCP, COM
   }
 
   public static enum ADDR_TYPE {

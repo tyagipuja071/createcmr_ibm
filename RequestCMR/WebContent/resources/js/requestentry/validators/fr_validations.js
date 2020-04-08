@@ -464,6 +464,7 @@ function addSboIboLogic() {
       if (iboCd != '' && iboCd.length > 3) {
         iboCd = iboCd.substring(iboCd.length-3, iboCd.length);
       }
+      FormManager.readOnly('installBranchOff');
       FormManager.setValue('installBranchOff', iboCd);
     }
   });
