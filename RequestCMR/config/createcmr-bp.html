@@ -1,25 +1,41 @@
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
-<style>
-  body, th, td '{'
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style>
+    body,
+    th,
+    td '{'
     font-family: IBM Plex Sans;
-  '}'
-  th, td '{'
+    '}'
+    th,
+    td '{'
     padding-bottom: 3px;
-  '}'
-  a, a:visited, a:hover '{'
+    '}'
+    a,
+    a:visited,
+    a:hover '{'
     color: #00649D;
     text-decoration: none;
-  '}'
-  a:hover '{'
+    '}'
+    a:hover '{'
     text-decoration: underline;
     cursor: pointer;
-  '}'
-  
-</style>
+    '}'
+
+    .blueText '{'
+    color: blue;
+    font-weight: bold;
+    '}'
+
+    .blackText '{'
+    color: black;
+    font-weight: bold;
+    '}'
+  </style>
 </head>
-<body >
+
+<body>
   The following CMR request has changed status:
   <br>
   <br>
@@ -35,20 +51,20 @@
     <tr>
       <th style="text-align:left" width="200px">End User:</th>
       <td>{13}</td>
-    </tr>   
+    </tr>
     <tr>
       <th style="text-align:left" width="200px">Address:</th>
       <td>{14}</td>
-    </tr>   
+    </tr>
     <tr>
       <th style="text-align:left" width="200px"></th>
       <td>{15}</td>
-    </tr> 
-     <tr>
-      <th style="text-align:left" width="200px">CMR#:</th>
+    </tr>
+    <tr>
+      <th style="text-align:left" width="200px">CMR number:</th>
       <td>{3}</td>
     </tr>
-    
+
     <tr>
       <th style="text-align:left" width="200px">Request Type:</th>
       <td>{4}</td>
@@ -69,13 +85,23 @@
       <th style="text-align:left;vertical-align:top" width="200px">Status Change Comments:</th>
       <td>{8}</td>
     </tr>
+
+    <tr>
+      <th style="text-align:left;" width="200px">Request URL Link:</th>
+      <td><span class="blackText">Click</span>
+        <span class="blueText"><a href="{12}">Here</a></span>
+        <span class="blackText"> to view your request that requires additional input</span>
+      </td>
+    </tr>
+
   </table>
-<br>
-<br>
-<hr>
-<span style="color:#555555; font-style:italic;font-size:14px;">
-This is a system-generated message.  Please do not reply.  
-You can view the details of your request on the <a href="{12}">CreateCMR</a> application.
-</span>
+  <br>
+  <br>
+  <hr>
+  <!-- <span style="color:#555555; font-style:italic;font-size:14px;"> -->
+  <!-- This is a system-generated message.  Please do not reply.   -->
+  <!-- You can view the details of your request on the <a href="{12}">CreateCMR</a> application. -->
+  <!-- </span> -->
 </body>
+
 </html>

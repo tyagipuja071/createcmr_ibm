@@ -993,7 +993,8 @@ public class CEMEAHandler extends BaseSOFHandler {
 		UpdatedDataModel update = null;
 		super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
 
-		if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())
+        && SystemLocation.AUSTRIA.equals(cmrCountry)) {
 			update = new UpdatedDataModel();
 			update.setDataField(
 					PageManager.getLabel(cmrCountry, "Central order block code", "Central order block code"));
@@ -1003,6 +1004,15 @@ public class CEMEAHandler extends BaseSOFHandler {
 					service.getCodeAndDescription(oldData.getOrdBlk(), "Central order block code", cmrCountry));
 			results.add(update);
 		}
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())
+        && SystemLocation.AUSTRIA.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Customer Classification Code", "Customer Classification Code"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustClass(), "Customer Classification Code", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "Customer Classification Code", cmrCountry));
+      results.add(update);
+    }
 
 		if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getPhone1(), newData.getPhone1())) {
 			update = new UpdatedDataModel();

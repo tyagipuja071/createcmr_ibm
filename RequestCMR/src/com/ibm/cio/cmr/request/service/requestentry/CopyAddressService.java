@@ -37,7 +37,7 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 @Component
 public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
 
-  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("862");
+  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("8620");
 
   @Override
   protected Logger initLogger() {
@@ -265,12 +265,16 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       Object[] result = results.get(0);
       maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "0");
 
+      if (StringUtils.isAlpha(maxAddrSeq)) {
+        maxAddrSeq = String.valueOf((int) ((Math.random() * 9 + 1) * 10));
+      }
       if (!(Integer.valueOf(maxAddrSeq) >= 0 && Integer.valueOf(maxAddrSeq) <= 20849)) {
-        maxAddrSeq = "";
+        maxAddrSeq = "1";
       }
       if (StringUtils.isEmpty(maxAddrSeq)) {
-        maxAddrSeq = "0";
+        maxAddrSeq = "1";
       }
+      log.debug("Copy address maxAddrSeq = " + maxAddrSeq);
       try {
         addrSeq = Integer.parseInt(maxAddrSeq);
       } catch (Exception e) {
