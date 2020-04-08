@@ -385,24 +385,19 @@ function addAddressTypeValidator() {
           if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0)) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
           } else if (cntry == SysLoc.AUSTRIA) {
-        	var reqReason = FormManager.getActualValue('reqReason');
-        	if(reqReason == 'IGF' && zs01Cnt == 0){
-        		return new ValidationResult(null, false, 'Sold to address is mandatory.');
-        	}else{
-        		var reqLob = FormManager.getActualValue('requestingLob');// request
-                // LOB=IGF
-                // will
-                // have 2
-                // additional
-                // address
-                // type to
-                // own
-                if (reqLob == 'IGF' && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0)) {
-                  return new ValidationResult(null, false, 'All address types are mandatory.');
-                } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
-                  return new ValidationResult(null, false, 'All address types are mandatory.');
-                }
-        	}
+    		var reqLob = FormManager.getActualValue('requestingLob');// request
+            // LOB=IGF
+            // will
+            // have 2
+            // additional
+            // address
+            // type to
+            // own
+            if (reqLob == 'IGF' && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0)) {
+              return new ValidationResult(null, false, 'All address types are mandatory.');
+            } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
+              return new ValidationResult(null, false, 'All address types are mandatory.');
+            }
           } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory except G Address.');
           } else if (zs01Cnt > 1) {
@@ -1300,8 +1295,8 @@ function custNmAttnPersonPhoneValidationOnChange() {
 
 function reqReasonOnChange() {
 	var reqReason = FormManager.getActualValue('reqReason');
-	if(reqReason == 'IGF'){
-		FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), [ 'BUSPR', 'COMME', 'GOVRN', 'IBMEM', 'XBP', 'XCOM', 'XGOV']);
+	if(reqReason == 'IGF' && isZD01OrZP01ExistOnCMR()){
+//		FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), [ 'BUSPR', 'COMME', 'GOVRN', 'IBMEM', 'XBP', 'XCOM', 'XGOV']);
 		dojo.byId('radiocont_ZP02').style.display = 'inline-block';
 		dojo.byId('radiocont_ZD02').style.display = 'inline-block';
 	}else{
@@ -1309,16 +1304,35 @@ function reqReasonOnChange() {
 		dojo.byId('radiocont_ZD02').style.display = 'none';
 	}
     dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-    	if(value == 'IGF'){
-    		FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), [ 'BUSPR', 'COMME', 'GOVRN', 'IBMEM', 'XBP', 'XCOM', 'XGOV']);
+    	if(value == 'IGF' && isZD01OrZP01ExistOnCMR()){
+//    		FormManager.limitDropdownValues(FormManager.getField('custSubGrp'), [ 'BUSPR', 'COMME', 'GOVRN', 'IBMEM', 'XBP', 'XCOM', 'XGOV']);
     		dojo.byId('radiocont_ZP02').style.display = 'inline-block';
     		dojo.byId('radiocont_ZD02').style.display = 'inline-block';
     	}else{
-    		FormManager.resetDropdownValues(FormManager.getField('custSubGrp'));
+//    		FormManager.resetDropdownValues(FormManager.getField('custSubGrp'));
     		dojo.byId('radiocont_ZP02').style.display = 'none';
     		dojo.byId('radiocont_ZD02').style.display = 'none';
     	}
     });
+}
+
+function isZD01OrZP01ExistOnCMR(){
+	for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+		record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+		if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+	      record = _allAddressData[i];
+	    }
+        var type = record.addrType;
+        if (typeof (type) == 'object') {
+          type = type[0];
+        }
+        var importInd = record.importInd[0];
+        var reqType = FormManager.getActualValue('reqType');
+        if ('U' == reqType && 'Y' == importInd && (type == 'ZD01' || type == 'ZP01') ) {
+          return true;
+        }
+	}
+	return false;
 }
 
 function phoneNoValidation() {
@@ -2369,16 +2383,7 @@ function restrictDuplicateAddrAT(cntry, addressMode, saving, finalSave, force) {
 		var reqReason = FormManager.getActualValue('reqReason');
 		var addressType = FormManager.getActualValue('addrType');
 		if(addressType == 'ZP02' || addressType == 'ZD02'){
-			if(reqReason == 'IGF'){
-				if(FormManager.getActualValue('reqType') == 'C'){
-					var custSubGrp = FormManager.getActualValue('custSubGrp');
-					if(custSubGrp != 'BUSPR' && custSubGrp != 'COMME' && custSubGrp != 'GOVRN' && custSubGrp != 'IBMEM'
-						&& custSubGrp != 'XBP' && custSubGrp != 'XCOM' && custSubGrp != 'XGOV')
-					{
-						return new ValidationResult(null, false, 'Couldn`t create IGF address, because scenario Sub-type not in scope.');
-					}
-				}
-			}else{
+			if(reqReason != 'IGF'){
 				return new ValidationResult(null, false, 'Request Reason should be IGF.');
 			}
 		}
