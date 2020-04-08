@@ -126,7 +126,7 @@ function actualAddToCMRList() {
 
   cmr.cmrList = textAreaString;
   // validation added to not import invalid CMR number for Swiss
-  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN) {
+  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA) {
     var cmrsArr = cmr.cmrList.split(',');
     var reqtype = FormManager.getActualValue('reqType');
     var invalidCount = 0;
@@ -142,7 +142,11 @@ function actualAddToCMRList() {
     } else {
       landCntryToCheck = 'LI';
     }
-    for ( var i = 0; i < cmrsArr.length; i++) {
+    if (cmrCntry == '618') {
+      landCntryToCheck = 'AT';
+    }
+
+    for (var i = 0; i < cmrsArr.length; i++) {
       var qParams = {
         KATR6 : cmrCntry,
         MANDT : cmr.MANDT,
@@ -154,6 +158,8 @@ function actualAddToCMRList() {
         ZZKV_CUSNO : cmrsArr[i],
         BEGRU : landCntryToCheck
       };
+      console.log("KATR6 = " + cmrCntry + "MANDT" + cmr.MANDT + "ZZKV_CUSNO" + cmrsArr[i]);
+
       if (reqtype == 'R') {
         result = cmr.query('CHECK_VALID_CMRS_R', qParams);
       } else {
@@ -171,18 +177,32 @@ function actualAddToCMRList() {
         if (invalidCmr == true)
           invalidCount++;
       }
-      // to check the land cntry of imported cmrs  (applicable for only sub-regions cntry)
+      // to check the land cntry of imported cmrs (applicable for only
+      // sub-regions cntry)
       if ((reqtype == 'R' || reqtype == 'D') && cmrCntry == SysLoc.SWITZERLAND) {
         resultRnD = cmr.query('CHECK_VALID_R_D', qParamsRnD);
         invalidCmrRnD = resultRnD.ret1 > 0 ? true : false;
         if (invalidCmrRnD == true)
           invalidCountRnD++;
       }
+
+      if ((reqtype == 'R' || reqtype == 'D') && cmrCntry == SysLoc.AUSTRIA) {
+        resultRnD = cmr.query('CHECK_VALID_R_D_AT', qParams);
+        invalidCmrRnD = resultRnD.ret1 > 0 ? true : false;
+        if (invalidCmrRnD == true)
+          invalidCountRnD++;
+      }
+
     }
     if (invalidCount > 0 && reqtype == 'R') {
       cmr.showAlert('Addresses can only be imported from inactive CMRs. The chosen CMRs has an invalid CMR.');
       return;
     } else if (invalidCount > 0 && reqtype == 'D') {
+      cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is an invalid record.');
+      return;
+    }
+
+    if (invalidCountRnD > 0 && landCntryToCheck == 'AT') {
       cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is an invalid record.');
       return;
     }
@@ -266,7 +286,7 @@ function actualRemoveFromCMRList() {
   var chkBoxes = document.getElementsByName('gridchk');
   var val = '';
   if (chkBoxes) {
-    for ( var i = 0; i < chkBoxes.length; i++) {
+    for (var i = 0; i < chkBoxes.length; i++) {
       if (chkBoxes[i].checked) {
         console.log('value' + i + "=" + chkBoxes[i].value);
         val = chkBoxes[i].value.slice(6);
