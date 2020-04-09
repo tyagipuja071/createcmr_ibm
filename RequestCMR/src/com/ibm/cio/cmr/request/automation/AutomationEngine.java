@@ -323,16 +323,20 @@ public class AutomationEngine {
           List<String> rejectionComments = (List<String>) engineData.get().get("rejections");
           Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
           if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
-            rejectCmt.append("Processor review is required for following issues-");
+            rejectCmt.append("Processor review is required for following issues");
             rejectCmt.append(":");
-            for (String rejCmt : rejectComments) {
-              rejectCmt.append("\n ");
-              rejectCmt.append(rejCmt);
+            if (rejectComments != null && !rejectComments.isEmpty()) {
+              for (String rejCmt : rejectComments) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(rejCmt);
+              }
             }
             // append pending checks
-            for (String pendingCheck : pendingChecks.values()) {
-              rejectCmt.append("\n ");
-              rejectCmt.append(pendingCheck);
+            if (pendingChecks != null && !pendingChecks.isEmpty()) {
+              for (String pendingCheck : pendingChecks.values()) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(pendingCheck);
+              }
             }
             cmt = rejectCmt.toString();
 
