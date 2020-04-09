@@ -2376,6 +2376,19 @@ function handleRequestLOBChange() {
   }
 }
 
+function filterCmrnoForAT(){
+	 var cmrNo = FormManager.getActualValue('cmrNo');
+	 if(cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P'){
+		 FormManager.setValue('cmrNo', '');
+	 }
+	 
+	 dojo.connect(FormManager.getField('cmrNo'), 'onChange', function(value) {
+		 if(value.length > 0 && value.substr(0, 1).toUpperCase() == 'P'){
+			 FormManager.setValue('cmrNo', '');
+		 }
+	    });
+}
+
 function restrictDuplicateAddrAT(cntry, addressMode, saving, finalSave, force) {
   FormManager.addFormValidator((function() {
     return {
@@ -2558,6 +2571,8 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.addAfterConfig(setAbbrvNmSuffix, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(handleRequestLOBChange, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(filterCmrnoForAT, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(filterCmrnoForAT, [ SysLoc.AUSTRIA ]);
   // CMR-811
   GEOHandler.addAfterConfig(changeBetachar, [ SysLoc.AUSTRIA ]);
 
