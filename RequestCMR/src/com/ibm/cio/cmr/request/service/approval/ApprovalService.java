@@ -418,7 +418,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       String user = SystemConfiguration.getValue("BATCH_USERID");
       String comment = "All approval requests have been approved.";
       if ("Y".equalsIgnoreCase(admin.getReviewReqIndc())) {
-        comment += "\nThe request requires a processor review before proceeding. Please view System Processing Results for more details.";
+        comment += "\nThe request requires a processor review before proceeding.";
       }
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
