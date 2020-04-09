@@ -117,7 +117,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           if (scenarioExceptions.isCheckVATForDnB() && !isOrgIdMatched && vatFound) {
             result.setResults("VAT not matched");
             details.insert(0, itemNo + " High Quality matches found.\nVAT value did not match with the highest confidence D&B match.\n");
-            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_FAIL", "VAT value did not match with the highest confidence D&B matche.");
+            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL", "VAT value did not match with the highest confidence D&B match.");
           } else {
             result.setResults("Matches Found");
             details.insert(0, itemNo + " valid matches found.\n");
