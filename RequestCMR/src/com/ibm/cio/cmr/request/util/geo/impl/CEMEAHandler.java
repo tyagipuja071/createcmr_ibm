@@ -186,6 +186,11 @@ public class CEMEAHandler extends BaseSOFHandler {
 						continue;
 					}
 
+          if ("618".equals(reqEntry.getCmrIssuingCntry()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+              && StringUtils.isAlpha(record.getCmrAddrSeq())) {
+            record.setCmrAddrSeq("1");
+          }
+
 					if (!StringUtils.isBlank(record.getCmrPOBox())) {
 						if (!record.getCmrPOBox().startsWith("PO")) {
 							record.setCmrPOBox(record.getCmrPOBox());
