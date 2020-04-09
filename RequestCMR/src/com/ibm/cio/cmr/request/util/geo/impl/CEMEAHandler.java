@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
@@ -39,6 +40,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -131,7 +133,14 @@ public class CEMEAHandler extends BaseSOFHandler {
 	protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source,
 			RequestEntryModel reqEntry, FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted,
 			ImportCMRModel searchModel) throws Exception {
-
+    // CMR-2719 divestiture CMR not imported
+    if ("AT".equals(mainRecord.getCmrCountryLanded())) {
+      if (!StringUtils.isBlank(mainRecord.getCmrOwner())) {
+        if (!"IBM".equals(mainRecord.getCmrOwner())) {
+          throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
+        }
+      }
+    }
 		if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
 			// only add zs01 equivalent for create by model
 			FindCMRRecordModel record = mainRecord;
@@ -176,6 +185,11 @@ public class CEMEAHandler extends BaseSOFHandler {
 						this.rdcShippingRecords.add(record);
 						continue;
 					}
+
+          if ("618".equals(reqEntry.getCmrIssuingCntry()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+              && StringUtils.isAlpha(record.getCmrAddrSeq())) {
+            record.setCmrAddrSeq("1");
+          }
 
 					if (!StringUtils.isBlank(record.getCmrPOBox())) {
 						if (!record.getCmrPOBox().startsWith("PO")) {

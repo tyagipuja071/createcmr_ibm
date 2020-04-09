@@ -1090,9 +1090,6 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
 
     transformer.transformLegacyCustomerDataMassUpdate(entityManager, cust, cmrObjects, muData);
 
-    // CMR-2279 Turkey update massUpdateData
-    updateEntity(cmrObjects.getMassUpdateData(), entityManager);
-
     if (transformer.hasCmrtCustExt()) {
       CmrtCustExt custExt = legacyObjects.getCustomerExt();
       if (transformer != null) {

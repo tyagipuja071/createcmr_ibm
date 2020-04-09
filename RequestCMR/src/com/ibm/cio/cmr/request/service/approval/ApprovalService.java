@@ -140,7 +140,7 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         break;
       case "R":
         updateApprovalStatus(entityManager, req, CmrConstants.APPROVAL_REJECTED, approval, admin);
-       // moveBackToRequester(entityManager, admin);
+        // moveBackToRequester(entityManager, admin);
         // defunctCurrentApprovals(entityManager, approval, req);
         approval.setProcessed(true);
         approval.setActionDone(CmrConstants.YES_NO.Y.toString());
@@ -395,7 +395,16 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(admin.getReqType())) {
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
       } else {
-        admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+        if (CmrConstants.REQUEST_STATUS.REP.toString().equals(admin.getReqStatus()) && "N".equalsIgnoreCase(admin.getReviewReqIndc())) {
+          boolean processOnCompletion = isProcessOnCompletionChk(entityManager, admin.getId().getReqId(), admin.getReqType());
+          if (processOnCompletion) {
+            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
+          } else {
+            admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+          }
+        } else {
+          admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+        }
         procCenter = getProcessingCenter(entityManager, admin);
         admin.setLastProcCenterNm(procCenter);
       }
@@ -408,6 +417,9 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       this.log.debug("Creating workflow history and sending notifications.");
       String user = SystemConfiguration.getValue("BATCH_USERID");
       String comment = "All approval requests have been approved.";
+      if ("Y".equalsIgnoreCase(admin.getReviewReqIndc())) {
+        comment += "\nThe request requires a processor review before proceeding.";
+      }
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
       appuser.setBluePagesName(user);
@@ -416,6 +428,29 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     } else {
       this.log.debug("The request is not in Draft Status and/or Pending Approvals need to be received.");
     }
+  }
+
+  /**
+   * Checks if this country will go to processing automatically on successful
+   * execution or not
+   * 
+   * @param entityManager
+   * @param reqId
+   * @param reqType
+   * @return
+   */
+  private boolean isProcessOnCompletionChk(EntityManager entityManager, long reqId, String reqType) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_ON_COMPLETE_ACTION_REQ_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    String result = query.getSingleResult(String.class);
+    boolean onCompleteAction = false;
+    if ("Y".equals(result) || ("C".equals(result) && "C".equals(reqType)) || ("U".equals(result) && "U".equals(reqType))) {
+      onCompleteAction = true;
+    }
+    return onCompleteAction;
+
   }
 
   /**
@@ -431,16 +466,17 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     if (PENDING_STATUSES_TO_RETURN.contains(admin.getReqStatus())) {
       // move only if it is one of the auto statuses
       this.log.debug("Moving Request ID " + admin.getId().getReqId() + " back to requester because of rejection.");
-      admin.setReqStatus(CmrConstants.REQUEST_STATUS.DRA.toString());
-      admin.setLockBy(admin.getRequesterId());
-      admin.setLockTs(SystemUtil.getCurrentTimestamp());
-      admin.setLockInd(CmrConstants.YES_NO.Y.toString());
-      admin.setLockByNm(admin.getRequesterNm());
+      admin.setReqStatus(CmrConstants.REQUEST_STATUS.PRJ.toString());
+      admin.setLastProcCenterNm(null);
+      admin.setLockInd("N");
+      admin.setLockByNm(null);
+      admin.setLockBy(null);
+      admin.setLockTs(null);
 
       updateEntity(admin, entityManager);
       this.log.debug("Creating workflow history and sending notifications.");
       String user = SystemConfiguration.getValue("BATCH_USERID");
-      String comment = "An approval request has been rejected, please check the approvals and work on the needed information.";
+      String comment = "Request has been rejected due to rejected approvals. Please check the approval comments.";
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
       appuser.setBluePagesName(user);
@@ -927,8 +963,9 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         }
         Date lastUpdt = (Date) results.get(0)[1];
         String lastUpdtStr = "";
-        if (lastUpdt != null && lastUpdt instanceof Date)
+        if (lastUpdt != null && lastUpdt instanceof Date) {
           lastUpdtStr = dateFormat.format(lastUpdt);
+        }
 
         // Compute approval status for scorecard
         if (containsOnly(statuses, noneStats)) {

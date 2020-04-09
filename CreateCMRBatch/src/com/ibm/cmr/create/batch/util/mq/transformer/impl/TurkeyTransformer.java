@@ -940,6 +940,9 @@ public class TurkeyTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+
+      legacyCust.setSalesRepNo(data.getSalesTeamCd());
+      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
     }
 
     // common data for C/U
@@ -1058,6 +1061,9 @@ public class TurkeyTransformer extends EMEATransformer {
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
+    // CMR-2279 Turkey update massUpdateData
+    entityManager.merge(cmrObjects.getMassUpdateData());
+    entityManager.flush();
   }
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {

@@ -118,10 +118,9 @@ public class AutomationService extends MultiThreadedBatchService {
    * @param entityManager
    * @param requestData
    * @param current
-   * @throws CmrException
-   * @throws SQLException
+   * @throws Exception
    */
-  private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws CmrException, SQLException {
+  private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws Exception {
     Admin admin = requestData.getAdmin();
     LOG.debug("Checking awaiting replies request " + admin.getId().getReqId() + "..");
 
@@ -130,26 +129,21 @@ public class AutomationService extends MultiThreadedBatchService {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     int count = query.getSingleResult(Integer.class);
-//    Date maxDt = query.getSingleResult(Date.class);
-    Calendar cal = new GregorianCalendar();
-    cal.setTime(current);
-    cal.add(Calendar.MINUTE, -1 * 10);
+    // Date maxDt = query.getSingleResult(Date.class);
+    // Calendar cal = new GregorianCalendar();
+    // cal.setTime(current);
+    // cal.add(Calendar.MINUTE, -1 * 10);
     ApprovalService approvalService = new ApprovalService();
-    //if (maxDt.after(cal.getTime())) {
-    if(count > 0){
+    // if (maxDt.after(cal.getTime())) {
+    if (count > 0) {
       // rejection
       LOG.debug("Rejecting the Request " + admin.getId().getReqId() + " and moving back to requester..");
       approvalService.moveBackToRequester(entityManager, admin);
-    }
-    else{
+    } else {
       LOG.debug("Moving Request " + admin.getId().getReqId() + " to next step..");
-      if("Y".equalsIgnoreCase(admin.getReviewReqIndc())){
-        LOG.debug("Setting the request status to " + admin.getId().getReqId() + " because review required indicator is set to Y.");
-        admin.setReqStatus("PPN");
-      }
       approvalService.moveToNextStep(entityManager, admin);
-    }     
-//    }
+    }
+    // }
   }
 
   /**

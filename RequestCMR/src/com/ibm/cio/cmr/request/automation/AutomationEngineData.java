@@ -68,6 +68,22 @@ public class AutomationEngineData extends HashMap<String, Object> {
     checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     checks.put(checkKey, userFriendlyCheckMessage);
   }
+  
+  /**
+   * Checks negative check status 
+   * 
+   * @param userFriendlyCheckMessage
+   */
+  @SuppressWarnings("unchecked")
+  public boolean hasNegativeCheckStatus() {
+    Map<String, String> checks = (Map<String, String>) get(NEGATIVE_CHECKS);
+    if (checks != null) {
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
 
   /**
    * Checks the current negative check status for the given key. If the status

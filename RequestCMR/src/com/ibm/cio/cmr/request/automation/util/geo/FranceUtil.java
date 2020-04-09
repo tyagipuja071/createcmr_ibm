@@ -144,6 +144,7 @@ public class FranceUtil extends AutomationUtil {
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
+    String countryUse = data.getCountryUse();
     Addr zs01 = requestData.getAddress("ZS01");
     boolean valid = true;
     String scenario = data.getCustSubGrp();
@@ -209,6 +210,11 @@ public class FranceUtil extends AutomationUtil {
           details.append("Duplicate CMR check using customer name match failed to execute.");
           engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
         }
+        
+        // For sub_regions of France for this scenario, requests should  go the CMDE
+        if(countryUse.length() > 3){
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
 
         break;
       case "CBOEM":
@@ -249,6 +255,12 @@ public class FranceUtil extends AutomationUtil {
           details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
           engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
         }
+        
+        // For sub_regions of France for this scenario, requests should  go the CMDE
+        if(countryUse.length() > 3){
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
+        
         break;
       case "CBIEU":
       case "CBUEU":
@@ -279,6 +291,10 @@ public class FranceUtil extends AutomationUtil {
           details.append("PPS CE ID not available on the request.");
           engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
         }
+        
+        // For  France as well as sub-regions for this scenario, requests should  go the CMDE
+        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
         break;
       case "INTER":
       case "CBTER":
@@ -292,13 +308,18 @@ public class FranceUtil extends AutomationUtil {
           details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
           valid = false;
         }
+        
+        // For sub_regions of France for this scenario, requests should  go the CMDE
+        if(countryUse.length() > 3){
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
+        
         break;
 
       case "HOSTC":
       case "CBSTC":
         String custNm1 = zs01.getCustNm1();
         String custNm2 = zs01.getCustNm2();
-        boolean validated = false;
         String custNm = custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "");
         if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
           valid = true;
@@ -322,33 +343,15 @@ public class FranceUtil extends AutomationUtil {
           engineData.addRejectionComment("Wrong Customer Name on Host address. CHEZ should be part of the name.");
           details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
           valid = false;
-
         }
+        
+        // For sub_regions of France for this scenario, requests should  go the CMDE
+        if(countryUse.length() > 3){
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
+        
         break;
-      case "COMME":
-      case "CBMME":
-        int count = 0;
-        // for (Addr addr : requestData.getAddresses()) {
-        // String sql = ExternalizedQuery.getSql("FR.GET_UNIQUE_ADDR_COUNT");
-        // PreparedQuery query = new PreparedQuery(entityManager, sql);
-        // query.setParameter("REQ_ID",
-        // requestData.getAdmin().getId().getReqId());
-        // query.setParameter("CUST_NM1", addr.getCustNm1());
-        // query.setParameter("ADDR_TXT", addr.getAddrTxt());
-        // query.setParameter("CITY1", addr.getCity1());
-        // count = query.getSingleResult(Integer.class);
-        // if (count == 1) {
-        // engineData.addRejectionComment("Multiple unique addresses found on
-        // the request.");
-        // engineData.addNegativeCheckStatus("SCENARIO_EXCEPTION", "Commercial
-        // scenario needs to be reviewed.");
-        // details.append("Multiple unique addresses found on the request.
-        // ").append("\n");
-        // valid = false;
-        // break;
-        // }
-        // }
-        break;
+
       case "CHDPT":
       case "THDPT":
         // zs02 -> mailing zp01 -> billing
@@ -378,7 +381,17 @@ public class FranceUtil extends AutomationUtil {
             valid = false;
           }
         }
-
+        
+        // For sub_regions of France for this scenario, requests should  go the CMDE
+        if(countryUse.length() > 3){
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
+        
+        break;
+      case "INTSO":
+      case "CBTSO":
+        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+       
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
