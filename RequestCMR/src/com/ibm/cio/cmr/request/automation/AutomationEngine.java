@@ -127,7 +127,6 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
-    String custSubGrp = requestData.getData().getCustSubGrp();
     // put the current engine data on the thread, for reuse if needed
     List<ActionOnError> actionsOnError = new ArrayList<>();
     LOG.trace("Preparing engine data..");
