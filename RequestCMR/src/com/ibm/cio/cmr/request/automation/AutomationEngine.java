@@ -35,7 +35,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
@@ -85,7 +84,8 @@ public class AutomationEngine {
   }
 
   @SuppressWarnings("unchecked")
-  private AutomationElement<?> initializeElement(String processCode, String reqTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
+  private AutomationElement<?> initializeElement(String processCode, String reqTypes, String actionOnError, boolean overrideData,
+      boolean stopOnError) {
     Class<?> elementClass = AutomationElementRegistry.getInstance().get(processCode);
     if (elementClass != null) {
       try {
@@ -127,7 +127,6 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
-    String custSubGrp = requestData.getData().getCustSubGrp();
     // put the current engine data on the thread, for reuse if needed
     List<ActionOnError> actionsOnError = new ArrayList<>();
     LOG.trace("Preparing engine data..");
@@ -143,7 +142,7 @@ public class AutomationEngine {
 
     long resultId = getNextResultId(entityManager);
 
-    createComment(entityManager, "Auomated system checks have been started.", reqId, appUser);
+    createComment(entityManager, "Automated system checks have been started.", reqId, appUser);
 
     boolean systemError = false;
     boolean stopExecution = false;
@@ -153,13 +152,13 @@ public class AutomationEngine {
     requestData.getAdmin().setReviewReqIndc("N");
     for (AutomationElement<?> element : this.elements) {
       ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
-      
+
       // determine if element is to be skipped
 
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
       boolean skipElement = (skipChecks || engineData.get().isSkipChecks())
-          && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType()) || (ProcessType.Matching
-              .equals(element.getProcessType()) && !(element instanceof DuplicateCheckElement)));
+          && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType())
+              || (ProcessType.Matching.equals(element.getProcessType()) && !(element instanceof DuplicateCheckElement)));
 
       boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
       skipVerification = skipVerification && (element instanceof CompanyVerifier);
@@ -190,7 +189,6 @@ public class AutomationEngine {
           }
         }
 
-        
         LOG.trace("Result for " + element.getProcessDesc() + ": " + result.getResults());
         LOG.trace(" - " + result.getDetails());
         // record the result first
@@ -198,14 +196,10 @@ public class AutomationEngine {
 
         // check processing
         if (result.isOnError()) {
-          requestData.getAdmin().setReviewReqIndc("Y");
-          LOG.debug("Setting the review Required Indc as Y.");
-          createComment(entityManager, "Request needs a review.", reqId, appUser);
           if (ActionOnError.Ignore.equals(element.getActionOnError())) {
             LOG.debug("Element " + element.getProcessDesc() + " encountered an error but was ignored.");
           } else {
             actionsOnError.add(element.getActionOnError());
-
             if (element.isStopOnError()) {
               LOG.info("Stopping execution of other elements because of an error in " + element.getProcessDesc());
               createComment(entityManager, "An error in execution of " + element.getProcessDesc() + " caused the process to stop.", reqId, appUser);
@@ -252,9 +246,6 @@ public class AutomationEngine {
     Data data = requestData.getData();
     String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
     String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
-    if(engineData.get().hasNegativeCheckStatus()){
-      admin.setReviewReqIndc("Y");
-    }
 
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
@@ -326,14 +317,43 @@ public class AutomationEngine {
         } else if (actionsOnError.contains(ActionOnError.Wait)) {
           // do not change status
           moveToNextStep = false;
+          String cmt = "";
+          StringBuilder rejectCmt = new StringBuilder();
+          List<String> rejectionComments = (List<String>) engineData.get().get("rejections");
           Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
-          if ((rejectComments != null && !rejectComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+          if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+            rejectCmt.append("Processor review is required for following issues");
+            rejectCmt.append(":");
+            if (rejectComments != null && !rejectComments.isEmpty()) {
+              for (String rejCmt : rejectComments) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(rejCmt);
+              }
+            }
+            // append pending checks
+            if (pendingChecks != null && !pendingChecks.isEmpty()) {
+              for (String pendingCheck : pendingChecks.values()) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(pendingCheck);
+              }
+            }
+            cmt = rejectCmt.toString();
+
+            if (cmt.length() > 1930) {
+              cmt = cmt.substring(0, 1920) + "...";
+            }
+            cmt += "\n\nPlease view system processing results for more details.";
+            admin.setReviewReqIndc("Y");
+            createComment(entityManager, cmt, reqId, appUser);
+          }
+          if (actionsOnError.size() > 1) {
             admin.setReviewReqIndc("Y");
           }
-          String cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
+          cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
           createComment(entityManager, cmt, reqId, appUser);
           admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
-          createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null, false);
+          createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,
+              false);
         }
       }
       if (moveToNextStep) {

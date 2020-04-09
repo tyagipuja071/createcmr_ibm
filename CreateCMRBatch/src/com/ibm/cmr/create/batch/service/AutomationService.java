@@ -118,7 +118,7 @@ public class AutomationService extends MultiThreadedBatchService {
    * @param entityManager
    * @param requestData
    * @param current
-   * @throws Exception 
+   * @throws Exception
    */
   private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws Exception {
     Admin admin = requestData.getAdmin();
@@ -129,22 +129,21 @@ public class AutomationService extends MultiThreadedBatchService {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     int count = query.getSingleResult(Integer.class);
-//    Date maxDt = query.getSingleResult(Date.class);
-    Calendar cal = new GregorianCalendar();
-    cal.setTime(current);
-    cal.add(Calendar.MINUTE, -1 * 10);
+    // Date maxDt = query.getSingleResult(Date.class);
+    // Calendar cal = new GregorianCalendar();
+    // cal.setTime(current);
+    // cal.add(Calendar.MINUTE, -1 * 10);
     ApprovalService approvalService = new ApprovalService();
-    //if (maxDt.after(cal.getTime())) {
-    if(count > 0){
+    // if (maxDt.after(cal.getTime())) {
+    if (count > 0) {
       // rejection
       LOG.debug("Rejecting the Request " + admin.getId().getReqId() + " and moving back to requester..");
       approvalService.moveBackToRequester(entityManager, admin);
-    }
-    else{
+    } else {
       LOG.debug("Moving Request " + admin.getId().getReqId() + " to next step..");
       approvalService.moveToNextStep(entityManager, admin);
-    }     
-//    }
+    }
+    // }
   }
 
   /**
