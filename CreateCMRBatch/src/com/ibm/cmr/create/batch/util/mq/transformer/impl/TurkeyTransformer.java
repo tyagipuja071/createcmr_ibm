@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
@@ -58,6 +59,7 @@ public class TurkeyTransformer extends EMEATransformer {
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
+  private static final String DEFAULT_CLEAR_CHAR = "@";
 
   public static void main(String[] args) {
     String s = "TÃœRKÄ°YE";
@@ -628,6 +630,110 @@ public class TurkeyTransformer extends EMEATransformer {
   }
 
   @Override
+  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
+      MassUpdtData muData, String cmr) throws Exception {
+    // LOG.debug("TR >> Mapping default CMRTCEXT values");
+    boolean isUpdated = false;
+    // CMR:1334 : MassUpdate: TAX code
+    // if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(muData.getSpecialTaxCd().trim())) {
+    // custExt.setItIVA("");
+    // } else {
+    // custExt.setItIVA(muData.getSpecialTaxCd().trim());
+    // }
+    // }
+
+    // for tax office
+    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    if (muaList != null && muaList.size() > 0) {
+      for (MassUpdtAddr mua : muaList) {
+        if ("ZP01".equals(mua.getId().getAddrType())) {
+          if (!StringUtils.isBlank(mua.getFloor())) {
+            if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
+              custExt.setiTaxCode("");
+            } else {
+              custExt.setiTaxCode(muData.getNewEntpName1());
+            }
+            isUpdated = true;
+            break;
+          }
+
+        }
+      }
+    }
+
+    // for ident client
+    // if (!StringUtils.isBlank(muData.getOutCityLimit())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(muData.getOutCityLimit().trim())) {
+    // custExt.setItIdentClient("");
+    // } else {
+    // custExt.setItIdentClient(muData.getOutCityLimit());
+    // }
+    // isUpdated = true;
+    // }
+
+    // for company customer number
+    // if (!StringUtils.isBlank(muData.getCompany())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(muData.getCompany().trim())) {
+    // custExt.setItCompanyCustomerNo("");
+    // } else {
+    // custExt.setItCompanyCustomerNo(muData.getCompany());
+    // }
+    // }
+    //
+    // if (!StringUtils.isBlank(muData.getAffiliate())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(muData.getAffiliate())) {
+    // custExt.setAffiliate("");
+    // } else {
+    // custExt.setAffiliate(muData.getAffiliate());
+    // }
+    // }
+
+    // Tipo Cliente
+    // if (!StringUtils.isBlank(muData.getEntpUpdtTyp())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(muData.getEntpUpdtTyp())) {
+    // custExt.setTipoCliente("");
+    // } else {
+    // custExt.setTipoCliente(muData.getEntpUpdtTyp());
+    // }
+    // }
+
+    // Codice Destinatario/Ufficio
+    // if (!StringUtils.isBlank(muData.getSearchTerm())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(muData.getSearchTerm())) {
+    // custExt.setCoddes("");
+    // } else {
+    // custExt.setCoddes(muData.getSearchTerm());
+    // }
+    // }
+    //
+    // // PEC
+    // if (!StringUtils.isBlank(muData.getEmail2())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(muData.getEmail2())) {
+    // custExt.setPec("");
+    // } else {
+    // custExt.setPec(muData.getEmail2());
+    // }
+    // }
+    //
+    // // CMR-1332: MassUpdate: Collection code
+    // // Collection Code
+    // if (!StringUtils.isBlank(muData.getCollectionCd())) {
+    // if ("@".equals(muData.getCollectionCd())) {
+    // // cust.setCollectionCd("");
+    // custExt.setItCodeSSV("");
+    // } else {
+    // custExt.setItCodeSSV(muData.getCollectionCd());
+    // }
+    // }
+
+    if (isUpdated) {
+      custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+    }
+
+  }
+
+  @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     CmrtAddr legacyFiscalAddr = null;
@@ -661,38 +767,48 @@ public class TurkeyTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
       legacyAddr.setStreet(addr.getAddrTxt());
+      legacyAddr.setAddrLine4(addr.getAddrTxt());
 
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setStreet(addr.getAddrTxt());
+        legacyFiscalAddr.setAddrLine4(addr.getAddrTxt());
+      }
+    }
+
+    if (!StringUtils.isBlank(addr.getCustNm4())) {
+      legacyAddr.setAddrLine3(addr.getCustNm4());
+      legacyAddr.setContact(addr.getCustNm4());
+
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setAddrLine3("CL" + addr.getCustNm4());
+        legacyFiscalAddr.setContact(addr.getCustNm4());
       }
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      legacyAddr.setStreetNo(addr.getAddrTxt2());
+      legacyAddr.setAddrLine3(addr.getAddrTxt2());
 
       if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setStreetNo(addr.getAddrTxt2());
+        legacyFiscalAddr.setAddrLine3(addr.getAddrTxt2());
       }
     }
 
-    if (!StringUtils.isBlank(addr.getCity1())) {
-      legacyAddr.setCity(addr.getCity1());
-
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setCity(addr.getCity1());
-      }
-    }
+    // legacy addr line5 is set in order district+postCd+City
+    StringBuilder addrLine5 = new StringBuilder();
 
     if (!StringUtils.isBlank(addr.getDept())) {
-      legacyAddr.setContact(addr.getDept());
+      legacyAddr.setDistrict(addr.getDept());
+      addrLine5.append(addr.getDept() + " ");
 
       if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setContact(addr.getDept());
+        legacyFiscalAddr.setDistrict(addr.getDept());
+        legacyFiscalAddr.setAddrLine5(addr.getDept());
       }
     }
 
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
+      addrLine5.append(addr.getPostCd() + " ");
 
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setZipCode(addr.getPostCd());
@@ -703,15 +819,41 @@ public class TurkeyTransformer extends EMEATransformer {
       }
     }
 
-    String poBox = addr.getPoBox();
-    if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
-      poBox = " APTO " + poBox;
-      legacyAddr.setPoBox(addr.getPoBox());
+    if (!StringUtils.isBlank(addr.getCity1())) {
+      legacyAddr.setCity(addr.getCity1());
+      addrLine5.append(addr.getCity1());
 
       if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(addr.getPoBox());
+        legacyFiscalAddr.setCity(addr.getCity1());
       }
     }
+
+    if (!StringUtils.isBlank(addrLine5.toString())) {
+      legacyAddr.setAddrLine5(addrLine5.toString());
+
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setAddrLine5(addrLine5.toString());
+      }
+    }
+
+    if (!StringUtils.isEmpty(addr.getLandCntry())) {
+      legacyAddr.setAddrLine6(addr.getLandCntry());
+
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setAddrLine6(addr.getLandCntry());
+      }
+    }
+
+    // String poBox = addr.getPoBox();
+    // if (!StringUtils.isEmpty(poBox) &&
+    // !poBox.toUpperCase().startsWith("APTO")) {
+    // poBox = " APTO " + poBox;
+    // legacyAddr.setPoBox(addr.getPoBox());
+    //
+    // if (legacyFiscalAddr != null) {
+    // legacyFiscalAddr.setPoBox(addr.getPoBox());
+    // }
+    // }
 
     boolean crossBorder = false;
     if (!StringUtils.isEmpty(addr.getLandCntry()) && !"ES".equals(addr.getLandCntry())) {
@@ -1014,6 +1156,22 @@ public class TurkeyTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {
       cust.setCeBo(muData.getCustNm2());
+    }
+
+    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    if (muaList != null && muaList.size() > 0) {
+      for (MassUpdtAddr mua : muaList) {
+        if ("ZP01".equals(mua.getId().getAddrType())) {
+          if (!StringUtils.isBlank(mua.getCustPhone())) {
+            if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
+              cust.setTelNoOrVat("");
+            } else {
+              cust.setTelNoOrVat(mua.getCustPhone());
+            }
+            break;
+          }
+        }
+      }
     }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
