@@ -1197,7 +1197,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         rejectReason = getRejectReason(entityManager, rejectReason);
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), sendToId, sendToNm,
-          complete, rejectReason, rejReasonCd);
+          complete, rejectReason, rejReasonCd, model.getRejSupplInfo1(), model.getRejSupplInfo2());
 
       // save comment in req_cmt_log table .
       // save only if it is not null or not blank
@@ -1220,7 +1220,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         wfComment = wfComment.substring(0, 237) + " (truncated)";
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
-          null);
+          null, null, null);
       String action = model.getAction();
       String actionDesc = getActionDescription(action, entityManager);
       String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
@@ -1259,7 +1259,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     // there's a status change
     RequestUtils.createWorkflowHistory(this, entityManager, request, admin, CmrConstants.Mark_as_Completed(), model.getAction(), null, null, complete,
-        null, null);
+        null, null, null, null);
 
     // save comment in req_cmt_log table .
     String comment = STATUS_CHG_CMT_PRE_PREFIX + CmrConstants.Mark_as_Completed() + "\"";
@@ -1406,8 +1406,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     updateEntity(admin, entityManager);
 
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
-        null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null,
+        null, null);
 
     // save comment in req_cmt_log table .
     // save only if it is not null or not blank
@@ -3686,8 +3686,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         massUpdtData.setEntpUpdtTyp(model.getEntUpdTyp());
         cname1 = model.getCname1();
         cname2 = "";
-        if (!StringUtils.isBlank(cname1))
+        if (!StringUtils.isBlank(cname1)) {
           splitName(massUpdtData, cname1, cname2, 28, 24);
+        }
       } else if (model.getEntUpdTyp().equalsIgnoreCase("B")) {
         massUpdtData.setCompany(model.getComp1());
         massUpdtData.setNewEntp(model.getNewEntp());
@@ -5588,10 +5589,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
     query.setParameter("REQ_TYP", req_typ);
     count = query.getSingleResult(Integer.class);
-    if (count >= 1)
+    if (count >= 1) {
       return true;
-    else
+    } else {
       return false;
+    }
 
   }
 }
