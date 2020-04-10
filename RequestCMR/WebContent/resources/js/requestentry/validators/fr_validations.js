@@ -264,11 +264,11 @@ function setSBOOnScenario() {
   if (custSubGrp == '') {
     return
   } else {
+    FormManager.readOnly('installBranchOff');
     if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('installBranchOff');
 
       } else if (role == 'Processor') {
         FormManager.setValue('salesBusOffCd','98F');
@@ -464,7 +464,6 @@ function addSboIboLogic() {
       if (iboCd != '' && iboCd.length > 3) {
         iboCd = iboCd.substring(iboCd.length-3, iboCd.length);
       }
-      FormManager.readOnly('installBranchOff');
       FormManager.setValue('installBranchOff', iboCd);
     }
   });
