@@ -156,8 +156,8 @@ public class FranceTransformer extends MessageTransformer {
         && MQMsgConstants.REQ_STATUS_NEW.equals(handler.mqIntfReqQueue.getReqStatus())) {
       if (isDoubleCreate(handler))
         if (StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())) {
-          LOG.debug("TUNISIA or ALGERIA for MQ ID " + handler.mqIntfReqQueue.getId().getQueryReqId() + " Request ID "
-              + handler.cmrData.getId().getReqId());
+          LOG.debug(
+              "TUNISIA or ALGERIA for MQ ID " + handler.mqIntfReqQueue.getId().getQueryReqId() + " Request ID " + handler.cmrData.getId().getReqId());
           String cmrNo = generateCMRNoForTunisiaAndAlgeria(handler, "729");
           if (cmrNo == null) {
             LOG.warn("Warning, a CMR No cannot be generated for TUNISIA or ALGERIA.");
@@ -177,6 +177,7 @@ public class FranceTransformer extends MessageTransformer {
     if (StringUtils.isEmpty(cmrData.getTaxCd1()))
       if (MQMsgConstants.CUSTSUBGRP_COMME.equalsIgnoreCase(cmrData.getCustSubGrp())
           || MQMsgConstants.CUSTSUBGRP_FIBAB.equalsIgnoreCase(cmrData.getCustSubGrp())
+          || MQMsgConstants.CUSTSUBGRP_IBMEM.equalsIgnoreCase(cmrData.getCustSubGrp())
           || MQMsgConstants.CUSTSUBGRP_PRICU.equalsIgnoreCase(cmrData.getCustSubGrp()) || isCrossBorder(cmrData, handler)
           || DOM.contains(countrySubRegion) || TOM.contains(countrySubRegion) || SystemLocation.MONACO.equalsIgnoreCase(countrySubRegion))
         messageHash.put(MQMsgConstants.SIRET, "SC" + "xxxxxx" + "0" + messageHash.get("LocationNumber"));
@@ -529,6 +530,7 @@ public class FranceTransformer extends MessageTransformer {
       messageHash.put(MQMsgConstants.AUTH_REMARK, "NO");
     } else if (MQMsgConstants.CUSTSUBGRP_IBMEM.equals(scenario)) { // LOCAL IBM
                                                                    // EMPLOYEE
+      /* messageHash.put(MQMsgConstants.NATURE_CLIENT, "111"); */
       messageHash.put(MQMsgConstants.AUTH_REMARK, "NO");
       messageHash.put(MQMsgConstants.SIGLE_IDENTIF, "D3");
       messageHash.put("CustomerType", "71");
@@ -816,8 +818,8 @@ public class FranceTransformer extends MessageTransformer {
 
     LOG.debug("Request Type " + handler.mqIntfReqQueue.getReqType());
     if (CmrConstants.REQ_TYPE_UPDATE.equals(handler.mqIntfReqQueue.getReqType())) {
-      String locNo = !StringUtils.isEmpty(handler.cmrData.getSubIndustryCd()) ? handler.mqIntfReqQueue.getCmrIssuingCntry()
-          + handler.cmrData.getSubIndustryCd() : "";
+      String locNo = !StringUtils.isEmpty(handler.cmrData.getSubIndustryCd())
+          ? handler.mqIntfReqQueue.getCmrIssuingCntry() + handler.cmrData.getSubIndustryCd() : "";
       LOG.debug("Computed Location No: " + locNo);
       handler.messageHash.put("LocationNumber", locNo);
       handler.messageHash.put("CustomerLocationNo", locNo);

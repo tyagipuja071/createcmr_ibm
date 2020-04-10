@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
@@ -50,6 +51,7 @@ public class IERPProcessService extends BaseBatchService {
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
     try {
 
+      ChangeLogListener.setUser(COMMENT_LOGGER);
       initClient();
 
       monitorCreqcmr(entityManager);
@@ -74,7 +76,8 @@ public class IERPProcessService extends BaseBatchService {
     String sql1 = ExternalizedQuery.getSql("BATCH.GET_DR_COUNTRIES");
     PreparedQuery query = new PreparedQuery(em, sql1);
     List<SuppCntry> drList = query.getResults(SuppCntry.class);
-    LOG.debug("Executing batch code for R" + SystemConfiguration.getSystemProperty("RELEASE") + ".b" + SystemConfiguration.getSystemProperty("BUILD"));
+    LOG.debug(
+        "Executing batch code for R" + SystemConfiguration.getSystemProperty("RELEASE") + ".b" + SystemConfiguration.getSystemProperty("BUILD"));
     LOG.debug("Size of DR list : " + drList.size());
 
     // DTN: 2) Get the requests
@@ -172,8 +175,8 @@ public class IERPProcessService extends BaseBatchService {
             // update admin status
             admin.setDisableAutoProc(disableAutoProc);
             LOG.debug("*** Setting DISABLE_AUTO_PROC >> " + admin.getDisableAutoProc());
-            admin.setProcessedFlag(CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N
-                .toString());
+            admin.setProcessedFlag(
+                CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N.toString());
             LOG.debug("*** Setting PROCESSED_FLAG >> " + admin.getProcessedFlag());
 
             /*
@@ -223,7 +226,7 @@ public class IERPProcessService extends BaseBatchService {
               LOG.error("ERROR: " + e.getMessage());
             }
 
-          }// if overallResponse is not null
+          } // if overallResponse is not null
 
         } else if (CmrConstants.REQ_TYPE_CREATE.equals(cmrServiceInput.getInputReqType())) {
           response = processCreateRequest(admin, cmrServiceInput, em);
@@ -238,8 +241,8 @@ public class IERPProcessService extends BaseBatchService {
           if (CmrConstants.RDC_STATUS_COMPLETED.equals(response.getStatus())) {
             overallStatus = CmrConstants.RDC_STATUS_COMPLETED;
             // response = processCreateRequest(admin, cmrServiceInput, em);
-            statusMessage.append("Record with request ID " + admin.getId().getReqId() + " and CMR Number " + response.getCmrNo()
-                + " created SUCCESSFULLY. ");
+            statusMessage
+                .append("Record with request ID " + admin.getId().getReqId() + " and CMR Number " + response.getCmrNo() + " created SUCCESSFULLY. ");
             statusMessage.append("CMR No. " + response.getCmrNo() + " generated for this request. ");
             if (prospectConversion) {
               statusMessage.append(" RDc processing converted prospect " + cmrServiceInput + " to KUNNR(s): ");
@@ -287,8 +290,8 @@ public class IERPProcessService extends BaseBatchService {
           // update admin status
           admin.setDisableAutoProc(disableAutoProc);
           LOG.debug("*** Setting DISABLE_AUTO_PROC >> " + admin.getDisableAutoProc());
-          admin.setProcessedFlag(CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N
-              .toString());
+          admin.setProcessedFlag(
+              CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N.toString());
           LOG.debug("*** Setting PROCESSED_FLAG >> " + admin.getProcessedFlag());
           /*
            * jzamora - edited to return the request back to processor if an
@@ -357,7 +360,8 @@ public class IERPProcessService extends BaseBatchService {
                       addrSeqs = red.getSeqNo().split(",");
                     }
 
-                    if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType()) && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
+                    if (red.getAddressType().equalsIgnoreCase(addr.getId().getAddrType())
+                        && addrSeqs[1].equalsIgnoreCase(addr.getId().getAddrSeq())) {
                       addr.setPairedAddrSeq(addrSeqs[0]);
                       addr.setSapNo(red.getSapNo());
                       addr.setIerpSitePrtyId(red.getIerpSitePartyId());

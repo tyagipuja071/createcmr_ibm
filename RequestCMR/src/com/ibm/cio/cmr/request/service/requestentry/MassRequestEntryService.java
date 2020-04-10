@@ -474,7 +474,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   //
   // if (muAddrs == null && muAddrs.size() > 0) {
   // throw new CmrException(new
-  // Exception(">> There are no mass update addresses to perform DPL check on."));
+  // Exception(">> There are no mass update addresses to perform DPL check
+  // on."));
   // return;
   // }
   //
@@ -597,8 +598,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   // }
   // }
 
-  private Map<String, String> doCheckLDMassUpdtAddr(AppUser user, RequestEntryModel model, Admin admin, EntityManager entityManager,
-      String custToUse, String cmrNo, MassUpdtAddr muAddr) throws CmrException {
+  private Map<String, String> doCheckLDMassUpdtAddr(AppUser user, RequestEntryModel model, Admin admin, EntityManager entityManager, String custToUse,
+      String cmrNo, MassUpdtAddr muAddr) throws CmrException {
     List<AddressModel> extractedAddr = new ArrayList<>();
     List<Addr> tempExtractAddr = new ArrayList<Addr>();
     FindCMRResultModel results = null;
@@ -1167,8 +1168,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     updateEntity(admin, entityManager);
 
     // MASS_UPDATE | set ROW_STATUS_CD = READY if 'CRU'
-    if ((CmrConstants.REQ_TYPE_MASS_UPDATE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_DELETE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE
-        .equalsIgnoreCase(admin.getReqType())) && CmrConstants.Create_Update_CMR().equals(trans.getId().getAction())) {
+    if ((CmrConstants.REQ_TYPE_MASS_UPDATE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_DELETE.equalsIgnoreCase(admin.getReqType())
+        || CmrConstants.REQ_TYPE_REACTIVATE.equalsIgnoreCase(admin.getReqType()))
+        && CmrConstants.Create_Update_CMR().equals(trans.getId().getAction())) {
       massDataService.setToReady(entityManager, model.getReqId(), admin.getIterationId());
     }
 
@@ -1217,7 +1219,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         wfComment = wfComment.substring(0, 237) + " (truncated)";
       }
-      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null);
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
+          null);
       String action = model.getAction();
       String actionDesc = getActionDescription(action, entityManager);
       String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
@@ -1255,8 +1258,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     // there's a status change
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, CmrConstants.Mark_as_Completed(), model.getAction(), null, null,
-        complete, null, null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, CmrConstants.Mark_as_Completed(), model.getAction(), null, null, complete,
+        null, null);
 
     // save comment in req_cmt_log table .
     String comment = STATUS_CHG_CMT_PRE_PREFIX + CmrConstants.Mark_as_Completed() + "\"";
@@ -1392,7 +1395,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
     admin.setReqStatus(trans.getNewReqStatus());
-    if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd()) && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
+    if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd())
+        && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
       // the request is to be locked
       RequestUtils.setClaimDetails(admin, request);
     } else if (CmrConstants.YES_NO.N.toString().equals(trans.getNewLockedInd())
@@ -1402,7 +1406,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     updateEntity(admin, entityManager);
 
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
+        null);
 
     // save comment in req_cmt_log table .
     // save only if it is not null or not blank
@@ -1432,9 +1437,19 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("CURR_REQ_STATUS", model.getReqStatus());
     query.setParameter("CURR_LOCKED_IND", model.getLockInd() != null ? model.getLockInd() : CmrConstants.YES_NO.N.toString());
     query.setParameter("ACTION", model.getAction());
+    query.setForReadOnly(true);
     List<StatusTrans> trans = query.getResults(2, StatusTrans.class);
     if (trans != null && trans.size() > 0) {
       for (StatusTrans transrec : trans) {
+        if ("PPN".equals(transrec.getNewReqStatus())) {
+          String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
+          if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
+            if (isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
+              this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
+              transrec.setNewReqStatus("AUT"); // set to automated processing
+            }
+          }
+        }
         if ("*".equals(transrec.getId().getReqType())) {
           return transrec;
         } else if (transrec.getId().getReqType().equals(model.getReqType())) {
@@ -4282,9 +4297,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             if (!StringUtils.equalsIgnoreCase(key, "SGDN") && !StringUtils.equalsIgnoreCase(key, "ERROR_TXT")) {
               val = df.formatCellValue(cmrRow.getCell(DATA_FLD.get(key) - 1));
               if (val.length() > dataLimit.get(key)) {
-                initLogger().debug(
-                    val.length() + " data limit : " + dataLimit.get(key) + " current actual row : " + key + " : "
-                        + Integer.toString(cmrRow.getRowNum()));
+                initLogger().debug(val.length() + " data limit : " + dataLimit.get(key) + " current actual row : " + key + " : "
+                    + Integer.toString(cmrRow.getRowNum()));
                 initLogger().error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " exceeded the limit");
                 throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROW, Integer.toString(cmrRow.getRowNum() + 1));
               }
@@ -5240,6 +5254,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getCity1()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setCity1(tempVal);
+        } else {
+          muaModel.setCity1("");
         }
 
         break;
@@ -5247,6 +5263,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getPostCd()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setPostCd(tempVal);
+        } else {
+          muaModel.setPostCd("");
         }
 
         break;
@@ -5265,7 +5283,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "PO_BOX":
         muaModel.setPoBox(tempVal);
         break;
-      case "FLOOR":
+      case "FLOOR":// For Tureky,used store taxOffice
         muaModel.setFloor(tempVal);
         break;
       case "BLDG":
@@ -5559,5 +5577,21 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     return cd;
+  }
+
+  public static boolean isRequestReactivationEnable(EntityManager entityManager, String country, String req) {
+    int count = 0;
+    String req_typ = (!StringUtils.isBlank(req)) ? "%" + req + "%" : "";
+    String sql = ExternalizedQuery.getSql("AUTOMATION.CHECK_REACTIVATION");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    /* query.setForReadOnly(true); */
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    query.setParameter("REQ_TYP", req_typ);
+    count = query.getSingleResult(Integer.class);
+    if (count >= 1)
+      return true;
+    else
+      return false;
+
   }
 }

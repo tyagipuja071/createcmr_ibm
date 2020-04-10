@@ -27,6 +27,8 @@ import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilCalculateIBMElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilDupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ImportExternalDataElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ScenarioCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USDelReacCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 
 /**
  * Registry of all {@link AutomationElement} classes with their corresponding
@@ -67,6 +69,10 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   // EU
   public static final String EU_VAT_VALIDATION = "EU_VAT_VALIDATION";
 
+  // US
+  public static final String US_DEL_REAC_CHECK = "US_DEL_REAC_CHECK";
+  public static final String US_DUP_CHK = "US_DUP_CHK";
+
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
   public static AutomationElementRegistry getInstance() {
@@ -92,14 +98,22 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(GBL_ADDR_STD, USAddrStdElement.class);
     put(GBL_SCENARIO_CHECK, GBLScenarioCheckElement.class);
     put(GBL_UPDATE_SWITCH, UpdateSwitchElement.class);
-    put(EU_VAT_VALIDATION, EUVatValidationElement.class);
     put(GBL_DNB_CHECK, DnBCheckElement.class);
     // Brazil - 631
     put(BR_SCENARIO, ScenarioCheckElement.class);
     put(BR_DUP_CHECK, BrazilDupCMRCheckElement.class);
     put(BR_CALCULATE, BrazilCalculateIBMElement.class);
     put(BR_IMPORT, ImportExternalDataElement.class);
+
+    // ANZ
     put(ANZ_BN_VALIDATION, ANZBNValidationElement.class);
+
+    // EU
+    put(EU_VAT_VALIDATION, EUVatValidationElement.class);
+
+    // US
+    put(US_DEL_REAC_CHECK, USDelReacCheckElement.class);
+    put(US_DUP_CHK, USDuplicateCheckElement.class);
   }
 
   @Override

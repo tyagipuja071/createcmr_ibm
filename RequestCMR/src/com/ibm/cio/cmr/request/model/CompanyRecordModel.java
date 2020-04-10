@@ -48,6 +48,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private Double revenue;
 
   private boolean highestRevenue;
+  private String operStatusCode;
 
   @Override
   public int compareTo(CompanyRecordModel o) {
@@ -307,5 +308,13 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setOrgIdMatch(boolean orgIdMatch) {
     this.orgIdMatch = orgIdMatch;
+  }
+
+  public String getOperStatusCode() {
+    return operStatusCode;
+  }
+
+  public void setOperStatusCode(String operStatusCode) {
+    this.operStatusCode = operStatusCode;
   }
 }

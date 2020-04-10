@@ -98,11 +98,13 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             engineData.addRejectionComment("Buisness Number is not Valid.");
             log.debug("The Company buisness number is not the same as the one on the request.");
           } else {
-            validation.setSuccess(false);
+            // validation.setSuccess(false);
             validation.setMessage("Legal Name not same as API's");
             output.setDetails("The Customer Legal Name on the request does not match the information from the service.");
-            output.setOnError(true);
-            engineData.addRejectionComment("Legal Name on request and API doesn't match.");
+            // output.setOnError(true);
+            // engineData.addRejectionComment("Legal Name on request and API
+            // doesn't match.");
+            engineData.addNegativeCheckStatus("ABNLegalName", "Legal Name on request and API doesn't match.");
             log.debug("The Customer Legal Name on the request does not match the information from the service.");
           }
         } else {

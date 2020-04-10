@@ -79,6 +79,7 @@
 			</p>
 		</cmr:column>
 		<!-- CMR-2093: add CoF field for Turkey -->
+		<%-- *abner revert begin
 		<cmr:column span="2" containerForField="CommercialFinanced"
 			forCountry="862">
 			<p>
@@ -91,6 +92,7 @@
 					fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB" />
 			</p>
 		</cmr:column>
+		 *abner revert end --%>
 		<cmr:column span="2" containerForField="EmbargoCode">
 			<p>
 				<cmr:label fieldId="embargoCd">
@@ -117,6 +119,19 @@
 				</cmr:column>
 			</c:if>
 		</cmr:view>
+		
+		<cmr:view forCountry="726">
+			<cmr:column span="2" containerForField="ModeOfPayment">
+				<p>
+					<cmr:label fieldId="modeOfPayment">
+						<cmr:fieldLabel fieldId="ModeOfPayment" />: 
+          			</cmr:label>
+					<cmr:field path="paymentMode" id="modeOfPayment"
+						fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>		
+		</cmr:view>
+		
 	</cmr:row>
 
 	<cmr:view forCountry="XXXX">

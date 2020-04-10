@@ -175,7 +175,8 @@
                 <option value="C">Create</option>
                 <option value="U">Update</option>
                 <option value="CU">Create/Update</option>
-                <option value="R">Reactivation</option>
+                <option value="R">Reactivate</option>
+                <option value="D">Delete</option>
               </select>
             </td>
             <td>

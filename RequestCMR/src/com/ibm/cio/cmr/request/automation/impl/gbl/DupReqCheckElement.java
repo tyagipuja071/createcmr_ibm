@@ -73,6 +73,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       if (response != null) {
         if (response.getSuccess()) {
           if (response.getMatched()) {
+            List<String> dupReqIds = new ArrayList<>();
             StringBuilder details = new StringBuilder();
             List<ReqCheckResponse> reqCheckMatches = response.getMatches();
             details.append(reqCheckMatches.size() + " record(s) found.");
@@ -111,7 +112,8 @@ public class DupReqCheckElement extends DuplicateCheckElement {
               engineData.put("reqCheckMatches", reqCheckRecord);
             }
             result.setResults("Found Duplicate Requests.");
-            engineData.addRejectionComment("Duplicate Request Check Element found " + reqCheckMatches.size() + " duplicate requests.");
+            engineData.addRejectionComment(reqCheckMatches.size()
+                + " possible duplicate request(s) found with the same data.\n Duplicate Request(s): " + StringUtils.join(dupReqIds, ", "));
             result.setOnError(true);
             result.setProcessOutput(output);
             result.setDetails(details.toString().trim());

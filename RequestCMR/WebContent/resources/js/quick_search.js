@@ -49,6 +49,7 @@ app.filter('recFilter', function() {
 app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$timeout', '$sanitize', '$filter', function($scope, $document, $http, $timeout, $sanitize, $filter) {
 
   $scope.searched = false;
+  $scope.orgIdSearch = false;
   $scope.records = [];
   $scope.cmrNo = '';
 
@@ -63,7 +64,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     F3 : 'Fuzzy matches against name, street line 1, city, and country.',
     F4 : 'Fuzzy matches against name, street line 2, city, postal code, and country.',
     F5 : 'Fuzzy matches against name, street line 2, city, and country.',
-    VAT : 'CMRs found with the same VAT only.',
+    VAT : 'CMRs found with the same VAT or Tax Code only.',
     A : 'Record an absolute match using CMR No.',
     LANG : 'Record matched against local language data.',
     DUNS : 'CMRs found for the related D&B Matches.',
@@ -73,7 +74,11 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     if (!FormManager.validate('frmCMR')) {
       return;
     }
+    $scope.orgIdSearch = false;
     var crit = buildSearchCriteria();
+    if (!crit.name || !crit.streetAddress1 || !crit.city) {
+      $scope.orgIdSearch = true;
+    }
     $scope.frozen = crit;
     if (crit.cmrNo && (crit.name || crit.stateProv || crit.city || crit.streetAddress1 || crit.streetAddress2 || crit.postCd || crit.vat)) {
       if (!confirm('CMR No. is specified so the values for the address fields will be ignored and only the records under the CMR No. will be retrieved. Proceed?')) {
@@ -99,6 +104,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
             console.log('splicing from 50, removing ' + (data.items.length - 50) + ' items');
             data.items.splice(50, data.items.length - 50);
           }
+          console.log(data.items);
           data.items.forEach(function(item, i) {
             if (item.recType == 'DNB' && !item.countryCd) {
               item.countryCd = crit.countryCd;
@@ -294,10 +300,10 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
       }
     }
     model.taxCd1 = FormManager.getActualValue('taxCd1');
-    if (model.issuingCntry == '706' && (!model.taxCd1 || !model.vat)) {
-      cmr.showAlert('At least VAT or SIRET must be specified.');
-      return;
-    }
+    // if (model.issuingCntry == '706' && (!model.taxCd1 || !model.vat)) {
+    // cmr.showAlert('At least VAT or SIRET must be specified.');
+    // return;
+    // }
 
     var details = 'System Location: ' + model.issuingCntry;
     details += '<br>' + model.name;
@@ -316,6 +322,13 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     }
     if (model.vat) {
       details += '<br>VAT: ' + model.vat;
+    }
+    if (model.taxCd1) {
+      if (model.issuingCntry == '706') {
+        details += '<br>SIRET: ' + model.taxCd1;
+      } else {
+        details += '<br>Tax Code: ' + model.taxCd1;
+      }
     }
 
     _currQuickDet = details;

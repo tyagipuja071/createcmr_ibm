@@ -77,6 +77,7 @@ form.ibm-column-form .dijitTextBox INPUT {
     });
 
     window.setTimeout('setDefaults()', 1500);
+    FormManager.addValidator('countryCd', Validators.REQUIRED, [ 'Landed Country' ]);
     FormManager.addValidator('issuingCntry', Validators.REQUIRED, [ 'CMR Issuing Country' ]);
     FormManager.addFormValidator((function() {
       return {
@@ -93,6 +94,16 @@ form.ibm-column-form .dijitTextBox INPUT {
                 }, false, 'Company Name, Country, and Street should be specified if CMR No. is blank.');
               }
             } else {
+              var orgIdSearch = crit.vat || crit.taxCd1;
+              var nameSearch = crit.name && crit.streetAddress1 && crit.city;
+              if (!orgIdSearch && !nameSearch){
+                return new ValidationResult({
+                  id : 'streetAddress1',
+                  type : 'text',
+                  name : 'streetAddress1'
+                }, false, 'VAT or Tax Code, OR Company Name + Country + Street + City should be specified if CMR No. is blank.');
+              }
+/*
               if (!crit.name || !crit.countryCd || !crit.streetAddress1 || !crit.city){
                 return new ValidationResult({
                   id : 'streetAddress1',
@@ -100,6 +111,7 @@ form.ibm-column-form .dijitTextBox INPUT {
                   name : 'streetAddress1'
                 }, false, 'Company Name, Country, Street, and City should be specified if CMR No. is blank.');
               }
+*/
             }
             if (crit.countryCd == 'US' && (!crit.stateProv || !crit.postCd)){
               return new ValidationResult({
@@ -383,11 +395,12 @@ form.ibm-column-form .dijitTextBox INPUT {
                            {{orgId}}
                          </div>
                        </span> 
-                       <img ng-show="rec.orgIdMatch" src="${resourcesPath}/images/approve.png" title="Matches VAT/Org ID on the search criteria" style="width:20px; height:20px; cursor:help">
+                       <img ng-show="rec.orgIdMatch" src="${resourcesPath}/images/approve.png" title="Matches VAT/Tax Code/Org ID on the search criteria" style="width:20px; height:20px; cursor:help">
                      </td>
                      <td>
                        <div ng-show="rec.recType == 'DNB'">
-                         <input type="button" class="cmr-grid-btn" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(rec, false)">
+                         <input ng-show="rec.operStatusCode != 'O'" type="button" class="cmr-grid-btn" value="Create New CMR" title="Request for a new CMR using this D&B record." ng-click="confirmImport(rec, false)">
+                         <span ng-show="rec.operStatusCode == 'O'" style="font-weight:bold;color:red">Out of business</span>
                        </div>
                        <div ng-show="rec.recType == 'CMR'">
                          <input ng-show="rec.cmrNo.indexOf('P') != 0" type="button" class="cmr-grid-btn" value="Create by Model" title="Request for a new CMR modeled after this record" ng-click="confirmImport(rec, false)">
@@ -398,7 +411,7 @@ form.ibm-column-form .dijitTextBox INPUT {
                    </tr>
                    <tr>
                      <td colspan="7">
-                       <input ng-show="!cmrNo && issuingCtry != '760' && issuingCntry != '641'" type="button" value="Request CMR with Address" title="Request for a new CMR using the information specified under the search criteria." class="search-btn" ng-click="createNewCmr()">
+                       <input ng-show="!cmrNo && issuingCtry != '760' && issuingCntry != '641' && !orgIdSearch" type="button" value="Request CMR with Address" title="Request for a new CMR using the information specified under the search criteria." class="search-btn" ng-click="createNewCmr()">
                        <input type="button" value="Request CMR with blank data" title="Request for a new CMR with only CMR Issuing Country specified." class="search-btn" ng-click="confirmCreateNew()">
                      </td>
                    </tr>

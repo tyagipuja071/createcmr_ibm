@@ -14,6 +14,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 
 /**
  * @author JeffZAMORA
@@ -23,8 +24,17 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
 
   @Override
   public void addEmailParams(EntityManager entityManager, List<Object> params, Admin admin) {
-    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL");
-    params.add(bpURL); // {12}
+    String type = (String) params.get(4);
+    String reqId = (String) params.get(0);
+    if ("Create".equalsIgnoreCase(type)) {
+      type = "C";
+    } else if ("Update".equalsIgnoreCase(type)) {
+      type = "U";
+    }
+    String reqStatus = (String) params.get(5);
+    if (RequestUtils.STATUS_INPUT_REQUIRED.equalsIgnoreCase(reqStatus)) {
+      reqStatus = "PRJ";
+    }
 
     String cmrIssuingCountry = null;
     cmrIssuingCountry = getCmrIssuingCntry(entityManager, admin);
@@ -33,6 +43,16 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
+
+    String bpURL = "";
+
+    if (cmrIssuingCountry != null && cmrIssuingCountry.equalsIgnoreCase(RequestUtils.US_CMRISSUINGCOUNTRY) && "PRJ".equalsIgnoreCase(reqStatus))
+      bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL").replace("/home", "") + "/request?cmrIssuingCntry=" + cmrIssuingCountry + "&reqStatus="
+          + reqStatus + "&reqType=" + type + "&reqId=" + reqId;
+    else
+      bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL");
+
+    params.add(bpURL); // {12}
 
     if (cmrIssuingCountry != null) {
       if ("897".equalsIgnoreCase(cmrIssuingCountry)) {
@@ -104,7 +124,7 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
 
   }
 
-  private String getCmrIssuingCntry(EntityManager entityManager, Admin admin) {
+  public static String getCmrIssuingCntry(EntityManager entityManager, Admin admin) {
     String cmrIssuingCntry = null;
     String sql = ExternalizedQuery.getSql("BATCH.EMAILENGINE.GETCMRISSUINGCNTRY");
     PreparedQuery query = new PreparedQuery(entityManager, sql);

@@ -97,10 +97,16 @@
   });
   
   function forceAddressValidationFromQS(){
-    if (!_allAddressData || _allAddressData.length == 0){
+    if (FilteringDropdown.pending() || !_allAddressData || _allAddressData.length == 0){
       window.setTimeout('forceAddressValidationFromQS()', 500);
     } else {
-      var soldToSeq = _allAddressData[0].addrSeq[0];
+      var soldToSeq = '1';
+      for (var i = 0; i < _allAddressData.length; i++){
+        if (_allAddressData[i].addrType == 'ZS01'){
+          soldToSeq = _allAddressData[i].addrSeq[0];
+          break;
+        }
+      }
       cmr.hideProgress();
       doUpdateAddr(FormManager.getActualValue('reqId'),'ZS01', soldToSeq, cmr.MANDT);
     }
@@ -438,7 +444,7 @@ div#ibm-content-main {
     <%} %>
 	</cmr:view>
 	
-    <cmr:view forGEO="CEMEA">
+    <cmr:view forGEO="CEMEA" exceptForCountry="618">
     <%if (!StringUtils.isEmpty(reqentry.getEmbargoCd())){%>
       <cmr:row>
         <cmr:column span="6">
@@ -450,7 +456,18 @@ div#ibm-content-main {
       </cmr:row>
     <%} %>
     </cmr:view>
-    
+    <cmr:view forCountry="618">
+    <%if (!StringUtils.isEmpty(reqentry.getOrdBlk()) && "88".equals(reqentry.getOrdBlk()) && "U".equals(reqentry.getReqType())){%>
+      <cmr:row>
+        <cmr:column span="6">
+          <div class="embargo">
+            <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+            <cmr:note text="${ui.info.cob}" />
+          </div>
+        </cmr:column>
+      </cmr:row>
+    <%} %>
+    </cmr:view>
     <cmr:view forGEO="AP">
     <%if ("Y".equals(reqentry.getGovType())){%>
       <cmr:row>

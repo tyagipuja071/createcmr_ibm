@@ -30,7 +30,6 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String COMPANY_INFO_SOURCE = "compInfoSrc";
   public static final String SCENARIO_VERIFIED_INDC = "scenarioVerifiedIndc";
   public static final String MATCH_DEPARTMENT = "matchDepartment";
-  public static final String COVERAGE_ID = "COVERAGE_ID";
   /**
    * 
    */
@@ -68,6 +67,22 @@ public class AutomationEngineData extends HashMap<String, Object> {
     }
     checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     checks.put(checkKey, userFriendlyCheckMessage);
+  }
+  
+  /**
+   * Checks negative check status 
+   * 
+   * @param userFriendlyCheckMessage
+   */
+  @SuppressWarnings("unchecked")
+  public boolean hasNegativeCheckStatus() {
+    Map<String, String> checks = (Map<String, String>) get(NEGATIVE_CHECKS);
+    if (checks != null) {
+      return true;
+    }
+    else{
+      return false;
+    }
   }
 
   /**

@@ -84,6 +84,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
               if (cmrCheckMatches.size() != 0) {
                 result.setResults("Matches Found");
                 details.append(cmrCheckMatches.size() + " record(s) found.");
+                List<String> dupCMRNos = new ArrayList<>();
                 if (cmrCheckMatches.size() > 5) {
                   cmrCheckMatches = cmrCheckMatches.subList(0, 5);
                   details.append("Showing top 5 matches only.");
@@ -94,8 +95,9 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   details.append("\n");
 
                   log.debug("Duplicate CMRs Found..");
-                  output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "",
-                      "CMR", itemNo++);
+                  output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
+                      itemNo++);
+                  dupCMRNos.add(cmrCheckRecord.getCmrNo());
                   if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
                     details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
                   }
@@ -151,8 +153,16 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   engineData.put("cmrCheckMatches", cmrCheckRecord);
                 }
                 result.setResults("Found Duplicate CMRs.");
-                engineData.addRejectionComment("There were " + cmrCheckMatches.size() + " possible duplicate CMRs found with the same data.");
-                result.setOnError(true);
+                if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
+                  engineData.addNegativeCheckStatus("dupAllowed",
+                      cmrCheckMatches.size()
+                          + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
+                          + StringUtils.join(dupCMRNos, ", "));
+                } else {
+                  engineData.addRejectionComment(cmrCheckMatches.size() + " possible duplicate CMR(s) found with the same data.\n Duplicate CMR(s): "
+                      + StringUtils.join(dupCMRNos, ", "));
+                  result.setOnError(true);
+                }
                 result.setProcessOutput(output);
                 result.setDetails(details.toString().trim());
               } else {
@@ -225,9 +235,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       for (String rdcAddrType : rdcAddrTypes) {
         if (addr != null) {
           DuplicateCMRCheckRequest request = getRequest(entityManager, data, admin, addr, rdcAddrType, vatMatchRequired);
-          log.debug("Executing Duplicate CMR Check "
-              + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI") + " for AddrType: " + cmrAddrType
-              + "-" + rdcAddrType);
+          log.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
+              + " for AddrType: " + cmrAddrType + "-" + rdcAddrType);
           MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
           ObjectMapper mapper = new ObjectMapper();
           String json = mapper.writeValueAsString(rawResponse);
