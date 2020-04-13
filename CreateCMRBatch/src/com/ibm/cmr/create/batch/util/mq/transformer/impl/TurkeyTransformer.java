@@ -742,110 +742,6 @@ public class TurkeyTransformer extends EMEATransformer {
   }
 
   @Override
-  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
-      MassUpdtData muData, String cmr) throws Exception {
-    // LOG.debug("TR >> Mapping default CMRTCEXT values");
-    boolean isUpdated = false;
-    // CMR:1334 : MassUpdate: TAX code
-    // if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getSpecialTaxCd().trim())) {
-    // custExt.setItIVA("");
-    // } else {
-    // custExt.setItIVA(muData.getSpecialTaxCd().trim());
-    // }
-    // }
-
-    // for tax office
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getFloor())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
-              custExt.setiTaxCode("");
-            } else {
-              custExt.setiTaxCode(muData.getNewEntpName1());
-            }
-            isUpdated = true;
-            break;
-          }
-
-        }
-      }
-    }
-
-    // for ident client
-    // if (!StringUtils.isBlank(muData.getOutCityLimit())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getOutCityLimit().trim())) {
-    // custExt.setItIdentClient("");
-    // } else {
-    // custExt.setItIdentClient(muData.getOutCityLimit());
-    // }
-    // isUpdated = true;
-    // }
-
-    // for company customer number
-    // if (!StringUtils.isBlank(muData.getCompany())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getCompany().trim())) {
-    // custExt.setItCompanyCustomerNo("");
-    // } else {
-    // custExt.setItCompanyCustomerNo(muData.getCompany());
-    // }
-    // }
-    //
-    // if (!StringUtils.isBlank(muData.getAffiliate())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getAffiliate())) {
-    // custExt.setAffiliate("");
-    // } else {
-    // custExt.setAffiliate(muData.getAffiliate());
-    // }
-    // }
-
-    // Tipo Cliente
-    // if (!StringUtils.isBlank(muData.getEntpUpdtTyp())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getEntpUpdtTyp())) {
-    // custExt.setTipoCliente("");
-    // } else {
-    // custExt.setTipoCliente(muData.getEntpUpdtTyp());
-    // }
-    // }
-
-    // Codice Destinatario/Ufficio
-    // if (!StringUtils.isBlank(muData.getSearchTerm())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getSearchTerm())) {
-    // custExt.setCoddes("");
-    // } else {
-    // custExt.setCoddes(muData.getSearchTerm());
-    // }
-    // }
-    //
-    // // PEC
-    // if (!StringUtils.isBlank(muData.getEmail2())) {
-    // if (DEFAULT_CLEAR_CHAR.equals(muData.getEmail2())) {
-    // custExt.setPec("");
-    // } else {
-    // custExt.setPec(muData.getEmail2());
-    // }
-    // }
-    //
-    // // CMR-1332: MassUpdate: Collection code
-    // // Collection Code
-    // if (!StringUtils.isBlank(muData.getCollectionCd())) {
-    // if ("@".equals(muData.getCollectionCd())) {
-    // // cust.setCollectionCd("");
-    // custExt.setItCodeSSV("");
-    // } else {
-    // custExt.setItCodeSSV(muData.getCollectionCd());
-    // }
-    // }
-
-    if (isUpdated) {
-      custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    }
-
-  }
-
-  @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     CmrtAddr legacyFiscalAddr = null;
@@ -1705,6 +1601,25 @@ public class TurkeyTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
       MassUpdtData muData, String cmr) throws Exception {
+
+    // for tax office
+    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    if (muaList != null && muaList.size() > 0) {
+      for (MassUpdtAddr mua : muaList) {
+        if ("ZP01".equals(mua.getId().getAddrType())) {
+          if (!StringUtils.isBlank(mua.getFloor())) {
+            if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
+              custExt.setiTaxCode("");
+            } else {
+              custExt.setiTaxCode(muData.getNewEntpName1());
+            }
+            break;
+          }
+
+        }
+      }
+    }
+
     List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     MassUpdtAddr zp01Addr = new MassUpdtAddr();
     for (MassUpdtAddr muAddr : muAddrList) {
