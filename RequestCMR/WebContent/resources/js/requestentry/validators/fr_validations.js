@@ -264,11 +264,11 @@ function setSBOOnScenario() {
   if (custSubGrp == '') {
     return
   } else {
+    FormManager.readOnly('installBranchOff');
     if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('installBranchOff');
 
       } else if (role == 'Processor') {
         FormManager.setValue('salesBusOffCd','98F');
@@ -464,7 +464,6 @@ function addSboIboLogic() {
       if (iboCd != '' && iboCd.length > 3) {
         iboCd = iboCd.substring(iboCd.length-3, iboCd.length);
       }
-      FormManager.readOnly('installBranchOff');
       FormManager.setValue('installBranchOff', iboCd);
     }
   });
@@ -2007,20 +2006,19 @@ function showAffacturageOnReqReason() {
 function setAbbrevNameFrDSW() {
   var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
     var requestingLob = FormManager.getActualValue('requestingLob');
-      if (requestingLob == 'DSW') {        
-        var abbrNm = FormManager.getActualValue('abbrevNm');
-        if(abbrNm.includes("D3")){
-          FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
+    if (requestingLob == 'DSW') {
+      var abbrNm = FormManager.getActualValue('abbrevNm');
+     if (!abbrNm.includes("D3 DSW")) {
+        if (abbrNm.includes("D3")) {
+          FormManager.setValue('abbrevNm', abbrNm.concat(" DSW"));
+        } else {
+          FormManager.setValue('abbrevNm', abbrNm.concat(" D3 DSW"));
         }
-        else {
-          FormManager.setValue('abbrevNm',abbrNm.concat(" D3 DSW") ); 
-        }
-      }     
+      }
+    }
   });
-  if (_abbrevNmHandler && _abbrevNmHandler[0]) {
-    _abbrevNmHandler[0].onChange();
-  }  
 }
+
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');
