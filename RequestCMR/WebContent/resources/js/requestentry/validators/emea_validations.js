@@ -3308,7 +3308,7 @@ function convertToUpperCaseGR(cntry, addressMode, saving) {
 }
 
 function updateAddrTypeList(cntry, addressMode, saving) {
-  if (!saving || FormManager.getActualValue('cmrIssuingCntry') != "862") {
+  if (!saving && FormManager.getActualValue('cmrIssuingCntry') != '862') {
     // hide 'additional shipping' selection for creates
     if ((addressMode == 'newAddress' || addressMode == 'copyAddress') && cmr.currentRequestType == 'C') {
       cmr.hideNode('radiocont_ZD01');
