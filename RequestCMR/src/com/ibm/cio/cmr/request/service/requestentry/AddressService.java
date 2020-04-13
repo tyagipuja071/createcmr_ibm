@@ -75,7 +75,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
   private final DataService dataService = new DataService();
   private final AdminService adminService = new AdminService();
-  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("8620");
+  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("862");
 
   @Override
   protected Logger initLogger() {
