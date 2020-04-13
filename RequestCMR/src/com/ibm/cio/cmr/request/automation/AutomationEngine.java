@@ -127,7 +127,6 @@ public class AutomationEngine {
     }
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
-    String custSubGrp = requestData.getData().getCustSubGrp();
     // put the current engine data on the thread, for reuse if needed
     List<ActionOnError> actionsOnError = new ArrayList<>();
     LOG.trace("Preparing engine data..");
@@ -318,13 +317,39 @@ public class AutomationEngine {
         } else if (actionsOnError.contains(ActionOnError.Wait)) {
           // do not change status
           moveToNextStep = false;
+          String cmt = "";
+          StringBuilder rejectCmt = new StringBuilder();
           List<String> rejectionComments = (List<String>) engineData.get().get("rejections");
           Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
-          if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())
-              || actionsOnError.size() > 1) {
+          if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+            rejectCmt.append("Processor review is required for following issues");
+            rejectCmt.append(":");
+            if (rejectComments != null && !rejectComments.isEmpty()) {
+              for (String rejCmt : rejectComments) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(rejCmt);
+              }
+            }
+            // append pending checks
+            if (pendingChecks != null && !pendingChecks.isEmpty()) {
+              for (String pendingCheck : pendingChecks.values()) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(pendingCheck);
+              }
+            }
+            cmt = rejectCmt.toString();
+
+            if (cmt.length() > 1930) {
+              cmt = cmt.substring(0, 1920) + "...";
+            }
+            cmt += "\n\nPlease view system processing results for more details.";
+            admin.setReviewReqIndc("Y");
+            createComment(entityManager, cmt, reqId, appUser);
+          }
+          if (actionsOnError.size() > 1) {
             admin.setReviewReqIndc("Y");
           }
-          String cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
+          cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
           createComment(entityManager, cmt, reqId, appUser);
           admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
           createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,

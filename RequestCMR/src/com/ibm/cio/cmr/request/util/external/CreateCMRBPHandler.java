@@ -43,8 +43,14 @@ public class CreateCMRBPHandler implements ExternalSystemHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
     List<Addr> addresses = query.getResults(Addr.class);
-    String bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL").replace("/home", "") + "/request?cmrIssuingCntry=" + cmrIssuingCountry
-        + "&reqStatus=" + reqStatus + "&reqType=" + type + "&reqId=" + reqId;
+
+    String bpURL = "";
+
+    if (cmrIssuingCountry != null && cmrIssuingCountry.equalsIgnoreCase(RequestUtils.US_CMRISSUINGCOUNTRY) && "PRJ".equalsIgnoreCase(reqStatus))
+      bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL").replace("/home", "") + "/request?cmrIssuingCntry=" + cmrIssuingCountry + "&reqStatus="
+          + reqStatus + "&reqType=" + type + "&reqId=" + reqId;
+    else
+      bpURL = SystemConfiguration.getValue("CREATECMR_BP_URL");
 
     params.add(bpURL); // {12}
 
