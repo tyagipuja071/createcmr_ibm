@@ -447,24 +447,18 @@ public class GermanyUtil extends AutomationUtil {
       details.append("Computed SORTL = " + coverageId).append("\n");
       details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
       details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
-      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("SEARCH_TERM", coverageId);
-      query.setForReadOnly(true);
-      List<Object[]> result = query.getResults(1);
-      if (result.size() > 0) {
-        String isuCd = (String) result.get(0)[0];
-        String clientTier = (String) result.get(0)[1];
-        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-          }
+      String isuCd = container.getIsuCd();
+      String clientTier = container.getClientTierCd();
+      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+        details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
+        details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+        if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
+          details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
         }
       }
+      results.setResults("Coverage Calculated");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
       details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
@@ -484,6 +478,7 @@ public class GermanyUtil extends AutomationUtil {
           details.append("CTC = " + data.getClientTier()).append("\n");
           details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
           details.append("Matching: " + response.get(MATCHING));
+          results.setResults("Coverage Calculated");
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           break;
         case "No Match Found":
@@ -501,7 +496,7 @@ public class GermanyUtil extends AutomationUtil {
       }
     } else {
       details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
-      results.setResults("Coverage calculation skipped.");
+      results.setResults("Skipped");
     }
     return true;
   }
