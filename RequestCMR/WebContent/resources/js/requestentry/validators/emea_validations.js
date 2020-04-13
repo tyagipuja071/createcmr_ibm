@@ -3588,7 +3588,6 @@ function setCustSubTypeBpGRTRCY() {
    console.log("skip set ISR.");
    }else{
    setISRValues();
-   }
   }
 }
 
