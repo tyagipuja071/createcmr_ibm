@@ -2007,16 +2007,17 @@ function setAbbrevNameFrDSW() {
   var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
     var requestingLob = FormManager.getActualValue('requestingLob');
     if (requestingLob == 'DSW') {
-      var abbrNm = FormManager.getActualValue('abbrevNm');
-     if (!abbrNm.includes("D3 DSW")) {
-        if (abbrNm.includes("D3")) {
-          FormManager.setValue('abbrevNm', abbrNm.concat(" DSW"));
-        } else {
-          FormManager.setValue('abbrevNm', abbrNm.concat(" D3 DSW"));
-        }
+      var abbrNm = FormManager.getActualValue('abbrevNm').trim();
+     if (!abbrNm.includes(" D3 DSW")) {
+          abbrNm = abbrNm.length > 16 ? abbrNm.substring(0,15) : abbrNm ; 
+          FormManager.setValue('abbrevNm', abbrNm.concat(" D3 DSW"));      
       }
     }
   });
+  
+  if (_abbrevNmHandler && _abbrevNmHandler[0]) {
+    _abbrevNmHandler[0].onChange();
+  }  
 }
 
 function affacturageLogic() {
