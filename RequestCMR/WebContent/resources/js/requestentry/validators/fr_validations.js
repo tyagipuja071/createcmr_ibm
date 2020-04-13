@@ -2005,20 +2005,22 @@ function showAffacturageOnReqReason() {
 
 function setAbbrevNameFrDSW() {
   var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
+    var abbrNm = FormManager.getActualValue('abbrevNm').trim();
     var requestingLob = FormManager.getActualValue('requestingLob');
     if (requestingLob == 'DSW') {
-      var abbrNm = FormManager.getActualValue('abbrevNm');
-     if (!abbrNm.includes("D3 DSW")) {
-        if (abbrNm.includes("D3")) {
-          FormManager.setValue('abbrevNm', abbrNm.concat(" DSW"));
-        } else {
+      if (abbrNm.endsWith("D3")) {
+        abbrNm =  abbrNm.substring(0,abbrNm.length-2).trim();
+      }
+     if (!abbrNm.includes(" D3 DSW")) {
+          abbrNm = abbrNm.length > 15 ? abbrNm.substring(0,15) : abbrNm ;
           FormManager.setValue('abbrevNm', abbrNm.concat(" D3 DSW"));
-        }
       }
     }
   });
+  if (_abbrevNmHandler && _abbrevNmHandler[0]) {
+    _abbrevNmHandler[0].onChange();
+  }
 }
-
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');
