@@ -523,7 +523,8 @@ public class FranceUtil extends AutomationUtil {
     Data data = requestData.getData();
     if (!isCoverageCalculated
         || (isCoverageCalculated && !(CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom)))) {
-      details.append("\nCoverage not calculated using Global Buying Group/Buying Group.\nCalculating Coverage using SIREN.").append("\n\n");
+      details.setLength(0);// clear string builder
+      details.append("\nCalculating Coverage using SIREN.").append("\n\n");
       String siren = StringUtils.isNotBlank(data.getTaxCd1()) ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
           : "";
       if (StringUtils.isNotBlank(siren)) {
@@ -540,13 +541,13 @@ public class FranceUtil extends AutomationUtil {
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {
             sboValue = overrides.getData().get(sboKey).getNewValue();
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
           } else {
             sboValue = getSBOfromCoverage(entityManager, coverage.getFinalCoverage());
             if (StringUtils.isNotBlank(sboValue)) {
               details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
-              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
             }
           }
           details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
@@ -579,7 +580,6 @@ public class FranceUtil extends AutomationUtil {
       details.append("\nCoverage calculated using Global Buying Group/Buying Group.").append("\n\n");
       results.setResults("Coverage Calculated");
     }
-
     return true;
   }
 
