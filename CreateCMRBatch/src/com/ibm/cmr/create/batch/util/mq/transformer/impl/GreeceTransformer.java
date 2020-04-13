@@ -340,7 +340,7 @@ public class GreeceTransformer extends EMEATransformer {
 
   @Override
   public String getFixedAddrSeqForProspectCreation() {
-    return "2";
+    return "00002";
   }
 
   /**
