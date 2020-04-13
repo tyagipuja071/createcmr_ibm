@@ -2009,7 +2009,7 @@ function setAbbrevNameFrDSW() {
     var requestingLob = FormManager.getActualValue('requestingLob');
     if (requestingLob == 'DSW') {
       if (abbrNm.endsWith("D3")) {
-        abbrNm =  abbrNm.substring(0,abbrNm.length-2).trim();
+        abbrNm.substring(0,abbrNm.length-2).trim();
       }
      if (!abbrNm.includes(" D3 DSW")) {
           abbrNm = abbrNm.length > 15 ? abbrNm.substring(0,15) : abbrNm ;
@@ -2021,6 +2021,7 @@ function setAbbrevNameFrDSW() {
     _abbrevNmHandler[0].onChange();
   }
 }
+
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');
