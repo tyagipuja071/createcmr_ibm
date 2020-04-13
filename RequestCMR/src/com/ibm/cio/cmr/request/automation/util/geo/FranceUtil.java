@@ -550,18 +550,11 @@ public class FranceUtil extends AutomationUtil {
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
             }
           }
-          details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-          details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
           String isuCd = coverage.getIsuCd();
           String clientTier = coverage.getClientTierCd();
           if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-            details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-            details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
             overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-            if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-              details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-            }
           }
           results.setResults("Coverage Calculated");
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);

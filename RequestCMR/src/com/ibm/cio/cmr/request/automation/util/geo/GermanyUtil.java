@@ -445,18 +445,11 @@ public class GermanyUtil extends AutomationUtil {
       // details.append("Coverage calculated using Global/Domestic Buying
       // Group.").append("\n");
       details.append("Computed SORTL = " + coverageId).append("\n");
-      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
       String isuCd = container.getIsuCd();
       String clientTier = container.getClientTierCd();
       if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-        details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-        details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
         overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-        if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-          details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-        }
       }
       results.setResults("Coverage Calculated");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
