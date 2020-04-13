@@ -1450,7 +1450,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
-          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? kna1.getZzkvSic() : "");
+          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? kna1.getZzkvSic().trim().substring(0, 4) : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
