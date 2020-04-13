@@ -4367,7 +4367,10 @@ function showCommercialFinanced() {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
   }
 }
-
+function lockCmrOwner(){
+// FormManager.setValue('cmrOwner', 'IBM');
+  FormManager.readOnly('cmrOwner');
+}
 function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
   var requestType = FormManager.getActualValue('reqType');
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -7614,7 +7617,7 @@ dojo.addOnLoad(function() {
 
   // CMR-2093
    GEOHandler.addAfterConfig(showCommercialFinanced,[SysLoc.TURKEY]);
-  // GEOHandler.addAfterConfig(setFieldsBehaviourGR,[SysLoc.GREECE]);
+   GEOHandler.addAfterConfig(lockCmrOwner,[SysLoc.TURKEY]);
   // GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR,[SysLoc.GREECE]);
   // GEOHandler.addAfterConfig(resetSubIndustryCdGR,[SysLoc.GREECE]);
   
