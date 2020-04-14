@@ -76,6 +76,9 @@ public class GBGMatchingElement extends MatchingElement {
     List<String> usedNames = new ArrayList<String>();
     while (continueCheck) {
       if (currentAddress != null) {
+        if ("ZS01".equals(currentAddress.getId().getAddrType())) {
+          continueCheck = false;
+        }
         request.setCity(currentAddress.getCity1());
 
         if (geoHandler != null && !geoHandler.customerNamesOnAddress()) {
