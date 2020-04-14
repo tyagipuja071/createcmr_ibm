@@ -90,6 +90,7 @@ public class GermanyUtil extends AutomationUtil {
       AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
     // cmr-2067 fix
@@ -274,6 +275,9 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
+      if (admin.getSourceSystId() != null && "MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+        engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+      }
 
       // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
       // skipCompanyCheckForScenario(requestData, engineData,
@@ -440,13 +444,12 @@ public class GermanyUtil extends AutomationUtil {
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
         && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
-      // details.append("Coverage calculated using Global/Domestic Buying
-      // Group.").append("\n");
       details.append("Computed SORTL = " + coverageId).append("\n");
       results.setResults("Coverage Calculated");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
       details.setLength(0); // clearing details
+      overrides.clearOverrides();
       details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
       HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
           data.getClientTier());
@@ -481,6 +484,8 @@ public class GermanyUtil extends AutomationUtil {
         results.setOnError(true);
       }
     } else {
+      details.setLength(0);
+      overrides.clearOverrides();
       details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
       results.setResults("Skipped");
     }
