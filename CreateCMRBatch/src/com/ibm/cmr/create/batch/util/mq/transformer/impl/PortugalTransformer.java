@@ -11,8 +11,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.CmrtAddr;
+import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
@@ -235,4 +238,19 @@ public class PortugalTransformer extends SpainTransformer {
     }
     return true;
   }
+
+  @Override
+  public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
+      CMRRequestContainer cmrObjects) {
+
+    super.transformLegacyCustomerData(entityManager, dummyHandler, legacyCust, cmrObjects);
+  }
+
+  @Override
+  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
+      CMRRequestContainer cmrObjects, Addr currAddr) {
+
+    super.transformLegacyAddressData(entityManager, dummyHandler, legacyCust, legacyAddr, cmrObjects, currAddr);
+  }
+
 }

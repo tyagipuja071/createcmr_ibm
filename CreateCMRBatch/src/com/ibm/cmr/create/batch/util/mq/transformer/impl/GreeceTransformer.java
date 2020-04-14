@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -40,11 +41,15 @@ public class GreeceTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
+  /* Greece - MQ - Code
   private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01" };
+   */
+  
+  // Comment this out when reverting to MQ
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01", "ZI01" };
 
   private static final Logger LOG = Logger.getLogger(GreeceTransformer.class);
 
-  public static final String DEFAULT_LANDED_COUNTRY = "ES";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -208,9 +213,7 @@ public class GreeceTransformer extends EMEATransformer {
     // country
     String line6 = "";
 
-    if (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType())) {
-      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-    }
+    line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
 
     int lineNo = 1;
     String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
@@ -263,6 +266,8 @@ public class GreeceTransformer extends EMEATransformer {
     return ADDRESS_ORDER;
   }
 
+  
+  /* Greece - MQ Code
   @Override
   public String getAddressKey(String addrType) {
     switch (addrType) {
@@ -276,7 +281,26 @@ public class GreeceTransformer extends EMEATransformer {
       return "";
     }
   }
+  */
+  
+  // Comment this method out when reverting to MQ code
+  @Override
+  public String getAddressKey(String addrType) {
+    switch (addrType) {
+    case "ZP01":
+      return "Local Language translation of Sold";
+    case "ZS01":
+      return "Sold To";
+    case "ZD01":
+      return "Ship To";
+    case "ZI01":
+      return "Install At";
+    default:
+      return "";
+    }
+  }
 
+  /* Greece - MQ Code
   @Override
   public String getTargetAddressType(String addrType) {
     switch (addrType) {
@@ -290,6 +314,24 @@ public class GreeceTransformer extends EMEATransformer {
       return "";
     }
   }
+  */
+  
+  // Comment this method out when reverting to MQ
+  @Override
+  public String getTargetAddressType(String addrType) {
+    switch (addrType) {
+    case "ZP01":
+      return "Local Language translation of Sold";
+    case "ZS01":
+      return "Sold To";
+    case "ZD01":
+      return "Ship To";
+    case "ZI01":
+      return "Install At";
+    default:
+      return "";
+    }
+  }
 
   @Override
   public String getSysLocToUse() {
@@ -298,7 +340,7 @@ public class GreeceTransformer extends EMEATransformer {
 
   @Override
   public String getFixedAddrSeqForProspectCreation() {
-    return "2";
+    return "00002";
   }
 
   /**
@@ -310,7 +352,8 @@ public class GreeceTransformer extends EMEATransformer {
   protected boolean isCrossBorder(Addr addr) {
     return !"GR".equals(addr.getLandCntry());
   }
-
+  
+  /* Greece - MQ Code
   @Override
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
@@ -320,6 +363,26 @@ public class GreeceTransformer extends EMEATransformer {
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING + MQMsgConstants.SOF_ADDRESS_USE_SHIPPING + MQMsgConstants.SOF_ADDRESS_USE_EPL;
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    default:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    }
+  }
+  */
+  
+  // Comment this method out when reverting to MQ
+  @Override
+  public String getAddressUse(Addr addr) {
+    switch (addr.getId().getAddrType()) {
+    case MQMsgConstants.ADDR_ZP02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+    case MQMsgConstants.ADDR_ZP01:
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZS01:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    case MQMsgConstants.ADDR_ZD01:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -425,6 +488,28 @@ public class GreeceTransformer extends EMEATransformer {
     data.setOrdBlk("88");
     entityManager.merge(data);
     entityManager.flush();
+  }
+  
+  @Override
+  public boolean hasCmrtCustExt() {
+    return true;
+  }
+  
+  @Override
+  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler,
+      CmrtCustExt legacyCustExt, CMRRequestContainer cmrObjects) {
+    for(Addr addr : cmrObjects.getAddresses()) {
+      if(addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
+      }
+    }
+  }
+  
+  @Override
+  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler,
+      CmrtCust legacyCust, CmrtAddr legacyAddr, CMRRequestContainer cmrObjects, Addr currAddr) {
+    legacyAddr.setAddrLineT("");
+    legacyAddr.setAddrLineU("");
   }
   
   @Override

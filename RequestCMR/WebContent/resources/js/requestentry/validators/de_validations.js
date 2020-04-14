@@ -321,6 +321,51 @@ function restrictNonSoldToAddress(cntry, addressMode, saving, finalSave, force) 
   }
 }
 
+function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
+  console.log(">>>> onSavingAddress ");
+  var reqType = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
+  if ((finalSave || force) && cmr.addressMode) {
+    var copyTypes = document.getElementsByName('copyTypes');
+    var copyingToA = false;
+    if (copyTypes != null && copyTypes.length > 0) {
+      copyTypes.forEach(function(input, i) {
+        if (input.value == 'ZS01' && input.checked) {
+          copyingToA = true;
+        }
+      });
+    }
+    var addrType = FormManager.getActualValue('addrType');
+    if ((addrType == 'ZS01' || copyingToA)) {
+      if (reqType == 'C')
+        autoSetAbbrevNmLogic();
+    }
+
+  }
+}
+
+function autoSetAbbrevNmLogic() {
+  console.log("autoSetAbbrevNmLogic");
+  var _abbrevNm = null;
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+  var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', qParams);
+  var custNm1 = FormManager.getActualValue('custNm1');
+  if (custNm1 == '') {
+    custNm1 = result.ret1;
+  }
+  _abbrevNm = custNm1;
+
+  if (_abbrevNm && _abbrevNm.length > 30) {
+    _abbrevNm = _abbrevNm.substring(0, 30);
+  }
+  FormManager.setValue('abbrevNm', _abbrevNm);
+}
+
 function validateAddressTypeForScenario() {
   FormManager.addFormValidator((function() {
     return {
@@ -358,6 +403,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForDE, GEOHandler.DE);
   GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
+  GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
   // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR REGISTERED
   // ON WW
   // GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.DE,

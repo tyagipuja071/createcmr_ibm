@@ -445,26 +445,13 @@ public class GermanyUtil extends AutomationUtil {
       // details.append("Coverage calculated using Global/Domestic Buying
       // Group.").append("\n");
       details.append("Computed SORTL = " + coverageId).append("\n");
-      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
-      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("SEARCH_TERM", coverageId);
-      query.setForReadOnly(true);
-      List<Object[]> result = query.getResults(1);
-      if (result.size() > 0) {
-        String isuCd = (String) result.get(0)[0];
-        String clientTier = (String) result.get(0)[1];
-        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-          }
-        }
+      String isuCd = container.getIsuCd();
+      String clientTier = container.getClientTierCd();
+      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
       }
+      results.setResults("Coverage Calculated");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
       details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
@@ -484,6 +471,7 @@ public class GermanyUtil extends AutomationUtil {
           details.append("CTC = " + data.getClientTier()).append("\n");
           details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
           details.append("Matching: " + response.get(MATCHING));
+          results.setResults("Coverage Calculated");
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           break;
         case "No Match Found":
@@ -501,7 +489,7 @@ public class GermanyUtil extends AutomationUtil {
       }
     } else {
       details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
-      results.setResults("Coverage calculation skipped.");
+      results.setResults("Skipped");
     }
     return true;
   }
@@ -648,88 +636,7 @@ public class GermanyUtil extends AutomationUtil {
     return true;
   }
 
-  /**
-   * Returns the DnB matches based on requestData & address
-   *
-   * @param requestData
-   * @param engineData
-   * @param addr
-   * @return
-   */
-  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr) throws Exception {
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-    if (addr == null) {
-      addr = requestData.getAddress("ZS01");
-    }
-    GBGFinderRequest request = createRequest(admin, data, addr);
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
-    client.setReadTimeout(1000 * 60 * 5);
-    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
-    ObjectMapper mapper = new ObjectMapper();
-    String json = mapper.writeValueAsString(rawResponse);
-
-    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
-    };
-
-    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-
-    List<DnBMatchingResponse> dnbMatches = response.getMatches();
-
-    return dnbMatches;
-
-  }
-
-  /**
-   * prepares and returns a dnb request based on requestData
-   *
-   * @param admin
-   * @param data
-   * @param addr
-   * @return
-   */
-  private GBGFinderRequest createRequest(Admin admin, Data data, Addr addr) {
-    GBGFinderRequest request = new GBGFinderRequest();
-    request.setMandt(SystemConfiguration.getValue("MANDT"));
-    if (StringUtils.isNotBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
-    }
-
-    if (addr != null) {
-      request.setCity(addr.getCity1());
-      request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
-      request.setStreetLine1(addr.getAddrTxt());
-      request.setStreetLine2(addr.getAddrTxt2());
-      request.setLandedCountry(addr.getLandCntry());
-      request.setPostalCode(addr.getPostCd());
-      request.setStateProv(addr.getStateProv());
-      // request.setMinConfidence("8");
-    }
-
-    return request;
-  }
-
-  /**
-   * Checks if the address updated closely matches D&B
-   *
-   * @param cntry
-   * @param addr
-   * @param matches
-   * @return
-   */
-  private boolean ifaddressCloselyMatchesDnb(List<DnBMatchingResponse> matches, Addr addr, Admin admin, String cntry) {
-    boolean result = false;
-    for (DnBMatchingResponse dnbRecord : matches) {
-      result = DnBUtil.closelyMatchesDnb(cntry, addr, admin, dnbRecord);
-      if (result) {
-        break;
-      }
-    }
-
-    return result;
-  }
+ 
 
   /**
    * Checks if the address is added on the Update Request
