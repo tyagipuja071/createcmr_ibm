@@ -7415,6 +7415,20 @@ function mandatoryForBusinessPartnerCY() {
   }
 }
 
+function addALPHANUMValidatorForEnterpriseNumber() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _number = FormManager.getActualValue('enterprise');
+          if(_number && _number.length > 0 && !_number.match("^[0-9a-zA-Z]*$")){
+          return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise Number should be alphanumeric.');
+        }
+        return new ValidationResult(null, true, null);
+      } 
+    }; 
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7496,6 +7510,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
   // CMR-2279
