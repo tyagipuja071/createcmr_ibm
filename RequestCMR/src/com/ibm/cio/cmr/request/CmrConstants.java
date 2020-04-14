@@ -67,7 +67,7 @@ public class CmrConstants {
     /**
      * Draft
      */
-    DRA, PVA, PCR, PCO, IIP, RIP, ACU, SVA, SV2, PPN, PCP, COM
+    DRA, PVA, PCR, PCO, IIP, RIP, REP, ACU, SVA, SV2, PPN, PCP, COM, PRJ
   }
 
   public static enum ADDR_TYPE {
@@ -259,6 +259,7 @@ public class CmrConstants {
   public static final String REQ_TYPE_MASS_UPDATE = "M";
   public static final String REQ_TYPE_MASS_CREATE = "N";
   public static final String REQ_TYPE_REACTIVATE = "R";
+  public static final String REQ_TYPE_SINGLE_REACTIVATE = "X";
   public static final String REQ_TYPE_UPDT_BY_ENT = "E";
   public static final String REQ_TYPE_DELETE = "D";
   public static final String PROSPECT_ORDER_BLOCK = "75";
@@ -281,7 +282,7 @@ public class CmrConstants {
   public static final String MASKED = "M";
   public static final String REGULAR = "REG";
 
-  public static final List<String> SINGLE_REQUESTS_TYPES = Arrays.asList("C", "U");
+  public static final List<String> SINGLE_REQUESTS_TYPES = Arrays.asList("C", "U", "X");
   public static final List<String> MASS_CHANGE_REQUESTS_TYPES = Arrays.asList("M", "D", "R", "N", "E");
 
   public static enum PROCESSING_STATUS {

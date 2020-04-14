@@ -479,6 +479,11 @@
     <put-attribute name="title" value="CreateCMR | Internal Division/Department (US)" />
     <put-attribute name="body" value="/resources/jsp/code/div_dept.jsp" />
   </definition>
+  
+  <definition name="germanyDept" extends="base">
+    <put-attribute name="title" value="CreateCMR | IBM Department" />
+    <put-attribute name="body" value="/resources/jsp/code/germanyDept.jsp" />
+  </definition>
 
   <definition name="isic" extends="base">
     <put-attribute name="title" value="CreateCMR | ISIC Maintenance" />
@@ -594,20 +599,30 @@
     <put-attribute name="body" value="/resources/jsp/code/salesbomaint.jsp" />
   </definition>
   
+  <definition name="apClusterModel" extends="base">
+    <put-attribute name="title" value="CreateCMR | AP Customer CLuster Tier Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/apClusterMaint.jsp" />
+  </definition>
+  
   <definition name="salesBoMaintModel" extends="base">
     <put-attribute name="title" value="CreateCMR | Sales Branch Off Maintenance" />
     <put-attribute name="body" value="/resources/jsp/code/addsalesbo.jsp" />
   </definition>
-
-  <definition name="apClusterMap" extends="base">
-    <put-attribute name="title" value="CreateCMR | Cluster Tier Map" />
-    <put-attribute name="body" value="/resources/jsp/code/apClusterMap.jsp" />
+  
+   <definition name="apClusterMaintModel" extends="base">
+    <put-attribute name="title" value="CreateCMR | AP Customer CLuster Tier Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/addApCluster.jsp" />
   </definition>
   
-  <definition name="apClusterMapdetails" extends="base">
-    <put-attribute name="title" value="CreateCMR | Custer Tier Map" />
-    <put-attribute name="body" value="/resources/jsp/code/apClusterMapdetails.jsp" />
-    </definition>
+  <definition name="repTeamModel" extends="base">
+    <put-attribute name="title" value="CreateCMR | Rep Team Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/repteammaint.jsp" />
+  </definition>
+  
+    <definition name="repTeamMaintModel" extends="base">
+    <put-attribute name="title" value="CreateCMR | Rep Team Maintenance" />
+    <put-attribute name="body" value="/resources/jsp/code/addrepteam.jsp" />
+  </definition> 
 
   <definition name="quick_search" extends="base">
     <put-attribute name="title" value="CreateCMR | Quick Search" />
@@ -619,4 +634,22 @@
     <put-attribute name="body" value="/resources/jsp/windows/company_details.jsp" />
   </definition>
   
+  <!-- Single Reactivation Start -->
+  <definition name="singlereactsearch" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/singlereactsearch.jsp" />
+  </definition>
+  
+  <definition name="singlereactlist" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/singlereactlist.jsp" />
+  </definition>
+  
+   <definition name="singlereactdet" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/singlereactdet.jsp" />
+  </definition>
+  
+  <definition name="singlereactnoresults" extends="window">
+    <put-attribute name="body" value="/resources/jsp/windows/singlereactnoresults.jsp" />
+  </definition>
+  
+   <!-- Single Reactivation End -->
 </tiles-definitions>

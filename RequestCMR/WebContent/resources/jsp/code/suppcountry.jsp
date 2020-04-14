@@ -76,6 +76,12 @@
            if (value.includes('E0')){
              formattedTypes += ' (manual)';
            }
+          } else if (types[i] == 'X') {
+            formattedTypes += formattedTypes.length > 0 ? '<br>' : '';
+           formattedTypes += '<b>X</b>-Single Reactivate';
+           if (value.includes('X0')){
+             formattedTypes += ' (manual)';
+           }
           }
         }
         return formattedTypes;

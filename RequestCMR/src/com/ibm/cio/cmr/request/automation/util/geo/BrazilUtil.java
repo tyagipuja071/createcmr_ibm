@@ -10,6 +10,7 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cmr.services.client.AutomationServiceClient;
@@ -30,8 +31,9 @@ public class BrazilUtil extends AutomationUtil {
   }
 
   @Override
-  public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
-    return false;
+  public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
+    return true;
   }
 
   /**

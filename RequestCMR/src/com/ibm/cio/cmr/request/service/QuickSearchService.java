@@ -40,7 +40,7 @@ import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 
 /**
- * 
+ *
  * @author JeffZAMORA
  *
  */
@@ -74,7 +74,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
    * Calls the {@link ImportCMRService} internally via
    * {@link RequestEntryController} and imports the CMR as a create by model or
    * update request
-   * 
+   *
    * @param entityManager
    * @param request
    * @param model
@@ -125,17 +125,16 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
             scorecard.setFindDnbResult(CmrConstants.RESULT_REJECTED);
             scorecard.setFindDnbRejReason("Record Not Found");
             scorecard.setFindDnbRejCmt("CMR Results from Quick Search did not contain the required company details.");
-            scorecard.setFindDnbTs(SystemUtil.getActualTimestamp());
-            scorecard.setFindDnbUsrId(user.getIntranetId());
-            scorecard.setFindDnbUsrNm(user.getBluePagesName());
             entityManager.merge(scorecard);
           } else if (model.getMatchGrade() != null && Arrays.asList("F4", "F5", "VAT").contains(model.getMatchGrade())) {
             scorecard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
-            scorecard.setFindDnbTs(SystemUtil.getActualTimestamp());
-            scorecard.setFindDnbUsrId(user.getIntranetId());
-            scorecard.setFindDnbUsrNm(user.getBluePagesName());
-            entityManager.merge(scorecard);
+          } else {
+            scorecard.setFindDnbResult("Not Required");
           }
+          scorecard.setFindDnbTs(SystemUtil.getActualTimestamp());
+          scorecard.setFindDnbUsrId(user.getIntranetId());
+          scorecard.setFindDnbUsrNm(user.getBluePagesName());
+          entityManager.merge(scorecard);
           entityManager.flush();
         }
 
@@ -153,7 +152,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
   /**
    * Imports a D&B record using the {@link ImportDnBService} and creates a new
    * request
-   * 
+   *
    * @param entityManager
    * @param request
    * @param model
@@ -216,7 +215,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
   /**
    * Creates a brand new record from scratch using the address information
    * supplied by users
-   * 
+   *
    * @param entityManager
    * @param request
    * @param model
@@ -234,6 +233,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     reqEntryModel.setCmrIssuingCntry(model.getIssuingCntry());
     reqEntryModel.setMainAddrType("ZS01");
     reqEntryModel.setVat(model.getVat());
+    reqEntryModel.setTaxCd1(model.getTaxCd1());
     controller.setDefaultValues(reqEntryModel, request);
     reqEntryModel.setCountryUse(model.getSubRegion());
 
@@ -241,11 +241,11 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     if (geoHandler != null) {
       int splitLength = geoHandler.getName1Length();
       int splitLength2 = geoHandler.getName2Length();
-      String[] parts = geoHandler.doSplitName(model.getName().toUpperCase(), "", splitLength, splitLength2);
+      String[] parts = geoHandler.doSplitName(model.getName(), "", splitLength, splitLength2);
       reqEntryModel.setMainCustNm1(parts[0]);
       reqEntryModel.setMainCustNm2(parts[1]);
     } else {
-      reqEntryModel.setMainCustNm1(model.getName().toUpperCase());
+      reqEntryModel.setMainCustNm1(model.getName());
     }
 
     RequestEntryService reqService = new RequestEntryService();
@@ -261,9 +261,9 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     AddressModel addrModel = new AddressModel();
     addrModel.setReqId(reqId);
     addrModel.setLandCntry(model.getCountryCd());
-    addrModel.setAddrTxt(model.getStreetAddress1() != null ? model.getStreetAddress1().toUpperCase() : null);
-    addrModel.setAddrTxt2(model.getStreetAddress2() != null ? model.getStreetAddress2().toUpperCase() : null);
-    addrModel.setCity1(model.getCity() != null ? model.getCity().toUpperCase() : null);
+    addrModel.setAddrTxt(model.getStreetAddress1() != null ? model.getStreetAddress1() : null);
+    addrModel.setAddrTxt2(model.getStreetAddress2() != null ? model.getStreetAddress2() : null);
+    addrModel.setCity1(model.getCity() != null ? model.getCity() : null);
     addrModel.setStateProv(model.getStateProv());
     addrModel.setPostCd(model.getPostCd());
     addrModel.setState(BaseModel.STATE_NEW);
@@ -336,7 +336,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
   /**
    * Handles the country-specific address types to set if the address
    * information is in latin/non latin
-   * 
+   *
    * @param model
    * @param addrModel
    */
@@ -392,6 +392,9 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     }
     if (!StringUtils.isBlank(searchParams.getVat())) {
       sb.append("\nVAT: " + searchParams.getVat().toUpperCase());
+    }
+    if (!StringUtils.isBlank(searchParams.getTaxCd1())) {
+      sb.append("\nSIRET: " + searchParams.getTaxCd1().toUpperCase());
     }
     return sb.toString();
   }

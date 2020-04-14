@@ -16,6 +16,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.DuplicateChecksUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -63,7 +64,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
 
       // check if eligible for vat matching
-      if (scenarioExceptions.isCheckVatForDuplicates()) {
+      if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
         matchType = "V";
       }
 
@@ -72,6 +73,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       if (response != null) {
         if (response.getSuccess()) {
           if (response.getMatched()) {
+            List<String> dupReqIds = new ArrayList<>();
             StringBuilder details = new StringBuilder();
             List<ReqCheckResponse> reqCheckMatches = response.getMatches();
             details.append(reqCheckMatches.size() + " record(s) found.");
@@ -110,7 +112,8 @@ public class DupReqCheckElement extends DuplicateCheckElement {
               engineData.put("reqCheckMatches", reqCheckRecord);
             }
             result.setResults("Found Duplicate Requests.");
-            engineData.addRejectionComment("Duplicate Request Check Element found " + reqCheckMatches.size() + " duplicate requests.");
+            engineData.addRejectionComment(reqCheckMatches.size()
+                + " possible duplicate request(s) found with the same data.\n Duplicate Request(s): " + StringUtils.join(dupReqIds, ", "));
             result.setOnError(true);
             result.setProcessOutput(output);
             result.setDetails(details.toString().trim());
@@ -245,7 +248,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
           request.setScenario(data.getCustSubGrp());
         }
 
-        if (scenarioExceptions.isCheckVatForDuplicates()) {
+        if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
           request.setMatchType("V");
         }
       }

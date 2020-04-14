@@ -538,13 +538,13 @@ public class TemplateColumn {
         }
         if (StringUtils.contains(hwInstlMstrFlg, "Y | Y")) {
           if (hwFlagMap.containsKey(CMRNo)) {
-            LOG.trace("Only One Contract or Install at address can be selected as Hardware Master. >>" + this.label);
-            validation.addError(rowIndex, this.label, "Only One Contract or Install at address can be selected as Hardware Master. ");
+            LOG.trace("Only One Sold to or Mail to address can be selected as Hardware Master. >>" + this.label);
+            validation.addError(rowIndex, this.label, "Only One Sold to or Mail to address can be selected as Hardware Master. ");
           } else {
             hwFlagMap.put(CMRNo, hwInstlMstrFlg);
             if (!StringUtils.equals(sheet.getSheetName(), "Contract") && !StringUtils.equals(sheet.getSheetName(), "Install At Address")) {
-              LOG.trace("Only One Contract or Install at address can be selected as Hardware Master. >>" + this.label);
-              validation.addError(rowIndex, this.label, "Only One Contract or Install at address can be selected as Hardware Master. ");
+              LOG.trace("Only One Sold to or Mail to address can be selected as Hardware Master. >>" + this.label);
+              validation.addError(rowIndex, this.label, "Only One Sold to or Mail to address can be selected as Hardware Master. ");
             }
 
           }

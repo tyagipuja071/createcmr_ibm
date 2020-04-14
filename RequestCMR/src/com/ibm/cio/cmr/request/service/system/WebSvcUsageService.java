@@ -72,6 +72,9 @@ public class WebSvcUsageService extends BaseSimpleService<MetricsChart> {
     case "S":
       sqlKey += "USAGE.BY_SERVICE_ID";
       break;
+    case "A":
+      sqlKey += "USAGE.BY_SERVICE_NAMES";
+      break;
     case "N":
       sqlKey += "USAGE.BY_SERVICE_NAME";
       break;
@@ -199,6 +202,10 @@ public class WebSvcUsageService extends BaseSimpleService<MetricsChart> {
       switch (model.getReportType()) {
       case "S":
         title += "Total Service Usage by Partners ";
+        fileName += "Totals_";
+        break;
+      case "A":
+        title += "Total Service Usage by Service ";
         fileName += "Totals_";
         break;
       case "N":

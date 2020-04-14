@@ -3,6 +3,7 @@ package com.ibm.cio.cmr.request.service.requestentry;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -74,6 +75,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
   private final DataService dataService = new DataService();
   private final AdminService adminService = new AdminService();
+  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("8620");
 
   @Override
   protected Logger initLogger() {
@@ -91,6 +93,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     uniqAddr.append("-");
     uniqAddr.append(model.getAddrSeq());
     GEOHandler geoHandler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
+
     if (SystemLocation.JAPAN.equals(model.getCmrIssuingCntry())) {
       String[] nameArray = geoHandler.dividingCustName1toName2(model.getCustNm1(), model.getCustNm2());
       if (nameArray != null && nameArray.length == 2) {
@@ -139,6 +142,37 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (newAddrSeq == null) {
         newAddrSeq = generateAddrSeq(entityManager, model.getAddrType(), model.getReqId());
       }
+
+      if ("618".equals(model.getCmrIssuingCntry())) {
+        newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId());
+      }
+
+      if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
+        newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
+      }
+
+      // if ("864".equals(model.getCmrIssuingCntry())) {
+      // newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId());
+      // System.out.println("newAdd =" + newAddrSeq);
+      // }
+
+      // if (SystemLocation.AUSTRIA.equals(model.getCmrIssuingCntry())) {
+      // if (model.getAddrType().equals("ZS01")) {
+      // newAddrSeq = "90001";
+      // } else if (model.getAddrType().equals("ZI01")) {
+      // newAddrSeq = "90002";
+      // } else if (model.getAddrType().equals("ZP01")) {
+      // newAddrSeq = "90003";
+      // } else if (model.getAddrType().equals("ZD01")) {
+      // newAddrSeq = "90004";
+      // } else if (model.getAddrType().equals("ZS02")) {
+      // newAddrSeq = "90005";
+      // } else {
+      // newAddrSeq = generateAddrSeq(entityManager, model.getAddrType(),
+      // model.getReqId());
+      // }
+      // }
+
       // }
       model.setAddrSeq(newAddrSeq);
       if (addrExists(entityManager, model.getAddrType(), model.getAddrSeq(), model.getReqId())) {
@@ -2029,4 +2063,77 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
     return addrSeq;
   }
+
+  protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId) {
+    int addrSeq = 0;
+    String maxAddrSeq = null;
+    String newAddrSeq = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "0");
+      if (StringUtils.isAlpha(maxAddrSeq)) {
+        maxAddrSeq = String.valueOf((int) ((Math.random() * 9 + 1) * 10));
+      }
+      if (!(Integer.valueOf(maxAddrSeq) >= 0 && Integer.valueOf(maxAddrSeq) <= 20849)) {
+        maxAddrSeq = "1";
+      }
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "1";
+      }
+      log.debug("Address Services maxAddrSeq = " + maxAddrSeq);
+      try {
+        addrSeq = Integer.parseInt(maxAddrSeq);
+      } catch (Exception e) {
+        // if returned value is invalid
+      }
+      addrSeq++;
+    }
+
+    newAddrSeq = Integer.toString(addrSeq);
+
+    // newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5,
+    // newAddrSeq.length());
+
+    return newAddrSeq;
+  }
+
+  protected String generateEMEAddrSeqCopy(EntityManager entityManager, long reqId) {
+    int addrSeq = 0;
+    String maxAddrSeq = null;
+    String newAddrSeq = null;
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "00000");
+
+      if (!(Integer.valueOf(maxAddrSeq) >= 00000 && Integer.valueOf(maxAddrSeq) <= 20849)) {
+        maxAddrSeq = "";
+      }
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "00000";
+      }
+      try {
+        addrSeq = Integer.parseInt(maxAddrSeq);
+      } catch (Exception e) {
+        // if returned value is invalid
+      }
+      addrSeq++;
+    }
+
+    newAddrSeq = "0000" + Integer.toString(addrSeq);
+
+    newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
+
+    return newAddrSeq;
+  }
+
 }

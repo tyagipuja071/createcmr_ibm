@@ -23,10 +23,13 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String NEGATIVE_CHECKS = "negative_checks";
   public static final String POSITIVE_CHECKS = "positive_checks";
   public static final String GBG_MATCH = "gbgMatch";
+  public static final String COVERAGE_CALCULATED = "coverageCalculated";
   public static final String DNB_MATCH = "dnbMatching";
   public static final String VAT_VERIFIED = "vatVerified";
   public static final String SKIP_CHECKS = "skipChecks";
   public static final String COMPANY_INFO_SOURCE = "compInfoSrc";
+  public static final String SCENARIO_VERIFIED_INDC = "scenarioVerifiedIndc";
+  public static final String MATCH_DEPARTMENT = "matchDepartment";
   /**
    * 
    */
@@ -64,6 +67,22 @@ public class AutomationEngineData extends HashMap<String, Object> {
     }
     checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     checks.put(checkKey, userFriendlyCheckMessage);
+  }
+  
+  /**
+   * Checks negative check status 
+   * 
+   * @param userFriendlyCheckMessage
+   */
+  @SuppressWarnings("unchecked")
+  public boolean hasNegativeCheckStatus() {
+    Map<String, String> checks = (Map<String, String>) get(NEGATIVE_CHECKS);
+    if (checks != null) {
+      return true;
+    }
+    else{
+      return false;
+    }
   }
 
   /**
@@ -153,9 +172,23 @@ public class AutomationEngineData extends HashMap<String, Object> {
   }
 
   public void setCompanySource(String source) {
-    if (get(COMPANY_INFO_SOURCE) != null) {
+    if (get(COMPANY_INFO_SOURCE) == null) {
       // only track the first element that verified the source
       put(COMPANY_INFO_SOURCE, source);
+    }
+  }
+
+  public void setScenarioVerifiedIndc(String indc) {
+    if (get(SCENARIO_VERIFIED_INDC) == null) {
+      // only track the first element that verified the source
+      put(SCENARIO_VERIFIED_INDC, indc);
+    }
+  }
+
+  public void setMatchDepartment(boolean indc) {
+    if (get(MATCH_DEPARTMENT) == null) {
+      // only track the first element that verified the source
+      put(MATCH_DEPARTMENT, indc);
     }
   }
 }

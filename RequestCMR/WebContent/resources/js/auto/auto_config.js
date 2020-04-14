@@ -926,10 +926,11 @@ app
               $scope.title = {
                 skipDupChecksIndc : 'Controls whether duplicate checks should be skipped for this particular scenario. For example, IBM Internal records can have duplicates so the check can be skipped.\n\nDefault: No',
                 importDnbInfoIndc : 'Specifies whether D&B processing will import only Subindustry, ISIC, and DUNS No., or whether all address information will be imported.\n\nDefault: Subindustry, ISIC, and DUNS No. only',
-                checkVatIndc : 'Indicates whether VAT will be checked during duplicate checks. If VAT is included, requests and CMRs with the same VAT are automatically treated as duplicates.\n\nDefault: No',
+                checkVatIndc : 'Indicates whether VAT will be checked during D&B Matching. If VAT is included, if no high quality D&B matches are found with the provided VAT, the request will be redirected to the processors for validation.\n\nDefault: No',
                 skipChecksIndc : 'Controls whether automatic checks and computations for this scenario will be skipped. If skipped, the request only undergoes standard processes like DPL check and no data will be computed.\n\nDefault: No',
                 skipAddressChecks : 'For update requests, requests with updates/new instances of ONLY the specified addresses here will not be checked anymore by the system. For some countries for example, new Shipping addresses should just be processed directly.\n\nDefault: Check all addresses',
-                dupAddressChecks : 'Maps the CMR address types against the RDc address types which will be used in duplicate checks. By default, the system uses only Main address vs RDc Sold-to to determine duplicates.\n\nDefault:Main address vs RDc Sold-to'
+                dupAddressChecks : 'Maps the CMR address types against the RDc address types which will be used in duplicate checks. By default, the system uses only Main address vs RDc Sold-to to determine duplicates.\n\nDefault:Main address vs RDc Sold-to',
+                skipCompanyVerificationChecks : 'Controls whether automatic checks for company verification (Eg. External API vat validation, D&B check, etc.) for this scenario will be skipped. If skipped, the request only undergoes standard processes like DPL check and company information will not be validated.\n\nDefault: No'
               };
 
               $scope.getCountries = function() {
@@ -1142,6 +1143,7 @@ app
                       region : r.id.subregionCd,
                       skipDupChecksIndc : r.skipDupChecksIndc ? r.skipDupChecksIndc.trim() : '',
                       importDnbInfoIndc : r.importDnbInfoIndc ? r.importDnbInfoIndc.trim() : '',
+                      skipVerificationIndc : r.skipVerificationIndc ? r.skipVerificationIndc.trim() : '',
                       checkVatIndc : r.checkVatIndc ? r.checkVatIndc.trim() : '',
                       skipChecksIndc : r.skipChecksIndc ? r.skipChecksIndc.trim() : '',
                       skipAddressChecks : skipTypes,
@@ -1181,6 +1183,7 @@ app
                   skipChecksIndc : '',
                   skipAddressChecks : [],
                   dupAddressChecks : [],
+                  skipChecksIndc : '',
                   status : 'N'
                 };
                 $scope.cleanException(exc);

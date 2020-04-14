@@ -15,6 +15,13 @@
           <width>40</width>
           <length>30</length>
         </column>
+
+		<column>
+          <label>Abbraviated location</label>
+          <dbColumn>ABBREV_LOCN</dbColumn>
+          <width>25</width>
+          <length>20</length>
+        </column>        
         
         <column>
           <label>ISIC</label>
@@ -22,14 +29,7 @@
           <width>20</width>
           <bdsId>ISIC</bdsId>
         </column>
-        
-        <column>
-          <label>Tax Code</label>
-          <dbColumn>SPECIAL_TAX_CD</dbColumn>
-          <width>30</width>
-          <lovId>SpecialTaxCd</lovId>
-        </column>
-        
+            
         <column>
           <label>INAC/NAC</label>
           <dbColumn>INAC_CD</dbColumn>
@@ -50,19 +50,24 @@
           <width>25</width>
           <lovId>ClientTier</lovId>
         </column>
-        
-        <column exactLength="true">
-          <label>Muboty</label>
-          <dbColumn>SEARCH_TERM</dbColumn>
-          <width>25</width>
-          <length>7</length>
+ 
+         <column>
+          <label>SBO</label>
+          <dbColumn>SALES_BO_CD</dbColumn>
+          <width>15</width>
+          <length>3</length>
         </column>
-        
         <column>
-          <label>Embargo Code</label>
+          <label>Company number</label>
+          <dbColumn>ENTERPRISE</dbColumn>
+          <width>15</width>
+          <length>6</length>
+        </column>
+        <column>
+          <label>Order block code</label>
           <dbColumn>ORD_BLK</dbColumn>
           <width>10</width>
-          <lovId>EmbargoCode</lovId>
+          <length>2</length>
         </column>
         
          <column>
@@ -88,7 +93,7 @@
         
       </columns>
     </tab>
-    <tab name="Install At" type="Address" typeCode="ZS01">
+    <tab name="Sold To" type="Address" typeCode="ZS01">
       <columns>
         <column exactLength="true">
           <label>CMR. No</label>
@@ -119,12 +124,25 @@
         </column>
         
         <column>
+          <label>Customer Name 3</label>
+          <dbColumn>CUST_NM3</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        
+        <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
         
+        <column>
+          <label>Preferred Language</label>
+          <dbColumn>CUST_LANG_CD</dbColumn>
+          <width>20</width>
+          <lovId>CustLangCd</lovId>
+        </column>
         <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
@@ -138,28 +156,11 @@
           <width>40</width>
           <length>24</length>
         </column>
-        
         <column>
-          <label>Department</label>
-          <dbColumn>DEPT</dbColumn>
-          <width>40</width>
-          <length>40</length>
-        </column>
-        
-        <column>
-          <label>Floor</label>
-          <dbColumn>FLOOR</dbColumn>
-          <width>40</width>
-          <length>10</length>
-        </column>
-        
-        <column>
-          <label>Building</label>
-          <dbColumn>BLDG</dbColumn>
-          <width>20</width>
-          <length>20</length>
-        </column>
-        
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <length>3</length>
+        </column>       
         <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -181,19 +182,6 @@
           <length>11</length>
         </column>
         
-        <column>
-          <label>FAX</label>
-          <dbColumn>CUST_FAX</dbColumn>
-          <width>20</width>
-          <length>8</length>
-        </column>
-        
-        <column>
-          <label>Preferred Language</label>
-          <dbColumn>CUST_LANG_CD</dbColumn>
-          <width>20</width>
-          <lovId>CustLangCd</lovId>
-        </column>
         
         <column>
           <label>Hardware Master</label>
@@ -204,7 +192,7 @@
         
       </columns>
     </tab>
-    <tab name="CONTRACT" type="Address" typeCode="ZP01">
+    <tab name="Mail to" type="Address" typeCode="ZS02">
       <columns>
         <column exactLength="true">
           <label>CMR. No</label>
@@ -233,14 +221,24 @@
           <width>40</width>
           <length>30</length>
         </column>
-        
+        <column>
+          <label>Customer Name 3</label>
+          <dbColumn>CUST_NM3</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>        
        	<column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
+        <column>
+          <label>Preferred Language</label>
+          <dbColumn>CUST_LANG_CD</dbColumn>
+          <width>20</width>
+          <lovId>CustLangCd</lovId>
+        </column>
         <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
@@ -254,28 +252,11 @@
           <width>40</width>
           <length>24</length>
         </column>
-        
-        <column>
-          <label>Department</label>
-          <dbColumn>DEPT</dbColumn>
-          <width>40</width>
-          <length>40</length>
+         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <length>3</length>
         </column>
-        
-        <column>
-          <label>FLOOR</label>
-          <dbColumn>FLOOR</dbColumn>
-          <width>40</width>
-          <length>10</length>
-        </column>
-        
-        <column>
-          <label>Building</label>
-          <dbColumn>BLDG</dbColumn>
-          <width>20</width>
-          <length>20</length>
-        </column>
-        
         <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -296,24 +277,9 @@
           <width>20</width>
           <length>11</length>
         </column>
-        
-        <column>
-          <label>FAX</label>
-          <dbColumn>CUST_FAX</dbColumn>
-          <width>20</width>
-          <length>8</length>
-        </column>
-        
-        <column>
-          <label>Preferred Language</label>
-          <dbColumn>CUST_LANG_CD</dbColumn>
-          <width>20</width>
-          <lovId>CustLangCd</lovId>
-        </column>
-        
       </columns>
     </tab>
-    <tab name="Bill To" type="Address" typeCode="ZI01">
+    <tab name="Bill To" type="Address" typeCode="ZP01">
       <columns>
         <column exactLength="true">
           <label>CMR. No</label>
@@ -342,84 +308,59 @@
           <width>40</width>
           <length>30</length>
         </column>
-        
+        <column>
+          <label>Customer Name 3</label>
+          <dbColumn>CUST_NM3</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>        
         <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
+        <column>
+          <label>Preferred Language</label>
+          <dbColumn>CUST_LANG_CD</dbColumn>
+          <width>20</width>
+          <lovId>CustLangCd</lovId>
+             </column>
         <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
         <column>
           <label>City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>24</length>
         </column>
-        
         <column>
-          <label>Department</label>
-          <dbColumn>DEPT</dbColumn>
-          <width>40</width>
-          <length>40</length>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <length>3</length>
         </column>
-        
-        <column>
-          <label>FLOOR</label>
-          <dbColumn>FLOOR</dbColumn>
-          <width>40</width>
-          <length>10</length>
-        </column>
-        
-        <column>
-          <label>Building</label>
-          <dbColumn>BLDG</dbColumn>
-          <width>20</width>
-          <length>20</length>
-        </column>
-        
         <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>10</length>
         </column>
-        
         <column>
           <label>PostBox</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>20</width>
           <length>6</length>
         </column>
-        
         <column>
           <label>Phone</label>
           <dbColumn>CUST_PHONE</dbColumn>
           <width>20</width>
           <length>11</length>
         </column>
-        
-        <column>
-          <label>FAX</label>
-          <dbColumn>CUST_FAX</dbColumn>
-          <width>20</width>
-          <length>8</length>
-        </column>
-        
-        <column>
-          <label>Preferred Language</label>
-          <dbColumn>CUST_LANG_CD</dbColumn>
-          <width>20</width>
-          <lovId>CustLangCd</lovId>
-        </column>
-        
         <column>
           <label>Hardware Master</label>
           <dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -437,35 +378,42 @@
           <width>20</width>
           <length>6</length>
         </column>
-        
         <column>
           <label>Address Seq. No.</label>
           <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
           <width>20</width>
           <length>15</length>
         </column>
-        
         <column>
           <label>Customer Name 1</label>
           <dbColumn>CUST_NM1</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
         <column>
           <label>Customer Name 2</label>
           <dbColumn>CUST_NM2</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
+        <column>
+          <label>Customer Name 3</label>
+          <dbColumn>CUST_NM3</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
         <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
-        
+         <column>
+          <label>Preferred Language</label>
+          <dbColumn>CUST_LANG_CD</dbColumn>
+          <width>20</width>
+          <lovId>CustLangCd</lovId>
+        </column>
         <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
@@ -479,28 +427,11 @@
           <width>40</width>
           <length>24</length>
         </column>
-        
-        <column>
-          <label>Department</label>
-          <dbColumn>DEPT</dbColumn>
-          <width>40</width>
-          <length>40</length>
+       <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <length>3</length>
         </column>
-        
-        <column>
-          <label>FLOOR</label>
-          <dbColumn>FLOOR</dbColumn>
-          <width>40</width>
-          <length>10</length>
-        </column>
-        
-        <column>
-          <label>Building</label>
-          <dbColumn>BLDG</dbColumn>
-          <width>20</width>
-          <length>20</length>
-        </column>
-        
         <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -522,23 +453,9 @@
           <length>11</length>
         </column>
         
-        <column>
-          <label>FAX</label>
-          <dbColumn>CUST_FAX</dbColumn>
-          <width>20</width>
-          <length>8</length>
-        </column>
-        
-        <column>
-          <label>Preferred Language</label>
-          <dbColumn>CUST_LANG_CD</dbColumn>
-          <width>20</width>
-          <lovId>CustLangCd</lovId>
-        </column>
-        
       </columns>
     </tab>
-    <tab name="EPL" data="false" type="Address" typeCode="ZS02">
+    <tab name="Install At" data="false" type="Address" typeCode="ZI01">
       <columns>
         <column exactLength="true">
           <label>CMR. No</label>
@@ -567,6 +484,13 @@
           <width>40</width>
           <length>30</length>
         </column>
+    
+        <column>
+          <label>Customer Name 3</label>
+          <dbColumn>CUST_NM3</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
         
         <column>
           <label>Att. Person</label>
@@ -574,7 +498,12 @@
           <width>40</width>
           <length>30</length>
         </column>
-        
+         <column>
+          <label>Preferred Language</label>
+          <dbColumn>CUST_LANG_CD</dbColumn>
+          <width>20</width>
+          <lovId>CustLangCd</lovId>
+         </column>
         <column>
           <label>Street</label>
           <dbColumn>ADDR_TXT</dbColumn>
@@ -588,28 +517,11 @@
           <width>40</width>
           <length>24</length>
         </column>
-        
-        <column>
-          <label>Department</label>
-          <dbColumn>DEPT</dbColumn>
-          <width>40</width>
-          <length>40</length>
-        </column>
-        
-        <column>
-          <label>FLOOR</label>
-          <dbColumn>FLOOR</dbColumn>
-          <width>40</width>
-          <length>10</length>
-        </column>
-        
-        <column>
-          <label>Building</label>
-          <dbColumn>BLDG</dbColumn>
-          <width>20</width>
-          <length>20</length>
-        </column>
-        
+         <column>
+          <label>State/Province</label>
+          <dbColumn>STATE_PROV</dbColumn>
+          <length>3</length>
+        </column>       
         <column>
           <label>Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
@@ -630,21 +542,7 @@
           <width>20</width>
           <length>11</length>
         </column>
-        
-        <column>
-          <label>FAX</label>
-          <dbColumn>CUST_FAX</dbColumn>
-          <width>20</width>
-          <length>8</length>
-        </column>
-        
-        <column>
-          <label>Preferred Language</label>
-          <dbColumn>CUST_LANG_CD</dbColumn>
-          <width>20</width>
-          <lovId>CustLangCd</lovId>
-        </column>
-        
+
       </columns>
     </tab>    
     </tabs>

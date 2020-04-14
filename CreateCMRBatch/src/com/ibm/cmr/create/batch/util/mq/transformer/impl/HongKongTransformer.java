@@ -45,12 +45,15 @@ public class HongKongTransformer extends GCGTransformer {
       handler.messageHash.put("AddrLine5", handler.messageHash.get("AddrLine6"));
       handler.messageHash.put("AddrLine6", "");
     }
-    
-    /*if (addrData.getLandCntry() != null && !addrData.getLandCntry().equalsIgnoreCase(convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) {
-      String line66 = "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) + ">";
-      if (addrData.getPostCd() != null)
-        line66 += " " + addrData.getPostCd();
-      handler.messageHash.put("AddrLine6", line66);
-    }*/
+
+    arrangeAddressLinesData(handler);
+    /*
+     * if (addrData.getLandCntry() != null &&
+     * !addrData.getLandCntry().equalsIgnoreCase
+     * (convertIssuing2Cd(handler.cmrData.getCmrIssuingCntry()))) { String
+     * line66 = "<" + LandedCountryMap.getCountryName(addrData.getLandCntry()) +
+     * ">"; if (addrData.getPostCd() != null) line66 += " " +
+     * addrData.getPostCd(); handler.messageHash.put("AddrLine6", line66); }
+     */
   }
 }

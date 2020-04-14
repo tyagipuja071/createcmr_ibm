@@ -155,6 +155,9 @@ public class LegacyDirectService extends TransConnService {
         case CmrConstants.REQ_TYPE_REACTIVATE:
           processReactivate(entityManager, admin);
           break;
+        case CmrConstants.REQ_TYPE_SINGLE_REACTIVATE:
+          processSingleReactivate(entityManager, admin);
+          break;
         // case CmrConstants.REQ_TYPE_MASS_UPDATE:
         // processMassUpdate(entityManager, admin);
         // break;
@@ -175,8 +178,7 @@ public class LegacyDirectService extends TransConnService {
 
     initClient();
 
-    // now send to RDc
-    // Retrieve the PCP records and create in the Legacy DB
+    // now send to RDc Retrieve the PCP records and create in the Legacy DB
     LOG.info("Retrieving pending RDc records for processing..");
     pending = getPendingRecordsRDC(entityManager);
 
@@ -212,6 +214,9 @@ public class LegacyDirectService extends TransConnService {
         case CmrConstants.REQ_TYPE_DELETE:
           processMassReactDelChanges(entityManager, admin, data);
           break;
+        case CmrConstants.REQ_TYPE_SINGLE_REACTIVATE:
+          processSingleReactivateRequest(entityManager, request, admin, data);
+          break;
         // case CmrConstants.REQ_TYPE_MASS_UPDATE:
         // processMassUpdateRequest(entityManager, request, admin, data);
         // break;
@@ -221,10 +226,11 @@ public class LegacyDirectService extends TransConnService {
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
-          WfHist hist = createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin
-              .getId().getReqId());
-        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS
-            .equalsIgnoreCase(admin.getRdcProcessingStatus())) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+          WfHist hist = createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing",
+              admin.getId().getReqId());
+        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           admin.setReqStatus("COM");
           admin.setProcessedFlag("Y"); // set request status to processed
           WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
@@ -284,8 +290,9 @@ public class LegacyDirectService extends TransConnService {
     CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
 
     if (admin.getRdcProcessingStatus() != null
-        && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin
-            .getRdcProcessingStatus())) && !StringUtils.isEmpty(cmrObjects.getData().getCmrNo())) {
+        && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin.getRdcProcessingStatus()))
+        && !StringUtils.isEmpty(cmrObjects.getData().getCmrNo())) {
 
       skipLegacyProcessingforCreateUpdate(entityManager, admin);
 
@@ -295,8 +302,8 @@ public class LegacyDirectService extends TransConnService {
 
       LOG.info("Checking existing records with same Name and Location..");
       LOG.trace("Name: " + legacyObjects.getCustomer().getAbbrevNm() + " - Location: " + legacyObjects.getCustomer().getAbbrevLocn());
-      if (validateNameAndLocation(entityManager, legacyObjects.getSofCntryCd(), legacyObjects.getCustomer().getAbbrevNm(), legacyObjects
-          .getCustomer().getAbbrevLocn())) {
+      if (validateNameAndLocation(entityManager, legacyObjects.getSofCntryCd(), legacyObjects.getCustomer().getAbbrevNm(),
+          legacyObjects.getCustomer().getAbbrevLocn())) {
         throw new Exception("An record with Name = " + legacyObjects.getCustomer().getAbbrevNm() + " and Location = "
             + legacyObjects.getCustomer().getAbbrevLocn() + " already exists.");
       }
@@ -355,9 +362,8 @@ public class LegacyDirectService extends TransConnService {
   private void processUpdate(EntityManager entityManager, Admin admin) throws Exception {
     LOG.debug("Started Update processing of Request " + admin.getId().getReqId());
 
-    if (admin.getRdcProcessingStatus() != null
-        && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin
-            .getRdcProcessingStatus()))) {
+    if (admin.getRdcProcessingStatus() != null && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())
+        || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin.getRdcProcessingStatus()))) {
 
       skipLegacyProcessingforCreateUpdate(entityManager, admin);
 
@@ -400,6 +406,12 @@ public class LegacyDirectService extends TransConnService {
               createEntity(legacyAddr, entityManager);
             }
           }
+
+          // CMR-2279:there should be some Data updated, so update Data
+          if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+            updateEntity(cmrObjects.getData(), entityManager);
+          }
+
           partialCompleteRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
 
           if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode())) {
@@ -430,6 +442,11 @@ public class LegacyDirectService extends TransConnService {
             LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
             LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
             updateEntity(legacyCust, entityManager);
+
+            // CMR-2279:there should be some Data updated, so update Data
+            if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+              updateEntity(cmrObjects.getData(), entityManager);
+            }
 
             completeTRECRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
           }
@@ -465,6 +482,11 @@ public class LegacyDirectService extends TransConnService {
           }
         }
 
+        // CMR-2279:there should be some Data updated, so update Data
+        if (SystemLocation.TURKEY.equals(legacyCust.getId().getSofCntryCode())) {
+          updateEntity(cmrObjects.getData(), entityManager);
+        }
+
         // for updates, the legacy address use records are rebuilt
         /*
          * for (CmrtAddrUse legacyAddrUse : legacyObjects.getUses()) {
@@ -489,13 +511,13 @@ public class LegacyDirectService extends TransConnService {
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
       if (legacyAddr.getIsAddrUseBilling() != null && legacyAddr.getIsAddrUseBilling().equalsIgnoreCase("Y")) {
 
-        String rdcBillingSeq = LegacyDirectUtil.getBillingSeqOfRDC(entityManager, legacyCust.getId().getCustomerNo(), legacyCust.getId()
-            .getSofCntryCode(), MQMsgConstants.ADDR_ZP01);
+        String rdcBillingSeq = LegacyDirectUtil.getBillingSeqOfRDC(entityManager, legacyCust.getId().getCustomerNo(),
+            legacyCust.getId().getSofCntryCode(), MQMsgConstants.ADDR_ZP01);
 
         LOG.info(" Updating Billing seq. according to RDC seq.:" + rdcBillingSeq + "  of CMR No.: " + legacyCust.getId().getCustomerNo());
         if (!StringUtils.isBlank(rdcBillingSeq) && (rdcBillingSeq.equals("2") || rdcBillingSeq.equals("00002"))) {
-          LegacyDirectUtil
-              .updateItalyBillingAddrSeq(entityManager, legacyCust.getId().getCustomerNo(), legacyCust.getId().getSofCntryCode(), "00002");
+          LegacyDirectUtil.updateItalyBillingAddrSeq(entityManager, legacyCust.getId().getCustomerNo(), legacyCust.getId().getSofCntryCode(),
+              "00002");
           partialCommit(entityManager);
           entityManager.clear();
         } else if (!StringUtils.isBlank(rdcBillingSeq) && rdcBillingSeq.equals("0000B")) {
@@ -513,16 +535,23 @@ public class LegacyDirectService extends TransConnService {
     Data data = cmrObjects.getData();
     String cmrNo = data.getCmrNo();
     String cntry = data.getCmrIssuingCntry();
+    List<Addr> addrs = cmrObjects.getAddresses();
+    String abbrevName = "";
+    String streetAbbrev = "";
+    String abbrevLoc = "";
 
-    LOG.debug("Update child records for request id: " + cmrObjects.getAdmin().getId().getReqId() + " and req type:"
-        + cmrObjects.getAdmin().getReqType());
+    LOG.debug(
+        "Update child records for request id: " + cmrObjects.getAdmin().getId().getReqId() + " and req type:" + cmrObjects.getAdmin().getReqType());
 
     if ("C".equals(cmrObjects.getAdmin().getReqType())) {
-      List<Addr> addrs = cmrObjects.getAddresses();
+      // List<Addr> addrs = cmrObjects.getAddresses();
       String billingCmr = "";
       for (Addr addr : addrs) {
         if ("ZP01".equals(addr.getId().getAddrType()) && "Y".equals(addr.getImportInd())) {
           billingCmr = addr.getParCmrNo();
+          abbrevName = addr.getBldg();
+          streetAbbrev = addr.getDivn();
+          abbrevLoc = addr.getCustFax();
           break;
         }
       }
@@ -535,6 +564,9 @@ public class LegacyDirectService extends TransConnService {
             for (CmrtCustExt cExt : custExtList) {
               cExt.setItIVA(!StringUtils.isEmpty(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
               cExt.setItCodeSSV(!StringUtils.isEmpty(data.getCollectionCd()) ? data.getCollectionCd() : "");
+              cExt.setItBillingName(StringUtils.isEmpty(abbrevName) ? "" : abbrevName);
+              cExt.setItBillingStreet(StringUtils.isEmpty(streetAbbrev) ? "" : streetAbbrev);
+              cExt.setItBillingCity(StringUtils.isEmpty(abbrevLoc) ? "" : abbrevLoc);
               updateEntity(cExt, entityManager);
             }
 
@@ -555,10 +587,22 @@ public class LegacyDirectService extends TransConnService {
         List<CmrtCustExt> custExtList = LegacyDirectUtil.getBillingChildFromCustExt(entityManager, billingCustNo, cntry);
         if (custExtList != null & !custExtList.isEmpty()) {
 
+          for (Addr addr : addrs) {
+            if ("ZP01".equals(addr.getId().getAddrType())) {
+              abbrevName = addr.getBldg();
+              streetAbbrev = addr.getDivn();
+              abbrevLoc = addr.getCustFax();
+              break;
+            }
+          }
+
           if (custExtList.size() > 1) {
             for (CmrtCustExt cExt : custExtList) {
               cExt.setItIVA(!StringUtils.isEmpty(data.getSpecialTaxCd()) ? data.getSpecialTaxCd() : "");
               cExt.setItCodeSSV(!StringUtils.isEmpty(data.getCollectionCd()) ? data.getCollectionCd() : "");
+              cExt.setItBillingName(StringUtils.isEmpty(abbrevName) ? "" : abbrevName);
+              cExt.setItBillingStreet(StringUtils.isEmpty(streetAbbrev) ? "" : streetAbbrev);
+              cExt.setItBillingCity(StringUtils.isEmpty(abbrevLoc) ? "" : abbrevLoc);
               updateEntity(cExt, entityManager);
             }
 
@@ -583,8 +627,8 @@ public class LegacyDirectService extends TransConnService {
               }
 
               cExt.setItCompanyCustomerNo(compCustNo);
-              cExt.setiTaxCode(data.getTaxCd1());
-              cExt.setItIdentClient(data.getIdentClient());
+              cExt.setiTaxCode(StringUtils.isEmpty(data.getTaxCd1()) ? "" : data.getTaxCd1());
+              cExt.setItIdentClient(StringUtils.isEmpty(data.getIdentClient()) ? "" : data.getIdentClient());
               updateEntity(cExt, entityManager);
             }
 
@@ -734,7 +778,29 @@ public class LegacyDirectService extends TransConnService {
     } else {
       completeReactDelRecord(entityManager, admin);
     }
+  }
 
+  private void processSingleReactivate(EntityManager entityManager, Admin admin) throws Exception {
+
+    LOG.debug("Started Single Reactivate processing of Request " + admin.getId().getReqId());
+
+    processUpdate(entityManager, admin);
+
+    // lock
+    lockRecord(entityManager, admin);
+
+    // get CreateCMR data
+    CMRRequestContainer cmrObjects = prepareRequest(entityManager, admin);
+
+    if (admin.getRdcProcessingStatus() != null
+        && (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin.getRdcProcessingStatus()))
+        && !StringUtils.isEmpty(cmrObjects.getData().getCmrNo())) {
+      skipLegacyProcessingforCreateUpdate(entityManager, admin);
+    } else {
+      // prepare legacy data, map to the values needed
+      LegacyDirectObjectContainer legacyObjects = mapRequestDataForCreate(entityManager, cmrObjects);
+    }
   }
 
   /**
@@ -822,8 +888,8 @@ public class LegacyDirectService extends TransConnService {
     partialCommit(entityManager);
   }
 
-  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects) throws CmrException,
-      SQLException {
+  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)
+      throws CmrException, SQLException {
     LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
     admin.setLockBy(null);
     admin.setLockByNm(null);
@@ -1060,12 +1126,14 @@ public class LegacyDirectService extends TransConnService {
     cust.setLangCd(!StringUtils.isEmpty(legacyLangCdMapValue) ? legacyLangCdMapValue : "");
     cust.setMrcCd(data.getMrcCd());
     cust.setModeOfPayment(data.getModeOfPayment());
-    cust.setIsuCd((!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
-        + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
+    cust.setIsuCd(
+        (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "") + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : ""));
     cust.setCreditCd(data.getCreditCd());
     cust.setTaxCd(data.getSpecialTaxCd());
+
     cust.setSalesRepNo(data.getRepTeamMemberNo());
     cust.setSalesGroupRep(data.getSalesTeamCd());
+
     if (!StringUtils.isEmpty(data.getEnterprise())) {
       cust.setEnterpriseNo(data.getEnterprise());
     }
@@ -1191,8 +1259,8 @@ public class LegacyDirectService extends TransConnService {
 
         // update the seqno of the original addr record
         if ("00001".equals(addr.getId().getAddrSeq())) {
-          updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(), legacyAddr.getId()
-              .getAddrNo() + "", null, legacyAddr.isForSharedSeq());
+          updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(),
+              legacyAddr.getId().getAddrNo() + "", null, legacyAddr.isForSharedSeq());
           seqNo++;
         }
       }
@@ -1288,12 +1356,14 @@ public class LegacyDirectService extends TransConnService {
     } else {
       cust.setTaxCd("");
     }
+
     if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
       cust.setSalesRepNo(data.getRepTeamMemberNo());
     }
     if (!StringUtils.isBlank(data.getSalesTeamCd())) {
       cust.setSalesGroupRep(data.getSalesTeamCd());
     }
+
     if (!StringUtils.isBlank(data.getEnterprise())) {
       cust.setEnterpriseNo(data.getEnterprise());
     }
@@ -1555,8 +1625,8 @@ public class LegacyDirectService extends TransConnService {
             }
 
             // update the seqno of the original addr record
-            updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(), legacyAddr.getId()
-                .getAddrNo() + "", null, legacyAddr.isForSharedSeq());
+            updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(),
+                legacyAddr.getId().getAddrNo() + "", null, legacyAddr.isForSharedSeq());
 
           }
         } else if ("ZP02".equals(addr.getId().getAddrType())) {
@@ -1703,7 +1773,8 @@ public class LegacyDirectService extends TransConnService {
    * @throws SQLException
    */
   private void processError(EntityManager entityManager, Admin admin, String errorMsg) throws CmrException, SQLException {
-    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())) {
+    if (CmrConstants.REQ_TYPE_DELETE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(admin.getReqType())
+        || CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(admin.getReqType())) {
       admin.setDisableAutoProc("Y");// disable auto processing if error on
                                     // processing
     }
@@ -1718,8 +1789,8 @@ public class LegacyDirectService extends TransConnService {
     admin.setLastUpdtBy(BATCH_USER_ID);
     updateEntity(admin, entityManager);
 
-    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error", admin.getId()
-        .getReqId());
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error",
+        admin.getId().getReqId());
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
@@ -1973,7 +2044,8 @@ public class LegacyDirectService extends TransConnService {
    * @param oldSeq
    * @param newSeq
    */
-  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
+  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
+      boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -2027,8 +2099,8 @@ public class LegacyDirectService extends TransConnService {
       updateEntity(admin, entityManager);
     }
     if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
-      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment, "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE
-          : ACTION_RDC_UPDATE, null, null, true, true);
+      RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment,
+          "C".equals(admin.getReqType()) ? ACTION_RDC_CREATE : ACTION_RDC_UPDATE, null, null, true, true);
     }
   }
 
@@ -2246,8 +2318,8 @@ public class LegacyDirectService extends TransConnService {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
-          admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-              : CmrConstants.RDC_STATUS_ABORTED);
+          admin.setRdcProcessingStatus(
+              processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
         } else {
@@ -2280,8 +2352,8 @@ public class LegacyDirectService extends TransConnService {
         }
 
         partialCommit(entityManager);
-        LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-            + admin.getRdcProcessingMsg());
+        LOG.debug(
+            "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
         // *** END OF FIX
       } else {
         LOG.error("*****There are no mass update requests for RDC processing.*****");
@@ -2461,8 +2533,8 @@ public class LegacyDirectService extends TransConnService {
           if (statusCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
             admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
           } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
-            admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-                : CmrConstants.RDC_STATUS_ABORTED);
+            admin.setRdcProcessingStatus(
+                processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
           } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
             admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
           } else {
@@ -2499,8 +2571,8 @@ public class LegacyDirectService extends TransConnService {
           }
 
           partialCommit(entityManager);
-          LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-              + admin.getRdcProcessingMsg());
+          LOG.debug(
+              "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
 
         } catch (Exception e) {
           LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -2639,9 +2711,9 @@ public class LegacyDirectService extends TransConnService {
                   comment = comment.append("\nRDc update processing for KUNNR "
                       + (request.getSapNo() != null ? request.getSapNo() : "(not generated)") + " failed. Error: " + response.getMessage());
                 } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
-                  comment = comment.append("\nRDc update processing for KUNNR "
-                      + (request.getSapNo() != null ? request.getSapNo() : "(not generated)") + " failed. Error: " + response.getMessage()
-                      + " System will retry processing once.");
+                  comment = comment
+                      .append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
+                          + " failed. Error: " + response.getMessage() + " System will retry processing once.");
                 } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
                   comment = comment.append("\nRDc update processing for KUNNR "
                       + (request.getSapNo() != null ? request.getSapNo() : "(not generated)") + " failed. Error: " + response.getMessage());
@@ -2666,8 +2738,8 @@ public class LegacyDirectService extends TransConnService {
             if (statusCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
               admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
             } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
-              admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-                  : CmrConstants.RDC_STATUS_ABORTED);
+              admin.setRdcProcessingStatus(
+                  processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
             } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
               admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
             } else {
@@ -2702,8 +2774,8 @@ public class LegacyDirectService extends TransConnService {
             }
 
             partialCommit(entityManager);
-            LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-                + admin.getRdcProcessingMsg());
+            LOG.debug(
+                "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
 
           } catch (Exception e) {
             LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -2809,8 +2881,8 @@ public class LegacyDirectService extends TransConnService {
           Addr addrNew = entityManager.find(Addr.class, dummyId);
 
           LOG.info("Response received from Process Service [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " KUNNR: "
-              + addrNew.getSapNo() + " Status: " + response.getStatus() + " Message: "
-              + (response.getMessage() != null ? response.getMessage() : "-") + "]");
+              + addrNew.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
+              + "]");
 
           // get the results from the service and process jason response
 
@@ -2911,8 +2983,8 @@ public class LegacyDirectService extends TransConnService {
           }
 
           statusCodes.add(response.getStatus());
-          comment = comment.append("\nPartner functions "
-              + (isCompletedSuccessfully(response.getStatus()) ? "processed successfully." : "not successfully processed."));
+          comment = comment.append(
+              "\nPartner functions " + (isCompletedSuccessfully(response.getStatus()) ? "processed successfully." : "not successfully processed."));
         }
 
         RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, comment.toString().trim());
@@ -2924,8 +2996,8 @@ public class LegacyDirectService extends TransConnService {
         if (statusCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
-          admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-              : CmrConstants.RDC_STATUS_ABORTED);
+          admin.setRdcProcessingStatus(
+              processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
         } else {
@@ -2960,8 +3032,8 @@ public class LegacyDirectService extends TransConnService {
         }
 
         partialCommit(entityManager);
-        LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-            + admin.getRdcProcessingMsg());
+        LOG.debug(
+            "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
 
       } catch (Exception e) {
         LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -3016,8 +3088,8 @@ public class LegacyDirectService extends TransConnService {
     this.devMode = devMode;
   }
 
-  public void processMassReactDelChanges(EntityManager entityManager, Admin admin, Data data) throws JsonGenerationException, JsonMappingException,
-      IOException, Exception {
+  public void processMassReactDelChanges(EntityManager entityManager, Admin admin, Data data)
+      throws JsonGenerationException, JsonMappingException, IOException, Exception {
     // Create the request
 
     long reqId = admin.getId().getReqId();
@@ -3150,7 +3222,7 @@ public class LegacyDirectService extends TransConnService {
         if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
           comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
         } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
-          comment = comment.append(requestType + " in RDc aborted: " + response.getMessage() + "\nSystem will retry once.");
+          comment = comment.append(requestType + " in RDc aborted: " + response.getMessage() + "\n System will retry once.");
         } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
           comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
         } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
@@ -3193,7 +3265,176 @@ public class LegacyDirectService extends TransConnService {
       LOG.error("Error in processing Mass Request  " + admin.getId().getReqId(), e);
       addError("Mass Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
     }
+  }
 
+  private void processSingleReactivateRequest(EntityManager entityManager, ProcessRequest request, Admin admin, Data data) throws Exception {
+    // Create the request
+    long reqId = admin.getId().getReqId();
+    long iterationId = admin.getIterationId();
+    String processingStatus = admin.getRdcProcessingStatus();
+
+    MassUpdateServiceInput input = prepareMassChangeInput(entityManager, admin);
+
+    MassProcessRequest singleRequest = new MassProcessRequest();
+
+    if (input.getInputReqType() != null && (input.getInputReqType().equalsIgnoreCase("X"))) {
+      processUpdateRequest(entityManager, request, admin, data);
+    }
+
+    // set the update mass record in request
+    if (input.getInputReqType() != null && (input.getInputReqType().equalsIgnoreCase("X"))) {
+      singleRequest = prepareReactDelReq(entityManager, admin, data, input);
+    }
+
+    // call the Mass service
+    LOG.info("Sending request to Mass Service [Request ID: " + request.getReqId() + "  Type: " + request.getReqType() + "]");
+
+    LOG.trace("Request JSON:");
+    if (LOG.isTraceEnabled()) {
+      DebugUtil.printObjectAsJson(LOG, request);
+    }
+    // actual service call here
+    ProcessResponse response = null;
+    String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
+    if (applicationId == null) {
+      LOG.debug("No Application ID mapped to " + data.getCmrIssuingCntry());
+      response = new ProcessResponse();
+      response.setReqId(request.getReqId());
+      response.setMandt(request.getMandt());
+      response.setStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+      response.setMessage("No application ID defined for Country: " + data.getCmrIssuingCntry() + ". Cannot process RDc records.");
+    } else {
+      try {
+        this.serviceClient.setReadTimeout(60 * 15 * 1000); // 15 mins
+        response = this.serviceClient.executeAndWrap(applicationId, request, ProcessResponse.class);
+      } catch (Exception e) {
+        LOG.error("Error when connecting to the service.", e);
+        response = new ProcessResponse();
+        response.setReqId(request.getReqId());
+        response.setStatus(CmrConstants.RDC_STATUS_ABORTED);
+        response.setMessage("A system error has occured. Setting to aborted.");
+      }
+    }
+
+    LOG.trace("Response JSON:");
+    if (LOG.isTraceEnabled()) {
+      DebugUtil.printObjectAsJson(LOG, response);
+    }
+    LOG.info("Response received from Process Service [Request ID: " + response.getReqId() + " Status: " + response.getStatus() + " Message: "
+        + (response.getMessage() != null ? response.getMessage() : "-") + "]");
+
+    if (response.getReqId() <= 0) {
+      response.setReqId(request.getReqId());
+    }
+
+    // try this get the results from the service and process jason response
+    try {
+      // update MASS_UPDT table with the error txt and row status cd
+      for (RDcRecord record : response.getRecords()) {
+        PreparedQuery updtQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_MASS_UPDT_ENTITY"));
+        updtQuery.setParameter("REQ_ID", reqId);
+        updtQuery.setParameter("ITERATION_ID", iterationId);
+        updtQuery.setParameter("CMR_NO", record.getCmrNo());
+        List<MassUpdt> updateList = updtQuery.getResults(MassUpdt.class);
+
+        for (MassUpdt massUpdt : updateList) {
+          LegacyDirectObjectContainer legacyObjects = LegacyDirectUtil.getLegacyDBValues(entityManager, data.getCmrIssuingCntry(),
+              massUpdt.getCmrNo(), false, false);
+          CmrtCust cust = legacyObjects.getCustomer();
+
+          massUpdt.setErrorTxt(record.getMessage());
+          if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(record.getStatus())) {
+            massUpdt.setRowStatusCd("RDCER");
+          } else if (CmrConstants.RDC_STATUS_COMPLETED.equals(record.getStatus())) {
+            massUpdt.setRowStatusCd("DONE");
+            if (cust != null) {
+              LOG.info(" - completed Single Reactivate SOF Country: " + cust.getId().getSofCntryCode() + " CMR No.: " + massUpdt.getCmrNo());
+              LOG.debug("completed Setting Status=A or C based on CMR.." + massUpdt.getCmrNo());
+              if ("X".equals(admin.getReqType()))
+                cust.setStatus(LEGACY_STATUS_ACTIVE);
+              cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+            }
+          } else if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(record.getStatus())) {
+            if (cust != null) {
+              LOG.info(" - Warning Single Reactivate SOF Country: " + cust.getId().getSofCntryCode() + " CMR No.: " + massUpdt.getCmrNo());
+              LOG.debug("Warning Setting Status=A or C based on CMR.." + massUpdt.getCmrNo());
+              if ("X".equals(admin.getReqType()))
+                cust.setStatus(LEGACY_STATUS_ACTIVE);
+              cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+            }
+          }
+          LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
+              + massUpdt.getId().getSeqNo() + "]");
+          updateEntity(massUpdt, entityManager);
+        }
+      }
+      String resultCode = response.getStatus();
+
+      String requestType = "";
+      String action = "";
+      switch (admin.getReqType()) {
+      case "X":
+        action = ACTION_RDC_SINGLE_REACTIVATE;
+        requestType = "Single Reactivate";
+        break;
+      case "M":
+        action = ACTION_RDC_MASS_UPDATE;
+        requestType = "Mass Update";
+        break;
+      }
+
+      // create comment log and workflow history entries for update type of
+      // request
+      StringBuilder comment = new StringBuilder();
+      if (isCompletedSuccessfully(resultCode)) {
+        comment = comment.append(requestType + " in RDc successfully completed.");
+      } else {
+        if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
+        } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc aborted: " + response.getMessage() + "\n System will retry once.");
+        } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc failed: " + response.getMessage());
+        } else if (CmrConstants.RDC_STATUS_IGNORED.equalsIgnoreCase(resultCode)) {
+          comment = comment.append(requestType + " in RDc skipped: " + response.getMessage());
+        }
+      }
+
+      RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), comment.toString().trim());
+
+      // only update Admin record once depending on the overall status of the
+      // request
+      LOG.debug("Updating Admin record for Request ID " + admin.getId().getReqId());
+      if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())) {
+        admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
+      } else {
+        admin.setRdcProcessingStatus(resultCode);
+      }
+      admin.setRdcProcessingTs(SystemUtil.getCurrentTimestamp());
+      admin.setRdcProcessingMsg(response.getMessage());
+      if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
+        admin.setReqStatus("COM");
+      } else if ("A".equals(admin.getRdcProcessingStatus()) || "N".equals(admin.getRdcProcessingStatus())) {
+        admin.setReqStatus("PPN");
+      }
+
+      updateEntity(admin, entityManager);
+      if ("N".equals(admin.getRdcProcessingStatus()) || "A".equals(admin.getRdcProcessingStatus())) {
+        RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
+            "Some errors occurred during RDc processing. Please check request's comment log for details.", action, null, null,
+            "COM".equals(admin.getReqStatus()));
+      } else {
+        RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, comment.toString().trim(), action, null, null,
+            "COM".equals(admin.getReqStatus()));
+      }
+      LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
+
+      partialCommit(entityManager);
+
+    } catch (Exception e) {
+      LOG.error("Error in processing Single Reactivate Request  " + admin.getId().getReqId(), e);
+      addError("Single Reactivate Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
+    }
   }
 
   public MassProcessRequest prepareReactDelReq(EntityManager entityManager, Admin admin, Data data, MassUpdateServiceInput input)
@@ -3235,7 +3476,6 @@ public class LegacyDirectService extends TransConnService {
     }
     // set updtRecordsList in request
     request.setRecords(updtRecordsList);
-
     return request;
 
   }

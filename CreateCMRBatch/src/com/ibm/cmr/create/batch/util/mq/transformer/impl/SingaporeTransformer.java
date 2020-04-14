@@ -117,17 +117,17 @@ public class SingaporeTransformer extends ASEANTransformer {
     }
     Addr addrData = handler.addrData;
     Data cmrData = handler.cmrData;
-	String custType = !StringUtils.isEmpty(cmrData.getCustGrp()) ? cmrData.getCustGrp() : "";
-	String custSubType = !StringUtils.isEmpty(cmrData.getCustSubGrp()) ? cmrData.getCustSubGrp() : "";
-	 boolean create = "C".equalsIgnoreCase(handler.adminData.getReqType());
+    String custType = !StringUtils.isEmpty(cmrData.getCustGrp()) ? cmrData.getCustGrp() : "";
+    String custSubType = !StringUtils.isEmpty(cmrData.getCustSubGrp()) ? cmrData.getCustSubGrp() : "";
+    boolean create = "C".equalsIgnoreCase(handler.adminData.getReqType());
     if (!StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())) {
       LOG.debug("Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. "
           + handler.mqIntfReqQueue.getCmrNo());
       handler.messageHash.put("CustNo", handler.mqIntfReqQueue.getCmrNo());
       handler.messageHash.put("TransCode", "N");
-    } else if("CROSS".equalsIgnoreCase(custType) && "SPOFF".equalsIgnoreCase(custSubType) && create){
-    	handler.messageHash.put("CustNo", handler.cmrData.getCmrNo());
-    	handler.messageHash.put("TransCode", "N");
+    } else if ("CROSS".equalsIgnoreCase(custType) && "SPOFF".equalsIgnoreCase(custSubType) && create) {
+      handler.messageHash.put("CustNo", handler.cmrData.getCmrNo());
+      handler.messageHash.put("TransCode", "N");
     }
   }
 
@@ -143,7 +143,6 @@ public class SingaporeTransformer extends ASEANTransformer {
 
     handler.messageHash.put("AddrLine6", line6);
     handleMove(handler, "ASEAN");
-
     // only for local
     if (StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId()) && addrData.getLandCntry() != null
         && "SG".equalsIgnoreCase(addrData.getLandCntry())) {
@@ -161,14 +160,6 @@ public class SingaporeTransformer extends ASEANTransformer {
       }
 
       handler.messageHash.put("AddrLine5", line5);
-      if (addr5 == null)
-        addr5 = "";
-      if (addr6 == null)
-        addr6 = "";
-      if ((handler.messageHash.get("AddrLine5").length() == 0 || handler.messageHash.get("AddrLine4").length() == 0)) {
-        handler.messageHash.put("AddrLine5", addr6);
-        handler.messageHash.put("AddrLine6", "");
-      }
     }
 
     // only for double creates
@@ -201,21 +192,8 @@ public class SingaporeTransformer extends ASEANTransformer {
       }
 
       handler.messageHash.put("AddrLine5", line5);
-
-      String addr5 = handler.messageHash.get("AddrLine5");
-      String addr6 = handler.messageHash.get("AddrLine6");
-
-      if (addr5 == null)
-        addr5 = "";
-      if (addr6 == null)
-        addr6 = "";
-
-      if (handler.messageHash.get("AddrLine5").length() == 0 || handler.messageHash.get("AddrLine4").length() == 0) {
-        handler.messageHash.put("AddrLine5", addr6);
-        handler.messageHash.put("AddrLine6", "");
-      }
     }
-
+    arrangeAddressLinesData(handler);
   }
 
   private String getLandedCntryInZS01(MQMessageHandler handler) {

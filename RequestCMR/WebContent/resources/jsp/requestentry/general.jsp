@@ -18,6 +18,7 @@ AppUser user = AppUser.getUser(request);
 boolean noFindCMR = user.getAuthCode() == null;
 RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
+boolean dnbPrimary = "Y".equals(request.getAttribute("dnbPrimary"));
 Boolean readOnly = (Boolean) request.getAttribute("yourActionsViewOnly");
 if (readOnly == null){
   readOnly = false;
@@ -220,7 +221,7 @@ if (readOnly){
                   <br/>
                   <cmr:buttonsRow>
                     <cmr:button  id="dnbSearchBtn" label="${ui.btn.dnbSrch}" onClick="doDnBSearch()" highlight="true" styleClass="cmr-reqentry-btn"/>
-                    <span class="ibm-required cmr-required-spacer" style="visibility:hidden">*</span>
+                    <span class="ibm-required cmr-required-spacer" id="dnbRequiredIndc" >*</span>
                     <cmr:info text="${ui.info.dnbSearch}" />
                     <%if (noFindCMR){%>
                     <img src="${resourcesPath}/images/warn-icon.png" class="cmr-warn-icon" title="${ui.info.nofindcmr}">
@@ -259,7 +260,7 @@ if (readOnly){
                 <td width="95px">${reqentry.findCmrDate}</td>
               </tr>
               <tr>
-                <td>D&B Search
+                <td>D&B Search&nbsp;<span id="dnbRequired" class="ibm-required cmr-required-spacer">*</span>
                   <form:hidden path="findDnbResult"/>
                 </td>
                 <td>

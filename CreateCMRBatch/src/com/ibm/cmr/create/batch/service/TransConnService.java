@@ -77,6 +77,7 @@ public class TransConnService extends BaseBatchService {
   protected static final String ACTION_RDC_CREATE = "System Action:RDc Create";
   protected static final String ACTION_RDC_DELETE = "System Action:RDc Mass Delete";
   protected static final String ACTION_RDC_REACTIVATE = "System Action:RDc Mass Reactivate";
+  protected static final String ACTION_RDC_SINGLE_REACTIVATE = "System Action:RDc Single Reactivate";
   protected static final String ACTION_RDC_MASS_UPDATE = "System Action:RDc Mass Update";
   private static final String FORCED_CHANGE_ACTION = "System Action: Forced Changes.";
   private static final String ACTION_RDC_UPDT_BY_ENT = "System Action:RDc Enterprise update";
@@ -539,6 +540,10 @@ public class TransConnService extends BaseBatchService {
       case "R":
         action = ACTION_RDC_REACTIVATE;
         requestType = "Mass Reactivate";
+        break;
+      case "X":
+        action = ACTION_RDC_SINGLE_REACTIVATE;
+        requestType = "Single Reactivate";
         break;
       case "M":
         action = ACTION_RDC_MASS_UPDATE;

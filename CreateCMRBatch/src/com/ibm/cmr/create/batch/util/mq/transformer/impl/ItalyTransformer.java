@@ -1233,26 +1233,21 @@ public class ItalyTransformer extends EMEATransformer {
       // legacyAddr.setItPostalAddrss(!StringUtils.isBlank(currAddr.getBillingPstlAddr())
       // ? currAddr.getBillingPstlAddr() : "");
       if (crossBorder) {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country
-                                                                                                                     // Landed
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country                                                                                                        // Landed
       } else {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State
-                                                                                                                     // Province
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State Province                                                                                                        // Province
       }
     }
 
     // Company Address
     if (MQMsgConstants.ADDR_ZI01.equals(addrType)) {
       if (crossBorder) {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country
-                                                                                                                     // Landed
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country                                                                                                         // Landed
       } else {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State
-                                                                                                                     // Province
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State Province                                                                 // 
       }
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
-
   }
 
   /**
@@ -1396,7 +1391,7 @@ public class ItalyTransformer extends EMEATransformer {
         }
       }
     }
-
+    
     if (addrData.getLandCntry().equals("IT")) {
       legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
     } else {
@@ -1682,8 +1677,9 @@ public class ItalyTransformer extends EMEATransformer {
       cust.setIsicCd(muData.getIsicCd());
     }
 
+    // CMR-1350
     if (!StringUtils.isBlank(muData.getVat())) {
-      if (DEFAULT_CLEAR_IT_VAT.equals(muData.getVat().trim())) {
+      if ("@".equals(muData.getVat().trim())) {
         cust.setVat("");
       } else {
         cust.setVat(muData.getVat());
@@ -1732,12 +1728,15 @@ public class ItalyTransformer extends EMEATransformer {
     // }
     // }
 
+    // Type of Customer : CMRTCUST.CCUAI
+    // legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ?
+    // data.getCrosSubTyp() : "");
     // Type Of Customer
     if (!StringUtils.isBlank(muData.getCurrencyCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getCurrencyCd())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getCurrencyCd() != null ? muData.getCurrencyCd().trim() : "")) {
         cust.setCustType("");
       } else {
-        cust.setCustType(muData.getCurrencyCd());
+        cust.setCustType(muData.getCurrencyCd() != null ? muData.getCurrencyCd().trim() : "");
       }
     }
 
@@ -1782,7 +1781,7 @@ public class ItalyTransformer extends EMEATransformer {
         sql = ExternalizedQuery.getSql("LD.REACTIVATE_COMPANY_CHECK");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
         query.setParameter("COUNTRY", custExt.getId().getSofCntryCode());
-        query.setParameter("CMR_NO", companyCMR);
+        query.setParameter("CMR_NO", billingCMR);
         query.setForReadOnly(true);
         return query.exists();
       }

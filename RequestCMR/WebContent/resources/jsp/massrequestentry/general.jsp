@@ -327,6 +327,19 @@ boolean autoProcCapable = PageManager.autoProcEnabled(reqentry.getCmrIssuingCntr
           </cmr:column>
         </cmr:row>
       </cmr:view>
+      <cmr:view forCountry='862'>
+      <%if (reqentry.getReqType().equalsIgnoreCase("R")){ %>
+		<cmr:column span="2" containerForField="EmbargoCode">
+			<p>
+				<cmr:label fieldId="embargoCd">
+					<cmr:fieldLabel fieldId="EmbargoCode" />:
+				</cmr:label>
+				<cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_GENERAL_TAB" />
+			</p>
+		</cmr:column>
+		  <%}%>
+		</cmr:view>
+           
     
       <form:hidden path="cmt"/>
       <form:hidden path="yourId"/>

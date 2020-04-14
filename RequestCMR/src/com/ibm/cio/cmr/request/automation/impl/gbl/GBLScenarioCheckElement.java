@@ -1,7 +1,5 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
-import java.lang.reflect.Constructor;
-
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
@@ -18,6 +16,11 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
 public class GBLScenarioCheckElement extends ValidatingElement {
 
   private static final Logger log = Logger.getLogger(GBLScenarioCheckElement.class);
@@ -33,65 +36,58 @@ public class GBLScenarioCheckElement extends ValidatingElement {
 
     long reqId = requestData.getAdmin().getId().getReqId();
 
-    AutomationResult<ValidationOutput> output = buildResult(reqId);
-    ValidationOutput validation = new ValidationOutput();
+    AutomationResult<ValidationOutput> result = buildResult(reqId);
+    ValidationOutput output = new ValidationOutput();
+    StringBuilder details = new StringBuilder();
     log.debug("Entering global performScenarioCheck()");
     ChangeLogListener.setManager(entityManager);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     String cmrIssuingCntry = data.getCmrIssuingCntry();
-    String scenario = data.getCustGrp();
 
     if ("Y".equals(admin.getScenarioVerifiedIndc())) {
       log.debug("Skip processing of element");
-      output.setDetails("Skip processing of element");
-      output.setOnError(false);
-      validation.setSuccess(true);
-      validation.setMessage("Skip scenario check.");
-
+      result.setDetails("Skip processing of element");
+      result.setOnError(false);
+      output.setSuccess(true);
+      output.setMessage("Skip scenario check.");
     } else {
       ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
       log.debug("Skip check is " + scenarioExceptions.isSkipChecks());
       // method that will perform country specific check
-      Class<? extends AutomationUtil> handlerClass = AutomationUtil.getCountrySpecificUtil(cmrIssuingCntry);
-      if (handlerClass != null) {
+      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(cmrIssuingCntry);
+      log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
+      if (countryUtil != null) {
         boolean countryCheck = false;
-        try {
-          @SuppressWarnings("unchecked")
-          Constructor<AutomationUtil> constructor = (Constructor<AutomationUtil>) handlerClass.getConstructor();
-          countryCheck = constructor.newInstance().performScenarioValidation(entityManager, requestData, engineData);
-        } catch (Exception e) {
-          log.warn("Scenario Validation handler for issuing country  " + cmrIssuingCntry + " cannot be determined via util.");
-        }
+        countryCheck = countryUtil.performScenarioValidation(entityManager, requestData, engineData, result, details, output);
         if (countryCheck) {
-          validation.setSuccess(true);
-          validation.setMessage("Scenario check done.");
-          output.setDetails("Scenario: " + scenario + "\nSend to Processor for further procesing as scenario chosen is correct");
-          output.setOnError(false);
+          output.setSuccess(true);
+          output.setMessage("Scenario Valid");
+          details.insert(0, "Scenario Checks Performed Successfully.\n" + (details.length() > 0 ? "Details:\n" : ""));
+          result.setDetails(details.toString());
+          result.setOnError(false);
           log.debug("Scenario chosen is correct");
-
         } else {
-          validation.setSuccess(false);
-          validation.setMessage("Scenario check done.");
-          output.setDetails("Scenario: " + scenario + "\nSending back to Requester as scenario chosen is not correct");
-          output.setOnError(true);
-          engineData.addRejectionComment("Scenario chosen is not correct");
+          output.setSuccess(false);
+          output.setMessage("Scenario Invalid");
+          details.insert(0, "Scenario Checks were not successful.\n" + (details.length() > 0 ? "Details:\n" : ""));
+          result.setDetails(details.toString());
+          result.setOnError(true);
           log.debug("Scenario chosen is not correct");
-
         }
       } else {
-        engineData.addNegativeCheckStatus("SCENARIO_CHECK_FAIL", "Scenario needs to be manually verified by processor");
-        validation.setSuccess(false);
-        validation.setMessage("No CntryCheck found");
-        output.setDetails("Country Scenario check logic was not found" + "\nScenario needs to be manually verified by processor");
+        engineData.addNegativeCheckStatus("SCENARIO_CHECK_FAIL", "Country Scenario check logic was not found and needs confirmation.");
+        output.setSuccess(false);
+        output.setMessage("No CntryCheck found");
+        result.setDetails("Country Scenario check logic was not found\nScenario needs to be manually verified by processor");
         log.debug("Scenario needs to be manually verified by processor");
       }
 
     }
 
-    output.setResults(validation.getMessage());
-    output.setProcessOutput(validation);
-    return output;
+    result.setResults(output.getMessage());
+    result.setProcessOutput(output);
+    return result;
   }
 
   @Override

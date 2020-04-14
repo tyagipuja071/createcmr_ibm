@@ -91,15 +91,29 @@
               </td>
             </tr>
             <tr>
+              <th width="40%">
+                <img class="exc-info" title="{{title.skipCompanyVerificationChecks}}" src="${resourcesPath}/images/info-bubble-icon.png">
+                Skip Company Verification Checks :
+              </th>
+              <td width="*">
+                <select ng-change="dirtyException(exc)" ng-model="exc.skipVerificationIndc" ng-class="{'exc-deflt' : !exc.skipVerificationIndc, 'exc-y' : exc.skipVerificationIndc == 'Y'}">
+                  <option value="">(use default, country or parent scenario setting)</option>
+                  <option value="N">No, do not skip company verification checks</option>
+                  <option value="Y">Yes, skip company verification checks</option>
+                </select>
+                <span title="Overrides default behavior" class="override" ng-show="exc.skipVerificationIndc == 'Y'">&nbsp;</span>
+              </td>
+            </tr>
+            <tr>
               <th>
                 <img class="exc-info" title="{{title.checkVatIndc}}" src="${resourcesPath}/images/info-bubble-icon.png">
-                Check VAT on Duplicate Checks:
+                Check VAT for D&B Matching:
               </th>
               <td>
                 <select ng-change="dirtyException(exc)" ng-model="exc.checkVatIndc"  ng-class="{'exc-deflt' : !exc.checkVatIndc, 'exc-y' : exc.checkVatIndc == 'Y'}">
                   <option value="">(use default, country or parent scenario setting)</option>
                   <option value="N">No, use only name and address information</option>
-                  <option value="Y">Yes, use VAT on duplicate checks</option>
+                  <option value="Y">Yes, use VAT along with name and address information</option>
                 </select>
                 <span title="Overrides default behavior" class="override" ng-show="exc.checkVatIndc == 'Y'">&nbsp;</span>
               </td>

@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+  <mapping>
+    <subIndustryCds>
+      A9, AA, AW, T9, TA, TC, TD, TE, TF, TG, TH, TJ, TL,
+      TM, TO, TW, U9, UA, UB, UD, UE, UW
+    </subIndustryCds>
+    <postalCdRanges>
+      73300 to 73599, 86000 to 87999, 88380 to 88489, 89000 to 89999,
+      90000 to 93999, 95000 to 96499, 96600 to 96999, 97000 to 97999,
+      80000 to 81999, 82000 to 82999, 83000 to 83999, 84000 to 85999,
+      94000 to 94999, 73300 to 73599, 86000 to 87999, 88380 to 88489,
+      89000 to 89999, 90000 to 93999, 95000 to 96499, 96600 to 96999,
+      97000 to 97999, 80000 to 81999, 82000 to 82999, 83000 to 83999,
+      84000 to 85999, 94000 to 94999, 72000 to 72999, 77000 to 79999,
+      88000 to 88379, 88490 to 88999, 70000 to 70999, 71000 to 71999,
+      73600 to 73999, 74000 to 76719, 73000 to 73299
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005915
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      MC, ME, MH, MI, MJ, MK, ML, MW, J9, JA, JB, JC, JD,
+      JW, L9, LA, LB, LW, P9, PC, PO, PW, V9, VA, VB, VC, VW
+    </subIndustryCds>
+    <postalCdRanges>
+      33000 to 33039, 34000 to 34999, 35000 to 35199, 35250 to 35329,
+      35330 to 35659, 35770 to 35999, 36000 to 36399, 36500 to 37299,
+      37400 to 37999, 59900 to 59999, 60000 to 60990, 61000 to 61999,
+      62000 to 62999, 63000 to 63199, 63200 to 63399, 63400 to 63699,
+      63700 to 64999, 65000 to 65999, 54000 to 55999, 66000 to 67999,
+      68000 to 69999, 76720 to 76899
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0006954
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      MC, ME, MH, MI, MJ, MK, ML, MW, J9, JA, JB, JC, JD,
+      JW, L9, LA, LB, LW, P9, PC, PO, PW, V9, VA, VB, VC, VW
+    </subIndustryCds>
+    <postalCdRanges>
+      72000 to 72999, 77000 to 79999, 88000 to 88379, 88490 to 88999, 
+      70000 to 70999, 71000 to 71999, 73600 to 73999, 74000 to 76719, 
+      73000 to 73299
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0006982
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      E9, EA, ER, EW
+    </subIndustryCds>
+    <postalCdRanges>
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0006956
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      Y9, YA, YE, YW, GA, GE, GW
+    </subIndustryCds>
+    <postalCdRanges>
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0006957
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      A9, AA, AW, T9, TA, TC, TD, TE, TF, TG, TH, TJ, TL,
+      TM, TO, TW, U9, UA, UB, UD, UE, UW
+    </subIndustryCds>
+    <postalCdRanges>
+      20000 to 23922, 24000 to 25999, 26000 to 29399, 29420 to 29999, 
+      30000 to 31999, 38000 to 38479, 38490 to 38799, 49340 to 49459, 
+      49600 to 49779, 01000 to 09999, 1xxxx, 23923 to 23999, 2941x,
+      364xx, 373xx, 3848x, 388xx, 39xxx, 965xx, 98000 to 99999
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005911
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      A9, AA, AW, T9, TA, TC, TD, TE, TF, TG, TH, TJ, TL,
+      TM, TO, TW, U9, UA, UB, UD, UE, UW
+    </subIndustryCds>
+    <postalCdRanges>
+      40000 to 41999, 42500 to 43999, 45000 to 45499, 46000 to 47999, 
+      50000 to 51999, 52000 to 53999, 56000 to 56999, 32000 to 32999, 
+      33040 to 33999, 35200 to 35249, 35660 to 35769, 42000 to 42499, 
+      44000 to 44999, 45500 to 45999, 48000 to 49339, 49460 to 49599, 
+      49780 to 49999, 57000 to 59899, 33000 to 33039, 34000 to 34999, 
+      35000 to 35199, 35250 to 35329, 35330 to 35659, 35770 to 35999, 
+      36000 to 36399, 36500 to 37299, 37400 to 37999, 59900 to 59999, 
+      60000 to 60990, 61000 to 61999, 62000 to 62999, 63000 to 63199, 
+      63200 to 63399, 63400 to 63699, 63700 to 64999, 65000 to 65999, 
+      54000 to 55999, 66000 to 67999, 68000 to 69999, 76720 to 76899
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005913
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      D9, DI, DJ, DK, DL, DW, K9, KA, KB, KC, KD, KE, KF,
+      KW, KZ, R9, RA, RC, RD, RE, RF, RG, RH, RR, RW, WN, WO, WP, WQ, WW
+    </subIndustryCds>
+    <postalCdRanges>
+      20000 to 23922, 24000 to 25999, 26000 to 29399, 29420 to 29999, 
+      30000 to 31999, 38000 to 38479, 38490 to 38799, 49340 to 49459, 
+      49600 to 49779, 01000 to 09999, 1xxxx, 23923 to 23999, 2941x,
+      364xx, 373xx, 3848x, 388xx, 39xxx, 965xx, 98000 to 99999
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005923
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      D9, DI, DJ, DK, DL, DW, K9, KA, KB, KC, KD, KE, KF,
+      KW, KZ, R9, RA, RC, RD, RE, RF, RG, RH, RR, RW, WN, WO, WP, WQ, WW
+    </subIndustryCds>
+    <postalCdRanges>
+      40000 to 41999, 42500 to 43999, 45000 to 45499, 46000 to 47999, 
+      50000 to 51999, 52000 to 53999, 56000 to 56999, 32000 to 32999, 
+      33040 to 33999, 35200 to 35249, 35660 to 35769, 42000 to 42499, 
+      44000 to 44999, 45500 to 45999, 48000 to 49339, 49460 to 49599, 
+      49780 to 49999, 57000 to 59899, 33000 to 33039, 34000 to 34999, 
+      35000 to 35199, 35250 to 35329, 35330 to 35659, 35770 to 35999, 
+      36000 to 36399, 36500 to 37299, 37400 to 37999, 59900 to 59999, 
+      60000 to 60990, 61000 to 61999, 62000 to 62999, 63000 to 63199, 
+      63200 to 63399, 63400 to 63699, 63700 to 64999, 65000 to 65999, 
+      54000 to 55999, 66000 to 67999, 68000 to 69999, 76720 to 76899
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005925
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      D9, DI, DJ, DK, DL, DW, K9, KA, KB, KC, KD, KE, KF,
+      KW, KZ, R9, RA, RC, RD, RE, RF, RG, RH, RR, RW, WN, WO, WP, WQ, WW
+    </subIndustryCds>
+    <postalCdRanges>
+      73300 to 73599, 86000 to 87999, 88380 to 88489, 89000 to 89999, 
+      90000 to 93999, 95000 to 96499, 96600 to 96999, 97000 to 97999, 
+      80000 to 81999, 82000 to 82999, 83000 to 83999, 84000 to 85999, 
+      94000 to 94999, 72000 to 72999, 77000 to 79999, 88000 to 88379, 
+      88490 to 88999, 70000 to 70999, 71000 to 71999, 73600 to 73999, 
+      74000 to 76719, 73000 to 73299
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005927
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      CB, CC, CD, CW, B9, BB, BD, BG, BI, BW
+    </subIndustryCds>
+    <postalCdRanges>
+      20000 to 23922, 24000 to 25999, 26000 to 29399, 29420 to 29999, 
+      30000 to 31999, 38000 to 38479, 38490 to 38799, 49340 to 49459, 
+      49600 to 49779, 01000 to 09999, 1xxxx, 23923 to 23999, 2941x,
+      364xx, 373xx, 3848x, 388xx, 39xxx, 965xx, 98000 to 99999
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005929
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      CB, CC, CD, CW, B9, BB, BD, BG, BI, BW
+    </subIndustryCds>
+    <postalCdRanges>
+      40000 to 41999, 42500 to 43999, 45000 to 45499, 46000 to 47999, 
+      50000 to 51999, 52000 to 53999, 56000 to 56999, 32000 to 32999, 
+      33040 to 33999, 35200 to 35249, 35660 to 35769, 42000 to 42499, 
+      44000 to 44999, 45500 to 45999, 48000 to 49339, 49460 to 49599, 
+      49780 to 49999, 57000 to 59899, 33000 to 33039, 34000 to 34999, 
+      35000 to 35199, 35250 to 35329, 35330 to 35659, 35770 to 35999, 
+      36000 to 36399, 36500 to 37299, 37400 to 37999, 59900 to 59999, 
+      60000 to 60990, 61000 to 61999, 62000 to 62999, 63000 to 63199, 
+      63200 to 63399, 63400 to 63699, 63700 to 64999, 65000 to 65999, 
+      54000 to 55999, 66000 to 67999, 68000 to 69999, 76720 to 76899
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005931
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      CB, CC, CD, CW, B9, BB, BD, BG, BI, BW
+    </subIndustryCds>
+    <postalCdRanges>
+      73300 to 73599, 86000 to 87999, 88380 to 88489, 89000 to 89999, 
+      90000 to 93999, 95000 to 96499, 96600 to 96999, 97000 to 97999, 
+      80000 to 81999, 82000 to 82999, 83000 to 83999, 84000 to 85999, 
+      94000 to 94999
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005933
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      MC, ME, MH, MI, MJ, MK, ML, MW, J9, JA, JB, JC, JD,
+      JW, L9, LA, LB, LW, P9, PC, PO, PW, V9, VA, VB, VC, VW
+    </subIndustryCds>
+    <postalCdRanges>
+      20000 to 23922, 24000 to 25999, 26000 to 29399, 29420 to 29999, 
+      30000 to 31999, 38000 to 38479, 38490 to 38799, 49340 to 49459, 
+      49600 to 49779, 01000 to 09999, 1xxxx, 23923 to 23999, 2941x,
+      364xx, 373xx, 3848x, 388xx, 39xxx, 965xx, 98000 to 99999
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005935
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      MC, ME, MH, MI, MJ, MK, ML, MW, J9, JA, JB, JC, JD,
+      JW, L9, LA, LB, LW, P9, PC, PO, PW, V9, VA, VB, VC, VW
+    </subIndustryCds>
+    <postalCdRanges>
+      40000 to 41999, 42500 to 43999, 45000 to 45499, 46000 to 47999, 
+      50000 to 51999, 52000 to 53999, 56000 to 56999, 32000 to 32999, 
+      33040 to 33999, 35200 to 35249, 35660 to 35769, 42000 to 42499, 
+      44000 to 44999, 45500 to 45999, 48000 to 49339, 49460 to 49599, 
+      49780 to 49999, 57000 to 59899, 33000 to 33039, 34000 to 34999, 
+      35000 to 35199, 35250 to 35329, 35330 to 35659, 35770 to 35999, 
+      36000 to 36399, 36500 to 37299, 37400 to 37999, 59900 to 59999, 
+      60000 to 60990, 61000 to 61999, 62000 to 62999, 63000 to 63199, 
+      63200 to 63399, 63400 to 63699, 63700 to 64999, 65000 to 65999, 
+      54000 to 55999, 66000 to 67999, 68000 to 69999, 76720 to 76899
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005937
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      MC, ME, MH, MI, MJ, MK, ML, MW, J9, JA, JB, JC, JD,
+      JW, L9, LA, LB, LW, P9, PC, PO, PW, V9, VA, VB, VC, VW
+    </subIndustryCds>
+    <postalCdRanges>
+      73300 to 73599, 86000 to 87999, 88380 to 88489, 89000 to 89999, 
+      90000 to 93999, 95000 to 96499, 96600 to 96999, 97000 to 97999, 
+      80000 to 81999, 82000 to 82999, 83000 to 83999, 84000 to 85999, 
+      94000 to 94999, 72000 to 72999, 77000 to 79999, 88000 to 88379, 
+      88490 to 88999, 70000 to 70999, 71000 to 71999, 73600 to 73999, 
+      74000 to 76719, 73000 to 73299
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005939
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      F9, FA, FW, N9, NA, NB, NI, NW, S9, SB, SW
+    </subIndustryCds>
+    <postalCdRanges>
+      20000 to 23922, 24000 to 25999, 26000 to 29399, 29420 to 29999, 
+      30000 to 31999, 38000 to 38479, 38490 to 38799, 49340 to 49459, 
+      49600 to 49779, 01000 to 09999, 1xxxx, 23923 to 23999, 2941x,
+      364xx, 373xx, 3848x, 388xx, 39xxx, 965xx, 98000 to 99999
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005941
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      F9, FA, FW, N9, NA, NB, NI, NW, S9, SB, SW
+    </subIndustryCds>
+    <postalCdRanges>
+      40000 to 41999, 42500 to 43999, 45000 to 45499, 46000 to 47999, 
+      50000 to 51999, 52000 to 53999, 56000 to 56999, 32000 to 32999, 
+      33040 to 33999, 35200 to 35249, 35660 to 35769, 42000 to 42499, 
+      44000 to 44999, 45500 to 45999, 48000 to 49339, 49460 to 49599, 
+      49780 to 49999, 57000 to 59899, 33000 to 33039, 34000 to 34999, 
+      35000 to 35199, 35250 to 35329, 35330 to 35659, 35770 to 35999, 
+      36000 to 36399, 36500 to 37299, 37400 to 37999, 59900 to 59999, 
+      60000 to 60990, 61000 to 61999, 62000 to 62999, 63000 to 63199, 
+      63200 to 63399, 63400 to 63699, 63700 to 64999, 65000 to 65999, 
+      54000 to 55999, 66000 to 67999, 68000 to 69999, 76720 to 76899
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005943
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      F9, FA, FW, N9, NA, NB, NI, NW, S9, SB, SW
+    </subIndustryCds>
+    <postalCdRanges>
+      73300 to 73599, 86000 to 87999, 88380 to 88489, 89000 to 89999,
+      90000 to 93999, 95000 to 96499, 96600 to 96999, 97000 to 97999, 
+      80000 to 81999, 82000 to 82999, 83000 to 83999, 84000 to 85999, 
+      94000 to 94999, 72000 to 72999, 77000 to 79999, 88000 to 88379, 
+      88490 to 88999, 70000 to 70999, 71000 to 71999, 73600 to 73999, 
+      74000 to 76719, 73000 to 73299
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005945
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      XF, XW, H9, HA, HB, HE, HW
+    </subIndustryCds>
+    <postalCdRanges>
+      20000 to 23922, 24000 to 25999, 26000 to 29399, 29420 to 29999, 
+      30000 to 31999, 38000 to 38479, 38490 to 38799, 49340 to 49459, 
+      49600 to 49779, 01000 to 09999, 1xxxx, 23923 to 23999, 2941x,
+      364xx, 373xx, 3848x, 388xx, 39xxx, 965xx, 98000 to 99999
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005953
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      XF, XW, H9, HA, HB, HE, HW
+    </subIndustryCds>
+    <postalCdRanges>
+      40000 to 41999, 42500 to 43999, 45000 to 45499, 46000 to 47999, 
+      50000 to 51999, 52000 to 53999, 56000 to 56999, 32000 to 32999, 
+      33040 to 33999, 35200 to 35249, 35660 to 35769, 42000 to 42499, 
+      44000 to 44999, 45500 to 45999, 48000 to 49339, 49460 to 49599, 
+      49780 to 49999, 57000 to 59899, 33000 to 33039, 34000 to 34999, 
+      35000 to 35199, 35250 to 35329, 35330 to 35659, 35770 to 35999, 
+      36000 to 36399, 36500 to 37299, 37400 to 37999, 59900 to 59999, 
+      60000 to 60990, 61000 to 61999, 62000 to 62999, 63000 to 63199, 
+      63200 to 63399, 63400 to 63699, 63700 to 64999, 65000 to 65999, 
+      54000 to 55999, 66000 to 67999, 68000 to 69999, 76720 to 76899
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005955
+    </sortl>
+  </mapping>
+  <mapping>
+    <subIndustryCds>
+      XF, XW, H9, HA, HB, HE, HW
+    </subIndustryCds>
+    <postalCdRanges>
+      73300 to 73599, 86000 to 87999, 88380 to 88489, 89000 to 89999, 
+      90000 to 93999, 95000 to 96499, 96600 to 96999, 97000 to 97999, 
+      80000 to 81999, 82000 to 82999, 83000 to 83999, 84000 to 85999, 
+      94000 to 94999, 72000 to 72999, 77000 to 79999, 88000 to 88379, 
+      88490 to 88999, 70000 to 70999, 71000 to 71999, 73600 to 73999, 
+      74000 to 76719, 73000 to 73299
+    </postalCdRanges>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sortl>
+      T0005957
+    </sortl>
+  </mapping>
+</mappings>

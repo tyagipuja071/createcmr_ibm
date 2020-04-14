@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+
+  <mapping>
+  <countryUse>
+  706
+  </countryUse>
+    <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+      21,25,39,52,54,55,57,58,67,68,70,71,88,89,90
+    </postalCdStarts>
+    <sbo>
+      06E
+    </sbo>
+    </mapping>
+    
+    <mapping>
+    <countryUse>
+    706
+    </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+      01,03,07,15,26,38,42,43,63,69,73,74
+    </postalCdStarts>
+    <sbo>
+      02L
+    </sbo>
+    </mapping>
+    
+    <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+      04,05,06,11,13,20,30,34,48,66,83,84
+    </postalCdStarts>
+    <sbo>
+      02M
+    </sbo>
+  </mapping>
+  
+   <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+     16,17,19,23,24,32,33,40,47,64,65,87
+    </postalCdStarts>
+    <sbo>
+      03M
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+     18,22,28,29,35,36,37,41,44,45,49,53,56,72,79,85,86
+    </postalCdStarts>
+    <sbo>
+      03N
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+     18,22,28,29,35,36,37,41,44,45,49,53,56,72,79,85,86
+    </postalCdStarts>
+    <sbo>
+      03N
+    </sbo>
+  </mapping>
+  
+  <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+     09,12,31,46,81,82
+    </postalCdStarts>
+    <sbo>
+      03T
+    </sbo>
+  </mapping>
+  
+   <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+     21,25,39,52,54,55,57,58,67,68,70,71,88,89,90
+    </postalCdStarts>
+    <sbo>
+      06E
+    </sbo>
+  </mapping>
+  
+   <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+     02,08,10,14,27,50,51,59,60,61,62,76,80
+    </postalCdStarts>
+    <sbo>
+      06N
+    </sbo>
+  </mapping>
+  
+   <mapping>
+    <countryUse>
+    706
+   </countryUse>
+     <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+     <postalCdStarts>
+     75,77,78,91,92,93,94,95
+    </postalCdStarts>
+    <isicCds>
+    9806, 6519, 6591, 6592, 7020, 7705, 9811, 4888, 9213, 2230, 9211, 9212, 9214, 9219, 9249, 2211, 2212, 2213, 2219,
+    2221, 2222, 7413, 9220, 9241, 7430, 7709, 9111, 9112, 9120, 9191, 9192, 9199, 9232, 9233, 9808, 8511, 8512, 8519,
+    7707, 9812, 1513, 1514, 1520, 1541, 1542, 1543, 1544, 1549, 1551, 1552, 1553, 1554, 1600, 2424, 0111, 0112, 0113,
+    0121, 0122, 0130, 0140, 0150, 0200, 0501, 0502, 1511, 1512, 1531, 1532, 1533, 8520, 7703, 5121, 5122, 5131, 5139,
+    5142, 5143, 5149, 5151, 5152, 5159, 5190, 4550, 5020, 5110, 5260, 7112, 7113, 7121,9806, 6519, 6591, 6592, 7020,
+    7705, 9811, 4888, 9213, 2230, 9211, 9212, 9214, 9219, 9249, 2211, 2212, 2213, 2219, 2221, 2222, 7413, 9220, 9241,
+    7430, 7709, 9111, 9112, 9120, 9191, 9192, 9199, 9232, 9233, 9808, 8511, 8512, 8519, 7707, 9812, 1513, 1514, 1520,
+    1541, 1542, 1543, 1544, 1549, 1551, 1552, 1553, 1554, 1600, 2424, 0111, 0112, 0113, 0121, 0122, 0130, 0140, 0150,
+    0200, 0501, 0502, 1511, 1512, 1531, 1532, 1533, 8520, 7703, 5121, 5122, 5131, 5139, 5142, 5143, 5149, 5151, 5152,
+    5159, 5190, 4550, 5020, 5110, 5260, 7112, 7113, 7121, 7122, 7129, 7130, 7310, 7422, 7491, 7492, 7493, 7494, 7495,
+    7499, 8531, 9301, 9302, 9303, 9309, 9500, 7719, 9820, 6210, 6220, 6010, 6021, 6022, 6023, 6110, 6120, 6301, 6302,
+    303, 6304, 5510, 7111, 6309, 6411, 6412, 7716, 9804, 1721, 1730, 1810, 1820, 1911, 1912, 1920, 5219, 5251, 5030,
+    5232, 5239, 5240, 5211, 5220, 5252, 5259, 5231, 5520, 5233, 5234, 7714, 9814, 6601, 6603, 6602, 6720, 7712, 9801,
+    6420, 7700, 9819, 6511, 6599, 6711, 6712, 6719, 7715, 9802, 7230, 7240, 7290, 7210, 7221, 7229, 7250, 7123, 7701,
+    7414, 7411, 7412, 7702 
+    </isicCds>
+    <sbo>
+      01D
+    </sbo>
+  </mapping>
+    
+  <mapping>
+  <countryUse>706RE</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      860
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706MQ</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      851
+    </sbo>
+  </mapping>
+  
+  <mapping>
+  <countryUse>706GP</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      852
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706GF</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      853
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706PM</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      853
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706KM</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      89W
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706YT</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      864
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706VU</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      872
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706NC</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      872
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706WF</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      872
+    </sbo>
+  </mapping>
+  
+   <mapping>
+  <countryUse>706PF</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      873
+    </sbo>
+  </mapping>
+  
+  <mapping>
+  <countryUse>706MC</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      02M
+    </sbo>
+  </mapping>
+  
+  <mapping>
+  <countryUse>706AD</countryUse>
+   <isu>
+      32
+    </isu>
+    <ctc>
+      S
+    </ctc>
+    <sbo>
+      03T
+    </sbo>
+  </mapping>
+  
+</mappings>

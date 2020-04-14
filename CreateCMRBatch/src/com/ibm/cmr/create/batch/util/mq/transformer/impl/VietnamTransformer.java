@@ -187,6 +187,7 @@ public class VietnamTransformer extends ASEANTransformer {
     }
     handler.messageHash.put("AddrLine6", line6);
     handleMove(handler, "ASEAN");
+    arrangeAddressLinesData(handler);
 
     // Defect 1735593: SG Pincode Issue
     /*

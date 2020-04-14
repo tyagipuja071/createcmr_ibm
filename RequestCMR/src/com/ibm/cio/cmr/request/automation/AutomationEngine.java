@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
@@ -141,21 +142,26 @@ public class AutomationEngine {
 
     long resultId = getNextResultId(entityManager);
 
-    createComment(entityManager, "Auomated system checks have been started.", reqId, appUser);
+    createComment(entityManager, "Automated system checks have been started.", reqId, appUser);
 
     boolean systemError = false;
     boolean stopExecution = false;
     int lastElementIndex = 0;
 
     boolean hasOverrideOrMatchingApplied = false;
+    requestData.getAdmin().setReviewReqIndc("N");
     for (AutomationElement<?> element : this.elements) {
       ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
 
       // determine if element is to be skipped
+
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
       boolean skipElement = (skipChecks || engineData.get().isSkipChecks())
           && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType())
               || (ProcessType.Matching.equals(element.getProcessType()) && !(element instanceof DuplicateCheckElement)));
+
+      boolean skipVerification = scenarioExceptions != null && scenarioExceptions.isSkipCompanyVerification();
+      skipVerification = skipVerification && (element instanceof CompanyVerifier);
 
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
@@ -165,7 +171,9 @@ public class AutomationEngine {
         AutomationResult<?> result = null;
 
         if (skipElement) {
-          result = element.createSkippedResult(reqId);
+          result = element.createSkippedResult(reqId, "Checks skipped because of scenario exceptions and/or previous element results.");
+        } else if (skipVerification) {
+          result = element.createSkippedResult(reqId, "Company verification skipped for this request scenario.");
         } else {
           try {
             ChangeLogListener.setManager(entityManager);
@@ -192,7 +200,6 @@ public class AutomationEngine {
             LOG.debug("Element " + element.getProcessDesc() + " encountered an error but was ignored.");
           } else {
             actionsOnError.add(element.getActionOnError());
-
             if (element.isStopOnError()) {
               LOG.info("Stopping execution of other elements because of an error in " + element.getProcessDesc());
               createComment(entityManager, "An error in execution of " + element.getProcessDesc() + " caused the process to stop.", reqId, appUser);
@@ -237,10 +244,23 @@ public class AutomationEngine {
 
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
+    String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
 
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
     }
+
+    // check company verified info
+    if (compInfoSrc != null && StringUtils.isNotBlank(compInfoSrc)) {
+      admin.setCompVerifiedIndc("Y");
+      admin.setCompInfoSrc(compInfoSrc);
+    }
+    // check scenario verified info
+    if (scenarioVerifiedIndc != null && StringUtils.isNotBlank(scenarioVerifiedIndc)) {
+      admin.setScenarioVerifiedIndc(scenarioVerifiedIndc);
+    }
+
     if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
       if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
         // change status to retry
@@ -297,7 +317,39 @@ public class AutomationEngine {
         } else if (actionsOnError.contains(ActionOnError.Wait)) {
           // do not change status
           moveToNextStep = false;
-          String cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
+          String cmt = "";
+          StringBuilder rejectCmt = new StringBuilder();
+          List<String> rejectionComments = (List<String>) engineData.get().get("rejections");
+          Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
+          if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+            rejectCmt.append("Processor review is required for following issues");
+            rejectCmt.append(":");
+            if (rejectComments != null && !rejectComments.isEmpty()) {
+              for (String rejCmt : rejectComments) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(rejCmt);
+              }
+            }
+            // append pending checks
+            if (pendingChecks != null && !pendingChecks.isEmpty()) {
+              for (String pendingCheck : pendingChecks.values()) {
+                rejectCmt.append("\n ");
+                rejectCmt.append(pendingCheck);
+              }
+            }
+            cmt = rejectCmt.toString();
+
+            if (cmt.length() > 1930) {
+              cmt = cmt.substring(0, 1920) + "...";
+            }
+            cmt += "\n\nPlease view system processing results for more details.";
+            admin.setReviewReqIndc("Y");
+            createComment(entityManager, cmt, reqId, appUser);
+          }
+          if (actionsOnError.size() > 1) {
+            admin.setReviewReqIndc("Y");
+          }
+          cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
           createComment(entityManager, cmt, reqId, appUser);
           admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
           createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,

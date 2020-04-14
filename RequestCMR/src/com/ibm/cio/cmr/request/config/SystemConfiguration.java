@@ -28,9 +28,9 @@ import com.ibm.cio.cmr.request.user.AppUser;
 
 /**
  * Class for handling system configuration
- * 
+ *
  * @author Jeffrey Zamora
- * 
+ *
  */
 public class SystemConfiguration {
 
@@ -39,12 +39,13 @@ public class SystemConfiguration {
   private static Map<String, ConfigItem> configurations = new HashMap<String, ConfigItem>();
 
   private static final ResourceBundle CONFIG = ResourceBundle.getBundle("cmr-config");
+  private static final ResourceBundle BUILD_NO = ResourceBundle.getBundle("build-no");
 
   public static File dirLocation = null;
 
   /**
    * Loads the config from the configuration file
-   * 
+   *
    * @throws IOException
    * @throws SAXException
    */
@@ -76,7 +77,7 @@ public class SystemConfiguration {
 
   /**
    * Updates a configuration value
-   * 
+   *
    * @param key
    * @param value
    */
@@ -90,7 +91,7 @@ public class SystemConfiguration {
 
   /**
    * Exports the current configuration to the physical file
-   * 
+   *
    * @return
    * @throws IOException
    */
@@ -144,7 +145,7 @@ public class SystemConfiguration {
 
   /**
    * Checks if the given user currently in the session is an administrator
-   * 
+   *
    * @param request
    * @return
    */
@@ -158,7 +159,7 @@ public class SystemConfiguration {
 
   /**
    * Gets a configuration param
-   * 
+   *
    * @param key
    * @return
    */
@@ -168,11 +169,14 @@ public class SystemConfiguration {
 
   /**
    * Gets a value from the internal system configuration
-   * 
+   *
    * @param key
    * @return
    */
   public static String getSystemProperty(String key) {
+    if (BUILD_NO.containsKey(key)) {
+      return BUILD_NO.getString(key);
+    }
     try {
       return CONFIG.getString(key);
     } catch (MissingResourceException e) {
@@ -182,7 +186,7 @@ public class SystemConfiguration {
 
   /**
    * Gets the value of a configuration parameter
-   * 
+   *
    * @param key
    * @param defaultValue
    * @return
@@ -194,7 +198,7 @@ public class SystemConfiguration {
 
   /**
    * Gets the value of a configuration parameter
-   * 
+   *
    * @param key
    * @param defaultValue
    * @return
@@ -206,7 +210,7 @@ public class SystemConfiguration {
 
   /**
    * Refreshes the parameters
-   * 
+   *
    * @throws Exception
    */
   public static void refresh() throws Exception {
@@ -215,7 +219,7 @@ public class SystemConfiguration {
 
   /**
    * Gets the {@link ConfigItem} list from the parameters
-   * 
+   *
    * @return
    */
   public static Collection<ConfigItem> asList() {

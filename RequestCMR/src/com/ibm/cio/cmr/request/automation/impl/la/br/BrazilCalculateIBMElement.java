@@ -116,8 +116,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         if (ifErrorSoldTo || ifErrorInstallAt) {
           LOG.debug("State Fiscal Code is empty , hence adding negative check status");
           // results.setResults("Fiscal Code empty");
-          engineData.addNegativeCheckStatus("StateFiscalCode",
-              "Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
+          engineData.addNegativeCheckStatus("StateFiscalCode", "State/Fiscal code is empty");
           // details.append("\nSending back to Processor as state fiscal code is
           // empty.Enter valid fiscal code value.");
           // engineData.addRejectionComment("State Fiscal Code is Empty.");
@@ -150,8 +149,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         if (ifErrorSoldTo || ifErrorInstallAt) {
           LOG.debug("State Fiscal Code is empty , hence adding negative check status");
           // results.setResults("Fiscal Code empty");
-          engineData.addNegativeCheckStatus("StateFiscalCode",
-              "Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
+          engineData.addNegativeCheckStatus("StateFiscalCode", "State/Fiscal code is empty");
           // details.append("\nSending back to Processor as state fiscal code is
           // empty.Enter valid fiscal code value.");
           // engineData.addRejectionComment("State Fiscal Code is Empty.");
@@ -183,8 +181,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         if (ifErrorSoldTo || ifErrorInstallAt) {
           LOG.debug("State Fiscal Code is empty , hence adding negative check status");
           // results.setResults("Fiscal Code empty");
-          engineData.addNegativeCheckStatus("StateFiscalCode",
-              "Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
+          engineData.addNegativeCheckStatus("StateFiscalCode", "State/Fiscal code is empty");
           // details.append("\nSending back to Processor as state fiscal code is
           // empty.Enter valid fiscal code value.");
           // engineData.addRejectionComment("State Fiscal Code is Empty.");
@@ -252,8 +249,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         if (ifErrorSoldTo || ifErrorInstallAt) {
           LOG.debug("State Fiscal Code is empty , hence adding negative check status");
           // results.setResults("Fiscal Code empty");
-          engineData.addNegativeCheckStatus("StateFiscalCode",
-              "Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
+          engineData.addNegativeCheckStatus("StateFiscalCode", "State/Fiscal code is empty");
           // details.append("\nSending back to Processor as state fiscal code is
           // empty.Enter valid fiscal code value.");
           // engineData.addRejectionComment("State Fiscal Code is Empty.");
@@ -318,8 +314,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
         if (ifErrorSoldTo || ifErrorInstallAt) {
           LOG.debug("State Fiscal Code is empty , hence adding negative check status");
           // results.setResults("Fiscal Code empty");
-          engineData.addNegativeCheckStatus("StateFiscalCode",
-              "Sending back to Processor as state fiscal code is empty.Enter valid fiscal code value.");
+          engineData.addNegativeCheckStatus("StateFiscalCode", "State/Fiscal code is empty");
           // details.append("\nSending back to Processor as state fiscal code is
           // empty.Enter valid fiscal code value.");
           // engineData.addRejectionComment("State Fiscal Code is Empty.");

@@ -286,7 +286,7 @@ public abstract class MessageTransformer {
    * @return
    */
   public boolean hasAddressLinks() {
-    return true;
+    return false;
   }
 
   public String handleVatMassUpdateChanges(String newStartingLetter, String legacyVat) {
@@ -302,8 +302,8 @@ public abstract class MessageTransformer {
 
   }
 
-  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry,
-      CmrtCust cust, Data data, LegacyDirectObjectContainer legacyObjects) {
+  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
+      Data data, LegacyDirectObjectContainer legacyObjects) {
     // noop for default class, override
   }
 

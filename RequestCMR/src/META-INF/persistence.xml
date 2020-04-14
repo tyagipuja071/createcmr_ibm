@@ -196,6 +196,8 @@
     <class>com.ibm.cio.cmr.request.entity.Kna1PK</class>
     <class>com.ibm.cio.cmr.request.entity.ReftUnsicW</class>
     <class>com.ibm.cio.cmr.request.entity.ReftUnsicWPK</class>
+    <class>com.ibm.cio.cmr.request.entity.RepTeam</class>
+    <class>com.ibm.cio.cmr.request.entity.RepTeamPK</class>
     
     <properties>
     <!-- ORIGINAL -->

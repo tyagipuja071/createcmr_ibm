@@ -193,6 +193,9 @@ public class CEMEATransformer extends MessageTransformer {
     messageHash.put("CreditCode", !StringUtils.isEmpty(cmrData.getCreditCd()) ? cmrData.getCreditCd() : "");
     messageHash.put("CurrencyCode", !StringUtils.isEmpty(cmrData.getLegacyCurrencyCd()) ? cmrData.getLegacyCurrencyCd() : "");
 
+    // CMR-2096-Austria - "Central order block code"
+    messageHash.put("OrdBlk", !StringUtils.isEmpty(cmrData.getOrdBlk()) ? cmrData.getOrdBlk() : "");
+
     boolean internal = custType.contains("IN");
     boolean bp = MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || custType.contains("BP");
 
@@ -275,7 +278,7 @@ public class CEMEATransformer extends MessageTransformer {
     Map<String, String> messageHash = handler.messageHash;
     Addr addrData = handler.addrData;
     Data cmrData = handler.cmrData;
-    
+
     String transCode = messageHash.get("TransactionCode");
     boolean addrUpdate = !StringUtils.isEmpty(transCode) && transCode.equals("M") ? true : false;
 
@@ -439,7 +442,7 @@ public class CEMEATransformer extends MessageTransformer {
         messageHash.put("ICE", ice);
       }
     }
- }
+  }
 
   protected boolean isCrossBorder(Addr addr) {
     String cd = CEMEAHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry());

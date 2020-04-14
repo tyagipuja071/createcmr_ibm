@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.ProcCenter;
 import com.ibm.cio.cmr.request.entity.ProlifChecklist;
 import com.ibm.cio.cmr.request.entity.ProlifChecklistPK;
@@ -44,6 +45,8 @@ import com.ibm.cio.cmr.request.model.requestentry.AttachmentModel;
 import com.ibm.cio.cmr.request.model.requestentry.AutoDNBDataModel;
 import com.ibm.cio.cmr.request.model.requestentry.CheckListModel;
 import com.ibm.cio.cmr.request.model.requestentry.DataModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.NotifyListModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.requestentry.SubindustryIsicSearchModel;
@@ -512,14 +515,18 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     // check if there's a status change
     if (transitionToNext && !trans.getId().getCurrReqStatus().equals(trans.getNewReqStatus())) {
-      String rejectReason = model.getRejectReason();
-      if (StringUtils.isEmpty(rejectReason)) {
+      // String rejectReason = model.getRejectReason();
+
+      String rejectReasonCd1 = model.getRejectReason();
+      String rejectReason = null;
+
+      if (StringUtils.isEmpty(rejectReasonCd1)) {
         rejectReason = null;
       } else {
-        rejectReason = getRejectReason(entityManager, rejectReason);
+        rejectReason = getRejectReason(entityManager, rejectReasonCd1);
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), sendToId, sendToNm,
-          complete, rejectReason);
+          complete, rejectReason, rejectReasonCd1);
 
       // save comment in req_cmt_log table .
       // save only if it is not null or not blank
@@ -541,7 +548,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
         wfComment = wfComment.substring(0, 237) + " (truncated)";
       }
-      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null);
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null, null);
       String action = model.getAction();
       String actionDesc = getActionDescription(action, entityManager);
       String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
@@ -644,7 +651,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     updateEntity(admin, entityManager);
 
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null);
+    RequestUtils
+        .createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null);
 
     // save comment in req_cmt_log table .
     // save only if it is not null or not blank
@@ -1018,6 +1026,9 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       /* 1970060 - automation engine */
       mv.addObject("automationIndicator", RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry()));
 
+      String dnbPrimary = RequestUtils.isDnBCountry(entityManager, model.getCmrIssuingCntry());
+      mv.addObject("dnbPrimary", dnbPrimary);
+
       GEOHandler geoHandler = RequestUtils.getGEOHandler(model.getCmrIssuingCntry());
       if (geoHandler != null) {
         geoHandler.appendExtraModelEntries(entityManager, mv, model);
@@ -1312,13 +1323,17 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     if (soldTo != null) {
       request.setCity(soldTo.getCity1());
+      if (StringUtils.isBlank(soldTo.getCity1()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+        // here for now, find a way to move to common class
+        request.setCity("SINGAPORE");
+      }
       request.setCustomerName(getCustomerName(handler, admin, soldTo));
       request.setStreetLine1(soldTo.getAddrTxt());
       request.setStreetLine2(soldTo.getAddrTxt2());
       request.setLandedCountry(soldTo.getLandCntry());
       request.setPostalCode(soldTo.getPostCd());
       request.setStateProv(soldTo.getStateProv());
-      // request.setMinConfidence("4");
+      request.setMinConfidence("8");
     }
 
     return request;
@@ -1362,4 +1377,99 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     return null;
   }
 
+  public FindCMRResultModel findSingleReactCMRs(String cmrNo, String cmrCntry, int i, String searchCntry) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    FindCMRResultModel queryResponse = new FindCMRResultModel();
+    try {
+
+      String sql = ExternalizedQuery.getSql("FIND_SINGLE_REACT_RECORDS_RDC");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CMR_NO", cmrNo);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("COUNTRY", searchCntry);
+      query.setForReadOnly(true);
+      List<Kna1> resultList = query.getResults(Kna1.class);
+
+      if (resultList != null && resultList.size() > 0) {
+        List<FindCMRRecordModel> cmrRecordModels = new ArrayList<>();
+        for (Kna1 kna1 : resultList) {
+          FindCMRRecordModel cmrRecord = new FindCMRRecordModel();
+
+          // Confirmed
+          cmrRecord.setCmrName1Plain(kna1.getName1());
+          cmrRecord.setCmrName2Plain(kna1.getName2());
+          cmrRecord.setCmrName3(kna1.getName3());
+          cmrRecord.setCmrName4(kna1.getName4());
+          cmrRecord.setCmrOrderBlock(kna1.getAufsd());
+          cmrRecord.setCmrIsu(kna1.getBrsch());
+          cmrRecord.setCmrAffiliate(kna1.getKonzs());
+          cmrRecord.setCmrAddrTypeCode(kna1.getKtokd());
+          cmrRecord.setCmrAddrType("");
+          cmrRecord.setCmrPrefLang(kna1.getSpras());
+          cmrRecord.setCmrBusinessReg(kna1.getStcd1());
+          cmrRecord.setCmrShortName(kna1.getTelx1());
+          cmrRecord.setCmrVat(kna1.getStceg());
+          cmrRecord.setCmrSubIndustry(kna1.getBran1());
+          cmrRecord.setCmrPpsceid(kna1.getBran3());
+          cmrRecord.setCmrSitePartyID(kna1.getBran5());
+          cmrRecord.setCmrIssuedBy(kna1.getKatr6());     
+          cmrRecord.setCmrCapIndicator(kna1.getKatr8());
+          cmrRecord.setCmrNum(kna1.getZzkvCusno());
+          cmrRecord.setCmrInac(kna1.getZzkvInac());
+          cmrRecord.setCmrCompanyNo(!StringUtils.isEmpty(kna1.getZzkvNode1()) ? kna1.getZzkvNode1().trim() : "");
+          cmrRecord.setCmrEnterpriseNumber(!StringUtils.isEmpty(kna1.getZzkvNode2()) ? kna1.getZzkvNode2().trim() : "");
+          cmrRecord.setCmrBusinessReg(kna1.getStcd1());
+          cmrRecord.setCmrLocalTax2(kna1.getStcd2());
+          cmrRecord.setCmrClass(kna1.getKukla());
+
+          // (Addr table)Need to confirm with KNA1 table mapping and set
+          cmrRecord.setCmrSapNumber(kna1.getId().getKunnr());
+          cmrRecord.setCmrAddrSeq(kna1.getZzkvSeqno());
+
+          cmrRecord.setCmrCity(!StringUtils.isEmpty(kna1.getOrt01()) ? kna1.getOrt01() : "");
+          cmrRecord.setCmrCity2(!StringUtils.isEmpty(kna1.getOrt02()) ? kna1.getOrt02() : "");
+          cmrRecord.setCmrState(!StringUtils.isEmpty(kna1.getRegio()) ? kna1.getRegio() : "");
+          cmrRecord.setCmrPostalCode(!StringUtils.isEmpty(kna1.getPstlz()) ? kna1.getPstlz() : "");
+
+          cmrRecord.setCmrCountyCode("");
+          cmrRecord.setCmrCounty("");
+          cmrRecord.setCmrStreetAddress(!StringUtils.isEmpty(kna1.getStras()) ? kna1.getStras() : "");
+          cmrRecord.setCmrCustPhone("");
+          cmrRecord.setCmrCustFax(!StringUtils.isEmpty(kna1.getTelfx()) ? kna1.getTelfx() : "");
+          cmrRecord.setCmrBusNmLangCd("");
+          cmrRecord.setCmrTransportZone(!StringUtils.isEmpty(kna1.getLzone()) ? kna1.getLzone() : "");
+          cmrRecord.setCmrPOBox(!StringUtils.isEmpty(kna1.getPfach()) ? kna1.getPfach() : "");
+          cmrRecord.setCmrPOBoxCity(!StringUtils.isEmpty(kna1.getPfort()) ? kna1.getPfort() : "");
+          cmrRecord.setCmrPOBoxPostCode(!StringUtils.isEmpty(kna1.getPstl2()) ? kna1.getPstl2() : "");
+          cmrRecord.setCmrBldg("");
+          cmrRecord.setCmrFloor("");
+          cmrRecord.setCmrOffice("");
+          cmrRecord.setCmrDept("");
+
+          cmrRecord.setCmrTier("");
+          cmrRecord.setCmrInacType("");
+          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? kna1.getZzkvSic() : "");
+          cmrRecord.setCmrSortl("");
+          cmrRecord.setCmrIssuedByDesc("");
+          cmrRecord.setCmrRdcCreateDate("");
+          cmrRecord.setCmrCountryLanded(!StringUtils.isEmpty(kna1.getLand1()) ? kna1.getLand1() : "");
+          cmrRecordModels.add(cmrRecord);
+        }
+
+        queryResponse.setItems(cmrRecordModels);
+        queryResponse.setSuccess(true);
+        queryResponse.setMessage("Records found..");
+      } else {
+        queryResponse.setSuccess(false);
+        queryResponse.setMessage("Records not found..");
+      }
+
+      return queryResponse;
+    } finally {
+      // empty the manager
+      entityManager.clear();
+      entityManager.close();
+    }
+
+  }
 }

@@ -5,7 +5,7 @@ package com.ibm.cio.cmr.request.automation;
 
 import java.util.HashMap;
 
-import com.ibm.cio.cmr.request.automation.impl.gbl.BNValidationElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.ANZBNValidationElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLSearchElement;
@@ -27,6 +27,8 @@ import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilCalculateIBMElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.BrazilDupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ImportExternalDataElement;
 import com.ibm.cio.cmr.request.automation.impl.la.br.ScenarioCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USDelReacCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 
 /**
  * Registry of all {@link AutomationElement} classes with their corresponding
@@ -54,15 +56,22 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String GBL_SCENARIO_CHECK = "GBL_SCENARIO_CHECK";
   public static final String GBL_FIELD_COMPUTE = "GBL_FIELD_COMPUTE";
   public static final String GBL_UPDATE_SWITCH = "GBL_UPDATE_SWITCH";
-  public static final String EU_VAT_VALIDATION = "EU_VAT_VALIDATION";
   public static final String GBL_DNB_CHECK = "GBL_DNB_CHECK";
-  // brazil
+  // Brazil
   public static final String BR_SCENARIO = "BR_SCENARIO";
   public static final String BR_CALCULATE = "BR_CALCULATE";
   public static final String BR_DUP_CHECK = "BR_DUP_CHECK";
   public static final String BR_IMPORT = "BR_IMPORT";
-  // AU/NZ
-  public static final String AUNZ_BUISNESS_NUMBER = "AUNZ_BUISNESS_NUMBER";
+
+  // ANZ
+  public static final String ANZ_BN_VALIDATION = "ANZ_BN_VALIDATION";
+
+  // EU
+  public static final String EU_VAT_VALIDATION = "EU_VAT_VALIDATION";
+
+  // US
+  public static final String US_DEL_REAC_CHECK = "US_DEL_REAC_CHECK";
+  public static final String US_DUP_CHK = "US_DUP_CHK";
 
   private static AutomationElementRegistry registry = new AutomationElementRegistry();
 
@@ -89,14 +98,22 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(GBL_ADDR_STD, USAddrStdElement.class);
     put(GBL_SCENARIO_CHECK, GBLScenarioCheckElement.class);
     put(GBL_UPDATE_SWITCH, UpdateSwitchElement.class);
-    put(EU_VAT_VALIDATION, EUVatValidationElement.class);
     put(GBL_DNB_CHECK, DnBCheckElement.class);
     // Brazil - 631
     put(BR_SCENARIO, ScenarioCheckElement.class);
     put(BR_DUP_CHECK, BrazilDupCMRCheckElement.class);
     put(BR_CALCULATE, BrazilCalculateIBMElement.class);
     put(BR_IMPORT, ImportExternalDataElement.class);
-    put(AUNZ_BUISNESS_NUMBER, BNValidationElement.class);
+
+    // ANZ
+    put(ANZ_BN_VALIDATION, ANZBNValidationElement.class);
+
+    // EU
+    put(EU_VAT_VALIDATION, EUVatValidationElement.class);
+
+    // US
+    put(US_DEL_REAC_CHECK, USDelReacCheckElement.class);
+    put(US_DUP_CHK, USDuplicateCheckElement.class);
   }
 
   @Override

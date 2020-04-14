@@ -27,6 +27,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private String city;
   private String postCd;
   private String vat;
+  private String taxCd1;
   private String matchGrade;
 
   private String cmrNo;
@@ -37,6 +38,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   private boolean hasCmr;
   private boolean hasDnb;
+  private boolean orgIdMatch;
   private String reqType;
 
   private String altName;
@@ -46,6 +48,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private Double revenue;
 
   private boolean highestRevenue;
+  private String operStatusCode;
 
   @Override
   public int compareTo(CompanyRecordModel o) {
@@ -289,5 +292,29 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setHighestRevenue(boolean highestRevenue) {
     this.highestRevenue = highestRevenue;
+  }
+
+  public String getTaxCd1() {
+    return taxCd1;
+  }
+
+  public void setTaxCd1(String taxCd1) {
+    this.taxCd1 = taxCd1;
+  }
+
+  public boolean isOrgIdMatch() {
+    return orgIdMatch;
+  }
+
+  public void setOrgIdMatch(boolean orgIdMatch) {
+    this.orgIdMatch = orgIdMatch;
+  }
+
+  public String getOperStatusCode() {
+    return operStatusCode;
+  }
+
+  public void setOperStatusCode(String operStatusCode) {
+    this.operStatusCode = operStatusCode;
   }
 }

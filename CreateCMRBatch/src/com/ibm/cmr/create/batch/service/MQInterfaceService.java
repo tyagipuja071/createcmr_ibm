@@ -24,6 +24,7 @@ import org.jdom.JDOMException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK;
+import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
@@ -62,6 +63,7 @@ public class MQInterfaceService extends BaseBatchService {
     LOG.info("Initializing MQ Configurations...");
     MQConfig.initConfigurations();
 
+    ChangeLogListener.setUser("MQCreateCMR");
     long WAIT_TIME = 8000; // 8 seconds
 
     String waitTime = BatchUtil.getProperty("MQ_WAIT_TIME");
@@ -120,7 +122,8 @@ public class MQInterfaceService extends BaseBatchService {
   }
 
   /**
-   * Publishes data to the defined MQ for that country. Performs the following:<br>
+   * Publishes data to the defined MQ for that country. Performs the
+   * following:<br>
    * <ol>
    * <li>Get any Processing Pending records for MQ then create records under
    * MQ_INTF_REQ_QUEUE</li>
@@ -195,7 +198,7 @@ public class MQInterfaceService extends BaseBatchService {
                   publishCount += count;
                   partialCommit(entityManager);
                 } catch (Exception e) {
-                  LOG.warn("Error has been encountered for MQ Request ID "+queueRecord.getId().getQueryReqId(),e);
+                  LOG.warn("Error has been encountered for MQ Request ID " + queueRecord.getId().getQueryReqId(), e);
                   partialRollback(entityManager);
                 }
               }
@@ -388,7 +391,7 @@ public class MQInterfaceService extends BaseBatchService {
                   msgHandler.processMQMessage(xmlString);
                   partialCommit(entityManager);
                 } catch (Exception e) {
-                  LOG.warn("Error has been encountered for MQ Request ID "+mqIntfReqQueue.getId().getQueryReqId(),e);
+                  LOG.warn("Error has been encountered for MQ Request ID " + mqIntfReqQueue.getId().getQueryReqId(), e);
                   partialRollback(entityManager);
                 }
                 collectCount++;

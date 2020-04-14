@@ -40,6 +40,8 @@ function afterConfigForDE() {
     });
   }
 
+  // Disable address copying for GERMANY
+  GEOHandler.disableCopyAddress();
 }
 
 function autoSetIBMDeptCostCenter() {
@@ -76,7 +78,7 @@ function defaultCapIndicator() {
 function disableVatExemptForScenarios() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('reqType') == 'C' && _custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp != 'COMME' && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
+    if (_custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'GOVMT' && _custSubGrp != 'BROKR' && _custSubGrp != 'CROSS') {
       FormManager.disable('vatExempt');
     } else {
       FormManager.enable('vatExempt');
@@ -112,7 +114,7 @@ function setISUValues(value) {
     return;
   }
 
-  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && _custSubGrp != 'IBMEM') {
+  if (_custSubGrp != 'PRIPE' && _custSubGrp != 'COMME' && _custSubGrp != '3PADC' && _custSubGrp != 'IBMEM' && _custSubGrp != 'CROSS') {
 
     if (!value) {
       value = FormManager.getField('clientTier');
@@ -130,7 +132,7 @@ function setISUValues(value) {
       } else if (_custSubGrp != 'undefined' && _custSubGrp != '' && _custSubGrp == 'BUSPR') {
         isuValues = [ '8B' ];
       } else {
-        isuValues = [ '5E', '31', '4A', '4F', '19', '04', '3T', '28', '5B', '21' ];
+        isuValues = [ '5E', '31', '4A', '4F', '19', '04', '3T', '28', '5B', '21', '60' ];
       }
     } else if (value == 'A' || value == '6') {
       isuValues = [ '34' ];
@@ -159,8 +161,10 @@ function setISUValues(value) {
     }
   } else if (_custSubGrp == 'IBMEM') {
     FormManager.readOnly('isuCd');
-  } else if (_custSubGrp == 'COMME') {
+  } else if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
     FormManager.enable('isuCd');
+  } else if (_custSubGrp == 'CROSS') {
+    FormManager.readOnly('isuCd');
   }
 
 }
@@ -173,7 +177,7 @@ function limitClientTierValuesOnCreate() {
   }
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   if (_custSubGrp != 'undefined' && _custSubGrp != '') {
-    if (_custSubGrp == 'COMME' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
+    if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC' || _custSubGrp == 'BROKR' || _custSubGrp == 'GOVMT' || _custSubGrp == 'SENSI') {
       var clientTierValues = [ 'A', 'B', 'V', 'Z', '6', '7', 'T', 'S', 'C', 'N' ];
       if (clientTierValues != null) {
         FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTierValues);
@@ -223,7 +227,7 @@ function canUpdateAddress(value, rowIndex, grid) {
   return true;
 }
 function canCopyAddress(value, rowIndex, grid) {
-  return true;
+  return false;
 }
 function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   console.log(value + ' - ' + rowIndex);
@@ -270,7 +274,7 @@ function setISUValuesOnUpdate(value) {
   }
   isuValues = null;
   if (value == '7') {
-    isuValues = [ '5E', '31', '4A', '4F', '19', '04', '3T', '28', '5B', '8B', '21', '4D' ];
+    isuValues = [ '5E', '31', '4A', '4F', '19', '04', '3T', '28', '5B', '8B', '21', '4D', '60' ];
   } else if (value == 'A' || value == '6') {
     isuValues = [ '34' ];
   } else if (value == 'B') {
@@ -296,6 +300,56 @@ function setISUValuesOnUpdate(value) {
   } else {
     FormManager.resetDropdownValues(FormManager.getField('isuCd'));
   }
+}
+
+function restrictNonSoldToAddress(cntry, addressMode, saving, finalSave, force) {
+  var scenarioType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
+  if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+    if (scenarioType != undefined && scenarioType != '' && (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
+      cmr.hideNode('radiocont_ZI01');
+      cmr.hideNode('radiocont_ZP01');
+      cmr.hideNode('radiocont_ZD01');
+    } else {
+      cmr.showNode('radiocont_ZI01');
+      cmr.showNode('radiocont_ZP01');
+      cmr.showNode('radiocont_ZD01');
+    }
+  }
+}
+
+function validateAddressTypeForScenario() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var scenarioType = FormManager.getActualValue('custSubGrp');
+        if (reqType == 'C' && scenarioType != undefined && scenarioType != '' && (scenarioType == 'PRIPE' || scenarioType == 'IBMEM')) {
+          var qParams = {
+            REQ_ID : requestId,
+          };
+          var record = cmr.query('COUNT_NON_SOLD_TO_ADDR', qParams);
+          var count = record.ret1;
+          var scenarioDesc = "";
+          if (scenarioType == 'PRIPE') {
+            scenarioDesc = 'Private Person';
+          } else {
+            scenarioDesc = 'IBM Employee';
+          }
+          if (Number(count) >= 1) {
+            return new ValidationResult(null, false, 'Only Sold To Address is allowed for ' + scenarioDesc + ' scenario. Please remove other addresses.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
@@ -324,5 +378,6 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.DE, GEOHandler.ROLE_PROCESSOR, true);
-
+  GEOHandler.addAddrFunction(restrictNonSoldToAddress, GEOHandler.DE);
+  GEOHandler.registerValidator(validateAddressTypeForScenario, GEOHandler.DE, null, true);
 });

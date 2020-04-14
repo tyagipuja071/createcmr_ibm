@@ -632,7 +632,8 @@ function submitForCreationBR(formName) {
         cmr.showAlert(data.error, 'Error');
       } else {
         requestIdRsn = data.reqId;
-        cmr.showAlert('Request created with ID ' + data.reqId + ' and has been sent for processing.', 'Success', 'cmr.showModal("dupCMRReasonModal")', true);
+        var dupCMRReason = FormManager.getActualValue('dupCmrRsn');
+        saveDupCMRReason();
       }
     },
     error : function(error, ioargs) {
@@ -640,6 +641,17 @@ function submitForCreationBR(formName) {
       cmr.showAlert('An error occurred while saving the request. Please contact your system administrator', 'Error');
     }
   });
+}
+
+function closeDupCMRReasonModal(){
+  var dupCmrReason = dojo.byId('dupCmrRsn').value.trim();
+  if(dupCmrReason!=null && dupCmrReason!=''){
+    FormManager.setValue('dupCmrReason', dupCmrReason);
+    cmr.hideModal('dupCMRReasonModal');
+    Automation.submitForCreation('frmCMR');
+  } else {
+    alert('Please provide a valid reason for creating duplicate CMR.');
+  }
 }
 
 function saveDupCMRReason() {
@@ -659,13 +671,14 @@ function saveDupCMRReason() {
       console.log(data);
       if (!data.success) {
         cmr.showAlert(data.error, 'Error');
-      } else {
-        Automation.redirectToWorkflow();
+      } 
+      else {
+        cmr.showAlert('Request created with ID ' + requestIdRsn + ' and has been sent for processing.', 'Success', 'Automation.redirectToWorkflow()', true);
       }
     },
     error : function(error, ioargs) {
       cmr.hideProgress();
-      cmr.showAlert('An error occurred while saving the duplicate cmr creation reason. Please contact your system administrator', 'Error');
+      cmr.showAlert('An error occurred while creating the request. Please contact your system administrator', 'Error');
     }
   });
 }

@@ -8,17 +8,21 @@
   
   <!-- Environment variables -->
   <property environment="env"/>
-  <property name="target.file" value="C:/builds/buildscripts/properties/CreateCMRRelease-Build.txt" />
-  <property name="build.file" value="C:/builds/buildscripts/properties/CreateCMRRelease.txt" />
+  <property name="target.file" value="${env.TARGET_BUILD_NO_FILE}" />
   
   <target name="copybuildno">
-  	<property file="src/cmr-config.properties" prefix="cmrconfig"></property>
-    <loadfile property="BUILDTS" srcfile="${build.file}"></loadfile>
+  	<property file="src/build-no.properties" prefix="cmrconfig"></property>
+  	<property file="src/cmr-config.properties" prefix="cmrprefix"></property>
+    <propertyfile file="src/build-no.properties">
+      <entry key="BUILD" type="int" operation="+" value="1" pattern="0000"/>
+    </propertyfile>
+    <tstamp>
+      <format property="build-time" pattern="yyyyMMdd_HHmm" />
+    </tstamp>
   	<echo>Build No: ${cmrconfig.BUILD}</echo>
-    <!--<echo>Release No: ${cmrconfig.RELEASE}</echo>-->
-  	<echo>RTC Build TS: ${BUILDTS}</echo>
-  	<echo>Setting Build No to B${cmrconfig.BUILD}_${BUILDTS}</echo>
-  	<echo file="${target.file}" append="false">B${cmrconfig.BUILD}_${BUILDTS}</echo>
+  	<echo>Target File: ${target.file}</echo>
+  	<echo>Setting Build No to ${cmrprefix.PREFIX}${cmrconfig.BUILD}_${build-time}</echo>
+  	<echo file="${target.file}" append="false">${cmrprefix.PREFIX}${cmrconfig.BUILD}_${build-time}</echo>
   </target>
 
 </project>

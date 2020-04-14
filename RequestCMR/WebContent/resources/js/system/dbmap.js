@@ -269,6 +269,9 @@ var DB_DATA_FIELDS = [ {
   id : 'Cluster',
   name : 'AP_CUST_CLUSTER_ID'
 }, {
+  id : 'ScenarioVerifiedIndc',
+  name : 'ADMIN.SCENARIO_VERIFIED_INDC'
+}, {
   id : 'AnyProlifChecklistItem',
   name : 'PROLIF_CHECKLIST.ANY'
 } ];

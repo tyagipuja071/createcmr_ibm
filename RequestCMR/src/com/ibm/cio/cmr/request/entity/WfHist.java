@@ -79,6 +79,18 @@ public class WfHist extends BaseEntity<WfHistPK> implements Serializable {
 
   @Column(name = "REJ_REASON")
   private String rejReason;
+  
+  @Column(name = "REJ_REASON_CD")
+  private String rejReasonCd;
+
+
+  public String getRejReasonCd() {
+    return rejReasonCd;
+  }
+
+  public void setRejReasonCd(String rejReasonCd) {
+    this.rejReasonCd = rejReasonCd;
+  }
 
   @Column(name = "REQ_STATUS_ACT")
   private String reqStatusAct;

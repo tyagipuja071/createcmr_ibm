@@ -324,6 +324,15 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       isMassUpdtDataChanges = true;
     }
+    // CMR-1728 Turkey RestrictTo and CsoSite temp used to store CoF and
+    // Economic code
+    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+      isMassUpdtDataChanges = true;
+    }
+
+    if (!StringUtils.isBlank(muData.getCsoSite())) {
+      isMassUpdtDataChanges = true;
+    }
 
     return isMassUpdtDataChanges;
   }
@@ -906,6 +915,11 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
             createEntity(legacyAddr, entityManager);
             // partialCommit(entityManager);
           }
+        }
+
+        // CMR-2279: update muData
+        if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+          updateEntity(cmrObjects.getMassUpdateData(), entityManager);
         }
 
         if (StringUtils.isEmpty(legacyObjects.getErrTxt())) {

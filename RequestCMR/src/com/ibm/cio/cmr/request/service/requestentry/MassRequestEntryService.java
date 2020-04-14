@@ -86,7 +86,9 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
@@ -167,6 +169,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (SwissUtil.isCountrySwissEnabled(entityManager, cmrIssuingCntry)) {
+        performLegacyDirectMassUpdate(model, entityManager, request);
+      } else if (ATUtil.isCountryATEnabled(entityManager, cmrIssuingCntry)) {// CMR-803
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else {
         performMassUpdate(model, entityManager, request);
@@ -594,8 +598,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   // }
   // }
 
-  private Map<String, String> doCheckLDMassUpdtAddr(AppUser user, RequestEntryModel model, Admin admin, EntityManager entityManager,
-      String custToUse, String cmrNo, MassUpdtAddr muAddr) throws CmrException {
+  private Map<String, String> doCheckLDMassUpdtAddr(AppUser user, RequestEntryModel model, Admin admin, EntityManager entityManager, String custToUse,
+      String cmrNo, MassUpdtAddr muAddr) throws CmrException {
     List<AddressModel> extractedAddr = new ArrayList<>();
     List<Addr> tempExtractAddr = new ArrayList<Addr>();
     FindCMRResultModel results = null;
@@ -1164,8 +1168,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     updateEntity(admin, entityManager);
 
     // MASS_UPDATE | set ROW_STATUS_CD = READY if 'CRU'
-    if ((CmrConstants.REQ_TYPE_MASS_UPDATE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_DELETE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE
-        .equalsIgnoreCase(admin.getReqType())) && CmrConstants.Create_Update_CMR().equals(trans.getId().getAction())) {
+    if ((CmrConstants.REQ_TYPE_MASS_UPDATE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_DELETE.equalsIgnoreCase(admin.getReqType())
+        || CmrConstants.REQ_TYPE_REACTIVATE.equalsIgnoreCase(admin.getReqType()))
+        && CmrConstants.Create_Update_CMR().equals(trans.getId().getAction())) {
       massDataService.setToReady(entityManager, model.getReqId(), admin.getIterationId());
     }
 
@@ -1185,13 +1190,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     // check if there's a status change
     if (!trans.getId().getCurrReqStatus().equals(trans.getNewReqStatus())) {
       String rejectReason = model.getRejectReason();
+      String rejReasonCd = model.getRejReasonCd();
       if (StringUtils.isEmpty(rejectReason)) {
         rejectReason = null;
       } else {
         rejectReason = getRejectReason(entityManager, rejectReason);
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), sendToId, sendToNm,
-          complete, rejectReason);
+          complete, rejectReason, rejReasonCd);
 
       // save comment in req_cmt_log table .
       // save only if it is not null or not blank
@@ -1213,7 +1219,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         wfComment = wfComment.substring(0, 237) + " (truncated)";
       }
-      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null);
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
+          null);
       String action = model.getAction();
       String actionDesc = getActionDescription(action, entityManager);
       String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
@@ -1251,8 +1258,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     // there's a status change
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, CmrConstants.Mark_as_Completed(), model.getAction(), null, null,
-        complete, null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, CmrConstants.Mark_as_Completed(), model.getAction(), null, null, complete,
+        null, null);
 
     // save comment in req_cmt_log table .
     String comment = STATUS_CHG_CMT_PRE_PREFIX + CmrConstants.Mark_as_Completed() + "\"";
@@ -1388,7 +1395,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
     admin.setReqStatus(trans.getNewReqStatus());
-    if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd()) && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
+    if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd())
+        && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
       // the request is to be locked
       RequestUtils.setClaimDetails(admin, request);
     } else if (CmrConstants.YES_NO.N.toString().equals(trans.getNewLockedInd())
@@ -1398,7 +1406,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     updateEntity(admin, entityManager);
 
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
+        null);
 
     // save comment in req_cmt_log table .
     // save only if it is not null or not blank
@@ -1428,9 +1437,19 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("CURR_REQ_STATUS", model.getReqStatus());
     query.setParameter("CURR_LOCKED_IND", model.getLockInd() != null ? model.getLockInd() : CmrConstants.YES_NO.N.toString());
     query.setParameter("ACTION", model.getAction());
+    query.setForReadOnly(true);
     List<StatusTrans> trans = query.getResults(2, StatusTrans.class);
     if (trans != null && trans.size() > 0) {
       for (StatusTrans transrec : trans) {
+        if ("PPN".equals(transrec.getNewReqStatus())) {
+          String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
+          if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
+            if (isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
+              this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
+              transrec.setNewReqStatus("AUT"); // set to automated processing
+            }
+          }
+        }
         if ("*".equals(transrec.getId().getReqType())) {
           return transrec;
         } else if (transrec.getId().getReqType().equals(model.getReqType())) {
@@ -1667,6 +1686,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       }
 
       if (cmrIssuingCntry != null && SwissUtil.isCountrySwissEnabled(entityManager, cmrIssuingCntry)) {
+        processLegacyDirectMassFile(entityManager, request, reqId, token, items);
+        return;
+      }
+      // CMR-803
+      if (cmrIssuingCntry != null && ATUtil.isCountryATEnabled(entityManager, cmrIssuingCntry)) {
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
@@ -4273,9 +4297,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
             if (!StringUtils.equalsIgnoreCase(key, "SGDN") && !StringUtils.equalsIgnoreCase(key, "ERROR_TXT")) {
               val = df.formatCellValue(cmrRow.getCell(DATA_FLD.get(key) - 1));
               if (val.length() > dataLimit.get(key)) {
-                initLogger().debug(
-                    val.length() + " data limit : " + dataLimit.get(key) + " current actual row : " + key + " : "
-                        + Integer.toString(cmrRow.getRowNum()));
+                initLogger().debug(val.length() + " data limit : " + dataLimit.get(key) + " current actual row : " + key + " : "
+                    + Integer.toString(cmrRow.getRowNum()));
                 initLogger().error(key + " value on row no. " + (cmrRow.getRowNum() + 1) + " exceeded the limit");
                 throw new CmrException(MessageUtil.ERROR_MASS_FILE_ROW, Integer.toString(cmrRow.getRowNum() + 1));
               }
@@ -4422,6 +4445,65 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
   private void processObsoleteApprovals(EntityManager entityManager, long reqId, AppUser user) throws Exception {
     ApprovalService service = new ApprovalService();
     service.makeApprovalsObsolete(entityManager, reqId, user);
+  }
+
+  // CMR-800
+  public boolean validateATMassUpdateFile(String path, Data data, Admin admin) throws Exception {
+    List<Boolean> isErr = new ArrayList<Boolean>();
+    try (FileInputStream fis = new FileInputStream(path)) {
+      MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.AUSTRIA);
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.AUSTRIA);
+
+      EntityManager em = JpaManager.getEntityManager();
+      try {
+        String country = data.getCmrIssuingCntry();
+        LOG.debug("Validating " + path);
+        byte[] bookBytes = template.cloneStream(fis);
+
+        List<TemplateValidation> validations = null;
+        StringBuilder errTxt = new StringBuilder();
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          validations = template.validate(em, is, country, 2000);
+          LOG.debug(new ObjectMapper().writeValueAsString(validations));
+          for (TemplateValidation validation : validations) {
+            for (ValidationRow row : validation.getRows()) {
+              if (!row.isSuccess()) {
+                if (StringUtils.isEmpty(errTxt.toString())) {
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
+                } else {
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
+                }
+              }
+            }
+          }
+        }
+
+        if (!StringUtils.isEmpty(errTxt.toString())) {
+          throw new Exception(new ObjectMapper().writeValueAsString(errTxt.toString()));
+        }
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          try (FileOutputStream fos = new FileOutputStream(path)) {
+            LOG.debug("Merging..");
+            template.merge(validations, is, fos, 2000);
+          }
+        }
+        // modify the country for testing
+      } catch (Exception e) {
+        LOG.error("An error occurred in validating AT Mass Update File.");
+        return false;
+      } finally {
+        em.close();
+      }
+    }
+
+    if (isErr.contains(false)) {
+      return false;
+    } else {
+      return true;
+    }
+
   }
 
   public boolean validateSWISSMassUpdateFile(String path, Data data, Admin admin) throws Exception {
@@ -4640,7 +4722,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (!validateMassUpdateFileMCO(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
-                } else if (PageManager.fromGeo("CEMEA", cmrIssuingCntry)) {
+                } else if (PageManager.fromGeo("CEMEA", cmrIssuingCntry) && !SystemLocation.AUSTRIA.equals(cmrIssuingCntry)) {// CMR-803
                   if (!validateMassUpdateFileCEMEA(item.getInputStream(), data, admin)) {
                     throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                   }
@@ -4669,7 +4751,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     }
                   } else if (SwissUtil.isCountrySwissEnabled(entityManager, data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
-                    if (!validateSWISSMassUpdateFile(filePath, data, admin)) {
+                    if (SystemLocation.SWITZERLAND.equals(data.getCmrIssuingCntry()) && !validateSWISSMassUpdateFile(filePath, data, admin)) {
+                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    }
+                    // CMR-800
+                  } else if (ATUtil.isCountryATEnabled(entityManager, data.getCmrIssuingCntry())) {
+                    fis = new FileInputStream(filePath);
+                    if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry()) && !validateATMassUpdateFile(filePath, data, admin)) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
                   } else {
@@ -4698,6 +4786,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForLegacyDirect(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath,
                         data.getCmrIssuingCntry());
+                  } else if (ATUtil.isCountryATEnabled(entityManager, data.getCmrIssuingCntry())) {// CMR-800
+                    setMassUpdateListForAT(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else if (SwissUtil.isCountrySwissEnabled(entityManager, data.getCmrIssuingCntry())) {
                     setMassUpdateListForSWISS(entityManager, legacyDirectModelCol, filePath, reqId, newIterId, filePath);
                   } else {
@@ -4904,7 +4994,91 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
 
+  // CMR-800
+  /**
+   * @param modelList
+   * @param mfStream
+   * @param reqId
+   * @param newIterId
+   * @param filePath
+   */
+  private void setMassUpdateListForAT(EntityManager entityManager, Map<String, Object> massUpdtCol, String filepath, long reqId, int newIterId,
+      String filePath) throws Exception {
+
+    // 1. get the config file and get all the valid tabs
+    try {
+      MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.AUSTRIA);
+      // change to the ID of the config you are generating
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.AUSTRIA);
+      List<TemplateTab> tabs = template.getTabs();
+
+      InputStream mfStream = new FileInputStream(filepath);
+
+      // 2. loop through all the tabs returned by the config
+      if (tabs != null && tabs.size() > 0) {
+        Workbook mfWb = new XSSFWorkbook(mfStream);
+        MassUpdateModel model = new MassUpdateModel();
+        List<MassUpdateAddressModel> addrModels = new ArrayList<MassUpdateAddressModel>();
+        List<MassUpdateModel> models = new ArrayList<MassUpdateModel>();
+
+        for (int i = 0; i < tabs.size(); i++) {
+          // 3. For every sheet, do: Sheet dataSheet =
+          // mfWb.getSheet(CMR_SHEET_NAME);
+          TemplateTab tab = tabs.get(i);
+          Sheet dataSheet = mfWb.getSheet(tab.getName());
+
+          // Check row for ISU_CD, INAC_CD, and/or CLIENT_TIER only
+          if ("Data".equals(tab.getName())) {
+            // call method that will set to Data table
+            for (Row cmrRow : dataSheet) {
+              int seqNo = cmrRow.getRowNum() + 1;
+
+              if (seqNo > 1) {
+                model = new MassUpdateModel();
+                model.setParReqId(reqId);
+                model.setSeqNo(seqNo);
+                model.setIterationId(newIterId);
+                model.setErrorTxt("");
+                model.setRowStatusCd("");
+                // 4. then for every sheet, get the fields
+                model = setMassUpdateData(entityManager, cmrRow, model, tab, reqId);
+
+                if (!StringUtils.isEmpty(model.getCmrNo()) && model.getCmrNo().length() <= 8 && model.getCmrNo().length() != 0) {
+                  models.add(model);
+                }
+              }
+            }
+          } else {
+            // if it is not Data, that means it is an address
+            MassUpdateAddressModel addrModel = new MassUpdateAddressModel();
+
+            for (Row cmrRow : dataSheet) {
+              int seqNo = cmrRow.getRowNum() + 1;
+
+              if (seqNo > 1) {
+                // 4. then for every sheet, get the fields
+                addrModel = new MassUpdateAddressModel();
+                addrModel.setParReqId(reqId);
+                addrModel.setSeqNo(seqNo);
+                addrModel.setIterationId(newIterId);
+                addrModel.setAddrType(tab.getTypeCode());
+                addrModel = setMassUpdateAddr(entityManager, cmrRow, addrModel, tab, reqId);
+
+                if (!StringUtils.isEmpty(addrModel.getCmrNo()) && addrModel.getCmrNo().length() <= 8 && addrModel.getCmrNo().length() != 0) {
+                  addrModels.add(addrModel);
+                }
+              }
+            }
+          }
+        }
+        massUpdtCol.put("dataModels", models);
+        massUpdtCol.put("addrModels", addrModels);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -5080,6 +5254,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getCity1()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setCity1(tempVal);
+        } else {
+          muaModel.setCity1("");
         }
 
         break;
@@ -5087,6 +5263,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getPostCd()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setPostCd(tempVal);
+        } else {
+          muaModel.setPostCd("");
         }
 
         break;
@@ -5105,7 +5283,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "PO_BOX":
         muaModel.setPoBox(tempVal);
         break;
-      case "FLOOR":
+      case "FLOOR":// For Tureky,used store taxOffice
         muaModel.setFloor(tempVal);
         break;
       case "BLDG":
@@ -5333,6 +5511,15 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "EMAIL3":
         muModel.setEmail3(tempVal);
         break;
+      // CMR-1728: CSO_SITE and RESTRICT_TO is temp used to store EconomicCD and
+      // CoF for Turkey
+      case "CSO_SITE":
+        muModel.setCsoSite(tempVal);
+        break;
+      case "RESTRICT_TO":
+        muModel.setRestrictTo(tempVal);
+      case "CUST_NM3":
+        muModel.setCustNm3(tempVal);
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;
@@ -5390,5 +5577,21 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
 
     return cd;
+  }
+
+  public static boolean isRequestReactivationEnable(EntityManager entityManager, String country, String req) {
+    int count = 0;
+    String req_typ = (!StringUtils.isBlank(req)) ? "%" + req + "%" : "";
+    String sql = ExternalizedQuery.getSql("AUTOMATION.CHECK_REACTIVATION");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    /* query.setForReadOnly(true); */
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    query.setParameter("REQ_TYP", req_typ);
+    count = query.getSingleResult(Integer.class);
+    if (count >= 1)
+      return true;
+    else
+      return false;
+
   }
 }

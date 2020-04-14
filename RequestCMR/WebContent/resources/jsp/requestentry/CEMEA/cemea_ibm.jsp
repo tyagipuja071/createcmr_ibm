@@ -18,6 +18,9 @@
 
 <cmr:view forGEO="CEMEA">
   <cmr:row topPad="10">
+   <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("618")){%>
+      <form:hidden path="repTeamMemberNo" id="repTeamMemberNo"/>
+    <%} else { %>
     <cmr:column span="2" containerForField="SalRepNameNo">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
@@ -26,7 +29,7 @@
         </cmr:label>
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column><%} %>
 
     <cmr:column span="2" containerForField="EngineeringBo" exceptForCountry="618">
       <p>

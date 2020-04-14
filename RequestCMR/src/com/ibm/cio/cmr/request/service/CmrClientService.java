@@ -166,7 +166,7 @@ public class CmrClientService extends BaseSimpleService<Object> {
           dnbRecord.setCmrPostalCode(StringUtils.isNotBlank(dnbcompany.getPrimaryPostalCode()) ? dnbcompany.getPrimaryPostalCode() : "");
           dnbRecord.setCmrState(StringUtils.isNotBlank(dnbcompany.getPrimaryStateCode()) ? dnbcompany.getPrimaryStateCode() : "");
           dnbRecord.setCmrStreet(StringUtils.isNotBlank(dnbcompany.getPrimaryAddress()) ? dnbcompany.getPrimaryAddress() : "");
-          dnbRecord.setCmrStreetAddressCont("");
+          dnbRecord.setCmrStreetAddressCont(StringUtils.isNotBlank(dnbcompany.getPrimaryAddressCont()) ? dnbcompany.getPrimaryAddressCont() : "");
           itemsList.add(dnbRecord);
         }
         dnbData.setItems(itemsList);

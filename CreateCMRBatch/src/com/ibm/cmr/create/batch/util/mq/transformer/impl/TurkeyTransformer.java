@@ -60,7 +60,7 @@ public class TurkeyTransformer extends EMEATransformer {
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   public static void main(String[] args) {
-    String s = "TÜRKİYE";
+    String s = "TÃœRKÄ°YE";
     System.out.println(s);
     String s1 = "T\u00dcRK\u0130YE";
     System.out.println(s1);
@@ -230,8 +230,8 @@ public class TurkeyTransformer extends EMEATransformer {
         !StringUtils.isEmpty(addrData.getTaxOffice()) ? addrData.getTaxOffice() : "");
     // vat
     if (!MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType())) {
-      messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU", !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat()
-          : "");
+      messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU",
+          !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat() : "");
     } else {
       messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU", "");
     }
@@ -264,18 +264,18 @@ public class TurkeyTransformer extends EMEATransformer {
 
       char[] problematicCharList = new char[12];
 
-      problematicCharList[0] = '\u00c7'; // Ç
-      problematicCharList[1] = '\u00e7'; // ç
-      problematicCharList[2] = '\u011e'; // Ğ
-      problematicCharList[3] = '\u011f'; // ğ
-      problematicCharList[4] = '\u0130'; // İ
-      problematicCharList[5] = '\u0131'; // ı
-      problematicCharList[6] = '\u00d6'; // Ö
-      problematicCharList[7] = '\u00f6'; // ö
-      problematicCharList[8] = '\u015e'; // Ş
-      problematicCharList[9] = '\u015f'; // ş
-      problematicCharList[10] = '\u00dc'; // Ü
-      problematicCharList[11] = '\u00fc'; // ü
+      problematicCharList[0] = '\u00c7'; // Ã‡
+      problematicCharList[1] = '\u00e7'; // Ã§
+      problematicCharList[2] = '\u011e'; // Äž
+      problematicCharList[3] = '\u011f'; // ÄŸ
+      problematicCharList[4] = '\u0130'; // Ä°
+      problematicCharList[5] = '\u0131'; // Ä±
+      problematicCharList[6] = '\u00d6'; // Ã–
+      problematicCharList[7] = '\u00f6'; // Ã¶
+      problematicCharList[8] = '\u015e'; // Åž
+      problematicCharList[9] = '\u015f'; // ÅŸ
+      problematicCharList[10] = '\u00dc'; // Ãœ
+      problematicCharList[11] = '\u00fc'; // Ã¼
 
       Map<String, String> addressDataMap = new HashMap<String, String>();
 
@@ -310,51 +310,51 @@ public class TurkeyTransformer extends EMEATransformer {
               if (index >= 0) {
                 String data = null;
                 switch (addressDataMap.get(key).charAt(index)) {
-                case '\u00c7':// Ç
+                case '\u00c7':// Ã‡
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'C');
                   addressDataMap.put(key, data);
                   break;
-                case '\u00e7': // ç
+                case '\u00e7': // Ã§
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'c');
                   addressDataMap.put(key, data);
                   break;
-                case '\u011e': // Ğ
+                case '\u011e': // Äž
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'G');
                   addressDataMap.put(key, data);
                   break;
-                case '\u011f': // ğ
+                case '\u011f': // ÄŸ
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'g');
                   addressDataMap.put(key, data);
                   break;
-                case '\u0130': // İ
+                case '\u0130': // Ä°
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'I');
                   addressDataMap.put(key, data);
                   break;
-                case '\u0131': // ı
+                case '\u0131': // Ä±
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'i');
                   addressDataMap.put(key, data);
                   break;
-                case '\u00d6': // Ö
+                case '\u00d6': // Ã–
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'O');
                   addressDataMap.put(key, data);
                   break;
-                case '\u00f6': // ö
+                case '\u00f6': // Ã¶
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'o');
                   addressDataMap.put(key, data);
                   break;
-                case '\u015e': // Ş
+                case '\u015e': // Åž
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'S');
                   addressDataMap.put(key, data);
                   break;
-                case '\u015f': // ş
+                case '\u015f': // ÅŸ
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 's');
                   addressDataMap.put(key, data);
                   break;
-                case '\u00dc': // Ü
+                case '\u00dc': // Ãœ
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'U');
                   addressDataMap.put(key, data);
                   break;
-                case '\u00fc': // ü
+                case '\u00fc': // Ã¼
                   data = addressDataMap.get(key).replace(addressDataMap.get(key).charAt(index), 'u');
                   addressDataMap.put(key, data);
                   break;
@@ -416,7 +416,8 @@ public class TurkeyTransformer extends EMEATransformer {
       if (!(StringUtils.isEmpty(addressDataMap.get("poBoxCity"))) && !(addressDataMap.get("poBoxCity").equals(handler.addrData.getPoBoxCity()))) {
         handler.addrData.setPoBoxCity(addressDataMap.get("poBoxCity"));
       }
-      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxPostCd"))) && !(addressDataMap.get("poBoxPostCd").equals(handler.addrData.getPoBoxPostCd()))) {
+      if (!(StringUtils.isEmpty(addressDataMap.get("poBoxPostCd")))
+          && !(addressDataMap.get("poBoxPostCd").equals(handler.addrData.getPoBoxPostCd()))) {
         handler.addrData.setPoBoxPostCd(addressDataMap.get("poBoxPostCd"));
       }
       if (!(StringUtils.isEmpty(addressDataMap.get("postCd"))) && !(addressDataMap.get("postCd").equals(handler.addrData.getPostCd()))) {
@@ -773,7 +774,7 @@ public class TurkeyTransformer extends EMEATransformer {
       line2 = StringUtils.replace(line2, " - ", "-");
       line2 = StringUtils.replace(line2, "- ", "-");
       line2 = StringUtils.replace(line2, " -", "-");
-      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
+      String[] parts = line2.split("[^A-Za-zÃ�Ã¡Ã‰Ã©Ã�Ã­Ã“Ã³ÃšÃºÃ‘Ã±.0-9]");
       for (String part : parts) {
         if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
           line3 = part;
@@ -939,6 +940,9 @@ public class TurkeyTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+
+      legacyCust.setSalesRepNo(data.getSalesTeamCd());
+      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
     }
 
     // common data for C/U
@@ -1057,6 +1061,9 @@ public class TurkeyTransformer extends EMEATransformer {
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
+    // CMR-2279 Turkey update massUpdateData
+    entityManager.merge(cmrObjects.getMassUpdateData());
+    entityManager.flush();
   }
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {

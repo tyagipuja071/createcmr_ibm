@@ -246,11 +246,19 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
         
         <!-- Street and Street Con't except BELUX,JP -->
-        <cmr:view exceptForGEO="BELUX,JP">
+        <cmr:view exceptForGEO="BELUX,JP,AP">
           <cmr:gridCol width="130px" field="addrTxt" header="${ui.grid.addrTxt}" >
               <cmr:formatter functionName="streetValueFormatter" />
           </cmr:gridCol>
         </cmr:view>
+        
+          <!-- Street and Street Con't for AP -->
+        <cmr:view forGEO="AP">
+          <cmr:gridCol width="130px" field="addrTxt" header="Address. <br> Address. Cont1" >
+              <cmr:formatter functionName="streetValueFormatter" />
+          </cmr:gridCol>
+        </cmr:view>
+        
 
         <!-- Street and Street Con't for BELUX -->
         <cmr:view forGEO="BELUX">
@@ -266,7 +274,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
 
         <cmr:view forGEO="AP" exceptForCountry="616,736,738,796">
-          <cmr:gridCol width="110px" field="dept" header="Street Cont 2" />
+          <cmr:gridCol width="110px" field="dept" header="Address. Cont2" />
         </cmr:view>
 
 		<!-- Address for Swiss -->

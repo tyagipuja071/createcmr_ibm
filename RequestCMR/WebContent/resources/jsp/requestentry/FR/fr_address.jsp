@@ -197,4 +197,5 @@
     </p>
   </cmr:column>
 </cmr:row>
+<form:hidden path="stateProv" />
 </cmr:view>

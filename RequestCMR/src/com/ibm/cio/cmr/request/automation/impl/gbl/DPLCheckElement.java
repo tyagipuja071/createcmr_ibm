@@ -213,16 +213,19 @@ public class DPLCheckElement extends ValidatingElement {
       case "SF":
         validation.setSuccess(false);
         output.setOnError(true);
+        engineData.addRejectionComment("DPL Check Failed for some addresses.");
         validation.setMessage("Some Failed");
         break;
       case "AF":
         validation.setSuccess(false);
         output.setOnError(true);
+        engineData.addRejectionComment("DPL Check Failed.");
         validation.setMessage("All Failed");
         break;
       default:
         validation.setSuccess(false);
         output.setOnError(true);
+        engineData.addRejectionComment("DPL Check could not be performed.");
         validation.setMessage("Not Done");
         break;
       }

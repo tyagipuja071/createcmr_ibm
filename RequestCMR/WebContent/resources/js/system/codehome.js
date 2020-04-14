@@ -377,5 +377,21 @@ var _allGroups = [ {
     "table" : "CREQCMR.AP_CUST_CLUSTER_TIER_MAP",
     "subType" : false,
     "parent" : "Asia Pacific"
-  } ]
+  },
+  {
+    "href" : null,
+    "name" : "Germany",
+    "description" : null,
+    "table" : null,
+    "subType" : true,
+    "parent" : null,
+  }, {
+    "href" : cmr.CONTEXT_ROOT + '/code/germanyDept',
+    "name" : "IBM Internal Department",
+    "description" : "Maintains Internal Department mappings",
+    "table" : "CREQCMR.LOV",
+    "subType" : false,
+    "parent" : "Germany"
+  }, 
+  ]
 } ];

@@ -34,7 +34,7 @@ public class BaseV2RequestModel extends BaseModel {
   private String findDnbResult;
   private String comment;
   private String custClass;
-  private String dupCmrRsn;
+  private String dupCmrReason;
 
   /**
    * 
@@ -174,12 +174,12 @@ public class BaseV2RequestModel extends BaseModel {
     this.custClass = custClass;
   }
 
-  public String getDupCmrRsn() {
-    return dupCmrRsn;
+  public String getDupCmrReason() {
+    return dupCmrReason;
   }
 
-  public void setDupCmrRsn(String dupCmrRsn) {
-    this.dupCmrRsn = dupCmrRsn;
+  public void setDupCmrReason(String dupCmrReason) {
+    this.dupCmrReason = dupCmrReason;
   }
 
   public String getComment() {

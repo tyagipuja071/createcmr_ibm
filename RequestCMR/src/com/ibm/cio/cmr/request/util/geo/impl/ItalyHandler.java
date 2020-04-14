@@ -272,7 +272,8 @@ public class ItalyHandler extends BaseSOFHandler {
       }
     } else {
       // for updates, just import all CMRs from the current records
-      String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
+      String reqType = reqEntry.getReqType();
+      String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), reqType);
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
 
         LOG.debug("Importing Installing and Billing for update from CMR No. " + mainRecord.getCmrNum());
@@ -331,65 +332,76 @@ public class ItalyHandler extends BaseSOFHandler {
           // zorgFound = true;
           // }
         }
+ 
+        //Single reactivation : if Billing and company address not found in RDC or DB2
+        List<CmrtAddr> cmrtAddrs = null;
+        if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType)){
+          cmrtAddrs = LegacyDirectUtil.checkLDAddress(entityManager,mainRecord.getCmrNum(),mainRecord.getCmrIssuedBy());
+        }
+          
+        if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType) && source.getItems().size() ==1 && INSTALLING_ADDR_TYPE.equals(source.getItems().get(0).getCmrAddrTypeCode()) && cmrtAddrs != null && cmrtAddrs.size() == 1){
+          LOG.debug("Single reactivation: Copy Comapany and Billing from Installing address of CMR No. " + mainRecord.getCmrNum());
+          createMissingAddressForSingleReact(source,converted,mainRecord);       
+        }else{
+          /*
+           * if (!zorgFound) { // should we get it from CMRTADDR? CmrtAddr addrC =
+           * getLegacyCompanyAddr(entityManager, mainRecord.getCmrNum());
+           * FindCMRRecordModel recordC = new FindCMRRecordModel(); if (addrC !=
+           * null) { recordC.setCmrAddrSeq(addrC.getId().getAddrNo());
+           * recordC.setCmrName(addrC.getAddrLine1());
+           * recordC.setCmrName2(addrC.getAddrLine2());
+           * recordC.setCmrStreetAddress(addrC.getAddrLine4());
+           * recordC.setCmrStreetAddressCont(addrC.getAddrLine2());
+           * recordC.setCmrName3(null); recordC.setCmrName4(null);
+           * recordC.setCmrCity(addrC.getCity());
+           * recordC.setCmrPostalCode(addrC.getZipCode());
+           * recordC.setCmrState(addrC.getItCompanyProvCd()); } }
+           */
 
-        /*
-         * if (!zorgFound) { // should we get it from CMRTADDR? CmrtAddr addrC =
-         * getLegacyCompanyAddr(entityManager, mainRecord.getCmrNum());
-         * FindCMRRecordModel recordC = new FindCMRRecordModel(); if (addrC !=
-         * null) { recordC.setCmrAddrSeq(addrC.getId().getAddrNo());
-         * recordC.setCmrName(addrC.getAddrLine1());
-         * recordC.setCmrName2(addrC.getAddrLine2());
-         * recordC.setCmrStreetAddress(addrC.getAddrLine4());
-         * recordC.setCmrStreetAddressCont(addrC.getAddrLine2());
-         * recordC.setCmrName3(null); recordC.setCmrName4(null);
-         * recordC.setCmrCity(addrC.getCity());
-         * recordC.setCmrPostalCode(addrC.getZipCode());
-         * recordC.setCmrState(addrC.getItCompanyProvCd()); } }
-         */
+          String billingCmrNo = this.currentImportValues.get("Anagrafico2BillingNo");
 
-        String billingCmrNo = this.currentImportValues.get("Anagrafico2BillingNo");
+          FindCMRRecordModel billing = null;
+          if (!billingFound) {
 
-        FindCMRRecordModel billing = null;
-        if (!billingFound) {
+            if (!StringUtils.isEmpty(billingCmrNo)) {
+              billing = extractBillingAddressData(billingCmrNo);
+              converted.add(billing);
+            } else {
 
-          if (!StringUtils.isEmpty(billingCmrNo)) {
-            billing = extractBillingAddressData(billingCmrNo);
-            converted.add(billing);
-          } else {
-
-            if (!billingFound) {
-              FindCMRRecordModel billingAddr = new FindCMRRecordModel();
-              LOG.debug("No separate billing address found, loading billing from Legacy");
-              loadBillingAddressDataLD(entityManager, billingAddr, mainRecord);
-              converted.add(billingAddr);
+              if (!billingFound) {
+                FindCMRRecordModel billingAddr = new FindCMRRecordModel();
+                LOG.debug("No separate billing address found, loading billing from Legacy");
+                loadBillingAddressDataLD(entityManager, billingAddr, mainRecord);
+                converted.add(billingAddr);
+              }
             }
           }
-        }
 
-        LOG.debug("Adding Company Address from CMR No. " + mainRecord.getCmrCompanyNo());
-        String companyCmr = mainRecord.getCmrCompanyNo();
-        FindCMRResultModel resultsR = LegacyDirectUtil.findCmrByAddrSeq(companyCmr, mainRecord.getCmrIssuedBy(), COMPANY_ADDR_SEQ_NO, "");
-        FindCMRRecordModel companyAddr = new FindCMRRecordModel();
+          LOG.debug("Adding Company Address from CMR No. " + mainRecord.getCmrCompanyNo());
+          String companyCmr = mainRecord.getCmrCompanyNo();
+          FindCMRResultModel resultsR = LegacyDirectUtil.findCmrByAddrSeq(companyCmr, mainRecord.getCmrIssuedBy(), COMPANY_ADDR_SEQ_NO, "");
+          FindCMRRecordModel companyAddr = new FindCMRRecordModel();
 
-        if (resultsR != null && resultsR.getItems() != null && resultsR.getItems().size() > 0) {
-          List<FindCMRRecordModel> listResultItems = resultsR.getItems();
-          // DENNIS:There should be only one company addr
-          companyAddr = listResultItems.get(0);
-          // DENNIS: Overriding the type and code for the ZORG to be ZI01
-          companyAddr.setCmrAddrType("Company");
-          companyAddr.setCmrAddrTypeCode("ZI01");
-          companyAddr.setParentCMRNo(mainRecord.getCmrCompanyNo());
-        } else {
-          // DENNIS:If the company number is empty, we get the company addr from
-          // LD DB
-          loadCompanyAddressDataLD(entityManager, companyAddr);
+          if (resultsR != null && resultsR.getItems() != null && resultsR.getItems().size() > 0) {
+            List<FindCMRRecordModel> listResultItems = resultsR.getItems();
+            // DENNIS:There should be only one company addr
+            companyAddr = listResultItems.get(0);
+            // DENNIS: Overriding the type and code for the ZORG to be ZI01
+            companyAddr.setCmrAddrType("Company");
+            companyAddr.setCmrAddrTypeCode("ZI01");
+            companyAddr.setParentCMRNo(mainRecord.getCmrCompanyNo());
+          } else {
+            // DENNIS:If the company number is empty, we get the company addr from
+            // LD DB
+            loadCompanyAddressDataLD(entityManager, companyAddr);
+          }
+          converted.add(companyAddr);
         }
-        converted.add(companyAddr);
       }
       source.setItems(converted);
     }
   }
-
+  
   private void loadCompanyAddressDataLD(EntityManager entityManager, FindCMRRecordModel record) {
     LegacyDirectUtil.getItalyCompanyAddress(entityManager, record, record.getParentCMRNo());
   }
@@ -749,7 +761,7 @@ public class ItalyHandler extends BaseSOFHandler {
       address.getId().setAddrSeq(addrSeq);
     }
     // Story 1593951: iERP Site Party ID field should be part of addresses
-    if ("U".equals(admin.getReqType())) {
+    if ("U".equals(admin.getReqType()) || "X".equals(admin.getReqType())) {
       address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
     } else if ("C".equals(admin.getReqType()) && !StringUtils.isEmpty(currentRecord.getParentCMRNo())) {
       address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
@@ -859,7 +871,7 @@ public class ItalyHandler extends BaseSOFHandler {
     data.setIdentClient(identClient);
     data.setSpecialTaxCd(taxCode);
 
-    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(admin.getReqType())) {
       data.setModeOfPayment(modePayment);
     } else {
       data.setModeOfPayment("");
@@ -971,11 +983,15 @@ public class ItalyHandler extends BaseSOFHandler {
   @Override
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCustPrefLang("I");
-    if (data.getCustSubGrp() != null && ("BUSPR".equals(data.getCustSubGrp()) || "BUSSM".equals(data.getCustSubGrp())
-        || "BUSVA".equals(data.getCustSubGrp()) || "CROBP".equals(data.getCustSubGrp()))) {
+    if (data.getCustSubGrp() != null
+        && ("BUSPR".equals(data.getCustSubGrp()) || "BUSSM".equals(data.getCustSubGrp()) || "BUSVA".equals(data.getCustSubGrp()) || "CROBP"
+            .equals(data.getCustSubGrp()))) {
       data.setMrcCd("5");
-    } else if (data.getCustSubGrp() != null && data.getIsuCd() != null && "34".equals(data.getIsuCd()) && ("COMME".equals(data.getCustSubGrp())
-        || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM".equals(data.getCustSubGrp()))) {
+    } else if (data.getCustSubGrp() != null
+        && data.getIsuCd() != null
+        && "34".equals(data.getIsuCd())
+        && ("COMME".equals(data.getCustSubGrp()) || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM"
+            .equals(data.getCustSubGrp()))) {
       data.setMrcCd("M");
     } else {
       data.setMrcCd("2");
@@ -1022,8 +1038,11 @@ public class ItalyHandler extends BaseSOFHandler {
     setEngineeringBo(entityManager, data);
     // Story 1596166: MRC M for Commercial scenario & ISU=34
     if ("C".equals(admin.getReqType())) {
-      if (data.getCustSubGrp() != null && data.getIsuCd() != null && "34".equals(data.getIsuCd()) && ("COMME".equals(data.getCustSubGrp())
-          || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM".equals(data.getCustSubGrp()))) {
+      if (data.getCustSubGrp() != null
+          && data.getIsuCd() != null
+          && "34".equals(data.getIsuCd())
+          && ("COMME".equals(data.getCustSubGrp()) || "COMSM".equals(data.getCustSubGrp()) || "COMVA".equals(data.getCustSubGrp()) || "CROCM"
+              .equals(data.getCustSubGrp()))) {
         data.setMrcCd("M");
       }
     }
@@ -1204,7 +1223,7 @@ public class ItalyHandler extends BaseSOFHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
-    if ("U".equals(admin.getReqType())) {
+    if ("U".equals(admin.getReqType()) || "X".equals(admin.getReqType())) {
       String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", admin.getId().getReqId());
@@ -1791,8 +1810,8 @@ public class ItalyHandler extends BaseSOFHandler {
 
         TemplateValidation error = new TemplateValidation(name);
 
-        if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA)
-            || !StringUtils.isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
+        if ((!StringUtils.isEmpty(fiscalCode) || !StringUtils.isEmpty(identClient) || !StringUtils.isEmpty(vatNumPartitaIVA) || !StringUtils
+            .isEmpty(enterpriseNumber)) && (!StringUtils.isEmpty(taxCodeIVACode) || !StringUtils.isEmpty(collectionCode))) {
           LOG.trace("Company level fields and Billing level fields can not be filled at the same time");
           error.addError(rowIndex, "Company [Fiscal code, Vat#, Ident. Cliente, Enterprise number] | Billing [Tax Code/ Code IVA, Collection Code]",
               "Company level fields and Billing level fields can not be filled at the same time");
@@ -1808,4 +1827,33 @@ public class ItalyHandler extends BaseSOFHandler {
     }
   }
 
+  private void createMissingAddressForSingleReact(FindCMRResultModel source, List<FindCMRRecordModel> converted,FindCMRRecordModel mainRecord) {
+    FindCMRRecordModel record = source.getItems().get(0);
+    
+        //Copy Installing address as Company address.
+        FindCMRRecordModel  company = new FindCMRRecordModel();
+        try {
+          PropertyUtils.copyProperties(company, record);
+          company.setCmrAddrType("Company");
+          company.setCmrAddrTypeCode(COMPANY_ADDR_TYPE);
+          company.setCmrAddrSeq(COMPANY_ADDR_SEQ_NO);
+          company.setParentCMRNo(mainRecord.getCmrCompanyNo());
+          converted.add(company);
+        } catch (Exception e) {
+          // noop
+        }
+        
+        //Copy Installing address as billing address.
+        FindCMRRecordModel  billing = new FindCMRRecordModel();
+        try {
+          PropertyUtils.copyProperties(billing, record);
+          billing.setCmrAddrType("Billing");
+          billing.setCmrAddrTypeCode(BILLING_ADDR_TYPE);
+          billing.setCmrSapNumber(null);
+          billing.setCmrAddrSeq("00002");
+          converted.add(billing);
+        } catch (Exception e) {
+          // noop
+        }      
+      }
 }

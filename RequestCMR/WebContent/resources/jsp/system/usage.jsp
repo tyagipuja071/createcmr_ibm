@@ -159,7 +159,8 @@ div#filterlabels table td, div#filterlabels table th {
             <form:select dojoType="dijit.form.FilteringSelect" id="reportType" searchAttr="name" style="display: block; " maxHeight="200"
               required="false" path="reportType" placeHolder="Select Report Type">
               <form:option value=""></form:option>
-              <form:option value="S">Total Usage (All Services)</form:option>
+              <form:option value="S">Total Usage (All Partners)</form:option>
+              <form:option value="A">Total Usage (All Services)</form:option>
               <form:option value="N">Usage by Service</form:option>
               <form:option value="P">Usage by Partner</form:option>
             </form:select>

@@ -32,6 +32,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
+import com.ibm.cio.cmr.request.util.at.ATUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
 
@@ -202,6 +203,100 @@ public class MassChangeTemplate {
         LegacyDirectUtil.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));
+        }
+      } else if (ATUtil.isCountryATEnabled(entityManager, country)) {// CMR-800
+        String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };// CMR-2065
+                                                                                    // installing
+                                                                                    // change
+                                                                                    // to
+                                                                                    // Sold
+                                                                                    // To
+        for (String name : sheetNames) {
+          XSSFSheet sheet = book.getSheet(name);
+          LOG.debug("validating name 3 for sheet " + name);
+          for (Row row : sheet) {
+            if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+              String dept = "";
+              String building = "";
+              String floor = "";
+              Cell cmrCell1 = row.getCell(7);
+              if (cmrCell1 != null) {
+                switch (cmrCell1.getCellTypeEnum()) {
+                case STRING:
+                  dept = cmrCell1.getStringCellValue();
+                  break;
+                case NUMERIC:
+                  double nvalue = cmrCell1.getNumericCellValue();
+                  if (nvalue > 0) {
+                    dept = "" + nvalue;
+                  }
+                  break;
+                default:
+                  continue;
+                }
+              }
+              Cell cmrCell2 = row.getCell(8);
+              if (cmrCell2 != null) {
+                switch (cmrCell2.getCellTypeEnum()) {
+                case STRING:
+                  floor = cmrCell2.getStringCellValue();
+                  break;
+                case NUMERIC:
+                  double nvalue = cmrCell2.getNumericCellValue();
+                  if (nvalue > 0) {
+                    floor = nvalue + "";
+                  }
+                  break;
+                default:
+                  continue;
+                }
+              }
+              Cell cmrCell3 = row.getCell(9);
+              if (cmrCell3 != null) {
+                switch (cmrCell3.getCellTypeEnum()) {
+                case STRING:
+                  building = cmrCell3.getStringCellValue();
+                  break;
+                case NUMERIC:
+                  double nvalue = cmrCell3.getNumericCellValue();
+                  if (nvalue > 0) {
+                    building = nvalue + "";
+                  }
+                  break;
+                default:
+                  continue;
+                }
+              }
+              String name3 = "";
+              if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept, "@")) {
+                name3 += dept;
+                if (StringUtils.isNotBlank(building) && !StringUtils.equals(building, "@")) {
+                  name3 += ", ";
+                } else if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
+                  name3 += ", ";
+                }
+              }
+              if (StringUtils.isNotBlank(building) && !StringUtils.equals(building, "@")) {
+                name3 += building;
+                if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
+                  name3 += ", ";
+                }
+              }
+              if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
+                name3 += floor;
+              }
+              if (name3.length() > 30) {
+                LOG.debug("Total computed length of building, department and floor should not exeed 30. Sheet: " + name + " Row: " + row.getRowNum());
+                TemplateValidation error = new TemplateValidation(name);
+                error.addError(row.getRowNum(), "building", "Total computed length of building, department and floor should not exeed 30");
+                validations.add(error);
+              }
+            }
+          }
+        }
+        HashMap<String, String> hwFlagMap = new HashMap<>();
+        for (TemplateTab tab : this.tabs) {
+          validations.add(tab.validateAT(entityManager, book, country, maxRows, hwFlagMap));
         }
       } else {
         for (TemplateTab tab : this.tabs) {

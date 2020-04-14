@@ -145,6 +145,8 @@ public class RequestEntryModel extends BaseModel {
   private String redirectUrl;
   private String statusChgCmt;
   private String rejectReason;
+  private String rejReasonCd;
+
   private String enterCMRNo;
   private String cmrSearchDone;
   private String subIndustryDesc;
@@ -410,6 +412,7 @@ public class RequestEntryModel extends BaseModel {
   private String compInfoSrc;
   private String matchIndc;
   private String matchOverrideIndc;
+  private String dupCmrReason;
 
   public String getMatchIndc() {
     return matchIndc;
@@ -1247,6 +1250,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setRejectReason(String rejectReason) {
     this.rejectReason = rejectReason;
+  }
+  
+  public String getRejReasonCd() {
+    return rejReasonCd;
+  }
+
+  public void setRejReasonCd(String rejReasonCd) {
+    this.rejReasonCd = rejReasonCd;
   }
 
   public String getRedirectUrl() {
@@ -2959,4 +2970,13 @@ public class RequestEntryModel extends BaseModel {
   public void setCompInfoSrc(String compInfoSrc) {
     this.compInfoSrc = compInfoSrc;
   }
+
+  public String getDupCmrReason() {
+    return dupCmrReason;
+  }
+
+  public void setDupCmrReason(String dupCmrReason) {
+    this.dupCmrReason = dupCmrReason;
+  }
+
 }

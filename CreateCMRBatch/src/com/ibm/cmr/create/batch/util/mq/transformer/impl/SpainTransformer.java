@@ -181,7 +181,7 @@ public class SpainTransformer extends MessageTransformer {
     }
 
   }
-  
+
   @Override
   public void formatAddressLines(MQMessageHandler handler) {
     Addr addrData = handler.addrData;

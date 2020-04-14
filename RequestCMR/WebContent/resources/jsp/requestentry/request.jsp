@@ -21,6 +21,7 @@
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 	DataModel rdcdata = (DataModel) request.getAttribute("rdcdata");
 	boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
+  boolean dnbPrimary = "Y".equals(request.getAttribute("dnbPrimary"));
 	AppUser user = AppUser.getUser(request);
 	String findCMRUrl = SystemConfiguration.getValue("FIND_CMR_URL");
 	String actionUrl = request.getContextPath() + "/request";
@@ -31,6 +32,7 @@
 	String tabsJS = newEntry ? "triggerSave" : "switchTabs";
 	String mandt = SystemConfiguration.getValue("MANDT");
 	String autoEngineIndc= (String) request.getAttribute("autoEngineIndc");
+  boolean fromQs = "Y".equals(request.getParameter("qs"));
 %>
 <jsp:include page="approvals_status.jsp" />
 <%
@@ -70,7 +72,7 @@
 <script>
     var _translateUrl = '<%=SystemParameters.getString("TRANSLATE.URL")%>';
     var _delayedLoadComplete = false;
-dojo.addOnLoad(function() {
+  dojo.addOnLoad(function() {
     loadYourActionsDropDown();
     FormManager.setCheckFunction(promptForSaveBeforeLeave);
     FilteringDropdown.loadItems('rejectReason', 'rejectReason_spinner', 'lov', 'fieldId=RejectReasonProc');
@@ -88,20 +90,45 @@ dojo.addOnLoad(function() {
     <%if (null != reqentry.getCmrIssuingCntry() && ("852".equals(reqentry.getCmrIssuingCntry()) || "720".equals(reqentry.getCmrIssuingCntry()) || "738".equals(reqentry.getCmrIssuingCntry()) || "736".equals(reqentry.getCmrIssuingCntry()) || "646".equals(reqentry.getCmrIssuingCntry()) || "714".equals(reqentry.getCmrIssuingCntry()))) {%>
     getChecklistStatus();
     <%}%>
-   
+    <%if (fromQs){%>
+      cmr.showProgress('Check and verify address created.<br>Please wait while the system opens the address...');
+      window.setTimeout('forceAddressValidationFromQS()', 1000);
+    <%}%>
   });
   
+  function forceAddressValidationFromQS(){
+    if (FilteringDropdown.pending() || !_allAddressData || _allAddressData.length == 0){
+      window.setTimeout('forceAddressValidationFromQS()', 500);
+    } else {
+      var soldToSeq = '1';
+      for (var i = 0; i < _allAddressData.length; i++){
+        if (_allAddressData[i].addrType == 'ZS01'){
+          soldToSeq = _allAddressData[i].addrSeq[0];
+          break;
+        }
+      }
+      cmr.hideProgress();
+      doUpdateAddr(FormManager.getActualValue('reqId'),'ZS01', soldToSeq, cmr.MANDT);
+    }
+  }
   function enableSupportal(){
     var error = dojo.byId('cmr-error-box-msg') ? dojo.byId('cmr-error-box-msg').innerHTML : null;
     if (error){
       $('#supportal').slideDown(1000);
     }
   }
-  
+
+  function enableQSPopup(){
+    if (FormManager.getActualValue('dnbPrimary') == 'Y' && FormManager.getActualValue('reqId') == '0' && FormManager.getActualValue('reqType') == 'C'){
+      $('#qs_pop').slideDown(1000);
+    }
+  }
+
   function enableYourActionsBar(){
     if (!FilteringDropdown.pending()){
       $('#cmr-your-actions').slideDown(500);
       enableSupportal();
+      enableQSPopup();
     }  else {
       window.setTimeout('enableYourActionsBar()', 1500);      
     }
@@ -237,6 +264,7 @@ div#ibm-content-main {
   <form:form method="POST" action="<%=actionUrl%>" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="reqentry">
     <jsp:include page="actionstatus.jsp" />
     <input type="hidden" value="${yourActionsViewOnly}" id="viewOnlyPage">
+    <input type="hidden" value="${dnbPrimary}" id="dnbPrimary">
     <input type="hidden" value="<%=mandt%>" id="mandt">
     <input type="hidden" value="<%=defaultLandedCountry%>" id="defaultLandedCountry">
     <input type="hidden" value="<%=autoEngineIndc%>" id="autoEngineIndc">
@@ -275,8 +303,8 @@ div#ibm-content-main {
     </c:if>
     <form:hidden path="covBgRetrievedInd" />
     <form:hidden path="rdcProcessingMsg" />
-    <cmr:view exceptForCountry="848">
-    <form:hidden path="ordBlk" />
+    <cmr:view exceptForCountry="848,618">
+    	<form:hidden path="ordBlk" />
     </cmr:view>
     <cmr:view forGEO="LA">
     <form:hidden path="crosTyp" />
@@ -332,7 +360,7 @@ div#ibm-content-main {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -416,7 +444,7 @@ div#ibm-content-main {
     <%} %>
 	</cmr:view>
 	
-    <cmr:view forGEO="CEMEA">
+    <cmr:view forGEO="CEMEA" exceptForCountry="618">
     <%if (!StringUtils.isEmpty(reqentry.getEmbargoCd())){%>
       <cmr:row>
         <cmr:column span="6">
@@ -428,7 +456,18 @@ div#ibm-content-main {
       </cmr:row>
     <%} %>
     </cmr:view>
-    
+    <cmr:view forCountry="618">
+    <%if (!StringUtils.isEmpty(reqentry.getOrdBlk()) && "88".equals(reqentry.getOrdBlk()) && "U".equals(reqentry.getReqType())){%>
+      <cmr:row>
+        <cmr:column span="6">
+          <div class="embargo">
+            <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+            <cmr:note text="${ui.info.cob}" />
+          </div>
+        </cmr:column>
+      </cmr:row>
+    <%} %>
+    </cmr:view>
     <cmr:view forGEO="AP">
     <%if ("Y".equals(reqentry.getGovType())){%>
       <cmr:row>
@@ -594,7 +633,9 @@ div#ibm-content-main {
 </cmr:section>
 <jsp:include page="attach_dl.jsp" />
 <jsp:include page="supportal.jsp" />
-
+<%if (newEntry && "C".equals(reqentry.getReqType()) && dnbPrimary) {%>
+  <jsp:include page="quick_search_popup.jsp" />
+<%} %>
 <jsp:include page="feedback.jsp" />
 
 <!--  Customizability Scripts -->

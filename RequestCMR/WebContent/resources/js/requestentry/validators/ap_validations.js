@@ -8,16 +8,17 @@ function addAfterConfigAP() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
-  
   if (reqType == 'U') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
   
   if(cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custType == 'CROSS' && custSubGrp == 'SPOFF'){
 	  FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
-  }else{
+  }
+   else{
 	  FormManager.removeValidator('cmrNo', Validators.REQUIRED);
   }
+  
   
   // Story 1681465 - Code reverted
   /*
@@ -114,7 +115,7 @@ function addAfterConfigAP() {
     }   
 }
 
- /*SG defect : 1795335*/
+ /* SG defect : 1795335 */
 
 function addFormatForCMRNumValidator() {	
   FormManager.addFormValidator((function() {
@@ -143,7 +144,10 @@ function addFormatForCMRNumValidator() {
 
 
 
-/* Story : 1787526 and Story 1813153 and defect 1792206 - APGCG Address Field Format  */
+/*
+ * Story : 1787526 and Story 1813153 and defect 1792206 - APGCG Address Field
+ * Format
+ */
 
 function addFormatFieldValidator() {
 	  FormManager.addFormValidator((function() {
@@ -156,12 +160,13 @@ function addFormatFieldValidator() {
 	  var addrTxt2 = FormManager.getActualValue('addrTxt2');
 	  var stateProv = FormManager.getActualValue('stateProv');
 	  var dept = FormManager.getActualValue('dept');
-	  //var reqType = FormManager.getActualValue('reqType');
-	  //var role = FormManager.getActualValue('userRole').toUpperCase();
+	  // var reqType = FormManager.getActualValue('reqType');
+	  // var role = FormManager.getActualValue('userRole').toUpperCase();
 	
-	  //if(role = 'REQUESTER' || role == 'PROCESSOR'){
+	  // if(role = 'REQUESTER' || role == 'PROCESSOR'){
 	  
-	  //if (city1 && city1.length > 0 && !city1.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
+	  // if (city1 && city1.length > 0 &&
+    // !city1.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
 	  if (city1 && city1.length > 0 && !city1.match("([\\/]+$)|^([\\.]+$)|^([-]+$)|^([#]+$)|^([,]+$)|^([:]+$)|^([']+$)|^([&]+$)|^([;]+$)|^([0-9A-Za-z-#;:,'&()\\s+\\.\\/]+$)|^[(]+$|^[)]+$")) {
 	  return new ValidationResult({
 	  id : 'city1',
@@ -229,7 +234,7 @@ function addFormatFieldValidator() {
 	  } 
 
 
-// Defect :  1815803 
+// Defect : 1815803
 
 function addFieldFormatValidator() {
 	console.log("addFieldFormatValidator..............");
@@ -258,9 +263,10 @@ function addFieldFormatValidator() {
 							addrAddrTxt2 = recordList.addrTxt2;
 							addrCity1 = recordList.city1;
 
-							/*if (typeof (addrSequence) == 'object') {
-								addrSequence = addrSequence[0];
-							}*/
+							/*
+               * if (typeof (addrSequence) == 'object') { addrSequence =
+               * addrSequence[0]; }
+               */
 							if (typeof (addrDept) == 'object') {
 								addrDept = addrDept[0];
 							}
@@ -1226,6 +1232,43 @@ function onSubIndustryChange() {
   }
 }
 
+// Story -2125 drop down list needed in INAC/NAC FIELD based on INAC Type
+var _inacCdHandler = null;
+function onInacTypeChange(){
+  var reqType = null;
+  reqType = FormManager.getActualValue('reqType');
+  if(reqType == 'C')
+    {
+     if (_inacCdHandler == null){
+    _inacCdHandler= dojo.connect(FormManager.getField('inacType'), 'onChange', function(value){
+      var value = FormManager.getActualValue('inacType');
+      console.log(value);
+      if(value!= null){
+        var inacCdValue = [];
+        var qParams = {
+          _qall : 'Y',
+          CMT : value , 
+           };
+           var results = cmr.query('GET.INAC_CD', qParams);
+           if (results != null) {
+             for (var i = 0; i < results.length; i++) {
+               inacCdValue.push(results[i].ret1);
+               }
+             if (value == 'N')
+             {
+             inacCdValue.push('new');
+             }           
+             FormManager.limitDropdownValues(FormManager.getField('inacCd'), inacCdValue);
+             if (inacCdValue.length == 1) {
+               FormManager.setValue('inacCd', inacCdValue[0]);
+             }
+           } 
+      }
+    });
+   }
+  } 
+}
+
 function updateIndustryClass() {
   console.log(">>>> updateIndustryClass >>>>");
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
@@ -1338,7 +1381,7 @@ function onIsuCdChangeAseanAnzIsa() {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   var cmrIssuingCntry =  dojo.byId('cmrIssuingCntry').value;
-  var asean_isa_cntries = ['Indonesia - 749','Brunei Darussalam - 643','Thailand - 856','Philippines - 818','New Zealand - 749','Malaysia - 778','Singapore - 834','Vietnam - 852','Bangladesh - 615','India - 744','Sri Lanka - 652'];
+  var asean_isa_cntries = ['Indonesia - 749','Brunei Darussalam - 643','Thailand - 856','Philippines - 818','New Zealand - 749','Malaysia - 778','Singapore - 834','Vietnam - 852','Bangladesh - 615','India - 744','Sri Lanka - 652', 'Australia - 616'];
   
   if (reqType == 'U') {
     console.log(">>>> Exit onIsuCdChangeAseanAnz for Update.");
@@ -1351,11 +1394,13 @@ function onIsuCdChangeAseanAnzIsa() {
         if(asean_isa_cntries.indexOf(cmrIssuingCntry) >= 0)
         FormManager.removeValidator('inacCd', Validators.REQUIRED);
       }
-      else if(asean_isa_cntries.indexOf(cmrIssuingCntry) >= 0){
+        else if(asean_isa_cntries.indexOf(cmrIssuingCntry) >= 0){
         setINACState();
       }
+      
       return;
     }
+    
     
     if (value != null && value.length > 1) {
       updateMRCAseanAnzIsa();
@@ -1577,39 +1622,26 @@ function addAbnValidatorForAU() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-/*function addCmrNoForSG() {
-	  FormManager.addFormValidator((function() {
-	    return {
-	      validate : function() {
-	          var cmrNo = FormManager.getActualValue('cmrNo');
-	    	  var role = FormManager.getActualValue('userRole').toUpperCase();
-	    	  var reqType = FormManager.getActualValue('reqType');
-	          var custSubGrp = FormManager.getActualValue('custSubGrp');
-	          var custGrp = FormManager.getActualValue('custGrp');
-	          var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	        
-	        if (custGrp == 'cross' && custSubGrp == 'SNOFF' && role == 'PROCESSOR' && reqType == 'C') {
-	          if (cmrNo && cmrNo.length != 6) {
-	            return new ValidationResult({
-	                id : 'cmrNo',
-	                type : 'text',
-	                name : 'CMR No#'
-	              }, false, 'The length of CMR No# should be exactly 6.');
-	          } else {
-	            return new ValidationResult(null, true);
-	          }
-	        } else {
-	          return new ValidationResult(null, true);
-	        }
-	      }
-	    };
-	  })(), 'MAIN_IBM_TAB', 'frmCMR');
-	}
-*/
+/*
+ * function addCmrNoForSG() { FormManager.addFormValidator((function() { return {
+ * validate : function() { var cmrNo = FormManager.getActualValue('cmrNo'); var
+ * role = FormManager.getActualValue('userRole').toUpperCase(); var reqType =
+ * FormManager.getActualValue('reqType'); var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var custGrp =
+ * FormManager.getActualValue('custGrp'); var cntry =
+ * FormManager.getActualValue('cmrIssuingCntry');
+ * 
+ * if (custGrp == 'cross' && custSubGrp == 'SNOFF' && role == 'PROCESSOR' &&
+ * reqType == 'C') { if (cmrNo && cmrNo.length != 6) { return new
+ * ValidationResult({ id : 'cmrNo', type : 'text', name : 'CMR No#' }, false,
+ * 'The length of CMR No# should be exactly 6.'); } else { return new
+ * ValidationResult(null, true); } } else { return new ValidationResult(null,
+ * true); } } }; })(), 'MAIN_IBM_TAB', 'frmCMR'); }
+ */
 
 
 
-/*   STory : 1782082 - Singapore*/
+/* STory : 1782082 - Singapore */
 
 function addCmrNoValidator() {
 	  FormManager.addFormValidator((function() {
@@ -1639,18 +1671,16 @@ function addCmrNoValidator() {
 	  })(), 'MAIN_IBM_TAB', 'frmCMR');
 	}
 
-/*function addMandateCmrNoForSG() {
-	var role = FormManager.getActualValue('userRole').toUpperCase();
-	var scenario = FormManager.getActualValue('custGrp');
-	var custSubGrp = FormManager.getActualValue('custSubGrp');
-	var reqType = FormManager.getActualValue('reqType');
-	if(cmr.currentRequestType == 'C' && scenario == 'CROSS' && custSubGrp == 'SPOFF' && role == 'PROCESSOR'){
-		FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], '');	
-		}else{
-			FormManager.removeValidator('cmrNo', Validators.REQUIRED);
-		}
-	
-}*/
+/*
+ * function addMandateCmrNoForSG() { var role =
+ * FormManager.getActualValue('userRole').toUpperCase(); var scenario =
+ * FormManager.getActualValue('custGrp'); var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var reqType =
+ * FormManager.getActualValue('reqType'); if(cmr.currentRequestType == 'C' &&
+ * scenario == 'CROSS' && custSubGrp == 'SPOFF' && role == 'PROCESSOR'){
+ * FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], '');
+ * }else{ FormManager.removeValidator('cmrNo', Validators.REQUIRED); } }
+ */
 
 
 function removeStateValidatorForHkMoNZ() {
@@ -1682,26 +1712,21 @@ function removeStateValidatorForHkMoNZ() {
 	}
 }
 
-/*function addValidatorForSingapore(){
-	  //var role = null;
-	var role = FormManager.getActualValue('userRole').toUpperCase();
-	  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-	  //var isaCntries = ['834'];
-	  var reqType = FormManager.getActualValue('reqType');
-	  var custGrp = FormManager.getActualValue('custGrp');
-	  var custSubGrp = FormManager.getActualValue('custSubGrp');
-	  if (typeof (_pagemodel) != 'undefined') {
-	    role = _pagemodel.userRole;
-	  }
-	  
-	  if(role == 'PROCESSOR' && cmrCntry == '834' && custGrp== 'cross' &&  custSubGrp== 'SPOFF' && reqType== 'C'){
-	    FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR No' ], 'MAIN_IBM_TAB');
-	  }
-	  
-	  else{
-	    FormManager.removeValidator('cmrNo', Validators.REQUIRED);
-	  }
-	}*/
+/*
+ * function addValidatorForSingapore(){ //var role = null; var role =
+ * FormManager.getActualValue('userRole').toUpperCase(); var cmrCntry =
+ * FormManager.getActualValue('cmrIssuingCntry'); //var isaCntries = ['834'];
+ * var reqType = FormManager.getActualValue('reqType'); var custGrp =
+ * FormManager.getActualValue('custGrp'); var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); if (typeof (_pagemodel) !=
+ * 'undefined') { role = _pagemodel.userRole; }
+ * 
+ * if(role == 'PROCESSOR' && cmrCntry == '834' && custGrp== 'cross' &&
+ * custSubGrp== 'SPOFF' && reqType== 'C'){ FormManager.addValidator('cmrNo',
+ * Validators.REQUIRED, [ 'CMR No' ], 'MAIN_IBM_TAB'); }
+ * 
+ * else{ FormManager.removeValidator('cmrNo', Validators.REQUIRED); } }
+ */
 
 function setINACState(){
   var role = null;
@@ -1711,13 +1736,17 @@ function setINACState(){
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
-  
-  if(role == 'Requester' && isuCd == '34'){
+  if (role == 'Requester' && (isuCd == '34' || isuCd == '04' || isuCd == '3T') && cmrCntry == '616')
+  { 
+ FormManager.addValidator('inacCd',Validators.REQUIRED,[ 'INAC/NAC Code' ],'MAIN_IBM_TAB');
+ FormManager.addValidator('inacType',Validators.REQUIRED,[ 'INAC Type' ],'MAIN_IBM_TAB');
+  }
+  else if(role == 'Requester' && isuCd == '34'){
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
   }
   else if(role == 'Requester' && (isuCd == '34'|| isuCd == '3T' || isuCd == '5B') && (isaCntries.indexOf(cmrCntry) >= 0)){
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
-  }
+  } 
   else{
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
@@ -1956,7 +1985,8 @@ function addAddressInstancesValidator(){
                type = type[0];
              }
              if (results[j].ret1 == type) {
-             //  New requirement : Defect 1767113 : For HK and MO -> Multiple Billing & Billing CCR are to be allowed
+             // New requirement : Defect 1767113 : For HK and MO -> Multiple
+              // Billing & Billing CCR are to be allowed
                if((cmrCntry == SysLoc.MACAO || cmrCntry == SysLoc.HONG_KONG) && (record.addrType == 'ZP01' || record.addrType == 'ZP02')){
                  continue; 
                }
@@ -2036,7 +2066,7 @@ function addContactInfoValidator() {
             switch (cntry) {
             case '643':
             case '834':
-              if ((custName == null || streetAddr == null || streetAddrCont == null || postCd == null)) {
+              if ((custName == null || streetAddr == null || postCd == null)) {
                 mandtDetails++;
               }
               break;
@@ -2048,35 +2078,35 @@ function addContactInfoValidator() {
             case '615':
             case '744':
             case '752':
-              if ((custName == null || streetAddr == null || streetAddrCont == null || postCd == null || city == null)) {
+              if ((custName == null || streetAddr == null || postCd == null || city == null)) {
                 mandtDetails_1++;
               }
               break; 
             case '796':
             case '616':
-              if ((custName == null || streetAddr == null  || postCd == null || city == null)) {
+              if ((custName == null || streetAddr == null  || postCd == null || city == null || state == null)) {
                 mandtDetails_2++;
               }
               break;
             case '736':
             case '738':
-              if ((custName == null || streetAddr == null  ||  streetAddrCont == null)) {
+              if ((custName == null || streetAddr == null )) {
                 mandtDetails_3++;
               }
               break;
             }          
           }
           if(mandtDetails > 0){
-          return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Street Address Con't is required, Postal Code is required.");
+          return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required.");
           }
           else if(mandtDetails_1 > 0){
-          return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Street Address Con't is required, Postal Code is required and City is required.");  
+          return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required and City is required.");  
           }
           else if(mandtDetails_2 > 0 ){
-          return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required and City is required.");
+            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Postal Code is required, City is required and State is required.");
           }
           else if(mandtDetails_3 > 0){
-            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required, Street Address Con't is required.");   
+            return new ValidationResult(null, false, "Customer Name  is required, Street Address is required.");   
             }  
         }
         return new ValidationResult(null, true);
@@ -2181,62 +2211,41 @@ function setFieldsForDoubleCreates(){
   }
 }
 
-/*function addDoubleCreateValidatorSG(){
-	FormManager.addFormValidator((function() {
-		 return {
-			 validate : function() {
-				 var role = FormManager.getActualValue('userRole').toUpperCase();
-			        var reqType = FormManager.getActualValue('reqType');
-			        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-			        var custSubGrp = FormManager.getActualValue('custSubGrp');
-			        var custGrp = FormManager.getActualValue('custGrp');
-			        if (reqType == 'U') {
-			        	return new ValidationResult(null, true);
-			        }
-			        if (FormManager.getActualValue('cmrNo') != '' ) {
-			            showError = true;
-			          }else{
-			            showError = false;
-			          }
-			        if((cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF')){
-			        	if(showError)
-			        		return new ValidationResult(null, false, 'For CMR Number and CMR Number Prefix in case of double creates, only one can be filled.');
-			        	else if(FormManager.getActualValue('cmrNo') != ''){
-			        		var cmrNumber = FormManager.getActualValue('cmrNo');
-			                var katr6 = FormManager.getActualValue('cmrIssuingCntry');
-			                qParams = {
-			                        KATR6 : katr6,
-			                        MANDT : cmr.MANDT,
-			                        ZZKV_CUSNO : cmrNumber,
-			                      };
-			                var record = cmr.query('CHECK_CMR_RDC', qParams);
-			                var rdcCMRCount = record.ret1;
-			                qParams = {
-			                    KATR6 : '834',
-			                    MANDT : cmr.MANDT,
-			                    ZZKV_CUSNO : cmrNumber,
-			                };
-			                var recordSG = cmr.query('CHECK_CMR_RDC', qParams);
-			                var rdcCMRCountSG = recordSG.ret1;
-			                if (Number(rdcCMRCount) > 0 || Number(rdcCMRCountSG) > 0 ) {
-			                	return new ValidationResult(null, false, 'Please enter another CMR Number as entered CMR Number already exists in RDC.');
-			                }
-			                
-			                var resultWTAAS = CmrServices.checkWTAAS(cmrNumber,katr6);
-			                var resultWTAAS_SG = CmrServices.checkWTAAS(cmrNumber,'834');
-			                if ((resultWTAAS.success && resultWTAAS.data && resultWTAAS.Status &&  resultWTAAS.Status == 'F' && resultWTAAS.Error_Msg != null && resultWTAAS.Error_Msg.toLowerCase().includes("does not exist")) && (resultWTAAS_SG.success && resultWTAAS_SG.data && resultWTAAS_SG.Status &&  resultWTAAS_SG.Status == 'F' && resultWTAAS_SG.Error_Msg != null && resultWTAAS_SG.Error_Msg.toLowerCase().includes("does not exist"))) {
-			                	 return new ValidationResult(null, true);
-			                }else if(!resultWTAAS.success || !resultWTAAS_SG.success){
-			                	
-			                }
-			                
-			        	}
-			        }
-			 }
-		 }
-	}
-}
-*/
+/*
+ * function addDoubleCreateValidatorSG(){
+ * FormManager.addFormValidator((function() { return { validate : function() {
+ * var role = FormManager.getActualValue('userRole').toUpperCase(); var reqType =
+ * FormManager.getActualValue('reqType'); var cntry =
+ * FormManager.getActualValue('cmrIssuingCntry'); var custSubGrp =
+ * FormManager.getActualValue('custSubGrp'); var custGrp =
+ * FormManager.getActualValue('custGrp'); if (reqType == 'U') { return new
+ * ValidationResult(null, true); } if (FormManager.getActualValue('cmrNo') != '' ) {
+ * showError = true; }else{ showError = false; } if((cntry == '834' && reqType ==
+ * 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF')){
+ * if(showError) return new ValidationResult(null, false, 'For CMR Number and
+ * CMR Number Prefix in case of double creates, only one can be filled.'); else
+ * if(FormManager.getActualValue('cmrNo') != ''){ var cmrNumber =
+ * FormManager.getActualValue('cmrNo'); var katr6 =
+ * FormManager.getActualValue('cmrIssuingCntry'); qParams = { KATR6 : katr6,
+ * MANDT : cmr.MANDT, ZZKV_CUSNO : cmrNumber, }; var record =
+ * cmr.query('CHECK_CMR_RDC', qParams); var rdcCMRCount = record.ret1; qParams = {
+ * KATR6 : '834', MANDT : cmr.MANDT, ZZKV_CUSNO : cmrNumber, }; var recordSG =
+ * cmr.query('CHECK_CMR_RDC', qParams); var rdcCMRCountSG = recordSG.ret1; if
+ * (Number(rdcCMRCount) > 0 || Number(rdcCMRCountSG) > 0 ) { return new
+ * ValidationResult(null, false, 'Please enter another CMR Number as entered CMR
+ * Number already exists in RDC.'); }
+ * 
+ * var resultWTAAS = CmrServices.checkWTAAS(cmrNumber,katr6); var resultWTAAS_SG =
+ * CmrServices.checkWTAAS(cmrNumber,'834'); if ((resultWTAAS.success &&
+ * resultWTAAS.data && resultWTAAS.Status && resultWTAAS.Status == 'F' &&
+ * resultWTAAS.Error_Msg != null &&
+ * resultWTAAS.Error_Msg.toLowerCase().includes("does not exist")) &&
+ * (resultWTAAS_SG.success && resultWTAAS_SG.data && resultWTAAS_SG.Status &&
+ * resultWTAAS_SG.Status == 'F' && resultWTAAS_SG.Error_Msg != null &&
+ * resultWTAAS_SG.Error_Msg.toLowerCase().includes("does not exist"))) { return
+ * new ValidationResult(null, true); }else if(!resultWTAAS.success ||
+ * !resultWTAAS_SG.success){ } } } } } } }
+ */
 
 
 /* Story : 1782082 - Singapore and defct : 1801410 */ 
@@ -2254,11 +2263,10 @@ function addDoubleCreateValidatorSG() {
 	        if (reqType == 'U') {
 	          return new ValidationResult(null, true);
 	        }
-/*        if (FormManager.getActualValue('cmrNo') != '' ) {
-	          showError = true;
-	        }else{
-	          showError = false;
-	        }  */  
+/*
+ * if (FormManager.getActualValue('cmrNo') != '' ) { showError = true; }else{
+ * showError = false; }
+ */  
 	        if (cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF') {
 			  if(FormManager.getActualValue('cmrNo') != '' && cmrNumber.length == 6){
 	            var cmrNumber = FormManager.getActualValue('cmrNo');
@@ -2362,21 +2370,20 @@ function addDoubleCreateValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+
 function setAddressDetailsForViewAP() {
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var asean_isa_cntries = [SysLoc.BRUNEI,SysLoc.MALASIA,SysLoc.INDONESIA,SysLoc.SINGAPORE,SysLoc.PHILIPPINES,SysLoc.THAILAND,SysLoc.VIETNAM,SysLoc.INDIA,SysLoc.SRI_LANKA,SysLoc.BANGLADESH];
-  if ( (cmrIssuingCntry == SysLoc.HONG_KONG || cmrIssuingCntry == SysLoc.MACAO)) {
-    $('label[for="city1_view"]').text("Street Address Cont'2:");    
-  }
+  var asean_isa_cntries = [SysLoc.BRUNEI,SysLoc.MALASIA,SysLoc.INDONESIA,SysLoc.SINGAPORE,SysLoc.PHILIPPINES,SysLoc.THAILAND,SysLoc.VIETNAM,SysLoc.INDIA,SysLoc.SRI_LANKA,SysLoc.BANGLADESH,SysLoc.HONG_KONG,SysLoc.MACAO];
   if ( (cmrIssuingCntry == SysLoc.AUSTRALIA || cmrIssuingCntry == SysLoc.NEW_ZEALAND)) {
     $('label[for="city1_view"]').text('Suburb:');    
   }
-  if ( asean_isa_cntries.indexOf(cmrIssuingCntry) > -1) {
-    $('label[for="dept_view"]').text("Street Address Con't 2:");
-    
-  }
-}
+ if ( asean_isa_cntries.indexOf(cmrIssuingCntry) > -1 ) {
+ $('label[for="addrTxt_view"]').text("Address.(Flr,Bldg,lvl,Unit.):");
+ $('label[for="addrTxt2_view"]').text("Address. Cont1(Street Name, Street No.):");
+ $('label[for="dept_view"]').text("Address. Cont2(District,Town,Region):");
 
+ } 
+}
 /*
  * Story 1734332 : Customer Name & Customer Name Con't in Address tab need to be
  * set as non-editable for processors
@@ -2513,6 +2520,78 @@ function setCollCdFrSingapore(){
 		FormManager.setValue('collectionCd',collCd);
 	}
 
+/*
+ * Story CMR-1753 : For the condition, "When there is value in both street
+ * address and street address con't. " Provide a validation on check request as
+ * well as address level to ensure that length of 'street address' is 27
+ */
+function addAddressLengthValidators() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+          var addrTxt = FormManager.getActualValue('addrTxt');
+          var addrTxt2 = FormManager.getActualValue('addrTxt2');
+          
+          if(addrTxt != '' && addrTxt2 != ''){
+            if(addrTxt.length > 27){
+              return new ValidationResult(null, false, 'Street address should not exceed 27 characters when both Street and Street Con\'t present.');
+            }else{
+              return new ValidationResult(null, true);
+            }
+          }else{
+            return new ValidationResult(null, true);
+          }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function addStreetValidationChkReq() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var qParams = {
+          _qall : 'Y',
+          REQID : reqId
+        };
+
+        var results = cmr.query('GET_STREET_LENGTH_AU', qParams);
+        if (results != null) {
+          for ( var i = 0; i < results.length; i++) {
+            if (results[i].ret1 != '' && results[i].ret2 != '' && results[i].ret1.length > 27) {
+              return new ValidationResult(null, false, 'Street address should not exceed 27 characters when both Street and Street Con\'t present.');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function validateStreetAddrCont2(){
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var streetAddrCont1= FormManager.getActualValue('addrTxt2');
+        var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+        var streetAddrCont2= "";
+        if(cmrCntry == '738' || cmrCntry =='736'){
+          streetAddrCont2= FormManager.getActualValue('city1');
+        }else {
+          streetAddrCont2= FormManager.getActualValue('dept');
+        }
+        if(streetAddrCont1 == '' && streetAddrCont2!=''){
+          return new ValidationResult(null, false, 'Street Address Con\'t2 cannot have a value as Street Address Con\'t1 is blank.');
+        }
+        
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.AP = [ SysLoc.AUSTRALIA, SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
       SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.NEW_ZEALAND, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ];
@@ -2547,7 +2626,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.AP);
   GEOHandler.addAddrFunction(setAbbrevNmLocnOnAddressSave, GEOHandler.AP);
   
- //GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
+ // GEOHandler.addAddrFunction(addMandateCmrNoForSG, [ SysLoc.SINGAPORE ]);
   
   GEOHandler.addAfterConfig(onCustSubGrpChange, GEOHandler.AP);
   GEOHandler.addAfterConfig(setCTCIsuByCluster, GEOHandler.AP);
@@ -2562,14 +2641,16 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(removeStateValidatorForHkMoNZ, [SysLoc.AUSTRALIA,SysLoc.NEW_ZEALAND]);
   
   
-  //GEOHandler.addAfterConfig(addValidatorForSingapore, [SysLoc.SINGAPORE]);
-  //GEOHandler.addAfterTemplateLoad(addValidatorForSingapore, [SysLoc.SINGAPORE]);
+  // GEOHandler.addAfterConfig(addValidatorForSingapore, [SysLoc.SINGAPORE]);
+  // GEOHandler.addAfterTemplateLoad(addValidatorForSingapore,
+  // [SysLoc.SINGAPORE]);
 
   // setting collection code for ASEAN
   GEOHandler.addAfterConfig(onISBUCdChange, GEOHandler.ASEAN);
   
   GEOHandler.addAfterConfig(addGovIndcHanlder, [SysLoc.AUSTRALIA]);
   GEOHandler.addAfterConfig(addGovCustTypHanlder, [SysLoc.AUSTRALIA]);
+  GEOHandler.addAfterConfig(onInacTypeChange,[SysLoc.AUSTRALIA]);
 
   // ERO specific
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.GCG);
@@ -2617,7 +2698,9 @@ dojo.addOnLoad(function() {
   // Story - 1781935 -> AR Code for Singapore
   GEOHandler.addAddrFunction(setCollCdFrSGOnAddrSave, [SysLoc.SINGAPORE]);
   GEOHandler.addAfterTemplateLoad(setCollCdFrSingapore, [SysLoc.SINGAPORE]);
-
-
+  GEOHandler.registerValidator(addAddressLengthValidators, [ SysLoc.AUSTRALIA ], null, true);
+  GEOHandler.registerValidator(addStreetValidationChkReq, [ SysLoc.AUSTRALIA ], null, true);
+  GEOHandler.registerValidator(validateStreetAddrCont2,  [ SysLoc.BANGLADESH, SysLoc.BRUNEI, SysLoc.MYANMAR, SysLoc.SRI_LANKA, SysLoc.INDIA, SysLoc.INDONESIA, SysLoc.PHILIPPINES, SysLoc.SINGAPORE, SysLoc.VIETNAM,
+                                                                  SysLoc.THAILAND, SysLoc.HONG_KONG, SysLoc.LAOS, SysLoc.MACAO, SysLoc.MALASIA, SysLoc.NEPAL, SysLoc.CAMBODIA ], null, true);
 
 });

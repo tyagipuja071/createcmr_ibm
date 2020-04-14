@@ -80,7 +80,7 @@ function cmrNoFormatter(value, rowIndex) {
   var reqType = rowData.reqType;
   var iterId = parseInt(rowData.iterationId);
 
-  if (reqType == 'C' || reqType == 'U') {
+  if (reqType == 'C' || reqType == 'U' || reqType == 'X') {
     return rowData.cmrNo;
   } else if ((reqType == 'M' || reqType == 'N') && iterId > 0) {
     return '<a href="javascript: downloadMassFile(\'' + reqId + '\')" title="Download the mass change file for the current iteration.">' + 'Download File' + '</a>';
@@ -335,7 +335,7 @@ function openRequestDetails(reqId, reqType) {
   // cmr.extractUrl(true) + '">';
   // dojo.place(from, document.forms['frmCMR'], 'last');
   dojo.byId('fromURL').value = cmr.extractUrl(true);
-  if (reqType == 'C' || reqType == 'U' || reqType == '') {
+  if (reqType == 'C' || reqType == 'U' || reqType == 'X' || reqType == '') {
     document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/request/' + reqId);
   } else {
     document.forms['frmCMR'].setAttribute('action', cmr.CONTEXT_ROOT + '/massrequest/' + reqId);
@@ -380,7 +380,7 @@ function createNewEntry() {
   if (cmr.validateNewEntry()) {
     var type = FormManager.getActualValue('newReqType');
     var cntry = FormManager.getActualValue('newReqCntry');
-    if (type == 'C' || type == 'U') {
+    if (type == 'C' || type == 'U' || type == 'X') {
       var from = '<input type="hidden" name="fromUrl" value="' + cmr.extractUrl(true) + '">';
       dojo.place(from, document.forms['frmCMR'], 'last');
       dojo.byId('newReqType_h').value = type;

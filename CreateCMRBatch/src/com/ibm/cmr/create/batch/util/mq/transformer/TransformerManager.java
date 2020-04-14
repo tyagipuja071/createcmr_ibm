@@ -194,6 +194,7 @@ public class TransformerManager {
     addTransformer(new NORDXTransformer(SystemLocation.DENMARK));
     addTransformer(new BELUXTransformer(SystemLocation.BELGIUM));
     addTransformer(new NLTransformer(SystemLocation.NETHERLANDS));
+    addTransformer(new TurkeyTransformer(SystemLocation.TURKEY));
   }
 
   /**

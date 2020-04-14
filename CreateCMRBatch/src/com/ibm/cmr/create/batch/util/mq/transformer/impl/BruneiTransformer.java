@@ -49,24 +49,14 @@ public class BruneiTransformer extends ASEANTransformer {
         lineSix += addrData.getPostCd();
       }
       handler.messageHash.put("AddrLine6", lineSix);
-      String addr5 = handler.messageHash.get("AddrLine5");
-      String addr6 = handler.messageHash.get("AddrLine6");
-
       String line5 = "";
       if (!StringUtils.isBlank(addrData.getDept())) {
         line5 += addrData.getDept();
       }
 
       handler.messageHash.put("AddrLine5", line5);
-      if (addr5 == null)
-        addr5 = "";
-      if (addr6 == null)
-        addr6 = "";
-      if ((handler.messageHash.get("AddrLine5").length() == 0 || handler.messageHash.get("AddrLine4").length() == 0)) {
-        handler.messageHash.put("AddrLine5", addr6);
-        handler.messageHash.put("AddrLine6", "");
-      }
     }
+    arrangeAddressLinesData(handler);
   }
 
 }

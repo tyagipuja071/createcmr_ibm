@@ -496,7 +496,7 @@ function setValuesForScenarios() {
     }
 
     if (_pagemodel.userRole.toUpperCase() == "PROCESSOR") {
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS') {
+      if (_custSubGrp == 'NRML' || _custSubGrp == 'AQSTN' || _custSubGrp == 'EMBSA' || _custSubGrp == 'CROSS' || _custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
         FormManager.setValue('custClass', '11');
         FormManager.readOnly('custClass');
       }
@@ -509,7 +509,7 @@ function setValuesForScenarios() {
         FormManager.limitDropdownValues(field, [ '81', '85' ]);
         field.set('value', '81');
       }
-      if (_custSubGrp == 'NRML' || _custSubGrp == 'BUSPR' || _custSubGrp == 'INTER' || _custSubGrp == 'EMBSA') {
+      if (_custSubGrp == 'NRML' || _custSubGrp == 'BUSPR' || _custSubGrp == 'INTER' || _custSubGrp == 'EMBSA' || _custSubGrp == 'BLUMX' || _custSubGrp == 'MRKT') {
         FormManager.setValue('cnInterAddrKey', '6');
         FormManager.addValidator('cnInterAddrKey', Validators.REQUIRED, [ 'InterAddrKey' ], '');
         FormManager.readOnly('cnInterAddrKey');
@@ -525,7 +525,11 @@ function setValuesForScenarios() {
             FormManager.setValue('rdcComment', 'Acquisition');
           }
         }
-      } else {
+      } else if(_custSubGrp == 'MRKT'){
+        FormManager.setValue('rdcComment', 'For Market place use only');       
+      }else if(_custSubGrp == 'BLUMX'){
+        FormManager.setValue('rdcComment', 'For Bluemix use only');       
+      }else {
         FormManager.resetValidations('rdcComment');
       }
     }
@@ -643,7 +647,12 @@ function showHideCityCN() {
       FormManager.resetValidations('custPhone');
       FormManager.resetValidations('cnCustContJobTitle');
       FormManager.resetValidations('cnCustContNm');
-    } else {
+    } else if(_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX'){
+      FormManager.resetValidations('custPhone');
+      FormManager.resetValidations('cnCustContJobTitle');
+      FormManager.resetValidations('cnCustContNm');     
+    }
+    else {
       FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ 'Street Address Chinese' ], null);
       FormManager.addValidator('cnCustName1', Validators.REQUIRED, [ 'Customer Name Chinese' ], null);
@@ -863,7 +872,7 @@ function addContactInfoValidator() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C'
-            && (custSubType == 'EMBSA' || custSubType == 'NRML' || custSubType == 'CROSS')) {
+            && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
           var record = null;
           var type = null;
 
