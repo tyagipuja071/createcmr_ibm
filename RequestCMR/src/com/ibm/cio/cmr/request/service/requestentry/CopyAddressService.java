@@ -181,31 +181,33 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
         }
 
         if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
-          int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
-          int zi01cout = Integer.valueOf(getTrZI01Count(entityManager, model.getReqId()));
-
-          if (model.getAddrType().equals("ZS01")) {
-            newAddrSeq = "00003";
-          }
-          if (model.getAddrType().equals("ZP01")) {
-            newAddrSeq = "00002";
-          }
-          if (model.getAddrType().equals("ZD01")) {
-            if (zd01cout == 0) {
-              newAddrSeq = "00004";
-            } else if (zd01cout == 1 && zi01cout == 0) {
-              newAddrSeq = "00006";
-            } else {
-              newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
-            }
-          }
-          if (model.getAddrType().equals("ZI01")) {
-            if (zi01cout == 0) {
-              newAddrSeq = "00005";
-            } else {
-              newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
-            }
-          }
+          // int zd01cout = Integer.valueOf(getTrZD01Count(entityManager,
+          // model.getReqId()));
+          // int zi01cout = Integer.valueOf(getTrZI01Count(entityManager,
+          // model.getReqId()));
+          //
+          // if (model.getAddrType().equals("ZS01")) {
+          // newAddrSeq = "00003";
+          // } else if (model.getAddrType().equals("ZP01")) {
+          // newAddrSeq = "00002";
+          // } else if (model.getAddrType().equals("ZD01")) {
+          // if (zd01cout == 0) {
+          // newAddrSeq = "00004";
+          // } else if (zd01cout == 1 && zi01cout == 0) {
+          // newAddrSeq = "00006";
+          // } else {
+          // newAddrSeq = generateEMEAddrSeqCopy(entityManager,
+          // model.getReqId());
+          // }
+          // } else if (model.getAddrType().equals("ZI01")) {
+          // if (zi01cout == 0) {
+          // newAddrSeq = "00005";
+          // } else {
+          // newAddrSeq = generateEMEAddrSeqCopy(entityManager,
+          // model.getReqId());
+          // }
+          // }
+          newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
 
         }
 
