@@ -19,17 +19,23 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.out.FieldResultKey;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
@@ -41,6 +47,7 @@ import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
@@ -210,10 +217,12 @@ public class FranceUtil extends AutomationUtil {
           details.append("Duplicate CMR check using customer name match failed to execute.");
           engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
         }
-        
-        // For sub_regions of France for this scenario, requests should  go the CMDE
-        if(countryUse.length() > 3){
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
+        // For sub_regions of France for this scenario, requests should go the
+        // CMDE
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenario + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
         }
 
         break;
@@ -255,12 +264,14 @@ public class FranceUtil extends AutomationUtil {
           details.append("Unable to perform Duplicate CMR Check for Broker scenario.");
           engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
         }
-        
-        // For sub_regions of France for this scenario, requests should  go the CMDE
-        if(countryUse.length() > 3){
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
+        // For sub_regions of France for this scenario, requests should go the
+        // CMDE
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenario + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
         }
-        
+
         break;
       case "CBIEU":
       case "CBUEU":
@@ -291,9 +302,11 @@ public class FranceUtil extends AutomationUtil {
           details.append("PPS CE ID not available on the request.");
           engineData.addNegativeCheckStatus("PPSCEID", "PPS CE ID not available on the request.");
         }
-        
-        // For  France as well as sub-regions for this scenario, requests should  go the CMDE
-        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
+        // For France as well as sub-regions for this scenario, requests should
+        // go the CMDE
+        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+            "For scenario " + scenario + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
 
         break;
       case "INTER":
@@ -308,12 +321,14 @@ public class FranceUtil extends AutomationUtil {
           details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
           valid = false;
         }
-        
-        // For sub_regions of France for this scenario, requests should  go the CMDE
-        if(countryUse.length() > 3){
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
+        // For sub_regions of France for this scenario, requests should go the
+        // CMDE
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenario + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
         }
-        
+
         break;
 
       case "HOSTC":
@@ -344,12 +359,14 @@ public class FranceUtil extends AutomationUtil {
           details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
           valid = false;
         }
-        
-        // For sub_regions of France for this scenario, requests should  go the CMDE
-        if(countryUse.length() > 3){
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
+        // For sub_regions of France for this scenario, requests should go the
+        // CMDE
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenario + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
         }
-        
+
         break;
 
       case "CHDPT":
@@ -381,17 +398,20 @@ public class FranceUtil extends AutomationUtil {
             valid = false;
           }
         }
-        
-        // For sub_regions of France for this scenario, requests should  go the CMDE
-        if(countryUse.length() > 3){
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
+        // For sub_regions of France for this scenario, requests should go the
+        // CMDE
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenario + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
         }
-        
+
         break;
       case "INTSO":
       case "CBTSO":
-        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC", "For scenario "+scenario +" the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-       
+        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+            "For scenario " + scenario + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
@@ -403,7 +423,6 @@ public class FranceUtil extends AutomationUtil {
     return valid;
   }
 
-  @SuppressWarnings("unchecked")
   private String getSBOFromMapping(String isicCd, String postCd, String isuCd, String clientTier, String subRegion) {
     if (!sortlMappings.isEmpty()) {
       for (FrSboMapping mapping : sortlMappings) {
@@ -504,12 +523,13 @@ public class FranceUtil extends AutomationUtil {
     Data data = requestData.getData();
     if (!isCoverageCalculated
         || (isCoverageCalculated && !(CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom)))) {
-      details.append("\nCoverage not calculated using Global Buying Group/Buying Group. Calculating Coverage using SIREN.").append("\n\n");
-      String siren = StringUtils.isNotBlank(data.getTaxCd1())
-          ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) + "%" : data.getTaxCd1() + "%") : "";
+      details.setLength(0);// clear string builder
+      details.append("\nCalculating Coverage using SIREN.").append("\n\n");
+      String siren = StringUtils.isNotBlank(data.getTaxCd1()) ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
+          : "";
       if (StringUtils.isNotBlank(siren)) {
-        details.append("SIREN: " + siren).append("\n\n");
-        List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren,
+        details.append("SIREN: " + siren).append("\n");
+        List<CoverageContainer> coverages = covElement.computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_TAX_CD1", siren + "%",
             data.getCmrIssuingCntry());
         if (coverages != null && !coverages.isEmpty()) {
           CoverageContainer coverage = coverages.get(0);
@@ -517,6 +537,28 @@ public class FranceUtil extends AutomationUtil {
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
           covElement.logCoverage(entityManager, engineData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
               coverage.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
+          FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
+          String sboValue = "";
+          if (overrides.getData().containsKey(sboKey)) {
+            sboValue = overrides.getData().get(sboKey).getNewValue();
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+          } else {
+            sboValue = getSBOfromCoverage(entityManager, coverage.getFinalCoverage());
+            if (StringUtils.isNotBlank(sboValue)) {
+              details.append("SORTL calculated on basis of Existing CMR Data: " + sboValue);
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
+            }
+          }
+          String isuCd = coverage.getIsuCd();
+          String clientTier = coverage.getClientTierCd();
+          if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+          }
+          results.setResults("Coverage Calculated");
+          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+          engineData.put(AutomationEngineData.COVERAGE_CALCULATED, coverage.getFinalCoverage());
         } else {
           details.append("Coverage could not be calculated on the basis of SIREN").append("\n");
           results.setResults("Review needed");
@@ -530,10 +572,238 @@ public class FranceUtil extends AutomationUtil {
     } else {
       details.append("\nCoverage calculated using Global Buying Group/Buying Group.").append("\n\n");
       results.setResults("Coverage Calculated");
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    }
+    return true;
+  }
+
+  @Override
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Admin admin = requestData.getAdmin();
+
+    Addr soldTo = requestData.getAddress("ZS01");
+    StringBuilder detail = new StringBuilder();
+    boolean isNegativeCheckNeedeed = false;
+
+    if (changes != null && changes.hasDataChanges()) {
+      if (changes.isDataChanged("VAT")) {
+        UpdatedDataModel vatChange = changes.getDataChange("VAT");
+        if (vatChange != null) {
+          if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+            // check if the name + VAT exists in D&B
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
+            if (!matches.isEmpty()) {
+              for (DnBMatchingResponse dnbRecord : matches) {
+                if ("Y".equals(dnbRecord.getOrgIdMatch())) {
+                  isNegativeCheckNeedeed = false;
+                  break;
+                }
+                isNegativeCheckNeedeed = true;
+              }
+            }
+            if (isNegativeCheckNeedeed) {
+              validation.setSuccess(false);
+              validation.setMessage("Not validated");
+              detail.append("Updates to VAT need verification as it does'nt match DnB");
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+              LOG.debug("Updates to VAT need verification as it does not match DnB");
+            }
+
+          }
+        }
+      }
+
+      if (changes.isDataChanged("Collection Code")) {
+        UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
+        if (collCdChange != null) {
+          if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
+            isNegativeCheckNeedeed = true;
+          }
+
+          if (isNegativeCheckNeedeed) {
+            validation.setSuccess(false);
+            validation.setMessage("Not validated");
+            detail.append("Updates to VAT need verification as it does'nt match DnB");
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+            LOG.debug("Updates to VAT need verification as it does not match DnB");
+          }
+
+        }
+      }
+
+      if (changes.isDataChanged("Top List Speciale")) {
+        UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
+        if (commFinanceChange != null) {
+          String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
+          isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
+          if (isNegativeCheckNeedeed) {
+            validation.setSuccess(false);
+            validation.setMessage("Not validated");
+            detail.append("Updates to VAT need verification as it does'nt match DnB");
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+            LOG.debug("Updates to VAT need verification as it does not match DnB");
+          }
+
+        }
+      }
+
+      if (changes.isDataChanged("ISU") || changes.isDataChanged("ClientTier") || changes.isDataChanged("Search Term/Sales Branch Office")
+          || changes.isDataChanged("Installing BO")) {
+        UpdatedDataModel isuCdChange = changes.getDataChange("ISU");
+        UpdatedDataModel clientTierChange = changes.getDataChange("ClientTier");
+        UpdatedDataModel sboChange = changes.getDataChange("Search Term/Sales Branch Office");
+        UpdatedDataModel iboChange = changes.getDataChange("Installing BO");
+
+        if (isuCdChange != null || clientTierChange != null || sboChange != null || iboChange != null) {
+          String designatedUser = SystemParameters.getString("ISU_CTC_SBO_USER");
+          isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
+          if (isNegativeCheckNeedeed) {
+            validation.setSuccess(false);
+            validation.setMessage("Not validated");
+            detail.append("Updates to VAT need verification as it does'nt match DnB");
+            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+            LOG.debug("Updates to VAT need verification as it does not match DnB");
+          }
+
+        }
+      }
+
     }
 
+    if (!isNegativeCheckNeedeed) {
+      validation.setSuccess(true);
+      validation.setMessage("Validated");
+    }
+    output.setDetails(detail.toString());
     return true;
+  }
+
+  @Override
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    boolean doesBillingMatchDnb = true;
+    boolean isNegativeCheckNeedeed = false;
+    Addr addressH = requestData.getAddress("ZD02");
+    Addr billing = requestData.getAddress("ZP01");
+    StringBuilder detail = new StringBuilder();
+
+    if (changes != null && changes.hasAddressChanges()) {
+      if (billing != null && (changes.isAddressChanged("Billing"))) {
+        // Check if address closely matches DnB
+        List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
+        if (matches != null) {
+          doesBillingMatchDnb = ifaddressCloselyMatchesDnb(matches, billing, admin, data.getCmrIssuingCntry());
+        }
+        if (!doesBillingMatchDnb) {
+          isNegativeCheckNeedeed = true;
+          detail.append("Updates to Billing address need verification as it does not match D&B");
+          LOG.debug("Updates to Billing address need verification as it does not match D&B");
+        }
+      }
+
+      if (addressH != null && (changes.isAddressChanged("(H Address (IGF))"))) {
+        if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
+          isNegativeCheckNeedeed = true;
+        }
+      }
+    }
+
+    if (isNegativeCheckNeedeed) {
+      validation.setSuccess(false);
+      validation.setMessage("Not validated");
+      engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+    } else {
+      validation.setSuccess(true);
+      detail.append("Updates to relevant addresses found but have been marked as Verified.");
+      validation.setMessage("Validated");
+    }
+    output.setDetails(detail.toString());
+    return true;
+  }
+
+  /**
+   * Checks if the address updated closely matches D&B
+   *
+   * @param cntry
+   * @param addr
+   * @param matches
+   * @return
+   */
+  private boolean ifaddressCloselyMatchesDnb(List<DnBMatchingResponse> matches, Addr addr, Admin admin, String cntry) {
+    boolean result = false;
+    for (DnBMatchingResponse dnbRecord : matches) {
+      result = DnBUtil.closelyMatchesDnb(cntry, addr, admin, dnbRecord);
+      if (result) {
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Returns the DnB matches based on requestData & address
+   *
+   * @param requestData
+   * @param engineData
+   * @param addr
+   * @return
+   */
+  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr) throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    if (addr == null) {
+      addr = requestData.getAddress("ZS01");
+    }
+    GBGFinderRequest request = createRequest(admin, data, addr);
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+    };
+
+    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+
+    List<DnBMatchingResponse> dnbMatches = response.getMatches();
+
+    return dnbMatches;
+
+  }
+
+  /**
+   * prepares and returns a dnb request based on requestData
+   *
+   * @param admin
+   * @param data
+   * @param addr
+   * @return
+   */
+  private GBGFinderRequest createRequest(Admin admin, Data data, Addr addr) {
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (StringUtils.isNotBlank(data.getVat())) {
+      request.setOrgId(data.getVat());
+    }
+
+    if (addr != null) {
+      request.setCity(addr.getCity1());
+      request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+      request.setStreetLine1(addr.getAddrTxt());
+      request.setStreetLine2(addr.getAddrTxt2());
+      request.setLandedCountry(addr.getLandCntry());
+      request.setPostalCode(addr.getPostCd());
+      request.setStateProv(addr.getStateProv());
+      // request.setMinConfidence("8");
+    }
+
+    return request;
   }
 
 }

@@ -37,7 +37,7 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 @Component
 public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
 
-  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("8620");
+  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("862");
 
   @Override
   protected Logger initLogger() {

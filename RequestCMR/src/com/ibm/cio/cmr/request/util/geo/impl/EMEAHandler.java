@@ -104,15 +104,8 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
 
-  // *abner revert begin
-  // protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang
-  // Translation Sold-To", "Billing Address",
-  // "Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL
-  // Address", "Sold-To Address",
-  // "Install-At Address", "Ship-To Address" };
-  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mailing-Billing Address", "Billing Address", "Mailing Address",
-      "Installing Address", "Shipping Address (Update)", "EPL Address" };
-  // *abner revert end
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Billing Address", "Mailing Address",
+      "Installing Address", "Shipping Address (Update)", "EPLAddress", "Sold-To Address", "Install-At Address", "Ship-To Address" };
 
 	// CMR-1728
 	protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
@@ -3256,9 +3249,7 @@ public class EMEAHandler extends BaseSOFHandler {
 		map.put("##CustomerScenarioSubType", "custSubGrp");
 		map.put("##EngineeringBo", "engineeringBo");
 		map.put("##CodFlag", "creditCd");
-    // *abner revert begin
-    // map.put("##CommercialFinanced", "commercialFinanced");
-    // *abner revert end
+    map.put("##CommercialFinanced", "commercialFinanced");
 		return map;
 	}
 
@@ -3583,11 +3574,9 @@ public class EMEAHandler extends BaseSOFHandler {
     } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
       return true;
     }
-    // *abner revert begin
-    // else if (SystemLocation.TURKEY.equals(issuingCountry)) {
-    // return true;
-    // }
-    // *abner revert end
+    else if (SystemLocation.TURKEY.equals(issuingCountry)) {
+      return true;
+    }
     else {
       return false;
     }
@@ -3603,11 +3592,9 @@ public class EMEAHandler extends BaseSOFHandler {
 		 * currently Turkey don't need Dup Fills check, so temp skip the
 		 * checking this part
 		 */
-    // *abner revert begin
-    // if (SystemLocation.TURKEY.equals(country)) {
-    // return;
-    // }
-    // *abner revert end
+    if (SystemLocation.TURKEY.equals(country)) {
+      return;
+    }
 		for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
 			XSSFSheet sheet = book.getSheet(name);
 
