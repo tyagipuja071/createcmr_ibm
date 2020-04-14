@@ -1853,12 +1853,17 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			String processingType = PageManager.getProcessingType(country, "U");
 			if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+
+        if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+            && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+          String seq = address.getId().getAddrSeq();
+          seq = StringUtils.leftPad(seq, 5, '0');
+          address.getId().setAddrSeq(seq);
+        }
 				if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-						&& "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
-					String seq = address.getId().getAddrSeq();
-					seq = StringUtils.leftPad(seq, 5, '0');
-					address.getId().setAddrSeq(seq);
-				}
+            && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && SystemLocation.TURKEY.equals(country)) {
+          address.getId().setAddrSeq("00003");
+        }
 				if ("D".equals(address.getImportInd())) {
 					String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
 					address.getId().setAddrSeq(seq);
