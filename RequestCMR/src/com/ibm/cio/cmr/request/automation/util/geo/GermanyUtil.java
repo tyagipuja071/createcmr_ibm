@@ -35,7 +35,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
-import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
@@ -44,7 +43,6 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 
@@ -445,15 +443,10 @@ public class GermanyUtil extends AutomationUtil {
       // details.append("Coverage calculated using Global/Domestic Buying
       // Group.").append("\n");
       details.append("Computed SORTL = " + coverageId).append("\n");
-      String isuCd = container.getIsuCd();
-      String clientTier = container.getClientTierCd();
-      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-      }
       results.setResults("Coverage Calculated");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+      details.setLength(0); // clearing details
       details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
       HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
           data.getClientTier());
@@ -635,8 +628,6 @@ public class GermanyUtil extends AutomationUtil {
     output.setDetails(detail.toString());
     return true;
   }
-
- 
 
   /**
    * Checks if the address is added on the Update Request
