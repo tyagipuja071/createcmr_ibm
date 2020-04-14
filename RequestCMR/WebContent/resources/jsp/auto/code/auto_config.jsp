@@ -171,12 +171,14 @@
               <img ng-show="!rec.existing" src="${resourcesPath}/images/approve.png" title="Select" class="auto-icon" ng-click="selectElement($index, rec)">            
             </td>
             <td>
-              <select ng-model="rec.requestTyp">
+              <span ng-if="rec.processType == 'A'" style="font-size:13px">All Types</span>
+              <select ng-if="rec.processType != 'A'" ng-model="rec.requestTyp">
                 <option value="C">Create</option>
                 <option value="U">Update</option>
                 <option value="CU">Create/Update</option>
                 <option value="R">Reactivate</option>
                 <option value="D">Delete</option>
+                <option value="RD">Delete/Reactivate</option>
               </select>
             </td>
             <td>
