@@ -1109,7 +1109,9 @@ function openCISupportal() {
 }
 
 function openQuickSearchDirect() {
-  window.location = cmr.CONTEXT_ROOT + '/quick_search?issuingCntry=' + FormManager.getActualValue('cmrIssuingCntry');
+  var subRegion = FormManager.getActualValue('countryUse');
+  var ctry = subRegion && subRegion.length > 3 ? subRegion : FormManager.getActualValue('cmrIssuingCntry');
+  window.location = cmr.CONTEXT_ROOT + '/quick_search?issuingCntry=' + ctry;
 }
 
 function openQuickSearch() {

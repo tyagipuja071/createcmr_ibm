@@ -152,10 +152,10 @@ public class FranceUtil extends AutomationUtil {
     Data data = requestData.getData();
     String countryUse = data.getCountryUse();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
     String scenarioDesc = getScenarioDescription(entityManager, data);
-
     if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
       case "PRICU":
@@ -397,6 +397,9 @@ public class FranceUtil extends AutomationUtil {
             "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
 
       }
+      if (admin.getSourceSystId() != null && "MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+        engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+      }
     } else {
       if (StringUtils.isBlank(scenario)) {
         valid = false;
@@ -479,10 +482,15 @@ public class FranceUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     Addr zs01 = requestData.getAddress("ZS01");
     details.append("\n");
-    if (!isCoverageCalculated
-        || (isCoverageCalculated && !(CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom)))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)
+        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom))) {
+      // If calculated using buying group then skip any other calculation
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else {
+      // if not calculated using bg/gbg try calculation using SIREN
       details.setLength(0);// clear string builder
-      details.append("\nCalculating Coverage using SIREN.").append("\n\n");
+      overrides.clearOverrides(); // clear existing overrides
+      details.append("Calculating Coverage using SIREN.").append("\n\n");
       String siren = StringUtils.isNotBlank(data.getTaxCd1()) ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
           : "";
       if (StringUtils.isNotBlank(siren)) {
@@ -508,66 +516,65 @@ public class FranceUtil extends AutomationUtil {
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
             }
           }
+          isCoverageCalculated = true;
           results.setResults("Coverage Calculated");
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           engineData.put(AutomationEngineData.COVERAGE_CALCULATED, coverage.getFinalCoverage());
         } else {
           details.append("Coverage could not be calculated on the basis of SIREN").append("\n");
           results.setResults("Review needed");
-          engineData.addNegativeCheckStatus("COVERAGE_ERROR", "Coverage could not be calculated on the basis of SIREN");
         }
       } else {
-        details.append("SIREN/SIRET not found on the request.").append("\n");
+        details.append("Coverage could not be calculated on the basis of SIREN. SIREN/SIRET not found on the request.").append("\n");
         results.setResults("SIREN not found");
-        engineData.addNegativeCheckStatus("SIREN_NOT_FOUND", "SIREN/SIRET not found on the request.");
-      }
-    } else if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
-        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
-      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
-      String isuCd = container.getIsuCd();
-      String clientTier = container.getClientTierCd();
-      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
       }
 
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
-      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
-      HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), zs01.getPostCd(), data.getIsuCd(),
-          data.getClientTier());
-      LOG.debug("Calculated SBO: " + response.get(SBO));
-      if (StringUtils.isNotBlank(response.get(MATCHING))) {
-        switch (response.get(MATCHING)) {
-        case "Exact Match":
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
-          details.append("Coverage calculation Successful.").append("\n");
-          details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
-          details.append("Matched Rule:").append("\n");
-          details.append("ISIC = " + data.getIsicCd()).append("\n");
-          details.append("ISU = " + data.getIsuCd()).append("\n");
-          details.append("CTC = " + data.getClientTier()).append("\n");
-          details.append("Postal Code Starts = " + response.get(POSTAL_CD_STARTS)).append("\n\n");
-          details.append("Matching: " + response.get(MATCHING));
-          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-          break;
-        case "No Match Found":
+      if (!isCoverageCalculated) {
+        // if not calculated using siren as well
+        if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+          details.append("\nCalculating coverage using 32S-PostalCode logic.").append("\n");
+          HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), zs01.getPostCd(), data.getIsuCd(),
+              data.getClientTier());
+          LOG.debug("Calculated SBO: " + response.get(SBO));
+          if (StringUtils.isNotBlank(response.get(MATCHING))) {
+            switch (response.get(MATCHING)) {
+            case "Exact Match":
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
+              details.append("Coverage calculation Successful.").append("\n");
+              details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
+              details.append("Matched Rule:").append("\n");
+              details.append("ISIC = " + data.getIsicCd()).append("\n");
+              details.append("ISU = " + data.getIsuCd()).append("\n");
+              details.append("CTC = " + data.getClientTier()).append("\n");
+              details.append("Postal Code Starts = " + response.get(POSTAL_CD_STARTS)).append("\n\n");
+              details.append("Matching: " + response.get(MATCHING));
+              engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+              break;
+            case "No Match Found":
+              // set on error if coverage could not be determined using mapping
+              engineData.addRejectionComment("Coverage cannot be computed automatically.");
+              details.append("Coverage cannot be computed automatically.").append("\n");
+              results.setResults("Coverage not calculated.");
+              results.setOnError(true);
+              break;
+            }
+          } else {
+            // set on error if coverage still not calculated using 32S logic
+            engineData.addRejectionComment("Coverage cannot be computed automatically.");
+            details.append("Coverage cannot be computed automatically.").append("\n");
+            results.setResults("Coverage not calculated.");
+            results.setOnError(true);
+          }
+        } else {
+          // if isu ctc is not 32S and coverage is not calculated (needs
+          // review... whether to set on error true or set skip results here)
           engineData.addRejectionComment("Coverage cannot be computed automatically.");
           details.append("Coverage cannot be computed automatically.").append("\n");
           results.setResults("Coverage not calculated.");
           results.setOnError(true);
-          break;
         }
-      } else {
-        engineData.addRejectionComment("Coverage cannot be computed automatically.");
-        details.append("Coverage cannot be computed automatically.").append("\n");
-        results.setResults("Coverage not calculated.");
-        results.setOnError(true);
       }
-    } else {
-      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
-      results.setResults("Coverage calculation skipped.");
     }
-
     return true;
   }
 
