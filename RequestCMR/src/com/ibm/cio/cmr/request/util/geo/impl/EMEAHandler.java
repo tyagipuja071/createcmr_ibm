@@ -3593,13 +3593,7 @@ public class EMEAHandler extends BaseSOFHandler {
 		XSSFRow row = null;
 		XSSFCell currCell = null;
 
-		/**
-		 * currently Turkey don't need Dup Fills check, so temp skip the
-		 * checking this part
-		 */
-    if (SystemLocation.TURKEY.equals(country)) {
-      return;
-    }
+
 		for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
 			XSSFSheet sheet = book.getSheet(name);
 
@@ -3611,8 +3605,11 @@ public class EMEAHandler extends BaseSOFHandler {
 				String localPostal = ""; // 9
 
 				String streetCont = ""; // 5
-				String poBox = ""; // 12
+				String poBox = ""; // 11
 				String attPerson = ""; // 13
+				
+				String district = "";//12
+        String taxOffice = ""; // 13
 				row = sheet.getRow(rowIndex);
 				if (row == null) {
 					return; // stop immediately when row is blank
@@ -3627,71 +3624,103 @@ public class EMEAHandler extends BaseSOFHandler {
 				currCell = row.getCell(9);
 				cbPostal = validateColValFromCell(currCell);
 
-				currCell = row.getCell(5);
-				streetCont = validateColValFromCell(currCell);
-				currCell = row.getCell(11);
-				poBox = validateColValFromCell(currCell);
-				currCell = row.getCell(12);
-				attPerson = validateColValFromCell(currCell);
-
 				TemplateValidation error = new TemplateValidation(name);
 
-				if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-					LOG.trace(
-							"Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-					error.addError(rowIndex, "Local City",
-							"Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
-					validations.add(error);
-				}
+        // CMR-2731 Turkey: Mass Update: country modification
+        if (SystemLocation.TURKEY.equals(country)) {
+          currCell = row.getCell(12);
+          district = validateColValFromCell(currCell);
+          currCell = row.getCell(13);
+          taxOffice = validateColValFromCell(currCell);
 
-				if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-					LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-							+ "If one is populated, the other must be empty. >>");
-					error.addError(rowIndex, "Local Postal Code",
-							"Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-									+ "If one is populated, the other must be empty.");
-					validations.add(error);
-				}
+          if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
+            LOG.trace(
+                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+            error.addError(rowIndex, "Local City",
+                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+            validations.add(error);
+          }
 
-				// DTN: Defect 1898300: UKI - mass updates - addresses
-				/*
-				 * Adding a check that if any of the address lines values that
-				 * are set as either value and both are filled out, it will
-				 * throw an error message that both can not be filled out.
-				 */
-				if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
-						&& (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
-					// if local
-					if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-						LOG.trace(
-								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-						error.addError(rowIndex, "Street Con't/PO Box",
-								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-						validations.add(error);
-					} else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
-						LOG.trace(
-								"Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-						error.addError(rowIndex, "PO Box/ATT Person",
-								"Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-						validations.add(error);
-					} else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
-						LOG.trace(
-								"Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-						error.addError(rowIndex, "ATT Person/Street Con't",
-								"Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-						validations.add(error);
-					}
-				} else {
-					// else cross border
-					if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-						LOG.trace(
-								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-						error.addError(rowIndex, "Street Con't/PO Box",
-								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-						validations.add(error);
-					}
-				}
-			}
+          if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
+            LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                + "If one is populated, the other must be empty. >>");
+            error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                + "If one is populated, the other must be empty.");
+            validations.add(error);
+          }
+          
+          if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+            if ("@".equals(district)) {
+              LOG.trace("Local address must not be populate District with @. ");
+              error.addError(rowIndex, "District", "Local address must not be populate District with @. ");
+              validations.add(error);
+            }
+
+            if ("@".equals(taxOffice)) {
+              LOG.trace("Local address must not be populate Tax Office with @. ");
+              error.addError(rowIndex, "Tax Office", "Local address must not be populate Tax Office with @. ");
+              validations.add(error);
+            }
+          }
+        } else {
+          currCell = row.getCell(5);
+          streetCont = validateColValFromCell(currCell);
+          currCell = row.getCell(11);
+          poBox = validateColValFromCell(currCell);
+          currCell = row.getCell(12);
+          attPerson = validateColValFromCell(currCell);
+          // DTN: Defect 1898300: UKI - mass updates - addresses
+          /*
+           * Adding a check that if any of the address lines values that
+           * are set as either value and both are filled out, it will
+           * throw an error message that both can not be filled out.
+           */
+          if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
+            LOG.trace(
+                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+            error.addError(rowIndex, "Local City",
+                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+            validations.add(error);
+          }
+
+          if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
+            LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                + "If one is populated, the other must be empty. >>");
+            error.addError(rowIndex, "Local Postal Code",
+                "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                    + "If one is populated, the other must be empty.");
+            validations.add(error);
+          }
+          if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
+              && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+            // if local
+            if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
+              LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+              error.addError(rowIndex, "Street Con't/PO Box",
+                  "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
+              LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
+              error.addError(rowIndex, "PO Box/ATT Person",
+                  "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
+              LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+              error.addError(rowIndex, "ATT Person/Street Con't",
+                  "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+          } else {
+            // else cross border
+            if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
+              LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+              error.addError(rowIndex, "Street Con't/PO Box",
+                  "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+          }
+        }
+      }
 		}
 	}
 
