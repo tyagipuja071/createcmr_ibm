@@ -3610,6 +3610,8 @@ public class EMEAHandler extends BaseSOFHandler {
 				
 				String district = "";//12
         String taxOffice = ""; // 13
+        String name4 = "";// 10
+
 				row = sheet.getRow(rowIndex);
 				if (row == null) {
 					return; // stop immediately when row is blank
@@ -3632,6 +3634,10 @@ public class EMEAHandler extends BaseSOFHandler {
           district = validateColValFromCell(currCell);
           currCell = row.getCell(13);
           taxOffice = validateColValFromCell(currCell);
+          currCell = row.getCell(5);
+          streetCont = validateColValFromCell(currCell);
+          currCell = row.getCell(10);
+          name4 = validateColValFromCell(currCell);
 
           if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
             LOG.trace(
@@ -3649,6 +3655,13 @@ public class EMEAHandler extends BaseSOFHandler {
             validations.add(error);
           }
           
+          if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
+            LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
+            error.addError(rowIndex, "Name4",
+                "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
+            validations.add(error);
+          }
+
           if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
             if ("@".equals(district)) {
               LOG.trace("Local address must not be populate District with @. ");
