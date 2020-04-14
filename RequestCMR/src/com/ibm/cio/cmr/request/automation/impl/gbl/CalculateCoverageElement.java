@@ -514,6 +514,7 @@ public class CalculateCoverageElement extends OverridingElement {
             }
           }
           if (StringUtils.isNotBlank(container.getIsuCd()) && StringUtils.isNotBlank(container.getClientTierCd())) {
+            details.append("\nOverrides based on CMR data:").append("\n");
             details.append(" - ISU Code = " + container.getIsuCd()).append("\n");
             details.append(" - Client Tier = " + container.getClientTierCd()).append("\n");
             output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), container.getIsuCd());
