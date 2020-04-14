@@ -3,6 +3,7 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -56,6 +57,9 @@ public class FranceUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(FranceUtil.class);
   private static List<FrSboMapping> sortlMappings = new ArrayList<FrSboMapping>();
+  private static final String MATCHING = "matching";
+  private static final String POSTAL_CD_STARTS = "postalCdStarts";
+  private static final String SBO = "sbo";
 
   @SuppressWarnings("unchecked")
   public FranceUtil() {
@@ -521,6 +525,9 @@ public class FranceUtil extends AutomationUtil {
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     Data data = requestData.getData();
+    String coverageId = container.getFinalCoverage();
+    Addr zs01 = requestData.getAddress("ZS01");
+    details.append("\n");
     if (!isCoverageCalculated
         || (isCoverageCalculated && !(CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom)))) {
       details.setLength(0);// clear string builder
@@ -569,11 +576,97 @@ public class FranceUtil extends AutomationUtil {
         results.setResults("SIREN not found");
         engineData.addNegativeCheckStatus("SIREN_NOT_FOUND", "SIREN/SIRET not found on the request.");
       }
+    } else if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
+        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
+      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
+      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
+      String isuCd = container.getIsuCd();
+      String clientTier = container.getClientTierCd();
+      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+        details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
+        details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+        if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
+          details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
+        }
+      }
+
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
+      HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), zs01.getPostCd(), data.getIsuCd(),
+          data.getClientTier());
+      LOG.debug("Calculated SBO: " + response.get(SBO));
+      if (StringUtils.isNotBlank(response.get(MATCHING))) {
+        switch (response.get(MATCHING)) {
+        case "Exact Match":
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
+          details.append("Coverage calculation Successful.").append("\n");
+          details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
+          details.append("Matched Rule:").append("\n");
+          details.append("ISIC = " + data.getIsicCd()).append("\n");
+          details.append("ISU = " + data.getIsuCd()).append("\n");
+          details.append("CTC = " + data.getClientTier()).append("\n");
+          details.append("Postal Code Starts = " + response.get(POSTAL_CD_STARTS)).append("\n\n");
+          details.append("Matching: " + response.get(MATCHING));
+          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+          break;
+        case "No Match Found":
+          engineData.addRejectionComment("Coverage cannot be computed automatically.");
+          details.append("Coverage cannot be computed automatically.").append("\n");
+          results.setResults("Coverage not calculated.");
+          results.setOnError(true);
+          break;
+        }
+      } else {
+        engineData.addRejectionComment("Coverage cannot be computed automatically.");
+        details.append("Coverage cannot be computed automatically.").append("\n");
+        results.setResults("Coverage not calculated.");
+        results.setOnError(true);
+      }
     } else {
-      details.append("\nCoverage calculated using Global Buying Group/Buying Group.").append("\n\n");
-      results.setResults("Coverage Calculated");
+      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
+      results.setResults("Coverage calculation skipped.");
     }
+
     return true;
+  }
+
+  private HashMap<String, String> getSBOFromPostalCodeMapping(String countryUse, String isicCd, String postCd, String isuCd, String clientTier) {
+    HashMap<String, String> response = new HashMap<String, String>();
+    response.put(MATCHING, "");
+    response.put(POSTAL_CD_STARTS, "");
+    response.put(SBO, "");
+    if (!sortlMappings.isEmpty()) {
+      for (FrSboMapping mapping : sortlMappings) {
+        List<String> isicCds = Arrays.asList(mapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        if (countryUse.equals(mapping.getCountryUse()) && (isicCds.isEmpty() || (!isicCds.isEmpty() && isicCds.contains(isicCd)))
+            && isuCd.equals(mapping.getIsu()) && clientTier.equals(mapping.getCtc())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCdStarts())) {
+            String[] postalCodeRanges = mapping.getPostalCdStarts().replaceAll("\n", "").replaceAll(" ", "").split(",");
+            for (String postalCdRange : postalCodeRanges) {
+              if (postCd.startsWith(postalCdRange)) {
+                response.put(MATCHING, "Exact Match");
+                response.put(SBO, mapping.getSbo());
+                response.put(POSTAL_CD_STARTS, postalCdRange);
+                return response;
+              }
+            }
+          }
+        } else {
+          response.put(MATCHING, "Exact Match");
+          response.put(SBO, mapping.getSbo());
+          response.put(POSTAL_CD_STARTS, "- No Postal Code Range Defined -");
+          return response;
+        }
+      }
+      response.put(MATCHING, "No Match Found");
+      return response;
+    } else {
+      response.put(MATCHING, "No Match Found");
+      return response;
+    }
   }
 
   @Override
