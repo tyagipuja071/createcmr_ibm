@@ -391,6 +391,10 @@ public class ItalyHandler extends BaseSOFHandler {
             companyAddr.setCmrAddrTypeCode("ZI01");
             companyAddr.setParentCMRNo(mainRecord.getCmrCompanyNo());
           } else {
+            //CMR-2776 Single Reactivation
+            if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType)){
+              companyAddr.setParentCMRNo(companyCmr);
+            }
             // DENNIS:If the company number is empty, we get the company addr from
             // LD DB
             loadCompanyAddressDataLD(entityManager, companyAddr);
