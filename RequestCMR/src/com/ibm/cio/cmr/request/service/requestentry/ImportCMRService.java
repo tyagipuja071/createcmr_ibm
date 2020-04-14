@@ -549,7 +549,7 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     data.setInacType(record.getCmrInacType());
     // Resolve Data issue (length of field ISIC_CD is 4 in db
    // data.setIsicCd(record.getCmrIsic());
-    data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic()) ? record.getCmrIsic().trim().substring(0, 4) :"");
+    data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic()) ? (record.getCmrIsic().trim().length()>4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
     
     data.setIsuCd(record.getCmrIsu());
     data.setSearchTerm(record.getCmrSortl());
