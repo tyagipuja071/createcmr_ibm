@@ -36,15 +36,10 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemParameters;
-import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
 import com.ibm.cmr.services.client.ServiceClient.Method;
-import com.ibm.cmr.services.client.automation.AutomationResponse;
-import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
-import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
@@ -159,8 +154,7 @@ public class FranceUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     boolean valid = true;
     String scenario = data.getCustSubGrp();
-    String scenarioDesc = getScenarioDescription(entityManager,data);
-
+    String scenarioDesc = getScenarioDescription(entityManager, data);
 
     if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
@@ -412,9 +406,9 @@ public class FranceUtil extends AutomationUtil {
     }
     return valid;
   }
-  
-  private String getScenarioDescription(EntityManager entityManager,Data data){
-    
+
+  private String getScenarioDescription(EntityManager entityManager, Data data) {
+
     String sql = ExternalizedQuery.getSql("GET_SCENARIO_DESC_FR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CUST_SUB_TYP_VAL", data.getCustSubGrp());
@@ -467,7 +461,6 @@ public class FranceUtil extends AutomationUtil {
     }
   }
 
-
   @Override
   public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
     String siret = requestData.getData().getTaxCd1();
@@ -500,7 +493,7 @@ public class FranceUtil extends AutomationUtil {
           CoverageContainer coverage = coverages.get(0);
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
+          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
               coverage.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
@@ -514,12 +507,6 @@ public class FranceUtil extends AutomationUtil {
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "INSTALL_BRANCH_OFF", data.getInstallBranchOff(), sboValue);
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
             }
-          }
-          String isuCd = coverage.getIsuCd();
-          String clientTier = coverage.getClientTierCd();
-          if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
           }
           results.setResults("Coverage Calculated");
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
@@ -541,13 +528,6 @@ public class FranceUtil extends AutomationUtil {
       String isuCd = container.getIsuCd();
       String clientTier = container.getClientTierCd();
       if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-        details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-        details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-        if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-          details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-        }
       }
 
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
@@ -635,12 +615,12 @@ public class FranceUtil extends AutomationUtil {
     Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder detail = new StringBuilder();
     boolean isNegativeCheckNeedeed = false;
-    LOG.debug("Changes are -> "+changes);
+    LOG.debug("Changes are -> " + changes);
 
     if (changes != null && changes.hasDataChanges()) {
-      LOG.debug("Changes has data changes -> "+changes.hasDataChanges());
+      LOG.debug("Changes has data changes -> " + changes.hasDataChanges());
       if (changes.isDataChanged("VAT")) {
-        LOG.debug("Changes has VAT changes -> "+changes.isDataChanged("VAT"));
+        LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT"));
         UpdatedDataModel vatChange = changes.getDataChange("VAT");
         if (vatChange != null) {
           if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
@@ -743,10 +723,10 @@ public class FranceUtil extends AutomationUtil {
     Addr billing = requestData.getAddress("ZP01");
     StringBuilder detail = new StringBuilder();
 
-    LOG.debug("Address changes are -> "+changes);
+    LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
       if (billing != null && (changes.isAddressChanged("Billing"))) {
-        LOG.debug("Billing changed -> "+changes.isAddressChanged("Billing"));
+        LOG.debug("Billing changed -> " + changes.isAddressChanged("Billing"));
 
         // Check if address closely matches DnB
         List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
@@ -780,6 +760,4 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
- 
- 
 }
