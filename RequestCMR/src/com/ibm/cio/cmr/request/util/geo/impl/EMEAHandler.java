@@ -115,7 +115,7 @@ public class EMEAHandler extends BaseSOFHandler {
   // *abner revert end
 
 	// CMR-1728
-	protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
+  protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
 			"EPL Address" };
 
 	static {
