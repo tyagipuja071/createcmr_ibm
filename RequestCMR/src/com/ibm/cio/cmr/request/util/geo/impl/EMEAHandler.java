@@ -110,7 +110,7 @@ public class EMEAHandler extends BaseSOFHandler {
   // "Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL
   // Address", "Sold-To Address",
   // "Install-At Address", "Ship-To Address" };
-  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mailing-Billing Address", "Billing Address", "Mailing Address",
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address",
       "Installing Address", "Shipping Address (Update)", "EPL Address" };
   // *abner revert end
 
