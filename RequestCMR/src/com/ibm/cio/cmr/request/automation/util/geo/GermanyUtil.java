@@ -500,8 +500,8 @@ public class GermanyUtil extends AutomationUtil {
     StringBuilder detail = new StringBuilder();
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT")) {
-        UpdatedDataModel vatChange = changes.getDataChange("VAT");
+      if (changes.isDataChanged("VAT #")) {
+        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
         if (vatChange != null) {
           if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
             // check if the name + VAT exists in D&B
@@ -516,10 +516,7 @@ public class GermanyUtil extends AutomationUtil {
               }
             }
             if (isNegativeCheckNeedeed) {
-              validation.setSuccess(false);
-              validation.setMessage("Not validated");
               detail.append("Updates to VAT need verification as it does'nt matches DnB");
-              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
               LOG.debug("Updates to VAT need verification as it does not matches DnB");
             }
 
@@ -528,15 +525,29 @@ public class GermanyUtil extends AutomationUtil {
             detail.append("Setting scenario verified indc= N as VAT is blank");
             LOG.debug("Setting scenario verified indc= N as VAT is blank");
           }
+
         }
+      } else {
+        isNegativeCheckNeedeed = true;
+        detail.append("Updates to data were found, review is required.");
+        LOG.debug("Updates to data other than VAT were found, review is required.");
       }
 
     }
-    if (!isNegativeCheckNeedeed) {
+    if (isNegativeCheckNeedeed) {
+      validation.setSuccess(false);
+      validation.setMessage("Not validated");
+      engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+
+    } else {
       validation.setSuccess(true);
       validation.setMessage("Validated");
+      if (detail.toString().isEmpty()) {
+        detail.append("No data updates made on the request");
+      }
     }
     output.setDetails(detail.toString());
+    output.setProcessOutput(validation);
     return true;
   }
 
@@ -545,6 +556,7 @@ public class GermanyUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
+    List<Addr> addressList = requestData.getAddresses();
     boolean isInstallAtMatchesDnb = true;
     boolean isBillToMatchesDnb = true;
     boolean isNegativeCheckNeedeed = false;
@@ -563,27 +575,36 @@ public class GermanyUtil extends AutomationUtil {
         output.setDetails("Skipping checks as customer class is " + data.getCustClass() + " and only address changes.");
         validation.setSuccess(true);
         validation.setMessage("No Validations");
+        output.setProcessOutput(validation);
         return true;
       }
 
-      if (shipTo != null && (changes.isAddressChanged("Ship To") || isAddressAdded(shipTo))) {
+      if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
         // Check If Address already exists on request
         isShipToExistOnReq = isAddressAleardyExists(entityManager, shipTo, reqId);
         if (isShipToExistOnReq) {
           detail.append("Ship To already exists on the request with same details.");
           validation.setMessage("ShipTo already exists");
           engineData.addRejectionComment("Ship To already exists on the request with same details.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          output.setProcessOutput(validation);
           LOG.debug("Ship To already exists on the request with same details.");
+          return true;
         }
       }
 
-      if (installAt != null && (changes.isAddressChanged("Install At (1)") || isAddressAdded(installAt))) {
+      if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
         // Check If Address already exists on request
         isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
         if (isInstallAtExistOnReq) {
           detail.append("Install At already exists on the request with same details.");
           engineData.addRejectionComment("Install At already exists on the request with same details.");
           LOG.debug("Install At already exists on the request with same details.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          output.setProcessOutput(validation);
+          return true;
         }
         // Check if address closely matches DnB
         List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt);
@@ -597,13 +618,17 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      if (billTo != null && (changes.isAddressChanged("Bill To") || isAddressAdded(billTo))) {
+      if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
         // Check If Address already exists on request
         isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
         if (isBillToExistOnReq) {
           detail.append("Bill To already exists on the request with same details.");
           engineData.addRejectionComment("Bill To already exists on the request with same details.");
           LOG.debug("Bill To already exists on the request with same details.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          output.setProcessOutput(validation);
+          return true;
         }
 
         // Check if address closely matches DnB
@@ -624,13 +649,32 @@ public class GermanyUtil extends AutomationUtil {
         validation.setMessage("Not validated");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
       } else {
-        validation.setSuccess(true);
-        detail.append("Updates to relevant addresses found but have been marked as Verified.");
-        validation.setMessage("Validated");
+        for (Addr addr : addressList) {
+          if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department")) {
+            validation.setSuccess(true);
+            LOG.debug("Department/Attn is found to be updated.Updates verified.");
+            detail.append("Updates to relevant addresses found but have been marked as Verified.");
+            validation.setMessage("Validated");
+            engineData.clearNegativeCheckStatus("UPDT_REVIEW_NEEDED");
+            isNegativeCheckNeedeed = false;
+            break;
+          }
+          isNegativeCheckNeedeed = true;
+        }
+
+        if (isNegativeCheckNeedeed) {
+          detail.append("Updates to addresses found which cannot be checked automatically.");
+          LOG.debug("Updates to addresses found which cannot be checked automatically.");
+          validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+        }
+
       }
 
     }
     output.setDetails(detail.toString());
+    output.setProcessOutput(validation);
     return true;
   }
 
