@@ -275,8 +275,12 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
-      if (admin.getSourceSystId() != null && "MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-        engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+      if (admin.getSourceSystId() != null) {
+        if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+        } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
+        }
       }
 
       // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
