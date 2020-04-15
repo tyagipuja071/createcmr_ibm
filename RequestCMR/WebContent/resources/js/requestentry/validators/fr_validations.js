@@ -387,6 +387,10 @@ function setSBOOnScenario() {
         }
       }
     }
+    var sbo = FormManager.getActualValue('salesBusOffCd');
+    if(sbo == null || sbo == '' || sbo == undefined){
+      FormManager.enable('salesBusOffCd');
+    }
   }
 }
 
