@@ -522,6 +522,7 @@ public class GermanyUtil extends AutomationUtil {
 
           } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
             admin.setScenarioVerifiedIndc("N");
+            entityManager.merge(admin);
             detail.append("Setting scenario verified indc= N as VAT is blank");
             LOG.debug("Setting scenario verified indc= N as VAT is blank");
           }
