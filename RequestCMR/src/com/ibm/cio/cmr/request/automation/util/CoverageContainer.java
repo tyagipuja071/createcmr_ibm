@@ -18,6 +18,8 @@ public class CoverageContainer {
   private String baseCoverage;
   private String finalCoverage;
   private String territoryId;
+  private String isuCd;
+  private String clientTierCd;
 
   public String getBaseCoverage() {
     return baseCoverage;
@@ -57,6 +59,22 @@ public class CoverageContainer {
 
   public void setFinalCoverageRules(List<Rule> finalCoverageRules) {
     this.finalCoverageRules = finalCoverageRules;
+  }
+
+  public String getIsuCd() {
+    return isuCd;
+  }
+
+  public void setIsuCd(String isuCd) {
+    this.isuCd = isuCd;
+  }
+
+  public String getClientTierCd() {
+    return clientTierCd;
+  }
+
+  public void setClientTierCd(String clientTierCd) {
+    this.clientTierCd = clientTierCd;
   }
 
 }

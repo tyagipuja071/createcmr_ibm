@@ -447,7 +447,7 @@ function displayHwMstInstallFlagNew() {
       && (FormManager.getActualValue('cmrIssuingCntry') == '838' || FormManager.getActualValue('cmrIssuingCntry') == '866' || FormManager.getActualValue('cmrIssuingCntry') == '754')) {
     var _addrTypesForEMEA = [ 'ZD01', 'ZP01', 'ZI01', 'ZS01', 'ZS02' ];
     console.log('>> BEGIN displayHwMstInstallFlagNew newAddress or copyAddress function ');
-    for ( var i = 0; i < _addrTypesForEMEA.length; i++) {
+    for (var i = 0; i < _addrTypesForEMEA.length; i++) {
       console.log('>> INSIDE for loop');
 
       addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForEMEA[i]), 'onClick', function(value) {
@@ -720,7 +720,7 @@ function refreshAddressAfterResult(result, skipCopy, skipHideModal) {
       cmr.noCreatePop = 'N';
       // enable all checkboxes
       var cb = dojo.query('[type=checkbox]');
-      for ( var i = 0; i < cb.length; i++) {
+      for (var i = 0; i < cb.length; i++) {
         if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
           cb[i].disabled = false;
           cb[i].removeAttribute('disabled');
@@ -753,7 +753,7 @@ function refreshAddressAfterResult(result, skipCopy, skipHideModal) {
             }
             // enable all checkboxes
             var cb = dojo.query('[type=checkbox]');
-            for ( var i = 0; i < cb.length; i++) {
+            for (var i = 0; i < cb.length; i++) {
               if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
                 cb[i].disabled = false;
                 cb[i].removeAttribute('disabled');
@@ -1325,7 +1325,7 @@ function populateAddressDeltaInd(rdcaddr, copyMode) {
   }
   var imgs = dojo.query('#addEditAddressModal img.cmr-delta-icon');
   if (imgs && imgs.length > 0) {
-    for ( var i = 0; i < imgs.length; i++) {
+    for (var i = 0; i < imgs.length; i++) {
       var id = imgs[i].id;
       var code = imgs[i].getAttribute('coded');
       var val = '';
@@ -1431,7 +1431,7 @@ function stdcityModal_onLoad() {
   dojo.byId('currcityname').innerHTML = city;
   if (cmr.standardCity && cmr.standardCity.suggested && cmr.standardCity.suggested.length > 0) {
     var options = '';
-    for ( var i = 0; i < cmr.standardCity.suggested.length; i++) {
+    for (var i = 0; i < cmr.standardCity.suggested.length; i++) {
       options += '<option value="' + cmr.standardCity.suggested[i].code + ',' + cmr.standardCity.suggested[i].city + ',' + cmr.standardCity.suggested[i].name + '">'
           + cmr.standardCity.suggested[i].city + ', ' + cmr.standardCity.suggested[i].name + ' County</option>';
     }
@@ -1663,7 +1663,7 @@ function doRunDpl() {
 function refreshAfterDpl(result) {
   if (result.success) {
     var cb = dojo.query('[type=checkbox]');
-    for ( var i = 0; i < cb.length; i++) {
+    for (var i = 0; i < cb.length; i++) {
       if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
         cb[i].disabled = false;
         cb[i].removeAttribute('disabled');
@@ -1702,12 +1702,15 @@ function applyAddrChangesModal_onLoad() {
     var useCntry = false;
 
     document.getElementById('copy_createOnly').value = '';
-    for ( var i = 0; i < types.length; i++) {
+    for (var i = 0; i < types.length; i++) {
       type = types[i];
       if (useCntry && type.ret3 != cntry) {
         break;
       }
-      if ((SysLoc.GREECE == cntry || SysLoc.TURKEY == cntry || SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
+
+      // update TR
+
+      if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
         break;
       }
       if (type.ret3 == cntry) {
@@ -1720,7 +1723,7 @@ function applyAddrChangesModal_onLoad() {
       if ((reqType == 'U' || reqType == 'X') && !GEOHandler.canCopyAddressType(type.ret1) && typeof (_allAddressData) != 'undefined') {
         var count = 0;
         console.log('checking instances of address type ' + type.ret1);
-        for ( var j = 0; j < _allAddressData.length; j++) {
+        for (var j = 0; j < _allAddressData.length; j++) {
           if (type.ret1 == _allAddressData[j].addrType[0]) {
             count++;
           }
@@ -1842,6 +1845,19 @@ function applyAddrChangesModal_onLoad() {
             addressDesc = type.ret2;
           }
         }
+      } else if (cntry == '618') {
+        var reqReason = FormManager.getActualValue('reqReason');
+        if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR())) {
+          continue;
+        }
+        if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+        } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
+        } else {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
+          addressDesc = type.ret2;
+        }
       } else {
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
           choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
@@ -1946,7 +1962,7 @@ function refreshAfterAddressCopy(result) {
     cmr.noCreatePop = 'N';
     // enable all checkboxes
     var cb = dojo.query('[type=checkbox]');
-    for ( var i = 0; i < cb.length; i++) {
+    for (var i = 0; i < cb.length; i++) {
       if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
         cb[i].disabled = false;
         cb[i].removeAttribute('disabled');
@@ -2172,13 +2188,13 @@ function resetAbbNmOnActualRemoveAddrFR() {
   if (abbrevNmValue != null && abbrevNmValue.length > 19 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
     abbrevNmValue = abbrevNmValue.substring(0, 19);
   } else if (abbrevNmValue != null && abbrevNmValue.length < 19 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 19; i++) {
+    for (var i = abbrevNmValue.length; i < 19; i++) {
       abbrevNmValue += ' ';
     }
   } else if (abbrevNmValue != null && abbrevNmValue.length > 17 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
     abbrevNmValue = abbrevNmValue.substring(0, 17);
   } else if (abbrevNmValue != null && abbrevNmValue.length < 17 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 17; i++) {
+    for (var i = abbrevNmValue.length; i < 17; i++) {
       abbrevNmValue += ' ';
     }
   }
@@ -2214,7 +2230,7 @@ function resetAbbNmOnRemoveSelectedAddrsFR() {
   if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
     var record = null;
     var type = null;
-    for ( var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
       record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
       if (record == null && _allAddressData != null && _allAddressData[i] != null) {
         record = _allAddressData[i];
@@ -2283,13 +2299,13 @@ function resetAbbNmOnRemoveSelectedAddrsFR() {
   if (abbrevNmValue != null && abbrevNmValue.length > 19 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
     abbrevNmValue = abbrevNmValue.substring(0, 19);
   } else if (abbrevNmValue != null && abbrevNmValue.length < 19 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 19; i++) {
+    for (var i = abbrevNmValue.length; i < 19; i++) {
       abbrevNmValue += ' ';
     }
   } else if (abbrevNmValue != null && abbrevNmValue.length > 17 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
     abbrevNmValue = abbrevNmValue.substring(0, 17);
   } else if (abbrevNmValue != null && abbrevNmValue.length < 17 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 17; i++) {
+    for (var i = abbrevNmValue.length; i < 17; i++) {
       abbrevNmValue += ' ';
     }
   }
@@ -2444,7 +2460,7 @@ function doCNDPLPageRefresh(result) {
     }
     // enable all checkboxes
     var cb = dojo.query('[type=checkbox]');
-    for ( var i = 0; i < cb.length; i++) {
+    for (var i = 0; i < cb.length; i++) {
       if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
         cb[i].disabled = false;
         cb[i].removeAttribute('disabled');
@@ -2468,7 +2484,7 @@ function doSSADPLPageRefresh(result) {
     }
     // enable all checkboxes
     var cb = dojo.query('[type=checkbox]');
-    for ( var i = 0; i < cb.length; i++) {
+    for (var i = 0; i < cb.length; i++) {
       if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
         cb[i].disabled = false;
         cb[i].removeAttribute('disabled');
@@ -2494,7 +2510,7 @@ function doMXDPLPageRefresh(result) {
     }
     // enable all checkboxes
     var cb = dojo.query('[type=checkbox]');
-    for ( var i = 0; i < cb.length; i++) {
+    for (var i = 0; i < cb.length; i++) {
       if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
         cb[i].disabled = false;
         cb[i].removeAttribute('disabled');
@@ -2521,7 +2537,7 @@ function doBRDPLPageRefresh(result) {
     }
     // enable all checkboxes
     var cb = dojo.query('[type=checkbox]');
-    for ( var i = 0; i < cb.length; i++) {
+    for (var i = 0; i < cb.length; i++) {
       if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
         cb[i].disabled = false;
         cb[i].removeAttribute('disabled');

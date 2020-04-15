@@ -18,18 +18,24 @@ import org.codehaus.jackson.type.TypeReference;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
@@ -37,8 +43,16 @@ import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
+
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
 
 public class GermanyUtil extends AutomationUtil {
 
@@ -234,19 +248,20 @@ public class GermanyUtil extends AutomationUtil {
         // check value of Department under '##GermanyInternalDepartment' LOV
         String sql = ExternalizedQuery.getSql("DE.CHECK_DEPARTMENT");
         PreparedQuery query = new PreparedQuery(entityManager, sql);
-        for (Addr addr : requestData.getAddresses()) {
-          if (StringUtils.isNotBlank(addr.getDept())) {
-            query.setParameter("CD", addr.getDept());
-            String result = query.getSingleResult(String.class);
-            if (result == null) {
-              engineData.addRejectionComment("Department on the request is invalid.");
-              details.append("Department on the request is invalid for address type - " + addr.getId().getAddrType() + ".").append("\n");
-              valid = false;
-            } else {
-              details.append("Department " + addr.getDept() + " validated successfully for address type - " + addr.getId().getAddrType() + ".")
-                  .append("\n");
-            }
+        String dept = data.getIbmDeptCostCenter();
+        if (StringUtils.isNotBlank(dept)) {
+          query.setParameter("CD", dept);
+          String result = query.getSingleResult(String.class);
+          if (result == null) {
+            engineData.addRejectionComment("IBM Department/Cost Center on the request is invalid.");
+            details.append("IBM Department/Cost Center on the request is invalid.").append("\n");
+            valid = false;
+          } else {
+            details.append("IBM Department/Cost Center " + dept + " validated successfully.").append("\n");
           }
+        } else {
+          details.append("IBM Department/Cost Center not provided on the request. Default Department Number(00X306) will be set.");
+          data.setIbmDeptCostCenter("00X306");
         }
         break;
       }
@@ -286,9 +301,12 @@ public class GermanyUtil extends AutomationUtil {
     String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
     String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
     Iterator<Addr> it = requestData.getAddresses().iterator();
+    boolean removed = false;
+    details.append("Checking for duplicate address records - ").append("\n");
     while (it.hasNext()) {
       Addr addr = it.next();
       if (!"ZS01".equals(addr.getId().getAddrType())) {
+        removed = true;
         String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
         if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
@@ -299,7 +317,12 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
 
+    if (!removed) {
+      details.append("No duplicate address records found on the request.").append("\n");
+    }
+
     // replace special characters from addresses.
+    details.append("Replacing German language characters from address fields if any.").append("\n");
     for (Addr addr : requestData.getAddresses()) {
       if (addr != null) {
         addr.setCustNm1(replaceGermanCharacters(addr.getCustNm1()));
@@ -315,72 +338,6 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
 
-    // handle coverage
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED) && engineData.get(AutomationEngineData.COVERAGE_ID) != null
-        && engineData.get(AutomationEngineData.COVERAGE_FROM) != null && ("BG_CALC".equals(engineData.get(AutomationEngineData.COVERAGE_FROM))
-            || "BG_ODM".equals(engineData.get(AutomationEngineData.COVERAGE_FROM)))) {
-      String coverageId = (String) engineData.get(AutomationEngineData.COVERAGE_ID);
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
-      details.append("Coverage calculated using Global/Domestic Buying Group.").append("\n");
-      details.append("Computed SORTL = " + coverageId).append("\n");
-      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
-      String sql = ExternalizedQuery.getSql("DE.AUTO.GETISUCTC_FOR_COVERAGE");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("SEARCH_TERM", coverageId);
-      query.setForReadOnly(true);
-      List<Object[]> result = query.getResults(1);
-      if (result.size() > 0) {
-        String isuCd = (String) result.get(0)[0];
-        String clientTier = (String) result.get(0)[1];
-        if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-          details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-          details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-          if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-            details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-          }
-        }
-      }
-
-    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
-      HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
-          data.getClientTier());
-      LOG.debug("Calculated SORTL: " + response.get(SORTL));
-      if (StringUtils.isNotBlank(response.get(MATCHING))) {
-        switch (response.get(MATCHING)) {
-        case "Exact Match":
-        case "Nearest Match":
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
-          details.append("Coverage calculation Successful.").append("\n");
-          details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
-          details.append("Matched Rule:").append("\n");
-          details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
-          details.append("ISU = " + data.getIsuCd()).append("\n");
-          details.append("CTC = " + data.getClientTier()).append("\n");
-          details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
-          details.append("Matching: " + response.get(MATCHING));
-          break;
-        case "No Match Found":
-          engineData.addRejectionComment("Coverage cannot be computed automatically.");
-          details.append("Coverage cannot be computed automatically.").append("\n");
-          results.setResults("Coverage not calculated.");
-          results.setOnError(true);
-          break;
-        }
-      } else {
-        engineData.addRejectionComment("Coverage cannot be computed automatically.");
-        details.append("Coverage cannot be computed automatically.").append("\n");
-        results.setResults("Coverage not calculated.");
-        results.setOnError(true);
-      }
-    } else {
-      details.append("Skipped coverage calculation from 32S-PostalCode Logic.").append("\n");
-      results.setResults("Coverage calculation skipped.");
-    }
-
-    results.setProcessOutput(overrides);
     return results;
   }
 
@@ -472,6 +429,345 @@ public class GermanyUtil extends AutomationUtil {
       return str;
     }
     return null;
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    Data data = requestData.getData();
+    Addr zs01 = requestData.getAddress("ZS01");
+    String coverageId = container.getFinalCoverage();
+    details.append("\n");
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
+        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
+      overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
+      // details.append("Coverage calculated using Global/Domestic Buying
+      // Group.").append("\n");
+      details.append("Computed SORTL = " + coverageId).append("\n");
+      String isuCd = container.getIsuCd();
+      String clientTier = container.getClientTierCd();
+      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
+      }
+      results.setResults("Coverage Calculated");
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
+      HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
+          data.getClientTier());
+      LOG.debug("Calculated SORTL: " + response.get(SORTL));
+      if (StringUtils.isNotBlank(response.get(MATCHING))) {
+        switch (response.get(MATCHING)) {
+        case "Exact Match":
+        case "Nearest Match":
+          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), response.get(SORTL));
+          details.append("Coverage calculation Successful.").append("\n");
+          details.append("Computed SORTL = " + response.get(SORTL)).append("\n\n");
+          details.append("Matched Rule:").append("\n");
+          details.append("Sub Industry = " + data.getSubIndustryCd()).append("\n");
+          details.append("ISU = " + data.getIsuCd()).append("\n");
+          details.append("CTC = " + data.getClientTier()).append("\n");
+          details.append("Postal Code Range = " + response.get(POSTAL_CD_RANGE)).append("\n\n");
+          details.append("Matching: " + response.get(MATCHING));
+          results.setResults("Coverage Calculated");
+          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+          break;
+        case "No Match Found":
+          engineData.addRejectionComment("Coverage cannot be computed automatically.");
+          details.append("Coverage cannot be computed automatically.").append("\n");
+          results.setResults("Coverage not calculated.");
+          results.setOnError(true);
+          break;
+        }
+      } else {
+        engineData.addRejectionComment("Coverage cannot be computed automatically.");
+        details.append("Coverage cannot be computed automatically.").append("\n");
+        results.setResults("Coverage not calculated.");
+        results.setOnError(true);
+      }
+    } else {
+      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
+      results.setResults("Skipped");
+    }
+    return true;
+  }
+
+  @Override
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Admin admin = requestData.getAdmin();
+    Addr soldTo = requestData.getAddress("ZS01");
+    StringBuilder detail = new StringBuilder();
+    boolean isNegativeCheckNeedeed = false;
+    if (changes != null && changes.hasDataChanges()) {
+      if (changes.isDataChanged("VAT")) {
+        UpdatedDataModel vatChange = changes.getDataChange("VAT");
+        if (vatChange != null) {
+          if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+            // check if the name + VAT exists in D&B
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
+            if (!matches.isEmpty()) {
+              for (DnBMatchingResponse dnbRecord : matches) {
+                if ("Y".equals(dnbRecord.getOrgIdMatch())) {
+                  isNegativeCheckNeedeed = false;
+                  break;
+                }
+                isNegativeCheckNeedeed = true;
+              }
+            }
+            if (isNegativeCheckNeedeed) {
+              validation.setSuccess(false);
+              validation.setMessage("Not validated");
+              detail.append("Updates to VAT need verification as it does'nt matches DnB");
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+              LOG.debug("Updates to VAT need verification as it does not matches DnB");
+            }
+
+          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
+            admin.setScenarioVerifiedIndc("N");
+            detail.append("Setting scenario verified indc= N as VAT is blank");
+            LOG.debug("Setting scenario verified indc= N as VAT is blank");
+          }
+        }
+      }
+
+    }
+    if (!isNegativeCheckNeedeed) {
+      validation.setSuccess(true);
+      validation.setMessage("Validated");
+    }
+    output.setDetails(detail.toString());
+    return true;
+  }
+
+  @Override
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    boolean isInstallAtMatchesDnb = true;
+    boolean isBillToMatchesDnb = true;
+    boolean isNegativeCheckNeedeed = false;
+    boolean isInstallAtExistOnReq = false;
+    boolean isBillToExistOnReq = false;
+    boolean isShipToExistOnReq = false;
+    Addr installAt = requestData.getAddress("ZI01");
+    Addr billTo = requestData.getAddress("ZP01");
+    Addr shipTo = requestData.getAddress("ZD01");
+    StringBuilder detail = new StringBuilder();
+    long reqId = requestData.getAdmin().getId().getReqId();
+    if (changes != null && changes.hasAddressChanges()) {
+      if (StringUtils.isNotEmpty(data.getCustClass()) && ("81".equals(data.getCustClass()) || "85".equals(data.getCustClass()))
+          && !changes.hasDataChanges()) {
+        LOG.debug("Skipping checks as customer class is " + data.getCustClass() + " and only address changes.");
+        output.setDetails("Skipping checks as customer class is " + data.getCustClass() + " and only address changes.");
+        validation.setSuccess(true);
+        validation.setMessage("No Validations");
+        return true;
+      }
+
+      if (shipTo != null && (changes.isAddressChanged("Ship To") || isAddressAdded(shipTo))) {
+        // Check If Address already exists on request
+        isShipToExistOnReq = isAddressAleardyExists(entityManager, shipTo, reqId);
+        if (isShipToExistOnReq) {
+          detail.append("Ship To already exists on the request with same details.");
+          validation.setMessage("ShipTo already exists");
+          engineData.addRejectionComment("Ship To already exists on the request with same details.");
+          LOG.debug("Ship To already exists on the request with same details.");
+        }
+      }
+
+      if (installAt != null && (changes.isAddressChanged("Install At (1)") || isAddressAdded(installAt))) {
+        // Check If Address already exists on request
+        isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
+        if (isInstallAtExistOnReq) {
+          detail.append("Install At already exists on the request with same details.");
+          engineData.addRejectionComment("Install At already exists on the request with same details.");
+          LOG.debug("Install At already exists on the request with same details.");
+        }
+        // Check if address closely matches DnB
+        List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt);
+        if (matches != null) {
+          isInstallAtMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
+        }
+        if (!isInstallAtMatchesDnb) {
+          isNegativeCheckNeedeed = true;
+          detail.append("Updates to Install At address need verification as it does not matches D&B");
+          LOG.debug("Updates to Install At address need verification as it does not matches D&B");
+        }
+      }
+
+      if (billTo != null && (changes.isAddressChanged("Bill To") || isAddressAdded(billTo))) {
+        // Check If Address already exists on request
+        isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
+        if (isBillToExistOnReq) {
+          detail.append("Bill To already exists on the request with same details.");
+          engineData.addRejectionComment("Bill To already exists on the request with same details.");
+          LOG.debug("Bill To already exists on the request with same details.");
+        }
+
+        // Check if address closely matches DnB
+        List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billTo);
+        if (matches != null) {
+          isBillToMatchesDnb = ifaddressCloselyMatchesDnb(matches, billTo, admin, data.getCmrIssuingCntry());
+          if (!isBillToMatchesDnb) {
+            isNegativeCheckNeedeed = true;
+            detail.append("Updates to Bill To address need verification as it does not matches D&B");
+            LOG.debug("Updates to Bill To address need verification as it does not matches D&B");
+          }
+
+        }
+      }
+
+      if (isNegativeCheckNeedeed || isShipToExistOnReq || isInstallAtExistOnReq || isBillToExistOnReq) {
+        validation.setSuccess(false);
+        validation.setMessage("Not validated");
+        engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+      } else {
+        validation.setSuccess(true);
+        detail.append("Updates to relevant addresses found but have been marked as Verified.");
+        validation.setMessage("Validated");
+      }
+
+    }
+    output.setDetails(detail.toString());
+    return true;
+  }
+
+  /**
+   * Returns the DnB matches based on requestData & address
+   *
+   * @param requestData
+   * @param engineData
+   * @param addr
+   * @return
+   */
+  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr) throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    if (addr == null) {
+      addr = requestData.getAddress("ZS01");
+    }
+    GBGFinderRequest request = createRequest(admin, data, addr);
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+    };
+
+    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+
+    List<DnBMatchingResponse> dnbMatches = response.getMatches();
+
+    return dnbMatches;
+
+  }
+
+  /**
+   * prepares and returns a dnb request based on requestData
+   *
+   * @param admin
+   * @param data
+   * @param addr
+   * @return
+   */
+  private GBGFinderRequest createRequest(Admin admin, Data data, Addr addr) {
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (StringUtils.isNotBlank(data.getVat())) {
+      request.setOrgId(data.getVat());
+    }
+
+    if (addr != null) {
+      request.setCity(addr.getCity1());
+      request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+      request.setStreetLine1(addr.getAddrTxt());
+      request.setStreetLine2(addr.getAddrTxt2());
+      request.setLandedCountry(addr.getLandCntry());
+      request.setPostalCode(addr.getPostCd());
+      request.setStateProv(addr.getStateProv());
+      // request.setMinConfidence("8");
+    }
+
+    return request;
+  }
+
+  /**
+   * Checks if the address updated closely matches D&B
+   *
+   * @param cntry
+   * @param addr
+   * @param matches
+   * @return
+   */
+  private boolean ifaddressCloselyMatchesDnb(List<DnBMatchingResponse> matches, Addr addr, Admin admin, String cntry) {
+    boolean result = false;
+    for (DnBMatchingResponse dnbRecord : matches) {
+      result = DnBUtil.closelyMatchesDnb(cntry, addr, admin, dnbRecord);
+      if (result) {
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Checks if the address is added on the Update Request
+   *
+   * @param addr
+   * @return
+   */
+  private boolean isAddressAdded(Addr addr) {
+    if (StringUtils.isNotEmpty(addr.getImportInd()) && "N".equals(addr.getImportInd())) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Checks if the address already exists on the Request
+   *
+   * @param addrToBeCHecked
+   * @param reqId
+   * @return
+   */
+  private boolean isAddressAleardyExists(EntityManager entityManager, Addr addrToBeCHecked, long reqId) {
+    boolean addrExists = false;
+    String sql = ExternalizedQuery.getSql("AUTO.DE.CHECK_IF_ADDRESS_EXIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("NAME1", addrToBeCHecked.getCustNm1());
+    query.setParameter("NAME2", addrToBeCHecked.getCustNm2());
+    query.setParameter("DEPT", addrToBeCHecked.getDept());
+    query.setParameter("FLOOR", addrToBeCHecked.getFloor());
+    query.setParameter("BLDG", addrToBeCHecked.getBldg());
+    query.setParameter("OFFICE", addrToBeCHecked.getOffice());
+    query.setParameter("LAND_CNTRY", addrToBeCHecked.getLandCntry());
+    query.setParameter("STATE", addrToBeCHecked.getStateProv());
+    query.setParameter("ADDR_TXT", addrToBeCHecked.getAddrTxt());
+    query.setParameter("PO_BOX", addrToBeCHecked.getPoBox());
+    query.setParameter("POST_CD", addrToBeCHecked.getPostCd());
+    query.setParameter("CITY", addrToBeCHecked.getCity1());
+    query.setParameter("PHONE", addrToBeCHecked.getCustNm1());
+    query.setParameter("COUNTY", addrToBeCHecked.getCounty());
+    query.setParameter("TRANSPORT_ZONE", addrToBeCHecked.getTransportZone());
+    // query.setParameter("ADDR_TYPE", addrToBeCHecked.getId().getAddrType());
+    query.setParameter("ADDR_SEQ", addrToBeCHecked.getId().getAddrSeq());
+    String res = query.getSingleResult(String.class);
+    if (res != null) {
+      if (Integer.parseInt(res) == 1) {
+        addrExists = true;
+      }
+    }
+    return addrExists;
   }
 
 }

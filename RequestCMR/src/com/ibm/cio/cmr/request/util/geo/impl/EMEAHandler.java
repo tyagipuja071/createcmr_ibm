@@ -104,9 +104,8 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
 
-	protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Billing Address",
-			"Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL Address", "Sold-To Address",
-			"Install-At Address", "Ship-To Address" };
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Billing Address", "Mailing Address",
+      "Installing Address", "Shipping Address (Update)", "EPLAddress", "Sold-To Address", "Install-At Address", "Ship-To Address" };
 
 	// CMR-1728
 	protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
@@ -3147,7 +3146,7 @@ public class EMEAHandler extends BaseSOFHandler {
 		if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
 			return Arrays.asList("ZP01", "ZS01", "ZI01");
 		} else if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
-			return Arrays.asList("ZP01", "ZS01");
+		  return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01");
 		} else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
 			return Arrays.asList("ZP01", "ZS01");
 		}
@@ -3170,11 +3169,17 @@ public class EMEAHandler extends BaseSOFHandler {
 		if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
 			return Arrays.asList("ZP01");
 		}
+	    if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
+	        return Arrays.asList("ZD01", "ZI01");
+	    }
 		return null;
 	}
 
 	@Override
 	public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
+	    if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
+	        return Arrays.asList("5");
+	    }
 		return null;
 	}
 
@@ -3244,7 +3249,7 @@ public class EMEAHandler extends BaseSOFHandler {
 		map.put("##CustomerScenarioSubType", "custSubGrp");
 		map.put("##EngineeringBo", "engineeringBo");
 		map.put("##CodFlag", "creditCd");
-		map.put("##CommercialFinanced", "commercialFinanced");
+    map.put("##CommercialFinanced", "commercialFinanced");
 		return map;
 	}
 
@@ -3562,18 +3567,20 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	@Override
 	public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-		if (SystemLocation.SPAIN.equals(issuingCountry)) {
-			return true;
-		} else if (SystemLocation.UNITED_KINGDOM.equals(issuingCountry)) {
-			return true;
-		} else if (SystemLocation.IRELAND.equals(issuingCountry)) {
-			return true;
-		} else if (SystemLocation.TURKEY.equals(issuingCountry)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    if (SystemLocation.SPAIN.equals(issuingCountry)) {
+      return true;
+    } else if (SystemLocation.UNITED_KINGDOM.equals(issuingCountry)) {
+      return true;
+    } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
+      return true;
+    }
+    else if (SystemLocation.TURKEY.equals(issuingCountry)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
 
 	@Override
 	public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows,
@@ -3585,9 +3592,9 @@ public class EMEAHandler extends BaseSOFHandler {
 		 * currently Turkey don't need Dup Fills check, so temp skip the
 		 * checking this part
 		 */
-		if (SystemLocation.TURKEY.equals(country)) {
-			return;
-		}
+    if (SystemLocation.TURKEY.equals(country)) {
+      return;
+    }
 		for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
 			XSSFSheet sheet = book.getSheet(name);
 

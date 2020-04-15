@@ -60,12 +60,13 @@ public class CoverageRulesFieldMap {
     addPhysicalFieldMapping(DEFAULT, "statePrefectureCode", "ADDR.STATE_PROV");
     addPhysicalFieldMapping(DEFAULT, "postalCode", "ADDR.POST_CD");
     addPhysicalFieldMapping(DEFAULT, "geoLocationCode", "GEO_LOCATION_CD");
-    addPhysicalFieldMapping(DEFAULT, "gbQuadSectorTier", "ORDER_BLOCK");
+    addPhysicalFieldMapping(DEFAULT, "gbQuadSectorTier", "CLIENT_TIER");
     addPhysicalFieldMapping(DEFAULT, "industryClass", "SUB_INDUSTRY_CD");
     addPhysicalFieldMapping(DEFAULT, "industrySolutionUnit", "ISU_CD");
     addPhysicalFieldMapping(DEFAULT, "unISIC", "ISIC_CD");
     addPhysicalFieldMapping(DEFAULT, "county", "ADDR.COUNTY");
-    addPhysicalFieldMapping(DEFAULT, "physicalAddressCountry", "ADDR.LANDED_CNTRY");
+    // addPhysicalFieldMapping(DEFAULT, "physicalAddressCountry",
+    // "ADDR.LANDED_CNTRY");
     addPhysicalFieldMapping(DEFAULT, "city", "ADDR.CITY1");
     addPhysicalFieldMapping(DEFAULT, "nationalTaxID", "VAT");
     addPhysicalFieldMapping(DEFAULT, "classification", "CUST_CLASS");
@@ -81,6 +82,9 @@ public class CoverageRulesFieldMap {
     // Country specific mappings
     addLogicalFieldMapping(SystemLocation.INDIA, "SORTL", "Cluster");
     addPhysicalFieldMapping(SystemLocation.INDIA, "SORTL", "AP_CUST_CLUSTER_ID");
+
+    addLogicalFieldMapping(SystemLocation.FRANCE, "SORTL", "Sales BO Code");
+    addPhysicalFieldMapping(SystemLocation.FRANCE, "SORTL", "SALES_BO_CD");
 
   };
 

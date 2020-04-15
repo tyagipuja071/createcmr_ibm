@@ -50,6 +50,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
 import com.ibm.cio.cmr.request.ui.UIMgr;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.external.CreateCMRBPHandler;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
 import com.ibm.cio.cmr.request.util.mail.Email;
@@ -69,6 +70,10 @@ public class RequestUtils {
   private static final Logger LOG = Logger.getLogger(RequestUtils.class);
   private static String emailTemplate = null;
   private static String batchemailTemplate = null;
+  private static final String SOURCE = "CreateCMR-BP";
+  public static final String STATUS_REJECTED = "Rejected";
+  public static final String STATUS_INPUT_REQUIRED = "Input Required";
+  public static final String US_CMRISSUINGCOUNTRY = "897";
 
   public static void refresh() {
     emailTemplate = null;
@@ -114,7 +119,7 @@ public class RequestUtils {
    */
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, HttpServletRequest request, Admin admin,
       String cmt, String action) throws CmrException, SQLException {
-    createWorkflowHistory(service, entityManager, request, admin, cmt, action, null, null, false, null, null);
+    createWorkflowHistory(service, entityManager, request, admin, cmt, action, null, null, false, null, null, null, null);
   }
 
   /**
@@ -174,7 +179,8 @@ public class RequestUtils {
   }
 
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, HttpServletRequest request, Admin admin,
-      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd) throws CmrException, SQLException {
+      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd, String rejSupplInfo1,
+      String rejSupplInfo2) throws CmrException, SQLException {
     AppUser user = AppUser.getUser(request);
 
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
@@ -191,6 +197,8 @@ public class RequestUtils {
     hist.setReqId(admin.getId().getReqId());
     hist.setRejReason(rejectReason);
     hist.setRejReasonCd(rejReasonCd);
+    hist.setRejSupplInfo1(rejSupplInfo1);
+    hist.setRejSupplInfo2(rejSupplInfo2);
     // String actionDesc = getActionDescription(entityManager, action);
     String actionDesc = action != null && action.length() > 3 ? action : getActionDescription(entityManager, action);
     hist.setReqStatusAct(actionDesc);
@@ -284,6 +292,9 @@ public class RequestUtils {
     String siteId = "";
     String rejectReason = history.getRejReason();
     String rejReasonCd = history.getRejReasonCd();
+
+    String cmrIssuingCountry = CreateCMRBPHandler.getCmrIssuingCntry(entityManager, admin);
+
     String sql = ExternalizedQuery.getSql("REQUESTENTRY.GETNOTIFLIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", history.getReqId());
@@ -350,7 +361,7 @@ public class RequestUtils {
     if (rejectReason == null) {
       rejectReason = "";
     }
-    
+
     if (rejReasonCd == null) {
       rejReasonCd = "";
     }
@@ -448,8 +459,13 @@ public class RequestUtils {
     }
 
     if (subject.contains("{0}")) {
-      // 1048370 - add request id in the mail
-      subject = MessageFormat.format(subject, history.getReqId() + "", status);
+      if (cmrIssuingCountry != null && US_CMRISSUINGCOUNTRY.equalsIgnoreCase(cmrIssuingCountry) && status != null && status.equals(STATUS_REJECTED)
+          && !StringUtils.isBlank(admin.getSourceSystId()) && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
+        subject = MessageFormat.format(subject, history.getReqId() + "", STATUS_INPUT_REQUIRED);
+      } else {
+        // 1048370 - add request id in the mail
+        subject = MessageFormat.format(subject, history.getReqId() + "", status);
+      }
     }
 
     String histContent = history.getCmt();
@@ -459,6 +475,10 @@ public class RequestUtils {
       int tempstart = temp.indexOf("{5}");
       int insertstart = tempstart + 17;
       String rejRes = "<tr><th style=\"text-align:left;width:200px\">Reject Reason:</th><td>{10}</td></tr>";
+      if (cmrIssuingCountry != null && US_CMRISSUINGCOUNTRY.equalsIgnoreCase(cmrIssuingCountry) && !StringUtils.isBlank(admin.getSourceSystId())
+          && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
+        rejRes = "<tr><th style=\"text-align:left;width:200px\">Input Required Reason:</th><td>{10}</td></tr>";
+      }
       temp.insert(insertstart, rejRes);
       email = temp.toString();
     } else {
@@ -476,7 +496,12 @@ public class RequestUtils {
     params.add(siteId); // {2}
     params.add(cmrno); // {3}
     params.add(type); // {4}
-    params.add(status); // {5}
+    if (cmrIssuingCountry != null && US_CMRISSUINGCOUNTRY.equalsIgnoreCase(cmrIssuingCountry) && status != null && status.equals(STATUS_REJECTED)
+        && !StringUtils.isBlank(admin.getSourceSystId()) && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
+      params.add(STATUS_INPUT_REQUIRED);
+    } else {
+      params.add(status); // {5}
+    }
     params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
     params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
     params.add(histContent); // {8}

@@ -118,26 +118,32 @@ public class AutomationService extends MultiThreadedBatchService {
    * @param entityManager
    * @param requestData
    * @param current
-   * @throws CmrException
-   * @throws SQLException
+   * @throws Exception
    */
-  private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws CmrException, SQLException {
+  private void processApprovalNextStep(EntityManager entityManager, RequestData requestData, Timestamp current) throws Exception {
     Admin admin = requestData.getAdmin();
     LOG.debug("Checking awaiting replies request " + admin.getId().getReqId() + "..");
 
-    // check if the last approval was at least 10 mins back
-    String sql = ExternalizedQuery.getSql("APPROVAL.GET_MAX_TS_APR");
+    // check if the last approval was at least 10 mins back -> removed for now
+    String sql = ExternalizedQuery.getSql("APPROVAL.GET_REQ_STATUS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
-    Date maxDt = query.getSingleResult(Date.class);
-    Calendar cal = new GregorianCalendar();
-    cal.setTime(current);
-    cal.add(Calendar.MINUTE, -1 * 10);
-    if (maxDt.after(cal.getTime())) {
+    int count = query.getSingleResult(Integer.class);
+    // Date maxDt = query.getSingleResult(Date.class);
+    // Calendar cal = new GregorianCalendar();
+    // cal.setTime(current);
+    // cal.add(Calendar.MINUTE, -1 * 10);
+    ApprovalService approvalService = new ApprovalService();
+    // if (maxDt.after(cal.getTime())) {
+    if (count > 0) {
+      // rejection
+      LOG.debug("Rejecting the Request " + admin.getId().getReqId() + " and moving back to requester..");
+      approvalService.moveBackToRequester(entityManager, admin);
+    } else {
       LOG.debug("Moving Request " + admin.getId().getReqId() + " to next step..");
-      ApprovalService approvalService = new ApprovalService();
       approvalService.moveToNextStep(entityManager, admin);
     }
+    // }
   }
 
   /**
