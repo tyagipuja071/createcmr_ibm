@@ -487,6 +487,7 @@ public class FranceUtil extends AutomationUtil {
       // If calculated using buying group then skip any other calculation
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else {
+      isCoverageCalculated = false;
       // if not calculated using bg/gbg try calculation using SIREN
       details.setLength(0);// clear string builder
       overrides.clearOverrides(); // clear existing overrides
@@ -552,26 +553,27 @@ public class FranceUtil extends AutomationUtil {
               break;
             case "No Match Found":
               // set on error if coverage could not be determined using mapping
-              engineData.addRejectionComment("Coverage cannot be computed automatically.");
-              details.append("Coverage cannot be computed automatically.").append("\n");
+              engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+              details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
               results.setResults("Coverage not calculated.");
               results.setOnError(true);
               break;
             }
           } else {
             // set on error if coverage still not calculated using 32S logic
-            engineData.addRejectionComment("Coverage cannot be computed automatically.");
-            details.append("Coverage cannot be computed automatically.").append("\n");
+            engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+            details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
             results.setResults("Coverage not calculated.");
             results.setOnError(true);
           }
         } else {
           // if isu ctc is not 32S and coverage is not calculated (needs
           // review... whether to set on error true or set skip results here)
-          engineData.addRejectionComment("Coverage cannot be computed automatically.");
-          details.append("Coverage cannot be computed automatically.").append("\n");
-          results.setResults("Coverage not calculated.");
-          results.setOnError(true);
+          details.setLength(0);
+          overrides.clearOverrides();
+          details.append("Coverage could not be calculated through Buying group or 32S-PostalCode logic.\n Skipping coverage calculation.")
+              .append("\n");
+          results.setResults("Skipped");
         }
       }
     }
