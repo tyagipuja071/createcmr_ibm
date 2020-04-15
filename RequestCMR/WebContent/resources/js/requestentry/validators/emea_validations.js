@@ -3654,6 +3654,15 @@ function setCustSubTypeBpGRTRCY() {
         FormManager.enable('isuCd');
       }
     }
+    //Control Classification Code
+    if(custType == 'BUSPR' || custType == 'XBP'){
+    	FormManager.show('CustClass', 'custClass');
+        FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+    }else{
+    	FormManager.hide('CustClass', 'custClass');
+    	FormManager.setValue('custClass', '');
+    	FormManager.resetValidations('custClass');
+    }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (custType == 'BUSPR') {
