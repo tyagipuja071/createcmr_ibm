@@ -679,7 +679,6 @@ function add32PostCdCntrySBOlogic() {
     return;
   }
 
-  FormManager.readOnly('salesBusOffCd');
   FormManager.setValue('salesBusOffCd', '');
 
   var _zs01ReqId = FormManager.getActualValue('reqId');
