@@ -2832,6 +2832,8 @@ function addGRAddressTypeValidator() {
           var zp01Cnt = 0;
           var zd01Cnt = 0;
           var zi01Cnt = 0;
+          var zs01Data = null;
+          var zp01Data = null;
 
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -2843,14 +2845,33 @@ function addGRAddressTypeValidator() {
               type = type[0];
             }
             if (type == 'ZS01') {
+              zs01Data = record;	
               zs01Cnt++;
             } else if (type == 'ZP01') {
+              zp01Data = record;	
               zp01Cnt++;
             } else if (type == 'ZD01') {
               zd01Cnt++;
             } else if (type == 'ZI01') {
               zi01Cnt++;
             }
+          }
+          
+          if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+            if(!isTranslationAddrFieldsFilledForGR(zs01Data.addrTxt, zp01Data.addrText)) {
+          	  return new ValidationResult(null, false, 'Please fill in Street Address in Local Language translation of Sold-to address.');
+        	}
+            if(!isTranslationAddrFieldsFilledForGR(zs01Data.custNm2, zp01Data.custNm2)) {
+              return new ValidationResult(null, false, 'Please fill in Customer Name Con\'t in Local Language translation of Sold-to address.');
+          	}
+            if(!isTranslationAddrFieldsFilledForGR(zs01Data.addrTxt2, zp01Data.addrTxt2)) {
+              return new ValidationResult(null, false, 'Please fill in Address Con\'t/Occupation in Local Language translation of Sold-to address.');
+           	}
+            if(!isTranslationAddrFieldsFilledForGR(zs01Data.poBox, zp01Data.poBox)) {
+              return new ValidationResult(null, false, 'Please fill in PO Box in Local Language translation of Sold-to address.');
+           	}
+          } else if(FormManager.getActualValue('custGrp') == 'CROSS' && !isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data)) {
+              return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
           }
 
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
@@ -2866,6 +2887,92 @@ function addGRAddressTypeValidator() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function isTranslationAddrFieldsFilledForGR(zs01Field, zp01Field) {
+  if (zs01Field != '') {
+    if (zp01Field == '') {
+      return false;
+  	} 
+  } 
+  return true;
+}
+
+function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
+	
+  if(zs01Data.custNm1[0]  == zp01Data.custNm1[0] 
+  && zs01Data.custNm2[0]  == zp01Data.custNm2[0] 
+  && zs01Data.addrTxt[0]  == zp01Data.addrTxt[0] 
+  && zs01Data.addrTxt2[0] == zp01Data.addrTxt2[0] 
+  && zs01Data.poBox[0]    == zp01Data.poBox[0]
+  && zs01Data.postCd[0]   == zp01Data.postCd[0]
+  && zs01Data.city1[0]    == zp01Data.city1[0]) {
+    return true;
+  }
+  
+  return false;
+}
+
+function populateTranslationAddrWithSoldToData() {
+  if (FormManager.getActualValue('custGrp') == 'CROSS' && CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('addrType') == 'ZP01') {
+    var record = null;
+    var type = null;
+    var zs01Data = null; // Sold-to
+	
+	for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+        record = _allAddressData[i];
+      }
+      type = record.addrType;
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+      if (type == 'ZS01') {
+        zs01Data = record;
+        break;
+      } 
+    }
+	
+    // Populate Local language translation of sold to with Sold to data
+ 	if(zs01Data != null ) {
+	  FormManager.setValue('custNm1', zs01Data.custNm1);
+	  FormManager.setValue('custNm2', zs01Data.custNm2);
+	  FormManager.setValue('addrTxt', zs01Data.addrTxt);
+	  FormManager.setValue('addrTxt2', zs01Data.addrTxt2);
+	  FormManager.setValue('poBox', zs01Data.poBox);
+	  FormManager.setValue('postCd', zs01Data.postCd);
+	  FormManager.setValue('city1', zs01Data.city1);
+	}
+  }
+}
+
+function clearAddrFieldsForGR() {	
+  FormManager.clearValue('custNm1');
+  FormManager.clearValue('custNm2', '');
+  FormManager.clearValue('addrTxt', '');
+  FormManager.clearValue('addrTxt2', '');
+  FormManager.clearValue('poBox', '');
+  FormManager.clearValue('postCd', '');
+  FormManager.clearValue('city1', '');
+}
+
+function preFillTranslationAddrWithSoldToForGR(cntry, addressMode, saving) {
+  if(cntry == SysLoc.GREECE) {
+    var custType = FormManager.getActualValue('custGrp');
+	// for local don't proceed
+	if (custType == 'LOCAL') {
+	  return;
+	}
+	if(!saving) {
+	  if (FormManager.getActualValue('addrType') == 'ZP01') {
+	    populateTranslationAddrWithSoldToData();	
+	  } else if (FormManager.getActualValue('addrType') != 'ZP01' && addressMode != 'updateAddress'){
+	    // clear address fields when switching
+	    clearAddrFieldsForGR();
+	  }  
+	}
+  }
 }
 
 function addTRAddressTypeValidator() {
@@ -3022,6 +3129,7 @@ var custType = FormManager.getActualValue('custGrp');
         convertToUpperCaseGR();
         disableAddrFieldsGRCYTR();
         disableAddrFieldsGR();
+       	preFillTranslationAddrWithSoldToForGR();	        
       });
     }
   }
@@ -7552,6 +7660,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addPOBoxValidatorGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(updateAddrTypeList, [ SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(convertToUpperCaseGR, [ SysLoc.GREECE ]);
+  GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(updateAbbrevNmLocnGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addGRAddressTypeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addOccupationPOBoxValidator, [  SysLoc.CYPRUS ], null, true);
