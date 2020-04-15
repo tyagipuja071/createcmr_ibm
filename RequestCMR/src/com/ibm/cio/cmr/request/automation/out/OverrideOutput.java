@@ -173,6 +173,24 @@ public class OverrideOutput implements AutomationOutput {
   }
 
   /**
+   * Clear all recorded overrides
+   */
+  public void clearOverrides() {
+    this.data = new HashMap<FieldResultKey, FieldResult>();
+  }
+
+  /**
+   * Removes the override record on the basis of fieldResultKey
+   * 
+   * @param fieldResultKey
+   */
+  public void clearOverride(FieldResultKey fieldResultKey) {
+    if (this.data != null && this.data.containsKey(fieldResultKey)) {
+      this.data.remove(fieldResultKey);
+    }
+  }
+
+  /**
    * Sets the data value by finding the relevant column having the given field
    * name
    * 

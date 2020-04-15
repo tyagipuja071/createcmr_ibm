@@ -3,7 +3,6 @@
  */
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,7 +23,6 @@ import com.ibm.cio.cmr.request.automation.impl.MatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
-import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -73,140 +71,150 @@ public class GBGMatchingElement extends MatchingElement {
     MatchingOutput output = new MatchingOutput();
 
     boolean continueCheck = true;
-    List<String> usedNames = new ArrayList<String>();
-    while (continueCheck) {
-      if (currentAddress != null) {
-        request.setCity(currentAddress.getCity1());
+    // List<String> usedNames = new ArrayList<String>();
+    // while (continueCheck) {
+    if (currentAddress != null) {
+      // if ("ZS01".equals(currentAddress.getId().getAddrType())) {
+      // continueCheck = false;
+      // }
+      request.setCity(currentAddress.getCity1());
 
-        if (geoHandler != null && !geoHandler.customerNamesOnAddress()) {
-          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
-        } else {
-          request.setCustomerName(
-              currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
-        }
-
-        String nameUsed = request.getCustomerName();
-        LOG.debug("Checking GBG for " + nameUsed);
-        usedNames.add(nameUsed.toUpperCase());
-        request.setStreetLine1(currentAddress.getAddrTxt());
-        request.setStreetLine2(currentAddress.getAddrTxt2());
-        request.setLandedCountry(currentAddress.getLandCntry());
-        request.setPostalCode(currentAddress.getPostCd());
-        request.setStateProv(currentAddress.getStateProv());
-        if (!StringUtils.isBlank(data.getVat())) {
-          request.setOrgId(data.getVat());
-        }
-        request.setMinConfidence("6");
-
-        if (StringUtils.isBlank(data.getDunsNo())) {
-          // duns has not been computed yet, check if any matching has been
-          // performed
-          if (dnbMatching != null && dnbMatching.getConfidenceCode() > 7) {
-            request.setDunsNo(dnbMatching.getDunsNo());
-          }
-        }
-
-        if (automationUtil != null) {
-          automationUtil.tweakGBGFinderRequest(entityManager, request, requestData);
-        }
-
-        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-            MatchingServiceClient.class);
-        client.setRequestMethod(Method.Get);
-        client.setReadTimeout(1000 * 60 * 5);
-
-        LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-        MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(rawResponse);
-
-        TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
-        };
-        MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
-
-        if (response != null && response.getMatched()) {
-          StringBuilder details = new StringBuilder();
-          List<GBGResponse> gbgMatches = response.getMatches();
-          Collections.sort(gbgMatches, new GBGComparator(request.getLandedCountry()));
-
-          result.setResults("Matches Found");
-          details.append(gbgMatches.size() + " record(s) found.");
-          if (gbgMatches.size() > 5) {
-            gbgMatches = gbgMatches.subList(0, 4);
-            details.append("Showing top 5 matches only.");
-          }
-          int itemNo = 1;
-          for (GBGResponse gbg : gbgMatches) {
-            details.append("\n");
-            if (gbg.isDnbMatch()) {
-              LOG.debug("Matches found via D&B matching..");
-              details.append("\n").append("Found via DUNS matching:");
-              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                  itemNo);
-            } else if (gbg.isVatMatch()) {
-              LOG.debug("Matches found via ORG ID matching..");
-              details.append("\n").append("Found via ORG ID matching:");
-              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                  itemNo);
-            } else {
-              LOG.debug("Matches found via Name matching..");
-              details.append("\n").append("Found via Name matching [" + CommonWordsUtil.minimize(nameUsed) + "]):");
-              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "Name-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                  itemNo);
-            }
-            details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
-            details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
-            details.append("\n").append("Country: " + gbg.getCountry());
-            details.append("\n").append("CMR Count: " + gbg.getCmrCount());
-            details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
-            details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
-            if (gbg.isDnbMatch()) {
-              details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
-            }
-
-            if (itemNo == 1) {
-              engineData.put(AutomationEngineData.GBG_MATCH, gbg);
-            }
-
-            itemNo++;
-          }
-          result.setProcessOutput(output);
-          result.setDetails(details.toString());
-          continueCheck = false;
-        } else {
-          boolean nextFound = false;
-          if (geoHandler != null && geoHandler.customerNamesOnAddress()) {
-            for (Addr addr : requestData.getAddresses()) {
-              String name = addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2());
-              name = name.toUpperCase();
-              if (!usedNames.contains(name)) {
-                currentAddress = addr;
-                nextFound = true;
-                // make sure to clear duns on non-main address to trigger re
-                // check of DUNS for next call
-                dnbMatching = null;
-                break;
-              }
-            }
-          }
-
-          if (!nextFound) {
-            continueCheck = false;
-            result.setDetails("No GBG was found using DUNS hierarchy matching and Name matching.");
-            // engineData.addRejectionComment("No GBG was found using DUNS
-            // hierarchy matching and Name matching.");
-            result.setResults("No Matches");
-            result.setOnError(false);
-          }
-
-        }
+      if (geoHandler != null && !geoHandler.customerNamesOnAddress()) {
+        request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
       } else {
-        result.setDetails("Missing main address on the request.");
-        engineData.addRejectionComment("Missing main address on the request.");
-        result.setResults("Missing Address");
-        result.setOnError(true);
+        request.setCustomerName(
+            currentAddress.getCustNm1() + (StringUtils.isBlank(currentAddress.getCustNm2()) ? "" : " " + currentAddress.getCustNm2()));
       }
+
+      String nameUsed = request.getCustomerName();
+      LOG.debug("Checking GBG for " + nameUsed);
+      // usedNames.add(nameUsed.toUpperCase());
+      request.setStreetLine1(currentAddress.getAddrTxt());
+      request.setStreetLine2(currentAddress.getAddrTxt2());
+      request.setLandedCountry(currentAddress.getLandCntry());
+      request.setPostalCode(currentAddress.getPostCd());
+      request.setStateProv(currentAddress.getStateProv());
+      if (!StringUtils.isBlank(data.getVat())) {
+        request.setOrgId(data.getVat());
+      }
+      request.setMinConfidence("6");
+
+      if (StringUtils.isBlank(data.getDunsNo())) {
+        // duns has not been computed yet, check if any matching has been
+        // performed
+        if (dnbMatching != null && dnbMatching.getConfidenceCode() > 7) {
+          request.setDunsNo(dnbMatching.getDunsNo());
+        }
+      }
+
+      if (automationUtil != null) {
+        automationUtil.tweakGBGFinderRequest(entityManager, request, requestData);
+      }
+
+      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          MatchingServiceClient.class);
+      client.setRequestMethod(Method.Get);
+      client.setReadTimeout(1000 * 60 * 5);
+
+      LOG.debug("Connecting to the GBG Finder Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.GBG_SERVICE_ID, request, MatchingResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<MatchingResponse<GBGResponse>> ref = new TypeReference<MatchingResponse<GBGResponse>>() {
+      };
+      MatchingResponse<GBGResponse> response = mapper.readValue(json, ref);
+
+      if (response != null && response.getMatched()) {
+        StringBuilder details = new StringBuilder();
+        List<GBGResponse> gbgMatches = response.getMatches();
+        Collections.sort(gbgMatches, new GBGComparator(request.getLandedCountry()));
+
+        result.setResults("Matches Found");
+        details.append(gbgMatches.size() + " record(s) found.");
+        if (gbgMatches.size() > 5) {
+          gbgMatches = gbgMatches.subList(0, 4);
+          details.append("Showing top 5 matches only.");
+        }
+        int itemNo = 1;
+        for (GBGResponse gbg : gbgMatches) {
+          details.append("\n");
+          if (gbg.isDnbMatch()) {
+            LOG.debug("Matches found via D&B matching..");
+            details.append("\n").append("Found via DUNS matching:");
+            output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
+                itemNo);
+          } else if (gbg.isVatMatch()) {
+            LOG.debug("Matches found via ORG ID matching..");
+            details.append("\n").append("Found via ORG ID matching:");
+            output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
+                itemNo);
+          }
+          // else {
+          // LOG.debug("Matches found via Name matching..");
+          // details.append("\n").append("Found via Name matching [" +
+          // CommonWordsUtil.minimize(nameUsed) + "]):");
+          // output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(),
+          // "Name-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(),
+          // "GBG",
+          // itemNo);
+          // }
+          details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+          details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+          details.append("\n").append("Country: " + gbg.getCountry());
+          details.append("\n").append("CMR Count: " + gbg.getCmrCount());
+          details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+          details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
+          if (gbg.isDnbMatch()) {
+            details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
+          }
+
+          if (itemNo == 1) {
+            engineData.put(AutomationEngineData.GBG_MATCH, gbg);
+          }
+
+          itemNo++;
+        }
+        result.setProcessOutput(output);
+        result.setDetails(details.toString());
+        continueCheck = false;
+      } else {
+        // boolean nextFound = false;
+        // if (geoHandler != null && geoHandler.customerNamesOnAddress()) {
+        // for (Addr addr : requestData.getAddresses()) {
+        // String name = addr.getCustNm1() +
+        // (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " +
+        // addr.getCustNm2());
+        // name = name.toUpperCase();
+        // if (!usedNames.contains(name)) {
+        // currentAddress = addr;
+        // nextFound = true;
+        // // make sure to clear duns on non-main address to trigger re
+        // // check of DUNS for next call
+        // dnbMatching = null;
+        // break;
+        // }
+        // }
+        // }
+
+        // if (!nextFound) {
+        continueCheck = false;
+        // result.setDetails("No GBG was found using DUNS hierarchy matching
+        // and Name matching.");
+        result.setDetails("No GBG was found using DUNS hierarchy matching.");
+        // engineData.addRejectionComment("No GBG was found using DUNS
+        // hierarchy matching and Name matching.");
+        result.setResults("No Matches");
+        result.setOnError(false);
+        // }
+      }
+    } else {
+      result.setDetails("Missing main address on the request.");
+      engineData.addRejectionComment("Missing main address on the request.");
+      result.setResults("Missing Address");
+      result.setOnError(true);
     }
+    // }
     return result;
   }
 

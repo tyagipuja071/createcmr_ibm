@@ -425,6 +425,8 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
 
+    
+
   }
   if (reqType != 'C') {
     return;
@@ -760,6 +762,8 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
+
+    
 
   }
 
@@ -2995,6 +2999,7 @@ var custType = FormManager.getActualValue('custGrp');
   }
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+
       if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
         setISRValuesGR();
       } else {
@@ -3100,6 +3105,7 @@ function setClientTierAndISR(value) {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
   }
 
+
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE && (FormManager.getActualValue('custSubGrp') != 'COMME'
     || FormManager.getActualValue('custSubGrp') != 'CROSS')) {
     setISRValuesGR();
@@ -3108,6 +3114,7 @@ function setClientTierAndISR(value) {
    }else{
    setISRValues();
    }
+
 }
 
 function setISRValuesGR() {
@@ -3363,7 +3370,7 @@ function convertToUpperCaseGR(cntry, addressMode, saving) {
 
 function updateAddrTypeList(cntry, addressMode, saving) {
   if (!saving && FormManager.getActualValue('cmrIssuingCntry') != '862') {
-    // hide 'additional shipping' selection for creates
+    // hide 'additional shipping' selection for creates .
     if ((addressMode == 'newAddress' || addressMode == 'copyAddress') && cmr.currentRequestType == 'C') {
       cmr.hideNode('radiocont_ZD01');
     }
@@ -3642,10 +3649,19 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('isuCd', '21');
     } else {
       // NOT enable ctc and isu for turkey internal and bp scenario
-       if(custType!='XINT' && custType!='XBP'){
-       FormManager.enable('clientTier');
-       FormManager.enable('isuCd');
-       }
+      if (custType != 'XINT' && custType != 'XBP') {
+        FormManager.enable('clientTier');
+        FormManager.enable('isuCd');
+      }
+    }
+    //Control Classification Code
+    if(custType == 'BUSPR' || custType == 'XBP'){
+    	FormManager.show('CustClass', 'custClass');
+        FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+    }else{
+    	FormManager.hide('CustClass', 'custClass');
+    	FormManager.setValue('custClass', '');
+    	FormManager.resetValidations('custClass');
     }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
@@ -3664,6 +3680,8 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.enable('isuCd');
     }
   }
+
+
 
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     if (custType == 'BUSPR') {
@@ -4373,8 +4391,8 @@ function showCommercialFinanced() {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
   }
 }
-function lockCmrOwner(){
-// FormManager.setValue('cmrOwner', 'IBM');
+function lockCmrOwner() {
+  // FormManager.setValue('cmrOwner', 'IBM');
   FormManager.readOnly('cmrOwner');
 }
 function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
@@ -6575,6 +6593,7 @@ function toggleBPRelMemType() {
   }
 }
 
+
  function toggleBPRelMemTypeForTurkey(){
    var reqType = null;
    // var role = null;
@@ -6594,6 +6613,7 @@ function toggleBPRelMemType() {
    FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
    }
  }
+
 
 function unlockINACForINTERUKI() {
   var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -7341,7 +7361,7 @@ function setSBOValuesForIsuCtc() {
 function setSBOLogicOnISUChange() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-       setSBOValuesForIsuCtc();
+      setSBOValuesForIsuCtc();
     });
   }
   if (_isuCdHandler && _isuCdHandler[0]) {
@@ -7349,7 +7369,7 @@ function setSBOLogicOnISUChange() {
   }
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-       setSBOValuesForIsuCtc();
+      setSBOValuesForIsuCtc();
     });
   }
   if (_clientTierHandler && _clientTierHandler[0]) {
@@ -7413,6 +7433,20 @@ function mandatoryForBusinessPartnerCY() {
       FormManager.removeValidator('ppsceid', Validators.REQUIRED);
     }
   }
+}
+
+function addALPHANUMValidatorForEnterpriseNumber() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _number = FormManager.getActualValue('enterprise');
+        if (_number && _number.length > 0 && !_number.match("^[0-9a-zA-Z]*$")) {
+          return new ValidationResult(FormManager.getField('enterprise'), false, 'Enterprise Number should be alphanumeric.');
+        }
+        return new ValidationResult(null, true, null);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
@@ -7496,11 +7530,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
   // CMR-2279
-   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
-   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   // CMR-2574 ISU+CTC
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
@@ -7576,13 +7611,14 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(stateProvValidatorCBforIT, [ SysLoc.ITALY ]);
   // CMR-2085 Turkey:CMR number: manual insertion for processor, validation
   // numeric, existing
-// // GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY ],
-// // null, true);
-//
-// // GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY],
-// // null,
-// // true);
-// // GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.TURKEY ]);
+  // // GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY
+  // ],
+  // // null, true);
+  //
+  // // GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY],
+  // // null,
+  // // true);
+  // // GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.TURKEY ]);
 
   // For EmbargoCode
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.EMEA);
@@ -7617,16 +7653,18 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAddrFunction(addAddrFunctionItaly, [ SysLoc.ITALY ]);
   // CMR-2205
-   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR,[SysLoc.TURKEY]);
-   GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR,[SysLoc.TURKEY]);
+  GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addTRAddressTypeValidator, [ SysLoc.TURKEY ]);
 
   // CMR-2093
+
   GEOHandler.addAfterConfig(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(resetSubIndustryCdGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(showCommercialFinanced,[SysLoc.TURKEY]);
   GEOHandler.addAfterConfig(lockCmrOwner,[SysLoc.TURKEY]);
+
   // CYPRUS Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);

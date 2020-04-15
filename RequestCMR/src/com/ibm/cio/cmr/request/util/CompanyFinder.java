@@ -262,32 +262,32 @@ public class CompanyFinder {
 
     List<CompanyRecordModel> cmrMatches = new ArrayList<CompanyRecordModel>();
 
+    String extraParams = "addressType=ZS01&showCmrType=R,P";
+
     FindCMRResultModel results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(),
-        searchModel.getStreetAddress1(), searchModel.getCity(), "addressType=ZS01");
+        searchModel.getStreetAddress1(), searchModel.getCity(), extraParams);
 
     // do a secondary search switching city/street
     if (results == null || results.getItems() == null || results.getItems().isEmpty()) {
       results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(), searchModel.getCity(),
-          searchModel.getStreetAddress1(), "addressType=ZS01");
+          searchModel.getStreetAddress1(), extraParams);
     }
     // try no street
     if (results == null || results.getItems() == null || results.getItems().isEmpty()) {
-      results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(), searchModel.getCity(), null,
-          "addressType=ZS01");
+      results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(), searchModel.getCity(), null, extraParams);
     }
     if (results == null || results.getItems() == null || results.getItems().isEmpty()) {
-      results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(), null, searchModel.getCity(),
-          "addressType=ZS01");
+      results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(), null, searchModel.getCity(), extraParams);
     }
 
     // try no city
     if (results == null || results.getItems() == null || results.getItems().isEmpty()) {
       results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(), null, searchModel.getStreetAddress1(),
-          "addressType=ZS01");
+          extraParams);
     }
     if (results == null || results.getItems() == null || results.getItems().isEmpty()) {
       results = SystemUtil.findCMRsAltLang(searchModel.getIssuingCntry(), 500, searchModel.getName(), searchModel.getStreetAddress1(), null,
-          "addressType=ZS01");
+          extraParams);
     }
 
     if (results != null && !results.getItems().isEmpty()) {
@@ -403,8 +403,8 @@ public class CompanyFinder {
     if (sbDuns.length() > 0) {
       // try to do a secondary matching against FindCMR using DUNS Information
       LOG.debug("Trying to find CMRs with DUNS: " + sbDuns.toString());
-      List<CompanyRecordModel> cmrs = findCMRsViaService(searchModel.getIssuingCntry(), null, 3,
-          "addressType=" + ("897".equals(searchModel.getIssuingCntry()) ? "ZS01,ZI01" : "ZS01") + "&dunsNumberList=" + sbDuns.toString());
+      List<CompanyRecordModel> cmrs = findCMRsViaService(searchModel.getIssuingCntry(), null, 3, "showCmrType=R,P&addressType="
+          + ("897".equals(searchModel.getIssuingCntry()) ? "ZS01,ZI01" : "ZS01") + "&dunsNumberList=" + sbDuns.toString());
       if (cmrs != null) {
         for (CompanyRecordModel cmr : cmrs) {
           cmr.setMatchGrade("DUNS");
@@ -478,22 +478,6 @@ public class CompanyFinder {
     // characters
     boolean isLatinResult = asciiEncoder.canEncode(text);
     return isLatinResult;
-  }
-
-  public static void main(String[] args) throws Exception {
-    System.setProperty("javax.net.ssl.keyStore", "c:/workspace/createcmr/createcmrbatch/store/cmma.keystore");
-    System.setProperty("javax.net.ssl.trustStore", "c:/workspace/createcmr/createcmrbatch/store/cmma.keystore");
-    System.setProperty("javax.net.ssl.keyStorePassword", "cmma123");
-    SystemConfiguration.refresh();
-    CompanyRecordModel search = new CompanyRecordModel();
-    search.setName("中国银行股份");
-    search.setCity("北京市");
-    search.setIssuingCntry("641");
-    search.setStreetAddress1("北京市复兴门内大");
-    List<CompanyRecordModel> companies = findCompanies(search);
-    for (CompanyRecordModel rec : companies) {
-      System.out.println(rec.getCmrNo() + " - " + rec.getName() + " " + rec.getAltName());
-    }
   }
 
 }
