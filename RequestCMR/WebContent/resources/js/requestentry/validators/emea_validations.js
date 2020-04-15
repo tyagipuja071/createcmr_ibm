@@ -3162,6 +3162,7 @@ function setFieldsBehaviourGR() {
   FormManager.readOnly('subIndustryCd');
   FormManager.addValidator('cmrOwner', Validators.REQUIRED, [ 'CMR Owner' ], 'MAIN_IBM_TAB');
   FormManager.resetValidations('sitePartyId');
+  FormManager.readOnly('sitePartyId');
 }
 
 function resetSubIndustryCdGR() {
