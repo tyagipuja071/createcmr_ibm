@@ -316,7 +316,7 @@ public class FranceUtil extends AutomationUtil {
       case "CBIFF":
       case "CBIFL":
         String mainCustNm = zs01.getCustNm1();
-        if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM")) {
+        if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM") && !(data.getCountryUse().length() > 3)) {
           engineData.addRejectionComment("Wrong Customer Name on the main address. IBM should be part of the name.");
           details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
           valid = false;
@@ -336,12 +336,14 @@ public class FranceUtil extends AutomationUtil {
         String custNm1 = zs01.getCustNm1();
         String custNm2 = zs01.getCustNm2();
         String custNm = custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "");
-        if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
-          valid = true;
-        } else {
-          engineData.addRejectionComment("Wrong Customer Name on Host address. CHEZ should be part of the name.");
-          details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
-          valid = false;
+        if(!(data.getCountryUse().length() > 3)){
+          if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
+            valid = true;
+          } else {
+            engineData.addRejectionComment("Wrong Customer Name on Host address. CHEZ should be part of the name.");
+            details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
+            valid = false;
+          }
         }
 
         // For sub_regions of France for this scenario, requests should go the
@@ -389,13 +391,34 @@ public class FranceUtil extends AutomationUtil {
           engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
               "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
         }
-
+        break;
+      case "FIBAB":
+      case "CBBAB":
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
+        break;
+      case "OTFIN":
+      case "CBFIN":
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        } 
+        break;
+      case "GOVRN":
+      case "CBVRN":
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
         break;
       case "INTSO":
       case "CBTSO":
-        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-            "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
       }
       if (admin.getSourceSystId() != null) {
         if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
@@ -635,9 +658,9 @@ public class FranceUtil extends AutomationUtil {
 
     if (changes != null && changes.hasDataChanges()) {
       LOG.debug("Changes has data changes -> " + changes.hasDataChanges());
-      if (changes.isDataChanged("VAT")) {
-        LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT"));
-        UpdatedDataModel vatChange = changes.getDataChange("VAT");
+      if (changes.isDataChanged("VAT #")) {
+        LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT #"));
+        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
         if (vatChange != null) {
           if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
             // check if the name + VAT exists in D&B
@@ -663,8 +686,8 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (changes.isDataChanged("CollectionCd")) {
-        UpdatedDataModel collCdChange = changes.getDataChange("CollectionCd");
+      if (changes.isDataChanged("Collection Code")) {
+        UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
         if (collCdChange != null) {
           if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
             isNegativeCheckNeedeed = true;
@@ -681,8 +704,8 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (changes.isDataChanged("CommercialFinanced")) {
-        UpdatedDataModel commFinanceChange = changes.getDataChange("CommercialFinanced");
+      if (changes.isDataChanged("Top List Speciale")) {
+        UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
         if (commFinanceChange != null) {
           String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
           isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
@@ -697,12 +720,12 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (changes.isDataChanged("ISU") || changes.isDataChanged("ClientTier") || changes.isDataChanged("SearchTerm")
-          || changes.isDataChanged("InstallBranchOff")) {
-        UpdatedDataModel isuCdChange = changes.getDataChange("ISU");
-        UpdatedDataModel clientTierChange = changes.getDataChange("ClientTier");
-        UpdatedDataModel sboChange = changes.getDataChange("SearchTerm");
-        UpdatedDataModel iboChange = changes.getDataChange("InstallBranchOff");
+      if (changes.isDataChanged("ISU Code") || changes.isDataChanged("Client Tier") || changes.isDataChanged("Search Term/Sales Branch Office")
+          || changes.isDataChanged("Installing BO")) {
+        UpdatedDataModel isuCdChange = changes.getDataChange("ISU Code");
+        UpdatedDataModel clientTierChange = changes.getDataChange("Client Tier");
+        UpdatedDataModel sboChange = changes.getDataChange("Search Term/Sales Branch Office");
+        UpdatedDataModel iboChange = changes.getDataChange("Installing BO");
 
         if (isuCdChange != null || clientTierChange != null || sboChange != null || iboChange != null) {
           String designatedUser = SystemParameters.getString("ISU_CTC_SBO_USER");
@@ -741,8 +764,8 @@ public class FranceUtil extends AutomationUtil {
 
     LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
-      if (billing != null && (changes.isAddressChanged("Billing"))) {
-        LOG.debug("Billing changed -> " + changes.isAddressChanged("Billing"));
+      if (billing != null && (changes.isAddressChanged("ZP01"))) {
+        LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
         // Check if address closely matches DnB
         List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
@@ -756,7 +779,7 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (addressH != null && (changes.isAddressChanged("(H Address (IGF))"))) {
+      if (addressH != null && (changes.isAddressChanged("ZD02"))) {
         if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
           isNegativeCheckNeedeed = true;
         }
