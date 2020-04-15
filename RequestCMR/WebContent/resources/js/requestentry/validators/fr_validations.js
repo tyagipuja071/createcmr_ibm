@@ -2011,9 +2011,9 @@ function setAbbrevNameFrDSW() {
       if (abbrNm.endsWith("D3")) {
         abbrNm.substring(0,abbrNm.length-2).trim();
       }
-     if (!abbrNm.includes(" D3 DSW")) {
+     if (!abbrNm.includes(" DSW D3")) {
           abbrNm = abbrNm.length > 15 ? abbrNm.substring(0,15) : abbrNm ;
-          FormManager.setValue('abbrevNm', abbrNm.concat(" D3 DSW"));
+          FormManager.setValue('abbrevNm', abbrNm.concat(" DSW D3"));
       }
     }
   });
