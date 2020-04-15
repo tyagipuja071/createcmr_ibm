@@ -471,22 +471,22 @@ public class GermanyUtil extends AutomationUtil {
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           break;
         case "No Match Found":
-          engineData.addRejectionComment("Coverage cannot be computed automatically.");
-          details.append("Coverage cannot be computed automatically.").append("\n");
+          engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+          details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
           results.setResults("Coverage not calculated.");
           results.setOnError(true);
           break;
         }
       } else {
-        engineData.addRejectionComment("Coverage cannot be computed automatically.");
-        details.append("Coverage cannot be computed automatically.").append("\n");
+        engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+        details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
         results.setResults("Coverage not calculated.");
         results.setOnError(true);
       }
     } else {
       details.setLength(0);
       overrides.clearOverrides();
-      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
+      details.append("Coverage could not be calculated through Buying group or 32S-PostalCode logic.\n Skipping coverage calculation.").append("\n");
       results.setResults("Skipped");
     }
     return true;
