@@ -397,8 +397,12 @@ public class FranceUtil extends AutomationUtil {
             "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
 
       }
-      if (admin.getSourceSystId() != null && "MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-        engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+      if (admin.getSourceSystId() != null) {
+        if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+        } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
+        }
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
@@ -587,7 +591,10 @@ public class FranceUtil extends AutomationUtil {
     response.put(SBO, "");
     if (!sortlMappings.isEmpty()) {
       for (FrSboMapping mapping : sortlMappings) {
-        List<String> isicCds = Arrays.asList(mapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        List<String> isicCds = new ArrayList<String>();
+        if (mapping.getIsicCds() != null && !mapping.getIsicCds().isEmpty()) {
+          isicCds = Arrays.asList(mapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        }
         if (countryUse.equals(mapping.getCountryUse()) && (isicCds.isEmpty() || (!isicCds.isEmpty() && isicCds.contains(isicCd)))
             && isuCd.equals(mapping.getIsu()) && clientTier.equals(mapping.getCtc())) {
           if (StringUtils.isNotBlank(mapping.getPostalCdStarts())) {
