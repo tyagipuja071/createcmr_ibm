@@ -421,18 +421,17 @@ public class GermanyUtil extends AutomationUtil {
 
   private String replaceGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("?", "AE").replaceAll("?", "ae").replaceAll("?", "OE").replaceAll("?", "oe").replaceAll("?", "UE")
-          .replace("?", "ue").replaceAll("?", "SS");
+      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
+          .replace("ü", "ue").replaceAll("ß", "SS");
       return str;
-
     }
     return null;
   }
 
   private String insertGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "?").replaceAll("ae", "?").replace("AE", "?").replaceAll("Oe", "?").replaceAll("oe", "?").replace("OE", "?")
-          .replaceAll("Ue", "?").replace("ue", "?").replace("UE", "?").replaceAll("ss", "?").replaceAll("SS", "?").replace("Ss", "?");
+      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
+          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
       return str;
     }
     return null;
