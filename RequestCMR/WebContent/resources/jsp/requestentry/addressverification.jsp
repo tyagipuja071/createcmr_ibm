@@ -9,21 +9,40 @@
 
 
 <!--  Modal for the Address Verification Rules modal -->
-<cmr:modal title="${ui.title.addressverification}" id="addressVerificationModal" widthId="570">
-  <cmr:row>
-    <cmr:column span="3" width="520">
+<cmr:modal title="${ui.title.addressverification}"
+	id="addressVerificationModal" widthId="570">
+	<cmr:row>
+		<cmr:column span="3" width="520">
       ${ui.addressverificationtext}
     </cmr:column>
-  </cmr:row>
-  <cmr:row topPad="30">
-    <cmr:column span="3" width="520">
-      <input type="checkbox" id="addrVerAgree" dojoType="dijit.form.CheckBox" name="addrVerAgree" value="Y">
+	</cmr:row>
+	<cmr:row topPad="20">
+		<cmr:column span="3" width="520">
+			<input type="checkbox" id="addrVerAgree"
+				dojoType="dijit.form.CheckBox" name="addrVerAgree" value="Y">
       ${ui.addressverificationagree}
     </cmr:column>
-  </cmr:row>
-  <cmr:buttonsRow>
-    <cmr:hr />
-    <cmr:button label="${ui.btn.ok}" onClick="doAcceptAddressVerification()" highlight="true" />
-    <cmr:button label="${ui.btn.cancel}" onClick="doCancelAddressVerification()" highlight="false" pad="true" />
-  </cmr:buttonsRow>
+	</cmr:row>
+	<div style="display:none;" id="dupCMRReasonDiv">
+	<br><b>Duplicate CMR Override Reason</b>
+	<cmr:row topPad="20">
+		<cmr:column span="3" width="520"> 
+      Please provide a reason for proceeding with duplicate CMR creation.
+      <br><b>Note: </b>This action will trigger approvals.
+    </cmr:column>
+    </cmr:row>
+	<cmr:row>
+		<cmr:column span="3">
+			<textarea id="dupCmrRsn" rows="5" cols="50"></textarea>
+		</cmr:column>
+	</cmr:row>
+	<br>
+	</div>
+	<cmr:buttonsRow>
+		<cmr:hr />
+		<cmr:button label="${ui.btn.ok}"
+			onClick="doAcceptAddressVerification()" highlight="true" />
+		<cmr:button label="${ui.btn.cancel}"
+			onClick="doCancelAddressVerification()" highlight="false" pad="true" />
+	</cmr:buttonsRow>
 </cmr:modal>
