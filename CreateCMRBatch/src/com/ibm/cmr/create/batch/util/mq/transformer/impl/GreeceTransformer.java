@@ -499,7 +499,7 @@ public class GreeceTransformer extends EMEATransformer {
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler,
       CmrtCustExt legacyCustExt, CMRRequestContainer cmrObjects) {
     for(Addr addr : cmrObjects.getAddresses()) {
-      if(addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+      if(addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
         legacyCustExt.setiTaxCode((addr.getTaxOffice()));
       }
     }

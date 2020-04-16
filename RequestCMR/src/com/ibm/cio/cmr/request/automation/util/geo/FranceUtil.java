@@ -36,15 +36,10 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemParameters;
-import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
 import com.ibm.cmr.services.client.ServiceClient.Method;
-import com.ibm.cmr.services.client.automation.AutomationResponse;
-import com.ibm.cmr.services.client.automation.eu.VatLayerRequest;
-import com.ibm.cmr.services.client.automation.eu.VatLayerResponse;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
@@ -157,11 +152,10 @@ public class FranceUtil extends AutomationUtil {
     Data data = requestData.getData();
     String countryUse = data.getCountryUse();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
-    String scenarioDesc = getScenarioDescription(entityManager,data);
-
-
+    String scenarioDesc = getScenarioDescription(entityManager, data);
     if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
       case "PRICU":
@@ -322,7 +316,7 @@ public class FranceUtil extends AutomationUtil {
       case "CBIFF":
       case "CBIFL":
         String mainCustNm = zs01.getCustNm1();
-        if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM")) {
+        if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM") && !(data.getCountryUse().length() > 3)) {
           engineData.addRejectionComment("Wrong Customer Name on the main address. IBM should be part of the name.");
           details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
           valid = false;
@@ -342,12 +336,14 @@ public class FranceUtil extends AutomationUtil {
         String custNm1 = zs01.getCustNm1();
         String custNm2 = zs01.getCustNm2();
         String custNm = custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "");
-        if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
-          valid = true;
-        } else {
-          engineData.addRejectionComment("Wrong Customer Name on Host address. CHEZ should be part of the name.");
-          details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
-          valid = false;
+        if(!(data.getCountryUse().length() > 3)){
+          if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
+            valid = true;
+          } else {
+            engineData.addRejectionComment("Wrong Customer Name on Host address. CHEZ should be part of the name.");
+            details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
+            valid = false;
+          }
         }
 
         // For sub_regions of France for this scenario, requests should go the
@@ -395,13 +391,41 @@ public class FranceUtil extends AutomationUtil {
           engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
               "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
         }
-
+        break;
+      case "FIBAB":
+      case "CBBAB":
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
+        break;
+      case "OTFIN":
+      case "CBFIN":
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        } 
+        break;
+      case "GOVRN":
+      case "CBVRN":
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
         break;
       case "INTSO":
       case "CBTSO":
-        engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-            "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-
+        if (countryUse.length() > 3) {
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
+        }
+      }
+      if (admin.getSourceSystId() != null) {
+        if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+        } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
+        }
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
@@ -412,9 +436,9 @@ public class FranceUtil extends AutomationUtil {
     }
     return valid;
   }
-  
-  private String getScenarioDescription(EntityManager entityManager,Data data){
-    
+
+  private String getScenarioDescription(EntityManager entityManager, Data data) {
+
     String sql = ExternalizedQuery.getSql("GET_SCENARIO_DESC_FR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CUST_SUB_TYP_VAL", data.getCustSubGrp());
@@ -467,7 +491,6 @@ public class FranceUtil extends AutomationUtil {
     }
   }
 
-
   @Override
   public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
     String siret = requestData.getData().getTaxCd1();
@@ -486,10 +509,16 @@ public class FranceUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     Addr zs01 = requestData.getAddress("ZS01");
     details.append("\n");
-    if (!isCoverageCalculated
-        || (isCoverageCalculated && !(CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom)))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)
+        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom))) {
+      // If calculated using buying group then skip any other calculation
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else {
+      isCoverageCalculated = false;
+      // if not calculated using bg/gbg try calculation using SIREN
       details.setLength(0);// clear string builder
-      details.append("\nCalculating Coverage using SIREN.").append("\n\n");
+      overrides.clearOverrides(); // clear existing overrides
+      details.append("Calculating Coverage using SIREN.").append("\n\n");
       String siren = StringUtils.isNotBlank(data.getTaxCd1()) ? (data.getTaxCd1().length() > 9 ? data.getTaxCd1().substring(0, 9) : data.getTaxCd1())
           : "";
       if (StringUtils.isNotBlank(siren)) {
@@ -500,7 +529,7 @@ public class FranceUtil extends AutomationUtil {
           CoverageContainer coverage = coverages.get(0);
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
+          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage.getFinalCoverage(), "Final",
               coverage.getFinalCoverageRules(), data.getCmrIssuingCntry(), container);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
@@ -515,79 +544,66 @@ public class FranceUtil extends AutomationUtil {
               overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboValue);
             }
           }
-          String isuCd = coverage.getIsuCd();
-          String clientTier = coverage.getClientTierCd();
-          if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-            overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-          }
+          isCoverageCalculated = true;
           results.setResults("Coverage Calculated");
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           engineData.put(AutomationEngineData.COVERAGE_CALCULATED, coverage.getFinalCoverage());
         } else {
           details.append("Coverage could not be calculated on the basis of SIREN").append("\n");
           results.setResults("Review needed");
-          engineData.addNegativeCheckStatus("COVERAGE_ERROR", "Coverage could not be calculated on the basis of SIREN");
         }
       } else {
-        details.append("SIREN/SIRET not found on the request.").append("\n");
+        details.append("Coverage could not be calculated on the basis of SIREN. SIREN/SIRET not found on the request.").append("\n");
         results.setResults("SIREN not found");
-        engineData.addNegativeCheckStatus("SIREN_NOT_FOUND", "SIREN/SIRET not found on the request.");
-      }
-    } else if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
-        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
-      details.append("\nISU Code supplied on request = " + data.getIsuCd()).append("\n");
-      details.append("Client Tier supplied on request = " + data.getClientTier()).append("\n");
-      String isuCd = container.getIsuCd();
-      String clientTier = container.getClientTierCd();
-      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-        details.append("\nISU Code calculated on basis of coverage = " + isuCd).append("\n");
-        details.append("Client Tier calculated on basis of coverage = " + clientTier).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-        if (isuCd.equals(data.getIsuCd()) && clientTier.equals(data.getClientTier())) {
-          details.append("\nSupplied ISU Code and Client Tier match the calculated ISU Code and Client Tier").append("\n");
-        }
       }
 
-      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
-      details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
-      HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), zs01.getPostCd(), data.getIsuCd(),
-          data.getClientTier());
-      LOG.debug("Calculated SBO: " + response.get(SBO));
-      if (StringUtils.isNotBlank(response.get(MATCHING))) {
-        switch (response.get(MATCHING)) {
-        case "Exact Match":
-          overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
-          details.append("Coverage calculation Successful.").append("\n");
-          details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
-          details.append("Matched Rule:").append("\n");
-          details.append("ISIC = " + data.getIsicCd()).append("\n");
-          details.append("ISU = " + data.getIsuCd()).append("\n");
-          details.append("CTC = " + data.getClientTier()).append("\n");
-          details.append("Postal Code Starts = " + response.get(POSTAL_CD_STARTS)).append("\n\n");
-          details.append("Matching: " + response.get(MATCHING));
-          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-          break;
-        case "No Match Found":
-          engineData.addRejectionComment("Coverage cannot be computed automatically.");
-          details.append("Coverage cannot be computed automatically.").append("\n");
-          results.setResults("Coverage not calculated.");
-          results.setOnError(true);
-          break;
+      if (!isCoverageCalculated) {
+        // if not calculated using siren as well
+        if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+          details.append("\nCalculating coverage using 32S-PostalCode logic.").append("\n");
+          HashMap<String, String> response = getSBOFromPostalCodeMapping(data.getCountryUse(), data.getIsicCd(), zs01.getPostCd(), data.getIsuCd(),
+              data.getClientTier());
+          LOG.debug("Calculated SBO: " + response.get(SBO));
+          if (StringUtils.isNotBlank(response.get(MATCHING))) {
+            switch (response.get(MATCHING)) {
+            case "Exact Match":
+              overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), response.get(SBO));
+              details.append("Coverage calculation Successful.").append("\n");
+              details.append("Computed SBO = " + response.get(SBO)).append("\n\n");
+              details.append("Matched Rule:").append("\n");
+              details.append("ISIC = " + data.getIsicCd()).append("\n");
+              details.append("ISU = " + data.getIsuCd()).append("\n");
+              details.append("CTC = " + data.getClientTier()).append("\n");
+              details.append("Postal Code Starts = " + response.get(POSTAL_CD_STARTS)).append("\n\n");
+              details.append("Matching: " + response.get(MATCHING));
+              engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+              break;
+            case "No Match Found":
+              // set on error if coverage could not be determined using mapping
+              engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+              details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
+              results.setResults("Coverage not calculated.");
+              results.setOnError(true);
+              break;
+            }
+          } else {
+            // set on error if coverage still not calculated using 32S logic
+            engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+            details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
+            results.setResults("Coverage not calculated.");
+            results.setOnError(true);
+          }
+        } else {
+          // if isu ctc is not 32S and coverage is not calculated (needs
+          // review... whether to set on error true or set skip results here)
+          details.setLength(0);
+          overrides.clearOverrides();
+          details.append("Coverage could not be calculated through Buying group or 32S-PostalCode logic.\n Skipping coverage calculation.")
+              .append("\n");
+          results.setResults("Skipped");
         }
-      } else {
-        engineData.addRejectionComment("Coverage cannot be computed automatically.");
-        details.append("Coverage cannot be computed automatically.").append("\n");
-        results.setResults("Coverage not calculated.");
-        results.setOnError(true);
       }
-    } else {
-      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
-      results.setResults("Coverage calculation skipped.");
     }
-
     return true;
   }
 
@@ -598,7 +614,10 @@ public class FranceUtil extends AutomationUtil {
     response.put(SBO, "");
     if (!sortlMappings.isEmpty()) {
       for (FrSboMapping mapping : sortlMappings) {
-        List<String> isicCds = Arrays.asList(mapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        List<String> isicCds = new ArrayList<String>();
+        if (mapping.getIsicCds() != null && !mapping.getIsicCds().isEmpty()) {
+          isicCds = Arrays.asList(mapping.getIsicCds().replaceAll("\n", "").replaceAll(" ", "").split(","));
+        }
         if (countryUse.equals(mapping.getCountryUse()) && (isicCds.isEmpty() || (!isicCds.isEmpty() && isicCds.contains(isicCd)))
             && isuCd.equals(mapping.getIsu()) && clientTier.equals(mapping.getCtc())) {
           if (StringUtils.isNotBlank(mapping.getPostalCdStarts())) {
@@ -635,13 +654,13 @@ public class FranceUtil extends AutomationUtil {
     Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder detail = new StringBuilder();
     boolean isNegativeCheckNeedeed = false;
-    LOG.debug("Changes are -> "+changes);
+    LOG.debug("Changes are -> " + changes);
 
     if (changes != null && changes.hasDataChanges()) {
-      LOG.debug("Changes has data changes -> "+changes.hasDataChanges());
-      if (changes.isDataChanged("VAT")) {
-        LOG.debug("Changes has VAT changes -> "+changes.isDataChanged("VAT"));
-        UpdatedDataModel vatChange = changes.getDataChange("VAT");
+      LOG.debug("Changes has data changes -> " + changes.hasDataChanges());
+      if (changes.isDataChanged("VAT #")) {
+        LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT #"));
+        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
         if (vatChange != null) {
           if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
             // check if the name + VAT exists in D&B
@@ -667,8 +686,8 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (changes.isDataChanged("CollectionCd")) {
-        UpdatedDataModel collCdChange = changes.getDataChange("CollectionCd");
+      if (changes.isDataChanged("Collection Code")) {
+        UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
         if (collCdChange != null) {
           if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
             isNegativeCheckNeedeed = true;
@@ -685,8 +704,8 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (changes.isDataChanged("CommercialFinanced")) {
-        UpdatedDataModel commFinanceChange = changes.getDataChange("CommercialFinanced");
+      if (changes.isDataChanged("Top List Speciale")) {
+        UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
         if (commFinanceChange != null) {
           String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
           isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
@@ -701,12 +720,12 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (changes.isDataChanged("ISU") || changes.isDataChanged("ClientTier") || changes.isDataChanged("SearchTerm")
-          || changes.isDataChanged("InstallBranchOff")) {
-        UpdatedDataModel isuCdChange = changes.getDataChange("ISU");
-        UpdatedDataModel clientTierChange = changes.getDataChange("ClientTier");
-        UpdatedDataModel sboChange = changes.getDataChange("SearchTerm");
-        UpdatedDataModel iboChange = changes.getDataChange("InstallBranchOff");
+      if (changes.isDataChanged("ISU Code") || changes.isDataChanged("Client Tier") || changes.isDataChanged("Search Term/Sales Branch Office")
+          || changes.isDataChanged("Installing BO")) {
+        UpdatedDataModel isuCdChange = changes.getDataChange("ISU Code");
+        UpdatedDataModel clientTierChange = changes.getDataChange("Client Tier");
+        UpdatedDataModel sboChange = changes.getDataChange("Search Term/Sales Branch Office");
+        UpdatedDataModel iboChange = changes.getDataChange("Installing BO");
 
         if (isuCdChange != null || clientTierChange != null || sboChange != null || iboChange != null) {
           String designatedUser = SystemParameters.getString("ISU_CTC_SBO_USER");
@@ -743,10 +762,10 @@ public class FranceUtil extends AutomationUtil {
     Addr billing = requestData.getAddress("ZP01");
     StringBuilder detail = new StringBuilder();
 
-    LOG.debug("Address changes are -> "+changes);
+    LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
-      if (billing != null && (changes.isAddressChanged("Billing"))) {
-        LOG.debug("Billing changed -> "+changes.isAddressChanged("Billing"));
+      if (billing != null && (changes.isAddressChanged("ZP01"))) {
+        LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
         // Check if address closely matches DnB
         List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
@@ -760,7 +779,7 @@ public class FranceUtil extends AutomationUtil {
         }
       }
 
-      if (addressH != null && (changes.isAddressChanged("(H Address (IGF))"))) {
+      if (addressH != null && (changes.isAddressChanged("ZD02"))) {
         if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
           isNegativeCheckNeedeed = true;
         }
@@ -780,6 +799,4 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
- 
- 
 }

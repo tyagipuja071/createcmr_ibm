@@ -117,7 +117,7 @@ app.controller('ConfigController', [ '$scope', '$document', '$http', '$timeout',
           processDesc : processDesc,
           processType : processType,
           processPrefix : rec.ret4.substring(0, rec.ret4.indexOf('_')),
-          requestTyp : rec.ret5,
+          requestTyp : processType == 'A' ? '*' : rec.ret5,
           actionOnError : !rec.ret6 || rec.ret6 == 'P' ? '' : rec.ret6.trim(),
           overrideDataIndc : rec.ret7 == 'Y' ? true : false,
           stopOnErrorIndc : rec.ret8 == 'Y' ? true : false,
@@ -281,6 +281,7 @@ app.controller('ConfigController', [ '$scope', '$document', '$http', '$timeout',
     });
     if (rec.processType == 'A') {
       rec.actionOnError = 'W';
+      rec.requestTyp = '*';
     }
     if (rec.nonImportable) {
       rec.overrideDataIndc = false;

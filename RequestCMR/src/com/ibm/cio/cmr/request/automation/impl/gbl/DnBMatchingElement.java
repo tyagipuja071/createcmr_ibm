@@ -219,12 +219,20 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
     List<DnbOrganizationId> orgIDDetails = dnbRecord.getOrgIdDetails();
 
-    details.append("Organization IDs:\n");
+    details.append("Organization IDs:");
+    boolean relevantOrgId = false;
     for (int i = 0; i < orgIDDetails.size(); i++) {
       DnbOrganizationId orgId = orgIDDetails.get(i);
       if (DnBUtil.isRelevant(dnbRecord.getDnbCountry(), orgId)) {
-        details.append(orgId.getOrganizationIdType() + " - " + orgId.getOrganizationIdCode() + "\n");
+        details.append("\n - " + orgId.getOrganizationIdType() + " = " + orgId.getOrganizationIdCode());
+        relevantOrgId = true;
       }
+    }
+
+    if (!relevantOrgId) {
+      details.append("(No relevant Org Id found)\n");
+    } else {
+      details.append("\n");
     }
 
     LOG.debug("Connecting to D&B details service..");

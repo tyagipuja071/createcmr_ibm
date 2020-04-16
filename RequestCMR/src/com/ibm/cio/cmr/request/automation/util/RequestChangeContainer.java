@@ -108,7 +108,7 @@ public class RequestChangeContainer {
    */
   public boolean isAddressChanged(String addrType) {
     for (UpdatedNameAddrModel addrChange : this.addressUpdates) {
-      if (addrType.equals(addrChange.getAddrType())) {
+      if (addrType.equals(addrChange.getAddrTypeCode())) {
         return true;
       }
     }
@@ -124,11 +124,11 @@ public class RequestChangeContainer {
    */
   public boolean isAddressFieldChanged(String addrType, String fieldId) {
     for (UpdatedNameAddrModel addrChange : this.addressUpdates) {
-      if (addrType.equals(addrChange.getAddrType()) && fieldId.equals(addrChange.getDataField())) {
+      if (addrType.equals(addrChange.getAddrTypeCode()) && fieldId.equals(addrChange.getDataField())) {
         return true;
       }
     }
-    return true;
+    return false;
   }
 
   /**
@@ -154,7 +154,7 @@ public class RequestChangeContainer {
    */
   public UpdatedNameAddrModel getAddressChange(String addrType, String fieldId) {
     for (UpdatedNameAddrModel addrChange : this.addressUpdates) {
-      if (addrType.equals(addrChange.getAddrType()) && fieldId.equals(addrChange.getDataField())) {
+      if (addrType.equals(addrChange.getAddrTypeCode()) && fieldId.equals(addrChange.getDataField())) {
         return addrChange;
       }
     }

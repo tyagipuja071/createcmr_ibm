@@ -35,7 +35,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.Person;
-import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
@@ -44,7 +43,6 @@ import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 
@@ -92,6 +90,7 @@ public class GermanyUtil extends AutomationUtil {
       AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
     // cmr-2067 fix
@@ -276,6 +275,13 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
+      if (admin.getSourceSystId() != null) {
+        if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+        } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+          engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
+        }
+      }
 
       // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
       // skipCompanyCheckForScenario(requestData, engineData,
@@ -442,18 +448,12 @@ public class GermanyUtil extends AutomationUtil {
     if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
         && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
-      // details.append("Coverage calculated using Global/Domestic Buying
-      // Group.").append("\n");
       details.append("Computed SORTL = " + coverageId).append("\n");
-      String isuCd = container.getIsuCd();
-      String clientTier = container.getClientTierCd();
-      if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ISU_CD", data.getIsuCd(), isuCd);
-        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "CLIENT_TIER", data.getClientTier(), clientTier);
-      }
       results.setResults("Coverage Calculated");
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
     } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier())) {
+      details.setLength(0); // clearing details
+      overrides.clearOverrides();
       details.append("Calculating coverage using 32S-PostalCode logic.").append("\n");
       HashMap<String, String> response = getSORTLFromPostalCodeMapping(data.getSubIndustryCd(), zs01.getPostCd(), data.getIsuCd(),
           data.getClientTier());
@@ -475,20 +475,22 @@ public class GermanyUtil extends AutomationUtil {
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           break;
         case "No Match Found":
-          engineData.addRejectionComment("Coverage cannot be computed automatically.");
-          details.append("Coverage cannot be computed automatically.").append("\n");
+          engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+          details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
           results.setResults("Coverage not calculated.");
           results.setOnError(true);
           break;
         }
       } else {
-        engineData.addRejectionComment("Coverage cannot be computed automatically.");
-        details.append("Coverage cannot be computed automatically.").append("\n");
+        engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+        details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
         results.setResults("Coverage not calculated.");
         results.setOnError(true);
       }
     } else {
-      details.append("Skipped coverage calculation from 32S-PostalCode logic.").append("\n");
+      details.setLength(0);
+      overrides.clearOverrides();
+      details.append("Coverage could not be calculated through Buying group or 32S-PostalCode logic.\n Skipping coverage calculation.").append("\n");
       results.setResults("Skipped");
     }
     return true;
@@ -502,8 +504,8 @@ public class GermanyUtil extends AutomationUtil {
     StringBuilder detail = new StringBuilder();
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
-      if (changes.isDataChanged("VAT")) {
-        UpdatedDataModel vatChange = changes.getDataChange("VAT");
+      if (changes.isDataChanged("VAT #")) {
+        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
         if (vatChange != null) {
           if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
             // check if the name + VAT exists in D&B
@@ -518,27 +520,39 @@ public class GermanyUtil extends AutomationUtil {
               }
             }
             if (isNegativeCheckNeedeed) {
-              validation.setSuccess(false);
-              validation.setMessage("Not validated");
               detail.append("Updates to VAT need verification as it does'nt matches DnB");
-              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
               LOG.debug("Updates to VAT need verification as it does not matches DnB");
             }
 
           } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
             admin.setScenarioVerifiedIndc("N");
+            entityManager.merge(admin);
             detail.append("Setting scenario verified indc= N as VAT is blank");
             LOG.debug("Setting scenario verified indc= N as VAT is blank");
           }
+
         }
+      } else {
+        isNegativeCheckNeedeed = true;
+        detail.append("Updates to data were found, review is required.");
+        LOG.debug("Updates to data other than VAT were found, review is required.");
       }
 
     }
-    if (!isNegativeCheckNeedeed) {
+    if (isNegativeCheckNeedeed) {
+      validation.setSuccess(false);
+      validation.setMessage("Not validated");
+      engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+
+    } else {
       validation.setSuccess(true);
       validation.setMessage("Validated");
+      if (detail.toString().isEmpty()) {
+        detail.append("No data updates made on the request");
+      }
     }
     output.setDetails(detail.toString());
+    output.setProcessOutput(validation);
     return true;
   }
 
@@ -547,6 +561,7 @@ public class GermanyUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
+    List<Addr> addressList = requestData.getAddresses();
     boolean isInstallAtMatchesDnb = true;
     boolean isBillToMatchesDnb = true;
     boolean isNegativeCheckNeedeed = false;
@@ -565,27 +580,36 @@ public class GermanyUtil extends AutomationUtil {
         output.setDetails("Skipping checks as customer class is " + data.getCustClass() + " and only address changes.");
         validation.setSuccess(true);
         validation.setMessage("No Validations");
+        output.setProcessOutput(validation);
         return true;
       }
 
-      if (shipTo != null && (changes.isAddressChanged("Ship To") || isAddressAdded(shipTo))) {
+      if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
         // Check If Address already exists on request
         isShipToExistOnReq = isAddressAleardyExists(entityManager, shipTo, reqId);
         if (isShipToExistOnReq) {
           detail.append("Ship To already exists on the request with same details.");
           validation.setMessage("ShipTo already exists");
           engineData.addRejectionComment("Ship To already exists on the request with same details.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          output.setProcessOutput(validation);
           LOG.debug("Ship To already exists on the request with same details.");
+          return true;
         }
       }
 
-      if (installAt != null && (changes.isAddressChanged("Install At (1)") || isAddressAdded(installAt))) {
+      if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
         // Check If Address already exists on request
         isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
         if (isInstallAtExistOnReq) {
           detail.append("Install At already exists on the request with same details.");
           engineData.addRejectionComment("Install At already exists on the request with same details.");
           LOG.debug("Install At already exists on the request with same details.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          output.setProcessOutput(validation);
+          return true;
         }
         // Check if address closely matches DnB
         List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt);
@@ -599,13 +623,17 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      if (billTo != null && (changes.isAddressChanged("Bill To") || isAddressAdded(billTo))) {
+      if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
         // Check If Address already exists on request
         isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
         if (isBillToExistOnReq) {
           detail.append("Bill To already exists on the request with same details.");
           engineData.addRejectionComment("Bill To already exists on the request with same details.");
           LOG.debug("Bill To already exists on the request with same details.");
+          output.setOnError(true);
+          validation.setSuccess(false);
+          output.setProcessOutput(validation);
+          return true;
         }
 
         // Check if address closely matches DnB
@@ -626,17 +654,34 @@ public class GermanyUtil extends AutomationUtil {
         validation.setMessage("Not validated");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
       } else {
-        validation.setSuccess(true);
-        detail.append("Updates to relevant addresses found but have been marked as Verified.");
-        validation.setMessage("Validated");
+        for (Addr addr : addressList) {
+          if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department")) {
+            validation.setSuccess(true);
+            LOG.debug("Department/Attn is found to be updated.Updates verified.");
+            detail.append("Updates to relevant addresses found but have been marked as Verified.");
+            validation.setMessage("Validated");
+            engineData.clearNegativeCheckStatus("UPDT_REVIEW_NEEDED");
+            isNegativeCheckNeedeed = false;
+            break;
+          }
+          isNegativeCheckNeedeed = true;
+        }
+
+        if (isNegativeCheckNeedeed) {
+          detail.append("Updates to addresses found which cannot be checked automatically.");
+          LOG.debug("Updates to addresses found which cannot be checked automatically.");
+          validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+        }
+
       }
 
     }
     output.setDetails(detail.toString());
+    output.setProcessOutput(validation);
     return true;
   }
-
- 
 
   /**
    * Checks if the address is added on the Update Request

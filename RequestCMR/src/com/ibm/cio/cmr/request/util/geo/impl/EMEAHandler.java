@@ -3251,7 +3251,8 @@ public class EMEAHandler extends BaseSOFHandler {
 		map.put("##CustomerScenarioSubType", "custSubGrp");
 		map.put("##EngineeringBo", "engineeringBo");
 		map.put("##CodFlag", "creditCd");
-    map.put("##CommercialFinanced", "commercialFinanced");
+	    map.put("##CommercialFinanced", "commercialFinanced");
+	    map.put("##CustClass", "custClass");
 		return map;
 	}
 

@@ -135,7 +135,7 @@ public class SingleReactService extends BaseSimpleService<FindCMRResultModel> {
 
         cmrRecord.setCmrTier("");
         cmrRecord.setCmrInacType("");
-        cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? kna1.getZzkvSic().trim().substring(0, 4) : "");
+        cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? (kna1.getZzkvSic().trim().length()>4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
         cmrRecord.setCmrSortl("");
         cmrRecord.setCmrIssuedByDesc("");
         cmrRecord.setCmrRdcCreateDate("");
