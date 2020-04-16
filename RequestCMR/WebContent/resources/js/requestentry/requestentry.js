@@ -231,6 +231,17 @@ function doAcceptAddressVerification() {
     cmr.showAlert('You must agree to the Address Verification Rules to proceed.');
     return;
   }
+
+  if (duplicateCMRMatchesCheck()) {
+    var dupCmrReason = dojo.byId('dupCmrRsn').value;
+    if (dupCmrReason && dupCmrReason != null && dupCmrReason.trim().length > 0) {
+      FormManager.setValue('dupCmrReason', dupCmrReason.trim());
+    } else {
+      cmr.showAlert('You must provide a Duplicate CMR Override Reason to proceed.');
+      return;
+    }
+  }
+
   cmr.hideModal('addressVerificationModal');
   doYourAction();
 }
@@ -737,6 +748,16 @@ function afterConfigChange() {
     GEOHandler.executeAfterConfigs();
   }
   dnbAutoChk();
+  if (duplicateCMRMatchesCheck()) {
+    cmr.showNode('dupCMRReasonDiv');
+    var reason = FormManager.getActualValue('dupCmrReason');
+    if (reason != null && reason != '') {
+      FormManager.setValue('dupCmrRsn', reason);
+    }
+    duplicateCMRMatchesNotif();
+  } else {
+    cmr.hideNode('dupCMRReasonDiv');
+  }
 
   FormManager.ready();
 }
@@ -1146,6 +1167,29 @@ function dnbAutoChk() {
   var userRole = FormManager.getActualValue('userRole');
   if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Rejected' && findDnbResult != 'Accepted' && userRole != 'Viewer') {
     cmr.showModal('DnbAutoCheckModal');
+  }
+}
+
+function duplicateCMRMatchesNotif() {
+  if (duplicateCMRMatchesCheck()) {
+    cmr
+        .showAlert(
+            'Existing CMR(s) were found with the similar information as the current request. Please check the CMR(s) provided in the request comments.<br><br>To proceed with duplicate CMR creation, please provide the override reason while sending for processing.<br><b>Note: </b>Duplicate CMR creation will trigger approvals',
+            'Duplicate CMR(s) Found');
+  }
+}
+
+function duplicateCMRMatchesCheck() {
+  var requestId = _pagemodel.reqId;
+  var reqType = _pagemodel.reqType;
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var matchIndc = FormManager.getActualValue('matchIndc');
+  var findDnbResult = FormManager.getActualValue('findDnbResult');
+  var userRole = FormManager.getActualValue('userRole');
+  if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'C' && userRole != 'Viewer') {
+    return true;
+  } else {
+    return false;
   }
 }
 
