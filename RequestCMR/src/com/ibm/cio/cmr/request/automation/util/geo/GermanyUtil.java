@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -103,7 +104,7 @@ public class GermanyUtil extends AutomationUtil {
           String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
           if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
               || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-              || custNm.contains("e.G") || custNm.contains("mit beschrÃ¤nkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
+              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
             engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
             details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
             valid = false;
@@ -420,8 +421,8 @@ public class GermanyUtil extends AutomationUtil {
 
   private String replaceGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ã„", "AE").replaceAll("Ã¤", "ae").replaceAll("Ã–", "OE").replaceAll("Ã¶", "oe").replaceAll("Ãœ", "UE")
-          .replace("Ã¼", "ue").replaceAll("ÃŸ", "SS");
+      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
+          .replace("ü", "ue").replaceAll("ß", "SS");
       return str;
 
     }
@@ -430,8 +431,8 @@ public class GermanyUtil extends AutomationUtil {
 
   private String insertGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "Ã„").replaceAll("ae", "Ã¤").replace("AE", "Ã„").replaceAll("Oe", "Ã–").replaceAll("oe", "Ã¶").replace("OE", "Ã–")
-          .replaceAll("Ue", "Ãœ").replace("ue", "Ã¼").replace("UE", "Ãœ").replaceAll("ss", "ÃŸ").replaceAll("SS", "ÃŸ").replace("Ss", "ÃŸ");
+      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
+          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
       return str;
     }
     return null;
@@ -708,23 +709,58 @@ public class GermanyUtil extends AutomationUtil {
     String sql = ExternalizedQuery.getSql("AUTO.DE.CHECK_IF_ADDRESS_EXIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
-    query.setParameter("NAME1", addrToBeCHecked.getCustNm1());
-    query.setParameter("NAME2", addrToBeCHecked.getCustNm2());
-    query.setParameter("DEPT", addrToBeCHecked.getDept());
-    query.setParameter("FLOOR", addrToBeCHecked.getFloor());
-    query.setParameter("BLDG", addrToBeCHecked.getBldg());
-    query.setParameter("OFFICE", addrToBeCHecked.getOffice());
-    query.setParameter("LAND_CNTRY", addrToBeCHecked.getLandCntry());
-    query.setParameter("STATE", addrToBeCHecked.getStateProv());
-    query.setParameter("ADDR_TXT", addrToBeCHecked.getAddrTxt());
-    query.setParameter("PO_BOX", addrToBeCHecked.getPoBox());
-    query.setParameter("POST_CD", addrToBeCHecked.getPostCd());
-    query.setParameter("CITY", addrToBeCHecked.getCity1());
-    query.setParameter("PHONE", addrToBeCHecked.getCustNm1());
-    query.setParameter("COUNTY", addrToBeCHecked.getCounty());
-    query.setParameter("TRANSPORT_ZONE", addrToBeCHecked.getTransportZone());
-    // query.setParameter("ADDR_TYPE", addrToBeCHecked.getId().getAddrType());
     query.setParameter("ADDR_SEQ", addrToBeCHecked.getId().getAddrSeq());
+    query.setParameter("NAME1", addrToBeCHecked.getCustNm1());
+    query.setParameter("LAND_CNTRY", addrToBeCHecked.getLandCntry());
+    query.setParameter("CITY", addrToBeCHecked.getCity1());
+    query.setParameter("TRANSPORT_ZONE", addrToBeCHecked.getTransportZone());
+    if (addrToBeCHecked.getAddrTxt() != null) {
+      query.append(" and ADDR_TXT = :ADDR_TXT");
+      query.setParameter("ADDR_TXT", addrToBeCHecked.getAddrTxt());
+    }
+    if (addrToBeCHecked.getCustNm2() != null) {
+      query.append(" and CUST_NM2 = :NAME2");
+      query.setParameter("NAME2", addrToBeCHecked.getCustNm2());
+    }
+    if (addrToBeCHecked.getDept() != null) {
+      query.append(" and DEPT = :DEPT");
+      query.setParameter("DEPT", addrToBeCHecked.getDept());
+    }
+    if (addrToBeCHecked.getFloor() != null) {
+      query.append(" and FLOOR= :FLOOR");
+      query.setParameter("FLOOR", addrToBeCHecked.getFloor());
+    }
+    if (addrToBeCHecked.getBldg() != null) {
+      query.append(" and BLDG= :BLDG");
+      query.setParameter("BLDG", addrToBeCHecked.getBldg());
+    }
+    if (addrToBeCHecked.getOffice() != null) {
+      query.append(" and OFFICE =:OFFICE");
+      query.setParameter("OFFICE", addrToBeCHecked.getOffice());
+    }
+    if (addrToBeCHecked.getStateProv() != null) {
+      query.append(" and STATE_PROV = :STATE");
+      query.setParameter("STATE", addrToBeCHecked.getStateProv());
+    }
+    if (addrToBeCHecked.getPoBox() != null) {
+      query.append(" and PO_BOX = :PO_BOX");
+      query.setParameter("PO_BOX", addrToBeCHecked.getPoBox());
+    }
+    if (addrToBeCHecked.getPostCd() != null) {
+      query.append(" and POST_CD= :POST_CD");
+      query.setParameter("POST_CD", addrToBeCHecked.getPostCd());
+    }
+    if (addrToBeCHecked.getCustPhone() != null) {
+      query.append(" and CUST_PHONE = :PHONE");
+      query.setParameter("PHONE", addrToBeCHecked.getCustPhone());
+    }
+    if (addrToBeCHecked.getCounty() != null) {
+      query.append(" and COUNTY= :COUNTY");
+      query.setParameter("COUNTY", addrToBeCHecked.getCounty());
+    }
+
+    // query.setParameter("ADDR_TYPE", addrToBeCHecked.getId().getAddrType());
+
     String res = query.getSingleResult(String.class);
     if (res != null) {
       if (Integer.parseInt(res) == 1) {
@@ -732,6 +768,21 @@ public class GermanyUtil extends AutomationUtil {
       }
     }
     return addrExists;
+  }
+
+  private boolean isOnlyDeptUpdated(RequestChangeContainer changes) {
+    boolean isOnlyDeptUpdated = true;
+    List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
+    String[] addressFields = { "Customer Name 1", "Customer Name 2", "Floor", "Building", "Office" };
+    List<String> relevantFieldNames = Arrays.asList(addressFields);
+    for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
+      String fieldId = updatedAddrModel.getDataField();
+      if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
+        isOnlyDeptUpdated = false;
+      }
+    }
+
+    return isOnlyDeptUpdated;
   }
 
 }
