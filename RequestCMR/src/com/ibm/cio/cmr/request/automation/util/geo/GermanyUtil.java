@@ -104,7 +104,7 @@ public class GermanyUtil extends AutomationUtil {
           String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
           if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
               || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-              || custNm.contains("e.G") || custNm.contains("mit beschr�nkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
+              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
             engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
             details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
             valid = false;
