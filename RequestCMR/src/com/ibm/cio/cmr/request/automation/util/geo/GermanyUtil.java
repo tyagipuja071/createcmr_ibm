@@ -104,7 +104,7 @@ public class GermanyUtil extends AutomationUtil {
           String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
           if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
               || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
+              || custNm.contains("e.G") || custNm.contains("mit beschr?nkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
             engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
             details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
             valid = false;
@@ -421,8 +421,8 @@ public class GermanyUtil extends AutomationUtil {
 
   private String replaceGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
-          .replace("ü", "ue").replaceAll("ß", "SS");
+      String str = input.replaceAll("?", "AE").replaceAll("?", "ae").replaceAll("?", "OE").replaceAll("?", "oe").replaceAll("?", "UE")
+          .replace("?", "ue").replaceAll("?", "SS");
       return str;
 
     }
@@ -431,8 +431,8 @@ public class GermanyUtil extends AutomationUtil {
 
   private String insertGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
-          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
+      String str = input.replaceAll("Ae", "?").replaceAll("ae", "?").replace("AE", "?").replaceAll("Oe", "?").replaceAll("oe", "?").replace("OE", "?")
+          .replaceAll("Ue", "?").replace("ue", "?").replace("UE", "?").replaceAll("ss", "?").replaceAll("SS", "?").replace("Ss", "?");
       return str;
     }
     return null;
@@ -508,12 +508,14 @@ public class GermanyUtil extends AutomationUtil {
       if (changes.isDataChanged("VAT #")) {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
         if (vatChange != null) {
-          if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+          if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
+              || (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
             // check if the name + VAT exists in D&B
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
+            String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
             if (!matches.isEmpty()) {
               for (DnBMatchingResponse dnbRecord : matches) {
-                if ("Y".equals(dnbRecord.getOrgIdMatch())) {
+                if ("Y".equals(dnbRecord.getOrgIdMatch()) && (StringUtils.isNotEmpty(custName) && custName.equals(dnbRecord.getDnbName()))) {
                   isNegativeCheckNeedeed = false;
                   break;
                 }
@@ -521,22 +523,29 @@ public class GermanyUtil extends AutomationUtil {
               }
             }
             if (isNegativeCheckNeedeed) {
-              detail.append("Updates to VAT need verification as it does'nt matches DnB");
-              LOG.debug("Updates to VAT need verification as it does not matches DnB");
+              detail.append("Updates to VAT need verification as it doesn't matches DnB.\n");
+              LOG.debug("Updates to VAT need verification as it does not matches DnB.");
+            } else {
+              detail.append("Updates to VAT matches DnB.\n");
+              LOG.debug("Updates to VAT matches DnB.\n");
             }
 
           } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isBlank(vatChange.getNewData())) {
             admin.setScenarioVerifiedIndc("N");
             entityManager.merge(admin);
-            detail.append("Setting scenario verified indc= N as VAT is blank");
-            LOG.debug("Setting scenario verified indc= N as VAT is blank");
+            detail.append("Setting scenario verified indc= N as VAT is blank.\n");
+            LOG.debug("Setting scenario verified indc= N as VAT is blank.");
+          } else if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+            isNegativeCheckNeedeed = true;
+            detail.append("Updates to VAT need verification.\n");
+            LOG.debug("Updates to VAT need verification.");
           }
 
         }
       } else {
         isNegativeCheckNeedeed = true;
-        detail.append("Updates to data were found, review is required.");
-        LOG.debug("Updates to data other than VAT were found, review is required.");
+        detail.append("Updates to data were found, review is required.\n");
+        LOG.debug("Updates to data were found, review is required.");
       }
 
     }
@@ -656,12 +665,12 @@ public class GermanyUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
       } else {
         for (Addr addr : addressList) {
-          if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department")) {
+          if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department") && isOnlyDeptUpdated(changes)
+              && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") != null) {
             validation.setSuccess(true);
             LOG.debug("Department/Attn is found to be updated.Updates verified.");
             detail.append("Updates to relevant addresses found but have been marked as Verified.");
             validation.setMessage("Validated");
-            engineData.clearNegativeCheckStatus("UPDT_REVIEW_NEEDED");
             isNegativeCheckNeedeed = false;
             break;
           }
@@ -773,12 +782,14 @@ public class GermanyUtil extends AutomationUtil {
   private boolean isOnlyDeptUpdated(RequestChangeContainer changes) {
     boolean isOnlyDeptUpdated = true;
     List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-    String[] addressFields = { "Customer Name 1", "Customer Name 2", "Floor", "Building", "Office" };
+    String[] addressFields = { "Customer Name 1", "Customer Name 2", "Floor", "Building", "Office", "Country (Landed)", "State/Province", "County",
+        "Street Address", "PostBox", "Postal Code", "City", "Phone #", "Transport Zone" };
     List<String> relevantFieldNames = Arrays.asList(addressFields);
     for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
       String fieldId = updatedAddrModel.getDataField();
       if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
         isOnlyDeptUpdated = false;
+        break;
       }
     }
 
