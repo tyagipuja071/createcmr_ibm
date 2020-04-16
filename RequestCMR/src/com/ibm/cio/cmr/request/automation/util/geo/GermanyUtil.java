@@ -104,7 +104,7 @@ public class GermanyUtil extends AutomationUtil {
           String custNm = addr.getCustNm1() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2() : "");
           if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
               || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
-              || custNm.contains("e.G") || custNm.contains("mit beschrÃ¤nkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
+              || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
             engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
             details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
             valid = false;
@@ -421,8 +421,8 @@ public class GermanyUtil extends AutomationUtil {
 
   private String replaceGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ã„", "AE").replaceAll("Ã¤", "ae").replaceAll("Ã–", "OE").replaceAll("Ã¶", "oe").replaceAll("Ãœ", "UE")
-          .replace("Ã¼", "ue").replaceAll("ÃŸ", "SS");
+      String str = input.replaceAll("Ä", "AE").replaceAll("ä", "ae").replaceAll("Ö", "OE").replaceAll("ö", "oe").replaceAll("Ü", "UE")
+          .replace("ü", "ue").replaceAll("ß", "SS");
       return str;
     }
     return null;
@@ -430,8 +430,8 @@ public class GermanyUtil extends AutomationUtil {
 
   private String insertGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "Ã„").replaceAll("ae", "Ã¤").replace("AE", "Ã„").replaceAll("Oe", "Ã–").replaceAll("oe", "Ã¶").replace("OE", "Ã–")
-          .replaceAll("Ue", "Ãœ").replace("ue", "Ã¼").replace("UE", "Ãœ").replaceAll("ss", "ÃŸ").replaceAll("SS", "ÃŸ").replace("Ss", "ÃŸ");
+      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
+          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
       return str;
     }
     return null;
@@ -597,13 +597,15 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isShipToExistOnReq = isAddressAleardyExists(entityManager, shipTo, reqId);
         if (isShipToExistOnReq) {
-          detail.append("Ship To already exists on the request with same details.");
+          detail.append("Ship To details provided matches already existing address.");
           validation.setMessage("ShipTo already exists");
-          engineData.addRejectionComment("Ship To already exists on the request with same details.");
+          engineData.addRejectionComment("Ship To details provided matches already existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
           output.setProcessOutput(validation);
-          LOG.debug("Ship To already exists on the request with same details.");
+          LOG.debug("Ship To details provided matches already existing address.");
           return true;
         }
       }
@@ -612,11 +614,13 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
         if (isInstallAtExistOnReq) {
-          detail.append("Install At already exists on the request with same details.");
-          engineData.addRejectionComment("Install At already exists on the request with same details.");
-          LOG.debug("Install At already exists on the request with same details.");
+          detail.append("Install At details provided matches already existing address.");
+          engineData.addRejectionComment("Install At details provided matches already existing address.");
+          LOG.debug("Install At details provided matches already existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
           output.setProcessOutput(validation);
           return true;
         }
@@ -636,11 +640,13 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
         if (isBillToExistOnReq) {
-          detail.append("Bill To already exists on the request with same details.");
-          engineData.addRejectionComment("Bill To already exists on the request with same details.");
-          LOG.debug("Bill To already exists on the request with same details.");
+          detail.append("Bill To details provided matches already existing address.");
+          engineData.addRejectionComment("Bill To details provided matches already existing address.");
+          LOG.debug("Bill To details provided matches already existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
           output.setProcessOutput(validation);
           return true;
         }
@@ -767,13 +773,12 @@ public class GermanyUtil extends AutomationUtil {
       query.setParameter("COUNTY", addrToBeCHecked.getCounty());
     }
 
+    // query.append(" fetch first 1 row only");
+
     // query.setParameter("ADDR_TYPE", addrToBeCHecked.getId().getAddrType());
 
-    String res = query.getSingleResult(String.class);
-    if (res != null) {
-      if (Integer.parseInt(res) == 1) {
-        addrExists = true;
-      }
+    if (query.exists()) {
+      addrExists = true;
     }
     return addrExists;
   }
