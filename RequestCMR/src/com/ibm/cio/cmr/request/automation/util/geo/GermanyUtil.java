@@ -508,7 +508,7 @@ public class GermanyUtil extends AutomationUtil {
         UpdatedDataModel vatChange = changes.getDataChange("VAT #");
         if (vatChange != null) {
           if ((StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))
-              || (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
+              || (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData()))) {
             // check if the name + VAT exists in D&B
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
             String custName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
@@ -534,7 +534,7 @@ public class GermanyUtil extends AutomationUtil {
             entityManager.merge(admin);
             detail.append("Setting scenario verified indc= N as VAT is blank.\n");
             LOG.debug("Setting scenario verified indc= N as VAT is blank.");
-          } else if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+          } else if (StringUtils.isNotBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
             isNegativeCheckNeedeed = true;
             detail.append("Updates to VAT need verification.\n");
             LOG.debug("Updates to VAT need verification.");
@@ -597,9 +597,9 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isShipToExistOnReq = isAddressAleardyExists(entityManager, shipTo, reqId);
         if (isShipToExistOnReq) {
-          detail.append("Ship To details provided matches already existing address.");
+          detail.append("Ship To details provided matches an existing address.");
           validation.setMessage("ShipTo already exists");
-          engineData.addRejectionComment("Ship To details provided matches already existing address.");
+          engineData.addRejectionComment("Ship To details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
@@ -614,9 +614,9 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
         if (isInstallAtExistOnReq) {
-          detail.append("Install At details provided matches already existing address.");
-          engineData.addRejectionComment("Install At details provided matches already existing address.");
-          LOG.debug("Install At details provided matches already existing address.");
+          detail.append("Install At details provided matches an existing address.");
+          engineData.addRejectionComment("Install At details provided matches an existing address.");
+          LOG.debug("Install At details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
@@ -624,15 +624,17 @@ public class GermanyUtil extends AutomationUtil {
           output.setProcessOutput(validation);
           return true;
         }
-        // Check if address closely matches DnB
-        List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt);
-        if (matches != null) {
-          isInstallAtMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
-        }
-        if (!isInstallAtMatchesDnb) {
-          isNegativeCheckNeedeed = true;
-          detail.append("Updates to Install At address need verification as it does not matches D&B");
-          LOG.debug("Updates to Install At address need verification as it does not matches D&B");
+        if ((changes.isAddressChanged("ZI01") && isOnlyDnBRelevantFieldUpdated(changes, "ZI01")) || isAddressAdded(installAt)) {
+          // Check if address closely matches DnB
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installAt);
+          if (matches != null) {
+            isInstallAtMatchesDnb = ifaddressCloselyMatchesDnb(matches, installAt, admin, data.getCmrIssuingCntry());
+          }
+          if (!isInstallAtMatchesDnb) {
+            isNegativeCheckNeedeed = true;
+            detail.append("Updates to Install At address need verification as it does not matches D&B");
+            LOG.debug("Updates to Install At address need verification as it does not matches D&B");
+          }
         }
       }
 
@@ -640,9 +642,9 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
         if (isBillToExistOnReq) {
-          detail.append("Bill To details provided matches already existing address.");
-          engineData.addRejectionComment("Bill To details provided matches already existing address.");
-          LOG.debug("Bill To details provided matches already existing address.");
+          detail.append("Bill To details provided matches an existing address.");
+          engineData.addRejectionComment("Bill To details provided matches an existing address.");
+          LOG.debug("Bill To details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
@@ -651,16 +653,17 @@ public class GermanyUtil extends AutomationUtil {
           return true;
         }
 
-        // Check if address closely matches DnB
-        List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billTo);
-        if (matches != null) {
-          isBillToMatchesDnb = ifaddressCloselyMatchesDnb(matches, billTo, admin, data.getCmrIssuingCntry());
-          if (!isBillToMatchesDnb) {
-            isNegativeCheckNeedeed = true;
-            detail.append("Updates to Bill To address need verification as it does not matches D&B");
-            LOG.debug("Updates to Bill To address need verification as it does not matches D&B");
+        if ((changes.isAddressChanged("ZP01") && isOnlyDnBRelevantFieldUpdated(changes, "ZP01")) || isAddressAdded(billTo)) {
+          // Check if address closely matches DnB
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billTo);
+          if (matches != null) {
+            isBillToMatchesDnb = ifaddressCloselyMatchesDnb(matches, billTo, admin, data.getCmrIssuingCntry());
+            if (!isBillToMatchesDnb) {
+              isNegativeCheckNeedeed = true;
+              detail.append("Updates to Bill To address need verification as it does not matches D&B");
+              LOG.debug("Updates to Bill To address need verification as it does not matches D&B");
+            }
           }
-
         }
       }
 
@@ -671,7 +674,7 @@ public class GermanyUtil extends AutomationUtil {
       } else {
         for (Addr addr : addressList) {
           if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department") && isOnlyDeptUpdated(changes)
-              && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") != null) {
+              && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
             validation.setSuccess(true);
             LOG.debug("Department/Attn is found to be updated.Updates verified.");
             detail.append("Updates to relevant addresses found but have been marked as Verified.");
@@ -800,4 +803,17 @@ public class GermanyUtil extends AutomationUtil {
     return isOnlyDeptUpdated;
   }
 
+  private boolean isOnlyDnBRelevantFieldUpdated(RequestChangeContainer changes, String addrTypeCode) {
+    boolean isDnBRelevantFieldUpdated = false;
+    String[] addressFields = { "Customer Name 1", "Customer Name 2", "Country (Landed)", "State/Province", "Street Address", "Postal Code", "City" };
+    List<String> relevantFieldNames = Arrays.asList(addressFields);
+    for (String fieldId : relevantFieldNames) {
+      UpdatedNameAddrModel addressChange = changes.getAddressChange(addrTypeCode, fieldId);
+      if (addressChange != null) {
+        isDnBRelevantFieldUpdated = true;
+        break;
+      }
+    }
+    return isDnBRelevantFieldUpdated;
+  }
 }
