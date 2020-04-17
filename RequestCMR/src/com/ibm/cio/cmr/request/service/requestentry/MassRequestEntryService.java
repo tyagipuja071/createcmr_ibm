@@ -90,7 +90,6 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
-import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
@@ -1310,10 +1309,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     String result = null;
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
-    if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
-      if (!isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
-        result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
-      }
+    if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)
+        && (!isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType()))) {
+      result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
     } else {
       this.log.info("Processor automation enabled, skipping default approvals.");
     }
