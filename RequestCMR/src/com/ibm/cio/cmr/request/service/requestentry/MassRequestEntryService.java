@@ -1310,8 +1310,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     String result = null;
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
-    if (!CmrConstants.REQ_TYPE_MASS_CREATE.equals(model.getReqType())) {
-      if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
+    if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
+      if (!isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
         result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
       }
     } else {
