@@ -1516,8 +1516,6 @@ function addStreetAddressFormValidatorGR() {
 	        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.GREECE) {
 	          return new ValidationResult(null, true);
 	        }
-	        console.log('street: ' + FormManager.getActualValue('addrTxt') == '');
-	        console.log('street cont:' + FormManager.getActualValue('addrTxt2') != '');
 	        if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('addrTxt2') != '') {
 		          return new ValidationResult(null, false, 'Address Con\'t cannot be filled if Street is empty.');
 		    }
