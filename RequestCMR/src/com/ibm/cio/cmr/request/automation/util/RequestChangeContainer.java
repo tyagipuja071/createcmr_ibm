@@ -77,7 +77,8 @@ public class RequestChangeContainer {
     List<UpdatedNameAddrModel> addrChangeList = summaryService.getUpdatedNameAddr(entityManager, reqId);
     if (addrChangeList != null) {
       for (UpdatedNameAddrModel addr : addrChangeList) {
-        if (!StringUtils.isBlank(addr.getNewData()) || !StringUtils.isBlank(addr.getOldData())) {
+        if (!StringUtils.isBlank(addr.getNewData()) || !StringUtils.isBlank(addr.getOldData())
+            || (!StringUtils.isBlank(addr.getSapNumber()) && ("[removed]".equals(addr.getSapNumber()) || "[new]".equals(addr.getSapNumber())))) {
           this.addressUpdates.add(addr);
         }
       }
