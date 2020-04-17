@@ -546,10 +546,12 @@ public class FranceUtil extends AutomationUtil {
     }
   }
 
+
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
 
     Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder detail = new StringBuilder();
@@ -558,89 +560,106 @@ public class FranceUtil extends AutomationUtil {
 
     if (changes != null && changes.hasDataChanges()) {
       LOG.debug("Changes has data changes -> " + changes.hasDataChanges());
-      if (changes.isDataChanged("VAT #")) {
-        LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT #"));
-        UpdatedDataModel vatChange = changes.getDataChange("VAT #");
-        if (vatChange != null) {
-          if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
-            // check if the name + VAT exists in D&B
-            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
-            if (!matches.isEmpty()) {
-              for (DnBMatchingResponse dnbRecord : matches) {
-                if ("Y".equals(dnbRecord.getOrgIdMatch())) {
-                  isNegativeCheckNeedeed = false;
-                  break;
+      boolean vatChngd = changes.isDataChanged("VAT #");
+      boolean collCdChngd = changes.isDataChanged("Collection Code");
+      boolean topLstChngd = changes.isDataChanged("Top List Speciale");
+      boolean sboChngd = changes.isDataChanged("Search Term/Sales Branch Office");
+      boolean iboChngd = changes.isDataChanged("Installing BO");
+      boolean isuCdChngd = changes.isDataChanged("ISU Code");
+      boolean ctcChngd = changes.isDataChanged("Client Tier");
+
+      if(!"9500".equals(data.getIsicCd()) && (vatChngd || collCdChngd || topLstChngd || sboChngd || iboChngd || isuCdChngd || ctcChngd)){
+        if (vatChngd) {
+          LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT #"));
+          UpdatedDataModel vatChange = changes.getDataChange("VAT #");
+          if (vatChange != null) {
+            if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
+              // check if the name + VAT exists in D&B
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
+              if (!matches.isEmpty()) {
+                for (DnBMatchingResponse dnbRecord : matches) {
+                  if ("Y".equals(dnbRecord.getOrgIdMatch())) {
+                    isNegativeCheckNeedeed = false;
+                    break;
+                  }
+                  isNegativeCheckNeedeed = true;
                 }
-                isNegativeCheckNeedeed = true;
               }
+              if (isNegativeCheckNeedeed) {
+                validation.setSuccess(false);
+                validation.setMessage("Not validated");
+                detail.append("Updates to VAT need verification as it does'nt match DnB");
+                engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+                LOG.debug("Updates to VAT need verification as it does not match DnB");
+              }
+
             }
+          }
+        }
+        
+        if (collCdChngd) {
+          UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
+          if (collCdChange != null) {
+            if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
+              isNegativeCheckNeedeed = true;
+            }
+
             if (isNegativeCheckNeedeed) {
               validation.setSuccess(false);
               validation.setMessage("Not validated");
-              detail.append("Updates to VAT need verification as it does'nt match DnB");
+              detail.append("Updates to Collection Code need verification.");
               engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-              LOG.debug("Updates to VAT need verification as it does not match DnB");
+              LOG.debug("Updates to Collection Code need verification.");
             }
 
           }
         }
-      }
+        
+        if (topLstChngd) {
+          UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
+          if (commFinanceChange != null) {
+            String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
+            isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
+            if (isNegativeCheckNeedeed) {
+              validation.setSuccess(false);
+              validation.setMessage("Not validated");
+              detail.append("Updates to Top List Speciale need verification.");
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+              LOG.debug("Updates to Top List Speciale need verification.");
+            }
 
-      if (changes.isDataChanged("Collection Code")) {
-        UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
-        if (collCdChange != null) {
-          if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
-            isNegativeCheckNeedeed = true;
           }
-
-          if (isNegativeCheckNeedeed) {
-            validation.setSuccess(false);
-            validation.setMessage("Not validated");
-            detail.append("Updates to Collection Code need verification.");
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-            LOG.debug("Updates to Collection Code need verification.");
-          }
-
         }
-      }
+        
+        if (isuCdChngd || ctcChngd || sboChngd || iboChngd) {
+          UpdatedDataModel isuCdChange = changes.getDataChange("ISU Code");
+          UpdatedDataModel clientTierChange = changes.getDataChange("Client Tier");
+          UpdatedDataModel sboChange = changes.getDataChange("Search Term/Sales Branch Office");
+          UpdatedDataModel iboChange = changes.getDataChange("Installing BO");
 
-      if (changes.isDataChanged("Top List Speciale")) {
-        UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
-        if (commFinanceChange != null) {
-          String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
-          isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
-          if (isNegativeCheckNeedeed) {
-            validation.setSuccess(false);
-            validation.setMessage("Not validated");
-            detail.append("Updates to Top List Speciale need verification.");
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-            LOG.debug("Updates to Top List Speciale need verification.");
+          if (isuCdChange != null || clientTierChange != null || sboChange != null || iboChange != null) {
+            String designatedUser = SystemParameters.getString("ISU_CTC_SBO_USER");
+            isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
+            if (isNegativeCheckNeedeed) {
+              validation.setSuccess(false);
+              validation.setMessage("Not validated");
+              detail.append("Updates to ISU/CTC/SBO/IBO need verification.");
+              engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+              LOG.debug("Updates to ISU/CTC/SBO/IBO need verification.");
+            }
+
           }
-
         }
+
       }
-
-      if (changes.isDataChanged("ISU Code") || changes.isDataChanged("Client Tier") || changes.isDataChanged("Search Term/Sales Branch Office")
-          || changes.isDataChanged("Installing BO")) {
-        UpdatedDataModel isuCdChange = changes.getDataChange("ISU Code");
-        UpdatedDataModel clientTierChange = changes.getDataChange("Client Tier");
-        UpdatedDataModel sboChange = changes.getDataChange("Search Term/Sales Branch Office");
-        UpdatedDataModel iboChange = changes.getDataChange("Installing BO");
-
-        if (isuCdChange != null || clientTierChange != null || sboChange != null || iboChange != null) {
-          String designatedUser = SystemParameters.getString("ISU_CTC_SBO_USER");
-          isNegativeCheckNeedeed = admin.getRequesterId().equalsIgnoreCase(designatedUser) ? false : true;
-          if (isNegativeCheckNeedeed) {
-            validation.setSuccess(false);
-            validation.setMessage("Not validated");
-            detail.append("Updates to ISU/CTC/SBO/IBO need verification.");
-            engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-            LOG.debug("Updates to ISU/CTC/SBO/IBO need verification.");
-          }
-
-        }
+      else if(!vatChngd && !collCdChngd &&  !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd){
+        isNegativeCheckNeedeed = true;
+        validation.setSuccess(false);
+        validation.setMessage("Not validated");
+        detail.append("Updates to fields need verification.");
+        engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+        LOG.debug("Updates to fields need verification."); 
       }
-
     }
 
     if (!isNegativeCheckNeedeed) {
@@ -650,6 +669,7 @@ public class FranceUtil extends AutomationUtil {
     output.setDetails(detail.toString());
     return true;
   }
+
 
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
