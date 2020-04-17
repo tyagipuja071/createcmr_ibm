@@ -597,13 +597,15 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isShipToExistOnReq = isAddressAleardyExists(entityManager, shipTo, reqId);
         if (isShipToExistOnReq) {
-          detail.append("Ship To already exists on the request with same details.");
+          detail.append("Ship To details provided matches already existing address.");
           validation.setMessage("ShipTo already exists");
-          engineData.addRejectionComment("Ship To already exists on the request with same details.");
+          engineData.addRejectionComment("Ship To details provided matches already existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
           output.setProcessOutput(validation);
-          LOG.debug("Ship To already exists on the request with same details.");
+          LOG.debug("Ship To details provided matches already existing address.");
           return true;
         }
       }
@@ -612,11 +614,13 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
         if (isInstallAtExistOnReq) {
-          detail.append("Install At already exists on the request with same details.");
-          engineData.addRejectionComment("Install At already exists on the request with same details.");
-          LOG.debug("Install At already exists on the request with same details.");
+          detail.append("Install At details provided matches already existing address.");
+          engineData.addRejectionComment("Install At details provided matches already existing address.");
+          LOG.debug("Install At details provided matches already existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
           output.setProcessOutput(validation);
           return true;
         }
@@ -636,11 +640,13 @@ public class GermanyUtil extends AutomationUtil {
         // Check If Address already exists on request
         isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
         if (isBillToExistOnReq) {
-          detail.append("Bill To already exists on the request with same details.");
-          engineData.addRejectionComment("Bill To already exists on the request with same details.");
-          LOG.debug("Bill To already exists on the request with same details.");
+          detail.append("Bill To details provided matches already existing address.");
+          engineData.addRejectionComment("Bill To details provided matches already existing address.");
+          LOG.debug("Bill To details provided matches already existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
+          validation.setMessage("Not validated");
+          output.setDetails(detail.toString());
           output.setProcessOutput(validation);
           return true;
         }
@@ -767,13 +773,12 @@ public class GermanyUtil extends AutomationUtil {
       query.setParameter("COUNTY", addrToBeCHecked.getCounty());
     }
 
+    // query.append(" fetch first 1 row only");
+
     // query.setParameter("ADDR_TYPE", addrToBeCHecked.getId().getAddrType());
 
-    String res = query.getSingleResult(String.class);
-    if (res != null) {
-      if (Integer.parseInt(res) == 1) {
-        addrExists = true;
-      }
+    if (query.exists()) {
+      addrExists = true;
     }
     return addrExists;
   }
