@@ -99,6 +99,7 @@ public class GreeceTransformer extends EMEATransformer {
     messageHash.put("MarketingResponseCode", "3");
     messageHash.put("ARemark", "");
     messageHash.put("EnterpriseNo", cmrData.getEnterprise());
+    messageHash.put("CustomerLanguage", "1");
 
     if (update) {
       messageHash.put("CollectionCode", cmrData.getCollectionCd());
@@ -424,6 +425,7 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         legacyCust.setMrcCd("3");
       }
+      legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -477,7 +479,7 @@ public class GreeceTransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : "");
     }
   }
-
+  
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
     data.setOrdBlk("");
     entityManager.merge(data);
