@@ -144,7 +144,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-        newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType());
+        newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
       }
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
@@ -2089,7 +2089,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     return addrSeq;
   }
 
-  protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId, String reqType) {
+  protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId, String reqType, String addrType) {
+	if("ZD02".equals(addrType)) {
+		return "598";
+	}else if("ZP02".equals(addrType)) {
+		return "599";
+	}
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
