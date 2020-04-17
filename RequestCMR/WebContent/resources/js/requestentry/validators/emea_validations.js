@@ -7611,14 +7611,9 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(stateProvValidatorCBforIT, [ SysLoc.ITALY ]);
   // CMR-2085 Turkey:CMR number: manual insertion for processor, validation
   // numeric, existing
-  // // GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY
-  // ],
-  // // null, true);
-  //
-  // // GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY],
-  // // null,
-  // // true);
-  // // GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.TURKEY ]);
+    GEOHandler.registerValidator(validateCMRNumExistForTR, [ SysLoc.TURKEY], null, true);
+    GEOHandler.registerValidator(validateCMRNumberForTR, [ SysLoc.TURKEY], null, true);
+    GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.TURKEY]);
 
   // For EmbargoCode
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.EMEA);
