@@ -681,29 +681,37 @@ public class FranceUtil extends AutomationUtil {
     Addr addressH = requestData.getAddress("ZD02");
     Addr billing = requestData.getAddress("ZP01");
     StringBuilder detail = new StringBuilder();
-
+   
     LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
-      if (billing != null && (changes.isAddressChanged("ZP01"))) {
-        LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
-
-        // Check if address closely matches DnB
-        List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
-        if (matches != null) {
-          doesBillingMatchDnb = ifaddressCloselyMatchesDnb(matches, billing, admin, data.getCmrIssuingCntry());
-        }
-        if (!doesBillingMatchDnb) {
-          isNegativeCheckNeedeed = true;
-          detail.append("Updates to Billing address need verification as it does not match D&B");
-          LOG.debug("Updates to Billing address need verification as it does not match D&B");
-        }
+      boolean billingChngd = changes.isAddressChanged("ZP01");
+      boolean addrHchngd = changes.isAddressChanged("ZD02");
+      if(!billingChngd && !addrHchngd){
+        isNegativeCheckNeedeed = true;
+        detail.append("Updates to  addresses need verification.Updated elements cannot be checked automatically.");
       }
+      else{
+        if (billing != null && billingChngd) {
+          LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
-      if (addressH != null && (changes.isAddressChanged("ZD02"))) {
-        if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
-          isNegativeCheckNeedeed = true;
+          // Check if address closely matches DnB
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
+          if (matches != null) {
+            doesBillingMatchDnb = ifaddressCloselyMatchesDnb(matches, billing, admin, data.getCmrIssuingCntry());
+          }
+          if (!doesBillingMatchDnb) {
+            isNegativeCheckNeedeed = true;
+            detail.append("Updates to Billing address need verification as it does not match D&B");
+            LOG.debug("Updates to Billing address need verification as it does not match D&B");
+          }
         }
-      }
+        
+        if (addressH != null && addrHchngd) {
+          if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
+            isNegativeCheckNeedeed = true;
+          }
+        }
+      }   
     }
 
     if (isNegativeCheckNeedeed) {
