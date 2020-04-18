@@ -536,7 +536,9 @@ public class TurkeyTransformer extends EMEATransformer {
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
     case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+      // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
+      // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
@@ -1660,6 +1662,7 @@ public class TurkeyTransformer extends EMEATransformer {
     CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
     mailingAddr.getId().setAddrNo("00001");
     mailingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+    mailingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(mailingAddr);
   }
