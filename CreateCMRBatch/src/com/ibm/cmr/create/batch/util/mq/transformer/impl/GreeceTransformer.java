@@ -155,7 +155,8 @@ public class GreeceTransformer extends EMEATransformer {
     Addr addrData = handler.addrData;
     Data cmrData = handler.cmrData;
     boolean crossBorder = isCrossBorder(addrData);
-
+    String addrType = addrData.getId().getAddrType();
+    
     String addrKey = getAddressKey(addrData.getId().getAddrType());
     LOG.debug("Handling " + (update ? "update" : "create") + " request.");
     Map<String, String> messageHash = handler.messageHash;
@@ -176,36 +177,28 @@ public class GreeceTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(addrData.getCustNm2())) {
       line2 = addrData.getCustNm2();
-    } else {
-      // move occupation up
-      line2 = addrData.getAddrTxt2();
     }
 
-    // occupation or PO Box or Phone (for additional shipping)
     String line3 = "";
-    if (!StringUtils.isBlank(addrData.getCustNm2())) {
-      // nickname specified, so line3 = occupation or pobox or phone
-      if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addrData.getId().getAddrType())) {
-        line3 = addrData.getCustPhone();
-      } else {
-        if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-          line3 = addrData.getAddrTxt2();
-        } else {
-          line3 = addrData.getPoBox();
-        }
-      }
-    } else {
-      // occupation moved up, this is pobox or phone
-      if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addrData.getId().getAddrType())) {
-        line3 = addrData.getCustPhone();
-      } else {
-        line3 = addrData.getPoBox();
-      }
+
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
+      line3 = addrData.getCustNm4();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line3 = addrData.getAddrTxt2();
+    } else if (!StringUtils.isBlank(addrData.getPoBox())
+        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+      line3 = addrData.getPoBox();
     }
-
+    
     // Street
-    String line4 = addrData.getAddrTxt();
-
+    String line4 = "";
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 = addrData.getAddrTxt();
+    } else if (!StringUtils.isBlank(addrData.getPoBox())
+        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+      line4 = addrData.getPoBox();
+    } 
+    
     // postal code + city
     String line5 = (!StringUtils.isEmpty(addrData.getPostCd()) ? addrData.getPostCd() : "") + " "
         + (!StringUtils.isEmpty(addrData.getCity1()) ? addrData.getCity1() : "");
@@ -341,7 +334,7 @@ public class GreeceTransformer extends EMEATransformer {
 
   @Override
   public String getFixedAddrSeqForProspectCreation() {
-    return "00002";
+    return "00003";
   }
 
   /**
