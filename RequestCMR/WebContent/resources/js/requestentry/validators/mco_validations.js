@@ -639,16 +639,18 @@ function disableAddrFieldsPTES() {
     FormManager.enable('landCntry');
   }
   FormManager.setValue('dept', '');
-  FormManager.disable('dept');
+  FormManager.readOnly('dept');
 
   // Phone: Create-billing address only, Update-also shipping address for ES
   if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && FormManager.getActualValue('addrType') == 'ZD01') {
     FormManager.enable('custPhone');
   } else if (FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZD01') {
     FormManager.setValue('custPhone', '');
-    FormManager.disable('custPhone');
+    FormManager.readOnly('custPhone');
+    //FormManager.hide('CustPhone', 'custPhone');
   } else {
     FormManager.enable('custPhone');
+    FormManager.show('CustPhone', 'custPhone');
   }
 
   // Sequence Number - enable for additional shipping
@@ -656,7 +658,7 @@ function disableAddrFieldsPTES() {
     FormManager.enable('prefSeqNo');
   } else {
     FormManager.setValue('prefSeqNo', '');
-    FormManager.disable('prefSeqNo');
+    FormManager.readOnly('prefSeqNo');
   }
 }
 
