@@ -131,7 +131,6 @@ public class FranceUtil extends AutomationUtil {
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
-    String countryUse = data.getCountryUse();
     Addr zs01 = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     boolean valid = true;
@@ -262,6 +261,8 @@ public class FranceUtil extends AutomationUtil {
               } else {
                 details.append("PPS CE ID validated successfully with PartnerWorld Profile Systems.");
               }
+              engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+                  "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
             } catch (Exception e) {
               LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
               details.append("Not able to validate PPS CE ID using PPS Service.");
@@ -299,6 +300,11 @@ public class FranceUtil extends AutomationUtil {
               valid = false;
             }
           }
+          break;
+        case "INTSO":
+        case "CBTSO":
+          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
+              "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
           break;
         case "CHDPT":
         case "THDPT":
