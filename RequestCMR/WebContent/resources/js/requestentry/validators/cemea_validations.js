@@ -2380,6 +2380,7 @@ function handleRequestLOBChange() {
   }
 }
 
+
 function filterCmrnoForAT() {
   var cmrNo = FormManager.getActualValue('cmrNo');
   if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {

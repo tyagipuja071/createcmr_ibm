@@ -264,11 +264,11 @@ function setSBOOnScenario() {
   if (custSubGrp == '') {
     return
   } else {
+    FormManager.readOnly('installBranchOff');
     if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('installBranchOff');
 
       } else if (role == 'Processor') {
         FormManager.setValue('salesBusOffCd','98F');
@@ -468,7 +468,6 @@ function addSboIboLogic() {
       if (iboCd != '' && iboCd.length > 3) {
         iboCd = iboCd.substring(iboCd.length-3, iboCd.length);
       }
-      FormManager.readOnly('installBranchOff');
       FormManager.setValue('installBranchOff', iboCd);
     }
   });
@@ -2015,6 +2014,7 @@ function setAbbrevNameFrDSW() {
       if (abbrNm.endsWith("D3")) {
         abbrNm.substring(0,abbrNm.length-2).trim();
       }
+
      if (!abbrNm.includes(" DSW D3")) {
           abbrNm = abbrNm.length > 15 ? abbrNm.substring(0,15) : abbrNm ;
           FormManager.setValue('abbrevNm', abbrNm.concat(" DSW D3"));

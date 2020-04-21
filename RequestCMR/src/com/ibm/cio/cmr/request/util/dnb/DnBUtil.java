@@ -60,8 +60,6 @@ public class DnBUtil {
     registerDnBVATCode("DE", 6867); // VAT Number
     registerDnBVATCode("ES", 2472); // VAT Number
     registerDnBVATCode("FR", 2080); // VAT Number
-    registerDnBTaxCd1Code("FR", 2081); // SIRET
-    registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
     registerDnBVATCode("IT", 481); // VAT Number
     registerDnBVATCode("LU", 480); // VAT Number
     registerDnBVATCode("NL", 6273); // VAT Number
@@ -70,8 +68,6 @@ public class DnBUtil {
                                     // Federation)
     registerDnBVATCode("CH", 28865); // Swiss Uniform Identification Number
     registerDnBVATCode("SE", 1861); // SW Business Registration Number
-    registerOtherDnBCode("SG", "SG_REG_NO", 1386); // Singapore Registration
-                                                   // File Number
     registerDnBVATCode("IL", 1365); // Israel Registration Number
     registerDnBVATCode("JP", 32475); // Corporate Number
     registerDnBVATCode("CN", 22958); // Business Registration Number
@@ -134,6 +130,15 @@ public class DnBUtil {
     registerDnBVATCode("UZ", 17279); // Tax Registration Number (Uzbekistan)
     registerDnBVATCode("VE", 1396); // Venezuelan Registry of Fiscal Information
     registerDnBVATCode("VN", 1397); // Business Registration Number (Vietnam)
+
+    // Tax Cd1
+    registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
+    registerDnBTaxCd1Code("FR", 2081); // SIRET
+
+    // other codes
+    registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
+    registerOtherDnBCode("SG", "SG_REG_NO", 1386); // Singapore Registration
+                                                   // File Number
 
   }
 
@@ -525,11 +530,11 @@ public class DnBUtil {
       if (StringUtils.isNotBlank(data.getVat())) {
         if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
           request.setOrgId(data.getVat().split("\\s")[0]);
-        } else{
-        request.setOrgId(data.getVat());
+        } else {
+          request.setOrgId(data.getVat());
         }
       } else if (StringUtils.isNotBlank(addr.getVat())) {
-          request.setOrgId(addr.getVat());
+        request.setOrgId(addr.getVat());
       }
 
       request.setCity(addr.getCity1());
