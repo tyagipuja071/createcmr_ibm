@@ -3113,9 +3113,11 @@ var custType = FormManager.getActualValue('custGrp');
   if (_gtcISUHandler == null) {
     if (FormManager.getActualValue('reqType') == 'C') {
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-        FormManager.clearValue('repTeamMemberNo');
-        FormManager.setValue('salesBusOffCd', '');
-        FormManager.setValue('salesTeamCd', '');
+        if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
+          FormManager.clearValue('repTeamMemberNo');
+          FormManager.setValue('salesBusOffCd', '');
+          FormManager.setValue('salesTeamCd', '');          
+        }
         setClientTierAndISR(value);
       });
     }
@@ -3809,7 +3811,7 @@ function setCustSubTypeBpGRTRCY() {
         FormManager.enable('isuCd');
       }
     }
-    //Control Classification Code
+    // Control Classification Code
     if(custType == 'BUSPR' || custType == 'XBP'){
     	FormManager.show('CustClass', 'custClass');
         FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
@@ -7497,7 +7499,7 @@ function setSBOValuesForIsuCtc() {
       ISSUING_CNTRY : cntry,
       ISU : '%' + isuCtc + '%'
     };
-    results = cmr.query('GET.SBOLISRIST.BYISUCTC', qParams);
+    results = cmr.query('GET.SBOLIST.BYISU', qParams);
     console.log("there are " + results.length + " SBO returned.");
 
     if (results.length == 1) {

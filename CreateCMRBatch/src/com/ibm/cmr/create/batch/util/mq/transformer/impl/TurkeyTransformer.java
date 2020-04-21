@@ -1160,12 +1160,12 @@ public class TurkeyTransformer extends EMEATransformer {
         resetOrdBlockToData(entityManager, data);
       }
     }
-    // For Liu hao move TR rule change
+
     if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-      legacyCust.setSalesRepNo(data.getSalesTeamCd());
+      // legacyCust.setSalesRepNo(data.getSalesTeamCd());
       legacyCust.setSalesGroupRep(data.getSalesTeamCd());
     } else {
-      legacyCust.setSalesRepNo("");
+      // legacyCust.setSalesRepNo("");
       legacyCust.setSalesGroupRep("");
     }
 
