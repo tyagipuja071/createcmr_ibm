@@ -264,11 +264,11 @@ function setSBOOnScenario() {
   if (custSubGrp == '') {
     return
   } else {
+    FormManager.readOnly('installBranchOff');
     if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
       if (role == 'Requester') {
         FormManager.setValue('salesBusOffCd','98F');
         FormManager.readOnly('salesBusOffCd');
-        FormManager.readOnly('installBranchOff');
 
       } else if (role == 'Processor') {
         FormManager.setValue('salesBusOffCd','98F');
@@ -387,6 +387,10 @@ function setSBOOnScenario() {
         }
       }
     }
+    var sbo = FormManager.getActualValue('salesBusOffCd');
+    if(sbo == null || sbo == '' || sbo == undefined){
+      FormManager.enable('salesBusOffCd');
+    }
   }
 }
 
@@ -464,7 +468,6 @@ function addSboIboLogic() {
       if (iboCd != '' && iboCd.length > 3) {
         iboCd = iboCd.substring(iboCd.length-3, iboCd.length);
       }
-      FormManager.readOnly('installBranchOff');
       FormManager.setValue('installBranchOff', iboCd);
     }
   });
@@ -679,7 +682,6 @@ function add32PostCdCntrySBOlogic() {
     return;
   }
 
-  FormManager.readOnly('salesBusOffCd');
   FormManager.setValue('salesBusOffCd', '');
 
   var _zs01ReqId = FormManager.getActualValue('reqId');
@@ -2006,21 +2008,24 @@ function showAffacturageOnReqReason() {
 
 function setAbbrevNameFrDSW() {
   var _abbrevNmHandler = dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
+    var abbrNm = FormManager.getActualValue('abbrevNm').trim();
     var requestingLob = FormManager.getActualValue('requestingLob');
-      if (requestingLob == 'DSW') {        
-        var abbrNm = FormManager.getActualValue('abbrevNm');
-        if(abbrNm.includes("D3")){
-          FormManager.setValue('abbrevNm',abbrNm.concat(" DSW") );
-        }
-        else {
-          FormManager.setValue('abbrevNm',abbrNm.concat(" D3 DSW") ); 
-        }
-      }     
+    if (requestingLob == 'DSW') {
+      if (abbrNm.endsWith("D3")) {
+        abbrNm.substring(0,abbrNm.length-2).trim();
+      }
+
+     if (!abbrNm.includes(" DSW D3")) {
+          abbrNm = abbrNm.length > 15 ? abbrNm.substring(0,15) : abbrNm ;
+          FormManager.setValue('abbrevNm', abbrNm.concat(" DSW D3"));
+      }
+    }
   });
   if (_abbrevNmHandler && _abbrevNmHandler[0]) {
     _abbrevNmHandler[0].onChange();
-  }  
+  }
 }
+
 function affacturageLogic() {
   var reqType = FormManager.getActualValue('reqType');
   var reqReason = FormManager.getActualValue('reqReason');

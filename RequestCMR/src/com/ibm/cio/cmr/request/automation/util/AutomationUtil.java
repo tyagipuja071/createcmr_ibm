@@ -9,6 +9,8 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -22,11 +24,18 @@ import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
@@ -320,5 +329,91 @@ public abstract class AutomationUtil {
   public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
     // NOOP
   }
+  
+  /**
+   * prepares and returns a dnb request based on requestData
+   *
+   * @param admin
+   * @param data
+   * @param addr
+   * @return
+   */
+  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr) {
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (StringUtils.isNotBlank(data.getVat())) {
+      request.setOrgId(data.getVat());
+    }
+
+    if (addr != null) {
+      request.setCity(addr.getCity1());
+      request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+      request.setStreetLine1(addr.getAddrTxt());
+      request.setStreetLine2(addr.getAddrTxt2());
+      request.setLandedCountry(addr.getLandCntry());
+      request.setPostalCode(addr.getPostCd());
+      request.setStateProv(addr.getStateProv());
+      // request.setMinConfidence("8");
+    }
+
+    return request;
+  }
+  
+  /**
+   * Returns the DnB matches based on requestData & address
+   *
+   * @param requestData
+   * @param engineData
+   * @param addr
+   * @return
+   */
+  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr) throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    if (addr == null) {
+      addr = requestData.getAddress("ZS01");
+    }
+    GBGFinderRequest request = createRequest(admin, data, addr);
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+    };
+
+    MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
+
+    List<DnBMatchingResponse> dnbMatches = response.getMatches();
+
+    return dnbMatches;
+
+  }
+
+  /**
+   * Checks if the address updated closely matches D&B
+   *
+   * @param cntry
+   * @param addr
+   * @param matches
+   * @return
+   */
+  public boolean ifaddressCloselyMatchesDnb(List<DnBMatchingResponse> matches, Addr addr, Admin admin, String cntry) {
+    boolean result = false;
+    for (DnBMatchingResponse dnbRecord : matches) {
+      result = DnBUtil.closelyMatchesDnb(cntry, addr, admin, dnbRecord);
+      if (result) {
+        break;
+      }
+    }
+
+    return result;
+  }
+
+ 
+
 
 }

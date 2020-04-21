@@ -40,6 +40,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -749,6 +750,16 @@ public class CEMEAHandler extends BaseSOFHandler {
 			// Currency code for Austria
 			data.setLegacyCurrencyCd(this.currentImportValues.get("CurrencyCode"));
 			LOG.trace("Currency: " + data.getLegacyCurrencyCd());
+
+      EntityManager em = JpaManager.getEntityManager();
+      String sql = ExternalizedQuery.getSql("AT.GET.ZS01.DATLT");
+      PreparedQuery query = new PreparedQuery(em, sql);
+      query.setParameter("COUNTRY", SystemLocation.AUSTRIA);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("CMR_NO", data.getCmrNo());
+      String datlt = query.getSingleResult(String.class);
+      data.setAbbrevLocn(datlt);
+      LOG.trace("Abbrev Loc: " + data.getAbbrevLocn());
 
 			// CMR-2046 change SBO get value from DNB search to avoid get value
 			// from
