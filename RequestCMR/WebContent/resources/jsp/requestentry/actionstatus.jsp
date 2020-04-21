@@ -41,6 +41,35 @@
       </cmr:column>
     </cmr:row>
   </div>
+      <div id="rejInfo1Div" style="display:none">
+    <cmr:row>
+        <cmr:column span="1" width="200">
+            <cmr:label fieldId="rejSupplInfo1">
+                <span id="rejInfo1Label"></span>: 
+                <span class="ibm-required">*</span>
+          </cmr:label>
+        </cmr:column>
+        <cmr:column span="2">
+            <cmr:field id="rejSupplInfo1" path="rejSupplInfo1"
+                fieldId="RejSupplInfo1" />
+        </cmr:column>
+    </cmr:row>
+    </div>
+    <div id = "rejInfo2Div" style="display:none">
+    <cmr:row>
+        <cmr:column span="1" width="200">
+            <cmr:label fieldId="rejSupplInfo2">
+                <span id="rejInfo2Label"></span>:
+                <span class="ibm-required">*</span>
+            </cmr:label>
+        </cmr:column>
+        <cmr:column span="2">
+            <cmr:field id="rejSupplInfo2" path="rejSupplInfo2"
+                fieldId="RejSupplInfo2" />
+        </cmr:column>
+    </cmr:row>
+    </div>
+
     <cmr:row>
       <cmr:column span="3" width="500">
         <cmr:label fieldId="statusChgCmt" cssClass="cmr-status-cmt">

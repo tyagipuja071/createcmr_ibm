@@ -78,7 +78,7 @@ dojo.addOnLoad(function(){
     <!-- Defect : 1444422 -->
     <!-- Site Party ID -->
     <cmr:row topPad="10" addBackground="true">
-			<cmr:column span="2" containerForField="SitePartyID" forGEO="IERP,MCO2,EMEA,JP,NORDX,NL,BELUX" forCountry="846,806,702,678,624,788">
+			<cmr:column span="2" containerForField="SitePartyID" forGEO="IERP,MCO2,EMEA,JP,NORDX,NL,BELUX" forCountry="846,806,702,678,624,788,726">
 				<p>
 					<cmr:label fieldId="sitePartyId">
             <cmr:fieldLabel fieldId="SitePartyID" />: 

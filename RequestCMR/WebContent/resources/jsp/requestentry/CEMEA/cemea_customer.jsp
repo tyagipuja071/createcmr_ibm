@@ -92,6 +92,7 @@
   </cmr:row>
 
   <cmr:row addBackground="false">
+
     <cmr:column span="2" containerForField="EmbargoCode" exceptForCountry="618">
       <p>
         <cmr:label fieldId="embargoCd">
@@ -101,7 +102,7 @@
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    
+
     <cmr:column span="2" containerForField="OrdBlk" forCountry="618">
       <p>
         <cmr:label fieldId="ordBlk">
