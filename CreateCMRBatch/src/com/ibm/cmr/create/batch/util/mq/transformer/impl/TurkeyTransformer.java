@@ -1541,7 +1541,7 @@ public class TurkeyTransformer extends EMEATransformer {
           boolean shareSeq = false;
           for (CmrtAddr legAdr : legacyAddrList) {
             if ("Y".equals(legAdr.getIsAddrUseMailing()) && "Y".equals(legAdr.getIsAddrUseBilling())) {
-              bilAddr = legAdr;
+              maiAddr = legAdr;
               shareSeq = true;
             } else if ("Y".equals(legAdr.getIsAddrUseMailing())) {
               maiAddr = legAdr;
@@ -1552,17 +1552,16 @@ public class TurkeyTransformer extends EMEATransformer {
 
           if (shareSeq) {
             // share Seq should split, remove existing, create mailing
-            legacyAddrList.remove(bilAddr);
-            maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
+            legacyAddrList.remove(maiAddr);
+            bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
 
             maiAddr.setIsAddrUseBilling("N");
             maiAddr.getId().setAddrNo("00001");
 
-            entityManager.persist(maiAddr);
-            entityManager.flush();
-
             bilAddr.setIsAddrUseMailing("N");
             bilAddr.getId().setAddrNo("00002");
+            entityManager.persist(bilAddr);
+            entityManager.flush();
 
             legacyAddrList.add(maiAddr);
             legacyAddrList.add(bilAddr);
@@ -1626,7 +1625,7 @@ public class TurkeyTransformer extends EMEATransformer {
         if (muAddr.getAddrSeqNo().equals(legacyAddr.getId().getAddrNo())) {
           addrSeqToAddrUseMap.put(legacyAddr.getId().getAddrNo(), getAddressUseByType(muAddr.getId().getAddrType()));
           break;
-        } else if ("ZP01".equals(muAddr.getId().getAddrType()) && "Y".equals(legacyAddr.getIsAddrUseMailing())) {
+        } else if ("ZP01".equals(muAddr.getId().getAddrType()) && "Y".equals(legacyAddr.getIsAddrUseBilling())) {
           addrSeqToAddrUseMap.put(legacyAddr.getId().getAddrNo(), getAddressUseByType(muAddr.getId().getAddrType()));
         }
       }
