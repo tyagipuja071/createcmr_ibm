@@ -146,6 +146,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if ("618".equals(model.getCmrIssuingCntry())) {
 
     	newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
+
       }
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
