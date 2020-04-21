@@ -82,6 +82,8 @@ public class UpdateSwitchElement extends ValidatingElement {
           log.debug("Updates to CMR code fields need verification");
         }
 
+      } else {
+        validation.setSuccess(true);
       }
 
       log.debug("Validation after data checks: " + validation.isSuccess());

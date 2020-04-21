@@ -299,7 +299,7 @@ public class EMEAHandler extends BaseSOFHandler {
 												installing.setCmrStreetAddress(sadr.getStras());
 												installing.setCmrName3(sadr.getName3());
 												installing.setCmrName4(sadr.getName4());
-												installing.setCmrCountryLanded(sadr.getSpras());
+                        installing.setCmrCountryLanded("TR");
 												installing.setCmrCountry(sadr.getSpras());
 												installing.setCmrStreetAddressCont(sadr.getStrs2());
 												installing.setCmrState(sadr.getRegio());
@@ -308,6 +308,38 @@ public class EMEAHandler extends BaseSOFHandler {
 											}
 										}
 									}
+                  if (StringUtils.isBlank(adrnr)) {
+                    CmrtAddr mailingAddr = getLegacyMailingAddress(entityManager, searchModel.getCmrNum());
+                    if (mailingAddr != null) {
+                      Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
+                      if (installingAddr != null) {
+                        LOG.debug("Adding installing to the records");
+                        FindCMRRecordModel installing = new FindCMRRecordModel();
+                        PropertyUtils.copyProperties(installing, mainRecord);
+                        copyAddrData(installing, installingAddr);
+                        // add value
+                        installing.setCmrName1Plain(mailingAddr.getAddrLine1());
+                        if (!StringUtils.isBlank(mailingAddr.getAddrLine2())) {
+                          installing.setCmrName2Plain(mailingAddr.getAddrLine2());
+                        } else {
+                          installing.setCmrName2Plain("");
+                        }
+                        installing.setCmrStreetAddress(mailingAddr.getAddrLine3());
+                        installing.setCmrCity(record.getCmrCity());
+                        installing.setCmrCity2(record.getCmrCity2());
+                        installing.setCmrCountry(mailingAddr.getAddrLine6());
+                        installing.setCmrCountryLanded("TR");
+                        installing.setCmrPostalCode(record.getCmrPostalCode());
+                        installing.setCmrState(record.getCmrState());
+                        if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
+                        installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
+                        } else {
+                          installing.setCmrStreetAddressCont("");
+                        }
+                        converted.add(installing);
+                      }
+                    }
+                  }
 								}
 							}
 						}
@@ -3812,7 +3844,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	private void copyAddrData(FindCMRRecordModel record, Addr addr) {
 		record.setCmrAddrTypeCode("ZP01");
-		record.setCmrAddrSeq("00002");
+    record.setCmrAddrSeq("00001");
 		record.setCmrName1Plain(addr.getCustNm1());
 		record.setCmrName2Plain(addr.getCustNm2());
 		record.setCmrName3(addr.getCustNm3());
@@ -3835,5 +3867,13 @@ public class EMEAHandler extends BaseSOFHandler {
 		query.setForReadOnly(true);
 		return query.getSingleResult(Addr.class);
 	}
+
+  private CmrtAddr getLegacyMailingAddress(EntityManager entityManager, String cmrNo) {
+    String sql = ExternalizedQuery.getSql("TR.GETLEGACYMAIL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setForReadOnly(true);
+    return query.getSingleResult(CmrtAddr.class);
+  }
 
 }
