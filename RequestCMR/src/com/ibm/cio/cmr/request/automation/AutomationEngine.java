@@ -279,7 +279,11 @@ public class AutomationEngine {
     }
 
     if (processWaiting) {
-
+      if (requestData.getAdmin().getChildReqId() > 0) {
+        LOG.debug("Adding process waiting comment log.");
+        createComment(entityManager, "Automated checks is waiting on child request " + requestData.getAdmin().getChildReqId() + " before proceeding.",
+            reqId, appUser);
+      }
     } else {
       if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
         if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {

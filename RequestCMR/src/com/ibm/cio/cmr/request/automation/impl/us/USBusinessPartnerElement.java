@@ -94,13 +94,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       LOG.debug("Getting child request data for Request " + childReqId);
       RequestData childRequest = new RequestData(entityManager, childReqId);
       String childReqStatus = childRequest.getAdmin().getReqStatus();
-      if ("PRJ".equals(childReqStatus)) {
-        LOG.debug("Child request has been rejected. Sending to processors.");
-        String msg = "IBM Direct Request " + childReqId + " has been rejected. The request needs to be manually processed.";
+      if ("PRJ".equals(childReqStatus) || "DRA".equals(childReqStatus) || "CAN".endsWith(childReqStatus)) {
+        LOG.debug("Child request processing has been stopped (Rejected or Sent back to requesters). Sending to processors.");
+        String msg = "IBM Direct Request " + childReqId + " has been sent back to requesters. The request needs to be manually processed.";
         details.append(msg);
         details.append("\n");
         details.append("No field value has been computed for this record.");
-        engineData.addNegativeCheckStatus("_usBpRejected", msg);
+        // engineData.addNegativeCheckStatus("_usBpRejected", msg);
         engineData.addRejectionComment(msg);
         output.setOnError(true);
         output.setDetails(details.toString());
@@ -133,7 +133,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       String childErrorMsg = "- IBM Direct CMR request creation cannot be done, errors were encountered -";
       if (childReqId <= 0) {
         details.append(childErrorMsg + "\n");
-        engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
+        // engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
         engineData.addRejectionComment(childErrorMsg);
         output.setDetails(details.toString());
         output.setOnError(true);
@@ -143,8 +143,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         String childDetails = completeChildRequestDataAndAddress(entityManager, requestData, engineData, childReqId, dnbMatch);
         if (childDetails == null) {
           details.append(childErrorMsg + "\n");
-          engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
+          // engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
           engineData.addRejectionComment(childErrorMsg);
+          output.setOnError(true);
           output.setResults("Issues Encountered");
           output.setDetails(details.toString());
           return output;
@@ -169,15 +170,18 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       details
           .append(" - NAC/INAC: " + ("I".equals(ibmDirectCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmDirectCmr.getCmrInacType()) ? "NAC" : "-")));
       details.append((StringUtils.isBlank(ibmDirectCmr.getCmrInac()) ? " - " + ibmDirectCmr.getCmrInac() : "") + "\n");
-      details.append(" - Client Tier: " + ibmDirectCmr.getCmrTier() + "\n");
+      details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
+      details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
 
       overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), ibmDirectCmr.getCmrAffiliate());
       overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), ibmDirectCmr.getCmrIsu());
       overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), ibmDirectCmr.getCmrTier());
       overrides.addOverride(getProcessCode(), "DATA", "INAC_TYPE", data.getInacType(), ibmDirectCmr.getCmrInacType());
       overrides.addOverride(getProcessCode(), "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
+      overrides.addOverride(getProcessCode(), "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
+      overrides.addOverride(getProcessCode(), "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmDirectCmr.getCmrSubIndustry());
     }
-
+    output.setProcessOutput(overrides);
     output.setDetails(details.toString());
     output.setResults("Success");
     return output;
@@ -199,9 +203,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     if (dnbMatches.isEmpty()) {
       LOG.debug("No D&B matches found for the End User " + addr.getDivn());
       String msg = "No high quality D&B matches for the End User " + addr.getDivn();
-      details.append(msg);
+      details.append(msg + "\n\n");
       engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
-      engineData.addRejectionComment(msg);
       return null;
     } else {
       DnBMatchingResponse dnbMatch = dnbMatches.get(0);
@@ -287,6 +290,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       // 4 - INAC code
       // 5 - KUNNR
       // 6 - CMR No.
+      // 7 - ISIC
+      // 8 - sub industry
       FindCMRRecordModel record = new FindCMRRecordModel();
       record.setCmrAffiliate((String) cmr[0]);
       record.setCmrTier((String) cmr[1]);
@@ -295,6 +300,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       record.setCmrInac((String) cmr[4]);
       record.setCmrSapNumber((String) cmr[5]);
       record.setCmrNum((String) cmr[6]);
+      record.setCmrIsic((String) cmr[7]);
+      record.setCmrSubIndustry((String) cmr[8]);
       return record;
     }
     LOG.debug("No IBM Direct CMRs found.");
