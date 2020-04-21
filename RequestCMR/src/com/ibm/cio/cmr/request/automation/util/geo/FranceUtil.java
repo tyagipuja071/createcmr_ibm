@@ -581,7 +581,11 @@ public class FranceUtil extends AutomationUtil {
           if (vatChange != null) {
             if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
               // check if the name + VAT exists in D&B
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+              if (matches.isEmpty()) {
+                // get DnB matches based on all address details
+                matches = getMatches(requestData, engineData, soldTo, false);
+              }
               if (!matches.isEmpty()) {
                 for (DnBMatchingResponse dnbRecord : matches) {
                   if ("Y".equals(dnbRecord.getOrgIdMatch())) {
@@ -701,7 +705,7 @@ public class FranceUtil extends AutomationUtil {
           LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
           // Check if address closely matches DnB
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing, false);
           if (matches != null) {
             doesBillingMatchDnb = ifaddressCloselyMatchesDnb(matches, billing, admin, data.getCmrIssuingCntry());
           }
