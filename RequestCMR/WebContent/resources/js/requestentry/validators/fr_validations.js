@@ -387,6 +387,10 @@ function setSBOOnScenario() {
         }
       }
     }
+    var sbo = FormManager.getActualValue('salesBusOffCd');
+    if(sbo == null || sbo == '' || sbo == undefined){
+      FormManager.enable('salesBusOffCd');
+    }
   }
 }
 
@@ -678,7 +682,6 @@ function add32PostCdCntrySBOlogic() {
     return;
   }
 
-  FormManager.readOnly('salesBusOffCd');
   FormManager.setValue('salesBusOffCd', '');
 
   var _zs01ReqId = FormManager.getActualValue('reqId');

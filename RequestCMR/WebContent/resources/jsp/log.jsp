@@ -53,13 +53,26 @@ ul {
       <th width="*">Changes</th>
     </tr>
     <tr>
-      <td>R5.0 b-M5062</td>
+      <td>R5.0 b-R5073</td>
+      <td>Apr 18, 2020</td>
+      <td>
+        <ul>
+          <li>BP Austria MTP</li>
+          <li>Austria Defect Fixes for CreateCMR</li>
+        </ul>
+      </td>
+    </tr>    
+    <tr>
+
+      <td>R5.0 b-M5066</td>
       <td>Apr 11, 2020</td>
       <td>
         <ul>
           <li>CreateCMR 2.0 - Australia and Singapore</li>
           <li>UI Changes and Enhancements for Germany and France</li>
           <li>Internal Defect Fixes for CreateCMR</li>
+          <li>Legacy sunset - Austria</li>
+          <li>US reject mail change from rejected to input required for BP</li>
         </ul>
       </td>
     </tr>
