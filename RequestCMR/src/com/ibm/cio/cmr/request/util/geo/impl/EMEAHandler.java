@@ -103,23 +103,12 @@ public class EMEAHandler extends BaseSOFHandler {
 	public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
-
-
-  // *abner revert begin
-  // protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang
-  // Translation Sold-To", "Billing Address",
-  // "Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL
-  // Address", "Sold-To Address",
-  // "Install-At Address", "Ship-To Address" };
-  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address",
-      "Installing Address", "Shipping Address (Update)", "EPL Address" };
-  // *abner revert end
-
-	// CMR-1728
-  protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
-			"EPL Address" };
-
-	static {
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
+      "Shipping Address (Update)", "EPL Address" };
+  protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Sold-To Address", "Install-At Address",
+      "Ship-To Address" };
+ 
+  static {
 		LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
 		LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");
 

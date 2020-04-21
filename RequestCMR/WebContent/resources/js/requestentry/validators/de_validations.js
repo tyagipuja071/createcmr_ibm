@@ -397,6 +397,27 @@ function validateAddressTypeForScenario() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addSoldToAddressValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var zs01ReqId = FormManager.getActualValue('reqId');
+        var addrType = FormManager.getActualValue('addrType');
+        qParams = {
+          REQ_ID : zs01ReqId,
+        };
+        var record = cmr.query('GETZS01VALRECORDS', qParams);
+        var zs01Reccount = record.ret1;
+        if (addrType == 'ZS01' && Number(zs01Reccount) == 1 && cmr.addressMode != 'updateAddress') {
+          return new ValidationResult(null, false, 'Only one Sold-To Address can be defined.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -426,4 +447,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.DE, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAddrFunction(restrictNonSoldToAddress, GEOHandler.DE);
   GEOHandler.registerValidator(validateAddressTypeForScenario, GEOHandler.DE, null, true);
+  GEOHandler.registerValidator(addSoldToAddressValidator, GEOHandler.DE);
 });

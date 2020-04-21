@@ -376,6 +376,9 @@ div#ibm-content-main {
     <form:hidden path="delInd" />
     <form:hidden path="modelCmrNo" />
     <form:hidden path="approvalResult" />
+    
+    
+	<form:hidden path="dupCmrReason"/>
 
 
     <cmr:view forCountry="760">
