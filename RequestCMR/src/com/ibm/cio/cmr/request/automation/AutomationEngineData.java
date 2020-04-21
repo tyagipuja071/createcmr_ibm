@@ -25,6 +25,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String GBG_MATCH = "gbgMatch";
   public static final String COVERAGE_CALCULATED = "coverageCalculated";
   public static final String DNB_MATCH = "dnbMatching";
+  public static final String DNB_ALL_MATCHES = "dnbAllMatches";
   public static final String VAT_VERIFIED = "vatVerified";
   public static final String SKIP_CHECKS = "skipChecks";
   public static final String COMPANY_INFO_SOURCE = "compInfoSrc";
@@ -68,9 +69,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
     checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     checks.put(checkKey, userFriendlyCheckMessage);
   }
-  
+
   /**
-   * Checks negative check status 
+   * Checks negative check status
    * 
    * @param userFriendlyCheckMessage
    */
@@ -79,8 +80,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
     Map<String, String> checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     if (checks != null) {
       return true;
-    }
-    else{
+    } else {
       return false;
     }
   }

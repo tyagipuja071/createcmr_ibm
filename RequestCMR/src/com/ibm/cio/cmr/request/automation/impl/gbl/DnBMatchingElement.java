@@ -75,6 +75,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        engineData.put(AutomationEngineData.DNB_ALL_MATCHES, dnbMatches);
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           result.setOnError(shouldThrowError);
@@ -236,7 +237,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     }
 
     LOG.debug("Connecting to D&B details service..");
-    DnBCompany dnbData = getDnBDetails(dnbRecord.getDunsNo());
+    DnbData dnbrec = CompanyFinder.getDnBDetails(dnbRecord.getDunsNo());
+    DnBCompany dnbData = dnbrec != null && !dnbrec.getResults().isEmpty() ? dnbrec.getResults().get(0) : null;
     if (dnbData != null) {
 
       if (!StringUtils.isBlank(dnbData.getPrimaryCounty())) {
@@ -323,22 +325,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         output.addMatch(getProcessCode(), addrType + "::LAND_CNTRY", dnbRecord.getDnbCountry(), "Derived", "Derived", "D&B", itemNo);
       }
     }
-  }
-
-  /**
-   * Connects to the details service and gets the details of the DUNS NO from
-   * D&B
-   *
-   * @param dunsNo
-   * @return
-   * @throws Exception
-   */
-  private DnBCompany getDnBDetails(String dunsNo) throws Exception {
-    DnbData data = CompanyFinder.getDnBDetails(dunsNo);
-    if (data != null && data.getResults() != null && !data.getResults().isEmpty()) {
-      return data.getResults().get(0);
-    }
-    return null;
   }
 
   @Override

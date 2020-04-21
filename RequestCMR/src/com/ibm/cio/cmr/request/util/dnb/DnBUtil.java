@@ -414,12 +414,30 @@ public class DnBUtil {
    * @return
    */
   public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord) {
+    return closelyMatchesDnb(country, addr, admin, dnbRecord, null);
+  }
+
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   *
+   * @param handler
+   * @param admin
+   * @param addresses
+   * @param dnbRecord
+   * @param nameToUse
+   * @return
+   */
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse) {
 
     boolean result = true;
 
     GEOHandler handler = RequestUtils.getGEOHandler(country);
-    if (StringUtils.isNotBlank(getCustomerName(handler, admin, addr)) && StringUtils.isNotBlank(dnbRecord.getDnbName())
-        && StringUtils.getLevenshteinDistance(getCustomerName(handler, admin, addr).toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 16) {
+
+    String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+    if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())
+        && StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 16) {
       result = false;
     }
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
