@@ -42,6 +42,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -5599,5 +5600,37 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     else
       return false;
 
+  }
+
+  /**
+   * Appends extra model entries if needed. These attributes can be accessed on
+   * the page via request.getAttribute('name') or ${name}
+   * 
+   * @param mv
+   * @param model
+   * @throws CmrException
+   */
+  public void appendExtraModelEntries(ModelAndView mv, RequestEntryModel model) throws CmrException {
+    // TODO Auto-generated method stub
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+
+      String autoEngineIndc = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
+      mv.addObject("autoEngineIndc", autoEngineIndc);
+    } catch (Exception e) {
+      if (e instanceof CmrException) {
+        log.error("CMR Error:" + ((CmrException) e).getMessage());
+      } else {
+        // log only unexpected errors, exclude validation errors
+        log.error("Error in processing transaction " + model, e);
+      }
+
+      // only wrap non CmrException errors
+      if (e instanceof CmrException) {
+        throw (CmrException) e;
+      } else {
+        throw new CmrException(MessageUtil.ERROR_GENERAL);
+      }
+    }
   }
 }
