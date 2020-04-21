@@ -119,7 +119,7 @@ public class RequestUtils {
    */
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, HttpServletRequest request, Admin admin,
       String cmt, String action) throws CmrException, SQLException {
-    createWorkflowHistory(service, entityManager, request, admin, cmt, action, null, null, false, null, null);
+    createWorkflowHistory(service, entityManager, request, admin, cmt, action, null, null, false, null, null, null, null);
   }
 
   /**
@@ -179,8 +179,8 @@ public class RequestUtils {
   }
 
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, HttpServletRequest request, Admin admin,
-      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd)
-      throws CmrException, SQLException {
+      String cmt, String action, String sendToId, String sendToNm, boolean complete, String rejectReason, String rejReasonCd, String rejSupplInfo1,
+      String rejSupplInfo2) throws CmrException, SQLException {
     AppUser user = AppUser.getUser(request);
 
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
@@ -197,6 +197,8 @@ public class RequestUtils {
     hist.setReqId(admin.getId().getReqId());
     hist.setRejReason(rejectReason);
     hist.setRejReasonCd(rejReasonCd);
+    hist.setRejSupplInfo1(rejSupplInfo1);
+    hist.setRejSupplInfo2(rejSupplInfo2);
     // String actionDesc = getActionDescription(entityManager, action);
     String actionDesc = action != null && action.length() > 3 ? action : getActionDescription(entityManager, action);
     hist.setReqStatusAct(actionDesc);
