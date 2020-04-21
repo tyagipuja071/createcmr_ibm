@@ -146,6 +146,8 @@ public class RequestEntryModel extends BaseModel {
   private String statusChgCmt;
   private String rejectReason;
   private String rejReasonCd;
+  private String rejSupplInfo1;
+  private String rejSupplInfo2;
 
   private String enterCMRNo;
   private String cmrSearchDone;
@@ -1251,7 +1253,7 @@ public class RequestEntryModel extends BaseModel {
   public void setRejectReason(String rejectReason) {
     this.rejectReason = rejectReason;
   }
-  
+
   public String getRejReasonCd() {
     return rejReasonCd;
   }
@@ -2977,6 +2979,22 @@ public class RequestEntryModel extends BaseModel {
 
   public void setDupCmrReason(String dupCmrReason) {
     this.dupCmrReason = dupCmrReason;
+  }
+
+  public String getRejSupplInfo1() {
+    return rejSupplInfo1;
+  }
+
+  public void setRejSupplInfo1(String rejSupplInfo1) {
+    this.rejSupplInfo1 = rejSupplInfo1;
+  }
+
+  public String getRejSupplInfo2() {
+    return rejSupplInfo2;
+  }
+
+  public void setRejSupplInfo2(String rejSupplInfo2) {
+    this.rejSupplInfo2 = rejSupplInfo2;
   }
 
 }
