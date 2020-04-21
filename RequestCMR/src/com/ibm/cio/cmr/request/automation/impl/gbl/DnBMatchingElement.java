@@ -224,13 +224,15 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     for (int i = 0; i < orgIDDetails.size(); i++) {
       DnbOrganizationId orgId = orgIDDetails.get(i);
       if (DnBUtil.isRelevant(dnbRecord.getDnbCountry(), orgId)) {
-        details.append("\n " + orgId.getOrganizationIdType() + " - " + orgId.getOrganizationIdCode());
+        details.append("\n - " + orgId.getOrganizationIdType() + " = " + orgId.getOrganizationIdCode());
         relevantOrgId = true;
       }
     }
 
     if (!relevantOrgId) {
       details.append("(No relevant Org Id found)\n");
+    } else {
+      details.append("\n");
     }
 
     LOG.debug("Connecting to D&B details service..");

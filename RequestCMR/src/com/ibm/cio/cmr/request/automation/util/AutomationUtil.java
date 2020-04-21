@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -329,7 +330,7 @@ public abstract class AutomationUtil {
   public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
     // NOOP
   }
-  
+
   /**
    * prepares and returns a dnb request based on requestData
    *
@@ -358,7 +359,7 @@ public abstract class AutomationUtil {
 
     return request;
   }
-  
+
   /**
    * Returns the DnB matches based on requestData & address
    *
@@ -370,6 +371,7 @@ public abstract class AutomationUtil {
   public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    List<DnBMatchingResponse> dnbMatches = new ArrayList<DnBMatchingResponse>();
     if (addr == null) {
       addr = requestData.getAddress("ZS01");
     }
@@ -386,11 +388,11 @@ public abstract class AutomationUtil {
     };
 
     MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-
-    List<DnBMatchingResponse> dnbMatches = response.getMatches();
+    if (response != null) {
+      dnbMatches = response.getMatches();
+    }
 
     return dnbMatches;
-
   }
 
   /**
@@ -412,8 +414,5 @@ public abstract class AutomationUtil {
 
     return result;
   }
-
- 
-
 
 }

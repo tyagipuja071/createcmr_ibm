@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -373,8 +374,9 @@ public class USUtil extends AutomationUtil {
     // get request admin and data
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    boolean valid = true;
     String[] scnarioList = { "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV", "SCHOOL PAROCHL", "SCHOOL COLLEGE", "STATE", "SPEC DIST",
-        "COUNTY", "CITY", "32C", "TPPS", "3CC", "SVR CONT" };
+        "COUNTY", "CITY", "32C", "TPPS", "3CC", "SVR CONT", "POOL", "DEVELOP", "E-HOST", "FEDSTATE", "FEDERAL", "POA" };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
@@ -382,8 +384,23 @@ public class USUtil extends AutomationUtil {
 
     if (Arrays.asList(scnarioList).contains(scenarioSubType)) {
       engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Automated checks cannot be performed for this scenario.");
+      valid = true;
+    } else if ("CAMOUFLAGED".equals(scenarioSubType)) {
+      String sql = ExternalizedQuery.getSql("AUTO.CHK_CMDE_USER");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQUESTER_ID", admin.getRequesterId());
+      String procCntr = query.getSingleResult(String.class);
+      if (StringUtils.isNotBlank(procCntr) && "Kuala Lumpur".equalsIgnoreCase(procCntr)) {
+        valid = true;
+      } else {
+        engineData.addRejectionComment(
+            "Federal CMR with restricted ISIC code is only allowed to be requested via FedCMR, please raise the request in FedCMR.");
+        details.append("\nFederal CMR with restricted ISIC code is only allowed to be requested via FedCMR, please raise the request in FedCMR.")
+            .append("\n");
+        valid = false;
+      }
     }
-    return true;
+    return valid;
   }
 
   @Override
