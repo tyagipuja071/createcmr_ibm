@@ -54,6 +54,18 @@ ul {
     </tr>
     <tr>
 
+      <td>R5.0 b-R5073</td>
+      <td>Apr 18, 2020</td>
+      <td>
+        <ul>
+          <li>BP Austria MTP</li>
+          <li>Austria Defect Fixes for CreateCMR</li>
+        </ul>
+      </td>
+    </tr>    
+    <tr>
+
+
       <td>R5.0 b-M5066</td>
       <td>Apr 11, 2020</td>
       <td>

@@ -152,7 +152,7 @@ public class MassRequestEntryController extends BaseController {
             if (reqModel.getReqType().trim().equalsIgnoreCase(CmrConstants.REQ_TYPE_UPDT_BY_ENT)) {
               service.setEnterpriseModel(reqId, reqModel);
             }
-
+            model = reqModel;
             mv = new ModelAndView("massrequestentry", "reqentry", reqModel);
           }
         }
@@ -165,7 +165,7 @@ public class MassRequestEntryController extends BaseController {
     model.setAction(null);
 
     setPageKeys("REQUEST", "REQUEST", mv);
-    addExtraModelEntries(mv, model.getReqId());
+    addExtraModelEntries(mv, model);
 
     return mv;
   }
@@ -230,7 +230,7 @@ public class MassRequestEntryController extends BaseController {
       mv = new ModelAndView("massrequestentry", "reqentry", model);
     }
     setPageKeys("REQUEST", "REQUEST", mv);
-    addExtraModelEntries(mv, model.getReqId());
+    addExtraModelEntries(mv, model);
 
     setYourActionsAttributes(request, model, true);
 
@@ -348,16 +348,17 @@ public class MassRequestEntryController extends BaseController {
    * @param mv
    * @throws CmrException
    */
-  private void addExtraModelEntries(ModelAndView mv, long reqId) throws CmrException {
+  private void addExtraModelEntries(ModelAndView mv, RequestEntryModel model) throws CmrException {
     mv.addObject("notif", new NotifyListModel());
     mv.addObject("attach", new AttachmentModel());
-    DataModel rdcData = service.getRdcDataModel(reqId);
+    DataModel rdcData = service.getRdcDataModel(model.getReqId());
     mv.addObject("rdcdata", rdcData);
 
     // Fixed Approval type for Mass Change requests
     ApprovalResponseModel approval = new ApprovalResponseModel();
     // approval.setTypId(CmrConstants.MASS_REQUEST_APPROVAL_TYPE_ID);
     mv.addObject("approval", approval);
+    service.appendExtraModelEntries(mv, model);
   }
 
   /**

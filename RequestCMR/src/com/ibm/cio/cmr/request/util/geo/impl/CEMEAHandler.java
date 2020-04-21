@@ -760,6 +760,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       String datlt = query.getSingleResult(String.class);
       data.setAbbrevLocn(datlt);
       LOG.trace("Abbrev Loc: " + data.getAbbrevLocn());
+
 			// CMR-2046 change SBO get value from DNB search to avoid get value
 			// from
 			// SOF

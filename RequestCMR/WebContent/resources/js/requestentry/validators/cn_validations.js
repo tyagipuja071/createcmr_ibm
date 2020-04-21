@@ -872,7 +872,7 @@ function addContactInfoValidator() {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C'
-            && (custSubType == 'EMBSA' || custSubType == 'NRML' || custSubType == 'CROSS')) {
+            && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
           var record = null;
           var type = null;
 

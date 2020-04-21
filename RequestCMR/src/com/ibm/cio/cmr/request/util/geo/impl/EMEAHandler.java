@@ -108,6 +108,7 @@ public class EMEAHandler extends BaseSOFHandler {
       "Shipping Address (Update)", "EPL Address" };
   protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Sold-To Address", "Install-At Address",
       "Ship-To Address" };
+
 	static {
 		LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
 		LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");

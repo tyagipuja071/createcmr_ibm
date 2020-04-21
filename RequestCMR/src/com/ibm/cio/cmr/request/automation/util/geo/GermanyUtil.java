@@ -542,9 +542,18 @@ public class GermanyUtil extends AutomationUtil {
 
         }
       } else {
-        isNegativeCheckNeedeed = true;
-        detail.append("Updates to data were found, review is required.\n");
-        LOG.debug("Updates to data were found, review is required.");
+        boolean otherFieldsChanged = false;
+        for (UpdatedDataModel dataChange : changes.getDataUpdates()) {
+          if (dataChange != null && !"CAP Record".equals(dataChange.getDataField())) {
+            otherFieldsChanged = true;
+            break;
+          }
+        }
+        if (otherFieldsChanged) {
+          isNegativeCheckNeedeed = true;
+          detail.append("Updates to data were found, review is required.\n");
+          LOG.debug("Updates to data were found, review is required.");
+        }
       }
 
     }
