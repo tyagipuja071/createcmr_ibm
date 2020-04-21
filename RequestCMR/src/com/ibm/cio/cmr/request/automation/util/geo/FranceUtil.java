@@ -300,11 +300,9 @@ public class FranceUtil extends AutomationUtil {
               valid = false;
             }
           }
-
           break;
         case "INTSO":
         case "CBTSO":
-
           engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
               "Requests for " + scenarioDesc + " cannot be processed automatically. Manual processing would be required.");
           break;
@@ -345,50 +343,6 @@ public class FranceUtil extends AutomationUtil {
             engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
           }
         }
-
-
-        // For sub_regions of France for this scenario, requests should go the
-        // CMDE
-        if (countryUse.length() > 3) {
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-        }
-        break;
-      case "FIBAB":
-      case "CBBAB":
-        if (countryUse.length() > 3) {
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-        }
-        break;
-      case "OTFIN":
-      case "CBFIN":
-        if (countryUse.length() > 3) {
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-        } 
-        break;
-      case "GOVRN":
-      case "CBVRN":
-        if (countryUse.length() > 3) {
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-        }
-        break;
-      case "INTSO":
-      case "CBTSO":
-        if (countryUse.length() > 3) {
-          engineData.addNegativeCheckStatus("DISABLEDAUTOPROC",
-              "For scenario " + scenarioDesc + " the automated processing should be off - so at all times, the request  goes to CMDE queue.");
-        }
-      }
-      if (admin.getSourceSystId() != null) {
-        if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-          engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
-        } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-          engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-        }
-
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
@@ -612,7 +566,6 @@ public class FranceUtil extends AutomationUtil {
 
     if (changes != null && changes.hasDataChanges()) {
       LOG.debug("Changes has data changes -> " + changes.hasDataChanges());
-
       boolean vatChngd = changes.isDataChanged("VAT #");
       boolean collCdChngd = changes.isDataChanged("Collection Code");
       boolean topLstChngd = changes.isDataChanged("Top List Speciale");
@@ -621,7 +574,7 @@ public class FranceUtil extends AutomationUtil {
       boolean isuCdChngd = changes.isDataChanged("ISU Code");
       boolean ctcChngd = changes.isDataChanged("Client Tier");
 
-      if(!"9500".equals(data.getIsicCd()) && (vatChngd || collCdChngd || topLstChngd || sboChngd || iboChngd || isuCdChngd || ctcChngd)){
+      if (!"9500".equals(data.getIsicCd()) && (vatChngd || collCdChngd || topLstChngd || sboChngd || iboChngd || isuCdChngd || ctcChngd)) {
         if (vatChngd) {
           LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT #"));
           UpdatedDataModel vatChange = changes.getDataChange("VAT #");
@@ -640,7 +593,6 @@ public class FranceUtil extends AutomationUtil {
                     break;
                   }
                   isNegativeCheckNeedeed = true;
-
                 }
               }
               if (isNegativeCheckNeedeed) {
@@ -654,7 +606,7 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-        
+
         if (collCdChngd) {
           UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
           if (collCdChange != null) {
@@ -673,7 +625,6 @@ public class FranceUtil extends AutomationUtil {
           }
         }
 
-        
         if (topLstChngd) {
           UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
           if (commFinanceChange != null) {
@@ -689,7 +640,7 @@ public class FranceUtil extends AutomationUtil {
 
           }
         }
-        
+
         if (isuCdChngd || ctcChngd || sboChngd || iboChngd) {
           UpdatedDataModel isuCdChange = changes.getDataChange("ISU Code");
           UpdatedDataModel clientTierChange = changes.getDataChange("Client Tier");
@@ -707,21 +658,17 @@ public class FranceUtil extends AutomationUtil {
               LOG.debug("Updates to ISU/CTC/SBO/IBO need verification.");
             }
 
-
-
           }
         }
 
-
-
       }
-      else if(!vatChngd && !collCdChngd &&  !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd){
+      else if (!vatChngd && !collCdChngd && !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd) {
         isNegativeCheckNeedeed = true;
         validation.setSuccess(false);
         validation.setMessage("Not validated");
         detail.append("Updates to fields need verification.");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-        LOG.debug("Updates to fields need verification."); 
+        LOG.debug("Updates to fields need verification.");
       }
     }
 
@@ -744,17 +691,15 @@ public class FranceUtil extends AutomationUtil {
     Addr addressH = requestData.getAddress("ZD02");
     Addr billing = requestData.getAddress("ZP01");
     StringBuilder detail = new StringBuilder();
-   
+
     LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
-
       boolean billingChngd = changes.isAddressChanged("ZP01");
       boolean addrHchngd = changes.isAddressChanged("ZD02");
-      if(!billingChngd && !addrHchngd){
+      if (!billingChngd && !addrHchngd) {
         isNegativeCheckNeedeed = true;
         detail.append("Updates to  addresses need verification.Updated elements cannot be checked automatically.");
-      }
-      else{
+      } else {
         if (billing != null && billingChngd) {
           LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
@@ -768,15 +713,14 @@ public class FranceUtil extends AutomationUtil {
             detail.append("Updates to Billing address need verification as it does not match D&B");
             LOG.debug("Updates to Billing address need verification as it does not match D&B");
           }
-
         }
-        
+
         if (addressH != null && addrHchngd) {
           if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
             isNegativeCheckNeedeed = true;
           }
         }
-      }   
+      }
     }
 
     if (isNegativeCheckNeedeed) {
