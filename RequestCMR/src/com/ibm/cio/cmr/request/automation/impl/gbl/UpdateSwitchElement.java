@@ -88,7 +88,7 @@ public class UpdateSwitchElement extends ValidatingElement {
 
       log.debug("Validation after data checks: " + validation.isSuccess());
 
-      if (validation.isSuccess() && changes.hasAddressChanges()) {
+      if (!output.isOnError() && changes.hasAddressChanges()) {
 
         Map<String, String> addressTypes = getAddressTypes(data.getCmrIssuingCntry(), entityManager);
 
