@@ -233,6 +233,8 @@ SuppCountryModel suppModel = (SuppCountryModel) request.getAttribute("suppcountr
             <form:option value="MQ">MQ Interface</form:option>
             <form:option value="DR">iERP</form:option>
             <form:option value="LD">Legacy Direct</form:option>
+            <form:option value="MA">Austria Processing</form:option>
+            <form:option value="MD">Swiss Processing</form:option>
           </form:select>
           </p>
         </cmr:column>

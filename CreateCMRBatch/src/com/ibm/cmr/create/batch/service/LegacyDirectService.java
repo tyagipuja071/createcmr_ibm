@@ -627,8 +627,8 @@ public class LegacyDirectService extends TransConnService {
               }
 
               cExt.setItCompanyCustomerNo(compCustNo);
-              cExt.setiTaxCode(data.getTaxCd1());
-              cExt.setItIdentClient(data.getIdentClient());
+              cExt.setiTaxCode(StringUtils.isEmpty(data.getTaxCd1()) ? "" : data.getTaxCd1());
+              cExt.setItIdentClient(StringUtils.isEmpty(data.getIdentClient()) ? "" : data.getIdentClient());
               updateEntity(cExt, entityManager);
             }
 

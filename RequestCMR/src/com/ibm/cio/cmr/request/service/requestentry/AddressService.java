@@ -144,7 +144,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-        newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId());
+    	newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
       }
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
@@ -2064,11 +2064,16 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     return addrSeq;
   }
 
-  protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId) {
+  protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId, String reqType, String addrType) {
+	if("ZD02".equals(addrType)) {
+		return "598";
+	}else if("ZP02".equals(addrType)) {
+		return "599";
+	}
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_TR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
@@ -2092,8 +2097,32 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         // if returned value is invalid
       }
       addrSeq++;
+      //Compare with RDC SEQ FOR UPDATE REQUEST
+      if(CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+    	String cmrNo = null;
+    	if(result != null && result.length > 0 && result[2] != null) {
+    		cmrNo = (String)result[2];
+    	}
+    	if(!StringUtils.isEmpty(cmrNo)) {
+    		String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_TR");
+            PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+            queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+            List<Object[]> resultsRDC = queryRDC.getResults();
+            List<String> seqList = new ArrayList<String>();
+            for(int i = 0; i < resultsRDC.size(); i++) {
+            	String item = String.valueOf(resultsRDC.get(i));
+            	if(!StringUtils.isEmpty(item)) {
+            		seqList.add(item); 
+            	}
+            }
+            while(seqList.contains(Integer.toString(addrSeq))) {
+            	addrSeq++;
+            }
+    	}
+      }
     }
-
+    
     newAddrSeq = Integer.toString(addrSeq);
 
     // newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5,
