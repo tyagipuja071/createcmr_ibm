@@ -194,7 +194,7 @@ public class CalculateCoverageElement extends OverridingElement {
           withCmrData = true;
         }
         covFrom = COV_VAT;
-      } else if (!StringUtils.isBlank(data.getCovId())) {
+      } else if (!StringUtils.isBlank(data.getCovId()) && data.getCovId().matches("[AITP]{1}[0-9]{7}")) {
         try {
           coverages = getCoverageRuleForID(data.getCovId());
         } catch (Exception e) {
@@ -325,15 +325,18 @@ public class CalculateCoverageElement extends OverridingElement {
           result.setOnError(true);
           if (coverageNotFound) {
             details.append("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
-            engineData.addRejectionComment("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
+            // engineData.addRejectionComment("Coverage ID " + data.getCovId() +
+            // " not found in the coverage rules.");
           } else {
             details.append("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
-            engineData
-                .addRejectionComment("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
+            // engineData
+            // .addRejectionComment("Coverage cannot be calculated. Missing
+            // calculated or projected Buying Group, and ODM determined
+            // Coverage");
           }
         } else if (!isCoverageCalculated) {
-          engineData.addNegativeCheckStatus("COVERAGE_ERROR",
-              StringUtils.isNotBlank(negativeCheck) ? negativeCheck : "Coverage calculation requires processor review.");
+          details.setLength(0);
+          details.append("Coverage could not be calculated.");
         } else if (isCoverageCalculated) {
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           if (calculatedCoverageContainer != null) {
@@ -690,8 +693,8 @@ public class CalculateCoverageElement extends OverridingElement {
     List<CoverageContainer> coverages = new ArrayList<>();
     List<Rule> rule = coverageRules.findRule(coverageId);
     CoverageContainer container = new CoverageContainer();
-    container.setBaseCoverage(coverageId);
-    container.setBaseCoverageRules(rule);
+    container.setFinalCoverage(coverageId);
+    container.setFinalCoverageRules(rule);
     coverages.add(container);
     return coverages;
   }
