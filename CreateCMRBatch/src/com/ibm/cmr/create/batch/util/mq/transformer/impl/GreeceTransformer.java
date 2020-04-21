@@ -182,12 +182,12 @@ public class GreeceTransformer extends EMEATransformer {
     String line3 = "";
 
     if (!StringUtils.isBlank(addrData.getCustNm4())) {
-      line3 = addrData.getCustNm4();
+      line3 = "ATT " + addrData.getCustNm4();
     } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
       line3 = addrData.getAddrTxt2();
     } else if (!StringUtils.isBlank(addrData.getPoBox())
         && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
-      line3 = addrData.getPoBox();
+      line3 = "PO BOX " + addrData.getPoBox();
     }
     
     // Street
@@ -196,7 +196,7 @@ public class GreeceTransformer extends EMEATransformer {
       line4 = addrData.getAddrTxt();
     } else if (!StringUtils.isBlank(addrData.getPoBox())
         && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
-      line4 = addrData.getPoBox();
+      line4 = "PO BOX " + addrData.getPoBox();
     } 
     
     // postal code + city
