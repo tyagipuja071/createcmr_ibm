@@ -689,16 +689,19 @@ public class GermanyUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
       } else {
         for (Addr addr : addressList) {
-          if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department") && isOnlyDeptUpdated(changes)
-              && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
-            validation.setSuccess(true);
-            LOG.debug("Department/Attn is found to be updated.Updates verified.");
-            detail.append("Updates to relevant addresses found but have been marked as Verified.");
-            validation.setMessage("Validated");
-            isNegativeCheckNeedeed = false;
-            break;
+          if ("Y".equals(addr.getImportInd())) {
+            if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department") && isOnlyDeptUpdated(changes)
+                && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
+              validation.setSuccess(true);
+              LOG.debug("Department/Attn is found to be updated.Updates verified.");
+              detail.append("Updates to relevant addresses found but have been marked as Verified.");
+              validation.setMessage("Validated");
+              isNegativeCheckNeedeed = false;
+              break;
+            } else {
+              isNegativeCheckNeedeed = true;
+            }
           }
-          isNegativeCheckNeedeed = true;
         }
 
         if (isNegativeCheckNeedeed) {
