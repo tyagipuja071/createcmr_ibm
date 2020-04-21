@@ -1343,7 +1343,7 @@ public class TurkeyTransformer extends EMEATransformer {
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
-    // CMR-2279 Turkey update massUpdateData ,For liu hao remove TR change
+    // CMR-2279 Turkey update massUpdateData
     entityManager.merge(cmrObjects.getMassUpdateData());
     entityManager.flush();
   }
@@ -1517,6 +1517,68 @@ public class TurkeyTransformer extends EMEATransformer {
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
     if ("M".equals(reqType)) {
       List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+
+      List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
+      for (int i = 0; i < muAddrList.size(); i++) {
+        MassUpdtAddr muAddr = muAddrList.get(i);
+        String addrType = muAddr.getId().getAddrType();
+        if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+          CmrtAddr maiAddr = null;
+          CmrtAddr bilAddr = null;
+          boolean shareSeq = false;
+          for (CmrtAddr legAdr : legacyAddrList) {
+            if ("Y".equals(legAdr.getIsAddrUseMailing()) && "Y".equals(legAdr.getIsAddrUseBilling())) {
+              bilAddr = legAdr;
+              shareSeq = true;
+            } else if ("Y".equals(legAdr.getIsAddrUseMailing())) {
+              maiAddr = legAdr;
+            } else if ("Y".equals(legAdr.getIsAddrUseBilling())) {
+              bilAddr = legAdr;
+            }
+          }
+
+          if (shareSeq) {
+            // share Seq should split, remove existing, create mailing
+            legacyAddrList.remove(bilAddr);
+            maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
+
+            maiAddr.setIsAddrUseBilling("N");
+            maiAddr.getId().setAddrNo("00001");
+
+            entityManager.persist(maiAddr);
+            entityManager.flush();
+
+            bilAddr.setIsAddrUseMailing("N");
+            bilAddr.getId().setAddrNo("00002");
+
+            legacyAddrList.add(maiAddr);
+            legacyAddrList.add(bilAddr);
+          } else {
+            if (maiAddr == null && bilAddr != null) {
+              maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
+
+              maiAddr.setIsAddrUseBilling("N");
+              maiAddr.getId().setAddrNo("00001");
+
+              entityManager.persist(maiAddr);
+              entityManager.flush();
+
+              legacyAddrList.add(maiAddr);
+            } else if (maiAddr != null & bilAddr == null) {
+              bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
+
+              bilAddr.setIsAddrUseMailing("N");
+              bilAddr.getId().setAddrNo("00002");
+              entityManager.persist(bilAddr);
+              entityManager.flush();
+
+              legacyAddrList.add(bilAddr);
+            }
+          }
+          break;
+        }
+      }
+
       addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList, cmrObjects.getMassUpdateAddresses());
     } else {
       addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
@@ -1550,6 +1612,8 @@ public class TurkeyTransformer extends EMEATransformer {
         if (muAddr.getAddrSeqNo().equals(legacyAddr.getId().getAddrNo())) {
           addrSeqToAddrUseMap.put(legacyAddr.getId().getAddrNo(), getAddressUseByType(muAddr.getId().getAddrType()));
           break;
+        } else if ("ZP01".equals(muAddr.getId().getAddrType()) && "Y".equals(legacyAddr.getIsAddrUseMailing())) {
+          addrSeqToAddrUseMap.put(legacyAddr.getId().getAddrNo(), getAddressUseByType(muAddr.getId().getAddrType()));
         }
       }
     }
