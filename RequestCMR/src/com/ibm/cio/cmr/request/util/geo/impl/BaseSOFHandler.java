@@ -326,14 +326,11 @@ public abstract class BaseSOFHandler extends GEOHandler {
       }
       
       //For Turkey ModeOfPayment set as CoF
-      // *abner revert begin
-      // if(SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())){
-      // data.setCommercialFinanced(this.currentImportValues.get("ModeOfPayment"));
-      // }else{
-      // data.setModeOfPayment(this.currentImportValues.get("ModeOfPayment"));
-      // }
-      data.setModeOfPayment(this.currentImportValues.get("ModeOfPayment"));
-      // *abner revert begin
+      if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+        data.setCommercialFinanced(this.currentImportValues.get("ModeOfPayment"));
+      } else {
+        data.setModeOfPayment(this.currentImportValues.get("ModeOfPayment"));
+      }
 
       LOG.trace("Mode of Payment: " + data.getModeOfPayment());
 

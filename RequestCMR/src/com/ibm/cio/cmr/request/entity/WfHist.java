@@ -23,8 +23,15 @@ import javax.persistence.TemporalType;
  * @author Rama mohan
  */
 @Entity
-@Table(name = "WF_HIST", schema = "CREQCMR")
-@SqlResultSetMappings({ @SqlResultSetMapping(name = "WorkflowHistoryMapping", entities = { @EntityResult(entityClass = WfHist.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS") }) })
+@Table(
+    name = "WF_HIST",
+    schema = "CREQCMR")
+@SqlResultSetMappings({ @SqlResultSetMapping(
+    name = "WorkflowHistoryMapping",
+    entities = { @EntityResult(
+        entityClass = WfHist.class) },
+    columns = { @ColumnResult(
+        name = "OVERALL_STATUS") }) })
 public class WfHist extends BaseEntity<WfHistPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -43,46 +50,65 @@ public class WfHist extends BaseEntity<WfHistPK> implements Serializable {
     this.id = id;
   }
 
-  @Column(name = "REQ_ID")
+  @Column(
+      name = "REQ_ID")
   private long reqId;
 
-  @Column(name = "REQ_STATUS")
+  @Column(
+      name = "REQ_STATUS")
   private String reqStatus;
 
-  @Column(name = "SUB_OPER_STATUS")
+  @Column(
+      name = "SUB_OPER_STATUS")
   private String subOperStatus;
 
-  @Column(name = "SUB_OPER_SEQ")
+  @Column(
+      name = "SUB_OPER_SEQ")
   private int subOperSeq;
 
-  @Column(name = "CREATE_BY_ID")
+  @Column(
+      name = "CREATE_BY_ID")
   private String createById;
 
-  @Column(name = "CREATE_BY_NM")
+  @Column(
+      name = "CREATE_BY_NM")
   private String createByNm;
 
-  @Column(name = "CREATE_TS")
+  @Column(
+      name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Timestamp createTs;
 
-  @Column(name = "COMPLETE_TS")
+  @Column(
+      name = "COMPLETE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Timestamp completeTs;
 
-  @Column(name = "SENT_TO_ID")
+  @Column(
+      name = "SENT_TO_ID")
   private String sentToId;
 
-  @Column(name = "SENT_TO_NM")
+  @Column(
+      name = "SENT_TO_NM")
   private String sentToNm;
 
   private String cmt;
 
-  @Column(name = "REJ_REASON")
+  @Column(
+      name = "REJ_REASON")
   private String rejReason;
-  
-  @Column(name = "REJ_REASON_CD")
+
+  @Column(
+      name = "REJ_REASON_CD")
   private String rejReasonCd;
 
+  @Column(
+      name = "REJ_SUPPL_INFO_1")
+  private String rejSupplInfo1;
+
+  @Column(
+      name = "REJ_SUPPL_INFO_2")
+  private String rejSupplInfo2;
 
   public String getRejReasonCd() {
     return rejReasonCd;
@@ -92,7 +118,8 @@ public class WfHist extends BaseEntity<WfHistPK> implements Serializable {
     this.rejReasonCd = rejReasonCd;
   }
 
-  @Column(name = "REQ_STATUS_ACT")
+  @Column(
+      name = "REQ_STATUS_ACT")
   private String reqStatusAct;
 
   public String getReqStatus() {
@@ -197,6 +224,22 @@ public class WfHist extends BaseEntity<WfHistPK> implements Serializable {
 
   public void setReqStatusAct(String reqStatusAct) {
     this.reqStatusAct = reqStatusAct;
+  }
+
+  public String getRejSupplInfo1() {
+    return rejSupplInfo1;
+  }
+
+  public void setRejSupplInfo1(String rejSupplInfo1) {
+    this.rejSupplInfo1 = rejSupplInfo1;
+  }
+
+  public String getRejSupplInfo2() {
+    return rejSupplInfo2;
+  }
+
+  public void setRejSupplInfo2(String rejSupplInfo2) {
+    this.rejSupplInfo2 = rejSupplInfo2;
   }
 
 }

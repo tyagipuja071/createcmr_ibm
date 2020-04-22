@@ -387,6 +387,10 @@ function setSBOOnScenario() {
         }
       }
     }
+    var sbo = FormManager.getActualValue('salesBusOffCd');
+    if(sbo == null || sbo == '' || sbo == undefined){
+      FormManager.enable('salesBusOffCd');
+    }
   }
 }
 
@@ -678,7 +682,6 @@ function add32PostCdCntrySBOlogic() {
     return;
   }
 
-  FormManager.readOnly('salesBusOffCd');
   FormManager.setValue('salesBusOffCd', '');
 
   var _zs01ReqId = FormManager.getActualValue('reqId');
@@ -2125,6 +2128,14 @@ function addIBMAbbrevNmValidator() {
 	})(), 'MAIN_CUST_TAB', 'frmCMR'); 
 }
 
+function setAbbrNmOnIbmDeptChng(){
+  var _ibmDeptCostHandler = dojo.connect(FormManager.getField('ibmDeptCostCenter'), 'onChange', function(value) {
+    setAbbrevNmOnCustSubGrpChange();
+  });
+  if (_ibmDeptCostHandler && _ibmDeptCostHandler[0]) {
+    _ibmDeptCostHandler[0].onChange();
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -2143,6 +2154,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, '706');
   GEOHandler.enableCustomerNamesOnAddress('706');
   GEOHandler.addAfterConfig(addALPHANUMSPACEValidatorFR, '706');
+  GEOHandler.addAfterConfig(setAbbrNmOnIbmDeptChng, '706');
   GEOHandler.addAfterTemplateLoad(addALPHANUMSPACEValidatorFR, '706');
   GEOHandler.registerValidator(addAbbrevLocnValidator, [ '706' ], null, true);
   GEOHandler.registerValidator(addHostingInstallCustNm1Validator, '706' , null, true);

@@ -37,7 +37,7 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 @Component
 public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
 
-  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("8620");
+  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("862");
 
   @Override
   protected Logger initLogger() {
@@ -357,4 +357,37 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
 
     return newAddrSeq;
   }
+
+  public String getTrZD01Count(EntityManager entityManager, long reqId) {
+    String zd01count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETZD01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      zd01count = sResult[0].toString();
+    }
+    System.out.println("zd01count = " + zd01count);
+
+    return zd01count;
+  }
+
+  public String getTrZI01Count(EntityManager entityManager, long reqId) {
+    String zi01count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETZI01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      zi01count = sResult[0].toString();
+    }
+    System.out.println("zi01count = " + zi01count);
+
+    return zi01count;
+  }
+
 }
