@@ -3113,9 +3113,11 @@ var custType = FormManager.getActualValue('custGrp');
   if (_gtcISUHandler == null) {
     if (FormManager.getActualValue('reqType') == 'C') {
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-        FormManager.clearValue('repTeamMemberNo');
-        FormManager.setValue('salesBusOffCd', '');
-        FormManager.setValue('salesTeamCd', '');
+        if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
+          FormManager.clearValue('repTeamMemberNo');
+          FormManager.setValue('salesBusOffCd', '');
+          FormManager.setValue('salesTeamCd', '');          
+        }
         setClientTierAndISR(value);
       });
     }
@@ -3809,7 +3811,7 @@ function setCustSubTypeBpGRTRCY() {
         FormManager.enable('isuCd');
       }
     }
-    //Control Classification Code
+    // Control Classification Code
     if(custType == 'BUSPR' || custType == 'XBP'){
     	FormManager.show('CustClass', 'custClass');
         FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
@@ -7381,6 +7383,21 @@ function checkIsicCodeValidationIT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addCustNm4ValidatorForTR() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm4 = FormManager.getActualValue('custNm4');
+        var streetCont = FormManager.getActualValue('addrTxt2');
+        if((custNm4.length != undefined && custNm4.length > 0) && (streetCont.length != undefined && streetCont.length > 0)){
+        	return new ValidationResult(null, false, 'Only \'Street Cont\' or \'Name 4\' can be filled.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
 function addAfterConfigItaly() {
   afterConfigForIT();
   fieldsReadOnlyItaly();
@@ -7482,7 +7499,7 @@ function setSBOValuesForIsuCtc() {
       ISSUING_CNTRY : cntry,
       ISU : '%' + isuCtc + '%'
     };
-    results = cmr.query('GET.SBOLISRIST.BYISUCTC', qParams);
+    results = cmr.query('GET.SBOLIST.BYISU', qParams);
     console.log("there are " + results.length + " SBO returned.");
 
     if (results.length == 1) {
@@ -7667,8 +7684,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(addCustNm4ValidatorForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
+  
   // CMR-2279
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);

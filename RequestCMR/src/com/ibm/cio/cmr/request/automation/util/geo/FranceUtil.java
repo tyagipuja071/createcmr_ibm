@@ -575,7 +575,7 @@ public class FranceUtil extends AutomationUtil {
       boolean isuCdChngd = changes.isDataChanged("ISU Code");
       boolean ctcChngd = changes.isDataChanged("Client Tier");
 
-      if(!"9500".equals(data.getIsicCd()) && (vatChngd || collCdChngd || topLstChngd || sboChngd || iboChngd || isuCdChngd || ctcChngd)){
+      if (!"9500".equals(data.getIsicCd()) && (vatChngd || collCdChngd || topLstChngd || sboChngd || iboChngd || isuCdChngd || ctcChngd)) {
         if (vatChngd) {
           LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT #"));
           UpdatedDataModel vatChange = changes.getDataChange("VAT #");
@@ -607,7 +607,7 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-        
+
         if (collCdChngd) {
           UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
           if (collCdChange != null) {
@@ -625,7 +625,7 @@ public class FranceUtil extends AutomationUtil {
 
           }
         }
-        
+
         if (topLstChngd) {
           UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
           if (commFinanceChange != null) {
@@ -641,7 +641,7 @@ public class FranceUtil extends AutomationUtil {
 
           }
         }
-        
+
         if (isuCdChngd || ctcChngd || sboChngd || iboChngd) {
           UpdatedDataModel isuCdChange = changes.getDataChange("ISU Code");
           UpdatedDataModel clientTierChange = changes.getDataChange("Client Tier");
@@ -663,13 +663,13 @@ public class FranceUtil extends AutomationUtil {
         }
 
       }
-      else if(!vatChngd && !collCdChngd &&  !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd){
+      else if (!vatChngd && !collCdChngd && !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd) {
         isNegativeCheckNeedeed = true;
         validation.setSuccess(false);
         validation.setMessage("Not validated");
         detail.append("Updates to fields need verification.");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-        LOG.debug("Updates to fields need verification."); 
+        LOG.debug("Updates to fields need verification.");
       }
     }
 
@@ -692,11 +692,12 @@ public class FranceUtil extends AutomationUtil {
     Addr addressH = requestData.getAddress("ZD02");
     Addr billing = requestData.getAddress("ZP01");
     StringBuilder detail = new StringBuilder();
-   
+
     LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
       boolean billingChngd = changes.isAddressChanged("ZP01");
       boolean addrHchngd = changes.isAddressChanged("ZD02");
+
       if(!billingChngd && !addrHchngd){
         for (Addr addr : requestData.getAddresses()) {
           if ("Y".equals(addr.getImportInd())) {
@@ -715,6 +716,7 @@ public class FranceUtil extends AutomationUtil {
         }
        }
       else{
+
         if (billing != null && billingChngd) {
           LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
@@ -729,13 +731,13 @@ public class FranceUtil extends AutomationUtil {
             LOG.debug("Updates to Billing address need verification as it does not match D&B");
           }
         }
-        
+
         if (addressH != null && addrHchngd) {
           if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
             isNegativeCheckNeedeed = true;
           }
         }
-      }   
+      }
     }
 
     if (isNegativeCheckNeedeed) {

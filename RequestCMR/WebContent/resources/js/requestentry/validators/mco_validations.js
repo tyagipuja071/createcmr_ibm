@@ -647,10 +647,8 @@ function disableAddrFieldsPTES() {
   } else if (FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZD01') {
     FormManager.setValue('custPhone', '');
     FormManager.readOnly('custPhone');
-    //FormManager.hide('CustPhone', 'custPhone');
   } else {
     FormManager.enable('custPhone');
-    FormManager.show('CustPhone', 'custPhone');
   }
 
   // Sequence Number - enable for additional shipping
@@ -962,11 +960,11 @@ function forceLockScenariosPortugal() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
   var fieldsToDisable = new Array();
-  FormManager.enable('isicCd');
+  /*FormManager.enable('isicCd');
   FormManager.enable('isuCd');
   FormManager.enable('clientTier');
   FormManager.enable('specialTaxCd');
-  //FormManager.enable('repTeamMemberNo');
+  FormManager.enable('repTeamMemberNo');*/
 
   if (custSubGroup == 'COMME') {
     fieldsToDisable.push('cmrOwner');

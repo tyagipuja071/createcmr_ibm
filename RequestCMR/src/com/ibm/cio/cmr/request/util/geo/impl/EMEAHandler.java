@@ -103,13 +103,12 @@ public class EMEAHandler extends BaseSOFHandler {
 	public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
-
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
   protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Sold-To Address", "Install-At Address",
       "Ship-To Address" };
-
-	static {
+ 
+  static {
 		LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
 		LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");
 
@@ -1869,6 +1868,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			if (SystemLocation.TURKEY.equals(country)) {
 				address.setDept(currentRecord.getCmrDept());
+				address.setCustNm4(currentRecord.getCmrName4());
 			}
 
 			if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
