@@ -56,14 +56,16 @@ public class ScenarioExceptionsUtil {
     ScenarioExceptions parentRecord = queryScenarios(entityManager, cmrIssuingCntry, subRegion, "*", "*");
 
     if (childRecord != null) {
-      parseResult(childRecord);
+      parseAddressResults(childRecord);
     }
     if (medianRecord != null) {
-      parseResult(medianRecord);
+      parseAddressResults(medianRecord);
     }
     if (parentRecord != null) {
-      parseResult(parentRecord);
+      parseAddressResults(parentRecord);
     }
+
+    parseResult(childRecord, medianRecord, parentRecord);
 
     // initialize default address types for duplicate checks
     if (getAddressTypesForDuplicateRequestCheck().size() == 0) {
@@ -74,20 +76,7 @@ public class ScenarioExceptionsUtil {
     }
   }
 
-  private ScenarioExceptions queryScenarios(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario,
-      String subScenario) {
-    String sqlKey = ExternalizedQuery.getSql("AUTOMATION.GET.SCENARIO_EXCEPTIONS");
-    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
-    query.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCntry);
-    query.setParameter("SCENARIO", StringUtils.isNotBlank(scenario) ? scenario : "");
-    query.setParameter("SUB_SCENARIO", StringUtils.isNotBlank(subScenario) ? subScenario : "");
-    query.setParameter("SUBREGION_CD", (StringUtils.isNotBlank(subRegion) && subRegion.contains(cmrIssuingCntry)) ? subRegion : cmrIssuingCntry);
-    query.setForReadOnly(true);
-    return query.getSingleResult(ScenarioExceptions.class);
-  }
-
-  private void parseResult(ScenarioExceptions exceptions) {
-
+  private void parseAddressResults(ScenarioExceptions exceptions) {
     // AddressTypesForDuplicateReqChecks
     if (exceptions.getDupCheckAddrTypes() != null && StringUtils.isNotBlank(exceptions.getDupCheckAddrTypes())
         && (getAddressTypesForDuplicateRequestCheck().size() == 0 || getAddressTypesForDuplicateCMRCheck().size() == 0)) {
@@ -121,31 +110,74 @@ public class ScenarioExceptionsUtil {
       List<String> addrTypes = Arrays.asList(exceptions.getSkipCheckAddrTypes().split(","));
       setAddressTypesForSkipChecks(addrTypes);
     }
+  }
 
+  private ScenarioExceptions queryScenarios(EntityManager entityManager, String cmrIssuingCntry, String subRegion, String scenario,
+      String subScenario) {
+    String sqlKey = ExternalizedQuery.getSql("AUTOMATION.GET.SCENARIO_EXCEPTIONS");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCntry);
+    query.setParameter("SCENARIO", StringUtils.isNotBlank(scenario) ? scenario : "");
+    query.setParameter("SUB_SCENARIO", StringUtils.isNotBlank(subScenario) ? subScenario : "");
+    query.setParameter("SUBREGION_CD", (StringUtils.isNotBlank(subRegion) && subRegion.contains(cmrIssuingCntry)) ? subRegion : cmrIssuingCntry);
+    query.setForReadOnly(true);
+    return query.getSingleResult(ScenarioExceptions.class);
+  }
+
+  private void parseResult(ScenarioExceptions child, ScenarioExceptions median, ScenarioExceptions parent) {
     // SkipDuplicateChecksIndicator
-    if (exceptions.getSkipDupChecksIndc() != null && StringUtils.isNotBlank(exceptions.getSkipDupChecksIndc()) && !isSkipDuplicateChecks()) {
-      setSkipDuplicateChecks("Y".equals(exceptions.getSkipDupChecksIndc()));
+    if (child != null && child.getSkipDupChecksIndc() != null && StringUtils.isNotBlank(child.getSkipDupChecksIndc())) {
+      setSkipDuplicateChecks("Y".equals(child.getSkipDupChecksIndc()));
+    } else if (median != null && median.getSkipDupChecksIndc() != null && StringUtils.isNotBlank(median.getSkipDupChecksIndc())) {
+      setSkipDuplicateChecks("Y".equals(median.getSkipDupChecksIndc()));
+    } else if (parent != null && parent.getSkipDupChecksIndc() != null && StringUtils.isNotBlank(parent.getSkipDupChecksIndc())) {
+      setSkipDuplicateChecks("Y".equals(parent.getSkipDupChecksIndc()));
+    } else {
+      setSkipDuplicateChecks(false);
     }
 
     // SkipCompanyVerificationChecksIndicator
-    if (exceptions.getSkipVerificationIndc() != null && StringUtils.isNotBlank(exceptions.getSkipVerificationIndc())
-        && !isSkipCompanyVerification()) {
-      setSkipCompanyVerification("Y".equals(exceptions.getSkipVerificationIndc()));
+    if (child != null && child.getSkipVerificationIndc() != null && StringUtils.isNotBlank(child.getSkipVerificationIndc())) {
+      setSkipCompanyVerification("Y".equals(child.getSkipVerificationIndc()));
+    } else if (median != null && median.getSkipVerificationIndc() != null && StringUtils.isNotBlank(median.getSkipVerificationIndc())) {
+      setSkipCompanyVerification("Y".equals(median.getSkipVerificationIndc()));
+    } else if (parent != null && parent.getSkipVerificationIndc() != null && StringUtils.isNotBlank(parent.getSkipVerificationIndc())) {
+      setSkipCompanyVerification("Y".equals(parent.getSkipVerificationIndc()));
+    } else {
+      setSkipCompanyVerification(false);
     }
 
     // ImportDnbInfoIndicator
-    if (exceptions.getImportDnbInfoIndc() != null && StringUtils.isNotBlank(exceptions.getImportDnbInfoIndc()) && !isImportDnbInfo()) {
-      setImportDnbInfo("Y".equals(exceptions.getImportDnbInfoIndc()));
+    if (child != null && child.getImportDnbInfoIndc() != null && StringUtils.isNotBlank(child.getImportDnbInfoIndc())) {
+      setImportDnbInfo("Y".equals(child.getImportDnbInfoIndc()));
+    } else if (median != null && median.getImportDnbInfoIndc() != null && StringUtils.isNotBlank(median.getImportDnbInfoIndc())) {
+      setImportDnbInfo("Y".equals(median.getImportDnbInfoIndc()));
+    } else if (parent != null && parent.getImportDnbInfoIndc() != null && StringUtils.isNotBlank(parent.getImportDnbInfoIndc())) {
+      setImportDnbInfo("Y".equals(parent.getImportDnbInfoIndc()));
+    } else {
+      setImportDnbInfo(false);
     }
 
     // CheckVatForDuplicatesIndicator
-    if (exceptions.getCheckVatIndc() != null && StringUtils.isNotBlank(exceptions.getCheckVatIndc()) && !isCheckVATForDnB()) {
-      setCheckVATForDnB("Y".equals(exceptions.getCheckVatIndc()));
+    if (child != null && child.getCheckVatIndc() != null && StringUtils.isNotBlank(child.getCheckVatIndc())) {
+      setCheckVATForDnB("Y".equals(child.getCheckVatIndc()));
+    } else if (median != null && median.getCheckVatIndc() != null && StringUtils.isNotBlank(median.getCheckVatIndc())) {
+      setCheckVATForDnB("Y".equals(median.getCheckVatIndc()));
+    } else if (parent != null && parent.getCheckVatIndc() != null && StringUtils.isNotBlank(parent.getCheckVatIndc())) {
+      setCheckVATForDnB("Y".equals(parent.getCheckVatIndc()));
+    } else {
+      setCheckVATForDnB(false);
     }
 
     // SkipChecksIndicator
-    if (exceptions.getSkipChecksIndc() != null && StringUtils.isNotBlank(exceptions.getSkipChecksIndc()) && !isSkipChecks()) {
-      setSkipChecks("Y".equals(exceptions.getSkipChecksIndc()));
+    if (child != null && child.getSkipChecksIndc() != null && StringUtils.isNotBlank(child.getSkipChecksIndc())) {
+      setSkipChecks("Y".equals(child.getSkipChecksIndc()));
+    } else if (median != null && median.getSkipChecksIndc() != null && StringUtils.isNotBlank(median.getSkipChecksIndc())) {
+      setSkipChecks("Y".equals(median.getSkipChecksIndc()));
+    } else if (parent != null && parent.getSkipChecksIndc() != null && StringUtils.isNotBlank(parent.getSkipChecksIndc())) {
+      setSkipChecks("Y".equals(parent.getSkipChecksIndc()));
+    } else {
+      setSkipChecks(false);
     }
   }
 

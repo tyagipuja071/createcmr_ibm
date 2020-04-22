@@ -114,7 +114,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           }
 
           // log dnb results
-          if (scenarioExceptions.isCheckVATForDnB() && !isOrgIdMatched && vatFound) {
+          if (scenarioExceptions.isCheckVATForDnB() && !isOrgIdMatched && vatFound && !"Y".equals(data.getVatExempt())) {
             result.setResults("VAT not matched");
             details.insert(0, itemNo + " High Quality matches found.\nVAT value did not match with the highest confidence D&B match.\n");
             engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL", "VAT value did not match with the highest confidence D&B match.");
@@ -219,12 +219,20 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
     List<DnbOrganizationId> orgIDDetails = dnbRecord.getOrgIdDetails();
 
-    details.append("Organization IDs:\n");
+    details.append("Organization IDs:");
+    boolean relevantOrgId = false;
     for (int i = 0; i < orgIDDetails.size(); i++) {
       DnbOrganizationId orgId = orgIDDetails.get(i);
       if (DnBUtil.isRelevant(dnbRecord.getDnbCountry(), orgId)) {
-        details.append(orgId.getOrganizationIdType() + " - " + orgId.getOrganizationIdCode() + "\n");
+        details.append("\n - " + orgId.getOrganizationIdType() + " = " + orgId.getOrganizationIdCode());
+        relevantOrgId = true;
       }
+    }
+
+    if (!relevantOrgId) {
+      details.append("(No relevant Org Id found)\n");
+    } else {
+      details.append("\n");
     }
 
     LOG.debug("Connecting to D&B details service..");

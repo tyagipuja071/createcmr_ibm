@@ -134,7 +134,7 @@ boolean approver = user != null && user.isApprover();
 	if (subMenu) {
 	  subMenu.setAttribute("class", "ibm-active");
 	  var menuLink = dojo.query(subMenu).query("a");
-	  if (menuLink && menuLink[0]){
+	  if (menuLink && menuLink[0] && '<%=request.getAttribute("primaryTabId")%>' != 'ADMIN'){
 	    menuLink[0].href = '#';
 	  }
 	}

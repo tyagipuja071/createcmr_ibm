@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
@@ -89,6 +90,7 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
@@ -1197,7 +1199,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         rejectReason = getRejectReason(entityManager, rejectReason);
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), sendToId, sendToNm,
-          complete, rejectReason, rejReasonCd);
+          complete, rejectReason, rejReasonCd, model.getRejSupplInfo1(), model.getRejSupplInfo2());
 
       // save comment in req_cmt_log table .
       // save only if it is not null or not blank
@@ -1220,7 +1222,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         wfComment = wfComment.substring(0, 237) + " (truncated)";
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
-          null);
+          null, null, null);
       String action = model.getAction();
       String actionDesc = getActionDescription(action, entityManager);
       String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
@@ -1259,7 +1261,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     // there's a status change
     RequestUtils.createWorkflowHistory(this, entityManager, request, admin, CmrConstants.Mark_as_Completed(), model.getAction(), null, null, complete,
-        null, null);
+        null, null, null, null);
 
     // save comment in req_cmt_log table .
     String comment = STATUS_CHG_CMT_PRE_PREFIX + CmrConstants.Mark_as_Completed() + "\"";
@@ -1306,9 +1308,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
       performMassUpdateJP(model, entityManager, request);
     }
-    String result = "";
+    String result = null;
+    String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
     if (!CmrConstants.REQ_TYPE_MASS_CREATE.equals(model.getReqType())) {
-      result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+      if (!AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) && !AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
+        result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+      }
+    } else {
+      this.log.info("Processor automation enabled, skipping default approvals.");
     }
     performGenericAction(trans, model, entityManager, request, procCenterName, null, false, StringUtils.isBlank(result));
   }
@@ -1406,8 +1413,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     updateEntity(admin, entityManager);
 
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
-        null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null,
+        null, null);
 
     // save comment in req_cmt_log table .
     // save only if it is not null or not blank

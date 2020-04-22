@@ -83,6 +83,9 @@ public class CoverageRulesFieldMap {
     addLogicalFieldMapping(SystemLocation.INDIA, "SORTL", "Cluster");
     addPhysicalFieldMapping(SystemLocation.INDIA, "SORTL", "AP_CUST_CLUSTER_ID");
 
+    addLogicalFieldMapping(SystemLocation.FRANCE, "SORTL", "Sales BO Code");
+    addPhysicalFieldMapping(SystemLocation.FRANCE, "SORTL", "SALES_BO_CD");
+
   };
 
   private static void addLogicalFieldMapping(String country, String key, String label) {

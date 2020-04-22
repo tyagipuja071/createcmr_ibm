@@ -334,12 +334,12 @@ public class ItalyHandler extends BaseSOFHandler {
         }
  
         //Single reactivation : if Billing and company address not found in RDC or DB2
-        List<CmrtAddr> cmrtAddrs = null;
-        if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType)){
-          cmrtAddrs = LegacyDirectUtil.checkLDAddress(entityManager,mainRecord.getCmrNum(),mainRecord.getCmrIssuedBy());
-        }
+      boolean isLDMultipleAddr = false;
+      if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType)){
+        isLDMultipleAddr = LegacyDirectUtil.checkLDAddress(entityManager,mainRecord.getCmrNum(),mainRecord.getCmrIssuedBy());
+      }
           
-        if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType) && source.getItems().size() ==1 && INSTALLING_ADDR_TYPE.equals(source.getItems().get(0).getCmrAddrTypeCode()) && cmrtAddrs != null && cmrtAddrs.size() == 1){
+        if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType) && source.getItems().size() ==1 && INSTALLING_ADDR_TYPE.equals(source.getItems().get(0).getCmrAddrTypeCode()) && !isLDMultipleAddr){
           LOG.debug("Single reactivation: Copy Comapany and Billing from Installing address of CMR No. " + mainRecord.getCmrNum());
           createMissingAddressForSingleReact(source,converted,mainRecord);       
         }else{
@@ -391,6 +391,10 @@ public class ItalyHandler extends BaseSOFHandler {
             companyAddr.setCmrAddrTypeCode("ZI01");
             companyAddr.setParentCMRNo(mainRecord.getCmrCompanyNo());
           } else {
+            //CMR-2776 Single Reactivation
+            if(CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(reqType)){
+              companyAddr.setParentCMRNo(companyCmr);
+            }
             // DENNIS:If the company number is empty, we get the company addr from
             // LD DB
             loadCompanyAddressDataLD(entityManager, companyAddr);

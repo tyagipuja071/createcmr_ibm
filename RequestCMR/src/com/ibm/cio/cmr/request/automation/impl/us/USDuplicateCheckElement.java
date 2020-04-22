@@ -310,9 +310,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
+    String resToCode = StringUtils.isBlank(data.getRestrictTo()) ? "" : data.getRestrictTo();
     String[] scnarioList = { "POA", "OIO", "OEMHW", "OEM-SW", "TPD", "RFBPO", "SSI", "ICC", "SVMP", "END USER", "POOL", "DEVELOP", "E-HOST", "IGS",
         "IGSF", "NO RESTRICT", "32C", "TPPS", "3CC", "IPMA", "LPMA", "INDIAN TRIBE", "TRIBAL BUS", "HEALTHCARE", "HOSPITAL", "CLINIC", "NATIVE CORP",
-        "BYMODEL" };
+        "BYMODEL", "CAMOUFLAGED", "STATE", "SPEC DIST", "COUNTY", "CITY", "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV" };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
@@ -377,9 +378,17 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
       } else if ("END USER".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("BPQS".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo()) || "IRCSO".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
+        if ("BPQS".equals(resToCode)) {
+          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+            if ("BPQS".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
+              reqCheckMatchesTmp.add(reqCheckRecord);
+            }
+          }
+        } else if ("IRCSO".equals(resToCode)) {
+          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+            if ("IRCSO".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
+              reqCheckMatchesTmp.add(reqCheckRecord);
+            }
           }
         }
         Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
@@ -437,7 +446,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
       } else if ("INDIAN TRIBE".equals(scenarioSubType) || "TRIBAL BUS".equals(scenarioSubType) || "HEALTHCARE".equals(scenarioSubType)
-          || "CLINIC".equals(scenarioSubType) || "NATIVE CORP".equals(scenarioSubType)) {
+          || "CLINIC".equals(scenarioSubType) || "NATIVE CORP".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType)
+          || "STATE".equals(scenarioSubType) || "SPEC DIST".equals(scenarioSubType) || "COUNTY".equals(scenarioSubType)
+          || "CITY".equals(scenarioSubType) || "HOSPITALS".equals(scenarioSubType) || "SCHOOL PUBLIC".equals(scenarioSubType)
+          || "SCHOOL CHARTER".equals(scenarioSubType) || "SCHOOL PRIV".equals(scenarioSubType)) {
         Collections.copy(reqCheckMatches, reqCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
@@ -474,11 +486,25 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
         } else if ("7".equals(mapUSCMR.get("custTypCd"))) {
-          Collections.copy(reqCheckMatches, reqCheckMatches);
-          reqNegStatFlag = true;
+          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
+                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo")) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
+                && StringUtils.isNotBlank(mapUSCMR.get("usRestricTo"))
+                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(mapUSCMR.get("usRestricTo"))) {
+              reqCheckMatchesTmp.add(reqCheckRecord);
+              reqNegStatFlag = true;
+            }
+          }
+          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
         } else if ("2".equals(mapUSCMR.get("custTypCd"))) {
-          Collections.copy(reqCheckMatches, reqCheckMatches);
-          reqNegStatFlag = true;
+          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
+                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+              reqCheckMatchesTmp.add(reqCheckRecord);
+              reqNegStatFlag = true;
+            }
+          }
+          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
         } else if ("1".equals(mapUSCMR.get("custTypCd"))) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
@@ -500,6 +526,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       reqCheckMatchesTmp.clear();
     }
     return reqCheckMatches;
+
   }
 
   public List<DuplicateCMRCheckResponse> filterDupCmrs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -508,9 +535,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
+    String resToCode = StringUtils.isBlank(data.getRestrictTo()) ? "" : data.getRestrictTo();
     String[] scnarioList = { "POA", "OIO", "OEMHW", "OEM-SW", "TPD", "RFBPO", "SSI", "ICC", "SVMP", "END USER", "POOL", "DEVELOP", "E-HOST", "IGS",
         "IGSF", "NO RESTRICT", "32C", "TPPS", "3CC", "IPMA", "LPMA", "INDIAN TRIBE", "TRIBAL BUS", "HEALTHCARE", "HOSPITAL", "CLINIC", "NATIVE CORP",
-        "BYMODEL" };
+        "BYMODEL", "CAMOUFLAGED", "STATE", "SPEC DIST", "COUNTY", "CITY", "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV" };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
@@ -575,9 +603,17 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
       } else if ("END USER".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()) || "IRCSO".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
+        if ("BPQS".equals(resToCode)) {
+          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+            if ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
+              cmrCheckMatchesTmp.add(cmrCheckRecord);
+            }
+          }
+        } else if ("IRCSO".equals(resToCode)) {
+          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+            if ("IRCSO".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
+              cmrCheckMatchesTmp.add(cmrCheckRecord);
+            }
           }
         }
         Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
@@ -635,7 +671,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
       } else if ("INDIAN TRIBE".equals(scenarioSubType) || "TRIBAL BUS".equals(scenarioSubType) || "HEALTHCARE".equals(scenarioSubType)
-          || "CLINIC".equals(scenarioSubType) || "NATIVE CORP".equals(scenarioSubType)) {
+          || "CLINIC".equals(scenarioSubType) || "NATIVE CORP".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType)
+          || "STATE".equals(scenarioSubType) || "SPEC DIST".equals(scenarioSubType) || "COUNTY".equals(scenarioSubType)
+          || "CITY".equals(scenarioSubType) || "HOSPITALS".equals(scenarioSubType) || "SCHOOL PUBLIC".equals(scenarioSubType)
+          || "SCHOOL CHARTER".equals(scenarioSubType) || "SCHOOL PRIV".equals(scenarioSubType)) {
         Collections.copy(cmrCheckMatches, cmrCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
@@ -675,8 +714,14 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           Collections.copy(cmrCheckMatches, cmrCheckMatches);
           reqNegStatFlag = true;
         } else if ("2".equals(mapUSCMR.get("custTypCd"))) {
-          Collections.copy(cmrCheckMatches, cmrCheckMatches);
-          reqNegStatFlag = true;
+          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
+                && cmrCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+              cmrCheckMatchesTmp.add(cmrCheckRecord);
+              reqNegStatFlag = true;
+            }
+          }
+          Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
         } else if ("1".equals(mapUSCMR.get("custTypCd"))) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
             if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
@@ -769,14 +814,28 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       ScenarioExceptionsUtil scenarioExceptions) {
     ReqCheckRequest request = new ReqCheckRequest();
     request.setReqId(admin.getId().getReqId());
+    String scenarioSubType = "";
+    if ("C".equals(admin.getReqType()) && data != null) {
+      scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
+    }
     if (addr != null) {
       request.setAddrType(addr.getId().getAddrType());
       request.setCity(addr.getCity1());
-      if (admin.getMainCustNm1() != null) {
-        request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+
+      if ("END USER".equals(scenarioSubType)) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustomerName(StringUtils.isBlank(addr.getDivn()) ? "" : addr.getDivn());
+        } else if ("ZI01".equals(addr.getId().getAddrType()) && admin.getMainCustNm1() != null) {
+          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+        }
       } else {
-        request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        if (admin.getMainCustNm1() != null) {
+          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+        } else {
+          request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        }
       }
+
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(addr.getAddrTxt2());
       request.setLandedCountry(addr.getLandCntry());
@@ -866,14 +925,28 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   private DuplicateCMRCheckRequest getRequestForCmrChk(EntityManager entityManager, Data data, Admin admin, Addr addr, String rdcAddrType,
       boolean vatMatchRequired) {
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+    String scenarioSubType = "";
+    if ("C".equals(admin.getReqType()) && data != null) {
+      scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
+    }
     if (addr != null) {
       request.setIssuingCountry(data.getCmrIssuingCntry());
       request.setLandedCountry(addr.getLandCntry());
-      if (admin.getMainCustNm1() != null) {
-        request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+
+      if ("END USER".equals(scenarioSubType)) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          request.setCustomerName(StringUtils.isBlank(addr.getDivn()) ? "" : addr.getDivn());
+        } else if ("ZI01".equals(addr.getId().getAddrType()) && admin.getMainCustNm1() != null) {
+          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+        }
       } else {
-        request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        if (admin.getMainCustNm1() != null) {
+          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+        } else {
+          request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        }
       }
+
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
       request.setCity(addr.getCity1());
