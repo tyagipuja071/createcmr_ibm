@@ -698,7 +698,7 @@ public class GermanyUtil extends AutomationUtil {
               validation.setMessage("Validated");
               isNegativeCheckNeedeed = false;
               break;
-            } else {
+            } else if (!isOnlyDeptUpdated(changes)) {
               isNegativeCheckNeedeed = true;
             }
           }
@@ -710,6 +710,19 @@ public class GermanyUtil extends AutomationUtil {
           validation.setSuccess(false);
           validation.setMessage("Not validated");
           engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
+        } else {
+          LOG.debug("Address changes don't need review");
+          if (changes.hasAddressChanges()) {
+            validation.setMessage("Address changes were found and validated. No further review required.");
+            detail.append("Address changes were found and validated. No further review required.");
+          } else {
+            validation.setMessage("No Address changes found on the request.");
+            detail.append("No Address changes found on the request.");
+          }
+          if (StringUtils.isBlank(output.getResults())) {
+            output.setResults("Validated");
+          }
+          validation.setSuccess(true);
         }
 
       }
