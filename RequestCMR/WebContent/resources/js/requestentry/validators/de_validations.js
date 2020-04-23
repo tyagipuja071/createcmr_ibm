@@ -422,7 +422,7 @@ var _custNameDEHandler = null;
 function addressLoadHandlerDE(cntry, addressMode, saving, afterValidate) {
   if (_custNameDEHandler == null) {
     _custNameDEHandler = dojo.connect(FormManager.getField('custNm1'), 'onChange', function(value) {
-      setAbbrevNameFRUpdate();
+      setAbbrevNameDEUpdate();
     });
   }
   if (_custNameDEHandler && _custNameDEHandler[0]) {
