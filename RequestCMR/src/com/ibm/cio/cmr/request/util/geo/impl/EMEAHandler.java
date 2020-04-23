@@ -3840,7 +3840,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	private void copyAddrData(FindCMRRecordModel record, Addr addr) {
 		record.setCmrAddrTypeCode("ZP01");
-    record.setCmrAddrSeq("00001");
+    record.setCmrAddrSeq("00002");
 		record.setCmrName1Plain(addr.getCustNm1());
 		record.setCmrName2Plain(addr.getCustNm2());
 		record.setCmrName3(addr.getCustNm3());
