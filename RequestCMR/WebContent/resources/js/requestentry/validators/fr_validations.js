@@ -201,6 +201,10 @@ function setVATOnScenario() {
 
     
 
+        
+
+    
+
   } else {
     if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
       FormManager.readOnly('vat');
@@ -266,6 +270,10 @@ function setSBOOnScenario() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == '') {
     return
+
+    
+
+        
 
     
 
@@ -1047,7 +1055,7 @@ function setAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, for
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
   }
-  if (reqType == 'U') {
+  if (cmr.currentRequestType == 'U') {
     return;
   }
   if (role != 'Requester') {
@@ -1286,6 +1294,10 @@ function getLandCntryDesc(cntryCd) {
 
     
 
+        
+
+    
+
   }
   var reqParam = {
     COUNTRY : cntryCd,
@@ -1388,6 +1400,10 @@ function addVATScenarioOnAddrSave() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == '') {
     return
+
+    
+
+        
 
     
 
