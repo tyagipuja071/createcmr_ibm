@@ -1553,41 +1553,42 @@ public class TurkeyTransformer extends EMEATransformer {
           if (shareSeq) {
             // share Seq should split, remove existing, create mailing
             legacyAddrList.remove(maiAddr);
-            bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
+            // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
 
-            maiAddr.setIsAddrUseBilling("N");
-            maiAddr.getId().setAddrNo("00001");
+            // maiAddr.setIsAddrUseBilling("N");
+            maiAddr.getId().setAddrNo("00002");
 
-            bilAddr.setIsAddrUseMailing("N");
-            bilAddr.getId().setAddrNo("00002");
-            entityManager.persist(bilAddr);
-            entityManager.flush();
+            // bilAddr.setIsAddrUseMailing("N");
+            // bilAddr.getId().setAddrNo("00001");
+            // entityManager.persist(bilAddr);
+            // entityManager.flush();
 
             legacyAddrList.add(maiAddr);
-            legacyAddrList.add(bilAddr);
-          } else {
-            if (maiAddr == null && bilAddr != null) {
-              maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
-
-              maiAddr.setIsAddrUseBilling("N");
-              maiAddr.getId().setAddrNo("00001");
-
-              entityManager.persist(maiAddr);
-              entityManager.flush();
-
-              legacyAddrList.add(maiAddr);
-            } else if (maiAddr != null & bilAddr == null) {
-              bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
-
-              bilAddr.setIsAddrUseMailing("N");
-              bilAddr.getId().setAddrNo("00002");
-              entityManager.persist(bilAddr);
-              entityManager.flush();
-
-              legacyAddrList.add(bilAddr);
-            }
+            // legacyAddrList.add(bilAddr);
           }
-          break;
+          // else {
+          // if (maiAddr == null && bilAddr != null) {
+          // maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
+          //
+          // maiAddr.setIsAddrUseBilling("N");
+          // maiAddr.getId().setAddrNo("00002");
+          //
+          // entityManager.persist(maiAddr);
+          // entityManager.flush();
+          //
+          // legacyAddrList.add(maiAddr);
+          // } else if (maiAddr != null & bilAddr == null) {
+          // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
+          //
+          // bilAddr.setIsAddrUseMailing("N");
+          // bilAddr.getId().setAddrNo("00001");
+          // entityManager.persist(bilAddr);
+          // entityManager.flush();
+          //
+          // legacyAddrList.add(bilAddr);
+          // }
+          // }
+          // break;
         }
       }
 
