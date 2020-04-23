@@ -329,6 +329,38 @@ public class EMEAHandler extends BaseSOFHandler {
                       }
                     }
                   }
+                  // boolean zi01 = false;
+                  //
+                  // boolean zd01 = false;
+                  // for (FindCMRRecordModel records : source.getItems()) {
+                  // if
+                  // (CmrConstants.ADDR_TYPE.ZI01.toString().equals(records.getCmrAddrTypeCode()))
+                  // {
+                  // zi01 = true;
+                  // }
+                  // if
+                  // (CmrConstants.ADDR_TYPE.ZD01.toString().equals(records.getCmrAddrTypeCode()))
+                  // {
+                  // zd01 = true;
+                  // }
+                  // }
+                  // if (!zi01) {
+                  // FindCMRRecordModel zi01addr = new FindCMRRecordModel();
+                  // PropertyUtils.copyProperties(zi01addr, mainRecord);
+                  // zi01addr.setCmrAddrTypeCode("ZI01");
+                  // zi01addr.setCmrAddrSeq("00005");
+                  // zi01addr.setCmrSapNumber("");
+                  // converted.add(zi01addr);
+                  // }
+                  // if (!zd01) {
+                  // FindCMRRecordModel zd01addr = new FindCMRRecordModel();
+                  // PropertyUtils.copyProperties(zd01addr, mainRecord);
+                  // zd01addr.setCmrAddrTypeCode("ZD01");
+                  // zd01addr.setCmrAddrSeq("00004");
+                  // zd01addr.setCmrSapNumber("");
+                  // converted.add(zd01addr);
+                  // }
+
 								}
 							}
 						}
@@ -1829,6 +1861,12 @@ public class EMEAHandler extends BaseSOFHandler {
 		if (currentRecord != null) {
 
 			String country = currentRecord.getCmrIssuedBy();
+
+      if (SystemLocation.TURKEY.equals(country)) {
+        if (!StringUtils.isBlank(currentRecord.getCmrCity2())) {
+          address.setDept(currentRecord.getCmrCity2());
+        }
+      }
 
 			if (!SystemLocation.GREECE.equals(country) && !SystemLocation.CYPRUS.equals(country)
 					&& !SystemLocation.TURKEY.equals(country) && !SystemLocation.UNITED_KINGDOM.equals(country)
