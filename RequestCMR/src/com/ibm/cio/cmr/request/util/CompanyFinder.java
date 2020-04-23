@@ -354,6 +354,7 @@ public class CompanyFinder {
       request.setOrgId(searchModel.getTaxCd1());
     }
     request.setMinConfidence("7");
+    request.setIncludeOob(true);
 
     LOG.debug("Connecting to D&B matching service for " + request.getLandedCountry() + " - " + request.getCustomerName());
     // connect to the duplicate CMR check service
