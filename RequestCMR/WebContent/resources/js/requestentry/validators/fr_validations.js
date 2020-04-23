@@ -805,19 +805,19 @@ function setAbbrevNmOnCustSubGrpChange() {
   } else {
     singleIndValue = "D3";
   }
-  if (abbrevNmValue != null && abbrevNmValue.length > 18 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
-    abbrevNmValue = abbrevNmValue.substring(0, 18);
-  } else if (abbrevNmValue != null && abbrevNmValue.length < 18 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 18; i++) {
-      abbrevNmValue += ' '; 
-    }
-  } else if (abbrevNmValue != null && abbrevNmValue.length > 16 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
-    abbrevNmValue = abbrevNmValue.substring(0, 16);
-  } else if (abbrevNmValue != null && abbrevNmValue.length < 16 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
-    for ( var i = abbrevNmValue.length; i < 16; i++) {
-      abbrevNmValue += ' '; 
-    }
-  }
+//  if (abbrevNmValue != null && abbrevNmValue.length > 18 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
+//    abbrevNmValue = abbrevNmValue.substring(0, 18);
+//  } else if (abbrevNmValue != null && abbrevNmValue.length < 18 && (custSubGrp != "INTER" && custSubGrp != "CBTER")) {
+//    for ( var i = abbrevNmValue.length; i < 18; i++) {
+//      abbrevNmValue += ' '; 
+//    }
+//  } else if (abbrevNmValue != null && abbrevNmValue.length > 16 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
+//    abbrevNmValue = abbrevNmValue.substring(0, 16);
+//  } else if (abbrevNmValue != null && abbrevNmValue.length < 16 && (custSubGrp == "INTER" || custSubGrp == "CBTER")) {
+//    for ( var i = abbrevNmValue.length; i < 16; i++) {
+//      abbrevNmValue += ' '; 
+//    }
+//  }
 
   // story 1507805 - set single identificateur 'DF' if having address H
   var checkZD02QParams = {
@@ -831,8 +831,17 @@ function setAbbrevNmOnCustSubGrpChange() {
   }
 
   if (singleIndValue != null && abbrevNmValue != null) {
-    abbrevNmValue = abbrevNmValue + ' ' + singleIndValue;
-    FormManager.setValue('abbrevNm', abbrevNmValue);
+    var _abbrevNmValue = abbrevNmValue + ' ' + singleIndValue;
+    if(_abbrevNmValue.length > 22){
+      _abbrevNmValue =  abbrevNmValue.substring(0,(21-singleIndValue.length)) + ' ' +  singleIndValue;
+      }
+    else if(_abbrevNmValue.length < 22){
+      for ( var i = _abbrevNmValue.length; i < (22-singleIndValue.length); i++) {
+      abbrevNmValue += ' '; 
+    }
+      _abbrevNmValue = abbrevNmValue + ' ' + singleIndValue;
+    }    
+     FormManager.setValue('abbrevNm', _abbrevNmValue);
   }
 }
 
