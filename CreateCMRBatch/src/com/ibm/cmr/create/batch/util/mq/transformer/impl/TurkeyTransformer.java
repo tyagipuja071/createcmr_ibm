@@ -48,7 +48,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
  * 
  */
 public class TurkeyTransformer extends EMEATransformer {
-  // public class TurkeyTransformer extends MessageTransformer {
+
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 

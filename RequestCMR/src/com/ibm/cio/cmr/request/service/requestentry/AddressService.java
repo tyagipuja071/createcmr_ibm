@@ -156,6 +156,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         if (model.getAddrType().equals("ZS01")) {
           newAddrSeq = "00003";
         }
+        // update
         if (model.getAddrType().equals("ZP01")) {
           newAddrSeq = "00002";
         }
