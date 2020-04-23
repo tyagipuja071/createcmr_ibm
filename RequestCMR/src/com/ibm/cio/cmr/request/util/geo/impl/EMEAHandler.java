@@ -1830,6 +1830,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			String country = currentRecord.getCmrIssuedBy();
 
+      if (SystemLocation.TURKEY.equals(country)) {
+        if (!StringUtils.isBlank(currentRecord.getCmrCity2())) {
+          address.setDept(currentRecord.getCmrCity2());
+        }
+      }
+
 			if (!SystemLocation.GREECE.equals(country) && !SystemLocation.CYPRUS.equals(country)
 					&& !SystemLocation.TURKEY.equals(country) && !SystemLocation.UNITED_KINGDOM.equals(country)
 					&& !SystemLocation.IRELAND.equals(country)) {
