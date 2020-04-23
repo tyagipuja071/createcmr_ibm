@@ -204,6 +204,54 @@ function addUKAddressTypeValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+// CMR-2688 Turkey - Default Preferred Language to T for all Create Scenarios
+function setDefaultValueForPreferredLanguage() {
+  console.log("setDefaultValueForPreferredLanguage..............");
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+	var reqType = FormManager.getActualValue('reqType');
+	console.log("reqType value is :" + reqType);
+	if (reqType == 'C') {
+	  FormManager.setValue('custPrefLang', 'T');
+	}
+  }
+}
+
+// CMR-1804-Turkey Business Partner ISU code 8B, Commercial ISU code 32
+function setDefaultValueForISU() {
+  console.log("setDefaultValueForISU..............");
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+	var subType = FormManager.getActualValue('custSubGrp');
+	console.log("sub-type scenario value is :" + subType);
+	// Business Partner
+	if (subType == 'BUSPR' || 'XBP') {
+	  FormManager.setValue('isuCd', '8B');
+      FormManager.enable('isuCd');
+	} 
+	// Commercial
+	else if (subType == 'COMME' || 'XINTS') {
+	  FormManager.setValue('isuCd', '32');
+	  FormManager.enable('isuCd');
+	}
+  }
+}
+
+// CMR-2695 - Turkey - VAT mandatory for scenario = local and sub scenario = Commercial
+function vatMandatoryValidation() {
+  console.log("vatMandatoryValidation..............");
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+	  var localType = FormManager.getActualValue('custGrp');
+	  var subScenarioType = FormManager.getActualValue('custSubGrp');
+	  console.log("Scenario Type value is :" + localType);
+	  console.log("Scenario Sub-type value is :" + subScenarioType);
+	  if (localType == 'LOCAL' && subScenarioType == 'COMME') {
+		var vatValue = dijit.byId('vatExempt').get('checked');
+		if (vatValue == false || vatValue == '') {
+			return new ValidationResult(null, false, 'VAT is mandatory for Local Customer Scenario and Commercial Sub-Scenario for Turkey');
+		}
+	  }
+   }
+}
+
 function autoSetAbbrevNameUKIInterFSL(custType) {
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
@@ -7830,6 +7878,14 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addTRAddressTypeValidator, [ SysLoc.TURKEY ]);
+
+  // CMR-2688
+  GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
+  // CMR-1804 Turkey - Fields values validations - ISU Default on UI
+  GEOHandler.addAfterConfig(setDefaultValueForISU, [ SysLoc.TURKEY ]);
+  // CMR-2695 Turkey - VAT mandatory for scenario = local and sub scenario = Commercial
+  GEOHandler.registerValidator(vatMandatoryValidation, [ SysLoc.TURKEY ], null, true);
+
 
   // CMR-2093
 
