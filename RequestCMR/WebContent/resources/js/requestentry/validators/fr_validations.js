@@ -197,70 +197,7 @@ function setVATOnScenario() {
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == '') {
-    return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
+    return;
   } else {
     if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU' || custSubGrp == 'IBMEM' || custSubGrp == 'CBIEM') {
       FormManager.readOnly('vat');
@@ -325,70 +262,7 @@ function setSBOOnScenario() {
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == '') {
-    return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
+    return;
   } else {
     FormManager.readOnly('installBranchOff');
     if (custSubGrp == 'INTER' || custSubGrp == 'CBTER') {
@@ -1402,70 +1276,7 @@ function addAbbrevLocnlogic() {
 
 function getLandCntryDesc(cntryCd) {
   if (cntryCd == null) {
-    return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
+    return;
   }
   var reqParam = {
     COUNTRY : cntryCd,
@@ -1567,70 +1378,7 @@ function addVATScenarioOnAddrSave() {
   }
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == '') {
-    return
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                    
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
-                
-
-    
-
-        
-
-    
-
-            
-
-    
-
-        
-
-    
-
+    return;
   } else {
     if (custSubGrp == 'PRICU' || custSubGrp == 'CBICU') {
       FormManager.enable('vat');
