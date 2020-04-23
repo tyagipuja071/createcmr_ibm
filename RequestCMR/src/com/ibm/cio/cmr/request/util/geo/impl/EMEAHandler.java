@@ -1920,6 +1920,10 @@ public class EMEAHandler extends BaseSOFHandler {
 			data.setSpecialTaxCd("AA");
 		} else if (SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
 			data.setCustPrefLang("I");
+		} 
+		// CMR-2688_Preferred_Language_T
+		else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+			data.setCustPrefLang("T");
 		} else {
 			data.setCustPrefLang("E");
 		}
