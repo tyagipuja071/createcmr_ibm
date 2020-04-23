@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.us.USCeIdMapping;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
@@ -51,12 +52,17 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.PPSServiceClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.pps.PPSProfile;
+import com.ibm.cmr.services.client.pps.PPSRequest;
+import com.ibm.cmr.services.client.pps.PPSResponse;
 import com.ibm.json.java.JSONObject;
 
 /**
@@ -78,12 +84,31 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   @Override
   public AutomationResult<OverrideOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
 
+    Admin admin = requestData.getAdmin();
     long reqId = admin.getId().getReqId();
-    USHandler handler = new USHandler();
+    Data data = requestData.getData();
     AutomationResult<OverrideOutput> output = buildResult(reqId);
+
+    // check the scenario
+    if ("U".equals(admin.getReqType())) {
+      output.setResults("Skipped");
+      output.setDetails("Update types not supported.");
+      return output;
+    }
+
+    String custGrp = data.getCustGrp();
+    String custSubGrp = data.getCustSubGrp();
+    if ("BYMODEL".equals(data.getCustGrp())) {
+      // TODO insert logic here to determine scenario by model
+    }
+    if (!"5".equals(custGrp) || !"END USER".equals(custSubGrp)) {
+      output.setResults("Skipped");
+      output.setDetails("Non BP End User scenario not supported.");
+      return output;
+    }
+
+    USHandler handler = new USHandler();
     OverrideOutput overrides = new OverrideOutput(false);
     StringBuilder details = new StringBuilder();
     Addr addr = requestData.getAddress("ZS01");
@@ -93,6 +118,17 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       // 1 - check child reqId processing first
       LOG.debug("Getting child request data for Request " + childReqId);
       RequestData childRequest = new RequestData(entityManager, childReqId);
+      if (childRequest == null || childRequest.getAdmin() == null) {
+        String msg = "Child request " + childReqId + " missing. The request needs to be manually processed.";
+        details.append(msg);
+        details.append("\n");
+        details.append("No field value has been computed for this record.");
+        engineData.addRejectionComment(msg);
+        output.setOnError(true);
+        output.setDetails(details.toString());
+        output.setResults("Issues Encountered");
+        return output;
+      }
       String childReqStatus = childRequest.getAdmin().getReqStatus();
       if ("PRJ".equals(childReqStatus) || "DRA".equals(childReqStatus) || "CAN".endsWith(childReqStatus)) {
         LOG.debug("Child request processing has been stopped (Rejected or Sent back to requesters). Sending to processors.");
@@ -108,7 +144,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         return output;
       } else if (!"COM".equals(childReqStatus)) {
         LOG.debug("Child request not yet completed. Checking waiting time..");
-        // TODO add waiting time
         this.waiting = true;
         output.setDetails(details.toString());
         output.setOnError(false);
@@ -122,7 +157,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     // 2 - match against D&B
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details);
 
-    // 3 - check IBM Direct CMR
+    // check CEID
+    boolean t1 = isTier1BP(data);
+    if (!t1) {
+      engineData.addNegativeCheckStatus("_usBpT1", "BP is not a T1 or status cannot be determined via PPS profile.");
+    }
+
+    // 4 - check IBM Direct CMR
     FindCMRRecordModel ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData);
     if (ibmDirectCmr == null) {
 
@@ -490,6 +531,59 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
     PropertyUtils.copyProperties(data, valueMap);
 
+  }
+
+  /**
+   * Checks if the current BP is a T1 from PPS Service
+   * 
+   * @param data
+   * @return
+   */
+  private boolean isTier1BP(Data data) {
+
+    USCeIdMapping mapping = null;
+    String enterpriseNo = data.getEnterprise();
+    String ceId = data.getPpsceid();
+
+    if (!StringUtils.isBlank(enterpriseNo)) {
+      mapping = USCeIdMapping.getByEnterprise(enterpriseNo);
+    }
+    if (mapping != null) {
+      // registered BPs are T1s
+      return true;
+    }
+
+    if (!StringUtils.isBlank(ceId)) {
+      mapping = USCeIdMapping.getByCeid(ceId);
+      if (mapping != null) {
+        // registered BPs are T1s
+        return true;
+      }
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      LOG.debug("CE ID or Enterprise not mapped to a registered BP. Checking");
+      try {
+        PPSServiceClient client = CmrServicesFactory.getInstance().createClient(url, PPSServiceClient.class);
+        client.setRequestMethod(Method.Get);
+        client.setReadTimeout(1000 * 60 * 5);
+        PPSRequest request = new PPSRequest();
+        request.setCeid(ceId);
+        PPSResponse response = client.executeAndWrap(request, PPSResponse.class);
+        if (response == null || !response.isSuccess()) {
+          LOG.warn("PPS error encountered.");
+          return false;
+        }
+        for (PPSProfile profile : response.getProfiles()) {
+          if ("T1".equals(profile.getTierCode())) {
+            LOG.debug("BP " + response.getCompanyName() + " is a T1.");
+            return true;
+          }
+        }
+      } catch (Exception e) {
+        LOG.warn("PPS error encountered.", e);
+        return false;
+      }
+    }
+    return false;
   }
 
   @Override
