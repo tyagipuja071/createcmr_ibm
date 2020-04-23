@@ -3146,7 +3146,9 @@ var custType = FormManager.getActualValue('custGrp');
       if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
         setISRValuesGR();
       } else {
-        setISRValues();
+        if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
+          setISRValues();          
+        }
       }
 
     });
@@ -7484,13 +7486,26 @@ function setSBOValuesForIsuCtc() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  FormManager.enable("salesBusOffCd");
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTier = FormManager.getActualValue('clientTier');
   var isuCd = FormManager.getActualValue('isuCd');
   var isuCtc = isuCd + clientTier;
+  
+    if (role == "REQUESTER") {
+      if (custSubGrp == 'INTER' || custSubGrp == 'XINT ') {
+        FormManager.setValue('salesBusOffCd', "A10");
+        FormManager.disable("salesBusOffCd");
+      }else if(custSubGrp == 'BUSPR'|| custSubGrp == 'XBP' ){
+        FormManager.setValue('salesBusOffCd', "140");
+        FormManager.disable("salesBusOffCd");
+      }
+    }else{
+      FormManager.enable("salesBusOffCd");      
+    }
+    
   var qParams = null;
-
   console.log("begin setSBO:" + '%' + isuCtc + '%');
   if (isuCd != '') {
     var results = null;
@@ -7501,13 +7516,20 @@ function setSBOValuesForIsuCtc() {
     };
     results = cmr.query('GET.SBOLIST.BYISU', qParams);
     console.log("there are " + results.length + " SBO returned.");
-
-    if (results.length == 1) {
-      console.log("results[0].ret1:" + results[0].ret1 + ",results[0].ret2:" + results[0].ret2);
-      FormManager.setValue('salesBusOffCd', results[0].ret1);
+    if (results.length > 0) {
+      var sboList = new Array();
+      for (var i = 0 ;i<results.length; i++){
+        sboList[i] = results[i].ret1;
+      }
+      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
+      if(sboList.length ==1 ){
+        FormManager.setValue('salesBusOffCd', sboList[0]);
+      }
     } else {
       FormManager.setValue('salesBusOffCd', "");
     }
+  }else{
+      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));    
   }
 }
 
@@ -7688,10 +7710,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
   
-  // CMR-2279
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
-  // CMR-2574 ISU+CTC
+  GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
 
