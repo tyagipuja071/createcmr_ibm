@@ -681,7 +681,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     for (Addr addrM : tempExtractAddr) {
       Boolean errorStatus = false;
       try {
-        dplResult = addrService.dplCheckAddress(admin, addrM, false);
+        dplResult = addrService.dplCheckAddress(admin, addrM, null, model.getCmrIssuingCntry(), false);
       } catch (Exception ex) {
         initLogger().error("Error in performing DPL Check when call EVS on Request ID " + reqId, ex);
         if (dplResult == null) {
@@ -1310,12 +1310,14 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     String result = null;
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
+
     if (AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) || AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
       if (!isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
         result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
       } else {
         this.log.info("Processor automation enabled, skipping default approvals.");
       }
+
     }
     performGenericAction(trans, model, entityManager, request, procCenterName, null, false, StringUtils.isBlank(result));
   }
@@ -5261,19 +5263,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getCity1()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setCity1(tempVal);
-        } else {
-          muaModel.setCity1("");
         }
-
         break;
       case "POST_CD":
 
         if (StringUtils.isEmpty(muaModel.getPostCd()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setPostCd(tempVal);
-        } else {
-          muaModel.setPostCd("");
         }
-
         break;
       case "CMR_NO":
         muaModel.setCmrNo(tempVal);

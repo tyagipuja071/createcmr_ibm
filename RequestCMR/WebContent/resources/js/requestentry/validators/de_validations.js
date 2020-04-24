@@ -418,6 +418,39 @@ function addSoldToAddressValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function setAbbrevNameDEUpdate(cntry, addressMode, saving, finalSave, force) {
+  var zs01Reccount = '';
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var addrType = FormManager.getActualValue('addrType');
+  if (cmr.currentRequestType != 'U') {
+    return new ValidationResult(null, true);
+  }
+
+  if (addrType != null && (addrType == 'ZS01' || FormManager.getField('addrType_ZS01').checked) && finalSave) {
+    if (cmr.addressMode != 'updateAddress') {
+      qParams = {
+        REQ_ID : zs01ReqId,
+      };
+      var record = cmr.query('GETZS01VALRECORDS', qParams);
+      zs01Reccount = record.ret1;
+    }
+
+    var addrSeq = FormManager.getActualValue('addrSeq');
+    qParams = {
+      REQ_ID : zs01ReqId,
+      ADDR_SEQ : addrSeq,
+    };
+    var record = cmr.query('GETZS01OLDCUSTNAME', qParams);
+    var oldCustNm = record.ret1;
+    var currCustNm = FormManager.getActualValue('custNm1');
+
+    var addrType = FormManager.getActualValue('addrType');
+    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0)) && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
+      FormManager.setValue('abbrevNm', FormManager.getActualValue('custNm1').substring(0, 30));
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -425,6 +458,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(autoSetTax, GEOHandler.DE);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.DE);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.DE);
+  GEOHandler.addAddrFunction(setAbbrevNameDEUpdate, GEOHandler.DE);
   // DENNIS: COMMENTED BECAUSE THIS IS IN DUPLICATE OF THE VALIDATOR REGISTERED
   // ON WW
   // GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.DE,

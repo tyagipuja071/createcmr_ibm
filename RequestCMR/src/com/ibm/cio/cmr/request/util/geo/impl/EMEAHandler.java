@@ -103,13 +103,12 @@ public class EMEAHandler extends BaseSOFHandler {
 	public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
-
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
   protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Sold-To Address", "Install-At Address",
       "Ship-To Address" };
-
-	static {
+ 
+  static {
 		LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
 		LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");
 
@@ -1831,6 +1830,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			String country = currentRecord.getCmrIssuedBy();
 
+      if (SystemLocation.TURKEY.equals(country)) {
+        if (!StringUtils.isBlank(currentRecord.getCmrCity2())) {
+          address.setDept(currentRecord.getCmrCity2());
+        }
+      }
+
 			if (!SystemLocation.GREECE.equals(country) && !SystemLocation.CYPRUS.equals(country)
 					&& !SystemLocation.TURKEY.equals(country) && !SystemLocation.UNITED_KINGDOM.equals(country)
 					&& !SystemLocation.IRELAND.equals(country)) {
@@ -1869,6 +1874,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			if (SystemLocation.TURKEY.equals(country)) {
 				address.setDept(currentRecord.getCmrDept());
+				address.setCustNm4(currentRecord.getCmrName4());
 			}
 
 			if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
@@ -1914,6 +1920,10 @@ public class EMEAHandler extends BaseSOFHandler {
 			data.setSpecialTaxCd("AA");
 		} else if (SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
 			data.setCustPrefLang("I");
+		} 
+		// CMR-2688_Preferred_Language_T
+		else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+			data.setCustPrefLang("T");
 		} else {
 			data.setCustPrefLang("E");
 		}
@@ -3834,7 +3844,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	private void copyAddrData(FindCMRRecordModel record, Addr addr) {
 		record.setCmrAddrTypeCode("ZP01");
-    record.setCmrAddrSeq("00001");
+    record.setCmrAddrSeq("00002");
 		record.setCmrName1Plain(addr.getCustNm1());
 		record.setCmrName2Plain(addr.getCustNm2());
 		record.setCmrName3(addr.getCustNm3());
