@@ -223,12 +223,12 @@ function setDefaultValueForISU() {
 	var subType = FormManager.getActualValue('custSubGrp');
 	console.log("sub-type scenario value is :" + subType);
 	// Business Partner
-	if (subType == 'BUSPR' || 'XBP') {
+	if (subType == 'BUSPR' || subType == 'XBP') {
 	  FormManager.setValue('isuCd', '8B');
       FormManager.enable('isuCd');
 	} 
 	// Commercial
-	else if (subType == 'COMME' || 'XINTS') {
+	else if (subType == 'COMME' || subType == 'XINTS') {
 	  FormManager.setValue('isuCd', '32');
 	  FormManager.enable('isuCd');
 	}
