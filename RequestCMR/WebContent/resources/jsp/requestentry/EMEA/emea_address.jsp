@@ -188,7 +188,7 @@
     </p>
   </cmr:column>
   </cmr:view>
-  <cmr:column span="2" exceptForCountry="758">
+  <cmr:column span="2" exceptForCountry="758,862">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
