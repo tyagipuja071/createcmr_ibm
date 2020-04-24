@@ -1236,6 +1236,22 @@ public class TurkeyTransformer extends EMEATransformer {
         cust.setEconomicCd(muData.getCsoSite());
       }
     }
+    // CMR-3059 Turkey use CurrencyCd to represent Type of Customer
+    if (!StringUtils.isBlank(muData.getCurrencyCd())) {
+      if ("@".equals(muData.getCurrencyCd())) {
+        cust.setCustType("");
+        cust.setMrcCd("3");
+      }else{
+        cust.setCustType(muData.getCurrencyCd());
+        if ("BP".equals(cust.getCustType())) {
+          cust.setMrcCd("5");
+        }else{
+          cust.setMrcCd("3");  
+        }
+      }
+    }
+    
+    
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
