@@ -360,7 +360,7 @@ div#ibm-content-main {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -376,6 +376,9 @@ div#ibm-content-main {
     <form:hidden path="delInd" />
     <form:hidden path="modelCmrNo" />
     <form:hidden path="approvalResult" />
+    
+    
+	<form:hidden path="dupCmrReason"/>
 
 
     <cmr:view forCountry="760">

@@ -103,9 +103,13 @@ public class DPLCheckElement extends ValidatingElement {
         return output;
       }
 
+      String soldToLandedCountry = null;
       for (Addr addr : addresses) {
         // initialize all
         addr.setDplChkResult(null);
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          soldToLandedCountry = addr.getLandCntry();
+        }
       }
 
       if (geoHandler != null) {
@@ -133,7 +137,8 @@ public class DPLCheckElement extends ValidatingElement {
 
             Boolean errorStatus = false;
             try {
-              dplResult = addrService.dplCheckAddress(admin, addr, geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
+              dplResult = addrService.dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
+                  geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
             } catch (Exception e) {
               log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                   + addr.getId().getAddrSeq(), e);

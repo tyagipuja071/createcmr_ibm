@@ -231,6 +231,17 @@ function doAcceptAddressVerification() {
     cmr.showAlert('You must agree to the Address Verification Rules to proceed.');
     return;
   }
+
+  if (duplicateCMRMatchesCheck()) {
+    var dupCmrReason = dojo.byId('dupCmrRsn').value;
+    if (dupCmrReason && dupCmrReason != null && dupCmrReason.trim().length > 0) {
+      FormManager.setValue('dupCmrReason', dupCmrReason.trim());
+    } else {
+      cmr.showAlert('You must provide a Duplicate CMR Override Reason to proceed.');
+      return;
+    }
+  }
+
   cmr.hideModal('addressVerificationModal');
   doYourAction();
 }
@@ -454,9 +465,19 @@ function doSaveChangeComments() {
   if (action == YourActions.Reject && rejReason == '') {
     cmr.showAlert('Please specify the Reject Reason');
     return;
+  } else if (action == YourActions.Reject && (rejReason == 'DUPC' || rejReason == 'MAPP') && (FormManager.getActualValue('rejSupplInfo1') == '' || FormManager.getActualValue('rejSupplInfo2') == '')) {
+    cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText + " and " + dojo.byId('rejInfo2Label').innerText + ".");
+    return;
+  } else if (action == YourActions.Reject && (rejReason == 'MDOC' || rejReason == 'DUPR' || rejReason == 'TYPR') && FormManager.getActualValue('rejSupplInfo1') == '') {
+    cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText + ".");
+    return;
   } else if (action == YourActions.Reject) {
     var rej = FormManager.getActualValue('rejectReason');
+    var rejInfo1 = FormManager.getActualValue('rejSupplInfo1');
+    var rejInfo2 = FormManager.getActualValue('rejSupplInfo2');
     var rejField = '<input type="hidden" name="rejectReason" value="' + rej + '">';
+    rejField += '<input type="hidden" name="rejSupplInfo1" value="' + rejInfo1 + '">';
+    rejField += '<input type="hidden" name="rejSupplInfo2" value="' + rejInfo2 + '">';
     dojo.place(rejField, document.forms['frmCMR'], 'last');
   }
 
@@ -570,6 +591,7 @@ var _countyHandler = null;
 var _enterCMRHandler = null;
 var _templateHandler = null;
 var defaultLandCntry = null;
+var _rejSupplInfoHandler = null;
 
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
@@ -591,6 +613,13 @@ function afterConfigChange() {
   }
   if (_inacHandler && _inacHandler[0]) {
     _inacHandler[0].onChange();
+  }
+
+  // rejectReason
+  if (_rejSupplInfoHandler == null) {
+    _rejSupplInfoHandler = dojo.connect(FormManager.getField('rejectReason'), 'onChange', function(value) {
+      setRejSupplInfoFields(value);
+    });
   }
 
   // ensure CMR No value on the main tab
@@ -737,6 +766,16 @@ function afterConfigChange() {
     GEOHandler.executeAfterConfigs();
   }
   dnbAutoChk();
+  if (duplicateCMRMatchesCheck()) {
+    cmr.showNode('dupCMRReasonDiv');
+    var reason = FormManager.getActualValue('dupCmrReason');
+    if (reason != null && reason != '') {
+      FormManager.setValue('dupCmrRsn', reason);
+    }
+    duplicateCMRMatchesNotif();
+  } else {
+    cmr.hideNode('dupCMRReasonDiv');
+  }
 
   FormManager.ready();
 }
@@ -1149,6 +1188,29 @@ function dnbAutoChk() {
   }
 }
 
+function duplicateCMRMatchesNotif() {
+  if (duplicateCMRMatchesCheck()) {
+    cmr
+        .showAlert(
+            'Existing CMR(s) were found with the similar information as the current request. Please check the CMR(s) provided in the request comments.<br><br>To proceed with duplicate CMR creation, please provide the override reason while sending for processing.<br><b>Note: </b>Duplicate CMR creation will trigger approvals',
+            'Duplicate CMR(s) Found');
+  }
+}
+
+function duplicateCMRMatchesCheck() {
+  var requestId = _pagemodel.reqId;
+  var reqType = _pagemodel.reqType;
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var matchIndc = FormManager.getActualValue('matchIndc');
+  var findDnbResult = FormManager.getActualValue('findDnbResult');
+  var userRole = FormManager.getActualValue('userRole');
+  if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'C' && userRole != 'Viewer') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 /**
  * Onload function for the dnb matches modal
  */
@@ -1236,4 +1298,40 @@ function matchDetailsFormatterUI(value, rowIndex) {
     str = str.substring(str.indexOf('=') + 1).trim();
   }
   return str;
+}
+
+function setRejSupplInfoFields(value) {
+  switch (value) {
+  case "DUPC":
+    cmr.showNode('rejInfo1Div');
+    cmr.showNode('rejInfo2Div');
+    dojo.byId('rejInfo1Label').innerText = "CMR No.";
+    dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
+    break;
+  case "MDOC":
+    cmr.showNode('rejInfo1Div');
+    cmr.hideNode('rejInfo2Div');
+    dojo.byId('rejInfo1Label').innerText = "Missing Document";
+    break;
+  case "MAPP":
+    cmr.showNode('rejInfo1Div');
+    cmr.showNode('rejInfo2Div');
+    dojo.byId('rejInfo1Label').innerText = "Approval Type";
+    dojo.byId('rejInfo2Label').innerText = "Approver";
+    break;
+  case "DUPR":
+    cmr.showNode('rejInfo1Div');
+    cmr.hideNode('rejInfo2Div');
+    dojo.byId('rejInfo1Label').innerText = "Other Request Id";
+    break;
+  case "TYPR":
+    cmr.showNode('rejInfo1Div');
+    cmr.hideNode('rejInfo2Div');
+    dojo.byId('rejInfo1Label').innerText = "Correct Type";
+    break;
+  default:
+    cmr.hideNode('rejInfo1Div');
+    cmr.hideNode('rejInfo2Div');
+    break;
+  }
 }
