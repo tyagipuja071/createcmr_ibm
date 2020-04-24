@@ -5490,6 +5490,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muModel.setCustClass(tempVal);
         break;
       case "CURRENCY_CD":
+        // Turkey use this represent Type of Customer
         muModel.setCurrencyCd(tempVal);
         break;
       case "OUT_CITY_LIMIT":
