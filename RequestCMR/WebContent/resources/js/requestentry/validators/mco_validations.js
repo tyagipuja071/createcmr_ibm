@@ -83,7 +83,7 @@ function mandatoryForBusinessPartnerPT() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'C') {
     var _custType = FormManager.getActualValue('custSubGrp');
-    if (_custType == 'BUSPR' || _custType == 'CRBUS') {
+    if (_custType == 'BUSPR' || _custType == 'XBP') {
       FormManager.show('PPSCEID', 'ppsceid');
       FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
     } else {
