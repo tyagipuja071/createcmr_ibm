@@ -3176,12 +3176,12 @@ function addTRAddressTypeValidator() {
             		  return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
             	  }
         	  }else{
-        		  if((zs01Copy[compareFields[i]] == '' || zs01Copy[compareFields[i]] == null || zs01Copy[compareFields[i]] == undefiend)
-        				  && (zp01Copy[compareFields[i]] != '' && zp01Copy[compareFields[i]] != null && zp01Copy[compareFields[i]] != undefiend)){
+        		  if((zs01Copy[compareFields[i]] == '' || zs01Copy[compareFields[i]] == null || zs01Copy[compareFields[i]] == undefined)
+        				  && (zp01Copy[compareFields[i]] != '' && zp01Copy[compareFields[i]] != null && zp01Copy[compareFields[i]] != undefined)){
             		  return new ValidationResult(null, false, 'There is a mismatch between Sold-To and Local Language Translation of Sold-To.');
             	  }
-        		  if((zp01Copy[compareFields[i]] == '' || zp01Copy[compareFields[i]] == null || zp01Copy[compareFields[i]] == undefiend)
-        				  && (zs01Copy[compareFields[i]] != '' && zs01Copy[compareFields[i]] != null && zs01Copy[compareFields[i]] != undefiend)){
+        		  if((zp01Copy[compareFields[i]] == '' || zp01Copy[compareFields[i]] == null || zp01Copy[compareFields[i]] == undefined)
+        				  && (zs01Copy[compareFields[i]] != '' && zs01Copy[compareFields[i]] != null && zs01Copy[compareFields[i]] != undefined)){
             		  return new ValidationResult(null, false, 'There is a mismatch between Sold-To and Local Language Translation of Sold-To.');
             	  }
         	  }
