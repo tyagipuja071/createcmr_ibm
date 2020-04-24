@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -211,7 +212,7 @@ public class EMEAHandler extends BaseSOFHandler {
 					// map RDc - SOF - CreateCMR by sequence no
 					for (FindCMRRecordModel record : source.getItems()) {
 						seqNo = record.getCmrAddrSeq();
-						if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !"862".equals(cmrIssueCd)) {
+						if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !("862".equals(cmrIssueCd) || "726".equals(cmrIssueCd))) {
 							sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
 							for (String sofUse : sofUses) {
 								addrType = getAddressTypeByUse(sofUse);
@@ -332,7 +333,47 @@ public class EMEAHandler extends BaseSOFHandler {
 								}
 							}
 						}
-
+						
+						if ("726".equals(cmrIssueCd)) {
+							seqNo = record.getCmrAddrSeq();
+							if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+								addrType = record.getCmrAddrTypeCode();
+								if (!StringUtils.isEmpty(addrType)) {
+									addr = cloneAddress(record, addrType);
+									converted.add(addr);
+								}
+							}
+							
+							if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+								//Map local language translation of sold to value
+								CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager,
+										record.getCmrNum(), cmrIssueCd);
+								CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
+								FindCMRRecordModel localTransAddr = new FindCMRRecordModel();
+								PropertyUtils.copyProperties(localTransAddr, record);
+								// If not in sadr look in DB2
+								localTransAddr.setCmrAddrSeq(db2LocalTransAddr.getId().getAddrNo());
+								localTransAddr.setCmrAddrTypeCode("ZP01");
+								localTransAddr.setCmrName1Plain(record.getCmrIntlName1());
+								localTransAddr.setCmrName2Plain(record.getCmrIntlName2());
+								localTransAddr.setCmrName4(record.getCmrIntlName4());
+								localTransAddr.setCmrStreetAddress(record.getCmrIntlAddress());
+								localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
+								localTransAddr.setCmrCity(record.getCmrIntlCity1());
+								localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());
+								localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());
+								String poBox = db2LocalTransAddr.getPoBox();
+								if (poBox.contains("PO BOX")) {
+									poBox = poBox.substring(6).trim();
+								} else if (poBox.contains("APTO")) {
+									poBox = poBox.substring(5).trim();
+								}
+								localTransAddr.setCmrPOBox(poBox);
+								
+								localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
+								converted.add(localTransAddr);
+							}
+						}
 					}
 
 					if (SystemLocation.UNITED_KINGDOM.equals(mainRecord.getCmrIssuedBy())
@@ -3875,5 +3916,13 @@ public class EMEAHandler extends BaseSOFHandler {
     query.setForReadOnly(true);
     return query.getSingleResult(CmrtAddr.class);
   }
+  
+	private CmrtCustExt getCustExt(EntityManager entityManager, String cmrCntry, String cmrNo) {
+		String sql = ExternalizedQuery.getSql("LEGACYD.GETCEXT");
+		PreparedQuery query = new PreparedQuery(entityManager, sql);
+		query.setParameter("COUNTRY", cmrCntry);
+		query.setParameter("CMR_NO", cmrNo);
+		return query.getSingleResult(CmrtCustExt.class);
+	}
 
 }
