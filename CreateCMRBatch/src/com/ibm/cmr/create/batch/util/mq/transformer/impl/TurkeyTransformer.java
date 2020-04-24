@@ -48,7 +48,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
  * 
  */
 public class TurkeyTransformer extends EMEATransformer {
-  // public class TurkeyTransformer extends MessageTransformer {
+
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
@@ -538,7 +538,7 @@ public class TurkeyTransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZP01:
       // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
       // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
@@ -567,7 +567,7 @@ public class TurkeyTransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZP01:
       // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
       // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
@@ -1553,41 +1553,42 @@ public class TurkeyTransformer extends EMEATransformer {
           if (shareSeq) {
             // share Seq should split, remove existing, create mailing
             legacyAddrList.remove(maiAddr);
-            bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
+            // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
 
-            maiAddr.setIsAddrUseBilling("N");
-            maiAddr.getId().setAddrNo("00001");
+            // maiAddr.setIsAddrUseBilling("N");
+            maiAddr.getId().setAddrNo("00002");
 
-            bilAddr.setIsAddrUseMailing("N");
-            bilAddr.getId().setAddrNo("00002");
-            entityManager.persist(bilAddr);
-            entityManager.flush();
+            // bilAddr.setIsAddrUseMailing("N");
+            // bilAddr.getId().setAddrNo("00001");
+            // entityManager.persist(bilAddr);
+            // entityManager.flush();
 
             legacyAddrList.add(maiAddr);
-            legacyAddrList.add(bilAddr);
-          } else {
-            if (maiAddr == null && bilAddr != null) {
-              maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
-
-              maiAddr.setIsAddrUseBilling("N");
-              maiAddr.getId().setAddrNo("00001");
-
-              entityManager.persist(maiAddr);
-              entityManager.flush();
-
-              legacyAddrList.add(maiAddr);
-            } else if (maiAddr != null & bilAddr == null) {
-              bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
-
-              bilAddr.setIsAddrUseMailing("N");
-              bilAddr.getId().setAddrNo("00002");
-              entityManager.persist(bilAddr);
-              entityManager.flush();
-
-              legacyAddrList.add(bilAddr);
-            }
+            // legacyAddrList.add(bilAddr);
           }
-          break;
+          // else {
+          // if (maiAddr == null && bilAddr != null) {
+          // maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
+          //
+          // maiAddr.setIsAddrUseBilling("N");
+          // maiAddr.getId().setAddrNo("00002");
+          //
+          // entityManager.persist(maiAddr);
+          // entityManager.flush();
+          //
+          // legacyAddrList.add(maiAddr);
+          // } else if (maiAddr != null & bilAddr == null) {
+          // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
+          //
+          // bilAddr.setIsAddrUseMailing("N");
+          // bilAddr.getId().setAddrNo("00001");
+          // entityManager.persist(bilAddr);
+          // entityManager.flush();
+          //
+          // legacyAddrList.add(bilAddr);
+          // }
+          // }
+          // break;
         }
       }
 
@@ -1637,11 +1638,10 @@ public class TurkeyTransformer extends EMEATransformer {
         }
       }
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
-        CmrtAddr mailingaddre = legacyObjects.findBySeqNo("00001");
-        // if ("00002".equals(currAddr.getId().getAddrNo()) &&
-        // "Y".equals(currAddr.getIsAddrUseBilling())
-        // && "N".equals(currAddr.getIsAddrUseLitMailing())) {
-        if ("00002".equals(currAddr.getId().getAddrNo())) {
+        CmrtAddr mailingaddre = legacyObjects.findBySeqNo("00002");
+        if ("00001".equals(currAddr.getId().getAddrNo()) && "N".equals(currAddr.getIsAddrUseBilling())
+            && "Y".equals(currAddr.getIsAddrUseLitMailing())) {
+          // if ("00001".equals(currAddr.getId().getAddrNo())) {
           currAddr.setAddrLine1(mailingaddre.getAddrLine1());
           if (!StringUtils.isBlank(mailingaddre.getAddrLine2())) {
             currAddr.setAddrLine2(mailingaddre.getAddrLine2());
@@ -1805,9 +1805,9 @@ public class TurkeyTransformer extends EMEATransformer {
 
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
     CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
-    mailingAddr.getId().setAddrNo("00002");
-    mailingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
-    mailingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+    mailingAddr.getId().setAddrNo("00001");
+    mailingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+    mailingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(mailingAddr);
   }
@@ -1815,8 +1815,8 @@ public class TurkeyTransformer extends EMEATransformer {
   private void copyBillingFromMailing(LegacyDirectObjectContainer legacyObjects, CmrtAddr mailingAddr, String billingseq) {
     CmrtAddr billingAddr = (CmrtAddr) SerializationUtils.clone(mailingAddr);
     billingAddr.getId().setAddrNo(billingseq);
-    billingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
-    billingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+    billingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+    billingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(billingAddr);
   }

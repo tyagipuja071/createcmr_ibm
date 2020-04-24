@@ -91,7 +91,6 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
-import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNDHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.JPHandler;
@@ -5264,19 +5263,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getCity1()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setCity1(tempVal);
-        } else {
-          muaModel.setCity1("");
         }
-
         break;
       case "POST_CD":
 
         if (StringUtils.isEmpty(muaModel.getPostCd()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setPostCd(tempVal);
-        } else {
-          muaModel.setPostCd("");
         }
-
         break;
       case "CMR_NO":
         muaModel.setCmrNo(tempVal);
