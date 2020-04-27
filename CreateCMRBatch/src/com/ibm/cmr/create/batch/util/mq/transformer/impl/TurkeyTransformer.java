@@ -49,7 +49,6 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
  */
 public class TurkeyTransformer extends EMEATransformer {
 
-
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZD01", "ZI01" };
@@ -1249,17 +1248,15 @@ public class TurkeyTransformer extends EMEATransformer {
       if ("@".equals(muData.getCurrencyCd())) {
         cust.setCustType("");
         cust.setMrcCd("3");
-      }else{
+      } else {
         cust.setCustType(muData.getCurrencyCd());
         if ("BP".equals(cust.getCustType())) {
           cust.setMrcCd("5");
-        }else{
-          cust.setMrcCd("3");  
+        } else {
+          cust.setMrcCd("3");
         }
       }
     }
-    
-    
 
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
@@ -1554,7 +1551,6 @@ public class TurkeyTransformer extends EMEATransformer {
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
     addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
 
-
     LOG.debug("LEGACY -- Turkey OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
@@ -1750,7 +1746,7 @@ public class TurkeyTransformer extends EMEATransformer {
       if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
 
         if (!StringUtils.isBlank(addr.getTaxOffice())) {
-        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
+          legacyCustExt.setiTaxCode((addr.getTaxOffice()));
         } else {
           legacyCustExt.setiTaxCode("");
         }
@@ -1868,6 +1864,11 @@ public class TurkeyTransformer extends EMEATransformer {
     LOG.debug("Get Copy Billing Seq = " + maxseq);
 
     return maxseq;
+  }
+
+  @Override
+  public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    return false;
   }
 
 }
