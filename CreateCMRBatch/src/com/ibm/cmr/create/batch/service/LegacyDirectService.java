@@ -1529,8 +1529,15 @@ public class LegacyDirectService extends TransConnService {
             legacyAddrPk = new CmrtAddrPK();
             legacyAddrPk.setCustomerNo(cmrNo);
             legacyAddrPk.setSofCntryCode(cntry);
-            int newSeq = availableSequences.remove();
-            String newAddrSeq = Integer.toString(newSeq);
+            int newSeq;
+            String newAddrSeq;
+            if (transformer.sequenceNoUpdateLogic(entityManager, cmrObjects, addr, false)) {
+              newSeq = availableSequences.remove();
+              newAddrSeq = Integer.toString(newSeq);
+            } else {
+              newAddrSeq = addr.getId().getAddrSeq();
+            }
+
             newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
