@@ -274,7 +274,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           result.setResults("Duplicate Request Check Encountered an error.");
         }
       } else if (cmrChkSrvError) {
-        if (response.getSuccess()) {
+        if (responseCMR.getSuccess()) {
           result.setDetails(responseCMR.getMessage());
           engineData.addRejectionComment(responseCMR.getMessage());
           result.setOnError(true);

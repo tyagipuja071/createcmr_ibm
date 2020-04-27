@@ -17,6 +17,14 @@
     <pccArDept>G8M</pccArDept>
   </mapping>
   <mapping>
+   	<scenario>DUMMYC</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>WYL</mtkgArDept>
+    <svcArOffice>IKB</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
   	<scenario>DOM</scenario>
     <csoSite>PAH</csoSite>
     <mktgDept>SVB</mktgDept>
@@ -47,6 +55,30 @@
     <mtkgArDept>L76</mtkgArDept>
     <svcArOffice>IKE</svcArOffice>
     <pccArDept>L76</pccArDept>
+  </mapping>
+   <mapping>
+   	<scenario>TPD</scenario>
+    <csoSite>YVO</csoSite>
+    <mktgDept>YVO</mktgDept>
+    <mtkgArDept>request</mtkgArDept>
+    <svcArOffice>request</svcArOffice>
+    <pccArDept>YVO</pccArDept>
+  </mapping>
+  <mapping>
+   	<scenario>SSD</scenario>
+    <csoSite>AD1</csoSite>
+    <mktgDept>AD1</mktgDept>
+    <mtkgArDept>YU3</mtkgArDept>
+    <svcArOffice>YU3</svcArOffice>
+    <pccArDept>AD1</pccArDept>
+  </mapping>
+  <mapping>
+   	<scenario>DB4</scenario>
+    <csoSite>DB4</csoSite>
+    <mktgDept>DB4</mktgDept>
+    <mtkgArDept>DB4</mtkgArDept>
+    <svcArOffice>IKE</svcArOffice>
+    <pccArDept>DB4</pccArDept>
   </mapping>
   <mapping>
   	<scenario>3CC</scenario>
@@ -107,6 +139,62 @@
   </mapping>
   <mapping>
   	<scenario>CSP</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>logic</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+   <mapping>
+  	<scenario>HILT</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>logic</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+   <mapping>
+  	<scenario>FPL</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>logic</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>OEMHW</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>logic</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>OEM-SW</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>logic</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>LBPS</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>logic</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>LIIS</scenario>
+    <csoSite>PAH</csoSite>
+    <mktgDept>SVB</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>logic</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>ICC</scenario>
     <csoSite>PAH</csoSite>
     <mktgDept>SVB</mktgDept>
     <mtkgArDept>logic</mtkgArDept>

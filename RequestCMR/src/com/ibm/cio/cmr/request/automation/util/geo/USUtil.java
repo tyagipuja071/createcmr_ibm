@@ -75,12 +75,29 @@ public class USUtil extends AutomationUtil {
       "12579643", "10782401", "12436301", "11363167" };
 
   public static String[] STATE_K9Y = { "CT", "DE", "ME", "MA", "NH", "NJ", "NY", "RI", "VT" };
-  public static String[] STATE_M3B = { "IL", "IA", "MN", "NE", "ND", "OH", "SD", "WV", "WI" };
+  public static String[] STATE_M3B = { "IL", "IA", "IN", "KY", "MI", "MN", "NE", "ND", "OH", "SD", "WV", "WI" };
   public static String[] STATE_S6H = { "MD", "DC", "VA" };
   public static String[] STATE_K9W = { "AL", "FL", "GA", "MS", "NC", "SC", "TN" };
   public static String[] STATE_M3A = { "AR", "CO", "KS", "LA", "NM", "OK", "TX", "WY", "PR", "VI" };
-  public static String[] STATE_S6G = { "AZ", "CA", "ID", "MT", "NV", "OR", "UT", "WA", "AK", "HI", "GU", "AS", "FM", "MH", "MP", "PW", "AP", "AE",
-      "AA" };
+  public static String[] STATE_S6G = { "AZ", "CA", "CZ", "ID", "MT", "NV", "OR", "UT", "WA", "AK", "HI", "GU", "AS", "FM", "MH", "MP", "PW", "AP",
+      "AE", "AA" };
+
+  public static String[] STATE_MO_M3A = { "001", "003", "005", "007", "009", "011", "013", "015", "019", "021", "025", "027", "029", "033", "037",
+      "039", "041", "043", "047", "049", "051", "053", "055", "057", "059", "061", "063", "065", "067", "073", "075", "077", "079", "081", "083",
+      "085", "087", "089", "091", "095", "097", "101", "103", "107", "109", "115", "117", "119", "121", "125", "129", "131", "135", "137", "139",
+      "141", "145", "147", "149", "151", "153", "157", "159", "161", "163", "165", "167", "169", "171", "173", "175", "177", "179", "181", "183",
+      "185", "186", "187", "189", "195", "197", "199", "201", "203", "205", "207", "209", "211", "213", "215", "217", "219", "221", "223", "225",
+      "227", "229", "510" };
+
+  public static String[] STATE_MO_M3B = { "017", "023", "031", "035", "045", "069", "071", "093", "099", "105", "111", "113", "123", "127", "133",
+      "143", "155" };
+
+  public static String[] STATE_PA_K9Y = { "001", "011", "015", "017", "023", "025", "027", "029", "035", "037", "041", "043", "045", "047", "053",
+      "055", "057", "061", "067", "069", "071", "075", "077", "079", "081", "083", "087", "089", "091", "093", "095", "097", "099", "101", "103",
+      "105", "107", "109", "113", "115", "117", "119", "123", "127", "131", "133" };
+
+  public static String[] STATE_PA_M3B = { "003", "005", "007", "009", "013", "019", "021", "031", "033", "039", "049", "051", "059", "063", "065",
+      "073", "085", "111", "121", "125", "129" };
 
   @SuppressWarnings("unchecked")
   public USUtil() {
@@ -278,25 +295,40 @@ public class USUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     Addr installAt = requestData.getAddress("ZI01");
-    String stateToMatch = StringUtils.isBlank(installAt.getStateProv()) ? "" : installAt.getStateProv();
+    String stateToMatch = "";
+    String countyToMatch = "";
+
+    if (installAt != null) {
+      stateToMatch = StringUtils.isBlank(installAt.getStateProv()) ? "" : installAt.getStateProv();
+      countyToMatch = StringUtils.isBlank(installAt.getCounty()) ? "" : installAt.getCounty();
+    }
+
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
     }
-    if ("FEDERAL".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType)) {
-      for (Map.Entry<String, List<String>> entry : stateMktgDepMap.entrySet()) {
-        List<String> stateList = entry.getValue();
-        if (stateList != null && stateList.size() != 0 && stateList.contains(stateToMatch)) {
-          mktgDept = entry.getKey();
-          break;
+    if ("FEDERAL".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType) || "POA".equals(scenarioSubType)) {
+      if ("MO".equals(stateToMatch)) {
+        if (Arrays.asList(STATE_MO_M3A) != null && Arrays.asList(STATE_MO_M3A).size() != 0 && Arrays.asList(STATE_MO_M3A).contains(countyToMatch)) {
+          mktgDept = "M3A";
+        } else if (Arrays.asList(STATE_MO_M3B) != null && Arrays.asList(STATE_MO_M3B).size() != 0
+            && Arrays.asList(STATE_MO_M3B).contains(countyToMatch)) {
+          mktgDept = "M3B";
         }
-      }
-    } else if ("POA".equals(scenarioSubType)) {
-      for (Map.Entry<String, List<String>> entry : stateMktgDepMap.entrySet()) {
-        List<String> stateList = entry.getValue();
-        if (stateList != null && stateList.size() != 0 && stateList.contains(stateToMatch)) {
-          mktgDept = entry.getKey();
-          break;
+      } else if ("PA".equals(stateToMatch)) {
+        if (Arrays.asList(STATE_PA_K9Y) != null && Arrays.asList(STATE_PA_K9Y).size() != 0 && Arrays.asList(STATE_PA_K9Y).contains(countyToMatch)) {
+          mktgDept = "K9Y";
+        } else if (Arrays.asList(STATE_PA_M3B) != null && Arrays.asList(STATE_PA_M3B).size() != 0
+            && Arrays.asList(STATE_PA_M3B).contains(countyToMatch)) {
+          mktgDept = "M3B";
+        }
+      } else {
+        for (Map.Entry<String, List<String>> entry : stateMktgDepMap.entrySet()) {
+          List<String> stateList = entry.getValue();
+          if (stateList != null && stateList.size() != 0 && stateList.contains(stateToMatch)) {
+            mktgDept = entry.getKey();
+            break;
+          }
         }
       }
     }
