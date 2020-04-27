@@ -61,7 +61,15 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
 
     MatchingOutput output = new MatchingOutput();
     if (!scenarioExceptions.isSkipDuplicateChecks()) {
-      if (soldTo != null) {
+      if (StringUtils.isNotBlank(admin.getDupCmrReason())) {
+        StringBuilder details = new StringBuilder();
+        details.append("User requested to proceed with Duplicate CMR Creation.").append("\n\n");
+        details.append("Reason provided - ").append("\n");
+        details.append(admin.getDupCmrReason()).append("\n");
+        result.setDetails(details.toString());
+        result.setResults("Overridden");
+        result.setOnError(false);
+      } else if (soldTo != null) {
         String department = StringUtils.isBlank(soldTo.getDept()) ? "" : soldTo.getDept();
         // get CMR Matches
         MatchingResponse<DuplicateCMRCheckResponse> response = getMatches(entityManager, requestData, engineData);
@@ -161,6 +169,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                 } else {
                   engineData.addRejectionComment(cmrCheckMatches.size() + " possible duplicate CMR(s) found with the same data.\n Duplicate CMR(s): "
                       + StringUtils.join(dupCMRNos, ", "));
+                  // to allow overides later
+                  requestData.getAdmin().setMatchIndc("C");
                   result.setOnError(true);
                 }
                 result.setProcessOutput(output);

@@ -42,9 +42,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
@@ -679,7 +681,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     for (Addr addrM : tempExtractAddr) {
       Boolean errorStatus = false;
       try {
-        dplResult = addrService.dplCheckAddress(admin, addrM, false);
+        dplResult = addrService.dplCheckAddress(admin, addrM, null, model.getCmrIssuingCntry(), false);
       } catch (Exception ex) {
         initLogger().error("Error in performing DPL Check when call EVS on Request ID " + reqId, ex);
         if (dplResult == null) {
@@ -1197,7 +1199,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         rejectReason = getRejectReason(entityManager, rejectReason);
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), sendToId, sendToNm,
-          complete, rejectReason, rejReasonCd);
+          complete, rejectReason, rejReasonCd, model.getRejSupplInfo1(), model.getRejSupplInfo2());
 
       // save comment in req_cmt_log table .
       // save only if it is not null or not blank
@@ -1220,7 +1222,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         wfComment = wfComment.substring(0, 237) + " (truncated)";
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
-          null);
+          null, null, null);
       String action = model.getAction();
       String actionDesc = getActionDescription(action, entityManager);
       String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
@@ -1259,7 +1261,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
     // there's a status change
     RequestUtils.createWorkflowHistory(this, entityManager, request, admin, CmrConstants.Mark_as_Completed(), model.getAction(), null, null, complete,
-        null, null);
+        null, null, null, null);
 
     // save comment in req_cmt_log table .
     String comment = STATUS_CHG_CMT_PRE_PREFIX + CmrConstants.Mark_as_Completed() + "\"";
@@ -1306,9 +1308,16 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     } else if (JPHandler.isJPIssuingCountry(cmrIssuingCntry)) {
       performMassUpdateJP(model, entityManager, request);
     }
-    String result = "";
-    if (!CmrConstants.REQ_TYPE_MASS_CREATE.equals(model.getReqType())) {
-      result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+    String result = null;
+    String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
+
+    if (AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) || AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
+      if (!isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
+        result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
+      } else {
+        this.log.info("Processor automation enabled, skipping default approvals.");
+      }
+
     }
     performGenericAction(trans, model, entityManager, request, procCenterName, null, false, StringUtils.isBlank(result));
   }
@@ -1406,8 +1415,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     }
     updateEntity(admin, entityManager);
 
-    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null,
-        null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null,
+        null, null);
 
     // save comment in req_cmt_log table .
     // save only if it is not null or not blank
@@ -5254,19 +5263,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
         if (StringUtils.isEmpty(muaModel.getCity1()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setCity1(tempVal);
-        } else {
-          muaModel.setCity1("");
         }
-
         break;
       case "POST_CD":
 
         if (StringUtils.isEmpty(muaModel.getPostCd()) && !StringUtils.isEmpty(tempVal)) {
           muaModel.setPostCd(tempVal);
-        } else {
-          muaModel.setPostCd("");
         }
-
         break;
       case "CMR_NO":
         muaModel.setCmrNo(tempVal);
@@ -5593,5 +5596,37 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     else
       return false;
 
+  }
+
+  /**
+   * Appends extra model entries if needed. These attributes can be accessed on
+   * the page via request.getAttribute('name') or ${name}
+   * 
+   * @param mv
+   * @param model
+   * @throws CmrException
+   */
+  public void appendExtraModelEntries(ModelAndView mv, RequestEntryModel model) throws CmrException {
+    // TODO Auto-generated method stub
+    EntityManager entityManager = JpaManager.getEntityManager();
+    try {
+
+      String autoEngineIndc = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
+      mv.addObject("autoEngineIndc", autoEngineIndc);
+    } catch (Exception e) {
+      if (e instanceof CmrException) {
+        log.error("CMR Error:" + ((CmrException) e).getMessage());
+      } else {
+        // log only unexpected errors, exclude validation errors
+        log.error("Error in processing transaction " + model, e);
+      }
+
+      // only wrap non CmrException errors
+      if (e instanceof CmrException) {
+        throw (CmrException) e;
+      } else {
+        throw new CmrException(MessageUtil.ERROR_GENERAL);
+      }
+    }
   }
 }

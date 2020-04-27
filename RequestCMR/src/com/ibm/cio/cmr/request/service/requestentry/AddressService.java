@@ -1022,12 +1022,19 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       DPLCheckResult dplResult = null;
       String errorInfo = null;
 
+      String soldToLandedCountry = null;
+      for (Addr addr : addresses) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          soldToLandedCountry = addr.getLandCntry();
+        }
+      }
       for (Addr addr : addresses) {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
           try {
-            dplResult = dplCheckAddress(admin, addr, geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
+            dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
+                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
           } catch (Exception e) {
             log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                 + addr.getId().getAddrSeq(), e);
@@ -1183,7 +1190,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
    * @return
    * @throws Exception
    */
-  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, boolean useNameOnMain) throws Exception {
+  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain)
+      throws Exception {
     String servicesUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String appId = SystemConfiguration.getSystemProperty("evs.appID");
     DPLCheckClient dplClient = CmrServicesFactory.getInstance().createClient(servicesUrl, DPLCheckClient.class);
@@ -1199,6 +1207,16 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       name = admin.getMainCustNm1() + (!StringUtils.isEmpty(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
     }
     request.setCountry(addr.getLandCntry());
+    if (StringUtils.isBlank(addr.getLandCntry())) {
+      if (!StringUtils.isBlank(soldToLandedCountry)) {
+        request.setCountry(soldToLandedCountry);
+      } else {
+        request.setCountry(PageManager.getDefaultLandedCountry(issuingCountry));
+      }
+      if (StringUtils.isBlank(addr.getLandCntry())) {
+        request.setCountry("US");
+      }
+    }
     request.setApplication(appId);
     request.setCity(addr.getCity1());
     request.setAddr1(addr.getAddrTxt());

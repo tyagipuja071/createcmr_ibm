@@ -526,7 +526,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         rejectReason = getRejectReason(entityManager, rejectReasonCd1);
       }
       RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), sendToId, sendToNm,
-          complete, rejectReason, rejectReasonCd1);
+          complete, rejectReason, rejectReasonCd1, model.getRejSupplInfo1(), model.getRejSupplInfo2());
 
       // save comment in req_cmt_log table .
       // save only if it is not null or not blank
@@ -548,7 +548,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
         wfComment = wfComment.substring(0, 237) + " (truncated)";
       }
-      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null, null);
+      RequestUtils.createWorkflowHistory(this, entityManager, request, admin, wfComment, model.getAction(), null, null, false, null, null, null,
+          null);
       String action = model.getAction();
       String actionDesc = getActionDescription(action, entityManager);
       String statusDesc = getstatusDescription(admin.getReqStatus(), entityManager);
@@ -641,7 +642,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     admin.setLastUpdtBy(user.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
     admin.setReqStatus(trans.getNewReqStatus());
-    if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd()) && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
+    if (CmrConstants.YES_NO.Y.toString().equals(trans.getNewLockedInd())
+        && CmrConstants.YES_NO.N.toString().equals(trans.getId().getCurrLockedInd())) {
       // the request is to be locked
       RequestUtils.setClaimDetails(admin, request);
     } else if (CmrConstants.YES_NO.N.toString().equals(trans.getNewLockedInd())
@@ -651,8 +653,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     }
     updateEntity(admin, entityManager);
 
-    RequestUtils
-        .createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null);
+    RequestUtils.createWorkflowHistory(this, entityManager, request, admin, model.getStatusChgCmt(), model.getAction(), null, null, false, null, null,
+        null, null);
 
     // save comment in req_cmt_log table .
     // save only if it is not null or not blank
@@ -1412,7 +1414,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrSubIndustry(kna1.getBran1());
           cmrRecord.setCmrPpsceid(kna1.getBran3());
           cmrRecord.setCmrSitePartyID(kna1.getBran5());
-          cmrRecord.setCmrIssuedBy(kna1.getKatr6());     
+          cmrRecord.setCmrIssuedBy(kna1.getKatr6());
           cmrRecord.setCmrCapIndicator(kna1.getKatr8());
           cmrRecord.setCmrNum(kna1.getZzkvCusno());
           cmrRecord.setCmrInac(kna1.getZzkvInac());
@@ -1448,7 +1450,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
-          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? kna1.getZzkvSic() : "");
+          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? (kna1.getZzkvSic().trim().length()>4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");

@@ -166,7 +166,8 @@ public class AutomationEngine {
       if (ProcessType.StandardProcess.equals(element.getProcessType())) {
         hasOverrideOrMatchingApplied = true;
       }
-      if (element.getRequestTypes().contains(reqType)) {
+      // handle the special ALL types (approvals)
+      if (element.getRequestTypes().contains("*") || element.getRequestTypes().contains(reqType)) {
         LOG.debug("Executing element " + element.getProcessDesc() + " for Request " + reqId);
         AutomationResult<?> result = null;
 

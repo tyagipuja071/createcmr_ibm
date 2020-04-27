@@ -28,6 +28,7 @@ if (!newEntry){
 PageManager.initFor(request, reqentry);
 String tabsJS = newEntry ? "triggerSave" : "switchTabs";
 String mandt = SystemConfiguration.getValue("MANDT");
+String autoEngineIndc= (String) request.getAttribute("autoEngineIndc");
 String entUpdType="";
 if(reqentry.getEntUpdTyp()!= null ){
   entUpdType = reqentry.getEntUpdTyp();
@@ -56,6 +57,8 @@ if (readOnly == null){
 <script src="${resourcesPath}/js/requestentry/notify.js?${cmrv}" type="text/javascript"></script>
 <script src="${resourcesPath}/js/requestentry/attachment.js?${cmrv}" type="text/javascript"></script>
 <script src="${resourcesPath}/js/requestentry/approvals.js?${cmrv}" type="text/javascript"></script>
+<script src="${resourcesPath}/js/auto/automation.js?${cmrv}" type="text/javascript"></script>
+
 
 <!--  Validators per country. Add to the validations jsp -->
 <jsp:include page="validations_js_mass.jsp" />
@@ -158,6 +161,7 @@ dojo.addOnLoad(function() {
     <jsp:include page="/resources/jsp/requestentry/actionstatus.jsp" />
     <input type="hidden" value="${yourActionsViewOnly}" id="viewOnlyPage">
     <input type="hidden" value="<%=mandt%>" id="mandt">
+    <input type="hidden" value="<%=autoEngineIndc%>" id="autoEngineIndc">
     <cmr:modelAction formName="frmCMR" />
     <form:hidden path="fromUrl" id="fromUrl" />
     <form:hidden path="claimRole" /> 
