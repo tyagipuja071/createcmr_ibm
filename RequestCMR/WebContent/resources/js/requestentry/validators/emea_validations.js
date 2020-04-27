@@ -4716,9 +4716,9 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
   var checkImportIndc = getImportedIndcForItaly();
   if (checkImportIndc != 'Y') {
     if (postCodeOrg != '' && isuCode != '' && isuCode == '32' && ctc == 'S') {
-      if ((postCodeOrg == '55100')) {
+      /*if ((postCodeOrg == '55100')) {
         FormManager.setValue('collectionCd', 'CIT03');
-      } else if (postCode >= 00 && postCode <= 04) {
+      } else*/ if (postCode >= 00 && postCode <= 04) {
         FormManager.setValue('collectionCd', 'CIT14');
       } else if (postCode == 10 || postCode == 11 || postCode == 28) {
         FormManager.setValue('collectionCd', 'CIT04');
@@ -4759,10 +4759,10 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
         && ctc == 'S'
         && (custSubType == 'COMME' || custSubType == '3PAIT' || custSubType == 'NGOIT' || custSubType == 'GOVST' || custSubType == 'LOCEN' || custSubType == 'PRICU' || custSubType == 'UNIVE'
             || custSubType == 'CROCM' || custSubType == 'CRO3P' || custSubType == 'CROLC' || custSubType == 'CROUN' || custSubType == 'CROGO' || custSubType == 'CROPR')) {
-      if ((postCodeOrg == '55100')) {
+      /*if ((postCodeOrg == '55100')) {
         FormManager.setValue('repTeamMemberNo', '09NAMM');
         FormManager.setValue('salesBusOffCd', 'NA');
-      } else if (postCode >= 00 && postCode <= 04) {
+      } else*/ if (postCode >= 00 && postCode <= 04) {
         FormManager.setValue('repTeamMemberNo', '09NCMM');
         FormManager.setValue('salesBusOffCd', 'NC');
       } else if (postCode == 10 || postCode == 11 || postCode == 28) {
@@ -4786,10 +4786,7 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
       } else if ((postCode >= 36 && postCode <= 39) || postCode == 46) {
         FormManager.setValue('repTeamMemberNo', '09GKMM');
         FormManager.setValue('salesBusOffCd', 'GK');
-      } else if ((postCode >= 41 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
-        FormManager.setValue('repTeamMemberNo', '09NAMM');
-        FormManager.setValue('salesBusOffCd', 'NA');
-      } else if (postCode == 40) {
+      } else if ((postCode >= 40 && postCode <= 44) || postCode == 29 || postCode == 47 || postCode == 48) {
         FormManager.setValue('repTeamMemberNo', '09NIMM');
         FormManager.setValue('salesBusOffCd', 'NI');
       } else if ((postCode >= 50 && postCode <= 59) || (postCode == 61)) {
