@@ -132,13 +132,13 @@ function isSkipDnbMatching() {
   var dnbPrimary = FormManager.getActualValue("dnbPrimary");
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var countryUse = FormManager.getActualValue("countryUse");
-  var subRegionCd = countryUse != null && countryUse != null && countryUse.length > 0 ? countryUse : cntry;
+  var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
   if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
     var qParams = {
       CNTRY : cntry,
       CUST_TYP : custGrp,
       CUST_SUB_TYP : custSubGroup,
-      SUBREGION_CD : cntry
+      SUBREGION_CD : subRegionCd
     };
     var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
     if (result.ret1 != null && result.ret1 == "Y") {
