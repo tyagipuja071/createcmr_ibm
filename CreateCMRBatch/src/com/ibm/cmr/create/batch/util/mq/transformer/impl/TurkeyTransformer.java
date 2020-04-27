@@ -1206,6 +1206,14 @@ public class TurkeyTransformer extends EMEATransformer {
     }
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
+    if (StringUtils.isEmpty(data.getCurrencyCd())) {
+      legacyCust.setMrcCd("3");
+    } else if (!StringUtils.isEmpty(data.getCurrencyCd()) && "BP".equals(data.getCurrencyCd())) {
+      legacyCust.setMrcCd("5");
+    } else {
+      legacyCust.setMrcCd("3");
+    }
+
   }
 
   @Override
