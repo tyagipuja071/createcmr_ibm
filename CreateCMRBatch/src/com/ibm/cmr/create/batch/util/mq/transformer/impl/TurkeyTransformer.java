@@ -741,7 +741,7 @@ public class TurkeyTransformer extends EMEATransformer {
       generateCMRNoObj.setMax(998899);
       LOG.debug("that is TR INTER CMR");
     } else {
-      generateCMRNoObj.setMin(330000);
+      generateCMRNoObj.setMin(369320);
       generateCMRNoObj.setMax(999999);
       LOG.debug("that is TR No INTER CMR");
     }
@@ -1528,6 +1528,7 @@ public class TurkeyTransformer extends EMEATransformer {
     long requestId = cmrObjects.getAdmin().getId().getReqId();
 
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
+    addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
 
 
     LOG.debug("LEGACY -- Turkey OVERRIDE transformOtherData");
