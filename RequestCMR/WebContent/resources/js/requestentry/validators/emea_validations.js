@@ -13,6 +13,7 @@ var _stateProvITHandler = null;
 var _internalDeptHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
+var _scenarioSubTypeHandler = null;
 
 var SCOTLAND_POST_CD = [ 'AB', 'KA', 'DD', 'KW', 'DG', 'KY', 'EH', 'ML', 'FK', 'PA', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'PH', 'TD', 'IV' ];
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
@@ -253,13 +254,13 @@ function vatMandatoryValidation() {
 }
 
 function setISUDefaultValueOnSubTypeChange() {
-  if (_isuCdHandler == null && FormManager.getField('custSubGrp')) {
-    _isuCdHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+  if (_scenarioSubTypeHandler == null && FormManager.getField('custSubGrp')) {
+	  _scenarioSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setDefaultValueForISU();
     });
   }
-  if (_isuCdHandler && _isuCdHandler[0]) {
-    _isuCdHandler[0].onChange();
+  if (_scenarioSubTypeHandler && _scenarioSubTypeHandler[0]) {
+	  _scenarioSubTypeHandler[0].onChange();
   }
 }
 
