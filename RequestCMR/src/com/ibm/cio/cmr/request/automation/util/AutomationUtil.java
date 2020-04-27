@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -329,7 +330,7 @@ public abstract class AutomationUtil {
   public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
     // NOOP
   }
-  
+
   /**
    * prepares and returns a dnb request based on requestData
    *
@@ -338,7 +339,7 @@ public abstract class AutomationUtil {
    * @param addr
    * @return
    */
-  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr) {
+  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr, Boolean isOrgIdMatchOnly) {
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (StringUtils.isNotBlank(data.getVat())) {
@@ -346,19 +347,23 @@ public abstract class AutomationUtil {
     }
 
     if (addr != null) {
-      request.setCity(addr.getCity1());
-      request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
-      request.setStreetLine1(addr.getAddrTxt());
-      request.setStreetLine2(addr.getAddrTxt2());
-      request.setLandedCountry(addr.getLandCntry());
-      request.setPostalCode(addr.getPostCd());
-      request.setStateProv(addr.getStateProv());
-      // request.setMinConfidence("8");
+      if (isOrgIdMatchOnly) {
+        request.setLandedCountry(addr.getLandCntry());
+      } else {
+        request.setCity(addr.getCity1());
+        request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        request.setStreetLine1(addr.getAddrTxt());
+        request.setStreetLine2(addr.getAddrTxt2());
+        request.setLandedCountry(addr.getLandCntry());
+        request.setPostalCode(addr.getPostCd());
+        request.setStateProv(addr.getStateProv());
+        // request.setMinConfidence("8");
+      }
     }
 
     return request;
   }
-  
+
   /**
    * Returns the DnB matches based on requestData & address
    *
@@ -367,13 +372,15 @@ public abstract class AutomationUtil {
    * @param addr
    * @return
    */
-  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr) throws Exception {
+  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr, boolean isOrgIdMatchOnly)
+      throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    List<DnBMatchingResponse> dnbMatches = new ArrayList<DnBMatchingResponse>();
     if (addr == null) {
       addr = requestData.getAddress("ZS01");
     }
-    GBGFinderRequest request = createRequest(admin, data, addr);
+    GBGFinderRequest request = createRequest(admin, data, addr, isOrgIdMatchOnly);
     MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         MatchingServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
@@ -386,11 +393,11 @@ public abstract class AutomationUtil {
     };
 
     MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-
-    List<DnBMatchingResponse> dnbMatches = response.getMatches();
+    if (response != null) {
+      dnbMatches = response.getMatches();
+    }
 
     return dnbMatches;
-
   }
 
   /**
@@ -412,8 +419,5 @@ public abstract class AutomationUtil {
 
     return result;
   }
-
- 
-
 
 }

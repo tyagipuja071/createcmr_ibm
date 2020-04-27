@@ -997,7 +997,9 @@ function setSBO(repTeamMemberNo) {
     }
   } else {
     // CMR-2053 AT can import SBO without ISR
-    // FormManager.setValue('salesBusOffCd', '');
+    if (cntry != SysLoc.AUSTRIA) {
+      FormManager.setValue('salesBusOffCd', '');
+    }
   }
 }
 
@@ -2380,7 +2382,6 @@ function handleRequestLOBChange() {
   }
 }
 
-
 function filterCmrnoForAT() {
   var cmrNo = FormManager.getActualValue('cmrNo');
   if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {
@@ -2546,8 +2547,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
   // CMR-2101 Austriathe func for Austria
-  // GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
-  // GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
+  GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
+  GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);

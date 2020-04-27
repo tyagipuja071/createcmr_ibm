@@ -216,6 +216,10 @@ public class BrazilDupCMRCheckElement extends DuplicateCheckElement {
           if (!StringUtils.isEmpty(admin.getDupCmrReason())) {
             details.append("\n\nDuplicate CMR reason provided: " + admin.getDupCmrReason());
           } else {
+
+            // add support to override duplicate CMR checks later
+            requestData.getAdmin().setMatchIndc("C");
+
             engineData.addRejectionComment("Duplicate CMR matches found.");
             result.setOnError(true);
           }
