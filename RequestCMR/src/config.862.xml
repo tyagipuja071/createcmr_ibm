@@ -54,7 +54,7 @@
           <dbColumn>EMBARGO_CD</dbColumn>
           <width>20</width>
           <length>1</length>
-          <lovId>EmbargoCode</lovId>
+          <bdsId>EmbargoCode</bdsId>
         </column>     
         <column>
           <label>Collection Code</label>
@@ -151,34 +151,23 @@
           <length>30</length>
         </column>
         <column>
-          <label>Local City</label>
-          <dbColumn>CITY1</dbColumn>
-          <width>40</width>
-          <length>22</length>
-        </column>
-        <column>
-          <label>Cross-Border City</label>
-          <dbColumn>CITY1</dbColumn>
-          <width>40</width>
-          <length>22</length>
-        </column>        
-        <column>
-          <label>Local Postal Code</label>
-          <dbColumn>POST_CD</dbColumn>
-          <width>18</width>
-          <length>5</length>
-        </column>
-        <column>
-          <label>Cross-border Postal Code</label>
-          <dbColumn>POST_CD</dbColumn>
-          <width>18</width>
-          <length>5</length>
-        </column>                
-        <column>
         	<label>Name4</label>
         	<dbColumn>CUST_NM4</dbColumn>
             <width>40</width>
             <length>30</length>
+        </column>
+        <column>
+          <label>City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>22</length>
+        </column>
+        
+        <column>
+          <label>Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>5</length>
         </column>
         <column>
           <label>Country (Landed)</label>
