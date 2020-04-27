@@ -13,6 +13,7 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.ui.ModelMap;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -27,15 +28,17 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -178,7 +181,6 @@ public class USUtil extends AutomationUtil {
     long reqId = requestData.getAdmin().getId().getReqId();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder eleResults = new StringBuilder();
     ArrayList<String> scenarioList = new ArrayList<String>();
     String scenarioSubType = "";
@@ -438,149 +440,381 @@ public class USUtil extends AutomationUtil {
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    String custTypeCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
-    List<String> restrictedCodesAddition = Arrays.asList("F", "G", "C", "D", "V", "W", "X");
-    List<String> restrictedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
-    boolean hasNegativeCheck = false;
-    for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
-      if (updatedDataModel != null && !hasNegativeCheck) {
-        LOG.debug("Checking updates for : " + new ObjectMapper().writeValueAsString(updatedDataModel));
-        switch (updatedDataModel.getDataField()) {
-        case "Tax Class / Code 1":
-        case "Tax Class / Code 2":
-        case "Tax Class / Code 3":
-        case "Tax Exempt Status":
-        case "ICC Tax Class":
-        case "ICC Tax Exempt Status":
-        case "Out of City Limits":
-          boolean requesterFromTaxTeam = false;
-          // TODO check if requester is from TaxTeam
-          if (!requesterFromTaxTeam) {
-            hasNegativeCheck = true;
-          }
-          break;
-        case "CSO Site":
-        case "Marketing Department":
-        case "Marketing A/R Department":
-          // set negative check status for FEDERAL Power of Attorney and BP
-          if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || BUSINESS_PARTNER.equals(custTypeCd))) {
-            hasNegativeCheck = true;
-          }
-          break;
-        case "Miscellaneous Bill Code":
-          for (String s : updatedDataModel.getOldData().split("")) {
-            List<String> newCodes = Arrays.asList(updatedDataModel.getNewData().split(""));
-            if (!newCodes.contains(s) && !restrictedCodesRemoval.contains(s) && !hasNegativeCheck) {
-              hasNegativeCheck = true;
-              break;
-            }
-          }
-          for (String s : updatedDataModel.getNewData().split("")) {
-            List<String> oldCodes = Arrays.asList(updatedDataModel.getOldData().split(""));
-            if (!oldCodes.contains(s) && !restrictedCodesAddition.contains(s) && !hasNegativeCheck) {
-              hasNegativeCheck = true;
-              break;
-            }
-          }
-          break;
 
-        case "Abbreviated Name (TELX1)":
-        case "PCC A/R Department":
-        case "SVC A/R Office":
-        case "Size Code":
-        case "CAP Record":
-          // SKIP THESE FIELDS
-          break;
-        default:
-          // Set Negative check status for any other fields updated.
-          hasNegativeCheck = true;
-          break;
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+
+    String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("EMAIL", admin.getRequesterId());
+    query.setForReadOnly(true);
+    if (query.exists()) {
+      // skip checks if requester is from USCMDE team
+      LOG.debug("Requester is from US CMDE team, skipping update checks.");
+      output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
+      validation.setMessage("Skipped");
+      validation.setSuccess(true);
+    } else {
+      EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
+      boolean hasNegativeCheck = false;
+      String custTypeCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
+      List<String> allowedCodesAddition = Arrays.asList("F", "G", "C", "D", "V", "W", "X");
+      List<String> allowedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
+      Map<String, String> failedChecks = new HashMap<String, String>();
+      boolean requesterFromTaxTeam = false;
+      boolean enterpriseAffiliateUpdated = false;
+
+      try {
+        for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
+          if (updatedDataModel != null) {
+            LOG.debug("Checking updates for : " + new ObjectMapper().writeValueAsString(updatedDataModel));
+            String field = updatedDataModel.getDataField();
+            switch (field) {
+            case "Tax Class / Code 1":
+            case "Tax Class / Code 2":
+            case "Tax Class / Code 3":
+            case "Tax Exempt Status":
+            case "ICC Tax Class":
+            case "ICC Tax Exempt Status":
+            case "Out of City Limits":
+              if (!failedChecks.containsKey("TAX_TEAM") && !requesterFromTaxTeam) {
+                // TODO check if requester is from TaxTeam
+                if (!requesterFromTaxTeam) {
+                  failedChecks.put("TAX_TEAM", "Requester not from Tax Team.");
+                  hasNegativeCheck = true;
+                }
+              }
+              break;
+            case "CSO Site":
+            case "Marketing Department":
+            case "Marketing A/R Department":
+              // set negative check status for FEDERAL Power of Attorney and BP
+              if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || BUSINESS_PARTNER.equals(custTypeCd))) {
+                failedChecks.put(field, field + " updated.");
+                hasNegativeCheck = true;
+              }
+              break;
+            case "Miscellaneous Bill Code":
+              List<String> newCodes = Arrays.asList(updatedDataModel.getNewData().split(""));
+              List<String> oldCodes = Arrays.asList(updatedDataModel.getOldData().split(""));
+
+              for (String s : oldCodes) {
+                if (!newCodes.contains(s) && !allowedCodesRemoval.contains(s) && !hasNegativeCheck) {
+                  failedChecks.put("MBC", "Restriced Miscellaneous Bill Codes changed.");
+                  hasNegativeCheck = true;
+                  break;
+                }
+              }
+              for (String s : newCodes) {
+                if (!oldCodes.contains(s) && !allowedCodesAddition.contains(s) && !hasNegativeCheck) {
+                  failedChecks.put("MBC", "Restriced Miscellaneous Bill Codes changed.");
+                  hasNegativeCheck = true;
+                  break;
+                }
+              }
+              break;
+            case "ISU Code":
+              if ("5B".equals(updatedDataModel.getNewData())) {
+                String error = performCSPCheck(cedpManager, entityManager, data);
+                if (StringUtils.isNotBlank(error)) {
+                  engineData.addRejectionComment(error);
+                  LOG.debug(error);
+                  output.setDetails(error);
+                  output.setOnError(true);
+                  validation.setMessage("Validation Failed");
+                  validation.setSuccess(false);
+                  return true;
+                }
+              } else {
+                failedChecks.put("ISU", "ISU Code updated.");
+                hasNegativeCheck = true;
+              }
+              break;
+            case "Enterprise":
+            case "Affiliate":
+              if (!enterpriseAffiliateUpdated) {
+                if (BUSINESS_PARTNER.equals(custTypeCd)) {
+                  engineData.addNegativeCheckStatus("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
+                  failedChecks.put("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
+                } else {
+                  String error = performEnterpriseAffiliateCheck(cedpManager, entityManager, requestData);
+                  if (StringUtils.isNotBlank(error)) {
+                    engineData.addRejectionComment(error);
+                    LOG.debug(error);
+                    output.setDetails(error);
+                    output.setOnError(true);
+                    validation.setMessage("Validation Failed");
+                    validation.setSuccess(false);
+                    return true;
+                  }
+                }
+                enterpriseAffiliateUpdated = true;
+              }
+              break;
+            case "ISIC":
+              String error = performISICCheck(cedpManager, entityManager, requestData);
+              if (StringUtils.isNotBlank(error)) {
+                engineData.addRejectionComment(error);
+                LOG.debug(error);
+                output.setDetails(error);
+                output.setOnError(true);
+                validation.setMessage("Validation Failed");
+                validation.setSuccess(false);
+                return true;
+              }
+              break;
+
+            case "Abbreviated Name (TELX1)":
+            case "PCC A/R Department":
+            case "SVC A/R Office":
+            case "Size Code":
+            case "CAP Record":
+              // SKIP THESE FIELDS
+              break;
+            default:
+              // Set Negative check status for any other fields updated.
+              hasNegativeCheck = true;
+              break;
+            }
+          }
         }
-      } else if (hasNegativeCheck) {
-        break;
+
+        if ("CSP".equals(admin.getReqReason())) {
+          String error = performCSPCheck(cedpManager, entityManager, data);
+          if (StringUtils.isNotBlank(error)) {
+            engineData.addRejectionComment(error);
+            LOG.debug(error);
+            output.setOnError(true);
+            output.setDetails(error);
+            validation.setMessage("Validation Failed");
+            validation.setSuccess(false);
+            return true;
+          }
+        }
+
+      } finally {
+        cedpManager.clear();
+        cedpManager.close();
+      }
+      if (hasNegativeCheck) {
+        engineData.addNegativeCheckStatus("RESTRICED_DATA_UPDATED", "Updated elements cannot be checked automatically.");
+        LOG.debug("Updated elements cannot be checked automatically.");
+        output.setDetails("Updated elements cannot be checked automatically.\n");
+        if (failedChecks != null && failedChecks.size() > 0) {
+          StringBuilder details = new StringBuilder();
+          details.append("Updated elements cannot be checked automatically.\nDetails:").append("\n");
+          for (String failedCheck : failedChecks.values()) {
+            details.append(" - " + failedCheck).append("\n");
+          }
+          details.append("\nPlease check Request Summary for more details.");
+        }
+        validation.setMessage("Review needed");
+        validation.setSuccess(false);
       }
     }
-
-    if (hasNegativeCheck) {
-      engineData.addNegativeCheckStatus("RESTRICED_DATA_UPDATED", "Updated elements cannot be checked automatically.");
-      LOG.debug("Updated elements cannot be checked automatically.");
-      output.setDetails("Updated elements cannot be checked automatically.\n");
-      validation.setMessage("Review needed");
-      validation.setSuccess(false);
-    }
-
     return true;
+  }
+
+  private String performISICCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+    Data data = requestData.getData();
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      float revenue = (float) (results.get(0)[1] != null ? results.get(0)[1] : 0);
+      if (revenue > 100000) {
+        return error;
+      } else if (revenue == 0) {
+        String dunsNo = "";
+        if (StringUtils.isNotBlank(data.getDunsNo())) {
+          dunsNo = data.getDunsNo();
+        } else {
+          MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
+          if (response != null && DnBUtil.hasValidMatches(response)) {
+            DnBMatchingResponse dnbRecord = response.getMatches().get(0);
+            if (dnbRecord.getConfidenceCode() >= 8) {
+              dunsNo = dnbRecord.getDunsNo();
+            }
+          }
+        }
+
+        if (StringUtils.isNotBlank(dunsNo)) {
+          DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+          if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
+            if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
+              return error;
+            } else {
+              // TODO check BRSCH from zzkv_sic
+            }
+          } else {
+            return error;
+          }
+        } else {
+          return error;
+        }
+      }
+    }
+    return null;
+  }
+
+  private String performEnterpriseAffiliateCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+    Data data = requestData.getData();
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      float revenue = (float) (results.get(0)[1] != null ? results.get(0)[1] : 0);
+      if (revenue > 0) {
+        return error;
+      } else if (revenue == 0) {
+        sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
+        query = new PreparedQuery(cedpManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("CMR_NO", data.getCmrNo());
+        query.setParameter("ENTERPRISE", data.getEnterprise());
+        query.setParameter("AFFILIATE", data.getAffiliate());
+        query.setForReadOnly(true);
+        if (!query.exists()) {
+          return error;
+        } else {
+          CmrClientService odmService = new CmrClientService();
+          RequestEntryModel model = requestData.createModelFromRequest();
+          Addr soldTo = requestData.getAddress("ZS01");
+          ModelMap response = new ModelMap();
+
+          boolean success = odmService.getBuyingGroup(entityManager, soldTo, model, response);
+          String gbgId = (String) response.get("globalBuyingGroupID");
+          if (!success || gbgId == null || (success && gbgId != null && !gbgId.equals(data.getGbgId()))) {
+            return error;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private String performCSPCheck(EntityManager cedpManager, EntityManager entityManager, Data data) {
+    boolean requesterFromCSPTeam = true;
+    // TODO check team heirarchy
+    if (!requesterFromCSPTeam) {
+      return "Only members of the CSP team can request for converting a CMR to CSP.  Kindly check with CMDE or your manager.";
+    } else {
+      String sql = ExternalizedQuery.getSql("AUTO.US.CHECK_CSP_VALID");
+      PreparedQuery query = new PreparedQuery(cedpManager, sql);
+      query.setParameter("CMR_NO", data.getCmrNo());
+      query.setForReadOnly(true);
+      List<Object[]> results = query.getResults(1);
+      if (results != null && results.size() > 0) {
+        String creationCapChanged = (String) results.get(0)[2];
+        String sicValidation = (String) results.get(0)[3];
+        String revenue = (String) results.get(0)[4];
+        if (!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation) || !"Ok".equals(revenue)) {
+          return "'The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+        } else {
+          sql = ExternalizedQuery.getSql("AUTO.US.GET_CSP_AFFILIATE");
+          query = new PreparedQuery(cedpManager, sql);
+          query.setParameter("CMR_NO", data.getCmrNo());
+          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          query.setForReadOnly(true);
+          results = query.getResults(1);
+          if (results != null && results.size() > 0) {
+            // TODO implement overrides
+            String konzs = (String) results.get(0)[3];
+            if (StringUtils.isNotBlank(konzs)) {
+              data.setAffiliate(konzs);
+              data.setCustClass("52");
+              entityManager.merge(data);
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
 
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     // init
-    StringBuilder details = new StringBuilder();
-    Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
-    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
-    // check addresses
-    if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
-      if (LEASING.equals(custTypCd) || BUSINESS_PARTNER.equals(custTypCd)) {
-        engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
-            "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
-        details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
-            + " scenario found. Processor review will be required.").append("\n");
-        validation.setMessage("Review needed");
-        validation.setSuccess(false);
-      } else {
-        List<String> addrTypesChanged = new ArrayList<String>();
-        for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
-          addrTypesChanged.add(addrModel.getAddrType());
-        }
-        if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01)) {
-          closelyMatchAddressWithDnbRecords(handler, requestData, engineData, "ZS01", details, validation);
-        }
+    String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
+    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+    query.setParameter("EMAIL", admin.getRequesterId());
+    query.setForReadOnly(true);
+    if (query.exists()) {
+      // skip checks if requester is from USCMDE team
+      validation.setSuccess(true);
+    } else {
+      StringBuilder details = new StringBuilder();
+      String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
 
-        if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01)) {
-          Addr zp01 = requestData.getAddress("ZP01");
-          boolean immutableAddrFound = false;
-          List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
-              "7100 HIGHLANDS PKWY", "294 ROUTE 100", "6710 ROCKLEDGE DR");
-          String addrTxt = zp01.getAddrTxt() + (StringUtils.isNotBlank(zp01.getAddrTxt2()) ? " " + zp01.getAddrTxt2() : "");
-          for (String streetAddr : immutableAddrList) {
-            if (addrTxt.contains(streetAddr)) {
-              immutableAddrFound = true;
-              break;
+      // check addresses
+      if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
+        if (LEASING.equals(custTypCd) || BUSINESS_PARTNER.equals(custTypCd)) {
+          engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
+              "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
+          details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
+              + " scenario found. Processor review will be required.").append("\n");
+          validation.setMessage("Review needed");
+          validation.setSuccess(false);
+        } else {
+          List<String> addrTypesChanged = new ArrayList<String>();
+          for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
+            addrTypesChanged.add(addrModel.getAddrType());
+          }
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01)) {
+            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
+          }
+
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01)) {
+            Addr zp01 = requestData.getAddress("ZP01");
+            boolean immutableAddrFound = false;
+            List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
+                "7100 HIGHLANDS PKWY", "294 ROUTE 100", "6710 ROCKLEDGE DR");
+            String addrTxt = zp01.getAddrTxt() + (StringUtils.isNotBlank(zp01.getAddrTxt2()) ? " " + zp01.getAddrTxt2() : "");
+            for (String streetAddr : immutableAddrList) {
+              if (addrTxt.contains(streetAddr)) {
+                immutableAddrFound = true;
+                break;
+              }
+            }
+            if (immutableAddrFound) {
+              engineData.addNegativeCheckStatus("IMMUTABLE_ADDR_FOUND", "Invoice-to address cannot be modified.");
+              details.append("Invoice-to address cannot be modified.").append("\n");
+              validation.setMessage("Review needed");
+              validation.setSuccess(false);
+            } else {
+              closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
             }
           }
-          if (immutableAddrFound) {
-            engineData.addNegativeCheckStatus("IMMUTABLE_ADDR_FOUND", "Invoice-to address cannot be modified.");
-            details.append("Invoice-to address cannot be modified.").append("\n");
-            validation.setMessage("Review needed");
-            validation.setSuccess(false);
-          } else {
-            closelyMatchAddressWithDnbRecords(handler, requestData, engineData, "ZP01", details, validation);
-          }
         }
-      }
-    } else
+      } else
 
-    {
-      validation.setSuccess(false);
-      validation.setMessage("Unknown CustType");
-      details.append("Customer Type could not be determined. Update checks for address could not be run.").append("\n");
-      output.setOnError(true);
+      {
+        validation.setSuccess(false);
+        validation.setMessage("Unknown CustType");
+        details.append("Customer Type could not be determined. Update checks for address could not be run.").append("\n");
+        output.setOnError(true);
+      }
+      output.setDetails(details.toString());
     }
-    output.setDetails(details.toString());
     return true;
   }
 
-  private void closelyMatchAddressWithDnbRecords(GEOHandler handler, RequestData requestData, AutomationEngineData engineData, String addrType,
-      StringBuilder details, ValidationOutput validation) throws Exception {
+  private void closelyMatchAddressWithDnbRecords(RequestData requestData, AutomationEngineData engineData, String addrType, StringBuilder details,
+      ValidationOutput validation) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(handler, requestData, engineData, addrType);
+    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, addrType);
     if (response.getSuccess()) {
       if (response.getMatched() && !response.getMatches().isEmpty()) {
         if (DnBUtil.hasValidMatches(response)) {
