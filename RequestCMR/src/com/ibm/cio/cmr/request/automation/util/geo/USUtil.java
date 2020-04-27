@@ -13,6 +13,7 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.ui.ModelMap;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -27,16 +28,17 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.JpaManager;
-import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
-import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -162,7 +164,6 @@ public class USUtil extends AutomationUtil {
     long reqId = requestData.getAdmin().getId().getReqId();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    Addr soldTo = requestData.getAddress("ZS01");
     StringBuilder eleResults = new StringBuilder();
     ArrayList<String> scenarioList = new ArrayList<String>();
     String scenarioSubType = "";
@@ -429,10 +430,11 @@ public class USUtil extends AutomationUtil {
       List<String> allowedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
       Map<String, String> failedChecks = new HashMap<String, String>();
       boolean requesterFromTaxTeam = false;
+      boolean enterpriseAffiliateUpdated = false;
 
       try {
         for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
-          if (updatedDataModel != null && !hasNegativeCheck) {
+          if (updatedDataModel != null) {
             LOG.debug("Checking updates for : " + new ObjectMapper().writeValueAsString(updatedDataModel));
             String field = updatedDataModel.getDataField();
             switch (field) {
@@ -496,6 +498,39 @@ public class USUtil extends AutomationUtil {
                 hasNegativeCheck = true;
               }
               break;
+            case "Enterprise":
+            case "Affiliate":
+              if (!enterpriseAffiliateUpdated) {
+                if (BUSINESS_PARTNER.equals(custTypeCd)) {
+                  engineData.addNegativeCheckStatus("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
+                  failedChecks.put("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
+                } else {
+                  String error = performEnterpriseAffiliateCheck(cedpManager, entityManager, requestData);
+                  if (StringUtils.isNotBlank(error)) {
+                    engineData.addRejectionComment(error);
+                    LOG.debug(error);
+                    output.setDetails(error);
+                    output.setOnError(true);
+                    validation.setMessage("Validation Failed");
+                    validation.setSuccess(false);
+                    return true;
+                  }
+                }
+                enterpriseAffiliateUpdated = true;
+              }
+              break;
+            case "ISIC":
+              String error = performISICCheck(cedpManager, entityManager, requestData);
+              if (StringUtils.isNotBlank(error)) {
+                engineData.addRejectionComment(error);
+                LOG.debug(error);
+                output.setDetails(error);
+                output.setOnError(true);
+                validation.setMessage("Validation Failed");
+                validation.setSuccess(false);
+                return true;
+              }
+              break;
 
             case "Abbreviated Name (TELX1)":
             case "PCC A/R Department":
@@ -509,8 +544,6 @@ public class USUtil extends AutomationUtil {
               hasNegativeCheck = true;
               break;
             }
-          } else if (hasNegativeCheck) {
-            break;
           }
         }
 
@@ -548,6 +581,90 @@ public class USUtil extends AutomationUtil {
       }
     }
     return true;
+  }
+
+  private String performISICCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+    Data data = requestData.getData();
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      float revenue = (float) (results.get(0)[1] != null ? results.get(0)[1] : 0);
+      if (revenue > 100000) {
+        return error;
+      } else if (revenue == 0) {
+        String dunsNo = "";
+        if (StringUtils.isNotBlank(data.getDunsNo())) {
+          dunsNo = data.getDunsNo();
+        } else {
+          MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
+          if (response != null && DnBUtil.hasValidMatches(response)) {
+            DnBMatchingResponse dnbRecord = response.getMatches().get(0);
+            if (dnbRecord.getConfidenceCode() >= 8) {
+              dunsNo = dnbRecord.getDunsNo();
+            }
+          }
+        }
+
+        if (StringUtils.isNotBlank(dunsNo)) {
+          DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
+          if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
+            if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
+              return error;
+            } else {
+              // TODO check BRSCH from zzkv_sic
+            }
+          } else {
+            return error;
+          }
+        } else {
+          return error;
+        }
+      }
+    }
+    return null;
+  }
+
+  private String performEnterpriseAffiliateCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+    Data data = requestData.getData();
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
+    PreparedQuery query = new PreparedQuery(cedpManager, sql);
+    query.setParameter("CMR_NO", data.getCmrNo());
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults(1);
+    if (results != null && results.size() > 0) {
+      float revenue = (float) (results.get(0)[1] != null ? results.get(0)[1] : 0);
+      if (revenue > 0) {
+        return error;
+      } else if (revenue == 0) {
+        sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
+        query = new PreparedQuery(cedpManager, sql);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+        query.setParameter("CMR_NO", data.getCmrNo());
+        query.setParameter("ENTERPRISE", data.getEnterprise());
+        query.setParameter("AFFILIATE", data.getAffiliate());
+        query.setForReadOnly(true);
+        if (!query.exists()) {
+          return error;
+        } else {
+          CmrClientService odmService = new CmrClientService();
+          RequestEntryModel model = requestData.createModelFromRequest();
+          Addr soldTo = requestData.getAddress("ZS01");
+          ModelMap response = new ModelMap();
+
+          boolean success = odmService.getBuyingGroup(entityManager, soldTo, model, response);
+          String gbgId = (String) response.get("globalBuyingGroupID");
+          if (!success || gbgId == null || (success && gbgId != null && !gbgId.equals(data.getGbgId()))) {
+            return error;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   private String performCSPCheck(EntityManager cedpManager, EntityManager entityManager, Data data) {
@@ -593,7 +710,6 @@ public class USUtil extends AutomationUtil {
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     // init
-    Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
 
     String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
@@ -606,7 +722,6 @@ public class USUtil extends AutomationUtil {
     } else {
       StringBuilder details = new StringBuilder();
       String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
-      GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
@@ -623,7 +738,7 @@ public class USUtil extends AutomationUtil {
             addrTypesChanged.add(addrModel.getAddrType());
           }
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01)) {
-            closelyMatchAddressWithDnbRecords(handler, requestData, engineData, "ZS01", details, validation);
+            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01)) {
@@ -644,7 +759,7 @@ public class USUtil extends AutomationUtil {
               validation.setMessage("Review needed");
               validation.setSuccess(false);
             } else {
-              closelyMatchAddressWithDnbRecords(handler, requestData, engineData, "ZP01", details, validation);
+              closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
             }
           }
         }
@@ -661,13 +776,13 @@ public class USUtil extends AutomationUtil {
     return true;
   }
 
-  private void closelyMatchAddressWithDnbRecords(GEOHandler handler, RequestData requestData, AutomationEngineData engineData, String addrType,
-      StringBuilder details, ValidationOutput validation) throws Exception {
+  private void closelyMatchAddressWithDnbRecords(RequestData requestData, AutomationEngineData engineData, String addrType, StringBuilder details,
+      ValidationOutput validation) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(handler, requestData, engineData, addrType);
+    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, addrType);
     if (response.getSuccess()) {
       if (response.getMatched() && !response.getMatches().isEmpty()) {
         if (DnBUtil.hasValidMatches(response)) {
