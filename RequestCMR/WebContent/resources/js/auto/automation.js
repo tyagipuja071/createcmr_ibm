@@ -165,7 +165,7 @@ function matchImportFormatter(value, rowIndex) {
     if (keyValue.indexOf('CMR_NO') >= 0) {
       formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openCMRDetailsPage(\'' + val + '\')">';
     } else if (keyValue.indexOf('REQ_ID') >= 0) {
-      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="showSummaryScreen(\'' + val + '\',\'C\')">';
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="showSummaryScreenV2(\'' + val + '\',\'C\')">';
     } else if (keyValue.indexOf('DUNS_NO') >= 0) {
       var dnbVal = val.substring(0, val.indexOf('\\n')).trim();
       formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dnbVal + '\')">';
@@ -186,7 +186,7 @@ function openDNBDetailsPage(dunsNo) {
   WindowMgr.open('COMPDET', 'DNB' + dunsNo, 'company_details?viewOnly=Y&issuingCountry=' + Automation.getParameterByName('cntry') + '&dunsNo=' + dunsNo, null, 550);
 }
 
-function showSummaryScreen(requestId, type) {
+function showSummaryScreenV2(requestId, type) {
   if ('C' == type || 'U' == type) {
     WindowMgr.open('SUMMARY', requestId, 'summary?reqId=' + requestId + '&reqType=' + type);
   } else {
