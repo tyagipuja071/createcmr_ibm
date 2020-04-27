@@ -1584,7 +1584,7 @@ public class TurkeyTransformer extends EMEATransformer {
         Addr addr = addrList.get(i);
         String addrType = addr.getId().getAddrType();
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-          CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
+          CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00001");
           if ("Y".equals(olddataaddr.getIsAddrUseEPL()) && "Y".equals(olddataaddr.getIsAddrUseInstalling())
               && "Y".equals(olddataaddr.getIsAddrUseShipping())) {
             // copy billing from mailing
@@ -1843,6 +1843,7 @@ public class TurkeyTransformer extends EMEATransformer {
     billingAddr.getId().setAddrNo(billingseq);
     billingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
     billingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+    billingAddr.setForCreate(true);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(billingAddr);
   }
