@@ -34,34 +34,26 @@ function getImportedIndcForPT() {
   return _importedIndc;
 }
 
-function autoSetTaxCodePT() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return new ValidationResult(null, true);
-  }
-  var addrType = FormManager.getActualValue('addrType');
-  if (addrType != null && addrType == 'ZS01') {
-    var currPostCd = FormManager.getActualValue('postCd');
-    setTaxCodeOnPostalCodePT(false, currPostCd);
-  }
-}
-
-function setTaxCodeOnPostalCodePT(currPostCd){
-  var requestType = FormManager.getActualValue('reqType');
-  var custSubType = FormManager.getActualValue('custSubGrp');
+function setTaxCodeOnPostalCodePT(postCd){
   
-  if ((requestType != 'C') || (custSubType == 'CRISO' || custSubType == 'CRIINT' 
-    || custSubType == 'CRPRI' ||custSubType == 'XCRO' || custSubType == 'XBP')) {
+  var postCd = FormManager.getActualValue('postCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   
-  var reqId = FormManager.getActualValue('reqId');
-  var result = cmr.query('VALIDATOR.POSTCODEIT', {
-    REQID : reqId
-  });
+  if (custSubGrp == 'CRISO' || custSubGrp == 'CRIINT' || custSubGrp == 'CRPRI' 
+    || custSubGrp == 'XCRO' || custSubGrp == 'XBP') {
+    return;
+  }
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
 
+  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
   var postCodeOrg = '';
-
   if (result != null && result.ret1 != undefined) {
     postCodeOrg = result.ret1;
   } else {
@@ -69,20 +61,18 @@ function setTaxCodeOnPostalCodePT(currPostCd){
   }
   
   var postCode = parseInt(postCodeOrg.substring(0, 1));
-
-  if (currPostCd && currPostCd != undefined && currPostCd != '' && currPostCd != postCodeOrg) {
-    postCode = currPostCd.substring(0, 1);
+  if (postCd && postCd != undefined && postCd != '') {
+    postCode = postCd.substring(0, 1);
   }
   
-  //set Tax code based on postalcode logic
+  //set Tax code based on postal-Code logic
   var checkImportIndc = getImportedIndcForPT();
-  var custSubGroup = FormManager.getActualValue('custSubGrp');
   if (checkImportIndc != 'Y') {
-    if (custSubGroup == 'GOVRN' && postCode == 9) {
+    if (custSubGrp == 'GOVRN' && postCode == 9) {
       FormManager.setValue('specialTaxCd', '18');
-    } else if(custSubGroup != 'GOVRN' && postCode == 9){
+    } else if(custSubGrp != 'GOVRN' && postCode == 9){
       FormManager.setValue('specialTaxCd', '23');
-    } 
+    }
   }
 }
 
@@ -647,10 +637,8 @@ function disableAddrFieldsPTES() {
   } else if (FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZD01') {
     FormManager.setValue('custPhone', '');
     FormManager.readOnly('custPhone');
-    //FormManager.hide('CustPhone', 'custPhone');
   } else {
     FormManager.enable('custPhone');
-    FormManager.show('CustPhone', 'custPhone');
   }
 
   // Sequence Number - enable for additional shipping
@@ -962,11 +950,11 @@ function forceLockScenariosPortugal() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
   var fieldsToDisable = new Array();
-  FormManager.enable('isicCd');
+  /*FormManager.enable('isicCd');
   FormManager.enable('isuCd');
   FormManager.enable('clientTier');
   FormManager.enable('specialTaxCd');
-  //FormManager.enable('repTeamMemberNo');
+  FormManager.enable('repTeamMemberNo');*/
 
   if (custSubGroup == 'COMME') {
     fieldsToDisable.push('cmrOwner');
@@ -1864,7 +1852,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   
-  GEOHandler.addAddrFunction(autoSetTaxCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);

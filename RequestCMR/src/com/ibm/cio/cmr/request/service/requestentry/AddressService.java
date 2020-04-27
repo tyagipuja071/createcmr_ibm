@@ -145,7 +145,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
       if ("618".equals(model.getCmrIssuingCntry())) {
 
-    	newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
+        newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
 
       }
 
@@ -171,12 +171,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
         if (model.getAddrType().equals("ZI01")) {
           if (zi01cout == 0) {
-          newAddrSeq = "00005";
+            newAddrSeq = "00005";
           } else {
             newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
           }
-        } 
-    
+        }
+
       }
 
       // if ("864".equals(model.getCmrIssuingCntry())) {
@@ -1050,12 +1050,19 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       DPLCheckResult dplResult = null;
       String errorInfo = null;
 
+      String soldToLandedCountry = null;
+      for (Addr addr : addresses) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          soldToLandedCountry = addr.getLandCntry();
+        }
+      }
       for (Addr addr : addresses) {
         errorInfo = null;
         if (addr.getDplChkResult() == null) {
           Boolean errorStatus = false;
           try {
-            dplResult = dplCheckAddress(admin, addr, geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
+            dplResult = dplCheckAddress(admin, addr, soldToLandedCountry, data.getCmrIssuingCntry(),
+                geoHandler != null ? !geoHandler.customerNamesOnAddress() : false);
           } catch (Exception e) {
             log.error("Error in performing DPL Check when call EVS on Request ID " + reqId + " Addr " + addr.getId().getAddrType() + "/"
                 + addr.getId().getAddrSeq(), e);
@@ -1211,7 +1218,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
    * @return
    * @throws Exception
    */
-  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, boolean useNameOnMain) throws Exception {
+  public DPLCheckResult dplCheckAddress(Admin admin, Addr addr, String soldToLandedCountry, String issuingCountry, boolean useNameOnMain)
+      throws Exception {
     String servicesUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String appId = SystemConfiguration.getSystemProperty("evs.appID");
     DPLCheckClient dplClient = CmrServicesFactory.getInstance().createClient(servicesUrl, DPLCheckClient.class);
@@ -1227,6 +1235,16 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       name = admin.getMainCustNm1() + (!StringUtils.isEmpty(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
     }
     request.setCountry(addr.getLandCntry());
+    if (StringUtils.isBlank(addr.getLandCntry())) {
+      if (!StringUtils.isBlank(soldToLandedCountry)) {
+        request.setCountry(soldToLandedCountry);
+      } else {
+        request.setCountry(PageManager.getDefaultLandedCountry(issuingCountry));
+      }
+      if (StringUtils.isBlank(addr.getLandCntry())) {
+        request.setCountry("US");
+      }
+    }
     request.setApplication(appId);
     request.setCity(addr.getCity1());
     request.setAddr1(addr.getAddrTxt());
@@ -2093,11 +2111,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
   }
 
   protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId, String reqType, String addrType) {
-	if("ZD02".equals(addrType)) {
-		return "598";
-	}else if("ZP02".equals(addrType)) {
-		return "599";
-	}
+    if ("ZD02".equals(addrType)) {
+      return "598";
+    } else if ("ZP02".equals(addrType)) {
+      return "599";
+    }
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
@@ -2125,32 +2143,32 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         // if returned value is invalid
       }
       addrSeq++;
-      //Compare with RDC SEQ FOR UPDATE REQUEST
-      if(CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
-    	String cmrNo = null;
-    	if(result != null && result.length > 0 && result[2] != null) {
-    		cmrNo = (String)result[2];
-    	}
-    	if(!StringUtils.isEmpty(cmrNo)) {
-    		String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_TR");
-            PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
-            queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-            queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
-            List<Object[]> resultsRDC = queryRDC.getResults();
-            List<String> seqList = new ArrayList<String>();
-            for(int i = 0; i < resultsRDC.size(); i++) {
-            	String item = String.valueOf(resultsRDC.get(i));
-            	if(!StringUtils.isEmpty(item)) {
-            		seqList.add(item); 
-            	}
+      // Compare with RDC SEQ FOR UPDATE REQUEST
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+        String cmrNo = null;
+        if (result != null && result.length > 0 && result[2] != null) {
+          cmrNo = (String) result[2];
+        }
+        if (!StringUtils.isEmpty(cmrNo)) {
+          String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_TR");
+          PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+          queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+          List<Object[]> resultsRDC = queryRDC.getResults();
+          List<String> seqList = new ArrayList<String>();
+          for (int i = 0; i < resultsRDC.size(); i++) {
+            String item = String.valueOf(resultsRDC.get(i));
+            if (!StringUtils.isEmpty(item)) {
+              seqList.add(item);
             }
-            while(seqList.contains(Integer.toString(addrSeq))) {
-            	addrSeq++;
-            }
-    	}
+          }
+          while (seqList.contains(Integer.toString(addrSeq))) {
+            addrSeq++;
+          }
+        }
       }
     }
-    
+
     newAddrSeq = Integer.toString(addrSeq);
 
     // newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5,
