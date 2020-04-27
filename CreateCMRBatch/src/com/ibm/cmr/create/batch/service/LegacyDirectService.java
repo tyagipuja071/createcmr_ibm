@@ -2799,6 +2799,8 @@ public class LegacyDirectService extends TransConnService {
         String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
         boolean isDataUpdated = false;
+        boolean isExceptionOccured = false;
+        Set<String> rdcProcessedSequences = new HashSet<String>();
         isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
         MessageTransformer transformer = TransformerManager.getTransformer(data.getCmrIssuingCntry());
 
@@ -2806,6 +2808,11 @@ public class LegacyDirectService extends TransConnService {
           entityManager.detach(addr);
           if (usedSequences.contains(addr.getId().getAddrSeq())) {
             LOG.warn("Sequence " + addr.getId().getAddrSeq() + " already sent in a previous request. Skipping.");
+            continue;
+          }
+
+          if (isExceptionOccured && rdcProcessedSequences.contains(addr.getId().getAddrSeq())) {
+            LOG.warn("New kunnr for Sequence " + addr.getId().getAddrSeq() + " already created in RDc. Skipping.");
             continue;
           }
 
@@ -2905,13 +2912,20 @@ public class LegacyDirectService extends TransConnService {
             try {
               updateEntity(addrNew, entityManager);
             } catch (Exception e) {
-              try {
-                LOG.info("Exception in LegacyDirect due to optimistic lock for KUNNR=" + addrNew.getSapNo());
-                Thread.sleep(60 * 1000);// 1 minute sleep time
-              } catch (InterruptedException ex) {
-                LOG.debug("Exception in LegacyDirect sleep method for KUNNR=" + addrNew.getSapNo());
+              // try {
+              LOG.info("Exception in LegacyDirect due to optimistic lock for KUNNR=" + addrNew.getSapNo() + "===" + addr.getSapNo());
+              if (addr.getSapNo() == null && addrNew.getSapNo() != null) {
+                LOG.info("Kunnr created for new address in RDc with Seq no=" + addrNew.getId().getAddrSeq());
+                isExceptionOccured = true;
+                rdcProcessedSequences.add(addrNew.getId().getAddrSeq());
               }
-              updateEntity(addrNew, entityManager);
+
+              // Thread.sleep(60 * 1000);// 1 minute sleep time
+              // } catch (InterruptedException ex) {
+              // LOG.debug("Exception in LegacyDirect sleep method for KUNNR=" +
+              // addrNew.getSapNo());
+              // }
+              // updateEntity(addrNew, entityManager);
             }
             // updateEntity(addrNew, entityManager);
 
