@@ -110,8 +110,10 @@ public class USDelReacCheckElement extends ValidatingElement {
           }
 
           if (oldCMRExist) {
+            result.setResults("Approval Needed");
             details.append("\nCMRs updated before 6 months exist on the request. An approval from CMR Owner is required to proceed.").append("\n");
           } else {
+            result.setResults("Validated");
             details.append("\nNo CMRs updated before 6 months exist on the request.").append("\n");
           }
         } else {
@@ -123,6 +125,7 @@ public class USDelReacCheckElement extends ValidatingElement {
       case "D":
         List<String> cmrNos = getCMRNoList(entityManager, admin.getId().getReqId());
         if (!cmrNos.isEmpty()) {
+          result.setResults("Approval Needed");
           details.append("Delete request detected, approval will be generated to CMR owner.").append("\n");
         } else {
           result.setOnError(true);
