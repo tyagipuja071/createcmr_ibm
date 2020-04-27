@@ -262,6 +262,7 @@ public class EMEAHandler extends BaseSOFHandler {
 								addrType = record.getCmrAddrTypeCode();
 								if (!StringUtils.isEmpty(addrType)) {
 									addr = cloneAddress(record, addrType);
+                  addr.setCmrDept(record.getCmrCity2());
 									converted.add(addr);
 								}
 								if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
@@ -293,6 +294,9 @@ public class EMEAHandler extends BaseSOFHandler {
 												installing.setCmrStreetAddressCont(sadr.getStrs2());
 												installing.setCmrState(sadr.getRegio());
 												installing.setCmrPostalCode(sadr.getPstlz());
+                        installing.setCmrDept(sadr.getOrt02());
+                        installing.setCmrTaxOffice(sadr.getTxjcd());
+                        installing.setCmrSapNumber("");
 												converted.add(installing);
 											}
 										}
