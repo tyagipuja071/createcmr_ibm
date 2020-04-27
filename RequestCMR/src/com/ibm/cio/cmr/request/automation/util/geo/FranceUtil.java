@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -574,14 +575,18 @@ public class FranceUtil extends AutomationUtil {
       boolean isuCdChngd = changes.isDataChanged("ISU Code");
       boolean ctcChngd = changes.isDataChanged("Client Tier");
 
-      if(!"9500".equals(data.getIsicCd()) && (vatChngd || collCdChngd || topLstChngd || sboChngd || iboChngd || isuCdChngd || ctcChngd)){
+      if (!"9500".equals(data.getIsicCd()) && (vatChngd || collCdChngd || topLstChngd || sboChngd || iboChngd || isuCdChngd || ctcChngd)) {
         if (vatChngd) {
           LOG.debug("Changes has VAT changes -> " + changes.isDataChanged("VAT #"));
           UpdatedDataModel vatChange = changes.getDataChange("VAT #");
           if (vatChange != null) {
             if (StringUtils.isBlank(vatChange.getOldData()) && StringUtils.isNotBlank(vatChange.getNewData())) {
               // check if the name + VAT exists in D&B
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo);
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+              if (matches.isEmpty()) {
+                // get DnB matches based on all address details
+                matches = getMatches(requestData, engineData, soldTo, false);
+              }
               if (!matches.isEmpty()) {
                 for (DnBMatchingResponse dnbRecord : matches) {
                   if ("Y".equals(dnbRecord.getOrgIdMatch())) {
@@ -602,7 +607,7 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-        
+
         if (collCdChngd) {
           UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
           if (collCdChange != null) {
@@ -620,7 +625,7 @@ public class FranceUtil extends AutomationUtil {
 
           }
         }
-        
+
         if (topLstChngd) {
           UpdatedDataModel commFinanceChange = changes.getDataChange("Top List Speciale");
           if (commFinanceChange != null) {
@@ -636,7 +641,7 @@ public class FranceUtil extends AutomationUtil {
 
           }
         }
-        
+
         if (isuCdChngd || ctcChngd || sboChngd || iboChngd) {
           UpdatedDataModel isuCdChange = changes.getDataChange("ISU Code");
           UpdatedDataModel clientTierChange = changes.getDataChange("Client Tier");
@@ -658,13 +663,13 @@ public class FranceUtil extends AutomationUtil {
         }
 
       }
-      else if(!vatChngd && !collCdChngd &&  !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd){
+      else if (!vatChngd && !collCdChngd && !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd) {
         isNegativeCheckNeedeed = true;
         validation.setSuccess(false);
         validation.setMessage("Not validated");
         detail.append("Updates to fields need verification.");
         engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updated elements cannot be checked automatically.");
-        LOG.debug("Updates to fields need verification."); 
+        LOG.debug("Updates to fields need verification.");
       }
     }
 
@@ -687,21 +692,36 @@ public class FranceUtil extends AutomationUtil {
     Addr addressH = requestData.getAddress("ZD02");
     Addr billing = requestData.getAddress("ZP01");
     StringBuilder detail = new StringBuilder();
-   
+
     LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
       boolean billingChngd = changes.isAddressChanged("ZP01");
       boolean addrHchngd = changes.isAddressChanged("ZD02");
+
       if(!billingChngd && !addrHchngd){
-        isNegativeCheckNeedeed = true;
-        detail.append("Updates to  addresses need verification.Updated elements cannot be checked automatically.");
-      }
+        for (Addr addr : requestData.getAddresses()) {
+          if ("Y".equals(addr.getImportInd())) {
+            if ((changes.isAddressFieldChanged(addr.getId().getAddrType(), "Contact Person") || changes.isAddressFieldChanged(addr.getId().getAddrType(), "Phone #"))&& isOnlyFieldUpdated(changes)
+                && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
+              validation.setSuccess(true);
+              LOG.debug("Contact Person/Phone# is found to be updated.Updates verified.");
+              detail.append("Updates to relevant addresses found but have been marked as Verified.");
+              validation.setMessage("Validated");
+              isNegativeCheckNeedeed = false;
+              break;
+            } else if (!isOnlyFieldUpdated(changes)) {
+              isNegativeCheckNeedeed = true;
+            }
+          }
+        }
+       }
       else{
+
         if (billing != null && billingChngd) {
           LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
           // Check if address closely matches DnB
-          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing);
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, billing, false);
           if (matches != null) {
             doesBillingMatchDnb = ifaddressCloselyMatchesDnb(matches, billing, admin, data.getCmrIssuingCntry());
           }
@@ -711,13 +731,13 @@ public class FranceUtil extends AutomationUtil {
             LOG.debug("Updates to Billing address need verification as it does not match D&B");
           }
         }
-        
+
         if (addressH != null && addrHchngd) {
           if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
             isNegativeCheckNeedeed = true;
           }
         }
-      }   
+      }
     }
 
     if (isNegativeCheckNeedeed) {
@@ -732,5 +752,23 @@ public class FranceUtil extends AutomationUtil {
     output.setDetails(detail.toString());
     return true;
   }
+  
+  private boolean isOnlyFieldUpdated(RequestChangeContainer changes) {
+    boolean isOnlyFieldUpdated = true;
+    List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
+    String[] addressFields = { "Customer Name", "Customer Name Continuation","Customer Name/ Additional Address Information", "Country (Landed)", "Street",
+        "Street Continuation","Postal Code", "City","PostBox"};
+    List<String> relevantFieldNames = Arrays.asList(addressFields);
+    for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
+      String fieldId = updatedAddrModel.getDataField();
+      if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
+        isOnlyFieldUpdated = false;
+        break;
+      }
+    }
+
+    return isOnlyFieldUpdated;
+  }
+
 
 }
