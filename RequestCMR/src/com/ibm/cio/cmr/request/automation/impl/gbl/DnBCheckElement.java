@@ -88,7 +88,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             || (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && !admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES))) {
           MatchingResponse<DnBMatchingResponse> dnbMatchingResult = new MatchingResponse<DnBMatchingResponse>();
           try {
-            dnbMatchingResult = DnBUtil.getMatches(handler, requestData, engineData, "ZS01");
+            dnbMatchingResult = DnBUtil.getMatches(requestData, "ZS01");
           } catch (Exception e) {
             LOG.debug("Error on DNB Matching" + e.getMessage());
           }

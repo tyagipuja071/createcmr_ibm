@@ -32,12 +32,10 @@ import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
-import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
-import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
@@ -70,7 +68,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(handler, requestData, engineData, "ZS01");
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
@@ -290,7 +288,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     }
 
     LOG.debug("Connecting to D&B details service..");
-    DnBCompany dnbData = getDnBDetails(dnbRecord.getDunsNo());
+    DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
     if (dnbData != null) {
 
       if (!StringUtils.isBlank(dnbData.getPrimaryCounty())) {
@@ -377,22 +375,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         output.addMatch(getProcessCode(), addrType + "::LAND_CNTRY", dnbRecord.getDnbCountry(), "Derived", "Derived", "D&B", itemNo);
       }
     }
-  }
-
-  /**
-   * Connects to the details service and gets the details of the DUNS NO from
-   * D&B
-   *
-   * @param dunsNo
-   * @return
-   * @throws Exception
-   */
-  private DnBCompany getDnBDetails(String dunsNo) throws Exception {
-    DnbData data = CompanyFinder.getDnBDetails(dunsNo);
-    if (data != null && data.getResults() != null && !data.getResults().isEmpty()) {
-      return data.getResults().get(0);
-    }
-    return null;
   }
 
   @Override
