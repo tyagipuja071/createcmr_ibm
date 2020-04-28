@@ -259,9 +259,9 @@ function setISUDefaultValueOnSubTypeChange() {
       setDefaultValueForISU();
     });
   }
-  if (_scenarioSubTypeHandler && _scenarioSubTypeHandler[0]) {
-	  _scenarioSubTypeHandler[0].onChange();
-  }
+//  if (_scenarioSubTypeHandler && _scenarioSubTypeHandler[0]) {
+//	  _scenarioSubTypeHandler[0].onChange();
+//  }
 }
 
 function autoSetAbbrevNameUKIInterFSL(custType) {
