@@ -160,7 +160,7 @@ window.addEventListener("message", function(e) {
               OK : 'Reactivate CMR',
               CANCEL : 'Create By Model'
             });
-          }else {
+          } else {
             // Additional Country checks for deactivated records & update
             // requests
             if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GERMANY) {
@@ -383,7 +383,7 @@ function findAndImportCMRs() {
       cmr.showAlert('This CMR is invalid. There were no active primary SOLD-TO found.');
       return;
     }
-  } else if (FormManager.getActualValue('reqType')=='U' && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GERMANY) {
+  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GERMANY) {
     var enterCMRNo = FormManager.getActualValue('enterCMRNo');
     var qParams = {
       ZZKV_CUSNO : enterCMRNo,
