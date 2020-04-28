@@ -10,7 +10,9 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -243,15 +245,63 @@ public class PortugalTransformer extends SpainTransformer {
   @Override
   public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
       CMRRequestContainer cmrObjects) {
+    Admin admin = cmrObjects.getAdmin();
+    Data data = cmrObjects.getData();
+    String landedCntry = "";
 
-    super.transformLegacyCustomerData(entityManager, dummyHandler, legacyCust, cmrObjects);
-  }
+    formatDataLines(dummyHandler);
 
-  @Override
-  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
-      CMRRequestContainer cmrObjects, Addr currAddr) {
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
+      legacyCust.setAccAdminBo("Y60382");
+      legacyCust.setCeDivision("2");
 
-    super.transformLegacyAddressData(entityManager, dummyHandler, legacyCust, legacyAddr, cmrObjects, currAddr);
+      // extract the phone from billing as main phone
+      for (Addr addr : cmrObjects.getAddresses()) {
+        if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+          legacyCust.setTelNoOrVat(addr.getCustPhone());
+          landedCntry = addr.getLandCntry();
+          break;
+        }
+      }
+
+      // mrc
+      String custSubType = data.getCustSubGrp();
+      if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custSubType) || "XBP".equals(custSubType)) {
+        legacyCust.setMrcCd("5");
+        legacyCust.setAuthRemarketerInd("Y");
+      }
+      
+      //Type Of Customer
+      if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custSubType)) {
+        legacyCust.setCustType("G");
+      } else if (MQMsgConstants.CUSTSUBGRP_INTSO.equals(custSubType) || "CRISO".equals(custSubType)) {
+        legacyCust.setCustType("91");
+      }
+
+      // common data for C/U
+      // formatted data
+      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
+        legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
+      }
+
+      if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+        if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+          legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
+        } else {
+          legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+        }
+      } else {
+        if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+          legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+        }
+      }
+      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
+        legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
+      }
+      legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
+      legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+    }
   }
 
   @Override
