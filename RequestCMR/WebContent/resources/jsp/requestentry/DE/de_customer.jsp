@@ -28,7 +28,7 @@
     <cmr:column span="2" containerForField="OrderBlock">
       <p>
         <label for="ordBlk"> <cmr:fieldLabel fieldId="OrderBlock" />: 
-          <span id="cmrDelta"><cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" code="L"/></span>
+          <span id="cmrDelta"><cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" /></span>
         </label>
         <cmr:field fieldId="OrderBlock" id="ordBlk" path="ordBlk" tabId="MAIN_CUST_TAB" />
       </p>
