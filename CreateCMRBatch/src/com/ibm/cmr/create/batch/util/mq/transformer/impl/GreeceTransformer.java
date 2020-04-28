@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +72,8 @@ public class GreeceTransformer extends EMEATransformer {
   private static final String ADDRESS_USE_COUNTRY_G = "G";
   private static final String ADDRESS_USE_COUNTRY_H = "H";
 
+  private List<CmrtAddr> addressToBeAdded = new ArrayList<>(); 
+  
   public GreeceTransformer() {
     super(SystemLocation.GREECE);
 
@@ -503,32 +506,88 @@ public class GreeceTransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler,
       CmrtCust legacyCust, CmrtAddr legacyAddr, CMRRequestContainer cmrObjects, Addr currAddr) {
+    formatAddressLines(dummyHandler);
+    boolean update = "U".equals(dummyHandler.adminData.getReqType());    
+
     legacyAddr.setAddrLineT("");
     legacyAddr.setAddrLineU("");
+    
+    if (update) {
+      legacyAddr.setForCreate(false);
+
+      if (!isAddressPresent(legacyAddr.getId().getAddrNo())) {
+        try {
+          LegacyDirectUtil.capsAndFillNulls(legacyAddr, true);
+          // no need to update sequence 
+          legacyAddr.getId().setAddrNo(currAddr.getId().getAddrSeq());
+          addressToBeAdded.add(legacyAddr);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
   }
   
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
     long reqId = cmrObjects.getAdmin().getId().getReqId();
-    List<Addr> addrList = cmrObjects.getAddresses();
-    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
-    
-    int seqStartForRequiredAddr = 2;
-    for (int i = 0; i < addrList.size(); i++) {
-      Addr addr = addrList.get(i);
-      String addrSeq = addr.getId().getAddrSeq();
-      String addrType = addr.getId().getAddrType();
+    boolean update = "U".equals(cmrObjects.getAdmin().getReqType());
 
-      if (addrSeq.equals("00001")) {
-        if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-          // copy mailing from billing
-          copyMailingFromBilling(legacyObjects, legacyAddrList.get(i));
-        } 
-        updateRequiredAddresses(entityManager, reqId, addrList.get(i).getId().getAddrType(), legacyAddrList.get(i).getId().getAddrNo(),
-            changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
+    List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+    List<Addr> addrList = cmrObjects.getAddresses();
+    if (!update) {
+      int seqStartForRequiredAddr = 2;
+      for (int i = 0; i < addrList.size(); i++) {
+        Addr addr = addrList.get(i);
+        String addrSeq = addr.getId().getAddrSeq();
+        String addrType = addr.getId().getAddrType();
+        if (addrSeq.equals("00001")) {
+          if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+            // copy mailing from billing
+            copyMailingFromBilling(legacyObjects, legacyAddrList.get(i));
+          }
+          updateRequiredAddresses(entityManager, reqId, addrList.get(i).getId().getAddrType(), legacyAddrList.get(i).getId().getAddrNo(),
+              changeSeqNo(seqStartForRequiredAddr++), legacyObjects, i);
+        }
+        modifyAddrUseFields(getAddressUse(addr), legacyAddrList.get(i));
       }
-      modifyAddrUseFields(getAddressUse(addr), legacyAddrList.get(i));
+    } else {
+      // revert isForCreate back -- used for partialCompleteRecord later
+      LOG.info("GREECE -- UPDATE! - addUpdateAddresses");
+        addUpdateAddresses(legacyObjects, addrList);
     }
+  }
+
+  private void addUpdateAddresses(LegacyDirectObjectContainer legacyObjects, List<Addr> addrList) {
+    for(CmrtAddr cmrAddr: addressToBeAdded) {
+      modifyAddedAddresses(cmrAddr, cmrAddr.getId().getAddrNo(), addrList);
+      cmrAddr.setForCreate(true);
+      legacyObjects.addAddress(cmrAddr);  
+    }
+  }
+  
+  private void modifyAddedAddresses(CmrtAddr cmrAddr, String addrSeq, List<Addr> addrList) {
+    for(Addr addr: addrList) {
+      if("N".equals(addr.getImportInd())) {
+        if(addrSeq.equals(addr.getId().getAddrSeq())) {
+          LOG.info("GREECE modified address use for seq: " + addrSeq);
+          modifyAddrUseFields(getAddressUse(addr), cmrAddr);
+        }
+      }
+    }
+  }
+  
+  private boolean isAddressPresent(String seqNo) {
+    if(addressToBeAdded.size() == 0) {
+      return false;
+    }
+    
+    for(CmrtAddr cmrAddr : addressToBeAdded) {
+      if(seqNo.equalsIgnoreCase(cmrAddr.getId().getAddrNo())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void updateRequiredAddresses(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq,
