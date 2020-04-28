@@ -228,6 +228,7 @@ public class USHandler extends GEOHandler {
         data.setMiscBillCd(data.getMiscBillCd().trim().substring(0, 3));
       }
       data.setTaxCd3((String) record.get("TAX_CD3"));
+      data.setSpecialTaxCd((String) record.get("cmrTaxCertStatus"));
       data.setBpName((String) record.get("BP_NAME"));
       data.setIccTaxClass((String) record.get("ICC_TAX_CLASS"));
       data.setIccTaxExemptStatus((String) record.get("ICC_TAX_EXEMPT_STATUS"));

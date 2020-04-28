@@ -126,6 +126,13 @@
           <cmr:field path="taxCd3" id="taxCd3" fieldId="LocalTax3" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+      
+       <cmr:column span="2" containerForField="SpecialTaxCd">
+        <p>
+          <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
+          <cmr:field path="specialTaxCd" id="specialTaxCd" fieldId="SpecialTaxCd" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
     </cmr:view>
 
   </cmr:row>
