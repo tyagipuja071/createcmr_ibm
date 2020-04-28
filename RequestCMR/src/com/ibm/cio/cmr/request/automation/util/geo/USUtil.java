@@ -243,12 +243,11 @@ public class USUtil extends AutomationUtil {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
         }
       } else {
-        List<String> noCheckScenarios = Arrays.asList("END USER");
-        if (!noCheckScenarios.contains(scenarioSubType)) {
+        if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
+          details.append("Branch Office codes computed by another element/external process.");
+        } else {
           details.append("Automatic computation of Branch Office codes cannot be done for this scenario.");
           engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
-        } else {
-          details.append("Branch Office codes computed by another element/external process.");
         }
       }
     }

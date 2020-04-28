@@ -708,6 +708,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
     if (!hasFieldError) {
       details.append("Branch Office codes computed successfully.");
+      engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
     }
 
   }

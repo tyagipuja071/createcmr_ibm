@@ -31,6 +31,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String COMPANY_INFO_SOURCE = "compInfoSrc";
   public static final String SCENARIO_VERIFIED_INDC = "scenarioVerifiedIndc";
   public static final String MATCH_DEPARTMENT = "matchDepartment";
+
+  public static final String BO_COMPUTATION = "_usBOComputation";
+
   /**
    * 
    */
