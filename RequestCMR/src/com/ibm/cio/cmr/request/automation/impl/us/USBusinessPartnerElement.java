@@ -82,6 +82,22 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
   public static final String BP_MANAGING_IR = "MIR";
   public static final String BP_INDIRECT_REMARKETER = "IRMR";
+
+  public static final String TYPE_STATE_AND_LOCAL = "7";
+  public static final String TYPE_FEDERAL = "9";
+  public static final String TYPE_COMMERCIAL = "1";
+  public static final String TYPE_BUSINESS_PARTNER = "5";
+
+  public static final String SUB_TYPE_STATE_AND_LOCAL_STATE = "STATE";
+  public static final String SUB_TYPE_STATE_AND_LOCAL_DISTRICT = "SPEC DIST";
+  public static final String SUB_TYPE_STATE_AND_LOCAL_COUNTY = "COUNTY";
+  public static final String SUB_TYPE_STATE_AND_LOCAL_CITY = "CITY";
+  public static final String SUB_TYPE_FEDERAL_POA = "POA";
+  public static final String SUB_TYPE_FEDERAL_REGULAR_GOVT = "FEDERAL";
+  public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
+  public static final String TYPE_BUSINESS_PARTNER_END_USER = "END USER";
+
+  public static final String AFFILIATE_FEDERAL = "9200000";
   private boolean waiting;
 
   public USBusinessPartnerElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
@@ -109,7 +125,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     if ("BYMODEL".equals(data.getCustGrp())) {
       // TODO insert logic here to determine scenario by model
     }
-    if (!"5".equals(custGrp) || !"END USER".equals(custSubGrp)) {
+    if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
       output.setResults("Skipped");
       output.setDetails("Non BP End User scenario not supported.");
       return output;
@@ -411,10 +427,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
 
     return model.getReqId();
-    // if (model.getReqId() <= 0) {
-    // LOG.debug("Request ID was not generated");
-    // return -1;
-    // }
 
   }
 
@@ -450,6 +462,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
     childAddr.setId(childAddrPk);
     childAddr.setDivn(null);
+    childAddr.setDept(null);
     LOG.debug("Creating Address for Child Request " + childReqId);
     entityManager.persist(childAddr);
 
@@ -470,13 +483,10 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     LOG.debug("Updating Child Admin data..");
     entityManager.merge(childAdmin);
 
-    // TODO commercial for now, fix soon
+    // set the correct scenario
+    setChildRequestScenario(data, childReqData.getData(), childAdmin, details);
     Data childData = childReqData.getData();
-    details.append(" - Type: Commercial\n");
-    details.append(" - Sub-type: Regular Commercial CMR\n");
-    childData.setCustGrp("1");
-    childData.setCustSubGrp("REGULAR");
-    childAdmin.setCustType(USUtil.COMMERCIAL);
+
     LOG.debug("Updating Child data..");
     loadTemplateDefaults(childData, childData.getCustSubGrp());
     if (StringUtils.isBlank(childData.getIsicCd())) {
@@ -485,9 +495,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
     Scorecard childScoreCard = childReqData.getScorecard();
     childScoreCard.setFindCmrResult(CmrConstants.RESULT_NO_RESULT);
-    childScoreCard.setFindDnbTs(SystemUtil.getCurrentTimestamp());
-    childScoreCard.setFindDnbUsrId("CreateCMR");
-    childScoreCard.setFindDnbUsrNm("CreateCMR");
+    childScoreCard.setFindCmrTs(SystemUtil.getCurrentTimestamp());
+    childScoreCard.setFindCmrUsrId("CreateCMR");
+    childScoreCard.setFindCmrUsrNm("CreateCMR");
 
     if (dnbMatch != null) {
       DnbData dnbData = CompanyFinder.getDnBDetails(dnbMatch.getDunsNo());
@@ -501,10 +511,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
       childData.setDunsNo(dnbMatch.getDunsNo());
       childScoreCard.setFindDnbResult(CmrConstants.RESULT_ACCEPTED);
-      childScoreCard.setFindDnbTs(SystemUtil.getCurrentTimestamp());
-      childScoreCard.setFindDnbUsrId("CreateCMR");
-      childScoreCard.setFindDnbUsrNm("CreateCMR");
+    } else {
+      childScoreCard.setFindDnbResult(CmrConstants.RESULT_NO_RESULT);
     }
+    childScoreCard.setFindDnbTs(SystemUtil.getCurrentTimestamp());
+    childScoreCard.setFindDnbUsrId("CreateCMR");
+    childScoreCard.setFindDnbUsrNm("CreateCMR");
+
     entityManager.merge(childData);
     entityManager.merge(childScoreCard);
 
@@ -521,6 +534,78 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     entityManager.merge(admin);
 
     return details.toString();
+  }
+
+  /**
+   * Sets the correct scenario on the child record based on request information
+   * 
+   * @param data
+   * @param childData
+   * @param childAdmin
+   */
+  private void setChildRequestScenario(Data data, Data childData, Admin childAdmin, StringBuilder details) {
+    String isic = data.getIsicCd();
+    String affiliate = data.getAffiliate();
+
+    String typeDesc = null;
+    String subTypeDesc = null;
+    String type = null;
+    String subType = null;
+    String custType = null;
+
+    int isicNumeric = 0;
+    if (StringUtils.isNumeric(isic.substring(0, 2))) {
+      isicNumeric = Integer.parseInt(isic.substring(0, 2));
+    }
+
+    if (isicNumeric >= 94 && isicNumeric <= 97) {
+      typeDesc = "State and Local";
+      type = TYPE_STATE_AND_LOCAL;
+      custType = USUtil.STATE_LOCAL;
+      switch (isicNumeric) {
+      case 94:
+        subTypeDesc = "State and Local - State";
+        subType = SUB_TYPE_STATE_AND_LOCAL_STATE;
+        break;
+      case 95:
+        subTypeDesc = "State and Local - County";
+        subType = SUB_TYPE_STATE_AND_LOCAL_COUNTY;
+        break;
+      case 96:
+        subTypeDesc = "State and Local - City";
+        subType = SUB_TYPE_STATE_AND_LOCAL_CITY;
+        break;
+      case 97:
+        subTypeDesc = "State and Local - District";
+        subType = SUB_TYPE_STATE_AND_LOCAL_DISTRICT;
+        break;
+      }
+    } else if (isicNumeric >= 90 && isicNumeric <= 92) {
+      typeDesc = "Federal";
+      type = TYPE_FEDERAL;
+      if (AFFILIATE_FEDERAL.equals(affiliate)) {
+        subTypeDesc = "Federal Gov't Regular";
+        subType = SUB_TYPE_FEDERAL_REGULAR_GOVT;
+        custType = USUtil.FEDERAL;
+      } else {
+        subTypeDesc = "Power of Attorney";
+        subType = SUB_TYPE_FEDERAL_POA;
+        custType = USUtil.POWER_OF_ATTORNEY;
+      }
+    } else {
+      typeDesc = "Commercial";
+      type = TYPE_COMMERCIAL;
+      subTypeDesc = "Regular Commercial CMR";
+      subType = SUB_TYPE_COMMERCIAL_REGULAR;
+      custType = USUtil.COMMERCIAL;
+    }
+
+    details.append(" - Type: " + typeDesc + "\n");
+    details.append(" - Sub-type: " + subTypeDesc + "\n");
+    childData.setCustGrp(type);
+    childData.setCustSubGrp(subType);
+    childAdmin.setCustType(custType);
+
   }
 
   /**
@@ -542,7 +627,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       if (field.getValues() != null && !field.getValues().isEmpty()) {
         String firstVal = field.getValues().get(0);
         if (!StringUtils.isBlank(firstVal)) {
-          if (!Arrays.asList("*", "%", "$", "~").contains(firstVal)) {
+          if (!Arrays.asList("*", "%", "$", "~", "@").contains(firstVal)) {
             LOG.trace(" - template: " + field.getFieldName() + " = " + firstVal);
             valueMap.put(field.getFieldName(), firstVal);
           }
