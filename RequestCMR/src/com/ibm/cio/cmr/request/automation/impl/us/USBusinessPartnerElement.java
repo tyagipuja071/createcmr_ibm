@@ -75,6 +75,11 @@ import com.ibm.json.java.JSONObject;
 public class USBusinessPartnerElement extends OverridingElement implements ProcessWaitingElement {
 
   private static final Logger LOG = Logger.getLogger(USBusinessPartnerElement.class);
+  public static final String RESTRICT_TO_END_USER = "BPQS";
+  public static final String RESTRICT_TO_MAINTENANCE = "IRCSO";
+
+  public static final String BP_MANAGING_IR = "MIR";
+  public static final String BP_INDIRECT_REMARKETER = "IRMR";
   private boolean waiting;
 
   public USBusinessPartnerElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
@@ -222,6 +227,62 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       overrides.addOverride(getProcessCode(), "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
       overrides.addOverride(getProcessCode(), "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmDirectCmr.getCmrSubIndustry());
     }
+
+    // do final checks on request data
+    overrides.addOverride(getProcessCode(), "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
+    overrides.addOverride(getProcessCode(), "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+    overrides.addOverride(getProcessCode(), "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
+    overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
+    overrides.addOverride(getProcessCode(), "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
+
+    boolean hasFieldError = false;
+    if (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
+      String msg = "Restrict To value is incorrect for BP End User request.";
+      engineData.addNegativeCheckStatus("_usBpData", msg);
+      details.append(msg + "\n");
+      hasFieldError = true;
+    } else {
+      if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())) {
+        overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
+      } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
+        if (!"7NZ".equals(data.getMtkgArDept()) && !"2NS".equals(data.getMtkgArDept())) {
+          String msg = "Marketing A/R Department for End User - Maintenance request cannot be validated.";
+          engineData.addNegativeCheckStatus("_usBpData", msg);
+          details.append(msg + "\n");
+          hasFieldError = true;
+        }
+      }
+    }
+
+    USCeIdMapping mapping = null;
+    if (!StringUtils.isBlank(data.getEnterprise())) {
+      mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+    }
+    if (mapping == null && !StringUtils.isBlank(data.getPpsceid())) {
+      mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+    }
+    details.append("\n");
+    if (mapping == null) {
+      String msg = "Cannot determine distributor status based on request data.";
+      engineData.addNegativeCheckStatus("_usBpData", msg);
+      details.append(msg + "\n");
+      hasFieldError = true;
+    } else {
+      boolean distributor = mapping.isDistributor();
+      if (distributor) {
+        overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
+        overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
+      } else {
+        overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "DV4");
+        overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
+      }
+    }
+    if (!hasFieldError) {
+      details.append("\n");
+      details.append("Branch Office codes computed successfully.");
+    }
+
     output.setProcessOutput(overrides);
     output.setDetails(details.toString());
     output.setResults("Success");

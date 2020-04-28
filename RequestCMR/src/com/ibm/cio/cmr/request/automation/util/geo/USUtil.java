@@ -13,6 +13,7 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.ui.ModelMap;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -37,6 +38,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
@@ -429,7 +431,8 @@ public class USUtil extends AutomationUtil {
     } else {
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       boolean hasNegativeCheck = false;
-      String custTypeCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
+      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+      String custTypeCd = detailsCont.getCustTypCd();
       List<String> allowedCodesAddition = Arrays.asList("F", "G", "C", "D", "V", "W", "X");
       List<String> allowedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
       Map<String, String> failedChecks = new HashMap<String, String>();
@@ -724,7 +727,8 @@ public class USUtil extends AutomationUtil {
       validation.setSuccess(true);
     } else {
       StringBuilder details = new StringBuilder();
-      String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
+      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+      String custTypCd = detailsCont.getCustTypCd();
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
