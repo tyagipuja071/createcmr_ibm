@@ -160,8 +160,15 @@ window.addEventListener("message", function(e) {
               OK : 'Reactivate CMR',
               CANCEL : 'Create By Model'
             });
-          } else {
-            importCMRConfirm(result);
+          }else {
+            // Additional Country checks for deactivated records & update
+            // requests
+            if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GERMANY) {
+              cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is an Inactive record.');
+              return;
+            } else {
+              importCMRConfirm(result);
+            }
           }
           if (CNTRY_LIST_FOR_INVALID_CUSTOMERS.includes(cntry)) {
             setRequestReason();
@@ -374,6 +381,18 @@ function findAndImportCMRs() {
     var result = cmr.query('GET.SWISS.PRIMARY_SOLD_TO_ORD_BLK', qParams);
     if (Object.keys(result).length === 0) {
       cmr.showAlert('This CMR is invalid. There were no active primary SOLD-TO found.');
+      return;
+    }
+  } else if (FormManager.getActualValue('reqType')=='U' && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GERMANY) {
+    var enterCMRNo = FormManager.getActualValue('enterCMRNo');
+    var qParams = {
+      ZZKV_CUSNO : enterCMRNo,
+      MANDT : cmr.MANDT,
+    };
+
+    var result = cmr.query('GET.GERMANY.CHECK_SOLD_TO_ACTIVE', qParams);
+    if (Object.keys(result).length === 0) {
+      cmr.showAlert('This CMR could not be imported. No active SOLD-TO records found.');
       return;
     }
   }
