@@ -65,6 +65,8 @@ import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
 import com.ibm.json.java.JSONObject;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 /**
  * {@link AutomationElement} handling the US - Business Partner End User
  * Scenario
@@ -119,8 +121,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     Addr addr = requestData.getAddress("ZS01");
 
     long childReqId = admin.getChildReqId();
+    String childCmrNo = null;
     if (childReqId > 0) {
-      // 1 - check child reqId processing first
+      // check child reqId processing first
       LOG.debug("Getting child request data for Request " + childReqId);
       RequestData childRequest = new RequestData(entityManager, childReqId);
       if (childRequest == null || childRequest.getAdmin() == null) {
@@ -157,19 +160,25 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       } else {
         LOG.debug("Child request " + childReqId + " completed.");
         details.append("Child Request " + childReqId + " completed. Proceeding with automated checks.\n");
+        childCmrNo = childRequest.getData().getCmrNo();
       }
     }
-    // 2 - match against D&B
-    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details);
+
+    // check IBM Direct CMR
+    FindCMRRecordModel ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
+
+    // match against D&B
+    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, ibmDirectCmr != null);
 
     // check CEID
     boolean t1 = isTier1BP(data);
     if (!t1) {
+      details.append("BP is NOT a Tier 1.\n");
       engineData.addNegativeCheckStatus("_usBpT1", "BP is not a T1 or status cannot be determined via PPS profile.");
+    } else {
+      details.append("BP is a Tier 1.\n");
     }
 
-    // 4 - check IBM Direct CMR
-    FindCMRRecordModel ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData);
     if (ibmDirectCmr == null) {
 
       LOG.debug("No IBM Direct CMR for the end user.");
@@ -207,81 +216,10 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         }
 
       }
-    } else {
-      // copy IBM Direct CMR details
-      details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " (" + ibmDirectCmr.getCmrSapNumber() + "): \n");
-      details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + "\n");
-      details.append(" - ISU: " + ibmDirectCmr.getCmrIsu() + "\n");
-      details.append(" - Client Tier: " + ibmDirectCmr.getCmrTier() + "\n");
-      details
-          .append(" - NAC/INAC: " + ("I".equals(ibmDirectCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmDirectCmr.getCmrInacType()) ? "NAC" : "-")));
-      details.append((StringUtils.isBlank(ibmDirectCmr.getCmrInac()) ? " - " + ibmDirectCmr.getCmrInac() : "") + "\n");
-      details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
-      details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
-
-      overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), ibmDirectCmr.getCmrAffiliate());
-      overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), ibmDirectCmr.getCmrIsu());
-      overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), ibmDirectCmr.getCmrTier());
-      overrides.addOverride(getProcessCode(), "DATA", "INAC_TYPE", data.getInacType(), ibmDirectCmr.getCmrInacType());
-      overrides.addOverride(getProcessCode(), "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
-      overrides.addOverride(getProcessCode(), "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
-      overrides.addOverride(getProcessCode(), "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmDirectCmr.getCmrSubIndustry());
     }
 
-    // do final checks on request data
-    overrides.addOverride(getProcessCode(), "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
-    overrides.addOverride(getProcessCode(), "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
-    overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
-    overrides.addOverride(getProcessCode(), "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
-    overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
-    overrides.addOverride(getProcessCode(), "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
-
-    boolean hasFieldError = false;
-    if (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
-      String msg = "Restrict To value is incorrect for BP End User request.";
-      engineData.addNegativeCheckStatus("_usBpData", msg);
-      details.append(msg + "\n");
-      hasFieldError = true;
-    } else {
-      if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())) {
-        overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
-      } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
-        if (!"7NZ".equals(data.getMtkgArDept()) && !"2NS".equals(data.getMtkgArDept())) {
-          String msg = "Marketing A/R Department for End User - Maintenance request cannot be validated.";
-          engineData.addNegativeCheckStatus("_usBpData", msg);
-          details.append(msg + "\n");
-          hasFieldError = true;
-        }
-      }
-    }
-
-    USCeIdMapping mapping = null;
-    if (!StringUtils.isBlank(data.getEnterprise())) {
-      mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
-    }
-    if (mapping == null && !StringUtils.isBlank(data.getPpsceid())) {
-      mapping = USCeIdMapping.getByCeid(data.getPpsceid());
-    }
-    details.append("\n");
-    if (mapping == null) {
-      String msg = "Cannot determine distributor status based on request data.";
-      engineData.addNegativeCheckStatus("_usBpData", msg);
-      details.append(msg + "\n");
-      hasFieldError = true;
-    } else {
-      boolean distributor = mapping.isDistributor();
-      if (distributor) {
-        overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
-        overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
-      } else {
-        overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "DV4");
-        overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
-      }
-    }
-    if (!hasFieldError) {
-      details.append("\n");
-      details.append("Branch Office codes computed successfully.");
-    }
+    // copy from IBM Direct if found, and fill the rest of BO codes
+    copyAndFillIBMData(handler, ibmDirectCmr, requestData, engineData, details, overrides);
 
     output.setProcessOutput(overrides);
     output.setDetails(details.toString());
@@ -300,13 +238,18 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    * @throws Exception
    */
   private DnBMatchingResponse matchAgainstDnB(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
-      StringBuilder details) throws Exception {
+      StringBuilder details, boolean hasExistingCmr) throws Exception {
     List<DnBMatchingResponse> dnbMatches = USUtil.getMatchesForBPEndUser(handler, requestData, engineData);
     if (dnbMatches.isEmpty()) {
       LOG.debug("No D&B matches found for the End User " + addr.getDivn());
       String msg = "No high quality D&B matches for the End User " + addr.getDivn();
-      details.append(msg + "\n\n");
-      engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
+      details.append(msg + "\n");
+      if (hasExistingCmr) {
+        details.append("- A current active CMR exists for the company.");
+      } else {
+        engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
+      }
+      details.append("\n");
       return null;
     } else {
       DnBMatchingResponse dnbMatch = dnbMatches.get(0);
@@ -341,47 +284,63 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    * @throws NoSuchMethodException
    */
   private FindCMRRecordModel findIBMDirectCMR(EntityManager entityManager, GEOHandler handler, RequestData requestData, Addr addr,
-      AutomationEngineData engineData) throws Exception {
-    DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
-    request.setIssuingCountry(SystemLocation.UNITED_STATES);
-    request.setLandedCountry(addr.getLandCntry());
-    request.setCustomerName(addr.getDivn());
-    request.setStreetLine1(addr.getAddrTxt());
-    request.setStreetLine2(addr.getAddrTxt2());
-    request.setCity(addr.getCity1());
-    request.setStateProv(addr.getStateProv());
-    request.setPostalCode(addr.getPostCd());
-    request.setAddrType("ZS01");
+      AutomationEngineData engineData, String directCmrNo) throws Exception {
 
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
-    client.setReadTimeout(1000 * 60 * 5);
+    if (!StringUtils.isBlank(directCmrNo)) {
+      LOG.debug("Checking details of CMR No. " + directCmrNo);
+      FindCMRResultModel result = SystemUtil.findCMRs(directCmrNo, SystemLocation.UNITED_STATES, 5);
+      if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
+        Collections.sort(result.getItems());
+        LOG.debug(" - record found via FindCMR");
+        return result.getItems().get(0);
+      }
+    } else {
+      DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+      request.setIssuingCountry(SystemLocation.UNITED_STATES);
+      request.setLandedCountry(addr.getLandCntry());
+      request.setCustomerName(addr.getDivn());
+      request.setStreetLine1(addr.getAddrTxt());
+      request.setStreetLine2(addr.getAddrTxt2());
+      request.setCity(addr.getCity1());
+      request.setStateProv(addr.getStateProv());
+      request.setPostalCode(addr.getPostCd());
+      request.setAddrType("ZS01");
 
-    JSONObject retObj = client.execute(MatchingServiceClient.CMR_SERVICE_ID, request);
-    ObjectMapper mapper = new ObjectMapper();
-    String rawJson = mapper.writeValueAsString(retObj);
-    TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> typeRef = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
-    };
-    MatchingResponse<DuplicateCMRCheckResponse> res = mapper.readValue(rawJson, typeRef);
-    if (res != null && res.getSuccess() && res.getMatched()) {
-      for (DuplicateCMRCheckResponse record : res.getMatches()) {
-        if (StringUtils.isBlank(record.getUsRestrictTo())) {
-          // IBM Direct CMRs have blank restrict to
-          FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 1, null, "addressType=ZS01");
-          if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
-            return result.getItems().get(0);
+      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          MatchingServiceClient.class);
+      client.setReadTimeout(1000 * 60 * 5);
+
+      JSONObject retObj = client.execute(MatchingServiceClient.CMR_SERVICE_ID, request);
+      ObjectMapper mapper = new ObjectMapper();
+      String rawJson = mapper.writeValueAsString(retObj);
+      TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> typeRef = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
+      };
+      MatchingResponse<DuplicateCMRCheckResponse> res = mapper.readValue(rawJson, typeRef);
+      if (res != null && res.getSuccess() && res.getMatched()) {
+        for (DuplicateCMRCheckResponse record : res.getMatches()) {
+          if (StringUtils.isBlank(record.getUsRestrictTo())) {
+            // IBM Direct CMRs have blank restrict to
+            FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 1, null, "addressType=ZS01");
+            if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
+              return result.getItems().get(0);
+            }
           }
         }
       }
     }
-
     // do a secondary check directly from RDC
     LOG.debug("No IBM Direct CMRs found in FindCMR. Checking directly on the database..");
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_IBM_DIRECT");
+
+    if (!StringUtils.isBlank(directCmrNo)) {
+      sql = ExternalizedQuery.getSql("AUTO.US.GET_IBM_DIRECT");
+    }
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setForReadOnly(true);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("NAME", addr.getDivn().toUpperCase() + "%");
+    query.setParameter("CMR_NO", directCmrNo);
+
     List<Object[]> results = query.getResults(1);
     if (results != null && !results.isEmpty()) {
       Object[] cmr = results.get(0);
@@ -500,7 +459,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     Admin childAdmin = childReqData.getAdmin();
     childAdmin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     childAdmin.setSourceSystId("CreateCMR");
-    String[] names = handler.doSplitName(bpAddr.getDivn(), "", 28, 22);
+    String[] names = handler.doSplitName(cleanName(bpAddr.getDivn()), "", 28, 22);
     childAdmin.setMainCustNm1(names[0]);
     childAdmin.setMainCustNm2(names[1]);
     childAdmin.setLockBy(null);
@@ -517,7 +476,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     details.append(" - Sub-type: Regular Commercial CMR\n");
     childData.setCustGrp("1");
     childData.setCustSubGrp("REGULAR");
-    childData.setCustAcctType(USUtil.COMMERCIAL);
+    childAdmin.setCustType(USUtil.COMMERCIAL);
     LOG.debug("Updating Child data..");
     loadTemplateDefaults(childData, childData.getCustSubGrp());
     if (StringUtils.isBlank(childData.getIsicCd())) {
@@ -634,7 +593,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
           return false;
         }
         for (PPSProfile profile : response.getProfiles()) {
-          if ("T1".equals(profile.getTierCode())) {
+          if ("1".equals(profile.getTierCode())) {
             LOG.debug("BP " + response.getCompanyName() + " is a T1.");
             return true;
           }
@@ -645,6 +604,129 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
     }
     return false;
+  }
+
+  /**
+   * Copies the IBM codes from the IBM Direct CMR and fills the BO codes with
+   * the given rules
+   * 
+   * @param handler
+   * @param requestData
+   * @param addr
+   * @param engineData
+   * @param details
+   */
+  private void copyAndFillIBMData(GEOHandler handler, FindCMRRecordModel ibmDirectCmr, RequestData requestData, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides) {
+    Data data = requestData.getData();
+    if (ibmDirectCmr != null) {
+      details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " (" + ibmDirectCmr.getCmrSapNumber() + "): \n");
+
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
+        details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + "\n");
+        overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), ibmDirectCmr.getCmrAffiliate());
+      }
+
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrIsu())) {
+        details.append(" - ISU: " + ibmDirectCmr.getCmrIsu() + "\n");
+        overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), ibmDirectCmr.getCmrIsu());
+      }
+
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrTier())) {
+        details.append(" - Client Tier: " + ibmDirectCmr.getCmrTier() + "\n");
+        overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), ibmDirectCmr.getCmrTier());
+      }
+
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrInac())) {
+        details.append(
+            " - NAC/INAC: " + ("I".equals(ibmDirectCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmDirectCmr.getCmrInacType()) ? "NAC" : "-")));
+        overrides.addOverride(getProcessCode(), "DATA", "INAC_TYPE", data.getInacType(), ibmDirectCmr.getCmrInacType());
+        overrides.addOverride(getProcessCode(), "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
+      }
+
+      details.append((StringUtils.isBlank(ibmDirectCmr.getCmrInac()) ? " - " + ibmDirectCmr.getCmrInac() : "") + "\n");
+      details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
+      details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
+
+      overrides.addOverride(getProcessCode(), "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
+      overrides.addOverride(getProcessCode(), "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmDirectCmr.getCmrSubIndustry());
+    }
+
+    // do final checks on request data
+    overrides.addOverride(getProcessCode(), "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
+    overrides.addOverride(getProcessCode(), "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+    overrides.addOverride(getProcessCode(), "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
+    overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
+    overrides.addOverride(getProcessCode(), "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
+
+    boolean hasFieldError = false;
+    if (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
+      String msg = "Restrict To value is incorrect for BP End User request.";
+      engineData.addNegativeCheckStatus("_usBpData", msg);
+      details.append(msg + "\n");
+      hasFieldError = true;
+    } else {
+      if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())) {
+        overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
+      } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
+        if (!"7NZ".equals(data.getMtkgArDept()) && !"2NS".equals(data.getMtkgArDept())) {
+          String msg = "Marketing A/R Department for End User - Maintenance request cannot be validated.";
+          engineData.addNegativeCheckStatus("_usBpData", msg);
+          details.append(msg + "\n");
+          hasFieldError = true;
+        }
+      }
+    }
+
+    USCeIdMapping mapping = null;
+    if (!StringUtils.isBlank(data.getEnterprise())) {
+      mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+    }
+    if (mapping == null && !StringUtils.isBlank(data.getPpsceid())) {
+      mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+    }
+    details.append("\n");
+    if (mapping == null) {
+      String msg = "Cannot determine distributor status based on request data.";
+      engineData.addNegativeCheckStatus("_usBpData", msg);
+      details.append(msg + "\n");
+      hasFieldError = true;
+    } else {
+      if (StringUtils.isBlank(data.getCompany())) {
+        overrides.addOverride(getProcessCode(), "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
+      }
+      boolean distributor = mapping.isDistributor();
+      details.append("BP is a distributor based on records.\n");
+      if (distributor) {
+        overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
+        overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
+      } else {
+        overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "DV4");
+        overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
+      }
+    }
+    if (!hasFieldError) {
+      details.append("Branch Office codes computed successfully.");
+    }
+
+  }
+
+  /**
+   * 
+   * Cleans the given name into US-CMR standards
+   * 
+   * @param name
+   * @return
+   */
+  private String cleanName(String name) {
+    if (name == null) {
+      return "";
+    }
+    name = name.replaceAll("'", "");
+    name = name.replaceAll("[^A-Za-z0-9&\\-]", " ");
+    name = name.replaceAll("  ", " ").toUpperCase();
+    return name;
   }
 
   @Override

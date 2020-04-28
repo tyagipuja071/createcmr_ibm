@@ -27,6 +27,14 @@ public class USCeIdMapping {
 
   private static Map<String, USCeIdMapping> configurations = new HashMap<String, USCeIdMapping>();
 
+  public static void main(String[] args) {
+    String name = "Abby's Pork & Retail Park, Inc";
+    name = name.replaceAll("'", "");
+    name = name.replaceAll("[^A-Za-z0-9&\\-]", " ");
+    name = name.replaceAll("  ", " ").toUpperCase();
+    System.out.println(name);
+  }
+
   public static synchronized void load(boolean force) {
     if (configurations.isEmpty() || force) {
       LOG.debug("Initializing CE ID mappings..");
@@ -57,6 +65,7 @@ public class USCeIdMapping {
           configurations.putAll(mappings);
         }
       } catch (Exception e) {
+        e.printStackTrace();
         LOG.warn("CE ID mappings cannot be initialized.");
       }
     }
