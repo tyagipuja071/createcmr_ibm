@@ -1648,6 +1648,7 @@ public class TurkeyTransformer extends EMEATransformer {
             // copy billing from mailing
             CmrtAddr bilAddr = (CmrtAddr) SerializationUtils.clone(olddataaddr);
             bilAddr.getId().setAddrNo(billingseq);
+            bilAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
             bilAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
             entityManager.persist(bilAddr);
             entityManager.flush();
@@ -1657,6 +1658,7 @@ public class TurkeyTransformer extends EMEATransformer {
           }
         }
       }
+      addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList, cmrObjects.getMassUpdateAddresses());
     }
   }
 
