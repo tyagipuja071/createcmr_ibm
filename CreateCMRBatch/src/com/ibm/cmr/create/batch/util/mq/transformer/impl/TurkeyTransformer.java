@@ -1075,13 +1075,14 @@ public class TurkeyTransformer extends EMEATransformer {
       }
 
       // mrc
-      String custType = data.getCustSubGrp();
-      if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
-        legacyCust.setMrcCd("5");
-        legacyCust.setAuthRemarketerInd("Y");
-      } else {
-        legacyCust.setMrcCd("3");
-      }
+      // String custType = data.getCustSubGrp();
+      // if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) ||
+      // "XBP".equals(custType)) {
+      // legacyCust.setMrcCd("5");
+      // legacyCust.setAuthRemarketerInd("Y");
+      // } else {
+      // legacyCust.setMrcCd("3");
+      // }
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -1205,9 +1206,9 @@ public class TurkeyTransformer extends EMEATransformer {
     }
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
-    if (StringUtils.isEmpty(data.getCurrencyCd())) {
+    if (StringUtils.isEmpty(data.getCrosSubTyp())) {
       legacyCust.setMrcCd("3");
-    } else if (!StringUtils.isEmpty(data.getCurrencyCd()) && "BP".equals(data.getCurrencyCd())) {
+    } else if (!StringUtils.isEmpty(data.getCrosSubTyp()) && "BP".equals(data.getCrosSubTyp())) {
       legacyCust.setMrcCd("5");
     } else {
       legacyCust.setMrcCd("3");
