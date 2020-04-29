@@ -122,14 +122,6 @@
     <pccArDept>G8M</pccArDept>
   </mapping>
   <mapping>
-  	<scenario>BYMODEL</scenario>
-    <csoSite>request</csoSite>
-    <mktgDept>request</mktgDept>
-    <mtkgArDept>request</mtkgArDept>
-    <svcArOffice>request</svcArOffice>
-    <pccArDept>logic</pccArDept>
-  </mapping>
-  <mapping>
   	<scenario>REGULAR</scenario>
     <csoSite>PAH</csoSite>
     <mktgDept>SVB</mktgDept>
