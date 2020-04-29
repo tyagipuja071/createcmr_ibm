@@ -1635,76 +1635,29 @@ public class TurkeyTransformer extends EMEATransformer {
       }
     }
     if ("M".equals(reqType)) {
+      List<MassUpdtAddr> addrList = cmrObjects.getMassUpdateAddresses();
       List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+      String billingseq = getMassSeqForBilling(entityManager, legacyObjects.getCustomerNo(), legacyObjects.getCustomer().getId().getSofCntryCode());
 
-      List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-      for (int i = 0; i < muAddrList.size(); i++) {
-        MassUpdtAddr muAddr = muAddrList.get(i);
-        String addrType = muAddr.getId().getAddrType();
+      for (int i = 0; i < addrList.size(); i++) {
+        MassUpdtAddr addr = addrList.get(i);
+        String addrType = addr.getId().getAddrType();
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-          CmrtAddr maiAddr = null;
-          CmrtAddr bilAddr = null;
-          boolean shareSeq = false;
-          for (CmrtAddr legAdr : legacyAddrList) {
-            if ("Y".equals(legAdr.getIsAddrUseMailing()) && "Y".equals(legAdr.getIsAddrUseBilling())) {
-              maiAddr = legAdr;
-              shareSeq = true;
-            } else if ("Y".equals(legAdr.getIsAddrUseMailing())) {
-              maiAddr = legAdr;
-            } else if ("Y".equals(legAdr.getIsAddrUseBilling())) {
-              bilAddr = legAdr;
-            }
+          CmrtAddr olddataaddr = legacyObjects.findBySeqNo(addr.getAddrSeqNo());
+          if ("Y".equals(olddataaddr.getIsAddrUseBilling()) && "Y".equals(olddataaddr.getIsAddrUseMailing())) {
+            // copy billing from mailing
+            CmrtAddr bilAddr = (CmrtAddr) SerializationUtils.clone(olddataaddr);
+            bilAddr.getId().setAddrNo(billingseq);
+            bilAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+            entityManager.persist(bilAddr);
+            entityManager.flush();
+            legacyAddrList.add(bilAddr);
+            // copyBillingFromMailing(legacyObjects, legacyAddrList.get(i),
+            // billingseq);
           }
-
-          if (shareSeq) {
-            // share Seq should split, remove existing, create mailing
-            legacyAddrList.remove(maiAddr);
-            // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
-
-            // maiAddr.setIsAddrUseBilling("N");
-            maiAddr.getId().setAddrNo("00002");
-
-            // bilAddr.setIsAddrUseMailing("N");
-            // bilAddr.getId().setAddrNo("00001");
-            // entityManager.persist(bilAddr);
-            // entityManager.flush();
-
-            legacyAddrList.add(maiAddr);
-            // legacyAddrList.add(bilAddr);
-          }
-          // else {
-          // if (maiAddr == null && bilAddr != null) {
-          // maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
-          //
-          // maiAddr.setIsAddrUseBilling("N");
-          // maiAddr.getId().setAddrNo("00002");
-          //
-          // entityManager.persist(maiAddr);
-          // entityManager.flush();
-          //
-          // legacyAddrList.add(maiAddr);
-          // } else if (maiAddr != null & bilAddr == null) {
-          // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
-          //
-          // bilAddr.setIsAddrUseMailing("N");
-          // bilAddr.getId().setAddrNo("00001");
-          // entityManager.persist(bilAddr);
-          // entityManager.flush();
-          //
-          // legacyAddrList.add(bilAddr);
-          // }
-          // }
-          // break;
         }
       }
-
-      addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList, cmrObjects.getMassUpdateAddresses());
     }
-    // else {
-    // addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager,
-    // String.valueOf(requestId)));
-    // }
-
   }
 
   private Map<String, String> mapSeqNoToAddrUseLegacy(List<CmrtAddr> legacyAddrList, List<MassUpdtAddr> muAddrlist) {
@@ -1837,8 +1790,8 @@ public class TurkeyTransformer extends EMEATransformer {
   private void copyBillingFromMailing(LegacyDirectObjectContainer legacyObjects, CmrtAddr mailingAddr, String billingseq) {
     CmrtAddr billingAddr = (CmrtAddr) SerializationUtils.clone(mailingAddr);
     billingAddr.getId().setAddrNo(billingseq);
-    billingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
-    billingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+    billingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+    billingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
     billingAddr.setForCreate(true);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(billingAddr);
@@ -1857,6 +1810,34 @@ public class TurkeyTransformer extends EMEATransformer {
       maxseq = sResult[0].toString();
     }
     addrSeq = Integer.parseInt(maxseq);
+    addrSeq++;
+
+    maxseq = Integer.toString(addrSeq);
+    maxseq = StringUtils.leftPad(maxseq, 5, '0');
+
+    LOG.debug("Get Copy Billing Seq = " + maxseq);
+
+    return maxseq;
+  }
+
+  public String getMassSeqForBilling(EntityManager entityManager, String cmrNo, String cntry) {
+    String maxseq = "";
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("TR.MASS.GETSEQFORBILLING");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NUM", cmrNo);
+    query.setParameter("CNTRY", cntry);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      maxseq = sResult[0].toString();
+    }
+    addrSeq = Integer.parseInt(maxseq);
+
+    if (addrSeq < 6) {
+      addrSeq = 6;
+    }
     addrSeq++;
 
     maxseq = Integer.toString(addrSeq);
