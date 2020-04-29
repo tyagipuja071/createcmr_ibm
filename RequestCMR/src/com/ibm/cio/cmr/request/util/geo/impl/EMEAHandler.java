@@ -1697,6 +1697,14 @@ public class EMEAHandler extends BaseSOFHandler {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
       }
+
+      if (SystemLocation.TURKEY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        CmrtCust cust = this.legacyObjects.getCustomer();
+        if (cust != null) {
+          String customerType = cust.getCustType();
+          data.setCrosSubTyp(customerType);
+        }
+      }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
       String collCd = this.currentImportValues.get("CollectionCode");
@@ -3163,6 +3171,7 @@ public class EMEAHandler extends BaseSOFHandler {
     map.put("##CodFlag", "creditCd");
     map.put("##CommercialFinanced", "commercialFinanced");
     map.put("##CustClass", "custClass");
+    map.put("##TypeOfCustomer", "crosSubTyp");
     return map;
   }
 

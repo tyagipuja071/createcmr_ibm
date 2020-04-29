@@ -3975,6 +3975,11 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('custClass', '');
       FormManager.resetValidations('custClass');
     }
+    // Control Type Of Customer
+    if(custType != 'BUSPR' && custType != 'GOVRN' && custType != 'INTER' 
+      && custType != 'XINT' && custType != 'XGOV' && custType != 'XBP'){
+      FormManager.setValue('crosSubTyp', '');
+    }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (custType == 'BUSPR') {
@@ -6904,6 +6909,21 @@ function toggleBPRelMemTypeForTurkey() {
   }
 }
 
+function toggleTypeOfCustomerForTR(){
+  var reqType = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if(reqType == 'U'){
+    FormManager.show('TypeOfCustomer', 'crosSubTyp');
+  }else{
+    FormManager.hide('TypeOfCustomer', 'crosSubTyp');
+  }
+}
+
 function unlockINACForINTERUKI() {
   var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custType = FormManager.getActualValue('custSubGrp');
@@ -7773,6 +7793,20 @@ function addALPHANUMValidatorForEnterpriseNumber() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addALPHANUMValidatorForTypeOfCustomer() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _value = FormManager.getActualValue('crosSubTyp');
+        if (_value && _value.length > 0 && !_value.match("^[0-9a-zA-Z]*$")) {
+          return new ValidationResult(FormManager.getField('crosSubTyp'), false, 'Type Of Customer should be alphanumeric.');
+        }
+        return new ValidationResult(null, true, null);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7856,6 +7890,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(addALPHANUMValidatorForTypeOfCustomer, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addCustNm4ValidatorForTR, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
@@ -7866,6 +7901,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(toggleTypeOfCustomerForTR, [ SysLoc.TURKEY ]);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
