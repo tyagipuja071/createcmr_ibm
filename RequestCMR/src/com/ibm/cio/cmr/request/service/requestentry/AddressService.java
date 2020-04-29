@@ -144,39 +144,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-
-        newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
-
+    	newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
       }
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
-        int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
-        int zi01cout = Integer.valueOf(getTrZI01Count(entityManager, model.getReqId()));
-
-        if (model.getAddrType().equals("ZS01")) {
-          newAddrSeq = "00003";
-        }
-        // update
-        if (model.getAddrType().equals("ZP01")) {
-          newAddrSeq = "00002";
-        }
-        if (model.getAddrType().equals("ZD01")) {
-          if (zd01cout == 0) {
-            newAddrSeq = "00004";
-          } else if (zd01cout == 1 && zi01cout == 0) {
-            newAddrSeq = "00006";
-          } else {
-            newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
-          }
-        }
-        if (model.getAddrType().equals("ZI01")) {
-          if (zi01cout == 0) {
-            newAddrSeq = "00005";
-          } else {
-            newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
-          }
-        }
-
+        newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
       }
 
       // if ("864".equals(model.getCmrIssuingCntry())) {
@@ -2111,11 +2083,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
   }
 
   protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId, String reqType, String addrType) {
-    if ("ZD02".equals(addrType)) {
-      return "598";
-    } else if ("ZP02".equals(addrType)) {
-      return "599";
-    }
+	if("ZD02".equals(addrType)) {
+		return "598";
+	}else if("ZP02".equals(addrType)) {
+		return "599";
+	}
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
@@ -2143,32 +2115,32 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         // if returned value is invalid
       }
       addrSeq++;
-      // Compare with RDC SEQ FOR UPDATE REQUEST
-      if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
-        String cmrNo = null;
-        if (result != null && result.length > 0 && result[2] != null) {
-          cmrNo = (String) result[2];
-        }
-        if (!StringUtils.isEmpty(cmrNo)) {
-          String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_TR");
-          PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
-          queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
-          List<Object[]> resultsRDC = queryRDC.getResults();
-          List<String> seqList = new ArrayList<String>();
-          for (int i = 0; i < resultsRDC.size(); i++) {
-            String item = String.valueOf(resultsRDC.get(i));
-            if (!StringUtils.isEmpty(item)) {
-              seqList.add(item);
+      //Compare with RDC SEQ FOR UPDATE REQUEST
+      if(CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+    	String cmrNo = null;
+    	if(result != null && result.length > 0 && result[2] != null) {
+    		cmrNo = (String)result[2];
+    	}
+    	if(!StringUtils.isEmpty(cmrNo)) {
+    		String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_TR");
+            PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+            queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+            queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+            List<Object[]> resultsRDC = queryRDC.getResults();
+            List<String> seqList = new ArrayList<String>();
+            for(int i = 0; i < resultsRDC.size(); i++) {
+            	String item = String.valueOf(resultsRDC.get(i));
+            	if(!StringUtils.isEmpty(item)) {
+            		seqList.add(item); 
+            	}
             }
-          }
-          while (seqList.contains(Integer.toString(addrSeq))) {
-            addrSeq++;
-          }
-        }
+            while(seqList.contains(Integer.toString(addrSeq))) {
+            	addrSeq++;
+            }
+    	}
       }
     }
-
+    
     newAddrSeq = Integer.toString(addrSeq);
 
     // newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5,
@@ -2209,38 +2181,6 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
 
     return newAddrSeq;
-  }
-
-  public String getTrZD01Count(EntityManager entityManager, long reqId) {
-    String zd01count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETZD01COUNT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    List<Object[]> results = query.getResults();
-
-    if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      zd01count = sResult[0].toString();
-    }
-    System.out.println("zd01count = " + zd01count);
-
-    return zd01count;
-  }
-
-  public String getTrZI01Count(EntityManager entityManager, long reqId) {
-    String zi01count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETZI01COUNT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    List<Object[]> results = query.getResults();
-
-    if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      zi01count = sResult[0].toString();
-    }
-    System.out.println("zi01count = " + zi01count);
-
-    return zi01count;
   }
 
 }

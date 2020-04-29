@@ -267,7 +267,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData(oldData.getCompany());
             results.add(update);
           }
-          if (!"848".equals(oldData.getCmrIssuingCntry())) {
+          if (!"848".equals(oldData.getCmrIssuingCntry()) && !SystemLocation.GERMANY.equals(oldData.getCmrIssuingCntry())) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CustClassCode"))) {
               update = new UpdatedDataModel();
