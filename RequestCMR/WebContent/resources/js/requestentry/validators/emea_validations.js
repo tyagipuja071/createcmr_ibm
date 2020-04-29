@@ -238,28 +238,55 @@ function setDefaultValueForISU() {
   }
 }
 
+function autoSetVatCheckBox () {
+  console.log("autoSetVatCheckBox..............");
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+	var role = FormManager.getActualValue('userRole').toUpperCase();
+    var localType = FormManager.getActualValue('custGrp');
+    var subScenarioType = FormManager.getActualValue('custSubGrp');
+    if (role == 'REQUESTER' && localType == 'LOCAL') {
+	  if (subScenarioType == 'GOVRN' || subScenarioType == 'INTER' || subScenarioType == 'PRICU') {
+	    FormManager.getField('vatExempt').set('checked', true);
+      } else {
+    	FormManager.getField('vatExempt').set('checked', false);
+      }
+    }
+  }
+}
+
 // CMR-2695 - Turkey - VAT mandatory for scenario = local and sub scenario =
 // Commercial
 function vatMandatoryValidation() {
   console.log("vatMandatoryValidation..............");
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-    var localType = FormManager.getActualValue('custGrp');
-    var subScenarioType = FormManager.getActualValue('custSubGrp');
-    console.log("Scenario Type value is :" + localType);
-    console.log("Scenario Sub-type value is :" + subScenarioType);
-    if (localType == 'LOCAL' && subScenarioType == 'COMME') {
-      var vatValue = dijit.byId('vatExempt').get('checked');
-      if (vatValue == false || vatValue == '') {
-        return new ValidationResult(null, false, 'VAT is mandatory for Local Customer Scenario and Commercial Sub-Scenario for Turkey');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+          var role = FormManager.getActualValue('userRole').toUpperCase();
+	      var localType = FormManager.getActualValue('custGrp');
+	      var subScenarioType = FormManager.getActualValue('custSubGrp');
+	      console.log("Scenario Type value is :" + localType);
+	      console.log("Scenario Sub-type value is :" + subScenarioType);
+          if (role == 'REQUESTER' && localType == 'LOCAL') {
+        	if (subScenarioType == 'COMME' || subScenarioType == 'BUSPR' 
+        	  || subScenarioType == 'IGF' || subScenarioType == 'THDPT' || subScenarioType == 'OEM') {
+        	  var vatValue = dijit.byId('vatExempt').get('checked');
+        	  if (vatValue == false || vatValue == '') {
+        	    return new ValidationResult(null, false, 'VAT is mandatory!');
+        	  } 
+        	}
+          }
+        }
       }
-    }
-  }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function setISUDefaultValueOnSubTypeChange() {
   if (_scenarioSubTypeHandler == null && FormManager.getField('custSubGrp')) {
     _scenarioSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setDefaultValueForISU();
+      autoSetVatCheckBox();
     });
   }
   // if (_scenarioSubTypeHandler && _scenarioSubTypeHandler[0]) {
@@ -8056,6 +8083,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(disableTaxOffice, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setTaxOfficeOnChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setTaxOfficeOnChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(autoSetVatCheckBox, [ SysLoc.TURKEY ]);
 
   // CMR-2093
 
