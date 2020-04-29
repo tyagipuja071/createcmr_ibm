@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +35,8 @@ import com.ibm.cio.cmr.request.automation.util.CoverageRulesFieldMap;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.BaseEntity;
+import com.ibm.cio.cmr.request.entity.BaseEntityPk;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -468,45 +472,61 @@ public class CalculateCoverageElement extends OverridingElement {
                       output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
                       break;
                     case "StartsWith":
-                      String uiField = null;
-                      if (handler != null) {
-                        Map<String, String> uiFieldMap = handler.getUIFieldIdMap();
-                        if (uiFieldMap != null && !uiFieldMap.isEmpty()) {
-                          String tempDbField = WordUtils.capitalizeFully(dbField, new char[] { '_' }).replaceAll("_", "");
-                          tempDbField = tempDbField.substring(0, 1).toLowerCase() + (tempDbField.length() > 1 ? tempDbField.substring(1) : "");
-                          for (String key : uiFieldMap.keySet()) {
-                            if (tempDbField.equals(uiFieldMap.get(key))) {
-                              uiField = key;
-                              break;
+                      String fieldValue = getColumnValueFromEntity(requestData, dbField, addr);
+                      if (StringUtils.isNotBlank(fieldValue) && fieldValue.startsWith(val)) {
+                        details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
+                      } else {
+                        // if we need to create an override check in lov for the
+                        // values
+                        String uiField = null;
+                        if (handler != null) {
+                          Map<String, String> uiFieldMap = handler.getUIFieldIdMap();
+                          if (uiFieldMap != null && !uiFieldMap.isEmpty()) {
+                            String tempDbField = WordUtils.capitalizeFully(dbField, new char[] { '_' }).replaceAll("_", "");
+                            tempDbField = tempDbField.substring(0, 1).toLowerCase() + (tempDbField.length() > 1 ? tempDbField.substring(1) : "");
+                            for (String key : uiFieldMap.keySet()) {
+                              if (tempDbField.equals(uiFieldMap.get(key))) {
+                                uiField = key;
+                                break;
+                              }
                             }
                           }
                         }
-                      }
 
-                      if (StringUtils.isNotEmpty(uiField)) {
-                        String sql = ExternalizedQuery.getSql("AUTOMATION.GET_LOV_STARTSWITH");
-                        PreparedQuery query = new PreparedQuery(entityManager, sql);
-                        query.setParameter("FIELD_ID", uiField);
-                        query.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCntry);
-                        query.setParameter("CD", val + "%");
-                        query.setForReadOnly(true);
-                        String value = query.getSingleResult(String.class);
-                        if (StringUtils.isNotBlank(value)) {
-                          details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
-                          output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
+                        if (StringUtils.isNotEmpty(uiField)) {
+                          String sql = ExternalizedQuery.getSql("AUTOMATION.GET_LOV_STARTSWITH");
+                          PreparedQuery query = new PreparedQuery(entityManager, sql);
+                          query.setParameter("FIELD_ID", uiField);
+                          query.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCntry);
+                          query.setParameter("CD", val + "%");
+                          query.setForReadOnly(true);
+                          String value = query.getSingleResult(String.class);
+                          if (StringUtils.isNotBlank(value)) {
+                            details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
+                            output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
+                          } else {
+                            engineData.addNegativeCheckStatus(dbField,
+                                "The override value could not be determined for the field - " + field + " during coverage calculation.");
+                          }
                         } else {
                           engineData.addNegativeCheckStatus(dbField,
                               "The override value could not be determined for the field - " + field + " during coverage calculation.");
                         }
-                      } else {
-                        engineData.addNegativeCheckStatus(dbField,
-                            "The override value could not be determined for the field - " + field + " during coverage calculation.");
                       }
                       break;
                     default:
                       engineData.addNegativeCheckStatus(dbField,
                           "The override value could not be determined for the field - " + field + " during coverage calculation.");
                       break;
+                    }
+                  } else if (val != null && val.startsWith("!")) {
+                    String value = val.substring(1);
+                    String fieldValue = getColumnValueFromEntity(requestData, dbField, addr);
+                    if (StringUtils.isNotBlank(fieldValue) && !fieldValue.startsWith(value)) {
+                      details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
+                    } else {
+                      engineData.addNegativeCheckStatus(dbField,
+                          "The override value could not be determined for the field - " + field + " during coverage calculation.");
                     }
                   } else {
                     engineData.addNegativeCheckStatus(dbField,
@@ -516,18 +536,45 @@ public class CalculateCoverageElement extends OverridingElement {
               }
             }
           }
-          if (StringUtils.isNotBlank(container.getIsuCd()) && StringUtils.isNotBlank(container.getClientTierCd())) {
-            details.append("\nOverrides based on CMR data:").append("\n");
-            details.append(" - ISU Code = " + container.getIsuCd()).append("\n");
-            details.append(" - Client Tier = " + container.getClientTierCd()).append("\n");
-            output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), container.getIsuCd());
-            output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(), container.getClientTierCd());
-          }
           index++;
         }
       }
+      if (StringUtils.isNotBlank(container.getIsuCd()) && StringUtils.isNotBlank(container.getClientTierCd())) {
+        details.append("\nOverrides based on CMR data:").append("\n");
+        details.append(" - ISU Code = " + container.getIsuCd()).append("\n");
+        details.append(" - Client Tier = " + container.getClientTierCd()).append("\n");
+        output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), container.getIsuCd());
+        output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(), container.getClientTierCd());
+      }
       coverageIds.add(currCovId);
     }
+  }
+
+  private String getColumnValueFromEntity(RequestData requestData, String dbField, boolean addr) {
+    BaseEntity<? extends BaseEntityPk> baseEntity = null;
+    if (addr) {
+      baseEntity = requestData.getData();
+    } else {
+      baseEntity = requestData.getAddress("ZS01");
+    }
+    try {
+      for (Field field : baseEntity.getClass().getFields()) {
+        if (String.class.isAssignableFrom(field.getType())) {
+          Column column = field.getAnnotation(Column.class);
+          if (dbField.equals(column)) {
+            Object objValue = field.get(baseEntity);
+            if (objValue != null) {
+              return (String) objValue;
+            } else {
+              return null;
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Unable to determine value from entity " + (addr ? "Addr" : "Data") + " for field " + dbField, e);
+    }
+    return null;
   }
 
   /**
