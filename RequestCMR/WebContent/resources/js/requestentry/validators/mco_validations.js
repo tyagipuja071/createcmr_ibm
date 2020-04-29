@@ -8,6 +8,73 @@ var _embargoCdHandler = null;
 var _oldEmbargoCd = null;
 var _oldReqReason = null;
 var _oldOrdBlk = null;
+var _importedIndc = null;
+var _postalCodeHandler = null;
+
+if (_postalCodeHandler == null) {
+  _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+    setTaxCodeOnPostalCodePT();
+  });
+}
+
+function getImportedIndcForPT() {
+  if (_importedIndc) {
+    console.log('Returning imported indc = ' + _importedIndc);
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED_PT', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  console.log('saving imported ind as ' + _importedIndc);
+  return _importedIndc;
+}
+
+function setTaxCodeOnPostalCodePT(postCd){
+  
+  var postCd = FormManager.getActualValue('postCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  
+  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  if (custSubGrp == 'CRISO' || custSubGrp == 'CRIINT' || custSubGrp == 'CRPRI' 
+    || custSubGrp == 'XCRO' || custSubGrp == 'XBP') {
+    return;
+  }
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+
+  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
+  var postCodeOrg = '';
+  if (result != null && result.ret1 != undefined) {
+    postCodeOrg = result.ret1;
+  } else {
+    postCodeOrg = '';
+  }
+  
+  var postCode = parseInt(postCodeOrg.substring(0, 1));
+  if (postCd && postCd != undefined && postCd != '') {
+    postCode = postCd.substring(0, 1);
+  }
+  
+  //set Tax code based on postal-Code logic
+  var checkImportIndc = getImportedIndcForPT();
+  if (checkImportIndc != 'Y') {
+    if (custSubGrp == 'GOVRN' && postCode == 9) {
+      FormManager.setValue('specialTaxCd', '18');
+    } else if(custSubGrp != 'GOVRN' && postCode == 9){
+      FormManager.setValue('specialTaxCd', '23');
+    }
+  }
+}
 
 function mandatoryForBusinessPartnerPT() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -562,14 +629,14 @@ function disableAddrFieldsPTES() {
     FormManager.enable('landCntry');
   }
   FormManager.setValue('dept', '');
-  FormManager.disable('dept');
+  FormManager.readOnly('dept');
 
   // Phone: Create-billing address only, Update-also shipping address for ES
   if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && FormManager.getActualValue('addrType') == 'ZD01') {
     FormManager.enable('custPhone');
   } else if (FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZD01') {
     FormManager.setValue('custPhone', '');
-    FormManager.disable('custPhone');
+    FormManager.readOnly('custPhone');
   } else {
     FormManager.enable('custPhone');
   }
@@ -579,7 +646,7 @@ function disableAddrFieldsPTES() {
     FormManager.enable('prefSeqNo');
   } else {
     FormManager.setValue('prefSeqNo', '');
-    FormManager.disable('prefSeqNo');
+    FormManager.readOnly('prefSeqNo');
   }
 }
 
@@ -883,11 +950,11 @@ function forceLockScenariosPortugal() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
   var fieldsToDisable = new Array();
-  FormManager.enable('isicCd');
+  /*FormManager.enable('isicCd');
   FormManager.enable('isuCd');
   FormManager.enable('clientTier');
   FormManager.enable('specialTaxCd');
-  FormManager.enable('repTeamMemberNo');
+  FormManager.enable('repTeamMemberNo');*/
 
   if (custSubGroup == 'COMME') {
     fieldsToDisable.push('cmrOwner');
@@ -1785,4 +1852,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   
+  GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
 });
