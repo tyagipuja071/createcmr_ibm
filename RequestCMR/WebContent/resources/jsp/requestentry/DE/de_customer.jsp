@@ -25,6 +25,14 @@
         <cmr:field fieldId="PrivacyIndc" id="privIndc" path="privIndc" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <cmr:column span="2" containerForField="OrderBlock">
+      <p>
+        <label for="ordBlk"> <cmr:fieldLabel fieldId="OrderBlock" />: 
+          <span id="cmrDelta"><cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" /></span>
+        </label>
+        <cmr:field fieldId="OrderBlock" id="ordBlk" path="ordBlk" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
   </cmr:row>
  
 </cmr:view>
