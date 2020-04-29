@@ -1645,6 +1645,10 @@ public class TurkeyTransformer extends EMEATransformer {
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
           CmrtAddr olddataaddr = legacyObjects.findBySeqNo(addr.getAddrSeqNo());
           if ("Y".equals(olddataaddr.getIsAddrUseBilling()) && "Y".equals(olddataaddr.getIsAddrUseMailing())) {
+            legacyAddrList.remove(olddataaddr);
+            olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+            legacyAddrList.add(olddataaddr);
+
             // copy billing from mailing
             CmrtAddr bilAddr = (CmrtAddr) SerializationUtils.clone(olddataaddr);
             bilAddr.getId().setAddrNo(billingseq);
