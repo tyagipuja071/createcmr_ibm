@@ -1659,6 +1659,19 @@ public class TurkeyTransformer extends EMEATransformer {
             legacyAddrList.add(bilAddr);
             // copyBillingFromMailing(legacyObjects, legacyAddrList.get(i),
             // billingseq);
+          } else {
+            String sql = ExternalizedQuery.getSql("TR.MASS.GETMAXSEQBILLING");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("CMR_NUM", legacyObjects.getCustomerNo());
+            query.setParameter("CNTRY", legacyObjects.getCustomer().getId().getSofCntryCode());
+            CmrtAddr billAdr = query.getSingleResult(CmrtAddr.class);
+            if (billAdr != null) {
+              CmrtAddr tempAdr = (CmrtAddr) SerializationUtils.clone(olddataaddr);
+              tempAdr.getId().setAddrNo(billAdr.getId().getAddrNo());
+              tempAdr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+              tempAdr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+              legacyAddrList.add(tempAdr);
+            }
           }
         }
       }
