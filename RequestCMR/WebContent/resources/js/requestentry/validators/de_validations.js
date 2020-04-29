@@ -5,8 +5,10 @@
 var _vatExemptHandler = null;
 var _scenarioSubTypeHandler = null;
 var _deClientTierHandler = null;
+var _reqReasonHandler = null;
 
 function afterConfigForDE() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
     disableAutoProcForProcessor();
   });
@@ -38,6 +40,21 @@ function afterConfigForDE() {
         setISUValuesOnUpdate(value);
       }
     });
+  }
+
+  if (_reqReasonHandler == null) {
+    _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
+      checkOrderBlk();
+    });
+  }
+  _reqReasonHandler[0].onChange();
+
+  if (!PageManager.isReadOnly() && FormManager.getActualValue('reqType') == 'C') {
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('ordBlk');
+    } else {
+      FormManager.enable('ordBlk');
+    }
   }
 
   // Disable address copying for GERMANY
@@ -451,6 +468,114 @@ function setAbbrevNameDEUpdate(cntry, addressMode, saving, finalSave, force) {
   }
 }
 
+function addReqReasonValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue == 'C') {
+          return new ValidationResult(null, true);
+        }
+        var reqReason = FormManager.getActualValue('reqReason');
+        if (!reqReason) {
+          return new ValidationResult(null, true);
+        }
+        var ordBlk = FormManager.getActualValue('ordBlk');
+        if (!ordBlk) {
+          var reqId = FormManager.getActualValue('reqId');
+          if (!reqReason) {
+            return new ValidationResult(null, true);
+          }
+          var qParams = {
+            REQ_ID : reqId
+          };
+
+          var result = cmr.query('GET.DATA_RDC.EMBARGO_BY_REQID_SWISS', qParams);
+          if (result.ret1 == '88') {
+            if (reqReason == 'TREC') {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult({
+                id : 'reqReason',
+                type : 'text',
+                name : 'reqReason'
+              }, false, 'Request reason must be \'Temporary Reactivate of Embargo Code\' for Order Block 88 removal.');
+            }
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else if (ordBlk && reqReason == 'TREC') {
+          return new ValidationResult({
+            id : 'reqReason',
+            type : 'text',
+            name : 'reqReason'
+          }, false, 'Request reason must NOT be \'Temporary Reactivate of Embargo Code\' if Order Block will not be removed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+function addOrderBlockValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+
+        var reqId = FormManager.getActualValue('reqId');
+        var qParams = {
+          REQ_ID : reqId
+        };
+        var result = cmr.query('GET.DATA_RDC.EMBARGO_BY_REQID_SWISS', qParams);
+
+        var oldVal = result ? result.ret1 : '';
+        var ordBlk = FormManager.getActualValue('ordBlk');
+
+        if (oldVal == '88' && ordBlk != '' && ordBlk != '88') {
+          return new ValidationResult({
+            id : 'ordBlk',
+            type : 'text',
+            name : 'ordBlk'
+          }, false, 'Order Block can only be 88 or blank when updating CMRs with Order Block 88.');
+        }
+        return new ValidationResult(null, true);
+
+        // below not used, keeping for now
+        if (!ordBlk || ordBlk == '88') {
+          return new ValidationResult(null, true);
+        } else {
+
+          return new ValidationResult({
+            id : 'ordBlk',
+            type : 'text',
+            name : 'ordBlk'
+          }, false, 'Value of Order Block can only be 88, 94 or blank.');
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function checkOrderBlk() {
+  var value = FormManager.getActualValue('reqReason');
+  if (value != 'TREC')
+    return;
+  var reqId = FormManager.getActualValue('reqId');
+  var ordBlk = FormManager.getActualValue('ordBlk');
+  var qParams = {
+    REQ_ID : reqId
+  };
+
+  var result = cmr.query('GET.DATA_RDC.EMBARGO_BY_REQID_SWISS', qParams);
+  if (result.ret1 == '88' && !ordBlk) {
+    // correct, no alert
+  } else {
+    FormManager.clearValue('reqReason');
+    cmr
+        .showAlert('This request reason can be chosen only if the CMR\'s Order Block is 88 and the new value on the request is blank.<br><br>Please set the value of Order Block to blank then choose the request reason again.');
+    return;
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -482,4 +607,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(restrictNonSoldToAddress, GEOHandler.DE);
   GEOHandler.registerValidator(validateAddressTypeForScenario, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(addSoldToAddressValidator, GEOHandler.DE);
+  GEOHandler.registerValidator(addOrderBlockValidator, GEOHandler.DE, null, true);
+  GEOHandler.registerValidator(addReqReasonValidator, GEOHandler.DE, null, true);
 });
