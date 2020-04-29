@@ -1048,6 +1048,10 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setAccAdminBo("Y60382");
       legacyCust.setCeDivision("2");
 
+      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
+        legacyCust.setCustType(data.getCrosSubTyp());
+      }
+
       // CMR-2279:Turkey-ISR set based on SBO
       if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
 
@@ -1093,6 +1097,10 @@ public class TurkeyTransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
+        legacyCust.setCustType(data.getCrosSubTyp());
       }
 
       // CMR-2279:Turkey-ISR set based on SBO
