@@ -1048,6 +1048,10 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setAccAdminBo("Y60382");
       legacyCust.setCeDivision("2");
 
+      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
+        legacyCust.setCustType(data.getCrosSubTyp());
+      }
+
       // CMR-2279:Turkey-ISR set based on SBO
       if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
 
@@ -1093,6 +1097,10 @@ public class TurkeyTransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
+        legacyCust.setCustType(data.getCrosSubTyp());
       }
 
       // CMR-2279:Turkey-ISR set based on SBO
@@ -1661,6 +1669,19 @@ public class TurkeyTransformer extends EMEATransformer {
             legacyAddrList.add(bilAddr);
             // copyBillingFromMailing(legacyObjects, legacyAddrList.get(i),
             // billingseq);
+          } else {
+            String sql = ExternalizedQuery.getSql("TR.MASS.GETMAXSEQBILLING");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("CMR_NUM", legacyObjects.getCustomerNo());
+            query.setParameter("CNTRY", legacyObjects.getCustomer().getId().getSofCntryCode());
+            CmrtAddr billAdr = query.getSingleResult(CmrtAddr.class);
+            if (billAdr != null) {
+              CmrtAddr tempAdr = (CmrtAddr) SerializationUtils.clone(olddataaddr);
+              tempAdr.getId().setAddrNo(billAdr.getId().getAddrNo());
+              tempAdr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+              tempAdr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+              legacyAddrList.add(tempAdr);
+            }
           }
         }
       }

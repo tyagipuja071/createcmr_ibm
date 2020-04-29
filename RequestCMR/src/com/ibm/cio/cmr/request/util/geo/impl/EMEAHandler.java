@@ -279,7 +279,12 @@ public class EMEAHandler extends BaseSOFHandler {
                         installing.setCmrState(sadr.getRegio());
                         installing.setCmrPostalCode(sadr.getPstlz());
                         installing.setCmrDept(sadr.getOrt02());
-                        installing.setCmrTaxOffice(sadr.getTxjcd());
+                        if (!StringUtils.isBlank(sadr.getTxjcd())) {
+                          installing.setCmrTaxOffice(sadr.getTxjcd());
+                        }
+                        if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
+                          installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
+                        }
                         installing.setCmrSapNumber("");
                         converted.add(installing);
                       }
