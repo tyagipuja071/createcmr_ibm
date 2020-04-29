@@ -14,6 +14,8 @@ var _internalDeptHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
 var _scenarioSubTypeHandler = null;
+var _addrTypeOnChangeHandler = [];
+var _addrTypesForOnChange = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01' ];
 
 var SCOTLAND_POST_CD = [ 'AB', 'KA', 'DD', 'KW', 'DG', 'KY', 'EH', 'ML', 'FK', 'PA', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'PH', 'TD', 'IV' ];
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
@@ -263,6 +265,30 @@ function setISUDefaultValueOnSubTypeChange() {
   // if (_scenarioSubTypeHandler && _scenarioSubTypeHandler[0]) {
   // _scenarioSubTypeHandler[0].onChange();
   // }
+}
+
+// CMR-2383 disable tax office
+function setTaxOfficeOnChange() {
+  for (var i = 0; i < _addrTypesForOnChange.length; i++) {
+	  _addrTypeOnChangeHandler[i] = null;
+    if (_addrTypeOnChangeHandler[i] == null) {
+    	_addrTypeOnChangeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForOnChange[i]), 'onClick', function(value) {
+    	  disableTaxOffice();
+      });
+    }
+  }
+}
+
+function disableTaxOffice() {
+  console.log("disableTaxOffice..............");
+  var addressTypeValue = FormManager.getActualValue('addrType');
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+    if (addressTypeValue == 'ZS01' || addressTypeValue == 'ZD01' || addressTypeValue == 'ZI01') {
+	    FormManager.disable('taxOffice');
+	} else if (addressTypeValue == 'ZP01' ) {
+		FormManager.enable('taxOffice');
+	}
+  }
 }
 
 function autoSetAbbrevNameUKIInterFSL(custType) {
@@ -8026,6 +8052,10 @@ dojo.addOnLoad(function() {
   // CMR-2695 Turkey - VAT mandatory for scenario = local and sub scenario =
   // Commercial
   GEOHandler.registerValidator(vatMandatoryValidation, [ SysLoc.TURKEY ], null, true);
+  
+  GEOHandler.addAfterConfig(disableTaxOffice, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setTaxOfficeOnChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setTaxOfficeOnChange, [ SysLoc.TURKEY ]);
 
   // CMR-2093
 
