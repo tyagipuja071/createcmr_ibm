@@ -187,6 +187,16 @@
 		        </p>
 		    </cmr:column>
 		</cmr:row>
+		<cmr:row addBackground="true">
+			<cmr:column span="2" containerForField="TypeOfCustomer">
+		        <p>
+		          <cmr:label fieldId="crosSubTyp">
+		            <cmr:fieldLabel fieldId="TypeOfCustomer" />:
+		          </cmr:label>
+		          <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+		        </p>
+		    </cmr:column>
+		</cmr:row>
 	</cmr:view>
 
 	<cmr:view forCountry="755">
