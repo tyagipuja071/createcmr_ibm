@@ -4,20 +4,15 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.util.Map;
-import org.apache.log4j.Logger;
-
-import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
-import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 
 /**
  * {@link MessageTransformer} implementation for Cyprus.
@@ -26,8 +21,6 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
  * 
  */
 public class CyprusTransformer extends GreeceTransformer {
-  
-  private static final Logger LOG = Logger.getLogger(CyprusTransformer.class);
 
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZD01" };
 
@@ -116,16 +109,4 @@ public class CyprusTransformer extends GreeceTransformer {
     }
   }
 
-  @Override
-  public void generateCMRNoByLegacy(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, CMRRequestContainer cmrObjects) {
-    Data data = cmrObjects.getData();
-    String custSubGrp = data.getCustSubGrp();
-    LOG.debug("Set max and min range For CY...");
-    if (custSubGrp != null
-        && ("INTER".equals(custSubGrp) || "CRINT".equals(custSubGrp))) {
-      generateCMRNoObj.setMin(990000);
-      generateCMRNoObj.setMax(998999);
-    }
-  }
-  
 }

@@ -18,7 +18,6 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
-import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -42,15 +41,11 @@ public class GreeceTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  /* Greece - MQ - Code
   private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01" };
-   */
-  
-  // Comment this out when reverting to MQ
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01", "ZI01" };
 
   private static final Logger LOG = Logger.getLogger(GreeceTransformer.class);
 
+  public static final String DEFAULT_LANDED_COUNTRY = "ES";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -102,7 +97,6 @@ public class GreeceTransformer extends EMEATransformer {
     messageHash.put("MarketingResponseCode", "3");
     messageHash.put("ARemark", "");
     messageHash.put("EnterpriseNo", cmrData.getEnterprise());
-    messageHash.put("CustomerLanguage", "1");
 
     if (update) {
       messageHash.put("CollectionCode", cmrData.getCollectionCd());
@@ -158,8 +152,7 @@ public class GreeceTransformer extends EMEATransformer {
     Addr addrData = handler.addrData;
     Data cmrData = handler.cmrData;
     boolean crossBorder = isCrossBorder(addrData);
-    String addrType = addrData.getId().getAddrType();
-    
+
     String addrKey = getAddressKey(addrData.getId().getAddrType());
     LOG.debug("Handling " + (update ? "update" : "create") + " request.");
     Map<String, String> messageHash = handler.messageHash;
@@ -180,28 +173,36 @@ public class GreeceTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(addrData.getCustNm2())) {
       line2 = addrData.getCustNm2();
+    } else {
+      // move occupation up
+      line2 = addrData.getAddrTxt2();
     }
 
+    // occupation or PO Box or Phone (for additional shipping)
     String line3 = "";
-
-    if (!StringUtils.isBlank(addrData.getCustNm4())) {
-      line3 = "ATT " + addrData.getCustNm4();
-    } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line3 = addrData.getAddrTxt2();
-    } else if (!StringUtils.isBlank(addrData.getPoBox())
-        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
-      line3 = "PO BOX " + addrData.getPoBox();
+    if (!StringUtils.isBlank(addrData.getCustNm2())) {
+      // nickname specified, so line3 = occupation or pobox or phone
+      if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addrData.getId().getAddrType())) {
+        line3 = addrData.getCustPhone();
+      } else {
+        if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+          line3 = addrData.getAddrTxt2();
+        } else {
+          line3 = addrData.getPoBox();
+        }
+      }
+    } else {
+      // occupation moved up, this is pobox or phone
+      if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addrData.getId().getAddrType())) {
+        line3 = addrData.getCustPhone();
+      } else {
+        line3 = addrData.getPoBox();
+      }
     }
-    
+
     // Street
-    String line4 = "";
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 = addrData.getAddrTxt();
-    } else if (!StringUtils.isBlank(addrData.getPoBox())
-        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
-      line4 = "PO BOX " + addrData.getPoBox();
-    } 
-    
+    String line4 = addrData.getAddrTxt();
+
     // postal code + city
     String line5 = (!StringUtils.isEmpty(addrData.getPostCd()) ? addrData.getPostCd() : "") + " "
         + (!StringUtils.isEmpty(addrData.getCity1()) ? addrData.getCity1() : "");
@@ -210,7 +211,9 @@ public class GreeceTransformer extends EMEATransformer {
     // country
     String line6 = "";
 
-    line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    if (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType())) {
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    }
 
     int lineNo = 1;
     String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
@@ -263,8 +266,6 @@ public class GreeceTransformer extends EMEATransformer {
     return ADDRESS_ORDER;
   }
 
-  
-  /* Greece - MQ Code
   @Override
   public String getAddressKey(String addrType) {
     switch (addrType) {
@@ -278,26 +279,7 @@ public class GreeceTransformer extends EMEATransformer {
       return "";
     }
   }
-  */
-  
-  // Comment this method out when reverting to MQ code
-  @Override
-  public String getAddressKey(String addrType) {
-    switch (addrType) {
-    case "ZP01":
-      return "Local Language translation of Sold";
-    case "ZS01":
-      return "Sold To";
-    case "ZD01":
-      return "Ship To";
-    case "ZI01":
-      return "Install At";
-    default:
-      return "";
-    }
-  }
 
-  /* Greece - MQ Code
   @Override
   public String getTargetAddressType(String addrType) {
     switch (addrType) {
@@ -311,24 +293,6 @@ public class GreeceTransformer extends EMEATransformer {
       return "";
     }
   }
-  */
-  
-  // Comment this method out when reverting to MQ
-  @Override
-  public String getTargetAddressType(String addrType) {
-    switch (addrType) {
-    case "ZP01":
-      return "Local Language translation of Sold";
-    case "ZS01":
-      return "Sold To";
-    case "ZD01":
-      return "Ship To";
-    case "ZI01":
-      return "Install At";
-    default:
-      return "";
-    }
-  }
 
   @Override
   public String getSysLocToUse() {
@@ -337,7 +301,7 @@ public class GreeceTransformer extends EMEATransformer {
 
   @Override
   public String getFixedAddrSeqForProspectCreation() {
-    return "00003";
+    return "2";
   }
 
   /**
@@ -349,8 +313,7 @@ public class GreeceTransformer extends EMEATransformer {
   protected boolean isCrossBorder(Addr addr) {
     return !"GR".equals(addr.getLandCntry());
   }
-  
-  /* Greece - MQ Code
+
   @Override
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
@@ -360,26 +323,6 @@ public class GreeceTransformer extends EMEATransformer {
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING + MQMsgConstants.SOF_ADDRESS_USE_SHIPPING + MQMsgConstants.SOF_ADDRESS_USE_EPL;
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    default:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    }
-  }
-  */
-  
-  // Comment this method out when reverting to MQ
-  @Override
-  public String getAddressUse(Addr addr) {
-    switch (addr.getId().getAddrType()) {
-    case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-    case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
-    case MQMsgConstants.ADDR_ZD01:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -421,7 +364,6 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         legacyCust.setMrcCd("3");
       }
-      legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -475,7 +417,7 @@ public class GreeceTransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : "");
     }
   }
-  
+
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
     data.setOrdBlk("");
     entityManager.merge(data);

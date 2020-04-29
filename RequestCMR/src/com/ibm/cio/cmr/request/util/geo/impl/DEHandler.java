@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -157,6 +158,20 @@ public class DEHandler extends GEOHandler {
   @Override
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !service.equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
+      UpdatedDataModel update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrderBlock", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getOrdBlk(), "OrderBlock", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrderBlock", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !service.equals(oldData.getCustClass(), newData.getCustClass())) {
+      UpdatedDataModel update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustClass(), "CustClass", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "CustClass", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
@@ -221,7 +236,8 @@ public class DEHandler extends GEOHandler {
     }
 
     // if (!StringUtils.isEmpty(data.getCovId())) {
-    // LOG.debug("*** Auto setting for Germany the Search Term Value as the coverage ID");
+    // LOG.debug("*** Auto setting for Germany the Search Term Value as the
+    // coverage ID");
     // data.setSearchTerm(data.getCovId());
     // }
 
@@ -288,9 +304,9 @@ public class DEHandler extends GEOHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO"));
+    fields.addAll(
+        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
+            "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
     return fields;
   }
 
@@ -376,7 +392,7 @@ public class DEHandler extends GEOHandler {
 
       for (int i = idxStart; i < tmpAr.length; i++) {
         namePart3 = namePart3 + " " + tmpAr[i];
-      }// namePart3 = temp2;
+      } // namePart3 = temp2;
 
       namePart3 = namePart3.trim();
 
@@ -491,8 +507,8 @@ public class DEHandler extends GEOHandler {
         // check if field is part of exemption list or is part of what to check
         // for the handler, if specified
         if (GEOHandler.ADDRESS_FIELDS_SKIP_CHECK.contains(srcName)
-            || (handler != null && handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry) != null && !handler.getAddressFieldsForUpdateCheck(
-                cmrIssuingCntry).contains(srcName))) {
+            || (handler != null && handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry) != null
+                && !handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry).contains(srcName))) {
           continue;
         }
 

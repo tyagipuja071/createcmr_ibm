@@ -104,12 +104,22 @@ public class EMEAHandler extends BaseSOFHandler {
 	public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
 	public static final String[] HRDWRE_MSTR_FLAG_ADDRS = { "ZI01", "ZS01" };
-  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
-      "Shipping Address (Update)", "EPL Address" };
-  protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Local Lang Translation Sold-To", "Sold-To Address", "Install-At Address",
-      "Ship-To Address" };
- 
-  static {
+
+  // *abner revert begin
+  // protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Local Lang
+  // Translation Sold-To", "Billing Address",
+  // "Mailing Address", "Installing Address", "Shipping Address (Update)", "EPL
+  // Address", "Sold-To Address",
+  // "Install-At Address", "Ship-To Address" };
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address",
+      "Installing Address", "Shipping Address (Update)", "EPL Address" };
+  // *abner revert end
+
+	// CMR-1728
+  protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
+			"EPL Address" };
+
+	static {
 		LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
 		LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");
 
@@ -289,7 +299,7 @@ public class EMEAHandler extends BaseSOFHandler {
 												installing.setCmrStreetAddress(sadr.getStras());
 												installing.setCmrName3(sadr.getName3());
 												installing.setCmrName4(sadr.getName4());
-                        installing.setCmrCountryLanded("TR");
+												installing.setCmrCountryLanded(sadr.getSpras());
 												installing.setCmrCountry(sadr.getSpras());
 												installing.setCmrStreetAddressCont(sadr.getStrs2());
 												installing.setCmrState(sadr.getRegio());
@@ -298,38 +308,6 @@ public class EMEAHandler extends BaseSOFHandler {
 											}
 										}
 									}
-                  if (StringUtils.isBlank(adrnr)) {
-                    CmrtAddr mailingAddr = getLegacyMailingAddress(entityManager, searchModel.getCmrNum());
-                    if (mailingAddr != null) {
-                      Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                      if (installingAddr != null) {
-                        LOG.debug("Adding installing to the records");
-                        FindCMRRecordModel installing = new FindCMRRecordModel();
-                        PropertyUtils.copyProperties(installing, mainRecord);
-                        copyAddrData(installing, installingAddr);
-                        // add value
-                        installing.setCmrName1Plain(mailingAddr.getAddrLine1());
-                        if (!StringUtils.isBlank(mailingAddr.getAddrLine2())) {
-                          installing.setCmrName2Plain(mailingAddr.getAddrLine2());
-                        } else {
-                          installing.setCmrName2Plain("");
-                        }
-                        installing.setCmrStreetAddress(mailingAddr.getAddrLine3());
-                        installing.setCmrCity(record.getCmrCity());
-                        installing.setCmrCity2(record.getCmrCity2());
-                        installing.setCmrCountry(mailingAddr.getAddrLine6());
-                        installing.setCmrCountryLanded("TR");
-                        installing.setCmrPostalCode(record.getCmrPostalCode());
-                        installing.setCmrState(record.getCmrState());
-                        if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
-                        installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
-                        } else {
-                          installing.setCmrStreetAddressCont("");
-                        }
-                        converted.add(installing);
-                      }
-                    }
-                  }
 								}
 							}
 						}
@@ -1905,12 +1883,6 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			String country = currentRecord.getCmrIssuedBy();
 
-      if (SystemLocation.TURKEY.equals(country)) {
-        if (!StringUtils.isBlank(currentRecord.getCmrCity2())) {
-          address.setDept(currentRecord.getCmrCity2());
-        }
-      }
-
 			if (!SystemLocation.GREECE.equals(country) && !SystemLocation.CYPRUS.equals(country)
 					&& !SystemLocation.TURKEY.equals(country) && !SystemLocation.UNITED_KINGDOM.equals(country)
 					&& !SystemLocation.IRELAND.equals(country)) {
@@ -1949,7 +1921,6 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			if (SystemLocation.TURKEY.equals(country)) {
 				address.setDept(currentRecord.getCmrDept());
-				address.setCustNm4(currentRecord.getCmrName4());
 			}
 
 			if (SystemLocation.GREECE.equals(country)) {
@@ -1968,17 +1939,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
 			String processingType = PageManager.getProcessingType(country, "U");
 			if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-
-        if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-            && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
-          String seq = address.getId().getAddrSeq();
-          seq = StringUtils.leftPad(seq, 5, '0');
-          address.getId().setAddrSeq(seq);
-        }
 				if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
-            && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && SystemLocation.TURKEY.equals(country)) {
-          address.getId().setAddrSeq("00003");
-        }
+						&& "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+					String seq = address.getId().getAddrSeq();
+					seq = StringUtils.leftPad(seq, 5, '0');
+					address.getId().setAddrSeq(seq);
+				}
 				if ("D".equals(address.getImportInd())) {
 					String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
 					address.getId().setAddrSeq(seq);
@@ -1999,10 +1965,6 @@ public class EMEAHandler extends BaseSOFHandler {
 			data.setSpecialTaxCd("AA");
 		} else if (SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
 			data.setCustPrefLang("I");
-		} 
-		// CMR-2688_Preferred_Language_T
-		else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
-			data.setCustPrefLang("T");
 		} else {
 			data.setCustPrefLang("E");
 		}
@@ -3373,8 +3335,9 @@ public class EMEAHandler extends BaseSOFHandler {
 		map.put("##CustomerScenarioSubType", "custSubGrp");
 		map.put("##EngineeringBo", "engineeringBo");
 		map.put("##CodFlag", "creditCd");
-	    map.put("##CommercialFinanced", "commercialFinanced");
-	    map.put("##CustClass", "custClass");
+    // *abner revert begin
+    // map.put("##CommercialFinanced", "commercialFinanced");
+    // *abner revert end
 		return map;
 	}
 
@@ -3699,9 +3662,11 @@ public class EMEAHandler extends BaseSOFHandler {
     } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
       return true;
     }
-    else if (SystemLocation.TURKEY.equals(issuingCountry)) {
-      return true;
-    }
+    // *abner revert begin
+    // else if (SystemLocation.TURKEY.equals(issuingCountry)) {
+    // return true;
+    // }
+    // *abner revert end
     else {
       return false;
     }
@@ -3713,14 +3678,18 @@ public class EMEAHandler extends BaseSOFHandler {
 		XSSFRow row = null;
 		XSSFCell currCell = null;
 
-    String[] countryAddrss = null;
-    if (country.equals(SystemLocation.TURKEY)) {
-      countryAddrss = TR_MASS_UPDATE_SHEET_NAMES;
-    } else {
-      countryAddrss = LD_MASS_UPDATE_SHEET_NAMES;
-    }
-    for (String name : countryAddrss) {
+		/**
+		 * currently Turkey don't need Dup Fills check, so temp skip the
+		 * checking this part
+		 */
+    // *abner revert begin
+    // if (SystemLocation.TURKEY.equals(country)) {
+    // return;
+    // }
+    // *abner revert end
+		for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
 			XSSFSheet sheet = book.getSheet(name);
+
 			for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
 
 				String cbCity = ""; // 8
@@ -3729,13 +3698,8 @@ public class EMEAHandler extends BaseSOFHandler {
 				String localPostal = ""; // 9
 
 				String streetCont = ""; // 5
-				String poBox = ""; // 11
+				String poBox = ""; // 12
 				String attPerson = ""; // 13
-				
-				String district = "";//12
-        String taxOffice = ""; // 13
-        String name4 = "";// 10
-
 				row = sheet.getRow(rowIndex);
 				if (row == null) {
 					return; // stop immediately when row is blank
@@ -3750,115 +3714,72 @@ public class EMEAHandler extends BaseSOFHandler {
 				currCell = row.getCell(9);
 				cbPostal = validateColValFromCell(currCell);
 
+				currCell = row.getCell(5);
+				streetCont = validateColValFromCell(currCell);
+				currCell = row.getCell(11);
+				poBox = validateColValFromCell(currCell);
+				currCell = row.getCell(12);
+				attPerson = validateColValFromCell(currCell);
+
 				TemplateValidation error = new TemplateValidation(name);
 
-        // CMR-2731 Turkey: Mass Update: country modification
-        if (SystemLocation.TURKEY.equals(country)) {
-          currCell = row.getCell(12);
-          district = validateColValFromCell(currCell);
-          currCell = row.getCell(13);
-          taxOffice = validateColValFromCell(currCell);
-          currCell = row.getCell(5);
-          streetCont = validateColValFromCell(currCell);
-          currCell = row.getCell(10);
-          name4 = validateColValFromCell(currCell);
+				if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
+					LOG.trace(
+							"Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+					error.addError(rowIndex, "Local City",
+							"Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+					validations.add(error);
+				}
 
-          if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-            LOG.trace(
-                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-            error.addError(rowIndex, "Local City",
-                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
-            validations.add(error);
-          }
+				if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
+					LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+							+ "If one is populated, the other must be empty. >>");
+					error.addError(rowIndex, "Local Postal Code",
+							"Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+									+ "If one is populated, the other must be empty.");
+					validations.add(error);
+				}
 
-          if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-            LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                + "If one is populated, the other must be empty. >>");
-            error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                + "If one is populated, the other must be empty.");
-            validations.add(error);
-          }
-          
-          if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
-            LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
-            error.addError(rowIndex, "Name4",
-                "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
-            validations.add(error);
-          }
-
-          if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
-            if ("@".equals(district)) {
-              LOG.trace("Local address must not be populate District with @. ");
-              error.addError(rowIndex, "District", "Local address must not be populate District with @. ");
-              validations.add(error);
-            }
-
-            if ("@".equals(taxOffice)) {
-              LOG.trace("Local address must not be populate Tax Office with @. ");
-              error.addError(rowIndex, "Tax Office", "Local address must not be populate Tax Office with @. ");
-              validations.add(error);
-            }
-          }
-        } else {
-          currCell = row.getCell(5);
-          streetCont = validateColValFromCell(currCell);
-          currCell = row.getCell(11);
-          poBox = validateColValFromCell(currCell);
-          currCell = row.getCell(12);
-          attPerson = validateColValFromCell(currCell);
-          // DTN: Defect 1898300: UKI - mass updates - addresses
-          /*
-           * Adding a check that if any of the address lines values that
-           * are set as either value and both are filled out, it will
-           * throw an error message that both can not be filled out.
-           */
-          if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-            LOG.trace(
-                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-            error.addError(rowIndex, "Local City",
-                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
-            validations.add(error);
-          }
-
-          if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-            LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                + "If one is populated, the other must be empty. >>");
-            error.addError(rowIndex, "Local Postal Code",
-                "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-                    + "If one is populated, the other must be empty.");
-            validations.add(error);
-          }
-          if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
-              && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
-            // if local
-            if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-              LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "Street Con't/PO Box",
-                  "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
-            } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
-              LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "PO Box/ATT Person",
-                  "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
-            } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
-              LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "ATT Person/Street Con't",
-                  "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
-            }
-          } else {
-            // else cross border
-            if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-              LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              error.addError(rowIndex, "Street Con't/PO Box",
-                  "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
-            }
-          }
-        }
-      }
-    }
+				// DTN: Defect 1898300: UKI - mass updates - addresses
+				/*
+				 * Adding a check that if any of the address lines values that
+				 * are set as either value and both are filled out, it will
+				 * throw an error message that both can not be filled out.
+				 */
+				if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
+						&& (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+					// if local
+					if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
+						LOG.trace(
+								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+						error.addError(rowIndex, "Street Con't/PO Box",
+								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+						validations.add(error);
+					} else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
+						LOG.trace(
+								"Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
+						error.addError(rowIndex, "PO Box/ATT Person",
+								"Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
+						validations.add(error);
+					} else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
+						LOG.trace(
+								"Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+						error.addError(rowIndex, "ATT Person/Street Con't",
+								"Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+						validations.add(error);
+					}
+				} else {
+					// else cross border
+					if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
+						LOG.trace(
+								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+						error.addError(rowIndex, "Street Con't/PO Box",
+								"Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+						validations.add(error);
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -3923,7 +3844,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
 	private void copyAddrData(FindCMRRecordModel record, Addr addr) {
 		record.setCmrAddrTypeCode("ZP01");
-    record.setCmrAddrSeq("00002");
+		record.setCmrAddrSeq("00002");
 		record.setCmrName1Plain(addr.getCustNm1());
 		record.setCmrName2Plain(addr.getCustNm2());
 		record.setCmrName3(addr.getCustNm3());
