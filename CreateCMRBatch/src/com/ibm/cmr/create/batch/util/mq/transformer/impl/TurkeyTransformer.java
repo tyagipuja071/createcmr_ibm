@@ -1581,11 +1581,12 @@ public class TurkeyTransformer extends EMEATransformer {
         Addr addr = addrList.get(i);
         String addrType = addr.getId().getAddrType();
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-          CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00001");
-          if ("Y".equals(olddataaddr.getIsAddrUseEPL()) && "Y".equals(olddataaddr.getIsAddrUseInstalling())
-              && "Y".equals(olddataaddr.getIsAddrUseShipping())) {
+          CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
+          if ("Y".equals(olddataaddr.getIsAddrUseMailing()) && "Y".equals(olddataaddr.getIsAddrUseBilling())) {
             // copy billing from mailing
             copyBillingFromMailing(legacyObjects, legacyAddrList.get(i), billingseq);
+            olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+            olddataaddr.setForUpdate(true);
           }
         }
       }
@@ -1796,6 +1797,7 @@ public class TurkeyTransformer extends EMEATransformer {
     billingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
     billingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
     billingAddr.setForCreate(true);
+    billingAddr.setForUpdate(false);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(billingAddr);
   }
