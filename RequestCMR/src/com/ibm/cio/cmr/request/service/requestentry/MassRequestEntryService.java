@@ -1317,7 +1317,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       } else {
         this.log.info("Processor automation enabled, skipping default approvals.");
       }
-
+    } else {
+      result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
     }
     performGenericAction(trans, model, entityManager, request, procCenterName, null, false, StringUtils.isBlank(result));
   }
@@ -3695,8 +3696,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         massUpdtData.setEntpUpdtTyp(model.getEntUpdTyp());
         cname1 = model.getCname1();
         cname2 = "";
-        if (!StringUtils.isBlank(cname1))
+        if (!StringUtils.isBlank(cname1)) {
           splitName(massUpdtData, cname1, cname2, 28, 24);
+        }
       } else if (model.getEntUpdTyp().equalsIgnoreCase("B")) {
         massUpdtData.setCompany(model.getComp1());
         massUpdtData.setNewEntp(model.getNewEntp());
@@ -5592,10 +5594,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
     query.setParameter("REQ_TYP", req_typ);
     count = query.getSingleResult(Integer.class);
-    if (count >= 1)
+    if (count >= 1) {
       return true;
-    else
+    } else {
       return false;
+    }
 
   }
 
