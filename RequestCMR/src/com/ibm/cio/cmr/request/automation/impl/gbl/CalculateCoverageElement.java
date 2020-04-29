@@ -35,8 +35,6 @@ import com.ibm.cio.cmr.request.automation.util.CoverageRulesFieldMap;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
-import com.ibm.cio.cmr.request.entity.BaseEntity;
-import com.ibm.cio.cmr.request.entity.BaseEntityPk;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -472,7 +470,12 @@ public class CalculateCoverageElement extends OverridingElement {
                       output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
                       break;
                     case "StartsWith":
-                      String fieldValue = getColumnValueFromEntity(requestData, dbField, addr);
+                      String fieldValue = "";
+                      if (addr) {
+                        fieldValue = getColumnValueFromAddr(requestData.getAddress("ZS01"), dbField);
+                      } else {
+                        fieldValue = getColumnValueFromData(requestData.getData(), dbField);
+                      }
                       if (StringUtils.isNotBlank(fieldValue) && fieldValue.startsWith(val)) {
                         details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                       } else {
@@ -521,7 +524,12 @@ public class CalculateCoverageElement extends OverridingElement {
                     }
                   } else if (val != null && val.startsWith("!")) {
                     String value = val.substring(1);
-                    String fieldValue = getColumnValueFromEntity(requestData, dbField, addr);
+                    String fieldValue = "";
+                    if (addr) {
+                      fieldValue = getColumnValueFromAddr(requestData.getAddress("ZS01"), dbField);
+                    } else {
+                      fieldValue = getColumnValueFromData(requestData.getData(), dbField);
+                    }
                     if (StringUtils.isNotBlank(fieldValue) && !fieldValue.startsWith(value)) {
                       details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                     } else {
@@ -550,29 +558,42 @@ public class CalculateCoverageElement extends OverridingElement {
     }
   }
 
-  private String getColumnValueFromEntity(RequestData requestData, String dbField, boolean addr) {
-    BaseEntity<? extends BaseEntityPk> baseEntity = null;
-    if (addr) {
-      baseEntity = requestData.getData();
-    } else {
-      baseEntity = requestData.getAddress("ZS01");
-    }
+  private String getColumnValueFromAddr(Addr addr, String dbField) {
     try {
-      for (Field field : baseEntity.getClass().getFields()) {
-        if (String.class.isAssignableFrom(field.getType())) {
-          Column column = field.getAnnotation(Column.class);
-          if (dbField.equals(column)) {
-            Object objValue = field.get(baseEntity);
-            if (objValue != null) {
-              return (String) objValue;
-            } else {
-              return null;
-            }
+      for (Field field : Addr.class.getDeclaredFields()) {
+        Column column = field.getAnnotation(Column.class);
+        if (column != null && dbField.equals(column.name())) {
+          field.setAccessible(true);
+          Object objValue = field.get(addr);
+          if (objValue != null) {
+            return (String) objValue;
+          } else {
+            return null;
           }
         }
       }
     } catch (Exception e) {
-      LOG.error("Unable to determine value from entity " + (addr ? "Addr" : "Data") + " for field " + dbField, e);
+      LOG.error("Unable to determine value from entity Data for field " + dbField, e);
+    }
+    return null;
+  }
+
+  private String getColumnValueFromData(Data data, String dbField) {
+    try {
+      for (Field field : Data.class.getDeclaredFields()) {
+        Column column = field.getAnnotation(Column.class);
+        if (column != null && dbField.equals(column.name())) {
+          field.setAccessible(true);
+          Object objValue = field.get(data);
+          if (objValue != null) {
+            return (String) objValue;
+          } else {
+            return null;
+          }
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Unable to determine value from entity Data for field " + dbField, e);
     }
     return null;
   }
