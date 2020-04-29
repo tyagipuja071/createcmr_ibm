@@ -1344,9 +1344,8 @@ public class LegacyDirectUtil {
 
     return isFisCodeUsed;
   }
-  public static boolean checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
-    int addrSize = 0;
-    boolean flage = true;
+  public static List<CmrtAddr> checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
+    
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("COUNTRY", country);
@@ -1354,27 +1353,9 @@ public class LegacyDirectUtil {
     query.setForReadOnly(true);
     List<CmrtAddr> addresses = query.getResults(CmrtAddr.class);
     if (addresses != null) {
-      addrSize = addresses.size();
-      LOG.debug(">> checkLDAddress for CMR# " + cmrNo + " address size> " + addresses.size());
+      LOG.debug(">> checkLDAddress for CMR# " + cmrNo + " > " + addresses.size());
     }
-    
-    if(addrSize == 1){
-      //Checking billing and company in CMRTCEXT
-      sql = ExternalizedQuery.getSql("LEGACYD.CMRTCEXT_CHECK_COMPANY");
-      query = new PreparedQuery(entityManager, sql);
-      query.setParameter("COUNTRY", country);
-      query.setParameter("CMR_NO", cmrNo);
-      query.setForReadOnly(true);
-      List<Object[]> results = query.getResults();
-
-      if (results != null && !results.isEmpty()) {
-        Object[] sResult = results.get(0);
-        LOG.debug("Checking billing and company in CMRTCEXT:"+sResult[0].toString()); 
-        flage = false;
-      }
-    }
-   
-    return flage;
+    return addresses;
   }
     
 }
