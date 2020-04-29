@@ -37,7 +37,7 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 @Component
 public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
 
-  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("862");
+  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("8620");
 
   @Override
   protected Logger initLogger() {
@@ -181,31 +181,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
         }
 
         if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
-        	int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
-            int zi01cout = Integer.valueOf(getTrZI01Count(entityManager, model.getReqId()));
-
-            if (toCopy.equals("ZS01")) {
-              newAddrSeq = "00003";
-            }
-            if (toCopy.equals("ZP01")) {
-              newAddrSeq = "00002";
-            }
-            if (toCopy.equals("ZD01")) {
-              if (zd01cout == 0) {
-                newAddrSeq = "00004";
-              } else if (zd01cout == 1 && zi01cout == 0) {
-                newAddrSeq = "00006";
-              } else {
-                newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
-              }
-            }
-            if (toCopy.equals("ZI01")) {
-              if (zi01cout == 0) {
-              newAddrSeq = "00005";
-              } else {
-                newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
-              }
-            } 
+          newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
         }
 
         // if ("864".equals(model.getCmrIssuingCntry())) {
@@ -381,37 +357,4 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
 
     return newAddrSeq;
   }
-
-  public String getTrZD01Count(EntityManager entityManager, long reqId) {
-    String zd01count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETZD01COUNT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    List<Object[]> results = query.getResults();
-
-    if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      zd01count = sResult[0].toString();
-    }
-    System.out.println("zd01count = " + zd01count);
-
-    return zd01count;
-  }
-
-  public String getTrZI01Count(EntityManager entityManager, long reqId) {
-    String zi01count = "";
-    String sql = ExternalizedQuery.getSql("TR.GETZI01COUNT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    List<Object[]> results = query.getResults();
-
-    if (results != null && !results.isEmpty()) {
-      Object[] sResult = results.get(0);
-      zi01count = sResult[0].toString();
-    }
-    System.out.println("zi01count = " + zi01count);
-
-    return zi01count;
-  }
-
 }

@@ -197,29 +197,8 @@
     <input type="hidden" name="custNm3_view" id="custNm3_view">
     <input type="hidden" name="custNm4_view" id="custNm4_view">
   </cmr:view>
-  
-  <cmr:view forCountry="862">
-    <cmr:row>
-      <cmr:column span="1">
-        <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="custNm1_view">-</div>
-      </cmr:column>
-    </cmr:row>
 
-    <cmr:row>
-      <cmr:column span="1">
-        <cmr:label fieldId="custNm2_view">${ui.custNameUKI2}:</cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="custNm2_view">-</div>
-      </cmr:column>
-    </cmr:row>
-    <input type="hidden" name="custNm3_view" id="custNm3_view">
-  </cmr:view>
-
-  <cmr:view forCountry="666">
+  <cmr:view forCountry="726,666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
@@ -527,20 +506,7 @@
         <div id="custNm4_view">-</div>
       </cmr:column>
     </cmr:view>
-    
-    <%if ("U".equals(reqentry.getReqType())){%> 
-    <cmr:view forCountry="862" >
-      <cmr:column span="1">
-        <cmr:label fieldId="custNm4_view">
-          <span class="lbl-CustomerName4">${ui.custName4}</span>
-        </cmr:label>:
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="custNm4_view">-</div>
-      </cmr:column>
-    </cmr:view>
-    <%}%> 
-    
+            
      <cmr:view forGEO="SWISS">
       <cmr:column span="1">
         <cmr:label fieldId="custLangCd_view">
