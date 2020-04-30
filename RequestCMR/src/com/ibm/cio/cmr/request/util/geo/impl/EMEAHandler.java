@@ -2220,6 +2220,18 @@ public class EMEAHandler extends BaseSOFHandler {
         if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"TR".equals(addr.getLandCntry())) {
           updateLandCntry(entityManager, addr);
         }
+        // Sync Sold to and Local lauguage address
+        if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp())
+            && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
+          updateSoldToAndTranslation(entityManager, addr);
+        }
+      }
+      if (data != null && admin.getReqType().equals("U")) {
+        // Sync Sold to and Local lauguage address
+        if (!"TR".equals(addr.getLandCntry())
+            && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
+          updateSoldToAndTranslation(entityManager, addr);
+        }
       }
 
       if ("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType())) {
@@ -2627,6 +2639,28 @@ public class EMEAHandler extends BaseSOFHandler {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.LANDEDCNTRY"));
     query.setParameter("LAND_CNTRY", addr.getLandCntry());
     query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.executeSql();
+  }
+
+  private void updateSoldToAndTranslation(EntityManager entityManager, Addr addr) throws Exception {
+    // If Sold-to is updated, then also Translation address must be updated and
+    // vice versa
+    String addrType = "ZP01".equals(addr.getId().getAddrType()) ? "ZS01" : "ZP01";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.SoldToOrTranslation"));
+    query.setParameter("Addr_Type", addrType);
+    query.setParameter("LAND_CNTRY", addr.getLandCntry());
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("Customer_Name", addr.getCustNm1());
+    query.setParameter("Customer_Name_Cont", addr.getCustNm2());
+    query.setParameter("Street", addr.getAddrTxt());
+    query.setParameter("Street_Cont", addr.getAddrTxt2());
+    query.setParameter("City", addr.getCity1());
+    query.setParameter("Province", addr.getStateProv());
+    query.setParameter("Postal_Code", addr.getPostCd());
+    query.setParameter("District", addr.getDept());
+    query.setParameter("PO_Box", addr.getPoBox());
+    query.setParameter("Name_4", addr.getCustNm4());
+
     query.executeSql();
   }
 

@@ -7870,6 +7870,41 @@ function addALPHANUMValidatorForTypeOfCustomer() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
+function addTRLandedCountryValidtor() {
+  console.log("register addTRLandedCountryValidtor . . .");
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                var reqType = FormManager.getActualValue('reqType');
+                if (typeof (CmrGrid.GRIDS.ADDRESS_GRID_GRID) != 'undefined' && CmrGrid.GRIDS.ADDRESS_GRID_GRID != null) {
+                  var addressStore = CmrGrid.GRIDS.ADDRESS_GRID_GRID.store, addressItems = addressStore._arrayOfAllItems, addrGridRow = 0, genericMsg = 'Landed Country value of the Sold-to (Main) Address should not be "TR" for Cross-Border customers.';
+                  if (addressItems != null && addressItems.length != 0) {
+                    for ( var key in addressItems) {
+                      addrGridRow++;
+                      var currentAddr = addressItems[key], landCtry = '', scenario = FormManager.getActualValue('custGrp');
+                      var addrType = currentAddr.addrType[0];
+                      landCtry = currentAddr.landCntry[0];
+                      console.log('addrType >> ' + addrType);
+                      console.log('landCntry >> ' + landCtry);
+                      if (addrType == 'ZS01' && landCtry == 'TR' && reqType == 'C' && scenario == 'CROSS') {
+                        return new ValidationResult(null, false, genericMsg);
+                      }
+                      if (addrType == 'ZS01' && landCtry != 'TR' && reqType == 'C' && scenario == 'LOCAL') {
+                        genericMsg = 'Landed Country value of the Sold-to (Main) Address should be "TR" for Local customers.';
+                        return new ValidationResult(null, false, genericMsg);
+                      }
+                    } // for
+                  }
+                } else {
+                  console.log("CmrGrid.GRIDS.ADDRESS_GRID_GRID undefined/null");
+                }
+                return new ValidationResult(null, true);
+              } // validate
+            }; // return
+          })(), 'MAIN_NAME_TAB', 'frmCMR'); // validator body
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
@@ -7956,6 +7991,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addALPHANUMValidatorForEnterpriseNumber, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForTypeOfCustomer, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addCustNm4ValidatorForTR, [ SysLoc.TURKEY ], null, true);
+  GEOHandler.registerValidator(addTRLandedCountryValidtor, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
 
@@ -8079,7 +8115,6 @@ dojo.addOnLoad(function() {
   // CMR-2205
   GEOHandler.addAfterConfig(autoSetAbbrevNmOnChanageTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(autoSetAbbrevLocnOnChangeTR, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(addTRAddressTypeValidator, [ SysLoc.TURKEY ]);
 
   // CMR-2688
   GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
