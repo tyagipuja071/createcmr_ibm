@@ -2167,7 +2167,7 @@ function setAbbrevNameFRUpdate(cntry, addressMode, saving, finalSave, force) {
   }
 
   if ((addrType != null && (addrType == 'ZS01' || FormManager.getField('addrType_ZS01').checked) && finalSave) || copyingToA) {
-    if (cmr.addressMode != 'updateAddress') {
+    if (cmr.addressMode != 'updateAddress' && copyingToA== false) {
       qParams = {
         REQ_ID : zs01ReqId,
       };
@@ -2187,6 +2187,7 @@ function setAbbrevNameFRUpdate(cntry, addressMode, saving, finalSave, force) {
     }
   }
 }
+
 function addSoldToAddressValidator() {
   FormManager.addFormValidator((function() {
     return {

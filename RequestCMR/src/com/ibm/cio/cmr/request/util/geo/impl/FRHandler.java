@@ -706,6 +706,12 @@ public class FRHandler extends BaseSOFHandler {
         abbrevNmValue = abbrevNmValue + ' ' + singleIndValue;
         data.setAbbrevNm(abbrevNmValue);
       }
+    } else if (admin.getReqType().equalsIgnoreCase("U") && "ZS01".equals(addr.getId().getAddrType())){
+      abbrevNmValue = addr.getCustNm1();
+      if(StringUtils.isNotBlank(abbrevNmValue) && abbrevNmValue.length()>22){
+        abbrevNmValue.substring(0, 22);
+      }
+      data.setAbbrevNm(abbrevNmValue);
     }
 
     entityManager.merge(data);
