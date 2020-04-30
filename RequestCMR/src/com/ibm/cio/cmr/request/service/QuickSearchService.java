@@ -92,7 +92,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
       Collections.sort(result.getItems());
       if ("93".equals(result.getItems().get(0).getCmrOrderBlock())) {
         throw new CmrException(new Exception(
-            "Thie CMR is marked as Inactive/Logically Deleted. For Reactivation, pls import the CMR using CMR Search from the request details page."));
+            "This CMR is marked as Inactive/Logically Deleted. For Reactivation, pls import the CMR using CMR Search from the request details page."));
       }
     }
 
