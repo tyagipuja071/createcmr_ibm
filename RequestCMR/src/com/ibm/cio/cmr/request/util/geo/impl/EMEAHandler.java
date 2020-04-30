@@ -201,7 +201,7 @@ public class EMEAHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !"862".equals(cmrIssueCd)) {
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !("862".equals(cmrIssueCd) || "726".equals(cmrIssueCd))) {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUse(sofUse);
@@ -325,7 +325,80 @@ public class EMEAHandler extends BaseSOFHandler {
                 }
               }
             }
-
+            
+            if ("726".equals(cmrIssueCd)) {
+                seqNo = record.getCmrAddrSeq();
+                if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+                  addrType = record.getCmrAddrTypeCode();
+                  if (!StringUtils.isEmpty(addrType)) {
+                    addr = cloneAddress(record, addrType);
+                    converted.add(addr);
+                  }
+                }
+                
+                if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+                  //Map local language translation of sold to value -- for greece
+                  CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager,
+                      record.getCmrNum(), cmrIssueCd);
+                  CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
+                  FindCMRRecordModel localTransAddr = new FindCMRRecordModel();
+                  PropertyUtils.copyProperties(localTransAddr, record);
+                  // If not in sadr look in DB2
+                  localTransAddr.setCmrAddrSeq(db2LocalTransAddr.getId().getAddrNo());
+                  localTransAddr.setCmrAddrTypeCode("ZP01");
+                  
+                  if(!StringUtils.isBlank(record.getCmrIntlName1())) {
+                    localTransAddr.setCmrName1Plain(record.getCmrIntlName1());
+                  } else {
+                    localTransAddr.setCmrName1Plain(db2LocalTransAddr.getAddrLine1());
+                  }
+                  if(!StringUtils.isBlank(record.getCmrIntlName2())) {
+                    localTransAddr.setCmrName2Plain(record.getCmrIntlName2());
+                  } else {
+                    localTransAddr.setCmrName2Plain(db2LocalTransAddr.getAddrLine2());
+                  }
+                  
+                  if(!StringUtils.isBlank(record.getCmrIntlName4())) {
+                    localTransAddr.setCmrName4(record.getCmrIntlName4());  
+                  } else {
+                    if(db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
+                      localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
+                    }
+                  }
+                  
+                  if(!StringUtils.isBlank(record.getCmrIntlAddress())) {
+                    localTransAddr.setCmrStreetAddress(record.getCmrIntlAddress());
+                  } else {
+                    localTransAddr.setCmrStreetAddress(db2LocalTransAddr.getStreet());
+                  }
+                  
+                  if(!StringUtils.isBlank(record.getCmrOtherIntlAddress())) {
+                    localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
+                  } else {
+                    if(!db2LocalTransAddr.getAddrLine3().startsWith("ATT") && !db2LocalTransAddr.getAddrLine3().startsWith("PO BOX")) {
+                      localTransAddr.setCmrStreetAddressCont(db2LocalTransAddr.getAddrLine3());  
+                    }
+                  }
+                  
+                  if(!StringUtils.isBlank(record.getCmrIntlCity1())) {
+                    localTransAddr.setCmrCity(record.getCmrIntlCity1());
+                  } else {
+                    localTransAddr.setCmrCity(db2LocalTransAddr.getCity());
+                  }
+                  
+                  localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());
+                  localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());
+                  String poBox = db2LocalTransAddr.getPoBox();
+                  if (poBox.contains("PO BOX")) {
+                    poBox = poBox.substring(6).trim();
+                  } else if (poBox.contains("APTO")) {
+                    poBox = poBox.substring(5).trim();
+                  }
+                  localTransAddr.setCmrPOBox(poBox);
+                  localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
+                  converted.add(localTransAddr);
+                }
+              }
           }
 
           if (SystemLocation.UNITED_KINGDOM.equals(mainRecord.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(mainRecord.getCmrIssuedBy())) {
@@ -1821,6 +1894,10 @@ public class EMEAHandler extends BaseSOFHandler {
         address.setDept(currentRecord.getCmrDept());
         address.setCustNm4(currentRecord.getCmrName4());
       }
+      
+  	  if (SystemLocation.GREECE.equals(country)) {
+		address.setCustNm4(currentRecord.getCmrName4());
+	  }
 
       if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
         if (!StringUtils.isEmpty(currentRecord.getCmrName3())) {
