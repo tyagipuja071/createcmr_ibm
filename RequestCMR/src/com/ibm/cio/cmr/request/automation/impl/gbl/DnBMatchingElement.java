@@ -73,6 +73,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        engineData.put(AutomationEngineData.DNB_ALL_MATCHES, dnbMatches);
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           result.setOnError(shouldThrowError);

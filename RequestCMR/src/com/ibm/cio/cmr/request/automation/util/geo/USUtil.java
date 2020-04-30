@@ -13,6 +13,7 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.springframework.ui.ModelMap;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -24,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -36,11 +38,14 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 
@@ -136,6 +141,8 @@ public class USUtil extends AutomationUtil {
   public static List<USBranchOffcMapping> svcARBOMappings = new ArrayList<USBranchOffcMapping>();
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
   public static Map<String, List<String>> stateMktgDepMap = new HashMap<String, List<String>>();
+
+  private static Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
 
   public static String[] COMP_NO_LIST = { "12526663", "12464170", "12539858", "12489905", "12469039", "12329586", "12393039", "12118585", "11206715",
       "12148960", "12501750", "12528315", "12126752", "12232055", "12543418", "12532055", "12550434", "12518669", "12411167", "12236746", "11873808",
@@ -303,9 +310,8 @@ public class USUtil extends AutomationUtil {
               if ("5AA".equalsIgnoreCase(data.getPccArDept())) {
                 pccArDept = "G8M";
               } else {
-                HashMap<String, String> mapUSCMR = new HashMap<>();
-                mapUSCMR = USUtil.determineUSCMRDetails(entityManager, requestData, engineData);
-                pccArDept = StringUtils.isNotBlank(mapUSCMR.get("pccArDept")) ? mapUSCMR.get("pccArDept") : "";
+                USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+                pccArDept = StringUtils.isNotBlank(usDetails.getPccArDept()) ? usDetails.getPccArDept() : "";
               }
             } else {
               if (!"logic".equalsIgnoreCase(mapping.getPccArDept())) {
@@ -335,7 +341,12 @@ public class USUtil extends AutomationUtil {
           }
         }
       } else {
-        engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
+        if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
+          details.append("Branch Office codes computed by another element/external process.");
+        } else {
+          details.append("Automatic computation of Branch Office codes cannot be done for this scenario.");
+          engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
+        }
       }
     }
 
@@ -365,9 +376,8 @@ public class USUtil extends AutomationUtil {
       if ("5AA".equalsIgnoreCase(data.getPccArDept())) {
         pccArDept = "G8M";
       } else {
-        HashMap<String, String> mapUSCMR = new HashMap<>();
-        mapUSCMR = USUtil.determineUSCMRDetails(entityManager, requestData, engineData);
-        pccArDept = StringUtils.isNotBlank(mapUSCMR.get("pccArDept")) ? mapUSCMR.get("pccArDept") : "";
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+        pccArDept = usDetails.getPccArDept();
       }
     }
     return pccArDept;
@@ -539,7 +549,8 @@ public class USUtil extends AutomationUtil {
     } else {
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       boolean hasNegativeCheck = false;
-      String custTypeCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
+      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+      String custTypeCd = detailsCont.getCustTypCd();
       List<String> allowedCodesAddition = Arrays.asList("F", "G", "C", "D", "V", "W", "X");
       List<String> allowedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
       Map<String, String> failedChecks = new HashMap<String, String>();
@@ -835,7 +846,8 @@ public class USUtil extends AutomationUtil {
       validation.setSuccess(true);
     } else {
       StringBuilder details = new StringBuilder();
-      String custTypCd = determineUSCMRDetails(entityManager, requestData, engineData).get("custTypCd");
+      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+      String custTypCd = detailsCont.getCustTypCd();
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
@@ -957,13 +969,13 @@ public class USUtil extends AutomationUtil {
     String cmrNo = "";
 
     // get USCMR values
-    HashMap<String, String> mapUSCMR = new HashMap<>();
-    mapUSCMR = USUtil.determineUSCMRDetails(entityManager, requestData, engineData);
-    custTypCd = StringUtils.isNotBlank(mapUSCMR.get("custTypCd")) ? mapUSCMR.get("custTypCd") : "";
-    usRestricTo = StringUtils.isNotBlank(mapUSCMR.get("usRestricTo")) ? mapUSCMR.get("usRestricTo") : "";
-    companyNo = StringUtils.isNotBlank(mapUSCMR.get("companyNo")) ? mapUSCMR.get("companyNo") : "";
-    bpAccTyp = StringUtils.isNotBlank(mapUSCMR.get("bpAccTyp")) ? mapUSCMR.get("bpAccTyp") : "";
-    mtkgArDept = StringUtils.isNotBlank(mapUSCMR.get("mtkgArDept")) ? mapUSCMR.get("mtkgArDept") : "";
+
+    USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+    custTypCd = usDetails.getCustTypCd();
+    usRestricTo = usDetails.getUsRestrictTo();
+    companyNo = usDetails.getCompanyNo();
+    bpAccTyp = usDetails.getBpAccTyp();
+    mtkgArDept = usDetails.getMktgArDept();
 
     if ("C".equals(admin.getReqType())) {
       cmrNo = StringUtils.isBlank(admin.getModelCmrNo()) ? "" : admin.getModelCmrNo();
@@ -1068,28 +1080,22 @@ public class USUtil extends AutomationUtil {
     return custSubGroup;
   }
 
-  public static HashMap<String, String> determineUSCMRDetails(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
+  public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo, AutomationEngineData engineData)
       throws Exception {
     // get request admin and data
-    HashMap<String, String> mapUSCMR = new HashMap<>();
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
+    if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
+      return usDetailsMap.get(cmrNo);
+    }
+    USDetailsContainer usDetails = new USDetailsContainer();
     String custTypCd = "NA";
     String entType = "";
     String leasingCo = "";
     String bpAccTyp = "";
     String cGem = "";
-    String usRestricTo = "";
+    String usRestrictTo = "";
     String companyNo = "";
     String pccArDept = "";
     String mtkgArDept = "";
-
-    String cmrNo = "";
-    if ("C".equals(admin.getReqType())) {
-      cmrNo = StringUtils.isBlank(admin.getModelCmrNo()) ? "" : admin.getModelCmrNo();
-    } else if ("U".equals(admin.getReqType())) {
-      cmrNo = StringUtils.isNotBlank(data.getCmrNo()) ? data.getCmrNo() : "";
-    }
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
@@ -1123,7 +1129,7 @@ public class USUtil extends AutomationUtil {
       leasingCo = (String) record.get("C_LEASING_CO");
       bpAccTyp = (String) record.get("I_BP_ACCOUNT_TYPE");
       cGem = (String) record.get("C_GEM");
-      usRestricTo = (String) record.get("C_COM_RESTRCT_CODE");
+      usRestrictTo = (String) record.get("C_COM_RESTRCT_CODE");
       companyNo = String.valueOf(record.get("I_CO"));
       pccArDept = (String) record.get("I_CUST_OFF_5");
       mtkgArDept = (String) record.get("I_CUST_OFF_3");
@@ -1143,17 +1149,69 @@ public class USUtil extends AutomationUtil {
         custTypCd = COMMERCIAL;
       }
     }
-    mapUSCMR.put("custTypCd", custTypCd);
-    mapUSCMR.put("entType", entType);
-    mapUSCMR.put("leasingCo", leasingCo);
-    mapUSCMR.put("bpAccTyp", bpAccTyp);
-    mapUSCMR.put("cGem", cGem);
-    mapUSCMR.put("usRestricTo", usRestricTo);
-    mapUSCMR.put("companyNo", companyNo);
-    mapUSCMR.put("pccArDept", pccArDept);
-    mapUSCMR.put("mtkgArDept", mtkgArDept);
-    // System.out.println(mapUSCMR);
-    return mapUSCMR;
+    usDetails.setCustTypCd(custTypCd);
+    usDetails.setEntType(entType);
+    usDetails.setLeasingCo(leasingCo);
+    usDetails.setBpAccTyp(bpAccTyp);
+    usDetails.setcGem(cGem);
+    usDetails.setUsRestrictTo(usRestrictTo);
+    usDetails.setCompanyNo(companyNo);
+    usDetails.setMktgArDept(mtkgArDept);
+
+    usDetails.setPccArDept(pccArDept);
+    usDetailsMap.put(cmrNo, usDetails);
+    return usDetails;
+  }
+
+  /**
+   * Gets D&B matches for BP end users
+   * 
+   * @param handler
+   * @param requestData
+   * @param engineData
+   * @return
+   * @throws Exception
+   */
+  public static List<DnBMatchingResponse> getMatchesForBPEndUser(GEOHandler handler, RequestData requestData, AutomationEngineData engineData)
+      throws Exception {
+    List<DnBMatchingResponse> closeMatches = new ArrayList<DnBMatchingResponse>();
+    MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
+    Addr addr = requestData.getAddress("ZS01");
+    Admin admin = requestData.getAdmin();
+    GBGFinderRequest request = new GBGFinderRequest();
+    request.setMandt(SystemConfiguration.getValue("MANDT"));
+    if (addr != null) {
+      request.setCity(addr.getCity1());
+      request.setCustomerName(addr.getDivn());
+      request.setStreetLine1(addr.getAddrTxt());
+      request.setStreetLine2(addr.getAddrTxt2());
+      request.setLandedCountry(addr.getLandCntry());
+      request.setPostalCode(addr.getPostCd());
+      request.setStateProv(addr.getStateProv());
+      request.setMinConfidence("8");
+      MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          MatchingServiceClient.class);
+      client.setReadTimeout(1000 * 60 * 5);
+      LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+      MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+      ObjectMapper mapper = new ObjectMapper();
+      String json = mapper.writeValueAsString(rawResponse);
+
+      TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
+      };
+
+      response = mapper.readValue(json, ref);
+
+      if (response != null && response.getMatched()) {
+        for (DnBMatchingResponse dnbRecord : response.getMatches()) {
+          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn())) {
+            closeMatches.add(dnbRecord);
+          }
+        }
+      }
+    }
+
+    return closeMatches;
   }
 
 }
