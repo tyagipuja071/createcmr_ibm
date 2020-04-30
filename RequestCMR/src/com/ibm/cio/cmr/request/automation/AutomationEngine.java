@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.automation;
 import java.lang.reflect.Constructor;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
@@ -128,6 +130,14 @@ public class AutomationEngine {
     String reqType = requestData.getAdmin().getReqType();
     String reqStatus = requestData.getAdmin().getReqStatus();
     // put the current engine data on the thread, for reuse if needed
+
+    // check child request status first
+    long childReqId = requestData.getAdmin().getChildReqId();
+    if (childReqId > 0 && isChildPending(entityManager, childReqId)) {
+      LOG.debug("Child request for this request is still pending. Skipping all processing.");
+      return;
+    }
+
     List<ActionOnError> actionsOnError = new ArrayList<>();
     LOG.trace("Preparing engine data..");
     engineData.remove();
@@ -145,6 +155,7 @@ public class AutomationEngine {
     createComment(entityManager, "Automated system checks have been started.", reqId, appUser);
 
     boolean systemError = false;
+    boolean processWaiting = false;
     boolean stopExecution = false;
     int lastElementIndex = 0;
 
@@ -196,7 +207,12 @@ public class AutomationEngine {
         result.record(entityManager, resultId, appUser, requestData, systemError ? "S" : (result.isOnError() ? "P" : null));
 
         // check processing
-        if (result.isOnError()) {
+        if ((element instanceof ProcessWaitingElement) && ((ProcessWaitingElement) element).isWaiting()) {
+          LOG.debug("Element is waiting on external processes. No action for this run");
+          stopExecution = true;
+          processWaiting = true;
+          break;
+        } else if (result.isOnError()) {
           if (ActionOnError.Ignore.equals(element.getActionOnError())) {
             LOG.debug("Element " + element.getProcessDesc() + " encountered an error but was ignored.");
           } else {
@@ -262,190 +278,199 @@ public class AutomationEngine {
       admin.setScenarioVerifiedIndc(scenarioVerifiedIndc);
     }
 
-    if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
-      if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
-        // change status to retry
-        if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
-          createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
-          admin.setReqStatus("PPN");
-        } else {
-          createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
-          admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
-        }
-
-      } else {
-        String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
-        // change status to awaiting processing
-        createComment(entityManager, "System failed to complete processing during the retry. Please wait a while then reprocess the record.", reqId,
-            appUser);
-        admin.setLastProcCenterNm(processingCenter);
-        admin.setReqStatus(AutomationConst.STATUS_AWAITING_PROCESSING);
-        createHistory(entityManager, admin, "System failed to complete processing during the retry. Please wait a while then reprocess the record.",
-            AutomationConst.STATUS_AWAITING_PROCESSING, "Automated Processing", reqId, appUser, null, null, false);
+    if (processWaiting) {
+      if (requestData.getAdmin().getChildReqId() > 0) {
+        LOG.debug("Adding process waiting comment log.");
+        createComment(entityManager, "Automated checks is waiting on child request " + requestData.getAdmin().getChildReqId() + " before proceeding.",
+            reqId, appUser);
       }
     } else {
-      boolean moveToNextStep = true;
-      if (!actionsOnError.isEmpty()) {
-        // an error has occurred
-        if (actionsOnError.contains(ActionOnError.Reject)) {
-          moveToNextStep = false;
-          // reject the record
-          StringBuilder rejCmtBuilder = new StringBuilder();
-          rejCmtBuilder.append("The record has been rejected due to some system processing errors");
-          rejectComments = (List<String>) engineData.get().get("rejections");
-          if (rejectComments != null && !rejectComments.isEmpty()) {
-            rejCmtBuilder.append(":");
-            for (String rejCmt : rejectComments) {
-              rejCmtBuilder.append("\n ");
-              rejCmtBuilder.append(rejCmt);
-            }
+      if (systemError || "N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
+        if (AutomationConst.STATUS_AUTOMATED_PROCESSING.equals(reqStatus)) {
+          // change status to retry
+          if ("N".equalsIgnoreCase(admin.getCompVerifiedIndc())) {
+            createComment(entityManager, "Processing error encountered as data is not company verified.", reqId, appUser);
+            admin.setReqStatus("PPN");
           } else {
-            rejCmtBuilder.append(".");
+            createComment(entityManager, "A system error occurred during the processing. A retry will be attempted shortly.", reqId, appUser);
+            admin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING_RETRY);
           }
-          String cmt = rejCmtBuilder.toString();
-          if (cmt.length() > 1000) {
-            cmt = cmt.substring(0, 1996) + "...";
+
+        } else {
+          String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
+          // change status to awaiting processing
+          createComment(entityManager, "System failed to complete processing during the retry. Please wait a while then reprocess the record.", reqId,
+              appUser);
+          admin.setLastProcCenterNm(processingCenter);
+          admin.setReqStatus(AutomationConst.STATUS_AWAITING_PROCESSING);
+          createHistory(entityManager, admin, "System failed to complete processing during the retry. Please wait a while then reprocess the record.",
+              AutomationConst.STATUS_AWAITING_PROCESSING, "Automated Processing", reqId, appUser, null, null, false);
+        }
+      } else {
+        boolean moveToNextStep = true;
+        if (!actionsOnError.isEmpty()) {
+          // an error has occurred
+          if (actionsOnError.contains(ActionOnError.Reject)) {
+            moveToNextStep = false;
+            // reject the record
+            StringBuilder rejCmtBuilder = new StringBuilder();
+            rejCmtBuilder.append("The record has been rejected due to some system processing errors");
+            rejectComments = (List<String>) engineData.get().get("rejections");
+            if (rejectComments != null && !rejectComments.isEmpty()) {
+              rejCmtBuilder.append(":");
+              for (String rejCmt : rejectComments) {
+                rejCmtBuilder.append("\n ");
+                rejCmtBuilder.append(rejCmt);
+              }
+            } else {
+              rejCmtBuilder.append(".");
+            }
+            String cmt = rejCmtBuilder.toString();
+            if (cmt.length() > 1000) {
+              cmt = cmt.substring(0, 1996) + "...";
+            }
+            admin.setReqStatus("PRJ");
+            createHistory(entityManager, admin, cmt, "PRJ", "Automated Processing", reqId, appUser, null, "Errors in automated checks", true);
+            admin.setLastProcCenterNm(null);
+            admin.setLockInd("N");
+            admin.setLockByNm(null);
+            admin.setLockBy(null);
+            admin.setLockTs(null);
+            createComment(entityManager, cmt, reqId, appUser);
+
+          } else if (actionsOnError.contains(ActionOnError.Wait)) {
+            // do not change status
+            moveToNextStep = false;
+            String cmt = "";
+            StringBuilder rejectCmt = new StringBuilder();
+            List<String> rejectionComments = (List<String>) engineData.get().get("rejections");
+            Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
+            if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+              rejectCmt.append("Processor review is required for following issues");
+              rejectCmt.append(":");
+              if (rejectComments != null && !rejectComments.isEmpty()) {
+                for (String rejCmt : rejectComments) {
+                  rejectCmt.append("\n ");
+                  rejectCmt.append(rejCmt);
+                }
+              }
+              // append pending checks
+              if (pendingChecks != null && !pendingChecks.isEmpty()) {
+                for (String pendingCheck : pendingChecks.values()) {
+                  rejectCmt.append("\n ");
+                  rejectCmt.append(pendingCheck);
+                }
+              }
+              cmt = rejectCmt.toString();
+
+              if (cmt.length() > 1930) {
+                cmt = cmt.substring(0, 1920) + "...";
+              }
+              cmt += "\n\nPlease view system processing results for more details.";
+              admin.setReviewReqIndc("Y");
+              createComment(entityManager, cmt, reqId, appUser);
+            }
+            if (actionsOnError.size() > 1) {
+              admin.setReviewReqIndc("Y");
+            }
+            cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
+            createComment(entityManager, cmt, reqId, appUser);
+            admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
+            createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,
+                false);
           }
-          admin.setReqStatus("PRJ");
-          createHistory(entityManager, admin, cmt, "PRJ", "Automated Processing", reqId, appUser, null, "Errors in automated checks", true);
-          admin.setLastProcCenterNm(null);
+        }
+        if (moveToNextStep) {
+
+          // if there is anything that changed on the request via automated
+          // import
+          // of overrides/match/standard output, do a save
+
+          if (hasOverrideOrMatchingApplied) {
+            GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+            if (geoHandler != null) {
+
+              LOG.debug("Performing GEO Handler saves on request..");
+
+              geoHandler.doBeforeAdminSave(entityManager, admin, data.getCmrIssuingCntry());
+
+              if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
+                // TODO - check if this is needed
+                // geoHandler.setDataDefaultsOnCreate(data, entityManager);
+                // geoHandler.doBeforeDataSave(entityManager, admin, data,
+                // data.getCmrIssuingCntry());
+              } else {
+                // geoHandler.doBeforeDataSave(entityManager, admin, data,
+                // data.getCmrIssuingCntry());
+              }
+            }
+          }
+
+          // check configured setting for what to do upon completion
+          boolean processOnCompletion = isProcessOnCompletion(entityManager, data.getCmrIssuingCntry(), admin.getReqType());
+
+          // if any element reported an error, it should always be reviewed by
+          // processor
+          processOnCompletion = processOnCompletion && actionsOnError.isEmpty();
+
+          String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
+          admin.setLastProcCenterNm(processingCenter);
           admin.setLockInd("N");
           admin.setLockByNm(null);
           admin.setLockBy(null);
           admin.setLockTs(null);
-          createComment(entityManager, cmt, reqId, appUser);
-
-        } else if (actionsOnError.contains(ActionOnError.Wait)) {
-          // do not change status
-          moveToNextStep = false;
-          String cmt = "";
-          StringBuilder rejectCmt = new StringBuilder();
-          List<String> rejectionComments = (List<String>) engineData.get().get("rejections");
+          admin.setProcessedFlag("N");
           Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
-          if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
-            rejectCmt.append("Processor review is required for following issues");
-            rejectCmt.append(":");
-            if (rejectComments != null && !rejectComments.isEmpty()) {
+          pendingChecks = pendingChecks != null ? pendingChecks : new HashMap<String, String>();
+          if (processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) {
+            // move to PCP
+            admin.setReqStatus("PCP");
+            String cmt = "Automated checks completed successfully. Request is ready for processing.";
+            createComment(entityManager, cmt, reqId, appUser);
+            createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true);
+          } else {
+            // move to PPN
+            String cmt = null;
+            admin.setReqStatus("PPN");
+            StringBuilder rejCmtBuilder = new StringBuilder();
+            rejectComments = (List<String>) engineData.get().get("rejections");
+            // add comments if request rejected or if pending checks
+            if ((rejectComments != null && !rejectComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+              rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
+              rejCmtBuilder.append(":");
               for (String rejCmt : rejectComments) {
-                rejectCmt.append("\n ");
-                rejectCmt.append(rejCmt);
+                rejCmtBuilder.append("\n ");
+                rejCmtBuilder.append(rejCmt);
               }
-            }
-            // append pending checks
-            if (pendingChecks != null && !pendingChecks.isEmpty()) {
+              // append pending checks
               for (String pendingCheck : pendingChecks.values()) {
-                rejectCmt.append("\n ");
-                rejectCmt.append(pendingCheck);
+                rejCmtBuilder.append("\n ");
+                rejCmtBuilder.append(pendingCheck);
               }
-            }
-            cmt = rejectCmt.toString();
+              cmt = rejCmtBuilder.toString();
 
-            if (cmt.length() > 1930) {
-              cmt = cmt.substring(0, 1920) + "...";
-            }
-            cmt += "\n\nPlease view system processing results for more details.";
-            admin.setReviewReqIndc("Y");
-            createComment(entityManager, cmt, reqId, appUser);
-          }
-          if (actionsOnError.size() > 1) {
-            admin.setReviewReqIndc("Y");
-          }
-          cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
-          createComment(entityManager, cmt, reqId, appUser);
-          admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
-          createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,
-              false);
-        }
-      }
-      if (moveToNextStep) {
-
-        // if there is anything that changed on the request via automated import
-        // of overrides/match/standard output, do a save
-
-        if (hasOverrideOrMatchingApplied) {
-          GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-          if (geoHandler != null) {
-
-            LOG.debug("Performing GEO Handler saves on request..");
-
-            geoHandler.doBeforeAdminSave(entityManager, admin, data.getCmrIssuingCntry());
-
-            if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
-              // TODO - check if this is needed
-              // geoHandler.setDataDefaultsOnCreate(data, entityManager);
-              // geoHandler.doBeforeDataSave(entityManager, admin, data,
-              // data.getCmrIssuingCntry());
+              if (cmt.length() > 1930) {
+                cmt = cmt.substring(0, 1920) + "...";
+              }
+              cmt += "\n\nPlease view system processing results for more details.";
             } else {
-              // geoHandler.doBeforeDataSave(entityManager, admin, data,
-              // data.getCmrIssuingCntry());
+              cmt = "Automated checks completed successfully.";
             }
-          }
-        }
-
-        // check configured setting for what to do upon completion
-        boolean processOnCompletion = isProcessOnCompletion(entityManager, data.getCmrIssuingCntry(), admin.getReqType());
-
-        // if any element reported an error, it should always be reviewed by
-        // processor
-        processOnCompletion = processOnCompletion && actionsOnError.isEmpty();
-
-        String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
-        admin.setLastProcCenterNm(processingCenter);
-        admin.setLockInd("N");
-        admin.setLockByNm(null);
-        admin.setLockBy(null);
-        admin.setLockTs(null);
-        admin.setProcessedFlag("N");
-        Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
-        pendingChecks = pendingChecks != null ? pendingChecks : new HashMap<String, String>();
-        if (processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) {
-          // move to PCP
-          admin.setReqStatus("PCP");
-          String cmt = "Automated checks completed successfully. Request is ready for processing.";
-          createComment(entityManager, cmt, reqId, appUser);
-          createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true);
-        } else {
-          // move to PPN
-          String cmt = null;
-          admin.setReqStatus("PPN");
-          StringBuilder rejCmtBuilder = new StringBuilder();
-          rejectComments = (List<String>) engineData.get().get("rejections");
-          // add comments if request rejected or if pending checks
-          if ((rejectComments != null && !rejectComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
-            rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
-            rejCmtBuilder.append(":");
-            for (String rejCmt : rejectComments) {
-              rejCmtBuilder.append("\n ");
-              rejCmtBuilder.append(rejCmt);
+            if (stopExecution) {
+              cmt = "Automated checks stopped execution due to an error reported by one of the processes.";
+            } else {
+              createComment(entityManager, cmt, reqId, appUser);
             }
-            // append pending checks
-            for (String pendingCheck : pendingChecks.values()) {
-              rejCmtBuilder.append("\n ");
-              rejCmtBuilder.append(pendingCheck);
+            String histCmt = cmt;
+            if (cmt.length() > 1000) {
+              histCmt = "The request needs further review due to some issues found during automated checks. Check the request comment log and system processing results for details.";
             }
-            cmt = rejCmtBuilder.toString();
+            createHistory(entityManager, admin, histCmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false);
+          }
 
-            if (cmt.length() > 1930) {
-              cmt = cmt.substring(0, 1920) + "...";
-            }
-            cmt += "\n\nPlease view system processing results for more details.";
-          } else {
-            cmt = "Automated checks completed successfully.";
-          }
-          if (stopExecution) {
-            cmt = "Automated checks stopped execution due to an error reported by one of the processes.";
-          } else {
-            createComment(entityManager, cmt, reqId, appUser);
-          }
-          String histCmt = cmt;
-          if (cmt.length() > 1000) {
-            histCmt = "The request needs further review due to some issues found during automated checks. Check the request comment log and system processing results for details.";
-          }
-          createHistory(entityManager, admin, histCmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false);
         }
 
       }
-
     }
     admin.setLastUpdtBy(appUser.getIntranetId());
     admin.setLastUpdtTs(SystemUtil.getActualTimestamp());
@@ -615,4 +640,24 @@ public class AutomationEngine {
     return user;
   }
 
+  /**
+   * Checks if the child request's status is part of the 'stop' statuses.
+   * Completed, Draft, Rejected, Cancelled
+   * 
+   * @param entityManager
+   * @param childReqId
+   * @return
+   */
+  private boolean isChildPending(EntityManager entityManager, long childReqId) {
+    LOG.debug("Checking child request status..");
+    String sql = ExternalizedQuery.getSql("AUTO.CHECK_CHILD_STATUS");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CHILD_ID", childReqId);
+    String status = query.getSingleResult(String.class);
+    if (status == null) {
+      return false;
+    }
+    return (!Arrays.asList("COM", "PRJ", "DRA", "CAN").contains(status));
+  }
 }

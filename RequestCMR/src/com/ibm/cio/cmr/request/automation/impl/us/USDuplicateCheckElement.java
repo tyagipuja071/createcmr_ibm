@@ -3,7 +3,6 @@ package com.ibm.cio.cmr.request.automation.impl.us;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.DuplicateChecksUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -274,7 +274,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           result.setResults("Duplicate Request Check Encountered an error.");
         }
       } else if (cmrChkSrvError) {
-        if (response.getSuccess()) {
+        if (responseCMR.getSuccess()) {
           result.setDetails(responseCMR.getMessage());
           engineData.addRejectionComment(responseCMR.getMessage());
           result.setOnError(true);
@@ -453,65 +453,64 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         Collections.copy(reqCheckMatches, reqCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
-        HashMap<String, String> mapUSCMR = new HashMap<>();
-        mapUSCMR = USUtil.determineUSCMRDetails(entityManager, requestData, engineData);
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
 
-        if ("6".equals(mapUSCMR.get("custTypCd"))) {
+        if ("6".equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
               reqCheckMatchesTmp.add(reqCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("4".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("4".equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
               reqCheckMatchesTmp.add(reqCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("3".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("3".equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo")) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
-                && StringUtils.isNotBlank(mapUSCMR.get("usRestricTo"))
-                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(mapUSCMR.get("usRestricTo"))) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
+                && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
               reqCheckMatchesTmp.add(reqCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("7".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("7".equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo")) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
-                && StringUtils.isNotBlank(mapUSCMR.get("usRestricTo"))
-                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(mapUSCMR.get("usRestricTo"))) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
+                && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
               reqCheckMatchesTmp.add(reqCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("2".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("2".equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
               reqCheckMatchesTmp.add(reqCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("1".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("1".equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && reqCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))
-                && ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(mapUSCMR.get("usRestricTo"))
-                    && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(mapUSCMR.get("usRestricTo")))
-                    || (StringUtils.isBlank(mapUSCMR.get("usRestricTo")) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())))) {
+            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
+                && ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                    && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
+                    || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())))) {
               reqCheckMatchesTmp.add(reqCheckRecord);
             }
           }
@@ -678,57 +677,56 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         Collections.copy(cmrCheckMatches, cmrCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
-        HashMap<String, String> mapUSCMR = new HashMap<>();
-        mapUSCMR = USUtil.determineUSCMRDetails(entityManager, requestData, engineData);
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
 
-        if ("6".equals(mapUSCMR.get("custTypCd"))) {
+        if ("6".equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
               cmrCheckMatchesTmp.add(cmrCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("4".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("4".equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
               cmrCheckMatchesTmp.add(cmrCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("3".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("3".equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo")) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo())
-                && StringUtils.isNotBlank(mapUSCMR.get("usRestricTo"))
-                && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(mapUSCMR.get("usRestricTo"))) {
+            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo())
+                && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
               cmrCheckMatchesTmp.add(cmrCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("7".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("7".equals(usDetails.getCustTypCd())) {
           Collections.copy(cmrCheckMatches, cmrCheckMatches);
           reqNegStatFlag = true;
-        } else if ("2".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("2".equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))) {
+            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
               cmrCheckMatchesTmp.add(cmrCheckRecord);
               reqNegStatFlag = true;
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("1".equals(mapUSCMR.get("custTypCd"))) {
+        } else if ("1".equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(mapUSCMR.get("companyNo"))
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(mapUSCMR.get("companyNo"))
-                && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(mapUSCMR.get("usRestricTo"))
-                    && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(mapUSCMR.get("usRestricTo")))
-                    || (StringUtils.isBlank(mapUSCMR.get("usRestricTo")) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))) {
+            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
+                && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                    && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
+                    || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))) {
               cmrCheckMatchesTmp.add(cmrCheckRecord);
             }
           }
