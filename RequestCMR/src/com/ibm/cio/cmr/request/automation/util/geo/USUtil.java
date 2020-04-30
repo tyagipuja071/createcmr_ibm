@@ -519,8 +519,8 @@ public class USUtil extends AutomationUtil {
       if (StringUtils.isNotBlank(procCntr) && "Kuala Lumpur".equalsIgnoreCase(procCntr)) {
         valid = true;
       } else {
-        engineData.addRejectionComment(
-            "Federal CMR with restricted ISIC code is only allowed to be requested via FedCMR, please raise the request in FedCMR.");
+        engineData.addRejectionComment("OTH",
+            "Federal CMR with restricted ISIC code is only allowed to be requested via FedCMR, please raise the request in FedCMR.", "", "");
         details.append("\nFederal CMR with restricted ISIC code is only allowed to be requested via FedCMR, please raise the request in FedCMR.")
             .append("\n");
         valid = false;
@@ -610,7 +610,7 @@ public class USUtil extends AutomationUtil {
               if ("5B".equals(updatedDataModel.getNewData())) {
                 String error = performCSPCheck(cedpManager, entityManager, data);
                 if (StringUtils.isNotBlank(error)) {
-                  engineData.addRejectionComment(error);
+                  engineData.addRejectionComment("OTH", error, "", "");
                   LOG.debug(error);
                   output.setDetails(error);
                   output.setOnError(true);
@@ -632,7 +632,7 @@ public class USUtil extends AutomationUtil {
                 } else {
                   String error = performEnterpriseAffiliateCheck(cedpManager, entityManager, requestData);
                   if (StringUtils.isNotBlank(error)) {
-                    engineData.addRejectionComment(error);
+                    engineData.addRejectionComment("OTH", error, "", "");
                     LOG.debug(error);
                     output.setDetails(error);
                     output.setOnError(true);
@@ -647,7 +647,7 @@ public class USUtil extends AutomationUtil {
             case "ISIC":
               String error = performISICCheck(cedpManager, entityManager, requestData);
               if (StringUtils.isNotBlank(error)) {
-                engineData.addRejectionComment(error);
+                engineData.addRejectionComment("OTH", error, "", "");
                 LOG.debug(error);
                 output.setDetails(error);
                 output.setOnError(true);
@@ -675,7 +675,7 @@ public class USUtil extends AutomationUtil {
         if ("CSP".equals(admin.getReqReason())) {
           String error = performCSPCheck(cedpManager, entityManager, data);
           if (StringUtils.isNotBlank(error)) {
-            engineData.addRejectionComment(error);
+            engineData.addRejectionComment("OTH", error, "", "");
             LOG.debug(error);
             output.setOnError(true);
             output.setDetails(error);
