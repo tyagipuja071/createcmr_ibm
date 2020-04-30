@@ -1592,7 +1592,7 @@ public class TurkeyTransformer extends EMEATransformer {
           CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
           if ("Y".equals(olddataaddr.getIsAddrUseMailing()) && "Y".equals(olddataaddr.getIsAddrUseBilling())) {
             // copy billing from mailing
-            copyBillingFromMailing(legacyObjects, legacyAddrList.get(i), billingseq);
+            copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
             olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
             olddataaddr.setForUpdate(true);
           }
