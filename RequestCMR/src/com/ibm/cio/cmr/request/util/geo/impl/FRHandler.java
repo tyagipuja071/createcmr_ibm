@@ -434,6 +434,9 @@ public class FRHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    if(admin.getReqType().equals("U")){
+      setAbbrevNameOnDataSave(entityManager,data);
+    }
     // autoSetAbbrevNmAfterImport(entityManager, admin, data);
   }
 
@@ -1165,5 +1168,27 @@ public class FRHandler extends BaseSOFHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+  
+  private void setAbbrevNameOnDataSave(EntityManager entityManager, Data data){
+    String abbrevNmValue ="";
+    String abbNmSql = ExternalizedQuery.getSql("QUERY.ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP");
+    PreparedQuery abbNmQuery = new PreparedQuery(entityManager, abbNmSql);
+    abbNmQuery.setParameter("REQ_ID", data.getId().getReqId());
+    abbNmQuery.setParameter("ADDR_TYPE", "ZS01");
+    List<String> abbNmResults = abbNmQuery.getResults(String.class);
+    if (abbNmResults != null && !abbNmResults.isEmpty()) {
+      abbrevNmValue = abbNmResults.get(0);
+    } else if (abbNmResults == null || abbNmResults.isEmpty()) {
+      abbrevNmValue="";
+    } 
+    if(StringUtils.isNotBlank(abbrevNmValue) && abbrevNmValue.length()>22){
+      abbrevNmValue.substring(0, 22);
+    }
+    data.setAbbrevNm(abbrevNmValue);
+  
+      entityManager.merge(data);
+      entityManager.flush();
+      return;
   }
 }
