@@ -1026,8 +1026,6 @@ public class ItalyTransformer extends EMEATransformer {
           && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
-      } else if (CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(admin.getReqType())) {
-        legacyCust.setStatus("A");
       }
     }
 

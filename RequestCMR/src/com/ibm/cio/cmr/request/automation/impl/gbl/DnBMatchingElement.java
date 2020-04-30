@@ -167,6 +167,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
               processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              itemNo++;
             }
             engineData.addRejectionComment(
                 "Matches against D&B were found but no record matched the request data. Please correct name/address information.");
