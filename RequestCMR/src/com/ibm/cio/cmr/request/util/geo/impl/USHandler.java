@@ -192,6 +192,7 @@ public class USHandler extends GEOHandler {
     query.addField("TAX_CD1");
     query.addField("ABBREV_NM");
     query.addField("I_CUST_ADDR_TYPE");
+    query.addField("TAX_EXEMPT_STATUS");
 
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
 
@@ -228,7 +229,7 @@ public class USHandler extends GEOHandler {
         data.setMiscBillCd(data.getMiscBillCd().trim().substring(0, 3));
       }
       data.setTaxCd3((String) record.get("TAX_CD3"));
-      data.setSpecialTaxCd((String) record.get("cmrTaxCertStatus"));
+      data.setSpecialTaxCd((String) record.get("TAX_EXEMPT_STATUS"));
       data.setBpName((String) record.get("BP_NAME"));
       data.setIccTaxClass((String) record.get("ICC_TAX_CLASS"));
       data.setIccTaxExemptStatus((String) record.get("ICC_TAX_EXEMPT_STATUS"));
