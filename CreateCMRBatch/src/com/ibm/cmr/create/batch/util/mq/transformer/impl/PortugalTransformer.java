@@ -3,6 +3,8 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -16,24 +18,44 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
+import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 
 /**
- * @author Jeffrey Zamora
+ * @author Dhananjay Yadav
  * 
  */
-public class PortugalTransformer extends SpainTransformer {
+public class PortugalTransformer extends MessageTransformer {
+
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "ZP02" };
 
   private static final Logger LOG = Logger.getLogger(PortugalTransformer.class);
 
+  private static final List<String> EU_COUNTRIES = Arrays.asList("AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "GR", "FI", "FR", "GB", "HU",
+      "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK");
+
+  private static final List<String> NON_EU_COUNTRIES = Arrays.asList("SG", "BA", "GE", "IL", "CO", "CR", "SA", "MA", "SO", "MU", "SS", "BI", "ZA",
+      "AE", "NA", "ML", "GU", "CA", "AW");
+
+  public static final String DEFAULT_LANDED_COUNTRY = "PT";
+  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  public static final String CMR_REQUEST_STATUS_PCR = "PCR";
+  public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
+
+  public PortugalTransformer(String issuingCntry) {
+    super(issuingCntry);
+  }
+
   public PortugalTransformer() {
     super(SystemLocation.PORTUGAL);
-
   }
 
   @Override
@@ -49,10 +71,35 @@ public class PortugalTransformer extends SpainTransformer {
     boolean crossBorder = isCrossBorder(addrData);
 
     String vat = cmrData.getVat();
-    // trim VAT prefix for Local
-    if (!crossBorder) {
+    // trim VAT prefix for Local Defect 1481070 fix: change cross border based on billing only
+    if (!zs01CrossBorder(handler)) {
       if (!StringUtils.isEmpty(vat) && vat.matches("^[A-Z]{2}.*")) {
         messageHash.put("VAT", vat.substring(2, vat.length()));
+      }
+    }
+
+    // for cross border,
+    // the AbbreviatedLocation is VAT, and VAT is constant
+    if (zs01CrossBorder(handler)) {
+
+      // rework for story 1618024
+
+      if (!StringUtils.isEmpty(vat)) {
+        messageHash.put("AbbreviatedLocation", cmrData.getAbbrevLocn());
+
+        // for nonEU, set CustomerLocation = Country Code + 000, 999 if EU
+        if (EU_COUNTRIES.contains(addrData.getLandCntry())) {
+          messageHash.put("LocationNumber", addrData.getLandCntry() + "999");
+        } else if (NON_EU_COUNTRIES.contains(addrData.getLandCntry())) {
+          messageHash.put("LocationNumber", addrData.getLandCntry() + "999");
+        } else {
+          messageHash.put("LocationNumber", addrData.getLandCntry() + "000");
+        }
+        messageHash.put("VAT", "CEE000000");
+      } else {
+        // CB without VAT : AbbrevLoc =Country Name, VAT =A00000000
+        messageHash.put("AbbreviatedLocation", LandedCountryMap.getCountryName(addrData.getLandCntry()));
+        messageHash.put("VAT", "A00000000");
       }
     }
 
@@ -62,6 +109,27 @@ public class PortugalTransformer extends SpainTransformer {
     messageHash.put("EmbargoCode", !StringUtils.isEmpty(cmrData.getEmbargoCd()) ? cmrData.getEmbargoCd() : "");
     messageHash.put("EconomicCode", "");
 
+    String embargoCode = !StringUtils.isEmpty(cmrData.getEmbargoCd()) ? cmrData.getEmbargoCd() : "";
+    messageHash.put("EmbargoCode", embargoCode);
+
+    if (!StringUtils.isEmpty(cmrData.getMailingCondition()) && !"X".equals(cmrData.getMailingCondition())) {
+      messageHash.put("MailingCondition", cmrData.getMailingCondition());
+    } else {
+      messageHash.put("MailingCondition", update ? "@" : "");
+    }
+
+    if (!StringUtils.isEmpty(cmrData.getSubIndustryCd())) {
+      messageHash.put("EconomicCode", cmrData.getSubIndustryCd().substring(0, 1) + cmrData.getSubIndustryCd());
+    } else {
+      messageHash.put("EconomicCode", "");
+    }
+    handleDataDefaults(handler, messageHash, cmrData, crossBorder, addrData);
+
+    // RTC1406039: if vat is empty, send dummy VAT A00000000
+    if (StringUtils.isEmpty(messageHash.get("VAT"))) {
+      messageHash.put("VAT", "A00000000");
+    }
+
     if (update) {
       String phone = getBillingPhone(handler);
       messageHash.put("MailPhone", phone);
@@ -70,18 +138,16 @@ public class PortugalTransformer extends SpainTransformer {
       if (StringUtils.isEmpty(cmrData.getIsuCd()) || StringUtils.isEmpty(cmrData.getClientTier())) {
         messageHash.put("ISU", "");
       }
-
     }
-    handleDataDefaults(handler, messageHash, cmrData, crossBorder, addrData);
   }
 
   @Override
   public void formatAddressLines(MQMessageHandler handler) {
     Addr addrData = handler.addrData;
+    Data cmrData = handler.cmrData;
     boolean update = "U".equals(handler.adminData.getReqType());
     boolean crossBorder = isCrossBorder(addrData);
 
-    Data cmrData = handler.cmrData;
     Map<String, String> messageHash = handler.messageHash;
     String addrKey = getAddressKey(addrData.getId().getAddrType());
     LOG.debug("Handling " + (update ? "update" : "create") + " request.");
@@ -175,10 +241,8 @@ public class PortugalTransformer extends SpainTransformer {
       // preferred sequence no for additional shipping
       messageHash.put("SequenceNo", StringUtils.isEmpty(addrData.getPrefSeqNo()) ? "" : addrData.getPrefSeqNo());
     }
-
   }
 
-  @Override
   protected void handleDataDefaults(MQMessageHandler handler, Map<String, String> messageHash, Data cmrData, boolean crossBorder, Addr addrData) {
     handler.messageHash.put("SourceCode", "FO5");
     messageHash.put("CEdivision", "3");
@@ -190,8 +254,8 @@ public class PortugalTransformer extends SpainTransformer {
     String custType = cmrData.getCustSubGrp();
     if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
       messageHash.put("MarketingResponseCode", "5");
+      messageHash.put("CEdivision", "2");
       messageHash.put("ARemark", "YES");
-      messageHash.put("CustomerType", "BP");
     } else if ("GOVRN".equals(custType)) {
       messageHash.put("CustomerType", "G");
     } else if ("INTER".equals(custType) || "INTSO".equals(custType) || "ININV".equals(custType)) {
@@ -199,37 +263,117 @@ public class PortugalTransformer extends SpainTransformer {
     } else {
       messageHash.put("ARemark", "");
     }
-
-    messageHash.put("LangCode", "1");
-    messageHash.put("CICode", "3");
-    messageHash.put("CustomerLanguage", "1");
-    messageHash.put("AccAdBo", "");
-    messageHash.put("AccAdmDSC", "");
-
-    if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
-      messageHash.put("CEdivision", "2");
-    }
+    //messageHash.put("LangCode", "1");
+    //messageHash.put("CICode", "3");
+    //messageHash.put("CustomerLanguage", "1");
+    //messageHash.put("AccAdBo", "");
+    //messageHash.put("AccAdmDSC", "");
 
     boolean create = "C".equals(handler.adminData.getReqType());
     if (create) {
       messageHash.put("NationalCust", "N");
       messageHash.put("DPCEBO", "00A0811");
-
     }
+  }
 
+  /**
+   * Gets the phone from the billing address
+   * 
+   * @param handler
+   * @return
+   */
+  protected String getBillingPhone(MQMessageHandler handler) {
+    List<Addr> addresses = handler.currentAddresses;
+    if (addresses != null) {
+      for (Addr addr : addresses) {
+        if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+          return addr.getCustPhone();
+        }
+      }
+    }
+    return "";
+  }
+  
+  @Override
+  public String[] getAddressOrder() {
+    return ADDRESS_ORDER;
+  }
+
+  @Override
+  public String getAddressKey(String addrType) {
+    switch (addrType) {
+    case "ZP01":
+      return "Mail";
+    case "ZI01":
+      return "Install";
+    case "ZD01":
+      return "Ship";
+    case "ZS01":
+      return "Billing";
+    case "ZS02":
+      return "Soft";
+    case "ZP02":
+      return "Fiscal";
+    default:
+      return "";
+    }
+  }
+
+  @Override
+  public String getTargetAddressType(String addrType) {
+    switch (addrType) {
+    case "ZP01":
+      return "Mailing";
+    case "ZI01":
+      return "Installing";
+    case "ZD01":
+      return "Shipping";
+    case "ZS01":
+      return "Billing";
+    case "ZS02":
+      return "EPL";
+    case "ZP02":
+      return "Fiscal";
+    default:
+      return "";
+    }
   }
 
   @Override
   public String getSysLocToUse() {
     return SystemLocation.PORTUGAL;
   }
-
+  
   @Override
+  public String getFixedAddrSeqForProspectCreation() {
+    return "00002";
+  }
+  
+  @Override
+  public String getAddressUse(Addr addr) {
+    switch (addr.getId().getAddrType()) {
+    case MQMsgConstants.ADDR_ZS01:
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZP01:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+    case MQMsgConstants.ADDR_ZI01:
+      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
+    case MQMsgConstants.ADDR_ZD01:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZP02:
+      return MQMsgConstants.SOF_ADDRESS_USE_FISCAL;
+    default:
+      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    }
+  }
+
   protected boolean isCrossBorder(Addr addr) {
     return !"PT".equals(addr.getLandCntry());
   }
 
-  @Override
+  /*@Override
   public boolean shouldSendAddress(EntityManager entityManager, MQMessageHandler handler, Addr nextAddr) {
     if (nextAddr == null) {
       return false;
@@ -240,20 +384,47 @@ public class PortugalTransformer extends SpainTransformer {
       return false;
     }
     return true;
+  }*/
+  
+  protected boolean zs01CrossBorder(MQMessageHandler handler) {
+    EntityManager entityManager = handler.getEntityManager();
+    if (entityManager == null) {
+      return false;
+    }
+    List<Addr> addresses = null;
+    if (handler.currentAddresses == null) {
+      String sql = ExternalizedQuery.getSql("MQREQUEST.GETNEXTADDR");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", handler.addrData.getId().getReqId());
+      query.setForReadOnly(true);
+      addresses = query.getResults(Addr.class);
+    } else {
+      addresses = handler.currentAddresses;
+    }
+    if (addresses != null) {
+      for (Addr addr : addresses) {
+        if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+          return isCrossBorder(addr);
+        }
+      }
+    }
+    return false;
   }
 
+  /*
+   * Legacy Direct Methods
+   */
   @Override
   public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
     String landedCntry = "";
-
+    
     formatDataLines(dummyHandler);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
-      legacyCust.setAccAdminBo("Y60382");
       legacyCust.setCeDivision("2");
 
       // extract the phone from billing as main phone
@@ -271,36 +442,94 @@ public class PortugalTransformer extends SpainTransformer {
         legacyCust.setMrcCd("5");
         legacyCust.setAuthRemarketerInd("Y");
       }
-      
-      //Type Of Customer
+
+      // Type Of Customer
       if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custSubType)) {
         legacyCust.setCustType("G");
       } else if (MQMsgConstants.CUSTSUBGRP_INTSO.equals(custSubType) || "CRISO".equals(custSubType)) {
         legacyCust.setCustType("91");
       }
 
-      // common data for C/U
-      // formatted data
-      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
-        legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      for (Addr addr : cmrObjects.getAddresses()) {
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          if (!StringUtils.isEmpty(addr.getCustPhone())) {
+            legacyCust.setTelNoOrVat(addr.getCustPhone());
+          }
+          landedCntry = addr.getLandCntry();
+          break;
+        }
       }
 
-      if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
-        if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-          legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
-        } else {
-          legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+      String dataEmbargoCd = data.getEmbargoCd();
+      String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
+
+      // permanent removal-single inactivation
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && "E".equals(rdcEmbargoCd)) {
+          if (StringUtils.isBlank(data.getEmbargoCd())) {
+            legacyCust.setEmbargoCd("");
+          }
         }
+      }
+
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd("");
+        blankOrdBlockFromData(entityManager, data);
+      }
+
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd(rdcEmbargoCd);
+        resetOrdBlockToData(entityManager, data);
+      }
+    }
+
+    // common data for C/U
+    if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
+      legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
+    }
+    
+    if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
       } else {
-        if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
-          legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
-        }
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       }
-      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
-        legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
+    } else {
+      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       }
-      legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
-      legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+    }
+    if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
+      legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
+    }
+    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
+    legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+  }
+
+  private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("");
+    entityManager.merge(data);
+    entityManager.flush();
+  }
+
+  private void resetOrdBlockToData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("88");
+    entityManager.merge(data);
+    entityManager.flush();
+  }
+
+  @Override
+  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
+      CMRRequestContainer cmrObjects, Addr currAddr) {
+    if ("N".equals(currAddr.getImportInd()) && MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
+      legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
     }
   }
 
@@ -309,8 +538,7 @@ public class PortugalTransformer extends SpainTransformer {
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
     LOG.debug("Set max and min range For Portugal...");
-    if (custSubGrp != null
-        && ("INTER".equals(custSubGrp) || "CRINT".equals(custSubGrp))) {
+    if (custSubGrp != null && ("INTER".equals(custSubGrp) || "CRINT".equals(custSubGrp))) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(998999);
     }
