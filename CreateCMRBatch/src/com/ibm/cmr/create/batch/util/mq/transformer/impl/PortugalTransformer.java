@@ -509,8 +509,8 @@ public class PortugalTransformer extends MessageTransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
-    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
-    legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+    legacyCust.setDistrictCd(data.getTerritoryCd() != null ? data.getTerritoryCd() : "");
+    legacyCust.setBankBranchNo(data.getCollectionCd() != null ? data.getCollectionCd() : "");
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
