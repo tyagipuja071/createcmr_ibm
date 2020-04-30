@@ -95,7 +95,7 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             validation.setMessage("Buisness no. invalid");
             output.setDetails("The information on the request does not match the information from the service");
             output.setOnError(true);
-            engineData.addRejectionComment("Buisness Number is not Valid.");
+            engineData.addRejectionComment("OTH", "Buisness Number is not Valid.", "", "");
             log.debug("The Company buisness number is not the same as the one on the request.");
           } else {
             // validation.setSuccess(false);
@@ -112,7 +112,7 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
           validation.setMessage("Execution failed");
           output.setDetails(response.getMessage());
           output.setOnError(true);
-          engineData.addRejectionComment(response.getMessage());
+          engineData.addRejectionComment("OTH", response.getMessage(), "", "");
           log.debug(response.getMessage());
         }
       }

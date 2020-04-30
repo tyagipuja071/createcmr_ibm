@@ -220,7 +220,7 @@ public class BrazilDupCMRCheckElement extends DuplicateCheckElement {
             // add support to override duplicate CMR checks later
             requestData.getAdmin().setMatchIndc("C");
 
-            engineData.addRejectionComment("Duplicate CMR matches found.");
+            engineData.addRejectionComment("DUPC", "Duplicate CMR matches found.", "", "");
             result.setOnError(true);
           }
           result.setDetails(details.toString().trim());

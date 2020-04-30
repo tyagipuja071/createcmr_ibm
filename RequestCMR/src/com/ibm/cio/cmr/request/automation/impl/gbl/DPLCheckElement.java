@@ -85,7 +85,8 @@ public class DPLCheckElement extends ValidatingElement {
         if ("U".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getEmbargoCd()) && !"N".equals(data.getEmbargoCd())) {
           validation.setSuccess(false);
           output.setOnError(true);
-          engineData.addRejectionComment("This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.");
+          engineData.addRejectionComment("MAPP", "This is a CMR record with a DPL/Embargo Code.",
+              " ERC approval will be needed to process this request.", "");
           log.debug(
               "This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.Hence sending back to processor.");
           details.append(details.toString());
@@ -218,19 +219,19 @@ public class DPLCheckElement extends ValidatingElement {
       case "SF":
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("DPL Check Failed for some addresses.");
+        engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address", "DPL Check Failed for some addresses.", "");
         validation.setMessage("Some Failed");
         break;
       case "AF":
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("DPL Check Failed.");
+        engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address", "DPL Check Failed.", "");
         validation.setMessage("All Failed");
         break;
       default:
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("DPL Check could not be performed.");
+        engineData.addRejectionComment("OTH", "DPL Check could not be performed.", "", "");
         validation.setMessage("Not Done");
         break;
       }
@@ -238,7 +239,8 @@ public class DPLCheckElement extends ValidatingElement {
       if ("U".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getEmbargoCd()) && !"N".equals(data.getEmbargoCd())) {
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.");
+        engineData.addRejectionComment("MAPP", "This is a CMR record with a DPL/Embargo Code.",
+            " ERC approval will be needed to process this request.", "");
         log.debug(
             "This is a CMR record with a DENIAL DPL Block Code. ERC approval will be needed to process this request.Hence sending back to processor.");
         details.append("This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.");
