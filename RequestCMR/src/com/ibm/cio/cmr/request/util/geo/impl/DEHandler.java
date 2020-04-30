@@ -123,9 +123,12 @@ public class DEHandler extends GEOHandler {
       address.setDept(parts[2]);
     }
 
-    if (currentRecord.getCmrOrderBlock() != null && CmrConstants.LEGAL_ORDER_BLOCK.equals(currentRecord.getCmrOrderBlock())) {
-      address.setPairedAddrSeq(currentRecord.getCmrAddrSeq());
-    }
+    // CMR-3171 - do not block seq import for OB records
+    // if (currentRecord.getCmrOrderBlock() != null &&
+    // CmrConstants.LEGAL_ORDER_BLOCK.equals(currentRecord.getCmrOrderBlock()))
+    // {
+    address.setPairedAddrSeq(currentRecord.getCmrAddrSeq());
+    // }
   }
 
   @Override
