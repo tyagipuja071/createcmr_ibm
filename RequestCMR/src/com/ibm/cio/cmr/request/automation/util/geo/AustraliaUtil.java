@@ -46,7 +46,7 @@ public class AustraliaUtil extends AutomationUtil {
     // a. check cluster
     if (defaultClusterCd.equalsIgnoreCase(data.getApCustClusterId())) {
       LOG.debug("Default Cluster used.");
-      engineData.addRejectionComment("Cluster should not be the default cluster for the scenario.");
+      engineData.addRejectionComment("OTH", "Cluster should not be the default cluster for the scenario.", "", "");
       results.setOnError(true);
       // eleResults.append("Default Cluster used.\n");
       details.append("Cluster should not be the default cluster for the scenario.\n");
@@ -62,13 +62,13 @@ public class AustraliaUtil extends AutomationUtil {
       details.append("\nThe combination of Salesman No. and Cluster is valid.\n");
     } else if ("INVALID".equalsIgnoreCase(validCode)) {
       LOG.debug("The combination of Salesman No. and Cluster is INVALID.");
-      engineData.addRejectionComment("The combination of Salesman No. and Cluster is invalid.");
+      engineData.addRejectionComment("TYPR", "The combination of Salesman No. and Cluster is invalid.", "", "");
       results.setOnError(true);
       // eleResults.append("Invalid Cluster and Salesman No. combination.\n");
       details.append("\nThe combination of Salesman No. and Cluster is invalid.\n");
     } else {
       LOG.debug("Salesman No.-Cluster combination not present.");
-      engineData.addRejectionComment("No combination of Salesman No. and Cluster is present.");
+      engineData.addRejectionComment("TYPR", "No combination of Salesman No. and Cluster is present.", "", "");
       results.setOnError(true);
       // eleResults.append("No combination of Salesman No. and Cluster
       // present.\n");
@@ -167,7 +167,7 @@ public class AustraliaUtil extends AutomationUtil {
 
     if (isIsicInvalid) {
       details.append("Invalid ISIC code, please choose another one based on industry.\n");
-      engineData.addRejectionComment("Invalid ISIC code, please choose another one based on industry.");
+      engineData.addRejectionComment("OTH", "Invalid ISIC code, please choose another one based on industry.", "", "");
       results.setOnError(true);
     } else {
       details.append("ISIC is valid" + "\n");

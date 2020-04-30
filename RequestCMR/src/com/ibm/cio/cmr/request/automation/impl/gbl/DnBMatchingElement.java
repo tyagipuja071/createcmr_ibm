@@ -169,8 +169,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
               itemNo++;
             }
-            engineData.addRejectionComment(
-                "Matches against D&B were found but no record matched the request data. Please correct name/address information.");
+            engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address",
+                "Matches against D&B were found but no record matched the request data. Please correct name/address information.", "");
             result.setResults("Name/Address not matched");
             result.setOnError(true);
             engineData.put("dnbMatching", dnbMatches.get(0));
@@ -195,14 +195,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         }
       } else {
         result.setDetails("No D&B record was found using advanced matching.");
-        engineData.addRejectionComment("No matches with D&B records. Please import from D&B search.");
+        engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
         result.setResults("No Matches");
         result.setOnError(true);
       }
 
     } else {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("Missing main address on the request");
+      engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address", "Missing main address on the request", "");
       result.setResults("No Matches");
       result.setOnError(true);
     }

@@ -152,7 +152,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         details.append(msg);
         details.append("\n");
         details.append("No field value has been computed for this record.");
-        engineData.addRejectionComment(msg);
+        engineData.addRejectionComment("OTH", msg, "", "");
         output.setOnError(true);
         output.setDetails(details.toString());
         output.setResults("Issues Encountered");
@@ -166,7 +166,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         details.append("\n");
         details.append("No field value has been computed for this record.");
         // engineData.addNegativeCheckStatus("_usBpRejected", msg);
-        engineData.addRejectionComment(msg);
+        engineData.addRejectionComment("OTH", msg, "", "");
         output.setOnError(true);
         output.setDetails(details.toString());
         output.setResults("Issues Encountered");
@@ -210,7 +210,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       if (childReqId <= 0) {
         details.append(childErrorMsg + "\n");
         // engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
-        engineData.addRejectionComment(childErrorMsg);
+        engineData.addRejectionComment("OTH", childErrorMsg, "", "");
         output.setDetails(details.toString());
         output.setOnError(true);
         output.setResults("Issues Encountered");
@@ -220,7 +220,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         if (childDetails == null) {
           details.append(childErrorMsg + "\n");
           // engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
-          engineData.addRejectionComment(childErrorMsg);
+          engineData.addRejectionComment("OTH", childErrorMsg, "", "");
           output.setOnError(true);
           output.setResults("Issues Encountered");
           output.setDetails(details.toString());

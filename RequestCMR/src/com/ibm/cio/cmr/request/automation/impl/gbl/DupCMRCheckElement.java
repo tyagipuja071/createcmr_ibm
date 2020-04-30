@@ -167,8 +167,9 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                           + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
                           + StringUtils.join(dupCMRNos, ", "));
                 } else {
-                  engineData.addRejectionComment(cmrCheckMatches.size() + " possible duplicate CMR(s) found with the same data.\n Duplicate CMR(s): "
-                      + StringUtils.join(dupCMRNos, ", "));
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR",
+                      cmrCheckMatches.size() + " possible duplicate CMR(s) found with the same data.",
+                      "\n Duplicate CMR(s): " + StringUtils.join(dupCMRNos, ", "));
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
                   result.setOnError(true);
@@ -187,19 +188,19 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
             }
           } else {
             result.setDetails(response.getMessage());
-            engineData.addRejectionComment(response.getMessage());
+            engineData.addRejectionComment("OTH", response.getMessage(), "", "");
             result.setOnError(true);
             result.setResults("Error on Duplicate CMR Check.");
           }
         } else {
           result.setDetails("Duplicate CMR Check Encountered an error.");
-          engineData.addRejectionComment("Duplicate CMR Check Encountered an error.");
+          engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
           result.setOnError(true);
           result.setResults("Error on Duplicate CMR Check");
         }
       } else {
         result.setDetails("Missing main address on the request.");
-        engineData.addRejectionComment("Missing main address on the request.");
+        engineData.addRejectionComment("ADDR", "Missing main address on the request.", "", "");
         result.setResults("No Matches");
         result.setOnError(true);
       }
