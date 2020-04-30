@@ -458,27 +458,19 @@ public class BluePagesHelper {
 
   public static boolean isBluePagesHeirarchyManager(String employeeEmail, String managerEmail) {
     if (StringUtils.isNotBlank(employeeEmail) && StringUtils.isNotBlank(managerEmail)) {
-      boolean found = false;
-      while (!found) {
-        String employeeId = getCNUMByIntranetAddr(employeeEmail);
-        String email = null;
+      String email = employeeEmail;
+      while (StringUtils.isNotBlank(email)) {
+        String employeeId = getCNUMByIntranetAddr(email);
         if (!"NOTFOUND".equals(employeeId) && !"MULTIPLE".equals(employeeId)) {
           email = BluePagesHelper.getManagerEmail(employeeId);
         }
-        if (email != null) {
-          System.out.println(email);
-          if (email.equals(managerEmail)) {
-            return true;
-          } else {
-            return BluePagesHelper.isBluePagesHeirarchyManager(email, managerEmail);
-          }
+        if (email != null && email.equals(managerEmail)) {
+          return true;
         }
       }
     }
     return false;
+
   }
 
-  public static void main(String[] args) {
-    System.out.println(BluePagesHelper.isBluePagesHeirarchyManager("roochugh@in.ibm.com", "sandip.patel@in.ibm.com"));
-  }
 }
