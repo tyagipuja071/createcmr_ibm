@@ -19,6 +19,7 @@ public class USDetailsContainer {
   private String usRestrictTo;
   private String companyNo;
   private String pccArDept;
+  private String mktgArDept;
 
   public String getCustTypCd() {
     return custTypCd;
@@ -82,6 +83,14 @@ public class USDetailsContainer {
 
   public void setPccArDept(String pccArDept) {
     this.pccArDept = pccArDept;
+  }
+
+  public String getMktgArDept() {
+    return mktgArDept;
+  }
+
+  public void setMktgArDept(String mktgArDept) {
+    this.mktgArDept = mktgArDept;
   }
 
 }

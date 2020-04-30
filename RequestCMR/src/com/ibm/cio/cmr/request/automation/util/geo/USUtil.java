@@ -142,7 +142,7 @@ public class USUtil extends AutomationUtil {
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
   public static Map<String, List<String>> stateMktgDepMap = new HashMap<String, List<String>>();
 
-  private Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
+  private static Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
 
   public static String[] COMP_NO_LIST = { "12526663", "12464170", "12539858", "12489905", "12469039", "12329586", "12393039", "12118585", "11206715",
       "12148960", "12501750", "12528315", "12126752", "12232055", "12543418", "12532055", "12550434", "12518669", "12411167", "12236746", "11873808",
@@ -310,9 +310,8 @@ public class USUtil extends AutomationUtil {
               if ("5AA".equalsIgnoreCase(data.getPccArDept())) {
                 pccArDept = "G8M";
               } else {
-                HashMap<String, String> mapUSCMR = new HashMap<>();
-                mapUSCMR = USUtil.determineUSCMRDetails(entityManager, requestData, engineData);
-                pccArDept = StringUtils.isNotBlank(mapUSCMR.get("pccArDept")) ? mapUSCMR.get("pccArDept") : "";
+                USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+                pccArDept = StringUtils.isNotBlank(usDetails.getPccArDept()) ? usDetails.getPccArDept() : "";
               }
             } else {
               if (!"logic".equalsIgnoreCase(mapping.getPccArDept())) {
@@ -970,13 +969,13 @@ public class USUtil extends AutomationUtil {
     String cmrNo = "";
 
     // get USCMR values
-    HashMap<String, String> mapUSCMR = new HashMap<>();
-    mapUSCMR = USUtil.determineUSCMRDetails(entityManager, requestData, engineData);
-    custTypCd = StringUtils.isNotBlank(mapUSCMR.get("custTypCd")) ? mapUSCMR.get("custTypCd") : "";
-    usRestricTo = StringUtils.isNotBlank(mapUSCMR.get("usRestricTo")) ? mapUSCMR.get("usRestricTo") : "";
-    companyNo = StringUtils.isNotBlank(mapUSCMR.get("companyNo")) ? mapUSCMR.get("companyNo") : "";
-    bpAccTyp = StringUtils.isNotBlank(mapUSCMR.get("bpAccTyp")) ? mapUSCMR.get("bpAccTyp") : "";
-    mtkgArDept = StringUtils.isNotBlank(mapUSCMR.get("mtkgArDept")) ? mapUSCMR.get("mtkgArDept") : "";
+
+    USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+    custTypCd = usDetails.getCustTypCd();
+    usRestricTo = usDetails.getUsRestrictTo();
+    companyNo = usDetails.getCompanyNo();
+    bpAccTyp = usDetails.getBpAccTyp();
+    mtkgArDept = usDetails.getMktgArDept();
 
     if ("C".equals(admin.getReqType())) {
       cmrNo = StringUtils.isBlank(admin.getModelCmrNo()) ? "" : admin.getModelCmrNo();
@@ -1084,6 +1083,9 @@ public class USUtil extends AutomationUtil {
   public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo, AutomationEngineData engineData)
       throws Exception {
     // get request admin and data
+    if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
+      return usDetailsMap.get(cmrNo);
+    }
     USDetailsContainer usDetails = new USDetailsContainer();
     String custTypCd = "NA";
     String entType = "";
@@ -1094,7 +1096,6 @@ public class USUtil extends AutomationUtil {
     String companyNo = "";
     String pccArDept = "";
     String mtkgArDept = "";
-
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
@@ -1155,8 +1156,10 @@ public class USUtil extends AutomationUtil {
     usDetails.setcGem(cGem);
     usDetails.setUsRestrictTo(usRestrictTo);
     usDetails.setCompanyNo(companyNo);
+    usDetails.setMktgArDept(mtkgArDept);
 
     usDetails.setPccArDept(pccArDept);
+    usDetailsMap.put(cmrNo, usDetails);
     return usDetails;
   }
 
