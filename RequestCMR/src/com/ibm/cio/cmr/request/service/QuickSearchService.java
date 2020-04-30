@@ -39,6 +39,8 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 /**
  *
  * @author JeffZAMORA
@@ -84,6 +86,16 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
   private RequestEntryModel importCMR(EntityManager entityManager, HttpServletRequest request, CompanyRecordModel model) throws Exception {
 
     RequestEntryController controller = new RequestEntryController();
+
+    // check CMR Details for OB 93
+    FindCMRResultModel result = CompanyFinder.getCMRDetails(model.getIssuingCntry(), model.getCmrNo(), 5, null, null);
+    if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
+      Collections.sort(result.getItems());
+      if ("93".equals(result.getItems().get(0).getCmrOrderBlock())) {
+        throw new CmrException(new Exception(
+            "Thie CMR is marked as Inactive/Logically Deleted. For Reactivation, pls import the CMR using CMR Search from the request details page."));
+      }
+    }
 
     RequestEntryModel reqModel = new RequestEntryModel();
     reqModel.setReqType(model.getReqType());
