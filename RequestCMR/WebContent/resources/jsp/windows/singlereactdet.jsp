@@ -123,10 +123,10 @@ div.ibm-columns {
         ${record.cmrVat}
       </cmr:column>   
       <cmr:column span="1" width="180">
-        <label for="cmrIsic">ISIC(UN SIC) Code:</label>
+        <label for="cmrCity">ISIC(UN SIC) Code:</label>
       </cmr:column>
       <cmr:column span="2" width="200">
-        ${record.cmrIsic}
+        ${record.cmrCity}
       </cmr:column>
     </cmr:row>
     <cmr:row>

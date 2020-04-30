@@ -73,6 +73,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        engineData.put(AutomationEngineData.DNB_ALL_MATCHES, dnbMatches);
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           result.setOnError(shouldThrowError);
@@ -166,6 +167,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             int itemNo = 1;
             for (DnBMatchingResponse dnbRecord : dnbMatches) {
               processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
+              itemNo++;
             }
             engineData.addRejectionComment(
                 "Matches against D&B were found but no record matched the request data. Please correct name/address information.");
