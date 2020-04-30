@@ -323,7 +323,7 @@ public class EMEAHandler extends BaseSOFHandler {
               }
               
               if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
-                //Map local language translation of sold to value
+                //Map local language translation of sold to value -- for greece recommit
                 CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager,
                     record.getCmrNum(), cmrIssueCd);
                 CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
