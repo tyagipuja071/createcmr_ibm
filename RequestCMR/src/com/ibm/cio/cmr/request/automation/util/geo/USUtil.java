@@ -36,7 +36,9 @@ import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -608,7 +610,7 @@ public class USUtil extends AutomationUtil {
               break;
             case "ISU Code":
               if ("5B".equals(updatedDataModel.getNewData())) {
-                String error = performCSPCheck(cedpManager, entityManager, data);
+                String error = performCSPCheck(cedpManager, entityManager, data, admin);
                 if (StringUtils.isNotBlank(error)) {
                   engineData.addRejectionComment("OTH", error, "", "");
                   LOG.debug(error);
@@ -672,8 +674,8 @@ public class USUtil extends AutomationUtil {
           }
         }
 
-        if ("CSP".equals(admin.getReqReason())) {
-          String error = performCSPCheck(cedpManager, entityManager, data);
+        if ("CSP".equals(admin.getReqReason()) && !changes.isDataChanged("ISIC")) {
+          String error = performCSPCheck(cedpManager, entityManager, data, admin);
           if (StringUtils.isNotBlank(error)) {
             engineData.addRejectionComment("OTH", error, "", "");
             LOG.debug(error);
@@ -740,7 +742,15 @@ public class USUtil extends AutomationUtil {
             if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
               return error;
             } else {
-              // TODO check BRSCH from zzkv_sic
+              sql = ExternalizedQuery.getSql("EXTQUERY.GET_MAPPED_ISU_FROM_RDC");
+              query = new PreparedQuery(entityManager, sql);
+              query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+              query.setParameter("ISIC", data.getIsicCd());
+              query.setForReadOnly(true);
+              String brsch = query.getSingleResult(String.class);
+              if (!data.getIsuCd().equals(brsch)) {
+                return error;
+              }
             }
           } else {
             return error;
@@ -792,10 +802,8 @@ public class USUtil extends AutomationUtil {
     return null;
   }
 
-  private String performCSPCheck(EntityManager cedpManager, EntityManager entityManager, Data data) {
-    boolean requesterFromCSPTeam = true;
-    // TODO check team heirarchy
-    if (!requesterFromCSPTeam) {
+  private String performCSPCheck(EntityManager cedpManager, EntityManager entityManager, Data data, Admin admin) {
+    if (!BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getString("US.CSP_HEAD"))) {
       return "Only members of the CSP team can request for converting a CMR to CSP.  Kindly check with CMDE or your manager.";
     } else {
       String sql = ExternalizedQuery.getSql("AUTO.US.CHECK_CSP_VALID");
@@ -817,7 +825,6 @@ public class USUtil extends AutomationUtil {
           query.setForReadOnly(true);
           results = query.getResults(1);
           if (results != null && results.size() > 0) {
-            // TODO implement overrides
             String konzs = (String) results.get(0)[3];
             if (StringUtils.isNotBlank(konzs)) {
               data.setAffiliate(konzs);
