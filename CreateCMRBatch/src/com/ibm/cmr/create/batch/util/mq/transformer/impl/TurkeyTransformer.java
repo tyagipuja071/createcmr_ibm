@@ -1050,6 +1050,8 @@ public class TurkeyTransformer extends EMEATransformer {
 
       if (!StringUtils.isBlank(data.getCrosSubTyp())) {
         legacyCust.setCustType(data.getCrosSubTyp());
+      } else {
+        legacyCust.setCustType("");
       }
 
       // CMR-2279:Turkey-ISR set based on SBO
