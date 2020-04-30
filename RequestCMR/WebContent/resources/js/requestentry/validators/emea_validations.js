@@ -3726,6 +3726,10 @@ function convertToUpperCaseGR(cntry, addressMode, saving) {
 
   // Greek address - block lowercase
   var addrFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'postCd', 'custPhone', 'sapNo', 'taxOffice', 'custNm4' ];
+  // add for CMR-2383-Tax Office
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+	addrFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'postCd', 'custPhone', 'sapNo', 'taxOffice' ];
+  }
   if (FormManager.getActualValue('addrType') == 'ZP01') {
     for (var i = 0; i < addrFields.length; i++) {
       dojo.byId(addrFields[i]).style.textTransform = 'uppercase';
