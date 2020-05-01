@@ -287,6 +287,7 @@ function setISUDefaultValueOnSubTypeChange() {
     _scenarioSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setDefaultValueForISU();
       autoSetVatCheckBox();
+      setClasificationCodeTR(value);
     });
   }
   // if (_scenarioSubTypeHandler && _scenarioSubTypeHandler[0]) {
@@ -4109,6 +4110,19 @@ function salesSRforUpdateOnChange() {
       setSalesBoSboIbo();
     });
   }
+  
+  setClassificationCodeTR();
+  dojo.connect(FormManager.getField('commercialFinanced'), 'onChange', function(value) {
+    setCOFClassificationCodeTR();
+  });
+  
+  dojo.connect(FormManager.getField('crosSubTyp'), 'onChange', function(value) {
+    setTypeOfCustomerClassificationCodeTR();
+  });
+  
+  dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    setIsicClassificationCodeTR(value);
+  });
 }
 
 function modifyCharForTurk(field) {
@@ -4744,6 +4758,13 @@ function showCommercialFinanced() {
     FormManager.hide('CommercialFinanced', 'commercialFinanced');
   } else {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
+    FormManager.show('CustClass', 'custClass');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if(role == 'REQUESTER') {
+      FormManager.disable('custClass');
+    } else {
+      FormManager.enable('custClass');
+    }
   }
 }
 function lockCmrOwner() {
@@ -7897,6 +7918,67 @@ function addTRLandedCountryValidtor() {
               } // validate
             }; // return
           })(), 'MAIN_NAME_TAB', 'frmCMR'); // validator body
+}
+
+function setClassificationCodeTR() {
+  var field = FormManager.getField('custClass');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    FormManager.limitDropdownValues(field, [ '45', '46' ]);
+  } else if (FormManager.getActualValue('reqType') == 'U') {
+    FormManager.limitDropdownValues(field, [ '11', '13','33', '35','45', '46','60', '81' ]);
+  }
+}
+
+function setCOFClassificationCodeTR() {
+  var cofVal = FormManager.getActualValue('commercialFinanced');
+  var field = FormManager.getField('custClass');
+  if(cofVal=='R' || cofVal=='S' || cofVal=='T') {
+    FormManager.limitDropdownValues(field, [ '11']);
+  }
+}
+
+function setTypeOfCustomerClassificationCodeTR() {
+  var typeOfCustomer = FormManager.getActualValue('crosSubTyp');
+  var field = FormManager.getField('custClass');
+  if(typeOfCustomer=='G') {
+    FormManager.limitDropdownValues(field, [ '13']);
+  } else if(typeOfCustomer=='BP') {
+    FormManager.limitDropdownValues(field, [ '45', '46']);
+  } else if(typeOfCustomer=='91') {
+    FormManager.limitDropdownValues(field, [ '81']);
+  } else {
+    setClassificationCodeTR();
+  }
+}
+
+function setClasificationCodeTR(value) {
+  var field = FormManager.getField('custClass');
+  if(!value) {
+    value = FormManager.getActualValue('crosSubTyp');
+  }
+  if (value == 'BUSPR' || value == 'XBP') {
+    FormManager.limitDropdownValues(field, [ '45', '46']);
+    FormManager.setValue('crosSubTyp', 'BP');
+  } else if (value == 'XGOV' || value == 'GOVRN') {
+    FormManager.limitDropdownValues(field, [ '13']);
+    FormManager.setValue('crosSubTyp', 'G');
+  } else if (value == 'INTER' || value == 'XINT') {
+    FormManager.limitDropdownValues(field, [ '91']);
+    FormManager.setValue('crosSubTyp', '91');
+  }
+}
+
+function setIsicClassificationCodeTR(value) {
+  var field = FormManager.getField('custClass');
+  if(!value) {
+    value = FormManager.getActualValue('isicCd');
+  }
+  
+  if(value == '9500') {
+    FormManager.limitDropdownValues(field, [ '60']);
+  } else {
+    setClassificationCodeTR();
+  }
 }
 
 dojo.addOnLoad(function() {
