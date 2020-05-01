@@ -252,75 +252,35 @@ public class EMEAHandler extends BaseSOFHandler {
                   addr.setCmrDept(record.getCmrCity2());
                   converted.add(addr);
                 }
-                if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
-                  String kunnr = addr.getCmrSapNumber();
-                  String adrnr = getaddAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
-                      addr.getCmrAddrSeq());
-                  if (!StringUtils.isBlank(adrnr)) {
-                    Sadr sadr = getTRAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
-                    if (sadr != null) {
-                      Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                      if (installingAddr != null) {
-                        LOG.debug("Adding installing to the records");
-                        FindCMRRecordModel installing = new FindCMRRecordModel();
-                        PropertyUtils.copyProperties(installing, mainRecord);
-                        copyAddrData(installing, installingAddr);
-                        // installing.setParentCMRNo(mainRecord.getCmrNum());
-                        installing.setCmrName1Plain(sadr.getName1());
-                        installing.setCmrName2Plain(sadr.getName2());
-                        installing.setCmrCity(sadr.getOrt01());
-                        installing.setCmrCity2(sadr.getOrt02());
-                        installing.setCmrStreetAddress(sadr.getStras());
-                        installing.setCmrName3(sadr.getName3());
-                        installing.setCmrName4(sadr.getName4());
-                        installing.setCmrCountryLanded("TR");
-                        installing.setCmrCountry(sadr.getSpras());
-                        installing.setCmrStreetAddressCont(sadr.getStrs2());
-                        installing.setCmrState(sadr.getRegio());
-                        installing.setCmrPostalCode(sadr.getPstlz());
-                        installing.setCmrDept(sadr.getOrt02());
-                        if (!StringUtils.isBlank(sadr.getTxjcd())) {
-                          installing.setCmrTaxOffice(sadr.getTxjcd());
-                        }
-                        if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
-                          installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
-                        }
-                        installing.setCmrSapNumber("");
-                        converted.add(installing);
-                      }
-                    }
-                  }
-                  if (StringUtils.isBlank(adrnr)) {
-                    CmrtAddr mailingAddr = getLegacyMailingAddress(entityManager, searchModel.getCmrNum());
-                    if (mailingAddr != null) {
-                      Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                      if (installingAddr != null) {
-                        LOG.debug("Adding installing to the records");
-                        FindCMRRecordModel installing = new FindCMRRecordModel();
-                        PropertyUtils.copyProperties(installing, mainRecord);
-                        copyAddrData(installing, installingAddr);
-                        // add value
-                        installing.setCmrName1Plain(mailingAddr.getAddrLine1());
-                        if (!StringUtils.isBlank(mailingAddr.getAddrLine2())) {
-                          installing.setCmrName2Plain(mailingAddr.getAddrLine2());
-                        } else {
-                          installing.setCmrName2Plain("");
-                        }
-                        installing.setCmrStreetAddress(mailingAddr.getAddrLine3());
-                        installing.setCmrCity(record.getCmrCity());
-                        installing.setCmrCity2(record.getCmrCity2());
-                        installing.setCmrCountry(mailingAddr.getAddrLine6());
-                        installing.setCmrCountryLanded("TR");
-                        installing.setCmrPostalCode(record.getCmrPostalCode());
-                        installing.setCmrState(record.getCmrState());
-                        if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
-                          installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
-                        } else {
-                          installing.setCmrStreetAddressCont("");
-                        }
-                        converted.add(installing);
-                      }
-                    }
+              }
+              
+              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+                //Map local language translation of sold to value -- for greece recommit
+                CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager,
+                    record.getCmrNum(), cmrIssueCd);
+                CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
+                FindCMRRecordModel localTransAddr = new FindCMRRecordModel();
+                PropertyUtils.copyProperties(localTransAddr, record);
+                // If not in sadr look in DB2
+                localTransAddr.setCmrAddrSeq(db2LocalTransAddr.getId().getAddrNo());
+                localTransAddr.setCmrAddrTypeCode("ZP01");
+                
+                if(!StringUtils.isBlank(record.getCmrIntlName1())) {
+                  localTransAddr.setCmrName1Plain(record.getCmrIntlName1());
+                } else {
+                  localTransAddr.setCmrName1Plain(db2LocalTransAddr.getAddrLine1());
+                }
+                if(!StringUtils.isBlank(record.getCmrIntlName2())) {
+                  localTransAddr.setCmrName2Plain(record.getCmrIntlName2());
+                } else {
+                  localTransAddr.setCmrName2Plain(db2LocalTransAddr.getAddrLine2());
+                }
+                
+                if(!StringUtils.isBlank(record.getCmrIntlName4())) {
+                  localTransAddr.setCmrName4(record.getCmrIntlName4());  
+                } else {
+                  if(db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
+                    localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
                   }
                 }
               }
