@@ -49,7 +49,6 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
  */
 public class TurkeyTransformer extends EMEATransformer {
 
-
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
   private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZD01", "ZI01" };
@@ -741,7 +740,7 @@ public class TurkeyTransformer extends EMEATransformer {
       generateCMRNoObj.setMax(998899);
       LOG.debug("that is TR INTER CMR");
     } else {
-      generateCMRNoObj.setMin(330000);
+      generateCMRNoObj.setMin(369320);
       generateCMRNoObj.setMax(999999);
       LOG.debug("that is TR No INTER CMR");
     }
@@ -1049,6 +1048,12 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setAccAdminBo("Y60382");
       legacyCust.setCeDivision("2");
 
+      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
+        legacyCust.setCustType(data.getCrosSubTyp());
+      } else {
+        legacyCust.setCustType("");
+      }
+
       // CMR-2279:Turkey-ISR set based on SBO
       if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
 
@@ -1076,13 +1081,14 @@ public class TurkeyTransformer extends EMEATransformer {
       }
 
       // mrc
-      String custType = data.getCustSubGrp();
-      if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
-        legacyCust.setMrcCd("5");
-        legacyCust.setAuthRemarketerInd("Y");
-      } else {
-        legacyCust.setMrcCd("3");
-      }
+      // String custType = data.getCustSubGrp();
+      // if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) ||
+      // "XBP".equals(custType)) {
+      // legacyCust.setMrcCd("5");
+      // legacyCust.setAuthRemarketerInd("Y");
+      // } else {
+      // legacyCust.setMrcCd("3");
+      // }
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -1093,6 +1099,10 @@ public class TurkeyTransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
+        legacyCust.setCustType(data.getCrosSubTyp());
       }
 
       // CMR-2279:Turkey-ISR set based on SBO
@@ -1206,6 +1216,14 @@ public class TurkeyTransformer extends EMEATransformer {
     }
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
+    if (StringUtils.isEmpty(data.getCrosSubTyp())) {
+      legacyCust.setMrcCd("3");
+    } else if (!StringUtils.isEmpty(data.getCrosSubTyp()) && "BP".equals(data.getCrosSubTyp())) {
+      legacyCust.setMrcCd("5");
+    } else {
+      legacyCust.setMrcCd("3");
+    }
+
   }
 
   @Override
@@ -1234,6 +1252,20 @@ public class TurkeyTransformer extends EMEATransformer {
         cust.setEconomicCd("");
       } else {
         cust.setEconomicCd(muData.getCsoSite());
+      }
+    }
+    // CMR-3059 Turkey use CurrencyCd to represent Type of Customer
+    if (!StringUtils.isBlank(muData.getCurrencyCd())) {
+      if ("@".equals(muData.getCurrencyCd())) {
+        cust.setCustType("");
+        cust.setMrcCd("3");
+      } else {
+        cust.setCustType(muData.getCurrencyCd());
+        if ("BP".equals(cust.getCustType())) {
+          cust.setMrcCd("5");
+        } else {
+          cust.setMrcCd("3");
+        }
       }
     }
 
@@ -1528,81 +1560,14 @@ public class TurkeyTransformer extends EMEATransformer {
     long requestId = cmrObjects.getAdmin().getId().getReqId();
 
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
-    if ("M".equals(reqType)) {
-      List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+    addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
 
-      List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-      for (int i = 0; i < muAddrList.size(); i++) {
-        MassUpdtAddr muAddr = muAddrList.get(i);
-        String addrType = muAddr.getId().getAddrType();
-        if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-          CmrtAddr maiAddr = null;
-          CmrtAddr bilAddr = null;
-          boolean shareSeq = false;
-          for (CmrtAddr legAdr : legacyAddrList) {
-            if ("Y".equals(legAdr.getIsAddrUseMailing()) && "Y".equals(legAdr.getIsAddrUseBilling())) {
-              maiAddr = legAdr;
-              shareSeq = true;
-            } else if ("Y".equals(legAdr.getIsAddrUseMailing())) {
-              maiAddr = legAdr;
-            } else if ("Y".equals(legAdr.getIsAddrUseBilling())) {
-              bilAddr = legAdr;
-            }
-          }
-
-          if (shareSeq) {
-            // share Seq should split, remove existing, create mailing
-            legacyAddrList.remove(maiAddr);
-            // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
-
-            // maiAddr.setIsAddrUseBilling("N");
-            maiAddr.getId().setAddrNo("00002");
-
-            // bilAddr.setIsAddrUseMailing("N");
-            // bilAddr.getId().setAddrNo("00001");
-            // entityManager.persist(bilAddr);
-            // entityManager.flush();
-
-            legacyAddrList.add(maiAddr);
-            // legacyAddrList.add(bilAddr);
-          }
-          // else {
-          // if (maiAddr == null && bilAddr != null) {
-          // maiAddr = (CmrtAddr) SerializationUtils.clone(bilAddr);
-          //
-          // maiAddr.setIsAddrUseBilling("N");
-          // maiAddr.getId().setAddrNo("00002");
-          //
-          // entityManager.persist(maiAddr);
-          // entityManager.flush();
-          //
-          // legacyAddrList.add(maiAddr);
-          // } else if (maiAddr != null & bilAddr == null) {
-          // bilAddr = (CmrtAddr) SerializationUtils.clone(maiAddr);
-          //
-          // bilAddr.setIsAddrUseMailing("N");
-          // bilAddr.getId().setAddrNo("00001");
-          // entityManager.persist(bilAddr);
-          // entityManager.flush();
-          //
-          // legacyAddrList.add(bilAddr);
-          // }
-          // }
-          // break;
-        }
-      }
-
-      addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList, cmrObjects.getMassUpdateAddresses());
-    } else {
-      addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
-    }
     LOG.debug("LEGACY -- Turkey OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
-      if ("U".equals(cmrObjects.getAdmin().getReqType()) && "00002".equals(legacyAddr.getId().getAddrNo())) {
-        continue;
+      if ("C".equals(cmrObjects.getAdmin().getReqType())) {
+        modifyAddrUseFields(legacyAddr.getId().getAddrNo(), addrSeqToAddrUseMap.get(legacyAddr.getId().getAddrNo()), legacyAddr);
       }
-      modifyAddrUseFields(legacyAddr.getId().getAddrNo(), addrSeqToAddrUseMap.get(legacyAddr.getId().getAddrNo()), legacyAddr);
     }
 
     if ("C".equals(cmrObjects.getAdmin().getReqType())) {
@@ -1627,14 +1592,12 @@ public class TurkeyTransformer extends EMEATransformer {
         String addrType = addr.getId().getAddrType();
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
           CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
-          if ("Y".equals(olddataaddr.getIsAddrUseEPL()) && "Y".equals(olddataaddr.getIsAddrUseInstalling())
-              && "Y".equals(olddataaddr.getIsAddrUseShipping())) {
+          if ("Y".equals(olddataaddr.getIsAddrUseMailing()) && "Y".equals(olddataaddr.getIsAddrUseBilling())) {
             // copy billing from mailing
-            copyBillingFromMailing(legacyObjects, legacyAddrList.get(i), billingseq);
+            copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+            olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+            olddataaddr.setForUpdate(true);
           }
-          // copy billing from mailing
-          // copyBillingFromMailing(legacyObjects, legacyAddrList.get(i),
-          // billingseq);
         }
       }
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
@@ -1683,6 +1646,49 @@ public class TurkeyTransformer extends EMEATransformer {
         }
       }
     }
+    if ("M".equals(reqType)) {
+      List<MassUpdtAddr> addrList = cmrObjects.getMassUpdateAddresses();
+      List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
+      String billingseq = getMassSeqForBilling(entityManager, legacyObjects.getCustomerNo(), legacyObjects.getCustomer().getId().getSofCntryCode());
+
+      for (int i = 0; i < addrList.size(); i++) {
+        MassUpdtAddr addr = addrList.get(i);
+        String addrType = addr.getId().getAddrType();
+        if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+          CmrtAddr olddataaddr = legacyObjects.findBySeqNo(addr.getAddrSeqNo());
+          if ("Y".equals(olddataaddr.getIsAddrUseBilling()) && "Y".equals(olddataaddr.getIsAddrUseMailing())) {
+            legacyAddrList.remove(olddataaddr);
+            olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+            legacyAddrList.add(olddataaddr);
+
+            // copy billing from mailing
+            CmrtAddr bilAddr = (CmrtAddr) SerializationUtils.clone(olddataaddr);
+            bilAddr.getId().setAddrNo(billingseq);
+            bilAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+            bilAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+            entityManager.persist(bilAddr);
+            entityManager.flush();
+            legacyAddrList.add(bilAddr);
+            // copyBillingFromMailing(legacyObjects, legacyAddrList.get(i),
+            // billingseq);
+          } else {
+            String sql = ExternalizedQuery.getSql("TR.MASS.GETMAXSEQBILLING");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("CMR_NUM", legacyObjects.getCustomerNo());
+            query.setParameter("CNTRY", legacyObjects.getCustomer().getId().getSofCntryCode());
+            CmrtAddr billAdr = query.getSingleResult(CmrtAddr.class);
+            if (billAdr != null) {
+              CmrtAddr tempAdr = (CmrtAddr) SerializationUtils.clone(olddataaddr);
+              tempAdr.getId().setAddrNo(billAdr.getId().getAddrNo());
+              tempAdr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+              tempAdr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+              legacyAddrList.add(tempAdr);
+            }
+          }
+        }
+      }
+      addrSeqToAddrUseMap = mapSeqNoToAddrUseLegacy(legacyAddrList, cmrObjects.getMassUpdateAddresses());
+    }
   }
 
   private Map<String, String> mapSeqNoToAddrUseLegacy(List<CmrtAddr> legacyAddrList, List<MassUpdtAddr> muAddrlist) {
@@ -1724,7 +1730,7 @@ public class TurkeyTransformer extends EMEATransformer {
       if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
 
         if (!StringUtils.isBlank(addr.getTaxOffice())) {
-        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
+          legacyCustExt.setiTaxCode((addr.getTaxOffice()));
         } else {
           legacyCustExt.setiTaxCode("");
         }
@@ -1815,8 +1821,10 @@ public class TurkeyTransformer extends EMEATransformer {
   private void copyBillingFromMailing(LegacyDirectObjectContainer legacyObjects, CmrtAddr mailingAddr, String billingseq) {
     CmrtAddr billingAddr = (CmrtAddr) SerializationUtils.clone(mailingAddr);
     billingAddr.getId().setAddrNo(billingseq);
-    billingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
-    billingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+    billingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+    billingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+    billingAddr.setForCreate(true);
+    billingAddr.setForUpdate(false);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(billingAddr);
   }
@@ -1842,6 +1850,39 @@ public class TurkeyTransformer extends EMEATransformer {
     LOG.debug("Get Copy Billing Seq = " + maxseq);
 
     return maxseq;
+  }
+
+  public String getMassSeqForBilling(EntityManager entityManager, String cmrNo, String cntry) {
+    String maxseq = "";
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("TR.MASS.GETSEQFORBILLING");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NUM", cmrNo);
+    query.setParameter("CNTRY", cntry);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      maxseq = sResult[0].toString();
+    }
+    addrSeq = Integer.parseInt(maxseq);
+
+    if (addrSeq < 6) {
+      addrSeq = 6;
+    }
+    addrSeq++;
+
+    maxseq = Integer.toString(addrSeq);
+    maxseq = StringUtils.leftPad(maxseq, 5, '0');
+
+    LOG.debug("Get Copy Billing Seq = " + maxseq);
+
+    return maxseq;
+  }
+
+  @Override
+  public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    return false;
   }
 
 }

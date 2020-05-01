@@ -111,45 +111,52 @@ public class USAddrStdElement extends OverridingElement {
       // create data elements for import for Street, City, and Postal Code.
       if ("C".equalsIgnoreCase(data1.getTgmeResponseCode()) || "V".equalsIgnoreCase(data1.getTgmeResponseCode())) {
         if (!StringUtils.isBlank(data1.getPostalCode())) {
-          LOG.debug(" Postal code is  : " + data1.getTgmeResponseCode());
+          LOG.debug(" Postal code is  : " + data1.getPostalCode());
           details.append("Postal Code: " + data1.getPostalCode() + "\n");
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), data1.getPostalCode());
+          if (!data1.getPostalCode().toUpperCase().equals(addr.getPostCd().toUpperCase())) {
+            overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), data1.getPostalCode());
+          }
         }
 
         if (!StringUtils.isBlank(data1.getCity())) {
           LOG.debug("City is : " + data1.getCity());
           details.append("City: " + data1.getCity() + "\n");
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), data1.getCity());
+          if (!data1.getCity().toUpperCase().equals(addr.getCity1().toUpperCase())) {
+            overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), data1.getCity());
+          }
         }
 
         if (!StringUtils.isBlank(data1.getStreetAddressLine1())) {
           LOG.debug("Address is : " + data1.getStreetAddressLine1());
           details.append("Address Line 1: " + data1.getStreetAddressLine1() + "\n");
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "ADDR_TXT", addr.getAddrTxt(), data1.getStreetAddressLine1());
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "CITY1", addr.getCity1(), data1.getCity());
+          if (!data1.getStreetAddressLine1().toUpperCase().equals(addr.getAddrTxt().toUpperCase())) {
+            overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "ADDR_TXT", addr.getAddrTxt(), data1.getStreetAddressLine1());
+          }
         }
 
         if (!StringUtils.isBlank(data1.getStreetAddressLine2())) {
           LOG.debug("Address is : " + data1.getStreetAddressLine2());
           details.append("AddressLine 2: " + data1.getStreetAddressLine2() + "\n");
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "ADDR_TXT_2", addr.getAddrTxt2(), data1.getStreetAddressLine2());
+          if (!data1.getStreetAddressLine2().toUpperCase().equals(addr.getAddrTxt2() != null ? addr.getAddrTxt2().toUpperCase() : "")) {
+            overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "ADDR_TXT_2", addr.getAddrTxt2(), data1.getStreetAddressLine2());
+          }
         }
 
         if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
           LOG.debug("State is : " + data1.getStateProvinceCode());
-          details.append("Stata/Province Code: " + data1.getStateProvinceCode() + "\n");
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(), data1.getStateProvinceCode());
+          details.append("State/Province Code: " + data1.getStateProvinceCode() + "\n");
+          if (!data1.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase())) {
+            overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(), data1.getStateProvinceCode());
+          }
         }
 
-        if (!StringUtils.isBlank(data1.getStateProvinceName())) {
-          LOG.debug("State is : " + data1.getStateProvinceName());
-          details.append("Stata/Province Name: " + data1.getStateProvinceName() + "\n");
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "STD_CITY_NM", addr.getStdCityNm(), data1.getStateProvinceName());
-        }
-
-        if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
-          LOG.debug("State Code determined from TGME: " + data1.getStateProvinceCode());
-          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "", addr.getStateProv(), data1.getStateProvinceCode());
-        }
+        // if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
+        // LOG.debug("State Code determined from TGME: " +
+        // data1.getStateProvinceCode());
+        // overrides.addOverride(getProcessCode(), addr.getId().getAddrType(),
+        // "", addr.getStateProv(), data1.getStateProvinceCode());
+        // }
 
         results.setResults("Successful Execution");
         results.setDetails("Data for " + data1.getCity() + " under Issuing Country " + data1.getCountry() + " has been override \n");

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 
 /**
  * The container for {@link AutomationEngine} data. When an
@@ -25,11 +26,15 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String GBG_MATCH = "gbgMatch";
   public static final String COVERAGE_CALCULATED = "coverageCalculated";
   public static final String DNB_MATCH = "dnbMatching";
+  public static final String DNB_ALL_MATCHES = "dnbAllMatches";
   public static final String VAT_VERIFIED = "vatVerified";
   public static final String SKIP_CHECKS = "skipChecks";
   public static final String COMPANY_INFO_SOURCE = "compInfoSrc";
   public static final String SCENARIO_VERIFIED_INDC = "scenarioVerifiedIndc";
   public static final String MATCH_DEPARTMENT = "matchDepartment";
+
+  public static final String BO_COMPUTATION = "_usBOComputation";
+
   /**
    * 
    */
@@ -41,14 +46,19 @@ public class AutomationEngineData extends HashMap<String, Object> {
    * @param comment
    */
   @SuppressWarnings("unchecked")
-  public void addRejectionComment(String comment) {
-    List<String> rejComments = (List<String>) get(REJECTIONS);
+  public void addRejectionComment(String code, String comment, String supplInf1, String supplInf2) {
+    List<RejectionContainer> rejComments = (List<RejectionContainer>) get(REJECTIONS);
     if (rejComments == null) {
-      rejComments = new ArrayList<String>();
+      rejComments = new ArrayList<RejectionContainer>();
       put(REJECTIONS, rejComments);
     }
-    rejComments = (List<String>) get(REJECTIONS);
-    rejComments.add(comment);
+    rejComments = (List<RejectionContainer>) get(REJECTIONS);
+    RejectionContainer rejCon = new RejectionContainer();
+    rejCon.setRejCode(code);
+    rejCon.setRejComment(comment);
+    rejCon.setSupplInfo1(supplInf1);
+    rejCon.setSupplInfo2(supplInf1);
+    rejComments.add(rejCon);
   }
 
   /**
@@ -68,9 +78,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
     checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     checks.put(checkKey, userFriendlyCheckMessage);
   }
-  
+
   /**
-   * Checks negative check status 
+   * Checks negative check status
    * 
    * @param userFriendlyCheckMessage
    */
@@ -79,8 +89,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
     Map<String, String> checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     if (checks != null) {
       return true;
-    }
-    else{
+    } else {
       return false;
     }
   }

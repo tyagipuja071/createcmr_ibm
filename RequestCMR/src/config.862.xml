@@ -77,7 +77,12 @@
           <length>4</length>
           <width>20</width>
         </column>
-		
+        <column>
+          <label>Type of Customer</label>
+          <dbColumn>CURRENCY_CD</dbColumn>
+          <length>2</length>
+          <width>20</width>
+        </column>		
         <column>
           <label>ISU Code</label>
           <dbColumn>ISU_CD</dbColumn>

@@ -93,6 +93,17 @@
     <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
     </p>
   </cmr:column>
+  <%if ("U".equals(reqentry.getReqType())){%> 
+  <cmr:column span="2" forCountry="862">
+    <p>
+    <cmr:label fieldId="custNm4">
+      <cmr:fieldLabel fieldId="CustomerName4" />: 
+      <cmr:delta text="-" id="delta-custNm4" />
+    </cmr:label>
+    <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
+    </p>
+  </cmr:column>
+  <%}%> 
 <!--  rollback TR address change
     <cmr:column span="2" forCountry="862">
     <p>
@@ -177,7 +188,7 @@
     </p>
   </cmr:column>
   </cmr:view>
-  <cmr:column span="2" exceptForCountry="758">
+  <cmr:column span="2" exceptForCountry="758,862">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:

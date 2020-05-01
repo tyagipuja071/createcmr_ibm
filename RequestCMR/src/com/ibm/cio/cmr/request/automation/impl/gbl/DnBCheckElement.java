@@ -88,7 +88,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             || (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && !admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES))) {
           MatchingResponse<DnBMatchingResponse> dnbMatchingResult = new MatchingResponse<DnBMatchingResponse>();
           try {
-            dnbMatchingResult = DnBUtil.getMatches(handler, requestData, engineData, "ZS01");
+            dnbMatchingResult = DnBUtil.getMatches(requestData, "ZS01");
           } catch (Exception e) {
             LOG.debug("Error on DNB Matching" + e.getMessage());
           }
@@ -99,7 +99,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             validation.setMessage("Matches found");
             result.setDetails("High confidence D&B matches were found. No override from users was recorded.");
             result.setOnError(true);
-            engineData.addRejectionComment("High confidence D&B matches were found. No override from users was recorded.");
+            engineData.addRejectionComment("OTH", "High confidence D&B matches were found. No override from users was recorded.", "", "");
             LOG.debug("High confidence D&B matches were found. No override from user was recorded.\n");
           } else if (!hasValidMatches) {
             validation.setSuccess(true);
@@ -135,7 +135,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             validation.setSuccess(false);
             validation.setMessage("Failed");
             result.setDetails("Company is Out of Business based on D&B records.");
-            engineData.addRejectionComment("Company is Out of Business based on D&B records.");
+            engineData.addRejectionComment("OTH", "Company is Out of Business based on D&B records.", "", "");
             // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
             // admin.setCompInfoSrc("D&B");
             engineData.setCompanySource("D&B");

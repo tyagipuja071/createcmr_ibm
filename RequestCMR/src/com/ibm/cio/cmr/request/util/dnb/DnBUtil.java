@@ -15,7 +15,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -414,12 +413,30 @@ public class DnBUtil {
    * @return
    */
   public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord) {
+    return closelyMatchesDnb(country, addr, admin, dnbRecord, null);
+  }
+
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   *
+   * @param handler
+   * @param admin
+   * @param addresses
+   * @param dnbRecord
+   * @param nameToUse
+   * @return
+   */
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse) {
 
     boolean result = true;
 
     GEOHandler handler = RequestUtils.getGEOHandler(country);
-    if (StringUtils.isNotBlank(getCustomerName(handler, admin, addr)) && StringUtils.isNotBlank(dnbRecord.getDnbName())
-        && StringUtils.getLevenshteinDistance(getCustomerName(handler, admin, addr).toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 16) {
+
+    String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+    if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())
+        && StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 16) {
       result = false;
     }
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
@@ -481,7 +498,7 @@ public class DnBUtil {
    */
   private static String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
     String customerName = null;
-    if (!handler.customerNamesOnAddress()) {
+    if (handler != null && !handler.customerNamesOnAddress()) {
       customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
     } else {
       customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
@@ -507,23 +524,37 @@ public class DnBUtil {
   }
 
   /**
+   * Connects to the details service and gets the details of the DUNS NO from
+   * D&B
+   *
+   * @param dunsNo
+   * @return
+   * @throws Exception
+   */
+  public static DnBCompany getDnBDetails(String dunsNo) throws Exception {
+    DnbData data = CompanyFinder.getDnBDetails(dunsNo);
+    if (data != null && data.getResults() != null && !data.getResults().isEmpty()) {
+      return data.getResults().get(0);
+    }
+    return null;
+  }
+
+  /**
    * 
    * gets DnB matches on the basis of input data for the provided addr type
    * 
-   * @param handler
    * @param requestData
-   * @param engineData
    * @param addrType
    * @return
    * @throws Exception
    */
-  public static MatchingResponse<DnBMatchingResponse> getMatches(GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      String addrType) throws Exception {
+  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, String addrType) throws Exception {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
+    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
