@@ -148,11 +148,11 @@ public class PortugalTransformer extends MessageTransformer {
     boolean update = "U".equals(handler.adminData.getReqType());
     boolean crossBorder = isCrossBorder(addrData);
 
-    Map<String, String> messageHash = handler.messageHash;
     String addrKey = getAddressKey(addrData.getId().getAddrType());
-    LOG.debug("Handling " + (update ? "update" : "create") + " request.");
+    LOG.trace("Handling " + (update ? "update" : "create") + " request.");
+    Map<String, String> messageHash = handler.messageHash;
 
-    handler.messageHash.put("SourceCode", "FO5");
+    messageHash.put("SourceCode", "FO5");
     messageHash.remove(addrKey + "Name");
     messageHash.remove(addrKey + "ZipCode");
     messageHash.remove(addrKey + "City");
@@ -165,50 +165,90 @@ public class PortugalTransformer extends MessageTransformer {
     String line5 = "";
     String line6 = "";
 
-    String vat = !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat() : "";
-    String vatDigit = vat;
-    if (vat.matches("^[A-Z]{2}.*")) {
-      vatDigit = vat.substring(2, vat.length());
-    }
-
     // fiscal address
     if (MQMsgConstants.ADDR_ZP02.equals(addrData.getId().getAddrType())) {
-      line1 = vatDigit;
-      if (crossBorder)
-        line1 = vat;
+      if (MQMsgConstants.CUSTSUBGRP_PRICU.equals(cmrData.getCustSubGrp())) {
+        line1 = "F" + addrData.getCustNm1();
+      } else {
+        line1 = "J" + addrData.getCustNm1();
+      }
+      line2 = "CL" + addrData.getAddrTxt();
+
+      StringBuilder street = new StringBuilder();
+      line2 = StringUtils.replace(line2, " - ", "-");
+      line2 = StringUtils.replace(line2, "- ", "-");
+      line2 = StringUtils.replace(line2, " -", "-");
+      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
+      for (String part : parts) {
+        if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
+          line3 = part;
+        } else if (!StringUtils.isEmpty(part)) {
+          street.append(street.length() > 0 ? " " : "");
+          street.append(part);
+        }
+      }
+
+      line2 = street.toString();
+      if (StringUtils.isEmpty(addrData.getAddrTxt()) && !StringUtils.isEmpty(addrData.getPoBox())) {
+        line2 = "CLAPTO " + addrData.getPoBox().replaceAll("[^\\d]", "");
+      }
+      line3 = StringUtils.leftPad(line3, 5, '0');
+
+      line4 = addrData.getCity1();
+      if (crossBorder) {
+        line5 = "88888";
+      } else {
+        line5 = addrData.getPostCd();
+      }
     } else {
       line1 = addrData.getCustNm1();
       line2 = addrData.getCustNm2();
+      if (StringUtils.isEmpty(line2) && crossBorder) {
+        line2 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
+        if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+          line2 = "ATT " + line2;
+        }
+        if (line2.length() > 30) {
+          line2 = line2.substring(0, 30);
+        }
+      }
       if (StringUtils.isEmpty(line2)) {
         line2 = addrData.getAddrTxt2();
       }
 
-      line3 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
-      if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
-        line3 = "ATT: " + line3;
-      }
-      if (line3.length() > 30) {
-        line3 = line3.substring(0, 30);
-      }
-      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(addrData.getCustNm2())) {
-        line3 = addrData.getAddrTxt2();
-      }
-
-      line4 = addrData.getAddrTxt();
+      line3 = addrData.getAddrTxt();
       String poBox = !StringUtils.isEmpty(addrData.getPoBox()) ? addrData.getPoBox() : "";
       if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
         poBox = " APTO " + poBox;
       }
-      line4 = (StringUtils.isEmpty(line4) ? "" : line4) + poBox;
+      line3 = (StringUtils.isEmpty(line3) ? "" : line3) + poBox;
 
-      line5 = addrData.getPostCd() + " " + addrData.getCity1();
-      line6 = "";
+      line4 = addrData.getPostCd() + " " + addrData.getCity1();
+
       if (crossBorder) {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-      } else if (MQMsgConstants.ADDR_ZS02.equals(addrData.getId().getAddrType())) {
-        line6 = "Portugal";
-      } else if (MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType()) && update) {
+        line5 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+      } else {
+        line5 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
+        if (!StringUtils.isEmpty(line5) && !line5.toUpperCase().startsWith("ATT ") && !line5.toUpperCase().startsWith("ATT:")) {
+          line5 = "ATT " + line5;
+        }
+        if (line5.length() > 30) {
+          line5 = line5.substring(0, 30);
+        }
+      }
+
+      line6 = "";
+      if (MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType()) && update) {
         line6 = addrData.getCustPhone();
+      }
+
+      if (!update && MQMsgConstants.ADDR_ZP01.equals(addrData.getId().getAddrType())) {
+        // send to MailPhone the billing phone number
+        String phone = getBillingPhone(handler);
+        messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Phone", phone);
+      } else {
+        // always clear *Phone otherwise
+        messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Phone", "");
       }
     }
 
@@ -218,23 +258,6 @@ public class PortugalTransformer extends MessageTransformer {
     for (String line : lines) {
       messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Address" + lineNo, line);
       lineNo++;
-    }
-
-    if (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType()) && crossBorder) {
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "AddressT", vat);
-    } else if (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType())) {
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "AddressT", vatDigit);
-    } else {
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "AddressT", "");
-    }
-
-    if (MQMsgConstants.ADDR_ZP01.equals(addrData.getId().getAddrType())) {
-      // send to MailPhone the billing phone number
-      String phone = getBillingPhone(handler);
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Phone", phone);
-    } else {
-      // always clear *Phone otherwise
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Phone", "");
     }
 
     if ("N".equals(addrData.getImportInd()) && MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType())) {
@@ -441,6 +464,8 @@ public class PortugalTransformer extends MessageTransformer {
       if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custSubType) || "XBP".equals(custSubType)) {
         legacyCust.setMrcCd("5");
         legacyCust.setAuthRemarketerInd("Y");
+      } else {
+        legacyCust.setMrcCd("3");
       }
 
       // Type Of Customer
@@ -448,6 +473,8 @@ public class PortugalTransformer extends MessageTransformer {
         legacyCust.setCustType("G");
       } else if (MQMsgConstants.CUSTSUBGRP_INTSO.equals(custSubType) || "CRISO".equals(custSubType)) {
         legacyCust.setCustType("91");
+      } else {
+        legacyCust.setCustType("");
       }
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
@@ -509,8 +536,8 @@ public class PortugalTransformer extends MessageTransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
-    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
-    legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
+    legacyCust.setDistrictCd(data.getTerritoryCd() != null ? data.getTerritoryCd() : "");
+    legacyCust.setBankBranchNo(data.getCollectionCd() != null ? data.getCollectionCd() : "");
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
