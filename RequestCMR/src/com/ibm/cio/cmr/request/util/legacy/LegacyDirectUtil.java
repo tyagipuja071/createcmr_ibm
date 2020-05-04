@@ -85,7 +85,8 @@ public class LegacyDirectUtil {
     FIELDS_CLEAR_LIST.add("ModeOfPayment");
     FIELDS_CLEAR_LIST.add("CrosSubTyp");
     FIELDS_CLEAR_LIST.add("TipoCliente");
-
+    FIELDS_CLEAR_LIST.add("EmbargoCode");
+    FIELDS_CLEAR_LIST.add("Enterprise");
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }
 

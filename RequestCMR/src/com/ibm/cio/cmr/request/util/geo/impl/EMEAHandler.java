@@ -15,6 +15,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -118,6 +120,9 @@ public class EMEAHandler extends BaseSOFHandler {
 	// CMR-1728
   protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address",
 			"EPL Address" };
+  
+  protected static final String[] GR_MASS_UPDATE_SHEET_NAMES = { "Local Lang translation Sold-to", "Sold To Address", "Ship To Address", 
+  "Install At Address" };
 
 	static {
 		LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
@@ -3666,7 +3671,10 @@ public class EMEAHandler extends BaseSOFHandler {
       return true;
     } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
       return true;
+    } else if (SystemLocation.GREECE.equals(issuingCountry)) {
+      return true;
     }
+
     // *abner revert begin
     // else if (SystemLocation.TURKEY.equals(issuingCountry)) {
     // return true;
@@ -3692,6 +3700,14 @@ public class EMEAHandler extends BaseSOFHandler {
     // return;
     // }
     // *abner revert end
+		
+		if (country.equals(SystemLocation.GREECE)) {
+      validateTemplateDupFillsGreece(validations, book, maxRows,
+          country);
+      LOG.trace("validateTemplateDupFills for Greece");
+      return;
+    }
+
 		for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
 			XSSFSheet sheet = book.getSheet(name);
 
@@ -3888,5 +3904,77 @@ public class EMEAHandler extends BaseSOFHandler {
 		query.setParameter("CMR_NO", cmrNo);
 		return query.getSingleResult(CmrtCustExt.class);
 	}
+	
+  private void validateTemplateDupFillsGreece(List<TemplateValidation> validations, XSSFWorkbook book,
+      int maxRows, String country) {
+    XSSFCell currCell = null;
+    for (String name : GR_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);      
+      if (sheet != null ) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {           
+          String localCity = ""; // 7  
+          String crossCity = ""; // 8
+          String localPostal = ""; // 9
+          String cbPostal = ""; // 10          
+          String street = ""; // 4
+          String addressCont = ""; // 5
+          String poBox = ""; // 12
+          String attPerson = ""; // 11  
+          // iterate all the rows and check each column value
+          currCell = (XSSFCell) row.getCell(6);
+          localCity = validateColValFromCell((XSSFCell) currCell);
+          currCell = (XSSFCell) row.getCell(7);
+          crossCity = validateColValFromCell((XSSFCell) currCell);
+          currCell = (XSSFCell) row.getCell(8);
+          localPostal = validateColValFromCell((XSSFCell) currCell);
+          currCell = (XSSFCell) row.getCell(9);
+          cbPostal = validateColValFromCell(currCell);          
+          currCell = (XSSFCell) row.getCell(4);
+          street = validateColValFromCell((XSSFCell) currCell);
+          currCell = (XSSFCell) row.getCell(5);
+          addressCont = validateColValFromCell((XSSFCell) currCell);
+          currCell = (XSSFCell) row.getCell(11);
+          attPerson = validateColValFromCell((XSSFCell) currCell);
+          currCell = (XSSFCell) row.getCell(12);
+          poBox = validateColValFromCell((XSSFCell) currCell);
+           
+          TemplateValidation error = new TemplateValidation(name);          
+          if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
+            LOG.trace(
+                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+            error.addError(row.getRowNum(), "City",
+                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+            validations.add(error);
+          }  
+          if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
+            LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                + "If one is populated, the other must be empty. >>");
+            error.addError(row.getRowNum(), "Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                + "If one is populated, the other must be empty.");
+            validations.add(error);
+          }
+          
+          if("Sold To Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
+            if(!StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox)) {
+              LOG.trace(
+                  "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Street/PO Box",
+                  "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            if(!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
+              LOG.trace(
+                  "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Con't/Att. Person",
+                  "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);              
+            }
+          }
+        }
+      }
+    }
+   }    
+  }
 
 }
