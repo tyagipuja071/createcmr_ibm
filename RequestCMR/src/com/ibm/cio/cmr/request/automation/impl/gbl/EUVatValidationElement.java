@@ -76,7 +76,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             LOG.debug("Vat and company information verified through VIES.");
 
             details.append("Vat and company information verified through VIES.");
-            details.append("\nCompany details from VAT Layer :");
+            details.append("\nCompany details from VIES :");
             details.append(
                 "\nCompany Name = " + (StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName()));
             details.append("\nVAT number = " + (StringUtils.isBlank(response.getRecord().getVatNumber()) ? "" : response.getRecord().getVatNumber()));
@@ -89,7 +89,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             output.setDetails("Vat is invalid.Need review.");
             output.setOnError(true);
             engineData.addRejectionComment("Vat is invalid.");
-            LOG.debug("Vat is invalid.Need review.");
+            LOG.debug("Vat is invalid. Need review.");
           }
         } else {
           validation.setSuccess(false);
