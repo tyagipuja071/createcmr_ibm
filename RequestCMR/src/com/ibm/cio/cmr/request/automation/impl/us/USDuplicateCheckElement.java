@@ -749,6 +749,18 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Data data = requestData.getData();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
+
+    // check if End user and has divn value
+    if ("END USER".equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
+      Addr zs01 = requestData.getAddress("ZS01");
+      if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
+        response.setSuccess(false);
+        response.setMatched(false);
+        response.setMessage("Division Line Empty for End User request.");
+        return response;
+      }
+    }
+
     MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
         MatchingServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
