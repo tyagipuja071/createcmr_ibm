@@ -396,6 +396,10 @@ public class FRHandler extends BaseSOFHandler {
       address.getId().setAddrSeq(StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0'));
     }
 
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+    }
+
   }
 
   @Override
