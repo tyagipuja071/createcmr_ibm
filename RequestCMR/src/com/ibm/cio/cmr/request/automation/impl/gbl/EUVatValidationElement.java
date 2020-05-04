@@ -85,10 +85,10 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             updateEntity(admin, entityManager);
           } else {
             validation.setSuccess(false);
-            validation.setMessage("Review needed.");
-            output.setDetails("Vat is invalid.Need review.");
+            validation.setMessage("Review needed");
+            output.setDetails("Vat is invalid. Need review.");
             output.setOnError(true);
-            engineData.addRejectionComment("VAT", "Ivalid VAT/TAX information.", "Vat is invalid.", "");
+            engineData.addRejectionComment("VAT", "Invalid VAT/TAX information.", "Vat is invalid.", "");
             LOG.debug("Vat is invalid. Need review.");
           }
         } else {
