@@ -262,7 +262,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         result.setResults("No Matches");
         result.setOnError(false);
       } else if (reqChkSrvError) {
-        if (responseCMR != null && StringUtils.isNotBlank(response.getMessage())) {
+        if (response != null && StringUtils.isNotBlank(response.getMessage())) {
           result.setDetails(response.getMessage());
           engineData.addRejectionComment("OTH", response.getMessage(), "", "");
           result.setOnError(true);
