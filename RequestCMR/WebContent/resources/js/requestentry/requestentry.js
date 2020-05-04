@@ -1192,7 +1192,7 @@ function duplicateCMRMatchesNotif() {
   if (duplicateCMRMatchesCheck()) {
     cmr
         .showAlert(
-            'Existing CMR(s) were found with the similar information as the current request. Please check the CMR(s) provided in the request comments.<br><br>To proceed with duplicate CMR creation, please provide the override reason while sending for processing.<br><b>Note: </b>Duplicate CMR creation will trigger approvals',
+            'Existing CMR(s) were found with the similar information as the current request. Please check the CMR(s) provided in the request comments.<br><br>To proceed with duplicate CMR creation, please provide the override reason while sending the request for processing.<br><b>Note: </b>Duplicate CMR creation will trigger approvals',
             'Duplicate CMR(s) Found');
   }
 }
