@@ -573,7 +573,8 @@ public class USUtil extends AutomationUtil {
             case "ICC Tax Exempt Status":
             case "Out of City Limits":
               if (!failedChecks.containsKey("TAX_TEAM") && !requesterFromTaxTeam) {
-                // TODO check if requester is from TaxTeam
+                requesterFromTaxTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(),
+                    SystemParameters.getString("US.TAX_TEAM_HEAD"));
                 if (!requesterFromTaxTeam) {
                   failedChecks.put("TAX_TEAM", "Requester not from Tax Team.");
                   hasNegativeCheck = true;
