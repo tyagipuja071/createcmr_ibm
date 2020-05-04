@@ -512,6 +512,7 @@ public class USUtil extends AutomationUtil {
 
     if (Arrays.asList(scnarioList).contains(scenarioSubType)) {
       engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Automated checks cannot be performed for this scenario.");
+      details.append("\nAutomated checks cannot be performed for this scenario.").append("\n");
       valid = true;
     } else if ("CAMOUFLAGED".equals(scenarioSubType)) {
       String sql = ExternalizedQuery.getSql("AUTO.CHK_CMDE_USER");
