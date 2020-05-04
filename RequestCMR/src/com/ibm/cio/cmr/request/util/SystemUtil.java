@@ -28,6 +28,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.RequestChangeLog;
 import com.ibm.cio.cmr.request.entity.RequestChangeLogPK;
 import com.ibm.cio.cmr.request.entity.SystParameters;
@@ -558,5 +559,29 @@ public class SystemUtil {
       LOG.error(ex.getMessage() + "error parsing Dummy Default date.", ex);
     }
     return dateToSave;
+  }
+  /**
+   * Get Data records by id
+   * 
+   * @param reqId
+   * @return
+   */
+  public static Data getDataRecord(long reqId) {
+    try {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        String sql = ExternalizedQuery.getSql("DATA.GET.RECORD.BYID");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", reqId);
+        query.setForReadOnly(true);
+        return query.getSingleResult(Data.class);
+      } finally {
+        entityManager.clear();
+        entityManager.close();
+      }
+    } catch (Exception e) {
+      LOG.error("Cannot get Data object", e);
+      return null;
+    }
   }
 }
