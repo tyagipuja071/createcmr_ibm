@@ -61,9 +61,8 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
         log.debug("No ABN# specified on the request.");
       } else {
         if (response != null && response.isSuccess()) {
-          if (response.getRecord().isValid()
-              && customerName.equalsIgnoreCase(StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord()
-                  .getCompanyName())) {
+          if (response.getRecord().isValid() && customerName
+              .equalsIgnoreCase(StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName())) {
             validation.setSuccess(true);
             validation.setMessage("Execution done.");
             log.debug("Buisness Number and Legal Name verified using ABN/NBN lookup service");
@@ -81,7 +80,7 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
             details.append("\nState =" + response.getRecord().getState());
             output.setDetails(details.toString());
             output.setOnError(false);
-            engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
+            engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
             // Defect CMR - 1375
             // admin.setCompVerifiedIndc("Y");
             // admin.setCompInfoSrc("Business Number Validation");
@@ -135,8 +134,8 @@ public class ANZBNValidationElement extends ValidatingElement implements Company
     request.setBusinessNumber(data.getVat());
     System.out.println(request + request.getBusinessNumber());
     log.debug("Connecting to the ABNValidation service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    AutomationResponse<?> rawResponse = client
-        .executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, request, AutomationResponse.class);
+    AutomationResponse<?> rawResponse = client.executeAndWrap(AutomationServiceClient.AU_ABN_VALIDATION_SERVICE_ID, request,
+        AutomationResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponse);
     TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {

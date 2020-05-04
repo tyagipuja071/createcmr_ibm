@@ -2148,38 +2148,6 @@ function setAbbrNmOnIbmDeptChng() {
   }
 }
 
-function setAbbrevNameFRUpdate(cntry, addressMode, saving, finalSave, force) {
-  var zs01Reccount = '';
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var addrType = FormManager.getActualValue('addrType');
-  if (cmr.currentRequestType != 'U') {
-    return new ValidationResult(null, true);
-  }
-
-  if (addrType != null && (addrType == 'ZS01' || FormManager.getField('addrType_ZS01').checked) && finalSave) {
-    if (cmr.addressMode != 'updateAddress') {
-      qParams = {
-        REQ_ID : zs01ReqId,
-      };
-      var record = cmr.query('GETZS01VALRECORDS', qParams);
-      zs01Reccount = record.ret1;
-    }
-
-    var addrSeq = FormManager.getActualValue('addrSeq');
-    qParams = {
-      REQ_ID : zs01ReqId,
-      ADDR_SEQ : addrSeq,
-    };
-    var record = cmr.query('GETZS01OLDCUSTNAME', qParams);
-    var oldCustNm = record.ret1;
-    var currCustNm = FormManager.getActualValue('custNm1');
-
-    var addrType = FormManager.getActualValue('addrType');
-    if ((zs01Reccount == '' || (zs01Reccount != '' && Number(zs01Reccount) == 0)) && (oldCustNm != undefined && oldCustNm != '' && currCustNm != '' && currCustNm != oldCustNm)) {
-      FormManager.setValue('abbrevNm', FormManager.getActualValue('custNm1').substring(0, 22));
-    }
-  }
-}
 function addSoldToAddressValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -2246,7 +2214,6 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, [ '706' ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAddrFunction(setAbbrevNameFRUpdate, '706');
   GEOHandler.registerValidator(addSoldToAddressValidator, '706');
 
 });

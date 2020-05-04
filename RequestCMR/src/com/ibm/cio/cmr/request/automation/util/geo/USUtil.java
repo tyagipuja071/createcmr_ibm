@@ -512,6 +512,7 @@ public class USUtil extends AutomationUtil {
 
     if (Arrays.asList(scnarioList).contains(scenarioSubType)) {
       engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Automated checks cannot be performed for this scenario.");
+      details.append("\nAutomated checks cannot be performed for this scenario.").append("\n");
       valid = true;
     } else if ("CAMOUFLAGED".equals(scenarioSubType)) {
       String sql = ExternalizedQuery.getSql("AUTO.CHK_CMDE_USER");
@@ -974,6 +975,8 @@ public class USUtil extends AutomationUtil {
     String subIndustryCd = "";
     String affiliate = "";
     String cmrNo = "";
+    String name3 = "";
+    String name4 = "";
 
     // get USCMR values
 
@@ -994,6 +997,7 @@ public class USUtil extends AutomationUtil {
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_RDC_VALUES");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setForReadOnly(true);
     List<Object[]> results = query.getResults(1);
     if (results != null && results.size() > 0) {
@@ -1081,7 +1085,31 @@ public class USUtil extends AutomationUtil {
       } else if ("D".equals(bpAccTyp)) {
         custSubGroup = SC_BP_DEVELOP;
       } else if ("E".equals(bpAccTyp)) {
-        custSubGroup = SC_BP_E_HOST;
+        String[] addrTypList = { "ZS01", "ZI01" };
+        for (String addrTyp : Arrays.asList(addrTypList)) {
+          // get RDC values
+          sql = ExternalizedQuery.getSql("AUTO.US.GET_ATTN_RDC");
+          query = new PreparedQuery(entityManager, sql);
+          query.setParameter("CMR_NO", cmrNo);
+          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          query.setParameter("ADDR_TYP", addrTyp);
+          query.setForReadOnly(true);
+          List<Object[]> resultList = query.getResults(1);
+          if (resultList != null && resultList.size() > 0) {
+            name3 = (String) resultList.get(0)[0];
+            name4 = (String) resultList.get(0)[1];
+          }
+
+          if ((StringUtils.isNotBlank(name3)
+              && (name3.toUpperCase().contains("e-hosting".toUpperCase()) || name3.toUpperCase().contains("e-host".toUpperCase())
+                  || name3.toUpperCase().contains("ehosting".toUpperCase()) || name3.toUpperCase().contains("ehost".toUpperCase())))
+              || (StringUtils.isNotBlank(name4)
+                  && (name4.toUpperCase().contains("e-hosting".toUpperCase()) || name4.toUpperCase().contains("e-host".toUpperCase())
+                      || name4.toUpperCase().contains("ehosting".toUpperCase()) || name4.toUpperCase().contains("ehost".toUpperCase())))) {
+            custSubGroup = SC_BP_E_HOST;
+            break;
+          }
+        }
       }
     }
     return custSubGroup;

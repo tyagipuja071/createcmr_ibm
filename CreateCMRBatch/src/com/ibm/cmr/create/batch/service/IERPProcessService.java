@@ -703,6 +703,10 @@ public class IERPProcessService extends BaseBatchService {
     reqCmtLog.setId(reqCmtLogpk);
     reqCmtLog.setReqId(admin.getId().getReqId());
     reqCmtLog.setCmt(message != null ? message : "No message provided.");
+    if (reqCmtLog.getCmt().length() > 2000) {
+      String cmt = "(some comments trimmed)";
+      reqCmtLog.setCmt(reqCmtLog.getCmt().substring(0, 1970) + cmt);
+    }
     // save cmtlockedIn as Y default for current realese
     reqCmtLog.setCmtLockedIn(CmrConstants.CMT_LOCK_IND_YES);
     reqCmtLog.setCreateById(admin.getLastUpdtBy());

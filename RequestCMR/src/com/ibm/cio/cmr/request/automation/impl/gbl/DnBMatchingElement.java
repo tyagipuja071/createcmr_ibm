@@ -111,7 +111,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
               vatFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
 
-              if (scenarioExceptions.isCheckVATForDnB() && !StringUtils.isBlank(data.getVat()) && vatFound && isOrgIdMatched) {
+              if (scenarioExceptions.isCheckVATForDnB() && !StringUtils.isBlank(data.getVat())
+                  && ((!vatFound && engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED)) || (vatFound && isOrgIdMatched))) {
                 // found the perfect match here
                 perfectMatch = dnbRecord;
                 break;
