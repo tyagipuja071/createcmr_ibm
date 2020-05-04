@@ -821,10 +821,16 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       request.setCity(addr.getCity1());
 
       if ("END USER".equals(scenarioSubType)) {
-        if ("ZS01".equals(addr.getId().getAddrType())) {
+        if ("ZS01".equals(addr.getId().getAddrType()) && addr.getDivn() != null) {
           request.setCustomerName(StringUtils.isBlank(addr.getDivn()) ? "" : addr.getDivn());
         } else if ("ZI01".equals(addr.getId().getAddrType()) && admin.getMainCustNm1() != null) {
           request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+        } else {
+          if (admin.getMainCustNm1() != null) {
+            request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
+          } else {
+            request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+          }
         }
       } else {
         if (admin.getMainCustNm1() != null) {
