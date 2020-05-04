@@ -656,6 +656,9 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
   @Column(name = "DEFLT_COLLECTOR_NO")
   private String defltCollectorNo;
 
+  @Column(name = "US_SICMEN")
+  private String usSicmen;
+
   public String getVatExempt() {
     return vatExempt;
   }
@@ -2231,6 +2234,14 @@ public class Data extends BaseEntity<DataPK> implements Serializable {
 
   public void setDefltCollectorNo(String defltCollectorNo) {
     this.defltCollectorNo = defltCollectorNo;
+  }
+
+  public String getUsSicmen() {
+    return usSicmen;
+  }
+
+  public void setUsSicmen(String usSicmen) {
+    this.usSicmen = usSicmen;
   }
 
 }
