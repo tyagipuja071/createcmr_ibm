@@ -3254,7 +3254,7 @@ function setVatValidatorGRCYTR() {
 
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     } else if (!dijit.byId('vatExempt').get('checked') && cntry == SysLoc.TURKEY) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'Tax Number' ]);
@@ -3367,18 +3367,27 @@ function setFieldsBehaviourGR() {
       FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-    }
+     }
     if (role == 'REQUESTER') {
       FormManager.resetValidations('isuCd');
       FormManager.resetValidations('clientTier');
       FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
     }
+    if (FormManager.getActualValue('reqType') == 'U') {
+    	FormManager.enable('embargoCd');    	
+    }
   }
   FormManager.addValidator('custPrefLang', Validators.REQUIRED, [ 'Preferred Language' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('cmrOwner', Validators.REQUIRED, [ 'CMR Owner' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+  if(FormManager.getActualValue('reqType') == 'C') {
+	  FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
+	  FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
+	  FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');	  
+  } else if (FormManager.getActualValue('reqType') == 'U'){
+      FormManager.resetValidations('subIndustryCd');
+      FormManager.resetValidations('isicCd');
+      FormManager.resetValidations('repTeamMemberNo');
+  }
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
   FormManager.readOnly('subIndustryCd');

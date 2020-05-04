@@ -1874,6 +1874,11 @@ public class EMEAHandler extends BaseSOFHandler {
 				}
 			}
 		} // End of Story 1389065
+		
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+      data.setMemLvl(mainRecord.getCmrMembLevel());
+      data.setBpRelType(mainRecord.getCmrBPRelType());
+    }
 	}
 
 	@Override
