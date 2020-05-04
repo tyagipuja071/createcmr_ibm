@@ -252,7 +252,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           engineData.addNegativeCheckStatus("dupAllowed",
               "There were possible duplicate CMRs/Requests found with the same data but allowed for the scenario.");
         } else {
-          engineData.addRejectionComment("There were possible duplicate CMRs/Requests found with the same data.");
+          engineData.addRejectionComment("DUPC/R", "There were possible duplicate CMRs/Requests found with the same data.", "", "");
           result.setOnError(true);
         }
         result.setProcessOutput(output);
@@ -264,24 +264,24 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       } else if (reqChkSrvError) {
         if (response.getSuccess()) {
           result.setDetails(response.getMessage());
-          engineData.addRejectionComment(response.getMessage());
+          engineData.addRejectionComment("OTH", response.getMessage(), "", "");
           result.setOnError(true);
           result.setResults("Duplicate Request Check Encountered an error.");
         } else {
           result.setDetails("Duplicate Request Check Encountered an error.");
-          engineData.addRejectionComment("Duplicate Request Check Encountered an error.");
+          engineData.addRejectionComment("OTH", "Duplicate Request Check Encountered an error.", "", "");
           result.setOnError(true);
           result.setResults("Duplicate Request Check Encountered an error.");
         }
       } else if (cmrChkSrvError) {
         if (responseCMR.getSuccess()) {
           result.setDetails(responseCMR.getMessage());
-          engineData.addRejectionComment(responseCMR.getMessage());
+          engineData.addRejectionComment("OTH", responseCMR.getMessage(), "", "");
           result.setOnError(true);
           result.setResults("Duplicate CMR Check encountered an error.");
         } else {
           result.setDetails("Duplicate CMR Check Encountered an error.");
-          engineData.addRejectionComment("Duplicate CMR Check Encountered an error.");
+          engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
           result.setOnError(true);
           result.setResults("Error on Duplicate CMR Check");
         }
@@ -292,12 +292,12 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       result.setOnError(false);
     } else if (soldTo == null) {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("Missing main address on the request.");
+      engineData.addRejectionComment("ADDR", "Missing main address on the request.", "", "");
       result.setResults("No Matches");
       result.setOnError(true);
     } else {
       result.setDetails("Duplicate Check Encountered an error.");
-      engineData.addRejectionComment("Duplicate Check Encountered an error.");
+      engineData.addRejectionComment("OTH", "Duplicate Check Encountered an error.", "", "");
       result.setOnError(true);
       result.setResults("Duplicate Check Encountered an error.");
     }

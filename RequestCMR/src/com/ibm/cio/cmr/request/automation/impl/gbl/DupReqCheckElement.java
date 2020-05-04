@@ -112,8 +112,8 @@ public class DupReqCheckElement extends DuplicateCheckElement {
               engineData.put("reqCheckMatches", reqCheckRecord);
             }
             result.setResults("Found Duplicate Requests.");
-            engineData.addRejectionComment(reqCheckMatches.size()
-                + " possible duplicate request(s) found with the same data.\n Duplicate Request(s): " + StringUtils.join(dupReqIds, ", "));
+            engineData.addRejectionComment("DUPR", reqCheckMatches.size() + " possible duplicate request(s) found with the same data.",
+                "\n Duplicate Request(s): " + StringUtils.join(dupReqIds, ", "), "");
             result.setOnError(true);
             result.setProcessOutput(output);
             result.setDetails(details.toString().trim());
@@ -124,13 +124,13 @@ public class DupReqCheckElement extends DuplicateCheckElement {
           }
         } else {
           result.setDetails(response.getMessage());
-          engineData.addRejectionComment(response.getMessage());
+          engineData.addRejectionComment("OTH", response.getMessage(), "", "");
           result.setOnError(true);
           result.setResults("Duplicate Request Check Encountered an error.");
         }
       } else {
         result.setDetails("Duplicate Request Check Encountered an error.");
-        engineData.addRejectionComment("Duplicate Request Check Encountered an error.");
+        engineData.addRejectionComment("OTH", "Duplicate Request Check Encountered an error.", "", "");
         result.setOnError(true);
         result.setResults("Duplicate Request Check Encountered an error.");
       }
@@ -141,12 +141,12 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       result.setOnError(false);
     } else if (soldTo == null) {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("Missing main address on the request.");
+      engineData.addRejectionComment("ADDR", "Missing main address on the request.", "", "");
       result.setResults("No Matches");
       result.setOnError(true);
     } else {
       result.setDetails("Duplicate Request Check Encountered an error.");
-      engineData.addRejectionComment("Duplicate Request Check Encountered an error.");
+      engineData.addRejectionComment("OTH", "Duplicate Request Check Encountered an error.", "", "");
       result.setOnError(true);
       result.setResults("Duplicate Request Check Encountered an error.");
     }

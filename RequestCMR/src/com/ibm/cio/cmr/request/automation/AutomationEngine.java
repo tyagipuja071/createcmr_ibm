@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
+import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -143,9 +144,9 @@ public class AutomationEngine {
     engineData.remove();
     AutomationEngineData threadData = new AutomationEngineData();
     AppUser appUser = createAutomationAppUser();
-    List<String> rejectComments = new ArrayList<String>();
+    List<RejectionContainer> rejectInfo = new ArrayList<RejectionContainer>();
     threadData.put(AutomationEngineData.APP_USER, appUser);
-    threadData.put(AutomationEngineData.REJECTIONS, rejectComments);
+    threadData.put(AutomationEngineData.REJECTIONS, rejectInfo);
     engineData.set(threadData);
 
     ChangeLogListener.setUser(appUser.getIntranetId());
@@ -315,12 +316,14 @@ public class AutomationEngine {
             // reject the record
             StringBuilder rejCmtBuilder = new StringBuilder();
             rejCmtBuilder.append("The record has been rejected due to some system processing errors");
-            rejectComments = (List<String>) engineData.get().get("rejections");
-            if (rejectComments != null && !rejectComments.isEmpty()) {
+            rejectInfo = (List<RejectionContainer>) engineData.get().get("rejections");
+            if (rejectInfo != null && !rejectInfo.isEmpty()) {
               rejCmtBuilder.append(":");
-              for (String rejCmt : rejectComments) {
+              for (RejectionContainer rejCont : rejectInfo) {
+                rejCmtBuilder.append(rejCont.getRejCode() + " : " + rejCont.getRejComment());
                 rejCmtBuilder.append("\n ");
-                rejCmtBuilder.append(rejCmt);
+                rejCmtBuilder.append(rejCont.getSupplInfo1() + "\n");
+                rejCmtBuilder.append(rejCont.getSupplInfo2() + "\n");
               }
             } else {
               rejCmtBuilder.append(".");
@@ -343,15 +346,17 @@ public class AutomationEngine {
             moveToNextStep = false;
             String cmt = "";
             StringBuilder rejectCmt = new StringBuilder();
-            List<String> rejectionComments = (List<String>) engineData.get().get("rejections");
+            List<RejectionContainer> rejectionInfo = (List<RejectionContainer>) engineData.get().get("rejections");
             Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
-            if ((rejectionComments != null && !rejectionComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+            if ((rejectionInfo != null && !rejectionInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
               rejectCmt.append("Processor review is required for following issues");
               rejectCmt.append(":");
-              if (rejectComments != null && !rejectComments.isEmpty()) {
-                for (String rejCmt : rejectComments) {
+              if (rejectionInfo != null && !rejectionInfo.isEmpty()) {
+                for (RejectionContainer rejCont : rejectionInfo) {
                   rejectCmt.append("\n ");
-                  rejectCmt.append(rejCmt);
+                  rejectCmt.append(rejCont.getRejCode() + " : " + rejCont.getRejComment() + "\n");
+                  rejectCmt.append(rejCont.getSupplInfo1() + "\n");
+                  rejectCmt.append(rejCont.getSupplInfo2() + "\n");
                 }
               }
               // append pending checks
@@ -433,14 +438,15 @@ public class AutomationEngine {
             String cmt = null;
             admin.setReqStatus("PPN");
             StringBuilder rejCmtBuilder = new StringBuilder();
-            rejectComments = (List<String>) engineData.get().get("rejections");
+            rejectInfo = (List<RejectionContainer>) engineData.get().get("rejections");
             // add comments if request rejected or if pending checks
-            if ((rejectComments != null && !rejectComments.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+            if ((rejectInfo != null && !rejectInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
               rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
               rejCmtBuilder.append(":");
-              for (String rejCmt : rejectComments) {
-                rejCmtBuilder.append("\n ");
-                rejCmtBuilder.append(rejCmt);
+              for (RejectionContainer rejCont : rejectInfo) {
+                rejCmtBuilder.append(rejCont.getRejCode() + " : " + rejCont.getRejComment() + "\n");
+                rejCmtBuilder.append(rejCont.getSupplInfo1() + "\n");
+                rejCmtBuilder.append(rejCont.getSupplInfo2() + "\n");
               }
               // append pending checks
               for (String pendingCheck : pendingChecks.values()) {

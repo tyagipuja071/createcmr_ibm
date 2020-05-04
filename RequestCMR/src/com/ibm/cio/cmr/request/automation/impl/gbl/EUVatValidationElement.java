@@ -88,7 +88,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             validation.setMessage("Review needed.");
             output.setDetails("Vat is invalid.Need review.");
             output.setOnError(true);
-            engineData.addRejectionComment("Vat is invalid.");
+            engineData.addRejectionComment("VAT", "Ivalid VAT/TAX information.", "Vat is invalid.", "");
             LOG.debug("Vat is invalid. Need review.");
           }
         } else {
@@ -96,7 +96,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("Execution failed.");
           output.setDetails(response.getMessage());
           output.setOnError(true);
-          engineData.addRejectionComment(response.getMessage());
+          engineData.addRejectionComment("VAT", response.getMessage(), "", "");
           LOG.debug(response.getMessage());
         }
       }

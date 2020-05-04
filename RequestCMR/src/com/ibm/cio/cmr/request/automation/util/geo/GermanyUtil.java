@@ -105,7 +105,7 @@ public class GermanyUtil extends AutomationUtil {
           if (StringUtils.isNotBlank(custNm) && (custNm.contains("GmbH") || custNm.contains("AG") || custNm.contains("e.V.") || custNm.contains("OHG")
               || custNm.contains("Co.KG") || custNm.contains("Co.OHG") || custNm.contains("KGaA") || custNm.contains("mbH") || custNm.contains("UG")
               || custNm.contains("e.G") || custNm.contains("mit beschränkter Haftung") || custNm.contains("Aktiengesellschaft"))) {
-            engineData.addRejectionComment("Scenario chosen is incorrect, should be Commercial.");
+            engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
             details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
             valid = false;
             break;
@@ -140,8 +140,9 @@ public class GermanyUtil extends AutomationUtil {
                 details.append(
                     "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo)
                     .append("\n");
-                engineData.addRejectionComment(
-                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo);
+                engineData.addRejectionComment("DUPC",
+                    "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo,
+                    "", "");
                 valid = false;
               } else {
                 details.append("No Duplicate CMRs were found.").append("\n");
@@ -153,7 +154,7 @@ public class GermanyUtil extends AutomationUtil {
                     String mainCustName = zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "");
                     person = BluePagesHelper.getPersonByName(insertGermanCharacters(mainCustName));
                     if (person == null) {
-                      engineData.addRejectionComment("Employee details not found in IBM BluePages.");
+                      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
                       details.append("Employee details not found in IBM BluePages.").append("\n");
                     } else {
                       details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
@@ -201,7 +202,7 @@ public class GermanyUtil extends AutomationUtil {
             engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
           }
           if (count > 1) {
-            engineData.addRejectionComment("Multiple registered CMRs already found for this customer.");
+            engineData.addRejectionComment("OTH", "Multiple registered CMRs already found for this customer.", "", "");
             details.append("Multiple registered CMRs already found for this customer.").append("\n");
             valid = false;
           } else if (count == 1) {
@@ -226,7 +227,7 @@ public class GermanyUtil extends AutomationUtil {
             request.setCeid(data.getPpsceid());
             PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
             if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
-              engineData.addRejectionComment("PPS CE ID on the request is invalid.");
+              engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
               details.append("PPS CE ID on the request is invalid.").append("\n");
               valid = false;
             } else {
@@ -253,7 +254,7 @@ public class GermanyUtil extends AutomationUtil {
           query.setParameter("CD", dept);
           String result = query.getSingleResult(String.class);
           if (result == null) {
-            engineData.addRejectionComment("IBM Department/Cost Center on the request is invalid.");
+            engineData.addRejectionComment("OTH", "IBM Department/Cost Center on the request is invalid.", "", "");
             details.append("IBM Department/Cost Center on the request is invalid.").append("\n");
             valid = false;
           } else {
@@ -290,7 +291,7 @@ public class GermanyUtil extends AutomationUtil {
 
     } else {
       valid = false;
-      engineData.addRejectionComment("No Scenario found on the request");
+      engineData.addRejectionComment("TYPR", "Wrong type of request.", "No Scenario found on the request", "");
       details.append("No Scenario found on the request").append("\n");
     }
     return valid;
@@ -475,14 +476,14 @@ public class GermanyUtil extends AutomationUtil {
           engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
           break;
         case "No Match Found":
-          engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+          engineData.addRejectionComment("OTH", "Coverage cannot be computed using 32S-PostalCode logic.", "", "");
           details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
           results.setResults("Coverage not calculated.");
           results.setOnError(true);
           break;
         }
       } else {
-        engineData.addRejectionComment("Coverage cannot be computed using 32S-PostalCode logic.");
+        engineData.addRejectionComment("OTH", "Coverage cannot be computed using 32S-PostalCode logic.", "", "");
         details.append("Coverage cannot be computed using 32S-PostalCode logic.").append("\n");
         results.setResults("Coverage not calculated.");
         results.setOnError(true);
@@ -615,7 +616,7 @@ public class GermanyUtil extends AutomationUtil {
         if (isShipToExistOnReq) {
           detail.append("Ship To details provided matches an existing address.");
           validation.setMessage("ShipTo already exists");
-          engineData.addRejectionComment("Ship To details provided matches an existing address.");
+          engineData.addRejectionComment("ADDR", "Ship To details provided matches an existing address.", "", "");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
@@ -631,7 +632,8 @@ public class GermanyUtil extends AutomationUtil {
         isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
         if (isInstallAtExistOnReq) {
           detail.append("Install At details provided matches an existing address.");
-          engineData.addRejectionComment("Install At details provided matches an existing address.");
+          engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address.",
+              "Install At details provided matches an existing address.", "");
           LOG.debug("Install At details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
@@ -659,7 +661,7 @@ public class GermanyUtil extends AutomationUtil {
         isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
         if (isBillToExistOnReq) {
           detail.append("Bill To details provided matches an existing address.");
-          engineData.addRejectionComment("Bill To details provided matches an existing address.");
+          engineData.addRejectionComment("ADDR", "Bill To details provided matches an existing address.", "", "");
           LOG.debug("Bill To details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);

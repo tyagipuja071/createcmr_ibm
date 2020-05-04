@@ -96,7 +96,7 @@ public class FranceUtil extends AutomationUtil {
         details.append("SBO value already provided on the request - " + data.getSalesBusOffCd()).append("\n");
         results.setResults("Skipped");
       } else {
-        engineData.addRejectionComment("SBO cannot be computed automatically.");
+        engineData.addRejectionComment("OTH", "SBO cannot be computed automatically.", "", "");
         details.append("SBO cannot be computed automatically.").append("\n");
         results.setResults("SBO not calculated.");
         results.setOnError(true);
@@ -174,8 +174,10 @@ public class FranceUtil extends AutomationUtil {
                 duplicateCMRNo = response.getMatches().get(0).getCmrNo();
                 details.append("The " + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
                     + " already has a record with CMR No. " + duplicateCMRNo);
-                engineData.addRejectionComment("The " + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
-                    + " already has a record with CMR No. " + duplicateCMRNo);
+                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR.",
+                    "The " + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
+                        + " already has a record with CMR No. " + duplicateCMRNo,
+                    "");
                 valid = false;
               } else {
                 details.append("No Duplicate CMRs were found with Name: " + name);
@@ -186,7 +188,7 @@ public class FranceUtil extends AutomationUtil {
                   person = BluePagesHelper
                       .getPersonByName(zs01.getCustNm1() + (StringUtils.isNotBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : ""));
                   if (person == null) {
-                    engineData.addRejectionComment("Employee details not found in IBM BluePages.");
+                    engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
                     details.append("Employee details not found in IBM BluePages.").append("\n");
                   } else {
                     details.append("Employee details validated with IBM BluePages for " + person.getName() + "(" + person.getEmail() + ").")
@@ -228,7 +230,7 @@ public class FranceUtil extends AutomationUtil {
               engineData.addNegativeCheckStatus("CMR_CHECK_FAILED", "Unable to perform Duplicate CMR Check for Broker scenario.");
             }
             if (count > 1) {
-              engineData.addRejectionComment("Multiple registered CMRs already found for this customer.");
+              engineData.addRejectionComment("OTH", "Multiple registered CMRs already found for this customer.", "", "");
               details.append("Multiple registered CMRs already found for this customer.");
               valid = false;
             } else if (count == 1) {
@@ -256,7 +258,7 @@ public class FranceUtil extends AutomationUtil {
               request.setCeid(data.getPpsceid());
               PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
               if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
-                engineData.addRejectionComment("PPS CE ID on the request is invalid.");
+                engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
                 details.append("PPS CE ID on the request is invalid.");
                 valid = false;
               } else {
@@ -282,7 +284,7 @@ public class FranceUtil extends AutomationUtil {
         case "CBIFL":
           String mainCustNm = zs01.getCustNm1();
           if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM") && !(data.getCountryUse().length() > 3)) {
-            engineData.addRejectionComment("Wrong Customer Name on the main address. IBM should be part of the name.");
+            engineData.addRejectionComment("ADDR", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
             details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
             valid = false;
           }
@@ -296,7 +298,8 @@ public class FranceUtil extends AutomationUtil {
             if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
               valid = true;
             } else {
-              engineData.addRejectionComment("Wrong Customer Name on Host address. CHEZ should be part of the name.");
+              engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address",
+                  "Wrong Customer Name on Host address. CHEZ should be part of the name.", "");
               details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
               valid = false;
             }
@@ -331,7 +334,8 @@ public class FranceUtil extends AutomationUtil {
             if (mailDetails.equalsIgnoreCase(billDetails)) {
               valid = true;
             } else {
-              engineData.addRejectionComment("Invalid Billing/Mailing address found on the request. The addresses should be the same.");
+              engineData.addRejectionComment("ADDR", "Invalid Billing/Mailing address found on the request. The addresses should be the same.", "",
+                  "");
               details.append("Invalid Billing/Mailing address found on the request. The addresses should be the same.").append("\n");
               valid = false;
             }
@@ -348,7 +352,7 @@ public class FranceUtil extends AutomationUtil {
     } else {
       if (StringUtils.isBlank(scenario)) {
         valid = false;
-        engineData.addRejectionComment("No Scenario found on the request");
+        engineData.addRejectionComment("TYPR", "No Scenario found on the request", "", "");
         details.append("No Scenario found on the request");
       }
     }
@@ -714,8 +718,7 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-       }
-      else{
+      } else {
 
         if (billing != null && billingChngd) {
           LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
@@ -752,12 +755,12 @@ public class FranceUtil extends AutomationUtil {
     output.setDetails(detail.toString());
     return true;
   }
-  
+
   private boolean isOnlyFieldUpdated(RequestChangeContainer changes) {
     boolean isOnlyFieldUpdated = true;
     List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-    String[] addressFields = { "Customer Name", "Customer Name Continuation","Customer Name/ Additional Address Information", "Country (Landed)", "Street",
-        "Street Continuation","Postal Code", "City","PostBox"};
+    String[] addressFields = { "Customer Name", "Customer Name Continuation", "Customer Name/ Additional Address Information", "Country (Landed)",
+        "Street", "Street Continuation", "Postal Code", "City", "PostBox" };
     List<String> relevantFieldNames = Arrays.asList(addressFields);
     for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
       String fieldId = updatedAddrModel.getDataField();
@@ -769,6 +772,5 @@ public class FranceUtil extends AutomationUtil {
 
     return isOnlyFieldUpdated;
   }
-
 
 }
