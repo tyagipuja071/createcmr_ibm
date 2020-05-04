@@ -889,6 +889,7 @@ public class CmrConstants {
   public static final String CN_CITIES_UPPER_FIELD_ID = "##ChinaCityUpperList";
 
   public static final String PROCESSING_TYPE_LEGACY_DIRECT = "LD";
+  public static final String PROCESSING_TYPE_RDC_MAIN = "MA";
   public static final String PROCESSING_TYPE_MQ = "MQ";
   public static final String PROCESSING_TYPE_TRANSACTION_CONNECT = "TC";
   public static final String PROCESSING_TYPE_IERP = "DR";
