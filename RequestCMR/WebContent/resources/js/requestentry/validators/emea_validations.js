@@ -3406,6 +3406,44 @@ function resetSubIndustryCdGR() {
   }, 1000);
 }
 
+function addInacCodeValidator() {
+	console.log("addInacCodeValidator..............");
+	FormManager.addFormValidator((function() {
+		return {
+	      validate : function() {
+	    	  var value = FormManager.getActualValue('inacCd');
+	    	  var inacCd1 = value.substring(0, 2);
+	    	  var inacCd2 = value.substring(2, 4);
+	    	  var result = false;
+	    	  if (value && value.length == 4 ) {
+		    	  if (value && value.length > 0 && isNaN(value)) {
+		    		  result = false;
+		    		  if(inacCd1 && inacCd1.length > 0 && inacCd1.match("^[a-zA-Z]+$") ) {
+		    			  result = true;
+		    			  if(isNaN(inacCd2) ) {
+		    				  result = false;
+		    			  }
+		    		  } else {
+		    			  result = false;
+			    	  }
+		    	   } else {
+		    		   result = true;
+		    	   }
+	    	  } else {
+	    		  result = false;
+	    	  }
+	    	  if(value.length == 0 || value == '') {
+	    		  result = true;
+	    	  }
+	    	  if(!result) {
+	    		  return new ValidationResult(null, false, 'Invalid value for INAC Code.');
+	    	  }
+	    	  return new ValidationResult(null, true);
+	      }
+	    };
+	})(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function setISRValues() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
@@ -3437,9 +3475,6 @@ function setEnterprise(value) {
   var ctc = FormManager.getActualValue('clientTier');
   if (cmrCntry == SysLoc.GREECE && value == 'R21180' && isu == '32' && ctc == 'M') {
     FormManager.setValue('enterprise', '822835');
-  } else if (cmrCntry == SysLoc.GREECE && value == 'R21180' && isu == '32' && ctc == 'S') {
-    FormManager.setValue('enterprise', '822806');
-
   } else if (cmrCntry == SysLoc.GREECE && value == '000000' && isu == '34' && ctc == '6') {
     FormManager.setValue('enterprise', '822836');
   } else if (cmrCntry == SysLoc.GREECE && value == '000000' && isu == '32' && ctc == '6') {
@@ -7858,6 +7893,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(resetSubIndustryCdGR, [ SysLoc.GREECE ]);
+  GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(showCommercialFinanced,[SysLoc.TURKEY]);
   GEOHandler.addAfterConfig(lockCmrOwner,[SysLoc.TURKEY]);
 
