@@ -74,6 +74,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             validation.setSuccess(true);
             validation.setMessage("Execution done.");
             LOG.debug("Vat and company information verified through VIES.");
+            engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
 
             details.append("Vat and company information verified through VIES.");
             details.append("\nCompany details from VIES :");
