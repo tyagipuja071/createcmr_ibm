@@ -73,11 +73,11 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           if (response.getRecord().isValid()) {
             validation.setSuccess(true);
             validation.setMessage("Execution done.");
-            LOG.debug("Vat and company information verified through VAT Layer.");
+            LOG.debug("Vat and company information verified through VIES.");
             engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
 
-            details.append("Vat and company information verified through VAT Layer.");
-            details.append("\nCompany details from VAT Layer :");
+            details.append("Vat and company information verified through VIES.");
+            details.append("\nCompany details from VIES :");
             details.append(
                 "\nCompany Name = " + (StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName()));
             details.append("\nVAT number = " + (StringUtils.isBlank(response.getRecord().getVatNumber()) ? "" : response.getRecord().getVatNumber()));
@@ -86,11 +86,11 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             updateEntity(admin, entityManager);
           } else {
             validation.setSuccess(false);
-            validation.setMessage("Review needed.");
-            output.setDetails("Vat is invalid.Need review.");
+            validation.setMessage("Review needed");
+            output.setDetails("Vat is invalid. Need review.");
             output.setOnError(true);
-            engineData.addRejectionComment("VAT", "Ivalid VAT/TAX information.", "Vat is invalid.", "");
-            LOG.debug("Vat is invalid.Need review.");
+            engineData.addRejectionComment("VAT", "Invalid VAT/TAX information.", "Vat is invalid.", "");
+            LOG.debug("Vat is invalid. Need review.");
           }
         } else {
           validation.setSuccess(false);
