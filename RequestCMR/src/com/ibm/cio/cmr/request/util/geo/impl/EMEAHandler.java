@@ -1803,6 +1803,35 @@ public class EMEAHandler extends BaseSOFHandler {
       }
     } // End of Story 1389065
   }
+			if (!(StringUtils.isEmpty(iBO))) {
+				if (iBO.length() > 3) {
+					data.setInstallBranchOff(iBO.substring(0, 3));
+				}
+			}
+			if (!(StringUtils.isEmpty(eBo))) {
+				if (eBo.length() > 3) {
+					data.setEngineeringBo(eBo.substring(0, 3));
+				}
+			}
+			// Story 1374607 : Mukesh
+			String abbrerLocn = this.currentImportValues.get("AbbreviatedLocation");
+			if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+				if (!StringUtils.isEmpty(abbrerLocn)) {
+					data.setAbbrevLocn(abbrerLocn);
+					if (abbrerLocn != null && abbrerLocn.length() > 12) {
+						data.setAbbrevLocn(abbrerLocn.substring(0, 12));
+					}
+				} else {
+					data.setAbbrevLocn("");
+				}
+			}
+		} // End of Story 1389065
+		
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+      data.setMemLvl(mainRecord.getCmrMembLevel());
+      data.setBpRelType(mainRecord.getCmrBPRelType());
+    }
+	}
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {

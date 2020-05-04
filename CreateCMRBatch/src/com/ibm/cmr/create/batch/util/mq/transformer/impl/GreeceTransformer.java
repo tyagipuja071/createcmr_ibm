@@ -462,6 +462,19 @@ public class GreeceTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
       legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
     }
+    
+    if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
+      } else {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+      }
+    } else {
+      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+      }
+    }
+    
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("ModeOfPayment"))) {
       legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
     }
@@ -695,6 +708,31 @@ public class GreeceTransformer extends EMEATransformer {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
+  }
+  
+  protected boolean zs01CrossBorder(MQMessageHandler handler) {
+    EntityManager entityManager = handler.getEntityManager();
+    if (entityManager == null) {
+      return false;
+    }
+    List<Addr> addresses = null;
+    if (handler.currentAddresses == null) {
+      String sql = ExternalizedQuery.getSql("MQREQUEST.GETNEXTADDR");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", handler.addrData.getId().getReqId());
+      query.setForReadOnly(true);
+      addresses = query.getResults(Addr.class);
+    } else {
+      addresses = handler.currentAddresses;
+    }
+    if (addresses != null) {
+      for (Addr addr : addresses) {
+        if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+          return isCrossBorder(addr);
+        }
+      }
+    }
+    return false;
   }
 
 }
