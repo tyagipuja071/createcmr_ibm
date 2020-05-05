@@ -875,7 +875,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public boolean retrieveInvalidCustomersForCMRSearch(String cmrIssuingCntry) {
-    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
+    if (SystemLocation.SPAIN.equals(cmrIssuingCntry) || SystemLocation.PORTUGAL.equals(cmrIssuingCntry)) {
       return true;
     }
     return false;
@@ -883,7 +883,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public void doAddMassUpdtValidation(TemplateValidation validation, String country) {
-    if (SystemLocation.SPAIN.equals(country)) {
+    if (SystemLocation.SPAIN.equals(country) || SystemLocation.PORTUGAL.equals(country)) {
       // noop
     }
   }
@@ -1073,7 +1073,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
+    if (SystemLocation.SPAIN.equals(cmrIssuingCntry) || SystemLocation.PORTUGAL.equals(cmrIssuingCntry)) {
       return Arrays.asList("ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "ZP02");
     }
     return null;
@@ -1086,7 +1086,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
+    if (SystemLocation.SPAIN.equals(cmrIssuingCntry) || SystemLocation.PORTUGAL.equals(cmrIssuingCntry)) {
       return Arrays.asList("ZD01", "ZI01");
     }
     return null;
