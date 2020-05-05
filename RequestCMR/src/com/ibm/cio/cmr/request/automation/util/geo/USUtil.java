@@ -670,6 +670,7 @@ public class USUtil extends AutomationUtil {
               break;
             default:
               // Set Negative check status for any other fields updated.
+              failedChecks.put(field, field + " updated.");
               hasNegativeCheck = true;
               break;
             }
@@ -872,7 +873,7 @@ public class USUtil extends AutomationUtil {
         } else {
           List<String> addrTypesChanged = new ArrayList<String>();
           for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
-            addrTypesChanged.add(addrModel.getAddrType());
+            addrTypesChanged.add(addrModel.getAddrTypeCode());
           }
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01)) {
             closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
