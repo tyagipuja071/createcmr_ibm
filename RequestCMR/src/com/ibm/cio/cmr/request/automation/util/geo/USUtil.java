@@ -710,6 +710,10 @@ public class USUtil extends AutomationUtil {
         }
         validation.setMessage("Review needed");
         validation.setSuccess(false);
+      } else {
+        output.setDetails("Updated DATA elements were validated successfully.\n");
+        validation.setMessage("Validated");
+        validation.setSuccess(true);
       }
     }
     return true;
@@ -902,6 +906,14 @@ public class USUtil extends AutomationUtil {
             }
           }
         }
+
+        // check if validated
+        if (validation.isSuccess()) {
+          output.setDetails("Updated ADDRESS elements were validated successfully.\n");
+          validation.setMessage("Validated");
+          validation.setSuccess(true);
+        }
+
       } else {
         validation.setSuccess(false);
         validation.setMessage("Unknown CustType");
