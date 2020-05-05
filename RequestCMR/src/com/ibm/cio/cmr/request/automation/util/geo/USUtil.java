@@ -995,7 +995,7 @@ public class USUtil extends AutomationUtil {
 
     // get USCMR values
 
-    USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+    USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, admin.getModelCmrNo(), engineData);
     custTypCd = usDetails.getCustTypCd();
     usRestricTo = usDetails.getUsRestrictTo();
     companyNo = usDetails.getCompanyNo();
