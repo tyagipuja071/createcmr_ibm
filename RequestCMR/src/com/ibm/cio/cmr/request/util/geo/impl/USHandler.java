@@ -191,9 +191,9 @@ public class USHandler extends GEOHandler {
     query.addField("TAX_CD2");
     query.addField("TAX_CD1");
     query.addField("ABBREV_NM");
-    query.addField("I_CUST_ADDR_TYPE");
     query.addField("TAX_EXEMPT_STATUS");
     query.addField("SICMEN");
+    query.addField("I_CUST_ADDR_TYPE");
 
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
 
