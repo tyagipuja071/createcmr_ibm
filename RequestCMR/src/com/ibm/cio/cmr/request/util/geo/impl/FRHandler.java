@@ -45,7 +45,7 @@ public class FRHandler extends BaseSOFHandler {
 
   private static final Logger LOG = Logger.getLogger(FRHandler.class);
   private static final String[] FR_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "SearchTerm", "Company", "INACType", "SpecialTaxCd", "TransportZone",
-      "Affiliate" };
+      "Affiliate", "SitePartyID" };
 
   public static final String DUMMY_SIRET_ADDRESS = "ZSIR";
 

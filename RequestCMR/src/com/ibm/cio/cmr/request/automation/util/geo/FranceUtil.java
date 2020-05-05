@@ -621,8 +621,11 @@ public class FranceUtil extends AutomationUtil {
         if (collCdChngd) {
           UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
           if (collCdChange != null) {
-            if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
-              isNegativeCheckNeedeed = true;
+            if ((StringUtils.isBlank(collCdChange.getOldData()) && StringUtils.isNotBlank(collCdChange.getNewData()))
+                || (StringUtils.isNotBlank(collCdChange.getOldData()) && StringUtils.isNotBlank(collCdChange.getNewData()))) {
+              if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
+                isNegativeCheckNeedeed = true;
+              }
             }
 
             if (isNegativeCheckNeedeed) {
@@ -750,10 +753,10 @@ public class FranceUtil extends AutomationUtil {
           }
         }
 
-        if (addressH != null && addrHchngd) {
-          if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
-            isNegativeCheckNeedeed = true;
-          }
+        String newAbbNm = changes.getDataChange("Abbreviated Name") != null ? changes.getDataChange("Abbreviated Name").getNewData() : "";
+        String oldAbbNm = changes.getDataChange("Abbreviated Name") != null ? changes.getDataChange("Abbreviated Name").getOldData() : "";
+        if (!"IGF".equalsIgnoreCase(admin.getRequestingLob()) && !(newAbbNm.contains("DF") && oldAbbNm.contains("D3"))) {
+          isNegativeCheckNeedeed = true;
         }
       }
     }
