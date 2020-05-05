@@ -715,6 +715,9 @@ public class FRHandler extends BaseSOFHandler {
       }
     } else if (admin.getReqType().equalsIgnoreCase("U") && "ZS01".equals(addr.getId().getAddrType())){
       abbrevNmValue = addr.getCustNm1();
+      if(!isZS01CustNameUpdated(entityManager,data.getId().getReqId(),abbrevNmValue)){
+        return;
+      }
       if(StringUtils.isNotBlank(abbrevNmValue) && abbrevNmValue.length()>22){
         abbrevNmValue.substring(0, 22);
       }
@@ -1183,6 +1186,9 @@ public class FRHandler extends BaseSOFHandler {
     List<String> abbNmResults = abbNmQuery.getResults(String.class);
     if (abbNmResults != null && !abbNmResults.isEmpty()) {
       abbrevNmValue = abbNmResults.get(0);
+      if(!isZS01CustNameUpdated(entityManager,data.getId().getReqId(),abbrevNmValue)){
+        return;
+      }
     } else if (abbNmResults == null || abbNmResults.isEmpty()) {
       abbrevNmValue="";
     } 
@@ -1194,5 +1200,20 @@ public class FRHandler extends BaseSOFHandler {
       entityManager.merge(data);
       entityManager.flush();
       return;
+  }
+  
+  private boolean isZS01CustNameUpdated(EntityManager entityManager, Long requestId, String currentCustNm){
+    boolean isNameUpdated= false;
+    String sql = ExternalizedQuery.getSql("QUERY.GETZS01OLDCUSTNAME");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", requestId);
+    List<String> results = query.getResults(String.class);
+    if(results!=null && !results.isEmpty()){
+      String oldCustNm=results.get(0);
+      if(!oldCustNm.equals(currentCustNm)){
+        isNameUpdated=true;
+      }
+    }
+    return isNameUpdated;
   }
 }

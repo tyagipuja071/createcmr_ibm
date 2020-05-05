@@ -452,10 +452,8 @@ function setAbbrevNameDEUpdate(cntry, addressMode, saving, finalSave, force) {
       zs01Reccount = record.ret1;
     }
 
-    var addrSeq = FormManager.getActualValue('addrSeq');
     qParams = {
-      REQ_ID : zs01ReqId,
-      ADDR_SEQ : addrSeq,
+      REQ_ID : zs01ReqId,      
     };
     var record = cmr.query('GETZS01OLDCUSTNAME', qParams);
     var oldCustNm = record.ret1;
