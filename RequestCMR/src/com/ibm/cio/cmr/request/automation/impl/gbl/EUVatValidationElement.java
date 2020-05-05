@@ -76,6 +76,11 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("Vat not found");
           output.setDetails("No VAT specified on the request.");
           LOG.debug("No VAT specified on the request.");
+        } else if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS)) {
+          validation.setSuccess(true);
+          validation.setMessage("Skipped");
+          output.setDetails("VAT checks not required for this record.");
+          LOG.debug("VAT checks not required.");
         } else {
           AutomationResponse<VatLayerResponse> response = getVatLayerInfo(admin, data, landCntryForVies);
           if (response != null && response.isSuccess()) {

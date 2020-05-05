@@ -30,8 +30,8 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
-import com.ibm.cio.cmr.request.entity.DataRdcPK;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -571,6 +571,7 @@ public class FranceUtil extends AutomationUtil {
       LOG.debug("Private customer record. Skipping validations.");
       validation.setSuccess(true);
       validation.setMessage("Skipped");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
       output.setDetails("Update checks skipped for Private Customer record.");
       return true;
     }
@@ -706,6 +707,7 @@ public class FranceUtil extends AutomationUtil {
       validation.setSuccess(true);
       validation.setMessage("Skipped");
       output.setDetails("Update checks skipped for Private Customer record.");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
       return true;
     }
 
@@ -787,7 +789,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   private DataRdc getDataRdc(EntityManager entityManager, Admin admin) {
-    DataRdcPK rdcPk = new DataRdcPK();
+    DataPK rdcPk = new DataPK();
     rdcPk.setReqId(admin.getId().getReqId());
     DataRdc rdc = entityManager.find(DataRdc.class, rdcPk);
     return rdc;
