@@ -194,6 +194,17 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
   }
 }
 
+function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C' && (scenario == 'OEMHW' || scenario == 'OEM-SW')) {
+    FormManager.addValidator('usSicmen', Validators.REQUIRED, [ 'SICMEN' ], 'MAIN_CUST_TAB');
+    FormManager.enable('usSicmen');
+  } else {
+    FormManager.readOnly('usSicmen');
+    FormManager.resetValidations('usSicmen');
+  }
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -204,4 +215,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addUSAddressHandler, [ SysLoc.USA ]);
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(setCSPValues, [ SysLoc.USA ]);
+  GEOHandler.addAfterTemplateLoad(enableUSSicMenForScenarios, [ SysLoc.USA ]);
+  GEOHandler.addAfterConfig(enableUSSicMenForScenarios, [ SysLoc.USA ]);
 });

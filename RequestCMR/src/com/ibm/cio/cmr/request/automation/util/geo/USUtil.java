@@ -704,7 +704,8 @@ public class USUtil extends AutomationUtil {
           for (String failedCheck : failedChecks.values()) {
             details.append(" - " + failedCheck).append("\n");
           }
-          details.append("\nPlease check Request Summary for more details.");
+          details.append("\nPlease check Request Summary for more details.\n");
+          output.setDetails(details.toString());
         }
         validation.setMessage("Review needed");
         validation.setSuccess(false);
@@ -855,7 +856,8 @@ public class USUtil extends AutomationUtil {
       // skip checks if requester is from USCMDE team
       validation.setSuccess(true);
     } else {
-      StringBuilder details = new StringBuilder();
+      StringBuilder details = new StringBuilder(output.getDetails());
+      details.append("\n");
       USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
       String custTypCd = detailsCont.getCustTypCd();
 
@@ -899,9 +901,7 @@ public class USUtil extends AutomationUtil {
             }
           }
         }
-      } else
-
-      {
+      } else {
         validation.setSuccess(false);
         validation.setMessage("Unknown CustType");
         details.append("Customer Type could not be determined. Update checks for address could not be run.").append("\n");
