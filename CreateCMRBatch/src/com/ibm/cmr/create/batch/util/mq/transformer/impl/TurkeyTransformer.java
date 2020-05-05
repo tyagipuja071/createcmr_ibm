@@ -793,20 +793,34 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getCustNm4())) {
-      legacyAddr.setAddrLine3(addr.getCustNm4());
-      legacyAddr.setContact(addr.getCustNm4());
+      if ("@".equals(addr.getCustNm4())) {
+        legacyAddr.setAddrLine3("");
+        legacyAddr.setContact("");
+      } else {
+        legacyAddr.setAddrLine3(addr.getCustNm4());
+        legacyAddr.setContact(addr.getCustNm4());
+      }
 
       if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setAddrLine3("CL" + addr.getCustNm4());
-        legacyFiscalAddr.setContact(addr.getCustNm4());
+        if ("@".equals(addr.getCustNm4())) {
+          legacyAddr.setAddrLine3("");
+          legacyAddr.setContact("");
+        } else {
+          legacyFiscalAddr.setAddrLine3("CL" + addr.getCustNm4());
+          legacyFiscalAddr.setContact(addr.getCustNm4());
+        }
       }
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      legacyAddr.setAddrLine3(addr.getAddrTxt2());
+      if ("@".equals(addr.getAddrTxt2())) {
+        legacyAddr.setAddrLine3("");
+      } else {
+        legacyAddr.setAddrLine3(addr.getAddrTxt2());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setAddrLine3(addr.getAddrTxt2());
+        if (legacyFiscalAddr != null) {
+          legacyFiscalAddr.setAddrLine3(addr.getAddrTxt2());
+        }
       }
     }
 
@@ -814,19 +828,16 @@ public class TurkeyTransformer extends EMEATransformer {
     StringBuilder addrLine5 = new StringBuilder();
 
     if (!StringUtils.isBlank(addr.getDept())) {
-      legacyAddr.setDistrict(addr.getDept());
-      addrLine5.append(addr.getDept() + " ");
       if ("@".equals(addr.getDept())) {
         legacyAddr.setDistrict("");
+        // addrLine5.append(" ");
       } else {
+        addrLine5.append(addr.getDept() + " ");
         legacyAddr.setDistrict(addr.getDept());
-      }
-    }
 
-    if (!StringUtils.isBlank(addr.getDept())) {
-      legacyAddr.setContact(addr.getDept());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setDistrict(addr.getDept());
+        if (legacyFiscalAddr != null) {
+          legacyFiscalAddr.setDistrict(addr.getDept());
+        }
       }
     }
 
@@ -901,6 +912,14 @@ public class TurkeyTransformer extends EMEATransformer {
         legacyFiscalAddr.setPoBox(addr.getCounty());
       }
     }
+    //
+    // if (!StringUtils.isBlank(addr.getCustLangCd())) {
+    // legacyAddr.setLanguage(addr.getCustLangCd());
+    //
+    // if (legacyFiscalAddr != null) {
+    // legacyFiscalAddr.setLanguage(addr.getCustLangCd());
+    // }
+    // }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     // legacyObjects.addAddress(legacyAddr);
