@@ -426,7 +426,7 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         legacyCust.setMrcCd("3");
       }
-      legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
+      legacyCust.setLangCd("1");
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -492,6 +492,7 @@ public class GreeceTransformer extends EMEATransformer {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd() : "");
     }
+    legacyCust.setCeBo("");
   }
   
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
@@ -571,8 +572,32 @@ public class GreeceTransformer extends EMEATransformer {
       }
     } else {
       // revert isForCreate back -- used for partialCompleteRecord later
-      LOG.info("GREECE -- UPDATE! - addUpdateAddresses");
         addUpdateAddresses(legacyObjects, addrList);
+        updateMailingAddrWithBillingData(legacyObjects);
+        legacyObjects.getCustomer().setLangCd("1");
+    }
+  }
+  
+  private void updateMailingAddrWithBillingData(LegacyDirectObjectContainer legacyObjects) {
+    CmrtAddr billingAddr = null;
+    int mailingAddrIndex = -1;
+    for(int i = 0; i < legacyObjects.getAddresses().size(); i++) {
+      if("Y".equals(legacyObjects.getAddresses().get(i).getIsAddrUseMailing())) {
+        mailingAddrIndex = i;
+      } else if("Y".equals(legacyObjects.getAddresses().get(i).getIsAddrUseBilling())) {
+        billingAddr = legacyObjects.getAddresses().get(i);
+      }
+    }
+
+    if (billingAddr.isForUpdate()) {
+      if (billingAddr != null && mailingAddrIndex != -1) {
+        LOG.info("GREECE -- UPDATING - updateMailingAddrWithBillingData");
+        CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+        newMailingAddr.getId().setAddrNo(String.format("%05d", 1));
+        newMailingAddr.setForUpdate(true);
+        modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
+        legacyObjects.getAddresses().set(mailingAddrIndex, newMailingAddr);
+      }
     }
   }
 
