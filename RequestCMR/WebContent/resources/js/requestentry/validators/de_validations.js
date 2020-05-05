@@ -180,7 +180,7 @@ function setISUValues(value) {
     FormManager.readOnly('isuCd');
   } else if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
     FormManager.enable('isuCd');
-  } else if (_custSubGrp == 'CROSS') {
+  } else if (_custSubGrp == 'CROSS' && _pagemodel.userRole.toUpperCase() != "PROCESSOR") {
     FormManager.readOnly('isuCd');
   }
 
