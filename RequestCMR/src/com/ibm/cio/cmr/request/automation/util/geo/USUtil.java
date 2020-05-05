@@ -666,6 +666,7 @@ public class USUtil extends AutomationUtil {
             case "SVC A/R Office":
             case "Size Code":
             case "CAP Record":
+            case "iERP Site Party ID":
               // SKIP THESE FIELDS
               break;
             default:
