@@ -57,48 +57,59 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     StringBuilder details = new StringBuilder();
     try {
       String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry(), data.getCountryUse());
-      if (!EU_COUNTRIES.contains(landCntryForVies)) {
+      if (landCntryForVies == null) {
         validation.setSuccess(true);
-        validation.setMessage("Skipped.");
-        output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
-        LOG.debug("Landed Country does not belong to the European Union. Skipping VAT Validation.");
-      } else if (StringUtils.isBlank(data.getVat())) {
-        validation.setSuccess(true);
-        validation.setMessage("Vat not found");
-        output.setDetails("No VAT specified on the request.");
-        LOG.debug("No VAT specified on the request.");
+        validation.setMessage("No Landed Country");
+        String msg = "Cannot verify VAT because no Landed Country was found on the main address. Further validation is needed.";
+        output.setDetails(msg);
+        output.setOnError(false);
+        engineData.addNegativeCheckStatus("_vatLandCntry", msg);
+        LOG.debug("Landed Country not found. Need review.");
       } else {
-        AutomationResponse<VatLayerResponse> response = getVatLayerInfo(admin, data, landCntryForVies);
-        if (response != null && response.isSuccess()) {
-          if (response.getRecord().isValid()) {
-            validation.setSuccess(true);
-            validation.setMessage("Execution done.");
-            LOG.debug("Vat and company information verified through VAT Layer.");
-            engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
+        if (!EU_COUNTRIES.contains(landCntryForVies)) {
+          validation.setSuccess(true);
+          validation.setMessage("Skipped.");
+          output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
+          LOG.debug("Landed Country does not belong to the European Union. Skipping VAT Validation.");
+        } else if (StringUtils.isBlank(data.getVat())) {
+          validation.setSuccess(true);
+          validation.setMessage("Vat not found");
+          output.setDetails("No VAT specified on the request.");
+          LOG.debug("No VAT specified on the request.");
+        } else {
+          AutomationResponse<VatLayerResponse> response = getVatLayerInfo(admin, data, landCntryForVies);
+          if (response != null && response.isSuccess()) {
+            if (response.getRecord().isValid()) {
+              validation.setSuccess(true);
+              validation.setMessage("Execution done.");
+              LOG.debug("Vat and company information verified through VAT Layer.");
+              engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
 
-            details.append("Vat and company information verified through VAT Layer.");
-            details.append("\nCompany details from VAT Layer :");
-            details.append(
-                "\nCompany Name = " + (StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName()));
-            details.append("\nVAT number = " + (StringUtils.isBlank(response.getRecord().getVatNumber()) ? "" : response.getRecord().getVatNumber()));
-            output.setDetails(details.toString());
-            engineData.setCompanySource("VIES");
-            updateEntity(admin, entityManager);
+              details.append("Vat and company information verified through VAT Layer.");
+              details.append("\nCompany details from VAT Layer :");
+              details.append(
+                  "\nCompany Name = " + (StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName()));
+              details
+                  .append("\nVAT number = " + (StringUtils.isBlank(response.getRecord().getVatNumber()) ? "" : response.getRecord().getVatNumber()));
+              output.setDetails(details.toString());
+              engineData.setCompanySource("VIES");
+              updateEntity(admin, entityManager);
+            } else {
+              validation.setSuccess(false);
+              validation.setMessage("Review needed.");
+              output.setDetails("Vat is invalid.Need review.");
+              output.setOnError(true);
+              engineData.addRejectionComment("Vat is invalid.");
+              LOG.debug("Vat is invalid.Need review.");
+            }
           } else {
             validation.setSuccess(false);
-            validation.setMessage("Review needed.");
-            output.setDetails("Vat is invalid.Need review.");
+            validation.setMessage("Execution failed.");
+            output.setDetails(response.getMessage());
             output.setOnError(true);
-            engineData.addRejectionComment("Vat is invalid.");
-            LOG.debug("Vat is invalid.Need review.");
+            engineData.addRejectionComment(response.getMessage());
+            LOG.debug(response.getMessage());
           }
-        } else {
-          validation.setSuccess(false);
-          validation.setMessage("Execution failed.");
-          output.setDetails(response.getMessage());
-          output.setOnError(true);
-          engineData.addRejectionComment(response.getMessage());
-          LOG.debug(response.getMessage());
         }
       }
     } finally {
@@ -113,6 +124,12 @@ public class EUVatValidationElement extends ValidatingElement implements Company
 
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
 
+    if (landCntry == null && !StringUtils.isBlank(defaultLandedCountry)) {
+      return defaultLandedCountry;
+    }
+    if (landCntry == null && StringUtils.isBlank(defaultLandedCountry)) {
+      return null;
+    }
     if (!landCntry.equals(defaultLandedCountry)) {
       // handle cross-border and subregions
 
