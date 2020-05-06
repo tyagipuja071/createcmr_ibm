@@ -892,9 +892,9 @@ public class USUtil extends AutomationUtil {
               boolean immutableAddrFound = false;
               List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
                   "7100 HIGHLANDS PKWY", "294 ROUTE 100", "6710 ROCKLEDGE DR");
-              String oldStreetAddress = addrTxt.getOldData();
+              String oldStreetAddress = addrTxt.getOldData().trim();
               if (addrTxt2 != null && StringUtils.isNotBlank(addrTxt2.getOldData())) {
-                oldStreetAddress += (" " + addrTxt2.getOldData());
+                oldStreetAddress += (" " + addrTxt2.getOldData().trim());
               }
               for (String streetAddr : immutableAddrList) {
                 if (oldStreetAddress.contains(streetAddr)) {
