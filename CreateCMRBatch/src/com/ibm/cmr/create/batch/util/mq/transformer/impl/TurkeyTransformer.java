@@ -863,6 +863,14 @@ public class TurkeyTransformer extends EMEATransformer {
       }
     }
 
+    if (!StringUtils.isBlank(addr.getCustLangCd())) {
+      legacyAddr.setLanguage(addr.getCustLangCd());
+
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setLanguage(addr.getCustLangCd());
+      }
+    }
+
     if (!StringUtils.isBlank(addrLine5.toString())) {
       legacyAddr.setAddrLine5(addrLine5.toString());
 
