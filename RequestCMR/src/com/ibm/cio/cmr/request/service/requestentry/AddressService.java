@@ -2119,7 +2119,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_TR");
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_AT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
@@ -2150,7 +2150,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           cmrNo = (String) result[2];
         }
         if (!StringUtils.isEmpty(cmrNo)) {
-          String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_TR");
+          String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_AT");
           PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
           queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
           queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
