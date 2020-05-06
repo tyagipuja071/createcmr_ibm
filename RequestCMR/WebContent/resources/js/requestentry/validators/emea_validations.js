@@ -3242,7 +3242,7 @@ function addTRAddressTypeValidator() {
           for (var i = 0; i < compareFields.length; i++) {
             var custType = FormManager.getActualValue('custGrp');
             if (custType == 'CROSS') {
-              if (zs01Copy[compareFields[i]] != zp01Copy[compareFields[i]]) {
+              if (zs01Copy[compareFields[i]].values != zp01Copy[compareFields[i]].values) {
                 return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
               }
             } else {
