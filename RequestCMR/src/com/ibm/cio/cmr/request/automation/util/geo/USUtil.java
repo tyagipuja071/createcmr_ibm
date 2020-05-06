@@ -908,10 +908,10 @@ public class USUtil extends AutomationUtil {
                 output.setOnError(true);
                 validation.setMessage("Review needed");
                 validation.setSuccess(false);
-              } else {
-                closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
+                return true;
               }
             }
+            closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
           }
         }
 
