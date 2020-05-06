@@ -313,8 +313,12 @@ function disableTaxOffice() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (addressTypeValue == 'ZS01' || addressTypeValue == 'ZD01' || addressTypeValue == 'ZI01') {
 	    FormManager.disable('taxOffice');
+	    dojo.byId('ast-taxOffice').style.display = 'none';
+	    FormManager.removeValidator('taxOffice', Validators.REQUIRED);
 	} else if (addressTypeValue == 'ZP01' ) {
 		FormManager.enable('taxOffice');
+		FormManager.addValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ], 'MAIN_CUST_TAB');
+		dojo.byId('ast-taxOffice').style.display = 'inline-block';
 	}
   }
 }
