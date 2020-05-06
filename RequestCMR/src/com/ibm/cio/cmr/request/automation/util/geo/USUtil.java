@@ -905,9 +905,10 @@ public class USUtil extends AutomationUtil {
               if (immutableAddrFound) {
                 engineData.addRejectionComment("OTH", "Invoice-to address cannot be modified.", "", "");
                 details.append("Invoice-to address cannot be modified.").append("\n");
-                output.setOnError(true);
                 validation.setMessage("Review needed");
                 validation.setSuccess(false);
+                output.setDetails(details.toString());
+                output.setOnError(true);
                 return true;
               }
             }
