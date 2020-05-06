@@ -73,7 +73,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           if (response.getRecord().isValid()) {
             validation.setSuccess(true);
             validation.setMessage("Execution done.");
-            LOG.debug("Vat and company information verified through VAT Layer.");
+            LOG.debug("VAT and company information verified through VIES.");
             engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
 
             details.append("Vat and company information verified through VAT Layer.");
