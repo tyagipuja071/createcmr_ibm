@@ -995,19 +995,18 @@ public class USUtil extends AutomationUtil {
     String name4 = "";
 
     // get USCMR values
-
-    USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
-    custTypCd = usDetails.getCustTypCd();
-    usRestricTo = usDetails.getUsRestrictTo();
-    companyNo = usDetails.getCompanyNo();
-    bpAccTyp = usDetails.getBpAccTyp();
-    mtkgArDept = usDetails.getMktgArDept();
-
     if ("C".equals(admin.getReqType())) {
       cmrNo = StringUtils.isBlank(admin.getModelCmrNo()) ? "" : admin.getModelCmrNo();
     } else if ("U".equals(admin.getReqType())) {
       cmrNo = StringUtils.isNotBlank(data.getCmrNo()) ? data.getCmrNo() : "";
     }
+
+    USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, cmrNo, engineData);
+    custTypCd = usDetails.getCustTypCd();
+    usRestricTo = usDetails.getUsRestrictTo();
+    companyNo = usDetails.getCompanyNo();
+    bpAccTyp = usDetails.getBpAccTyp();
+    mtkgArDept = usDetails.getMktgArDept();
 
     // get RDC values
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_RDC_VALUES");
