@@ -3589,6 +3589,13 @@ public class EMEAHandler extends BaseSOFHandler {
     } else {
       countryAddrss = LD_MASS_UPDATE_SHEET_NAMES;
     }
+
+    if (country.equals(SystemLocation.GREECE)) {
+      validateTemplateDupFillsGreece(validations, book, maxRows, country);
+      LOG.trace("validateTemplateDupFills for Greece");
+      return;
+    }
+
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
