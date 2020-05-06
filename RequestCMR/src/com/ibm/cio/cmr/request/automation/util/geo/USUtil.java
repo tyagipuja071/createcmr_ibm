@@ -705,7 +705,6 @@ public class USUtil extends AutomationUtil {
           for (String failedCheck : failedChecks.values()) {
             details.append(" - " + failedCheck).append("\n");
           }
-          details.append("\nPlease check Request Summary for more details.\n");
           output.setDetails(details.toString());
         }
         validation.setMessage("Review needed");
@@ -878,13 +877,15 @@ public class USUtil extends AutomationUtil {
         } else {
           List<String> addrTypesChanged = new ArrayList<String>();
           for (UpdatedNameAddrModel addrModel : changes.getAddressUpdates()) {
-            addrTypesChanged.add(addrModel.getAddrTypeCode());
+            if (!addrTypesChanged.contains(addrModel.getAddrTypeCode())) {
+              addrTypesChanged.add(addrModel.getAddrTypeCode());
+            }
           }
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01)) {
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString())) {
             closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
           }
 
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01)) {
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
             Addr zp01 = requestData.getAddress("ZP01");
             boolean immutableAddrFound = false;
             List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
