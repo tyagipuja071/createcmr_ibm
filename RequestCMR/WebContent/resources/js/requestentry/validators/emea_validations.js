@@ -6982,8 +6982,10 @@ function toggleBPRelMemTypeForTurkey() {
     FormManager.show('BPRelationType', 'bpRelType');
     FormManager.resetValidations('bpRelType');
     FormManager.resetValidations('memLvl');
-    FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level'
+// ], 'MAIN_IBM_TAB');
+// FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation
+// Type' ], 'MAIN_IBM_TAB');
   }
 }
 
