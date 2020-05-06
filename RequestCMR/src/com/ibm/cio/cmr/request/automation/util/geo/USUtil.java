@@ -886,24 +886,31 @@ public class USUtil extends AutomationUtil {
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-            Addr zp01 = requestData.getAddress("ZP01");
-            boolean immutableAddrFound = false;
-            List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
-                "7100 HIGHLANDS PKWY", "294 ROUTE 100", "6710 ROCKLEDGE DR");
-            String addrTxt = zp01.getAddrTxt() + (StringUtils.isNotBlank(zp01.getAddrTxt2()) ? " " + zp01.getAddrTxt2() : "");
-            for (String streetAddr : immutableAddrList) {
-              if (addrTxt.contains(streetAddr)) {
-                immutableAddrFound = true;
-                break;
+            UpdatedNameAddrModel addrTxt = changes.getAddressChange("ZP01", "Address");
+            UpdatedNameAddrModel addrTxt2 = changes.getAddressChange("ZP01", "Address Cont");
+            if (addrTxt != null) {
+              boolean immutableAddrFound = false;
+              List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
+                  "7100 HIGHLANDS PKWY", "294 ROUTE 100", "6710 ROCKLEDGE DR");
+              String oldStreetAddress = addrTxt.getOldData();
+              if (addrTxt2 != null && StringUtils.isNotBlank(addrTxt2.getOldData())) {
+                oldStreetAddress += (" " + addrTxt2.getOldData());
               }
-            }
-            if (immutableAddrFound) {
-              engineData.addNegativeCheckStatus("IMMUTABLE_ADDR_FOUND", "Invoice-to address cannot be modified.");
-              details.append("Invoice-to address cannot be modified.").append("\n");
-              validation.setMessage("Review needed");
-              validation.setSuccess(false);
-            } else {
-              closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
+              for (String streetAddr : immutableAddrList) {
+                if (oldStreetAddress.contains(streetAddr)) {
+                  immutableAddrFound = true;
+                  break;
+                }
+              }
+              if (immutableAddrFound) {
+                engineData.addRejectionComment("OTH", "Invoice-to address cannot be modified.", "", "");
+                details.append("Invoice-to address cannot be modified.").append("\n");
+                output.setOnError(true);
+                validation.setMessage("Review needed");
+                validation.setSuccess(false);
+              } else {
+                closelyMatchAddressWithDnbRecords(requestData, engineData, "ZP01", details, validation);
+              }
             }
           }
         }
