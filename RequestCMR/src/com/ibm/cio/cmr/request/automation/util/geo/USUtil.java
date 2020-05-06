@@ -885,7 +885,7 @@ public class USUtil extends AutomationUtil {
             closelyMatchAddressWithDnbRecords(requestData, engineData, "ZS01", details, validation);
           }
 
-          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+          if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
             UpdatedNameAddrModel addrTxt = changes.getAddressChange("ZP01", "Address");
             UpdatedNameAddrModel addrTxt2 = changes.getAddressChange("ZP01", "Address Cont");
             if (addrTxt != null) {
