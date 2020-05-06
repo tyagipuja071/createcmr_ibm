@@ -886,8 +886,8 @@ public class USUtil extends AutomationUtil {
           }
 
           if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZI01.toString())) {
-            UpdatedNameAddrModel addrTxt = changes.getAddressChange("ZP01", "Address");
-            UpdatedNameAddrModel addrTxt2 = changes.getAddressChange("ZP01", "Address Cont");
+            UpdatedNameAddrModel addrTxt = changes.getAddressChange("ZI01", "Address");
+            UpdatedNameAddrModel addrTxt2 = changes.getAddressChange("ZI01", "Address Cont");
             if (addrTxt != null) {
               boolean immutableAddrFound = false;
               List<String> immutableAddrList = Arrays.asList("150 KETTLETOWN RD", "6303 BARFIELD RD", "PO BOX 12195 BLDG 061", "1 N CASTLE DR",
