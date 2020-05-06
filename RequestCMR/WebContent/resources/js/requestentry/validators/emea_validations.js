@@ -2894,6 +2894,8 @@ function addGRAddressTypeValidator() {
             }
           } else if(FormManager.getActualValue('custGrp') == 'CROSS' && !isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data)) {
               return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
+          } else if(FormManager.getActualValue('reqType') == 'U' && !isLandedCntryMatch(zs01Data, zp01Data)) {
+              return new ValidationResult(null, false, '\'Country (Landed)\' of Local Language translation of Sold-to should match Sold-to.');
           }
 
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
@@ -2929,6 +2931,14 @@ function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
   && zs01Data.poBox[0]    == zp01Data.poBox[0]
   && zs01Data.postCd[0]   == zp01Data.postCd[0]
   && zs01Data.city1[0]    == zp01Data.city1[0]) {
+    return true;
+  }
+  
+  return false;
+}
+
+function isLandedCntryMatch(zs01Data, zp01Data) {
+  if(zs01Data.landCntry[0]  == zp01Data.landCntry[0] ) {
     return true;
   }
   
@@ -3387,6 +3397,8 @@ function setFieldsBehaviourGR() {
       FormManager.resetValidations('subIndustryCd');
       FormManager.resetValidations('isicCd');
       FormManager.resetValidations('repTeamMemberNo');
+      FormManager.resetValidations('isuCd');
+      FormManager.resetValidations('clientTier');
   }
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
