@@ -3072,6 +3072,8 @@ function addGRAddressTypeValidator() {
             }
           } else if (FormManager.getActualValue('custGrp') == 'CROSS' && !isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data)) {
             return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
+          } else if(FormManager.getActualValue('reqType') == 'U' && !isLandedCntryMatch(zs01Data, zp01Data)) {
+              return new ValidationResult(null, false, '\'Country (Landed)\' of Local Language translation of Sold-to should match Sold-to.');
           }
 
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
@@ -3105,6 +3107,14 @@ function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
     return true;
   }
 
+  return false;
+}
+
+function isLandedCntryMatch(zs01Data, zp01Data) {
+  if(zs01Data.landCntry[0]  == zp01Data.landCntry[0] ) {
+    return true;
+  }
+  
   return false;
 }
 
@@ -3576,6 +3586,17 @@ function setFieldsBehaviourGR() {
   FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+  if(FormManager.getActualValue('reqType') == 'C') {
+	  FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
+	  FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
+	  FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');	  
+  } else if (FormManager.getActualValue('reqType') == 'U'){
+      FormManager.resetValidations('subIndustryCd');
+      FormManager.resetValidations('isicCd');
+      FormManager.resetValidations('repTeamMemberNo');
+      FormManager.resetValidations('isuCd');
+      FormManager.resetValidations('clientTier');
+  }
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
   FormManager.readOnly('subIndustryCd');
