@@ -627,8 +627,8 @@ public class USUtil extends AutomationUtil {
                 hasNegativeCheck = true;
               }
               break;
-            case "Enterprise":
-            case "Affiliate":
+            case "Enterprise Number":
+            case "Affiliate Number":
               if (!enterpriseAffiliateUpdated) {
                 if (BUSINESS_PARTNER.equals(custTypeCd)) {
                   engineData.addNegativeCheckStatus("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
