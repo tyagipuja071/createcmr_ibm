@@ -136,6 +136,15 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       return output;
     }
 
+    if (StringUtils.isBlank(data.getPpsceid())) {
+      String msg = "PPS CEID is required for Business Partner requests.";
+      engineData.addRejectionComment("OTH", msg, "", "");
+      output.setOnError(true);
+      output.setDetails(msg);
+      output.setResults("CEID Missing");
+      return output;
+    }
+
     USHandler handler = new USHandler();
     OverrideOutput overrides = new OverrideOutput(false);
     StringBuilder details = new StringBuilder();
@@ -241,6 +250,37 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
     // copy from IBM Direct if found, and fill the rest of BO codes
     copyAndFillIBMData(handler, ibmDirectCmr, requestData, engineData, details, overrides);
+
+    // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
+    String affiliate = data.getAffiliate();
+    if (ibmDirectCmr != null && !StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
+      affiliate = ibmDirectCmr.getCmrAffiliate();
+    }
+    if (StringUtils.isBlank(affiliate)) {
+      details.append("Affiliate cannot be computed automatically.\n");
+      engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be computed automatically");
+    }
+
+    USCeIdMapping mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+    String enterpriseNo = data.getEnterprise();
+    if (mapping != null) {
+      if (!mapping.getEnterpriseNo().equals(enterpriseNo)) {
+        details.append("Enterprise No. updated to mapped value for the CEID (" + mapping.getEnterpriseNo() + ").\n");
+        overrides.addOverride(getProcessCode(), "DATA", "ENTERPRISE", enterpriseNo, mapping.getEnterpriseNo());
+        enterpriseNo = mapping.getEnterpriseNo();
+      }
+      if (!mapping.getCompanyNo().equals(data.getCompany())) {
+        details.append("Company No. updated to mapped value for the CEID (" + mapping.getCompanyNo() + ").\n");
+        overrides.addOverride(getProcessCode(), "DATA", "ENTERPRISE", data.getCompany(), mapping.getCompanyNo());
+      }
+    } else {
+      details.append("Enterprise No. and CEID combination cannot be validated automatically.\n");
+      engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. and CEID combination cannot be validated automatically.");
+    }
+    if (StringUtils.isBlank(enterpriseNo)) {
+      details.append("Enterprise No. cannot be computed automatically.\n");
+      engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. cannot be computed automatically");
+    }
 
     output.setProcessOutput(overrides);
     output.setDetails(details.toString());
