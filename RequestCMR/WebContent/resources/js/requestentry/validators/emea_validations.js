@@ -3450,7 +3450,8 @@ function setClientTierAndISR(value) {
     if (value == '34') {
       tierValues = [ 'V' ];
     } else if (value == '32') {
-      tierValues = [ 'B', 'N', 'S', 'T' ];
+      // remove ISU+CTC=32B from all scenarioes
+      tierValues = [ 'N', 'S', 'T' ];
     } else if (value == '5B' || value == '21' || value == '8B') {
       tierValues = [ '7' ];
     }
