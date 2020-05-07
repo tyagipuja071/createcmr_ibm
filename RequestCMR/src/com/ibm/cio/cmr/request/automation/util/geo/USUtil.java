@@ -727,7 +727,7 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     List<Object[]> results = query.getResults(1);
     if (results != null && results.size() > 0) {
-      float revenue = (float) (results.get(0)[1] != null ? results.get(0)[1] : 0);
+      int revenue = (int) (results.get(0)[1] != null ? results.get(0)[1] : 0);
       if (revenue > 100000) {
         return error;
       } else if (revenue == 0) {
