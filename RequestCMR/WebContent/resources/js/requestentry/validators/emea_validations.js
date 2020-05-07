@@ -4022,7 +4022,12 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
-    } else {
+    } else if(custType == 'PRICU' || custType == 'XPC'){
+      FormManager.enable('clientTier');
+      FormManager.setValue('clientTier', 'S');
+      FormManager.enable('isuCd');
+      FormManager.setValue('isuCd', '32'); 
+    }else {
       // NOT enable ctc and isu for turkey internal and bp scenario
       if (custType != 'XINT' && custType != 'XBP') {
         FormManager.enable('clientTier');
