@@ -3507,7 +3507,8 @@ function setClientTierAndISR(value) {
     if (value == '34') {
       tierValues = [ 'V' ];
     } else if (value == '32') {
-      tierValues = [ 'B', 'N', 'S', 'T' ];
+      // remove ISU+CTC=32B from all scenarioes
+      tierValues = [ 'N', 'S', 'T' ];
     } else if (value == '5B' || value == '21' || value == '8B') {
       tierValues = [ '7' ];
     }
@@ -4089,7 +4090,12 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
-    } else {
+    } else if(custType == 'PRICU' || custType == 'XPC'){
+      FormManager.enable('clientTier');
+      FormManager.setValue('clientTier', 'S');
+      FormManager.enable('isuCd');
+      FormManager.setValue('isuCd', '32'); 
+    }else {
       // NOT enable ctc and isu for turkey internal and bp scenario
       if (custType != 'XINT' && custType != 'XBP') {
         FormManager.enable('clientTier');
