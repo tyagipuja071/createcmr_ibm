@@ -700,4 +700,7 @@ var DB_DELETE_DATA_FIELDS = [ {
 }, {
   id : 'RequesterID',
   name : 'ADMIN.REQUESTER_ID'
+}, {
+  id : 'ScenarioVerifiedIndc',
+  name : 'ADMIN.SCENARIO_VERIFIED_INDC'
 } ];
