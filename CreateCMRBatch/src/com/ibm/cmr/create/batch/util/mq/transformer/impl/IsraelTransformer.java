@@ -7,17 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.query.ExternalizedQuery;
-import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -160,8 +155,6 @@ public class IsraelTransformer extends EMEATransformer {
     String addrKey = getAddressKey(addrData.getId().getAddrType());
     LOG.debug("Handling " + (update ? "update" : "create") + " request.");
     Map<String, String> messageHash = handler.messageHash;
-    boolean changeInd = "Y".equals(addrData.getChangedIndc());
-    EntityManager entityManager = handler.getEntityManager();
 
     messageHash.put("SourceCode", "EFO");
     messageHash.remove(addrKey + "Name");
@@ -222,26 +215,12 @@ public class IsraelTransformer extends EMEATransformer {
     String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
     LOG.debug("Lines: " + line1 + " | " + line2 + " | " + line3 + " | " + line4 + " | " + line5 + " | " + line6);
     // fixed mapping value, not move up if blank
-    if (!update) {
-      for (String line : lines) {
-        if (line != null && line.length() > 30) {
-          line = line.substring(0, 30);
-        }
-        messageHash.put(addrKey + "Address" + lineNo, localAddressType ? reverseNumbers(line) : line);
-        lineNo++;
+    for (String line : lines) {
+      if (line != null && line.length() > 30) {
+        line = line.substring(0, 30);
       }
-    } else {
-      if (changeInd && localAddressType) {
-        updateAddressLine(handler, entityManager, addrData, lines, addrKey);
-      } else {
-        for (String line : lines) {
-          if (line != null && line.length() > 30) {
-            line = line.substring(0, 30);
-          }
-          messageHash.put(addrKey + "Address" + lineNo, line);
-          lineNo++;
-        }
-      }
+      messageHash.put(addrKey + "Address" + lineNo, localAddressType ? reverseNumbers(line) : line);
+      lineNo++;
     }
 
     String countryName = LandedCountryMap.getCountryName(addrData.getLandCntry());
@@ -264,8 +243,7 @@ public class IsraelTransformer extends EMEATransformer {
           // count index from CTYC types only
           if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addr.getId().getAddrType())) {
             running++;
-            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType())
-                && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
+            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType()) && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
               ctyCIndex = running;
               break;
             }
@@ -302,8 +280,7 @@ public class IsraelTransformer extends EMEATransformer {
           // count index from CTYC types only
           if (CmrConstants.ADDR_TYPE.CTYC.toString().equals(addr.getId().getAddrType()) && !"Y".equals(addr.getImportInd())) {
             running++;
-            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType())
-                && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
+            if (addr.getId().getAddrType().equals(addrData.getId().getAddrType()) && addr.getId().getAddrSeq().equals(addrData.getId().getAddrSeq())) {
               ctyCIndex = running;
               break;
             }
@@ -429,79 +406,4 @@ public class IsraelTransformer extends EMEATransformer {
     }
   }
 
-  // compare with old data in AddrRdc table
-  public AddrRdc checkAddressLine(EntityManager entityManager, Addr addrData) {
-    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADDRRDC.SEARCH_BY_REQID_TYPE_SEQ");
-    PreparedQuery q = new PreparedQuery(entityManager, sql);
-    q.setParameter("REQ_ID", addrData.getId().getReqId());
-    q.setParameter("ADDR_TYPE", addrData.getId().getAddrType());
-    q.setParameter("ADDR_SEQ", addrData.getId().getAddrSeq());
-    q.setForReadOnly(true);
-    AddrRdc addr_rdc = new AddrRdc();
-    try {
-      addr_rdc = q.getSingleResult(AddrRdc.class);
-    } catch (Exception e) {
-      System.out.println(e);
-      LOG.trace("Exception found i sql" + e);
-    }
-    return addr_rdc;
-  }
-
-  // To check for update scenario in case address fields are updated
-  public void updateAddressLine(MQMessageHandler handler, EntityManager entityManager, Addr addrData, String[] lines, String addrKey) {
-    Map<String, String> messageHash = handler.messageHash;
-    AddrRdc oldAddrData = checkAddressLine(entityManager, addrData);
-    boolean check;
-    // customer name
-    String line0 = oldAddrData.getCustNm1();
-    check = line0.equals(lines[0]);
-    if (lines[0] != null && lines[0].length() > 30) {
-      lines[0] = lines[0].substring(0, 30);
-    }
-    messageHash.put(addrKey + "Address1", check ? lines[0] : reverseNumbers(lines[0]));
-    // name con't or attn
-    String line1 = StringUtils.isBlank(oldAddrData.getCustNm2()) ? oldAddrData.getDept() : oldAddrData.getCustNm2();
-    // add phone to line 2
-    if (!StringUtils.isBlank(oldAddrData.getCustPhone())) {
-      line1 += ", " + oldAddrData.getCustPhone();
-    }
-    check = line1.equals(lines[1]);
-    if (lines[1] != null && lines[1].length() > 30) {
-      lines[1] = lines[1].substring(0, 30);
-    }
-    messageHash.put(addrKey + "Address2", check ? lines[1] : reverseNumbers(lines[1]));
-    // PO BOX
-    String line2 = "";
-    if (!StringUtils.isBlank(oldAddrData.getPoBox())) {
-      line2 = oldAddrData.getPoBox();
-    }
-    check = line2.equals(lines[2]);
-    if (lines[2] != null && lines[2].length() > 30) {
-      lines[2] = lines[2].substring(0, 30);
-    }
-    messageHash.put(addrKey + "Address3", check ? lines[2] : reverseNumbers(lines[2]));
-    // Street
-    String line3 = "";
-    if (!StringUtils.isBlank(oldAddrData.getAddrTxt())) {
-      line3 = oldAddrData.getAddrTxt();
-    }
-    check = line3.equals(lines[3]);
-    if (lines[3] != null && lines[3].length() > 30) {
-      lines[3] = lines[3].substring(0, 30);
-    }
-    messageHash.put(addrKey + "Address4", check ? lines[3] : reverseNumbers(lines[3]));
-    // postal code + city
-    String line4 = (!StringUtils.isEmpty(oldAddrData.getPostCd()) ? oldAddrData.getPostCd() : "") + " "
-        + (!StringUtils.isEmpty(oldAddrData.getCity1()) ? oldAddrData.getCity1() : "");
-    line4 = line4.trim();
-    check = line4.equals(lines[4]);
-    if (lines[4] != null && lines[4].length() > 30) {
-      lines[4] = lines[4].substring(0, 30);
-    }
-    messageHash.put(addrKey + "Address5", check ? lines[4] : reverseNumbers(lines[4]));
-    if (lines[5] != null && lines[5].length() > 30) {
-      lines[5] = lines[5].substring(0, 30);
-    }
-    messageHash.put(addrKey + "Address6", lines[5]);
-  }
 }
