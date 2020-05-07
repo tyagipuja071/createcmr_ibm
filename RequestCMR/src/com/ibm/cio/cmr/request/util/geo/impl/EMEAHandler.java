@@ -173,7 +173,6 @@ public class EMEAHandler extends BaseSOFHandler {
         record.setCmrAddrSeq("00003");
       }
 
-
       if (SystemLocation.ISRAEL.equals(record.getCmrIssuedBy()) || SystemLocation.SAP_ISRAEL_SOF_ONLY.equals(record.getCmrIssuedBy())) {
         // imported ZS01 will be Country Use A, and imported Country Use
         // A will
