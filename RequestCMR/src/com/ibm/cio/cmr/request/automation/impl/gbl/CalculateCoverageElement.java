@@ -324,13 +324,14 @@ public class CalculateCoverageElement extends OverridingElement {
 
       if (!hasCountryCheck) {
         if ("NONE".equals(covFrom)) {
-          result.setOnError(true);
+          // result.setOnError(true);
           if (coverageNotFound) {
             details.append("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
             // engineData.addRejectionComment("Coverage ID " + data.getCovId() +
             // " not found in the coverage rules.");
           } else {
-            details.append("Coverage cannot be calculated. Missing calculated or projected Buying Group, and ODM determined Coverage");
+            result.setResults("Skipped");
+            details.append("No projected Buying Group or ODM Coverage found, coverage adjustments will be skipped.");
             // engineData
             // .addRejectionComment("Coverage cannot be calculated. Missing
             // calculated or projected Buying Group, and ODM determined

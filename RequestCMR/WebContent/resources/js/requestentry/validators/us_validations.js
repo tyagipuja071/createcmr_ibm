@@ -199,6 +199,9 @@ function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
   if (reqType == 'C' && (scenario == 'OEMHW' || scenario == 'OEM-SW')) {
     FormManager.addValidator('usSicmen', Validators.REQUIRED, [ 'SICMEN' ], 'MAIN_CUST_TAB');
     FormManager.enable('usSicmen');
+  } else if (reqType == 'U') {
+    FormManager.enable('usSicmen');
+    FormManager.resetValidations('usSicmen');
   } else {
     FormManager.readOnly('usSicmen');
     FormManager.resetValidations('usSicmen');
