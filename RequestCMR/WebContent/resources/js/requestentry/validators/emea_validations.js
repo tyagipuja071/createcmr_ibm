@@ -2874,7 +2874,7 @@ function addGRAddressTypeValidator() {
           
           if (FormManager.getActualValue('custGrp') == 'LOCAL') {
         	var missingFields = '';
-            if(!isTranslationAddrFieldsFilledForGR(zs01Data.addrTxt, zp01Data.addrText)) {
+            if(!isTranslationAddrFieldsFilledForGR(zs01Data.addrTxt, zp01Data.addrTxt)) {
           	  missingFields += 'Street Address';
         	}
             if(!isTranslationAddrFieldsFilledForGR(zs01Data.custNm2, zp01Data.custNm2)) {
@@ -2896,7 +2896,18 @@ function addGRAddressTypeValidator() {
               return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
           } else if(FormManager.getActualValue('reqType') == 'U' && !isLandedCntryMatch(zs01Data, zp01Data)) {
               return new ValidationResult(null, false, '\'Country (Landed)\' of Local Language translation of Sold-to should match Sold-to.');
-          }
+          } else if((FormManager.getActualValue('reqType') == 'U')) {
+        	  var mismatchFields = '';
+        	  // GR then not crossborder
+        	  if(zs01Data.landCntry[0] == 'GR') {
+        		  mismatchFields = getMismatchFields(zs01Data, zp01Data, false);
+        	  } else if(zs01Data.landCntry[0] != 'GR') {
+        		  mismatchFields = getMismatchFields(zs01Data, zp01Data, true);
+        	  }
+        	  if(mismatchFields != '') {
+        		  return new ValidationResult(null, false, 'Sold-to mismatch, please update Language translation of Sold-to: ' +  mismatchFields);	  
+        	  }
+          } 
 
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
             return new ValidationResult(null, false, 'Local Language translation of Sold-to, Sold To, Ship To, and Install At addresses are required.');
@@ -2935,6 +2946,67 @@ function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
   }
   
   return false;
+}
+
+function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
+    console.log('isCrossborder: ' + isCrossborder);
+
+	var mismatchFields = '';
+	  if(!hasMatchingFieldsFilled(zs01Data.addrTxt[0], zp01Data.addrTxt[0], isCrossborder)) {
+		mismatchFields += 'Street Address';
+  	  }
+      if(!hasMatchingFieldsFilled(zs01Data.custNm2[0], zp01Data.custNm2[0], isCrossborder)) {
+    	  mismatchFields += mismatchFields != '' ? ', ' : '';
+    	  mismatchFields += 'Customer Name Con\'t';
+    	}
+      if(!hasMatchingFieldsFilled(zs01Data.addrTxt2[0], zp01Data.addrTxt2[0], isCrossborder)) {
+    	  mismatchFields += mismatchFields != '' ? ', ' : '';
+    	  mismatchFields += 'Address Con\'t/Occupation';
+     	}
+      if(!hasMatchingFieldsFilled(zs01Data.poBox[0], zp01Data.poBox[0], isCrossborder)) {
+    	  mismatchFields += mismatchFields != '' ? ', ' : '';
+    	  mismatchFields += 'PO Box';
+     	}
+      
+      if(isCrossborder) {
+        if(!hasMatchingFieldsFilled(zs01Data.custNm1[0], zp01Data.custNm1[0], isCrossborder)) {
+          mismatchFields += mismatchFields != '' ? ', ' : '';
+          mismatchFields += 'Customer Name';
+         }
+        if(!hasMatchingFieldsFilled(zs01Data.postCd[0], zp01Data.postCd[0], isCrossborder)) {
+          mismatchFields += mismatchFields != '' ? ', ' : '';
+          mismatchFields += 'Postal Code';
+        }        
+        if(!hasMatchingFieldsFilled(zs01Data.city1[0], zp01Data.city1[0], isCrossborder)) {
+          mismatchFields += mismatchFields != '' ? ', ' : '';
+          mismatchFields += 'City';
+        }
+      }
+      
+     return mismatchFields;
+}
+
+function hasMatchingFieldsFilled(zs01Field, zp01Field, isCrossborder) {
+	console.log(zs01Field + ' : ' + zp01Field);
+  if(!isCrossborder) {
+	  // local just check if empty or not
+    if (zs01Field != '' && zs01Field != null) {
+	  if (zp01Field == '' || zp01Field == null) {
+        return false;
+	  } 
+   }
+  if (zp01Field != '' && zp01Field != null) {
+    if (zs01Field == '' || zs01Field == null) {
+	  return false;
+	} 
+  } 	  
+ } else {
+	 // check if it is matching
+	 if(zs01Field != zp01Field) {
+		 return false;
+	 } 
+ }
+  return true;
 }
 
 function isLandedCntryMatch(zs01Data, zp01Data) {
