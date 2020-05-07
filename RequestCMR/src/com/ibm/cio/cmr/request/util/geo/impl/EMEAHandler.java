@@ -153,6 +153,10 @@ public class EMEAHandler extends BaseSOFHandler {
           record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
         }
       }
+      if (StringUtils.isEmpty(record.getCmrAddrSeq()) && "TR".equals(record.getCmrCountryLanded())) {
+        record.setCmrAddrSeq("00003");
+      }
+
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
