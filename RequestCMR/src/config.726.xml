@@ -2,7 +2,7 @@
   <tabs>
     <tab name="Data" type="Data" >
       <columns>
-        <column exactLength="true" number="true">
+        <column exactLength="true">
           <label>CMR. No</label>
           <dbColumn>CMR_NO</dbColumn>
           <width>20</width>
@@ -74,12 +74,6 @@
           <bdsId>ClientTier</bdsId>
         </column>
         <column>
-          <label>Sales Rep. No.</label>
-          <dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
-          <width>30</width>
-          <bdsId>SalRepNameNo</bdsId>
-        </column>
-        <column>
           <label>Mode of Payment</label>
           <dbColumn>MODE_OF_PAYMENT</dbColumn>
           <width>20</width>
@@ -89,7 +83,7 @@
     </tab>
     <tab name="Local Lang translation Sold-to" type="Address" typeCode="ZP01">
       <columns>
-        <column exactLength="true" number="true">
+        <column exactLength="true">
           <label>CMR. No</label>
           <dbColumn>CMR_NO</dbColumn>
           <width>20</width>
@@ -177,7 +171,7 @@
     </tab>
     <tab name="Sold To Address" type="Address" typeCode="ZS01">
       <columns>
-        <column exactLength="true" number="true">
+        <column exactLength="true">
           <label>CMR. No</label>
           <dbColumn>CMR_NO</dbColumn>
           <width>20</width>
@@ -264,7 +258,7 @@
     </tab>
     <tab name="Ship To Address" type="Address" typeCode="ZD01">
       <columns>
-        <column exactLength="true" number="true">
+        <column exactLength="true">
           <label>CMR. No</label>
           <dbColumn>CMR_NO</dbColumn>
           <width>20</width>
@@ -351,7 +345,7 @@
     </tab>
     <tab name="Install At Address" type="Address" typeCode="ZI01">
       <columns>
-        <column exactLength="true" number="true">
+        <column exactLength="true">
           <label>CMR. No</label>
           <dbColumn>CMR_NO</dbColumn>
           <width>20</width>
@@ -417,12 +411,6 @@
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
         </column>
-        <!-- <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column> -->
         <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
