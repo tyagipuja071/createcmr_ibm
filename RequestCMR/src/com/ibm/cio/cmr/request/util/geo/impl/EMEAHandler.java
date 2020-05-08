@@ -2284,6 +2284,9 @@ public class EMEAHandler extends BaseSOFHandler {
       break;
 
     case SystemLocation.TURKEY:
+      if (admin.getReqType().equals("C") && "ZS01".equals(addr.getId().getAddrType())) {
+        addr.getId().setAddrSeq("00003");
+      }
       if (data != null && admin.getReqType().equals("C")) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           LOG.debug("Computing Abbreviated Name/Location for address of TURKEY. Request " + addr.getId().getReqId());
