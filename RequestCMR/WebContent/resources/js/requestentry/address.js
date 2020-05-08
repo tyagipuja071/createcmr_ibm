@@ -1484,10 +1484,10 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, name, type) {
   cmr.showModal('addEditAddressModal');
   // CMR-2383
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-	if (addressTypeValue == 'ZS01' || addressTypeValue == 'ZD01' || addressTypeValue == 'ZI01') {
+	if (addrType == 'ZS01' || addrType == 'ZD01' || addrType == 'ZI01') {
 	  FormManager.disable('taxOffice');
 	  dojo.byId('ast-taxOffice').style.display = 'none';
-	} else if (addressTypeValue == 'ZP01' ) {
+	} else if (addrType == 'ZP01' ) {
 	  dojo.byId('ast-taxOffice').style.display = 'inline-block';
 	}
   }
