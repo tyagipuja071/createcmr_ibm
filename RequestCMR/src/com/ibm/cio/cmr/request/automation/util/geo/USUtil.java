@@ -754,7 +754,7 @@ public class USUtil extends AutomationUtil {
             if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
               return error;
             } else {
-              sql = ExternalizedQuery.getSql("EXTQUERY.GET_MAPPED_ISU_FROM_RDC");
+              sql = ExternalizedQuery.getSql("AUTO.US.GET_ISU_BY_ISIC");
               query = new PreparedQuery(entityManager, sql);
               query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
               query.setParameter("ISIC", data.getIsicCd());
