@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -727,10 +728,13 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     List<Object[]> results = query.getResults(1);
     if (results != null && results.size() > 0) {
-      float revenue = (float) (results.get(0)[1] != null ? results.get(0)[1] : 0);
-      if (revenue > 100000) {
+      BigDecimal revenue = new BigDecimal(0);
+      if (results.get(0)[1] != null) {
+        revenue = (BigDecimal) results.get(0)[1];
+      }
+      if (revenue.floatValue() > 100000) {
         return error;
-      } else if (revenue == 0) {
+      } else if (revenue.floatValue() == 0) {
         String dunsNo = "";
         if (StringUtils.isNotBlank(data.getDunsNo())) {
           dunsNo = data.getDunsNo();
@@ -780,10 +784,13 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     List<Object[]> results = query.getResults(1);
     if (results != null && results.size() > 0) {
-      int revenue = (int) (results.get(0)[1] != null ? results.get(0)[1] : 0);
-      if (revenue > 0) {
+      BigDecimal revenue = new BigDecimal(0);
+      if (results.get(0)[1] != null) {
+        revenue = (BigDecimal) results.get(0)[1];
+      }
+      if (revenue.floatValue() > 0) {
         return error;
-      } else if (revenue == 0) {
+      } else if (revenue.floatValue() == 0) {
         sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
         query = new PreparedQuery(cedpManager, sql);
         query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
