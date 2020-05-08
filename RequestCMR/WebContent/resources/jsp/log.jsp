@@ -52,6 +52,16 @@ ul {
       <th width="160">Date of Deployment</th>
       <th width="*">Changes</th>
     </tr>
+        <tr>
+      <td>R5.0 b-R5127</td>
+      <td>May 8, 2020</td>
+      <td>
+        <ul>
+          <li>CreateCMR 2.0 - Prod Deploy</li>
+          <li>Defect Fixes for CreateCMR</li>
+        </ul>
+      </td>
+    </tr>
     <tr>
       <td>R5.0 b-R5075</td>
       <td>Apr 25, 2020</td>
