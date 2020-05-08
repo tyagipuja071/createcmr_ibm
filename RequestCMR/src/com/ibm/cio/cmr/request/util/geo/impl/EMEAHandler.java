@@ -2317,6 +2317,13 @@ public class EMEAHandler extends BaseSOFHandler {
             && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
           updateSoldToAndTranslation(entityManager, addr);
         }
+        if(admin.getReqType().equals("C")){
+          Addr zs01addr = getCurrentInstallingAddress(entityManager,admin.getId().getReqId() );
+          if (zs01addr != null && !"00003".equals(zs01addr.getId().getAddrSeq()) && !"ZS01".equals(addr.getId().getAddrType())) {
+            updateDNBAddressSeq(entityManager, zs01addr);
+          }
+        }
+        
       }
       if (data != null && admin.getReqType().equals("U")) {
         // Sync Sold to and Local lauguage address
@@ -2729,6 +2736,13 @@ public class EMEAHandler extends BaseSOFHandler {
     // GRCYTR cross border, all landCntry should be the same
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.LANDEDCNTRY"));
     query.setParameter("LAND_CNTRY", addr.getLandCntry());
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.executeSql();
+  }
+
+  private void updateDNBAddressSeq(EntityManager entityManager, Addr addr) throws Exception {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.UPDATEDNBADDR"));
+    query.setParameter("ADDR_SEQ", "00003");
     query.setParameter("REQ_ID", addr.getId().getReqId());
     query.executeSql();
   }
