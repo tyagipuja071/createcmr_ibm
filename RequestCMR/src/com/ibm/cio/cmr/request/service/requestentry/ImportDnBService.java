@@ -487,10 +487,6 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       addrSeq = nextSeq + "";
     }
 
-    if (SystemLocation.TURKEY.equalsIgnoreCase(reqModel.getCmrIssuingCntry()) && "C".equals(admin.getReqType())) {
-      addrSeq = "00003";
-    }
-
     LOG.debug("Assigning address sequence " + addrSeq);
     addrPk.setAddrSeq(addrSeq);
     addr.setId(addrPk);
