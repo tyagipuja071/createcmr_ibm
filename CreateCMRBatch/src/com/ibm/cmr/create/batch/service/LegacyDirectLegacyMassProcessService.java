@@ -1105,10 +1105,11 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
           return legacyObjects;
         }
       }
-      custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-      custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-      legacyObjects.setCustomerExt(custExt);
-
+      if (custExt != null) {
+        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+        legacyObjects.setCustomerExt(custExt);
+      }
     }
 
     capsAndFillNulls(cust, true);
