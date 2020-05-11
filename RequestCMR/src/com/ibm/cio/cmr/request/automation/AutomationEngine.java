@@ -33,6 +33,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
+import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -305,7 +306,7 @@ public class AutomationEngine {
           admin.setLastProcCenterNm(processingCenter);
           admin.setReqStatus(AutomationConst.STATUS_AWAITING_PROCESSING);
           createHistory(entityManager, admin, "System failed to complete processing during the retry. Please wait a while then reprocess the record.",
-              AutomationConst.STATUS_AWAITING_PROCESSING, "Automated Processing", reqId, appUser, null, null, false);
+              AutomationConst.STATUS_AWAITING_PROCESSING, "Automated Processing", reqId, appUser, null, null, false, null);
         }
       } else {
         boolean moveToNextStep = true;
@@ -320,10 +321,7 @@ public class AutomationEngine {
             if (rejectInfo != null && !rejectInfo.isEmpty()) {
               rejCmtBuilder.append(":");
               for (RejectionContainer rejCont : rejectInfo) {
-                rejCmtBuilder.append(rejCont.getRejCode() + " : " + rejCont.getRejComment());
-                rejCmtBuilder.append("\n ");
-                rejCmtBuilder.append(rejCont.getSupplInfo1() + "\n");
-                rejCmtBuilder.append(rejCont.getSupplInfo2() + "\n");
+                rejCmtBuilder.append(rejCont.getRejComment());
               }
             } else {
               rejCmtBuilder.append(".");
@@ -333,7 +331,9 @@ public class AutomationEngine {
               cmt = cmt.substring(0, 1996) + "...";
             }
             admin.setReqStatus("PRJ");
-            createHistory(entityManager, admin, cmt, "PRJ", "Automated Processing", reqId, appUser, null, "Errors in automated checks", true);
+            for (RejectionContainer r : rejectInfo) {
+              createHistory(entityManager, admin, cmt, "PRJ", "Automated Processing", reqId, appUser, null, "Errors in automated checks", true, r);
+            }
             admin.setLastProcCenterNm(null);
             admin.setLockInd("N");
             admin.setLockByNm(null);
@@ -353,10 +353,7 @@ public class AutomationEngine {
               rejectCmt.append(":");
               if (rejectionInfo != null && !rejectionInfo.isEmpty()) {
                 for (RejectionContainer rejCont : rejectionInfo) {
-                  rejectCmt.append("\n ");
-                  rejectCmt.append(rejCont.getRejCode() + " : " + rejCont.getRejComment() + "\n");
-                  rejectCmt.append(rejCont.getSupplInfo1() + "\n");
-                  rejectCmt.append(rejCont.getSupplInfo2() + "\n");
+                  rejectCmt.append(rejCont.getRejComment() + "\n");
                 }
               }
               // append pending checks
@@ -382,7 +379,7 @@ public class AutomationEngine {
             createComment(entityManager, cmt, reqId, appUser);
             admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
             createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,
-                false);
+                false, null);
           }
         }
         if (moveToNextStep) {
@@ -432,7 +429,7 @@ public class AutomationEngine {
             admin.setReqStatus("PCP");
             String cmt = "Automated checks completed successfully. Request is ready for processing.";
             createComment(entityManager, cmt, reqId, appUser);
-            createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true);
+            createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
           } else {
             // move to PPN
             String cmt = null;
@@ -444,9 +441,7 @@ public class AutomationEngine {
               rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
               rejCmtBuilder.append(":");
               for (RejectionContainer rejCont : rejectInfo) {
-                rejCmtBuilder.append(rejCont.getRejCode() + " : " + rejCont.getRejComment() + "\n");
-                rejCmtBuilder.append(rejCont.getSupplInfo1() + "\n");
-                rejCmtBuilder.append(rejCont.getSupplInfo2() + "\n");
+                rejCmtBuilder.append(rejCont.getRejComment() + "\n");
               }
               // append pending checks
               for (String pendingCheck : pendingChecks.values()) {
@@ -471,7 +466,7 @@ public class AutomationEngine {
             if (cmt.length() > 1000) {
               histCmt = "The request needs further review due to some issues found during automated checks. Check the request comment log and system processing results for details.";
             }
-            createHistory(entityManager, admin, histCmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false);
+            createHistory(entityManager, admin, histCmt, "PPN", "Automated Processing", reqId, appUser, processingCenter, null, false, null);
           }
 
         }
@@ -600,11 +595,46 @@ public class AutomationEngine {
    * @throws CmrException
    */
   protected WfHist createHistory(EntityManager entityManager, Admin admin, String comment, String status, String action, long reqId, AppUser user,
-      String processingCenter, String rejectReason, boolean sendMail) throws CmrException, SQLException {
+      String processingCenter, String rejectReason, boolean sendMail, RejectionContainer rejectCont) throws CmrException, SQLException {
     // create workflow history record
+    completeLastHistoryRecord(entityManager, admin.getId().getReqId());
+    WfHist hist = new WfHist();
+    WfHistPK histpk = new WfHistPK();
+    histpk.setWfId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "WF_ID"));
+    hist.setId(histpk);
+    hist.setCmt(comment);
+    hist.setReqStatus(admin.getReqStatus());
+    hist.setCreateById(user.getIntranetId());
+    hist.setCreateByNm(user.getIntranetId());
+    hist.setCreateTs(SystemUtil.getCurrentTimestamp());
+    hist.setReqId(admin.getId().getReqId());
+    hist.setRejReason(rejectReason);
+    hist.setReqStatusAct(action);
+    if (rejectCont != null) {
+      hist.setRejReasonCd(rejectCont.getRejCode());
+      hist.setRejSupplInfo1(rejectCont.getSupplInfo1());
+      hist.setRejSupplInfo2(rejectCont.getSupplInfo2());
+    }
+    if (user.getIntranetId() != null) {
+      hist.setSentToId(user.getIntranetId());
+    }
 
-    return RequestUtils.createWorkflowHistoryFromBatch(entityManager, user.getIntranetId(), admin, comment, action, processingCenter, null, false,
-        sendMail, rejectReason);
+    if (user.getBluePagesName() != null) {
+      hist.setSentToNm(user.getBluePagesName());
+    }
+
+    // if (complete) {
+    // hist.setCompleteTs(SystemUtil.getCurrentTimestamp());
+    // }
+
+    entityManager.persist(hist);
+    entityManager.flush();
+
+    if (sendMail) {
+      RequestUtils.sendEmailNotifications(entityManager, admin, hist);
+    }
+
+    return hist;
   }
 
   /**
@@ -665,5 +695,11 @@ public class AutomationEngine {
       return false;
     }
     return (!Arrays.asList("COM", "PRJ", "DRA", "CAN").contains(status));
+  }
+
+  private static void completeLastHistoryRecord(EntityManager entityManager, long reqId) {
+    PreparedQuery update = new PreparedQuery(entityManager, ExternalizedQuery.getSql("WORK_FLOW.COMPLETE_LAST"));
+    update.setParameter("REQ_ID", reqId);
+    update.executeSql();
   }
 }
