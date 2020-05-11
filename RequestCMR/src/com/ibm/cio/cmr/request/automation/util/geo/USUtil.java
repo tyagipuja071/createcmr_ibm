@@ -637,13 +637,19 @@ public class USUtil extends AutomationUtil {
                 } else {
                   String error = performEnterpriseAffiliateCheck(cedpManager, entityManager, requestData);
                   if (StringUtils.isNotBlank(error)) {
-                    engineData.addRejectionComment("OTH", error, "", "");
-                    LOG.debug(error);
-                    output.setDetails(error);
-                    output.setOnError(true);
-                    validation.setMessage("Validation Failed");
-                    validation.setSuccess(false);
-                    return true;
+                    if ("BG_ERROR".equals(error)) {
+                      hasNegativeCheck = true;
+                      failedChecks.put(error,
+                          "The projected global buying group during Enterprise/Affiliate checks did not match the one on the request.");
+                    } else {
+                      engineData.addRejectionComment("OTH", error, "", "");
+                      LOG.debug(error);
+                      output.setDetails(error);
+                      output.setOnError(true);
+                      validation.setMessage("Validation Failed");
+                      validation.setSuccess(false);
+                      return true;
+                    }
                   }
                 }
                 enterpriseAffiliateUpdated = true;
@@ -792,15 +798,17 @@ public class USUtil extends AutomationUtil {
         return error;
       } else if (revenue.floatValue() == 0) {
         sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
-        query = new PreparedQuery(cedpManager, sql);
+        query = new PreparedQuery(entityManager, sql);
         query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
         query.setParameter("CMR_NO", data.getCmrNo());
         query.setParameter("ENTERPRISE", data.getEnterprise());
         query.setParameter("AFFILIATE", data.getAffiliate());
         query.setForReadOnly(true);
-        if (!query.exists()) {
-          return error;
-        } else {
+        results = query.getResults(1);
+        if (results != null && !results.isEmpty()) {
+          String guDunsNo = (String) results.get(0)[0];
+          String gbgIdDb = (String) results.get(0)[1];
+
           CmrClientService odmService = new CmrClientService();
           RequestEntryModel model = requestData.createModelFromRequest();
           Addr soldTo = requestData.getAddress("ZS01");
@@ -808,9 +816,16 @@ public class USUtil extends AutomationUtil {
 
           boolean success = odmService.getBuyingGroup(entityManager, soldTo, model, response);
           String gbgId = (String) response.get("globalBuyingGroupID");
-          if (!success || gbgId == null || (success && gbgId != null && !gbgId.equals(data.getGbgId()))) {
-            return error;
+          if (!success && gbgId == null) {
+            gbgId = gbgIdDb;
           }
+
+          if (gbgId == null || (gbgId != null && !gbgId.equals(data.getGbgId()))) {
+            return "BG_ERROR";
+          }
+
+        } else {
+          return error;
         }
       }
     }
