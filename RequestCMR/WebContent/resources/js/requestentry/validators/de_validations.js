@@ -180,7 +180,7 @@ function setISUValues(value) {
     FormManager.readOnly('isuCd');
   } else if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
     FormManager.enable('isuCd');
-  } else if (_custSubGrp == 'CROSS') {
+  } else if (_custSubGrp == 'CROSS' && _pagemodel.userRole.toUpperCase() != "PROCESSOR") {
     FormManager.readOnly('isuCd');
   }
 
@@ -452,10 +452,8 @@ function setAbbrevNameDEUpdate(cntry, addressMode, saving, finalSave, force) {
       zs01Reccount = record.ret1;
     }
 
-    var addrSeq = FormManager.getActualValue('addrSeq');
     qParams = {
-      REQ_ID : zs01ReqId,
-      ADDR_SEQ : addrSeq,
+      REQ_ID : zs01ReqId,      
     };
     var record = cmr.query('GETZS01OLDCUSTNAME', qParams);
     var oldCustNm = record.ret1;
