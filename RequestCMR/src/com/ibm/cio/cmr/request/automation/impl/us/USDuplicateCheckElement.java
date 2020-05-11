@@ -252,7 +252,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           engineData.addNegativeCheckStatus("dupAllowed",
               "There were possible duplicate CMRs/Requests found with the same data but allowed for the scenario.");
         } else {
-          engineData.addRejectionComment("DUPC/R", "There were possible duplicate CMRs/Requests found with the same data.", "", "");
+          engineData.addRejectionComment("DUPCR", "There were possible duplicate CMRs/Requests found with the same data.", "", "");
           result.setOnError(true);
         }
         result.setProcessOutput(output);
