@@ -816,11 +816,11 @@ public class USUtil extends AutomationUtil {
 
           boolean success = odmService.getBuyingGroup(entityManager, soldTo, model, response);
           String gbgId = (String) response.get("globalBuyingGroupID");
-          if (!success && gbgId == null) {
+          if (StringUtils.isBlank(gbgId)) {
             gbgId = gbgIdDb;
           }
 
-          if (gbgId == null || (gbgId != null && !gbgId.equals(data.getGbgId()))) {
+          if (StringUtils.isBlank(gbgId) || (StringUtils.isNotBlank(gbgId) && !gbgId.equals(data.getGbgId()))) {
             return "BG_ERROR";
           }
 
