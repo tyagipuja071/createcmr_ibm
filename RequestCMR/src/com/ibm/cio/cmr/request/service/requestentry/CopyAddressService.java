@@ -283,47 +283,6 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
     return null;
   }
 
-//  protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId) {
-  // int addrSeq = 0;
-  // String maxAddrSeq = null;
-  // String newAddrSeq = null;
-  // String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
-  // PreparedQuery query = new PreparedQuery(entityManager, sql);
-  // query.setParameter("REQ_ID", reqId);
-  //
-  // List<Object[]> results = query.getResults();
-  // if (results != null && results.size() > 0) {
-  // Object[] result = results.get(0);
-  // maxAddrSeq = (String) (result != null && result.length > 0 && result[0] !=
-  // null ? result[0] : "0");
-  //
-  // if (StringUtils.isAlpha(maxAddrSeq)) {
-  // maxAddrSeq = String.valueOf((int) ((Math.random() * 9 + 1) * 10));
-  // }
-  // if (!(Integer.valueOf(maxAddrSeq) >= 0 && Integer.valueOf(maxAddrSeq) <=
-  // 20849)) {
-  // maxAddrSeq = "1";
-  // }
-  // if (StringUtils.isEmpty(maxAddrSeq)) {
-  // maxAddrSeq = "1";
-  // }
-  // log.debug("Copy address maxAddrSeq = " + maxAddrSeq);
-  // try {
-  // addrSeq = Integer.parseInt(maxAddrSeq);
-  // } catch (Exception e) {
-  // // if returned value is invalid
-  // }
-  // addrSeq++;
-  // }
-  //
-  // newAddrSeq = Integer.toString(addrSeq);
-  //
-  // // newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5,
-  // // newAddrSeq.length());
-  //
-  // return newAddrSeq;
-  // }
-
   protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId, String reqType, String addrType) {
     if ("ZD02".equals(addrType)) {
       return "598";
