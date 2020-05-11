@@ -57,7 +57,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     StringBuilder details = new StringBuilder();
     try {
       String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry(), data.getCountryUse());
-      if (landCntryForVies == null) {
+      if (!EU_COUNTRIES.contains(landCntryForVies)) {
         validation.setSuccess(true);
         validation.setMessage("Skipped.");
         output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
@@ -113,12 +113,6 @@ public class EUVatValidationElement extends ValidatingElement implements Company
 
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
 
-    if (landCntry == null && !StringUtils.isBlank(defaultLandedCountry)) {
-      return defaultLandedCountry;
-    }
-    if (landCntry == null && StringUtils.isBlank(defaultLandedCountry)) {
-      return null;
-    }
     if (!landCntry.equals(defaultLandedCountry)) {
       // handle cross-border and subregions
 
