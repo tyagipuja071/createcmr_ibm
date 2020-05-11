@@ -1039,52 +1039,67 @@ public class USUtil extends AutomationUtil {
 
     // determine cust scenarios
     if (COMMERCIAL.equals(custTypCd)) {
-      if (("11".equals(custClass) || "18".equals(custClass) || "19".equals(custClass)) && StringUtils.isBlank(usRestricTo)) {
-        custSubGroup = SC_COMM_REGULAR;
-      } else if ("9500".equals(isicCd)) {
-        custSubGroup = SC_PVT_HOUSEHOLD;
-      } else if ("5159".equals(isicCd) && "672".equals(mtkgArDept)) {
-        custSubGroup = SC_BROKER;
-      } else if ("12554525".equals(companyNo)) {
-        custSubGroup = SC_DUMMY;
-      } else if ("52".equals(custClass) && StringUtils.isBlank(usRestricTo)) {
-        custSubGroup = SC_CSP;
-      } else if ("2539231".equals(affiliate) && StringUtils.isBlank(usRestricTo)) {
-        custSubGroup = SC_DOMINO;
-      } else if ("4276400".equals(affiliate) && StringUtils.isBlank(usRestricTo)) {
-        custSubGroup = SC_HILTON;
-      } else if ("3435500".equals(affiliate) && StringUtils.isBlank(usRestricTo)) {
-        custSubGroup = SC_FLORIDA;
-      } else if ("OIO".equals(usRestricTo)) {
-        custSubGroup = SC_REST_OIO;
-      } else if ("OEMHQ".equals(usRestricTo)) {
-        custSubGroup = SC_REST_OEMHW;
-      } else if ("OEMHQ".equals(usRestricTo)) {
-        custSubGroup = SC_REST_OEMSW;
-      } else if ("TPD".equals(usRestricTo)) {
-        custSubGroup = SC_REST_TPD;
-      } else if ("SSD".equals(usRestricTo)) {
-        custSubGroup = SC_REST_SSD;
-      } else if ("DB4".equals(usRestricTo)) {
-        custSubGroup = SC_REST_DB4;
-      } else if ("GRNTS".equals(usRestricTo)) {
-        custSubGroup = SC_REST_GRNTS;
-      } else if ("LBPS".equals(usRestricTo)) {
-        custSubGroup = SC_REST_LBPS;
-      } else if ("LIIS".equals(usRestricTo)) {
-        custSubGroup = SC_REST_LIIS;
-      } else if ("RFBPO".equals(usRestricTo)) {
-        custSubGroup = SC_REST_RFBPO;
-      } else if ("SSI".equals(usRestricTo)) {
-        custSubGroup = SC_REST_SSI;
-      } else if ("ICC".equals(usRestricTo)) {
-        custSubGroup = SC_REST_ICC;
-      } else if ("SVMP".equals(usRestricTo)) {
-        custSubGroup = SC_REST_SVMP;
-      } else if ("85".equals(custClass)) {
-        custSubGroup = SC_IGS;
-      } else if ("81".equals(custClass)) {
-        custSubGroup = SC_IGSF;
+      if (StringUtils.isNotBlank(usRestricTo)) {
+        // US restrict to filters
+        if ("OIO".equals(usRestricTo)) {
+          custSubGroup = SC_REST_OIO;
+        } else if ("OEMHQ".equals(usRestricTo)) {
+          custSubGroup = SC_REST_OEMHW;
+        } else if ("OEMHQ".equals(usRestricTo)) {
+          custSubGroup = SC_REST_OEMSW;
+        } else if ("TPD".equals(usRestricTo)) {
+          custSubGroup = SC_REST_TPD;
+        } else if ("SSD".equals(usRestricTo)) {
+          custSubGroup = SC_REST_SSD;
+        } else if ("DB4".equals(usRestricTo)) {
+          custSubGroup = SC_REST_DB4;
+        } else if ("GRNTS".equals(usRestricTo)) {
+          custSubGroup = SC_REST_GRNTS;
+        } else if ("LBPS".equals(usRestricTo)) {
+          custSubGroup = SC_REST_LBPS;
+        } else if ("LIIS".equals(usRestricTo)) {
+          custSubGroup = SC_REST_LIIS;
+        } else if ("RFBPO".equals(usRestricTo)) {
+          custSubGroup = SC_REST_RFBPO;
+        } else if ("SSI".equals(usRestricTo)) {
+          custSubGroup = SC_REST_SSI;
+        } else if ("ICC".equals(usRestricTo)) {
+          custSubGroup = SC_REST_ICC;
+        } else if ("SVMP".equals(usRestricTo)) {
+          custSubGroup = SC_REST_SVMP;
+        }
+      } else {
+        // affiliate filters with condition of usRestrictTo=blank
+        if ("2539231".equals(affiliate)) {
+          custSubGroup = SC_DOMINO;
+        } else if ("4276400".equals(affiliate)) {
+          custSubGroup = SC_HILTON;
+        } else if ("3435500".equals(affiliate)) {
+          custSubGroup = SC_FLORIDA;
+        }
+      }
+
+      if (StringUtils.isBlank(custSubGroup)) {
+        // If still no cust group found
+        // other filters in order of
+        // 1.company filters
+        // 2.isic filters
+        // 3.kukla filters
+        if ("12554525".equals(companyNo)) {
+          custSubGroup = SC_DUMMY;
+        } else if ("9500".equals(isicCd)) {
+          custSubGroup = SC_PVT_HOUSEHOLD;
+        } else if ("5159".equals(isicCd) && "672".equals(mtkgArDept)) {
+          custSubGroup = SC_BROKER;
+        } else if ("85".equals(custClass)) {
+          custSubGroup = SC_IGS;
+        } else if ("81".equals(custClass)) {
+          custSubGroup = SC_IGSF;
+        } else if ("52".equals(custClass)) {
+          custSubGroup = SC_CSP;
+        } else if (("11".equals(custClass) || "18".equals(custClass) || "19".equals(custClass)) && StringUtils.isBlank(usRestricTo)) {
+          custSubGroup = SC_COMM_REGULAR;
+        }
       }
     } else if (STATE_LOCAL.equals(custTypCd)) {
       if (("13".equals(custClass) || "14".equals(custClass) || "16".equals(custClass) || "17".equals(custClass))
