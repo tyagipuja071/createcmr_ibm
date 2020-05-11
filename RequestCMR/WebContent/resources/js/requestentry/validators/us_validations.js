@@ -196,6 +196,10 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
 
 function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
   var reqType = FormManager.getActualValue('reqType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
   if (reqType == 'C' && (scenario == 'OEMHW' || scenario == 'OEM-SW')) {
     FormManager.addValidator('usSicmen', Validators.REQUIRED, [ 'SICMEN' ], 'MAIN_CUST_TAB');
     FormManager.enable('usSicmen');

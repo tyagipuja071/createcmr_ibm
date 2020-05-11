@@ -689,6 +689,22 @@ public class USHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSpecialTaxCd(), newData.getSpecialTaxCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SpecialTaxCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSpecialTaxCd(), "SpecialTaxCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSpecialTaxCd(), "SpecialTaxCd", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getUsSicmen(), newData.getUsSicmen())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "USSicmen", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getUsSicmen(), "USSicmen", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getUsSicmen(), "USSicmen", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   /**
