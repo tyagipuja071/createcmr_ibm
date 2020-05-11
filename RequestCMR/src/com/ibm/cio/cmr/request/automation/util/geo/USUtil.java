@@ -290,7 +290,7 @@ public class USUtil extends AutomationUtil {
               mktgDept = ("request".equalsIgnoreCase(mapping.getMktgDept())) ? ((StringUtils.isBlank(data.getMktgDept()) ? "" : data.getMktgDept()))
                   : ((StringUtils.isBlank(mapping.getMktgDept()) ? "" : mapping.getMktgDept()));
             } else {
-              mktgDept = getMktgDept(entityManager, requestData, engineData);
+              mktgDept = getMktgDept(entityManager, requestData, engineData, scenarioSubType);
             }
 
             if (!"logic".equalsIgnoreCase(mapping.getMtkgArDept())) {
@@ -298,7 +298,7 @@ public class USUtil extends AutomationUtil {
                   ? ((StringUtils.isBlank(data.getMtkgArDept()) ? "" : data.getMtkgArDept()))
                   : ((StringUtils.isBlank(mapping.getMtkgArDept()) ? "" : mapping.getMtkgArDept()));
             } else {
-              mtkgArDept = getMtkgArDept(entityManager, requestData, engineData);
+              mtkgArDept = getMtkgArDept(entityManager, requestData, engineData, scenarioSubType);
             }
 
             if (!"logic".equalsIgnoreCase(mapping.getSvcArOffice())) {
@@ -341,6 +341,12 @@ public class USUtil extends AutomationUtil {
 
             details.append("\nPCC A/R Department = " + pccArDept);
             overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
+
+            if (StringUtils.isNotBlank(csoSite) && StringUtils.isNotBlank(mktgDept) && StringUtils.isNotBlank(mtkgArDept)
+                && StringUtils.isNotBlank(pccArDept)) {
+              break;
+            }
+
           }
         }
       } else {
@@ -351,6 +357,11 @@ public class USUtil extends AutomationUtil {
           engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
         }
       }
+    }
+
+    // if scenario is OEMSW or OEMHW set isic to 357X
+    if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType)) {
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
     }
 
     if (results != null && !results.isOnError()) {
@@ -386,11 +397,9 @@ public class USUtil extends AutomationUtil {
     return pccArDept;
   }
 
-  private String getMktgDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+  private String getMktgDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String scenarioSubType)
+      throws Exception {
     String mktgDept = "";
-    // get request admin and data
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
     Addr installAt = requestData.getAddress("ZI01");
     String stateToMatch = "";
     String countyToMatch = "";
@@ -400,10 +409,6 @@ public class USUtil extends AutomationUtil {
       countyToMatch = StringUtils.isBlank(installAt.getCounty()) ? "" : installAt.getCounty();
     }
 
-    String scenarioSubType = "";
-    if ("C".equals(admin.getReqType()) && data != null) {
-      scenarioSubType = data.getCustSubGrp();
-    }
     if ("FEDERAL".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType) || "POA".equals(scenarioSubType)) {
       if ("MO".equals(stateToMatch)) {
         if (Arrays.asList(STATE_MO_M3A) != null && Arrays.asList(STATE_MO_M3A).size() != 0 && Arrays.asList(STATE_MO_M3A).contains(countyToMatch)) {
@@ -432,16 +437,11 @@ public class USUtil extends AutomationUtil {
     return mktgDept;
   }
 
-  private String getMtkgArDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+  private String getMtkgArDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String scenarioSubType)
+      throws Exception {
     String mtkgArDept = "";
-    // get request admin and data
-    // get request admin and data
-    Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    String scenarioSubType = "";
-    if ("C".equals(admin.getReqType()) && data != null) {
-      scenarioSubType = data.getCustSubGrp();
-    }
+
     if ("POA".equals(scenarioSubType)) {
       if (data != null && StringUtils.isNotBlank(data.getCompany()) && Arrays.asList(COMP_NO_LIST).contains(data.getCompany())) {
         mtkgArDept = "14W";
