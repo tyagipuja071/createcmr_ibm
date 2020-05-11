@@ -2143,8 +2143,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         // if returned value is invalid
       }
       addrSeq++;
-      // Compare with RDC SEQ FOR UPDATE REQUEST
-      if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      //Compare with RDC SEQ FOR UPDATE REQUEST
+      if(CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
         String cmrNo = null;
         if (result != null && result.length > 0 && result[2] != null) {
           cmrNo = (String) result[2];

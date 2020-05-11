@@ -44,6 +44,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private String altName;
   private String altStreet;
   private String altCity;
+  private String restrictTo;
 
   private Double revenue;
 
@@ -316,5 +317,13 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setOperStatusCode(String operStatusCode) {
     this.operStatusCode = operStatusCode;
+  }
+
+  public String getRestrictTo() {
+    return restrictTo;
+  }
+
+  public void setRestrictTo(String restrictTo) {
+    this.restrictTo = restrictTo;
   }
 }

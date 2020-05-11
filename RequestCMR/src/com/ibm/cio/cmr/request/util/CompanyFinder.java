@@ -148,6 +148,7 @@ public class CompanyFinder {
         request.setVat(searchModel.getTaxCd1());
       }
       request.setAddrType(addrType);
+      request.setUsRestrictTo(searchModel.getRestrictTo());
 
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
       // connect to the duplicate CMR check service
@@ -182,6 +183,7 @@ public class CompanyFinder {
           match.setAltCity(record.getAltCity());
           match.setAltStreet(record.getAltStreet());
 
+          match.setRestrictTo(record.getUsRestrictTo());
           match.setRevenue(record.getRevenue());
           if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
             match.setOrgIdMatch(searchModel.getVat().equals(match.getVat()) || searchModel.getTaxCd1().equals(match.getTaxCd1()));
