@@ -28,6 +28,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String DNB_MATCH = "dnbMatching";
   public static final String DNB_ALL_MATCHES = "dnbAllMatches";
   public static final String VAT_VERIFIED = "vatVerified";
+  public static final String SKIP_VAT_CHECKS = "skipVatChecks";
   public static final String SKIP_CHECKS = "skipChecks";
   public static final String COMPANY_INFO_SOURCE = "compInfoSrc";
   public static final String SCENARIO_VERIFIED_INDC = "scenarioVerifiedIndc";
