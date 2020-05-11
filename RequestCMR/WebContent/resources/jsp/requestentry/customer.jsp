@@ -152,12 +152,13 @@
       <cmr:view forCountry="897">
          <cmr:column span="2" containerForField="USSicmen">
         <p>
-          <label for="usSicmen"> <cmr:fieldLabel fieldId="USSicmen" />: </label>
+          <label for="usSicmen"> <cmr:fieldLabel fieldId="USSicmen" />: <cmr:delta text="${rdcdata.usSicmen}" oldValue="${reqentry.usSicmen}" />
+           </label>
           <cmr:field path="usSicmen" id="usSicmen" fieldId="USSicmen" tabId="MAIN_CUST_TAB"  size="500" />
         </p>
       </cmr:column>
       </cmr:view>
-      <cmr:column span="2" containerForField="VAT">
+      <cmr:column span="2" containerForField="VAT" exceptForCountry="897">
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">
