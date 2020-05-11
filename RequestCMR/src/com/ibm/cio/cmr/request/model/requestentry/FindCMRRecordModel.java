@@ -235,6 +235,12 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String email2;
   private String email3;
 
+  // new fields from FindCMR
+  private String usCmrCsoSite;
+  private String usCmrMktgArDept;
+  private String usCmrRestrictTo;
+  private String usCmrBpAccountType;
+
   public String getCustClass() {
     return custClass;
   }
@@ -1832,5 +1838,37 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
 
   public void setEmail3(String email3) {
     this.email3 = email3;
+  }
+
+  public String getUsCmrCsoSite() {
+    return usCmrCsoSite;
+  }
+
+  public void setUsCmrCsoSite(String usCmrCsoSite) {
+    this.usCmrCsoSite = usCmrCsoSite;
+  }
+
+  public String getUsCmrMktgArDept() {
+    return usCmrMktgArDept;
+  }
+
+  public void setUsCmrMktgArDept(String usCmrMktgArDept) {
+    this.usCmrMktgArDept = usCmrMktgArDept;
+  }
+
+  public String getUsCmrRestrictTo() {
+    return usCmrRestrictTo;
+  }
+
+  public void setUsCmrRestrictTo(String usCmrRestrictTo) {
+    this.usCmrRestrictTo = usCmrRestrictTo;
+  }
+
+  public String getUsCmrBpAccountType() {
+    return usCmrBpAccountType;
+  }
+
+  public void setUsCmrBpAccountType(String usCmrBpAccountType) {
+    this.usCmrBpAccountType = usCmrBpAccountType;
   }
 }
