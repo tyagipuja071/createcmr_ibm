@@ -57,7 +57,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     StringBuilder details = new StringBuilder();
     try {
       String landCntryForVies = getLandedCountryForVies(data.getCmrIssuingCntry(), zs01.getLandCntry(), data.getCountryUse());
-      if (!EU_COUNTRIES.contains(landCntryForVies)) {
+      if (landCntryForVies == null) {
         validation.setSuccess(true);
         validation.setMessage("No Landed Country");
         String msg = "Cannot verify VAT because no Landed Country was found on the main address. Further validation is needed.";
@@ -128,6 +128,13 @@ public class EUVatValidationElement extends ValidatingElement implements Company
   private String getLandedCountryForVies(String cmrIssuingCntry, String landCntry, String subRegion) {
 
     String defaultLandedCountry = PageManager.getDefaultLandedCountry(cmrIssuingCntry);
+
+    if (landCntry == null && !StringUtils.isBlank(defaultLandedCountry)) {
+      return defaultLandedCountry;
+    }
+    if (landCntry == null && StringUtils.isBlank(defaultLandedCountry)) {
+      return null;
+    }
 
     if (!landCntry.equals(defaultLandedCountry)) {
       // handle cross-border and subregions
