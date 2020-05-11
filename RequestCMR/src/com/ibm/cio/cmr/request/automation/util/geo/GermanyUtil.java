@@ -122,6 +122,7 @@ public class GermanyUtil extends AutomationUtil {
             request.setCustomerName(name);
             request.setIssuingCountry(data.getCmrIssuingCntry());
             request.setLandedCountry(zs01.getLandCntry());
+            request.setIsicCd("9500");
             request.setNameMatch("Y");
             client.setReadTimeout(1000 * 60 * 5);
             LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
