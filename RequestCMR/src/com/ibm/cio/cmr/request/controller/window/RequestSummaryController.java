@@ -80,6 +80,8 @@ public class RequestSummaryController extends BaseWindowController {
       return getWindow(new ModelAndView("summarymass", "summary", summary), "Request Summary: Delete Request (" + reqId + ")");
     } else if (summary != null && CmrConstants.REQ_TYPE_UPDT_BY_ENT.equals(summary.getAdmin().getReqType())) {
       return getWindow(new ModelAndView("summarymass", "summary", summary), "Request Summary: Update by  Enterprise# Request (" + reqId + ")");
+    } else if (summary != null && CmrConstants.REQ_TYPE_SINGLE_REACTIVATE.equals(summary.getAdmin().getReqType())) {
+      return getWindow(new ModelAndView("summaryupd", "summary", summary), "Request Summary: Single Reactivation Request (" + reqId + ")");
     } else {
       return getWindow(new ModelAndView("summarymass", "summary", summary), "Request Summary: Unspecified Request Type (" + reqId + ")");
     }

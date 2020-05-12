@@ -75,6 +75,9 @@ window.doFocus = function(){
         <c:if test="${summary.admin.reqType == 'E'}">
           Update by Enterprise #
         </c:if>
+        <c:if test="${summary.admin.reqType == 'X'}">
+          Single Reactivate
+        </c:if>
         
         </cmr:column>
         <cmr:column span="1" width="130">
