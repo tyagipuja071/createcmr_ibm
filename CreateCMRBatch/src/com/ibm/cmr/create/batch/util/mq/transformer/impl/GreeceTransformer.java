@@ -462,6 +462,13 @@ public class GreeceTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+      
+      if (!StringUtils.isBlank(data.getAbbrevNm())) {
+        legacyCust.setAbbrevNm(data.getAbbrevNm());
+      } else {
+        legacyCust.setAbbrevNm("");
+      }
+
     } // common data for C/U
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {

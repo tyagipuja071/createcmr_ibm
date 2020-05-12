@@ -351,21 +351,21 @@ public class EMEAHandler extends BaseSOFHandler {
                 
                 if(!StringUtils.isBlank(record.getCmrIntlName4())) {
                   localTransAddr.setCmrName4(record.getCmrIntlName4());  
-                } else {
+                } else if (!StringUtils.isBlank(record.getCmrName4())){
                   if(db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
                     localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
                   }
-                }
+                } 
                 
                 if(!StringUtils.isBlank(record.getCmrIntlAddress())) {
                   localTransAddr.setCmrStreetAddress(record.getCmrIntlAddress());
-                } else {
+                } else if(!StringUtils.isBlank(record.getCmrStreetAddress())){
                   localTransAddr.setCmrStreetAddress(db2LocalTransAddr.getStreet());
                 }
                 
                 if(!StringUtils.isBlank(record.getCmrOtherIntlAddress())) {
                   localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
-                } else {
+                } else if(!StringUtils.isBlank(record.getCmrStreetAddressCont())){
                   if(!db2LocalTransAddr.getAddrLine3().startsWith("ATT") && !db2LocalTransAddr.getAddrLine3().startsWith("PO BOX")) {
                     localTransAddr.setCmrStreetAddressCont(db2LocalTransAddr.getAddrLine3());  
                   }
@@ -378,16 +378,26 @@ public class EMEAHandler extends BaseSOFHandler {
                   localTransAddr.setCmrCity(db2LocalTransAddr.getCity());
                 }
                 
-                localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());
-                localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());
+                if(!StringUtils.isBlank(record.getCmrState())) {
+                  localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());  
+                }
+                if(!StringUtils.isBlank(record.getCmrPostalCode())) {
+                  localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());  
+                }
+                
                 String poBox = db2LocalTransAddr.getPoBox();
                 if (poBox.contains("PO BOX")) {
                   poBox = poBox.substring(6).trim();
                 } else if (poBox.contains("APTO")) {
                   poBox = poBox.substring(5).trim();
                 }
-                localTransAddr.setCmrPOBox(poBox);
-                localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
+                if(!StringUtils.isBlank(record.getCmrPOBox())) {
+                  localTransAddr.setCmrPOBox(poBox);
+                }
+                
+                if(custExt != null) {
+                  localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());  
+                }
                 converted.add(localTransAddr);
               }
             }
@@ -1883,6 +1893,7 @@ public class EMEAHandler extends BaseSOFHandler {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
       data.setMemLvl(mainRecord.getCmrMembLevel());
       data.setBpRelType(mainRecord.getCmrBPRelType());
+      data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
     }
 	}
 
