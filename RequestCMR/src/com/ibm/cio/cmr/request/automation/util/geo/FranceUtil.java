@@ -30,6 +30,8 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -553,7 +555,6 @@ public class FranceUtil extends AutomationUtil {
     }
   }
 
-
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
@@ -565,6 +566,15 @@ public class FranceUtil extends AutomationUtil {
     boolean isNegativeCheckNeedeed = false;
     LOG.debug("Changes are -> " + changes);
 
+    DataRdc rdc = getDataRdc(entityManager, admin);
+    if ("9500".equals(rdc.getIsicCd())) {
+      LOG.debug("Private customer record. Skipping validations.");
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
+      output.setDetails("Update checks skipped for Private Customer record.");
+      return true;
+    }
     if (changes != null && changes.hasDataChanges()) {
       LOG.debug("Changes has data changes -> " + changes.hasDataChanges());
       boolean vatChngd = changes.isDataChanged("VAT #");
@@ -611,8 +621,11 @@ public class FranceUtil extends AutomationUtil {
         if (collCdChngd) {
           UpdatedDataModel collCdChange = changes.getDataChange("Collection Code");
           if (collCdChange != null) {
-            if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
-              isNegativeCheckNeedeed = true;
+            if ((StringUtils.isBlank(collCdChange.getOldData()) && StringUtils.isNotBlank(collCdChange.getNewData()))
+                || (StringUtils.isNotBlank(collCdChange.getOldData()) && StringUtils.isNotBlank(collCdChange.getNewData()))) {
+              if (!"AR".equalsIgnoreCase(admin.getRequestingLob())) {
+                isNegativeCheckNeedeed = true;
+              }
             }
 
             if (isNegativeCheckNeedeed) {
@@ -662,8 +675,7 @@ public class FranceUtil extends AutomationUtil {
           }
         }
 
-      }
-      else if (!vatChngd && !collCdChngd && !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd) {
+      } else if (!vatChngd && !collCdChngd && !isuCdChngd && !topLstChngd && !sboChngd && !iboChngd && !ctcChngd) {
         isNegativeCheckNeedeed = true;
         validation.setSuccess(false);
         validation.setMessage("Not validated");
@@ -681,7 +693,6 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
-
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
@@ -693,15 +704,26 @@ public class FranceUtil extends AutomationUtil {
     Addr billing = requestData.getAddress("ZP01");
     StringBuilder detail = new StringBuilder();
 
+    DataRdc rdc = getDataRdc(entityManager, admin);
+    if ("9500".equals(rdc.getIsicCd())) {
+      LOG.debug("Private customer record. Skipping validations.");
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      output.setDetails("Update checks skipped for Private Customer record.");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
+      return true;
+    }
+
     LOG.debug("Address changes are -> " + changes);
     if (changes != null && changes.hasAddressChanges()) {
       boolean billingChngd = changes.isAddressChanged("ZP01");
       boolean addrHchngd = changes.isAddressChanged("ZD02");
 
-      if(!billingChngd && !addrHchngd){
+      if (!billingChngd && !addrHchngd) {
         for (Addr addr : requestData.getAddresses()) {
           if ("Y".equals(addr.getImportInd())) {
-            if ((changes.isAddressFieldChanged(addr.getId().getAddrType(), "Contact Person") || changes.isAddressFieldChanged(addr.getId().getAddrType(), "Phone #"))&& isOnlyFieldUpdated(changes)
+            if ((changes.isAddressFieldChanged(addr.getId().getAddrType(), "Contact Person")
+                || changes.isAddressFieldChanged(addr.getId().getAddrType(), "Phone #")) && isOnlyFieldUpdated(changes)
                 && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
               validation.setSuccess(true);
               LOG.debug("Contact Person/Phone# is found to be updated.Updates verified.");
@@ -714,8 +736,7 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-       }
-      else{
+      } else {
 
         if (billing != null && billingChngd) {
           LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
@@ -732,10 +753,10 @@ public class FranceUtil extends AutomationUtil {
           }
         }
 
-        if (addressH != null && addrHchngd) {
-          if (!"IGF".equalsIgnoreCase(admin.getRequestingLob())) {
-            isNegativeCheckNeedeed = true;
-          }
+        String newAbbNm = changes.getDataChange("Abbreviated Name") != null ? changes.getDataChange("Abbreviated Name").getNewData() : "";
+        String oldAbbNm = changes.getDataChange("Abbreviated Name") != null ? changes.getDataChange("Abbreviated Name").getOldData() : "";
+        if (!"IGF".equalsIgnoreCase(admin.getRequestingLob()) && !(newAbbNm.contains("DF") && oldAbbNm.contains("D3"))) {
+          isNegativeCheckNeedeed = true;
         }
       }
     }
@@ -752,12 +773,12 @@ public class FranceUtil extends AutomationUtil {
     output.setDetails(detail.toString());
     return true;
   }
-  
+
   private boolean isOnlyFieldUpdated(RequestChangeContainer changes) {
     boolean isOnlyFieldUpdated = true;
     List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-    String[] addressFields = { "Customer Name", "Customer Name Continuation","Customer Name/ Additional Address Information", "Country (Landed)", "Street",
-        "Street Continuation","Postal Code", "City","PostBox"};
+    String[] addressFields = { "Customer Name", "Customer Name Continuation", "Customer Name/ Additional Address Information", "Country (Landed)",
+        "Street", "Street Continuation", "Postal Code", "City", "PostBox" };
     List<String> relevantFieldNames = Arrays.asList(addressFields);
     for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
       String fieldId = updatedAddrModel.getDataField();
@@ -770,5 +791,11 @@ public class FranceUtil extends AutomationUtil {
     return isOnlyFieldUpdated;
   }
 
+  private DataRdc getDataRdc(EntityManager entityManager, Admin admin) {
+    DataPK rdcPk = new DataPK();
+    rdcPk.setReqId(admin.getId().getReqId());
+    DataRdc rdc = entityManager.find(DataRdc.class, rdcPk);
+    return rdc;
+  }
 
 }
