@@ -37,6 +37,7 @@ public class MassChangeTemplateManager {
     configList.put("758", "config.758.xml");
     configList.put("618", "config.618.xml");
     configList.put("862", "config.862.xml");
+    configList.put("693", "config.693.xml");
     // configList.put("848", "config.SWISS.xml");
   }
 
