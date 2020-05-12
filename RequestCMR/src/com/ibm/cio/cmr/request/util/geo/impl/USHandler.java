@@ -193,6 +193,7 @@ public class USHandler extends GEOHandler {
     query.addField("ABBREV_NM");
     query.addField("TAX_EXEMPT_STATUS");
     query.addField("SICMEN");
+    query.addField("ISIC");
     query.addField("I_CUST_ADDR_TYPE");
 
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
@@ -250,6 +251,15 @@ public class USHandler extends GEOHandler {
 
       if (record.get("COMPANY_NM") != null && !StringUtils.isEmpty(record.get("COMPANY_NM").toString())) {
         this.legalName = (String) record.get("COMPANY_NM");
+      }
+
+      if (record.get("ISIC") != null && !StringUtils.isEmpty(record.get("ISIC").toString()) && !StringUtils.isBlank((String) record.get("SICMEN"))
+          && !(record.get("SICMEN").toString()).equals(record.get("ISIC").toString())) {
+        data.setIsicCd(record.get("ISIC").toString());
+        String newSubInd = getSubIndusryValue(entityManager, record.get("ISIC").toString());
+        if (StringUtils.isNotBlank(newSubInd)) {
+          data.setSubIndustryCd(newSubInd);
+        }
       }
 
       if ((model.getItems() != null && model.getItems().size() == 1)) {
@@ -902,5 +912,17 @@ public class USHandler extends GEOHandler {
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+
+  private String getSubIndusryValue(EntityManager entityManager, String isic) {
+    String subInd = "";
+    String sql = ExternalizedQuery.getSql("US.GET.SUBIND_FOR_ISIC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISIC", isic);
+    subInd = query.getSingleResult(String.class);
+    if (subInd != null) {
+      return subInd;
+    }
+    return subInd;
   }
 }
