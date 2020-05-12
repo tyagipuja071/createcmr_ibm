@@ -7074,10 +7074,8 @@ function toggleBPRelMemType() {
 
 function toggleBPRelMemTypeForTurkey() {
   var reqType = null;
-  // var role = null;
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
-    // role = _pagemodel.userRole.toUpperCase();
   }
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -7087,10 +7085,26 @@ function toggleBPRelMemTypeForTurkey() {
     FormManager.show('BPRelationType', 'bpRelType');
     FormManager.resetValidations('bpRelType');
     FormManager.resetValidations('memLvl');
-// FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level'
-// ], 'MAIN_IBM_TAB');
-// FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation
-// Type' ], 'MAIN_IBM_TAB');
+  }else{
+    var _custType = FormManager.getActualValue('custSubGrp');
+    if (_custType == 'BUSPR' || _custType == 'XBP') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.show('MembLevel', 'memLvl');
+      FormManager.show('BPRelationType', 'bpRelType');
+      FormManager.resetValidations('ppsceid');
+      FormManager.resetValidations('bpRelType');
+      FormManager.resetValidations('memLvl');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.hide('PPSCEID', 'ppsceid');
+      FormManager.hide('MembLevel', 'memLvl');
+      FormManager.hide('BPRelationType', 'bpRelType');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+      FormManager.removeValidator('memLvl', Validators.REQUIRED);
+      FormManager.removeValidator('bpRelType', Validators.REQUIRED);
+    }
   }
 }
 
@@ -8183,6 +8197,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleTypeOfCustomerForTR, [ SysLoc.TURKEY ]);
 
