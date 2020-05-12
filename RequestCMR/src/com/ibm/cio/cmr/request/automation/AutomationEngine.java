@@ -600,6 +600,21 @@ public class AutomationEngine {
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
     WfHist hist = new WfHist();
     WfHistPK histpk = new WfHistPK();
+    String rejCd = null;
+    String supplInfo1 = null;
+    String supplInfo2 = null;
+
+    if (rejectCont != null) {
+      if (StringUtils.isNotBlank(rejectCont.getRejCode())) {
+        rejCd = rejectCont.getRejCode().length() > 5 ? rejectCont.getRejCode().substring(0, 4) : rejectCont.getRejCode();
+      }
+      if (StringUtils.isNotBlank(rejectCont.getSupplInfo1())) {
+        supplInfo1 = rejectCont.getSupplInfo1().length() > 50 ? rejectCont.getSupplInfo1().substring(0, 49) : rejectCont.getSupplInfo1();
+      }
+      if (StringUtils.isNotBlank(rejectCont.getSupplInfo2())) {
+        supplInfo2 = rejectCont.getSupplInfo2().length() > 50 ? rejectCont.getSupplInfo2().substring(0, 49) : rejectCont.getSupplInfo2();
+      }
+    }
     histpk.setWfId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "WF_ID"));
     hist.setId(histpk);
     hist.setCmt(comment);
@@ -610,11 +625,10 @@ public class AutomationEngine {
     hist.setReqId(admin.getId().getReqId());
     hist.setRejReason(rejectReason);
     hist.setReqStatusAct(action);
-    if (rejectCont != null) {
-      hist.setRejReasonCd(rejectCont.getRejCode());
-      hist.setRejSupplInfo1(rejectCont.getSupplInfo1());
-      hist.setRejSupplInfo2(rejectCont.getSupplInfo2());
-    }
+    hist.setRejReasonCd(rejCd);
+    hist.setRejSupplInfo1(supplInfo1);
+    hist.setRejSupplInfo2(supplInfo2);
+
     if (user.getIntranetId() != null) {
       hist.setSentToId(user.getIntranetId());
     }

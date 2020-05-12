@@ -362,6 +362,7 @@ public class USUtil extends AutomationUtil {
     // if scenario is OEMSW or OEMHW set isic to 357X
     if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType)) {
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
     }
 
     if (results != null && !results.isOnError()) {
@@ -1055,32 +1056,36 @@ public class USUtil extends AutomationUtil {
     // determine cust scenarios
     if (COMMERCIAL.equals(custTypCd)) {
       if (StringUtils.isNotBlank(usRestricTo)) {
+        sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("RESTRICT_TO", usRestricTo);
+        String usRestrictToLOV = query.getSingleResult(String.class);
         // US restrict to filters
-        if ("OIO".equals(usRestricTo)) {
+        if ("OIO".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_OIO;
-        } else if ("OEMHQ".equals(usRestricTo)) {
+        } else if ("OEMHQ".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_OEMHW;
-        } else if ("OEMHQ".equals(usRestricTo)) {
+        } else if ("OEMHQ".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_OEMSW;
-        } else if ("TPD".equals(usRestricTo)) {
+        } else if ("TPD".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_TPD;
-        } else if ("SSD".equals(usRestricTo)) {
+        } else if ("SSD".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_SSD;
-        } else if ("DB4".equals(usRestricTo)) {
+        } else if ("DB4".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_DB4;
-        } else if ("GRNTS".equals(usRestricTo)) {
+        } else if ("GRNTS".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_GRNTS;
-        } else if ("LBPS".equals(usRestricTo)) {
+        } else if ("LBPS".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_LBPS;
-        } else if ("LIIS".equals(usRestricTo)) {
+        } else if ("LIIS".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_LIIS;
-        } else if ("RFBPO".equals(usRestricTo)) {
+        } else if ("RFBPO".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_RFBPO;
-        } else if ("SSI".equals(usRestricTo)) {
+        } else if ("SSI".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_SSI;
-        } else if ("ICC".equals(usRestricTo)) {
+        } else if ("ICC".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_ICC;
-        } else if ("SVMP".equals(usRestricTo)) {
+        } else if ("SVMP".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_SVMP;
         }
       } else {
