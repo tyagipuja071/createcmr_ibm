@@ -86,7 +86,7 @@
 					<length>1</length>
 					<bdsId>ClientTier</bdsId>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>SBO</label>
 					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>20</width>
