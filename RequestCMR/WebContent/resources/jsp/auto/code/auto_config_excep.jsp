@@ -91,7 +91,7 @@
                     <td width="*">
                       <select ng-change="dirtyException(exc)" ng-model="exc.skipDupChecksIndc" ng-class="{'exc-deflt' : !exc.skipDupChecksIndc, 'exc-y' : exc.skipDupChecksIndc == 'Y'}">
                         <option value="">Default</option>
-                        <option value="N">Exec</option>
+                        <option value="N">Execute</option>
                         <option value="Y">Skip</option>
                       </select>
                     </td>
@@ -101,7 +101,7 @@
                     <td>
                       <select ng-change="dirtyException(exc)" ng-model="exc.skipVerificationIndc" ng-class="{'exc-deflt' : !exc.skipVerificationIndc, 'exc-y' : exc.skipVerificationIndc == 'Y'}">
                         <option value="">Default</option>
-                        <option value="N">Exec</option>
+                        <option value="N">Execute</option>
                         <option value="Y">Skip</option>
                       </select>
                     </td>
