@@ -362,6 +362,7 @@ public class USUtil extends AutomationUtil {
     // if scenario is OEMSW or OEMHW set isic to 357X
     if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType)) {
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
     }
 
     if (results != null && !results.isOnError()) {
