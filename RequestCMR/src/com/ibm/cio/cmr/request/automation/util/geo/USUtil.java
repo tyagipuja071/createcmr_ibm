@@ -310,10 +310,10 @@ public class USUtil extends AutomationUtil {
             }
 
             if ("BYMODEL".equals(data.getCustSubGrp())) {
-              if ("5AA".equalsIgnoreCase(data.getPccArDept())) {
+              USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+              if ("5AA".equalsIgnoreCase(usDetails.getPccArDept())) {
                 pccArDept = "G8M";
               } else {
-                USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
                 pccArDept = StringUtils.isNotBlank(usDetails.getPccArDept()) ? usDetails.getPccArDept() : "";
               }
             } else {
