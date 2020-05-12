@@ -401,7 +401,7 @@ public class USUtil extends AutomationUtil {
   private String getMktgDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String scenarioSubType)
       throws Exception {
     String mktgDept = "";
-    Addr installAt = requestData.getAddress("ZI01");
+    Addr installAt = requestData.getAddress("ZS01");
     String stateToMatch = "";
     String countyToMatch = "";
 
