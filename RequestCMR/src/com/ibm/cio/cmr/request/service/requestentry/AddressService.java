@@ -2091,7 +2091,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_TR");
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_AT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
@@ -2117,27 +2117,27 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       addrSeq++;
       //Compare with RDC SEQ FOR UPDATE REQUEST
       if(CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
-    	String cmrNo = null;
-    	if(result != null && result.length > 0 && result[2] != null) {
-    		cmrNo = (String)result[2];
-    	}
-    	if(!StringUtils.isEmpty(cmrNo)) {
-    		String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_TR");
-            PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
-            queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-            queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
-            List<Object[]> resultsRDC = queryRDC.getResults();
-            List<String> seqList = new ArrayList<String>();
-            for(int i = 0; i < resultsRDC.size(); i++) {
-            	String item = String.valueOf(resultsRDC.get(i));
-            	if(!StringUtils.isEmpty(item)) {
-            		seqList.add(item); 
-            	}
+        String cmrNo = null;
+        if (result != null && result.length > 0 && result[2] != null) {
+          cmrNo = (String) result[2];
+        }
+        if (!StringUtils.isEmpty(cmrNo)) {
+          String sqlRDC = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_RDC_AT");
+          PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+          queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+          queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+          List<Object[]> resultsRDC = queryRDC.getResults();
+          List<String> seqList = new ArrayList<String>();
+          for (int i = 0; i < resultsRDC.size(); i++) {
+            String item = String.valueOf(resultsRDC.get(i));
+            if (!StringUtils.isEmpty(item)) {
+              seqList.add(item);
             }
-            while(seqList.contains(Integer.toString(addrSeq))) {
-            	addrSeq++;
-            }
-    	}
+          }
+          while (seqList.contains(Integer.toString(addrSeq))) {
+            addrSeq++;
+          }
+        }
       }
     }
     
