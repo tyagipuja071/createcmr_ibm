@@ -789,11 +789,6 @@ public class GreeceTransformer extends EMEATransformer {
       cust.setIsuCd(isuClientTier);
     }
     
-    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      cust.setSalesRepNo(muData.getRepTeamMemberNo());
-      cust.setSalesGroupRep(muData.getRepTeamMemberNo());
-    }
-    
     if (!StringUtils.isBlank(muData.getEnterprise())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getEnterprise())) {
         cust.setEnterpriseNo("");
@@ -805,7 +800,7 @@ public class GreeceTransformer extends EMEATransformer {
     List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
     if (muaList != null && muaList.size() > 0) {
       for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
+        if ("ZS01".equals(mua.getId().getAddrType())) {
           if (!StringUtils.isBlank(mua.getCustPhone())) {
             if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
               cust.setTelNoOrVat("");
@@ -857,12 +852,6 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         cust.setEmbargoCd(muData.getMiscBillCd());
       }
-    }
-    
-    if (!StringUtils.isBlank(muData.getSalesBoCd())) {
-      cust.setSbo(muData.getSalesBoCd() );
-      cust.setIbo(muData.getSalesBoCd());
-      cust.setSalesGroupRep(muData.getSalesBoCd());
     }
     
     if (!StringUtils.isBlank(muData.getOutCityLimit())) {
