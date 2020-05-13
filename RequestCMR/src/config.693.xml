@@ -66,7 +66,7 @@
 				</column>
 				<column>
 					<label>Company number</label>
-					<dbColumn>ENTERPRISE</dbColumn>
+					<dbColumn>COMPANY</dbColumn>
 					<width>15</width>
 					<length>6</length>
 				</column>
@@ -96,13 +96,13 @@
 				</column>
 				<column>
 					<label>IČO</label>
-					<dbColumn></dbColumn>
+					<dbColumn>NEW_ENTP_NAME1</dbColumn>
 					<width>10</width>
 					<length>8</length>
 				</column>
 				<column>
 					<label>DIČ</label>
-					<dbColumn></dbColumn>
+					<dbColumn>EMAIL2</dbColumn>
 					<width>10</width>
 					<length>12</length>
 				</column>
