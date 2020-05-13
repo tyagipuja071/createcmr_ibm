@@ -309,7 +309,7 @@ var TemplateService = (function() {
             }
           }
 
-          if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
+          if (name == 'enterprise' || name == 'company') {
             FormManager.addValidator(name, Validators.DIGIT, [ label ], field.parentTab);
           }
 
