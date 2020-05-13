@@ -309,9 +309,14 @@ var TemplateService = (function() {
             }
           }
 
-          if (name == 'enterprise' || name == 'affiliate' || name == 'company') {
+          if (name == 'enterprise' || name == 'company') {
             FormManager.addValidator(name, Validators.DIGIT, [ label ], field.parentTab);
           }
+
+          if (name == 'affiliate') {
+            FormManager.addValidator(name, Validators.ALPHANUM, [ label ], field.parentTab);
+          }
+
           var showWarning = false;
 
           if (null != FormManager.getActualValue('cmrIssuingCntry') && FormManager.getActualValue('cmrIssuingCntry') == '897') {
