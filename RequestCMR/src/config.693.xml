@@ -122,7 +122,7 @@
 				</column>
 				<column>
 					<label>Phone</label>
-					<dbColumn>CUST_PHONE</dbColumn>
+					<dbColumn>EMAIL1</dbColumn>
 					<width>20</width>
 					<length>16</length>
 				</column>
