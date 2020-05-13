@@ -2506,6 +2506,10 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
 
+      if (!"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setTaxOffice("");
+      }
+
       break;
 
     case SystemLocation.ITALY:
