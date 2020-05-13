@@ -71,6 +71,12 @@
 					<length>6</length>
 				</column>
 				<column>
+					<label>Enterprise Number</label>
+					<dbColumn>ENTERPRISE</dbColumn>
+					<width>15</width>
+					<length>6</length>
+				</column>				
+				<column>
 					<label>Order block code</label>
 					<dbColumn>ORD_BLK</dbColumn>
 					<width>10</width>
@@ -182,12 +188,14 @@
 					<label>Preferred Language</label>
 					<dbColumn>CUST_LANG_CD</dbColumn>
 					<width>20</width>
-					<lovId>CustLangCd</lovId>
+					<length>1</length>
+					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
+					<length>1</length>
 					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>
@@ -252,12 +260,14 @@
 					<label>Preferred Language</label>
 					<dbColumn>CUST_LANG_CD</dbColumn>
 					<width>20</width>
-					<lovId>CustLangCd</lovId>
+					<length>1</length>
+					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
+					<length>1</length>
 					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>
@@ -322,12 +332,14 @@
 					<label>Preferred Language</label>
 					<dbColumn>CUST_LANG_CD</dbColumn>
 					<width>20</width>
-					<lovId>CustLangCd</lovId>
+					<length>1</length>
+					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
+					<length>1</length>
 					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>
@@ -392,12 +404,14 @@
 					<label>Preferred Language</label>
 					<dbColumn>CUST_LANG_CD</dbColumn>
 					<width>20</width>
-					<lovId>CustLangCd</lovId>
+					<length>1</length>
+					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
+					<length>1</length>
 					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>
@@ -462,12 +476,14 @@
 					<label>Preferred Language</label>
 					<dbColumn>CUST_LANG_CD</dbColumn>
 					<width>20</width>
-					<lovId>CustLangCd</lovId>
+					<length>1</length>
+					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
+					<length>1</length>
 					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>

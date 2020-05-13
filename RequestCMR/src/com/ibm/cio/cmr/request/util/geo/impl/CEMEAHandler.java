@@ -1246,7 +1246,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 		/**
 		 * Austria support new template to mass update
 		 */
-		if ("618".equals(issuingCountry)) {
+    if ("618".equals(issuingCountry) || "693".equals(issuingCountry)) {
 			return true;
 		}
 		return false;
