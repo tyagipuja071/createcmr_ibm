@@ -196,7 +196,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
     // check IBM Direct CMR
     FindCMRRecordModel ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
-
+    if (ibmDirectCmr != null) {
+      LOG.debug("IBM Direct CMR Found: " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName());
+    }
     // match against D&B
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, ibmDirectCmr != null);
 
@@ -357,6 +359,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         return result.getItems().get(0);
       }
     } else {
+      LOG.debug("Checking IBM direct CMR for " + addr.getDivn());
       DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
       request.setIssuingCountry(SystemLocation.UNITED_STATES);
       request.setLandedCountry(addr.getLandCntry());
@@ -380,9 +383,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       MatchingResponse<DuplicateCMRCheckResponse> res = mapper.readValue(rawJson, typeRef);
       if (res != null && res.getSuccess() && res.getMatched()) {
         for (DuplicateCMRCheckResponse record : res.getMatches()) {
+          LOG.debug(" - Duplicate: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")" + record.getCompany()
+              + " - " + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
           if (StringUtils.isBlank(record.getUsRestrictTo())) {
             // IBM Direct CMRs have blank restrict to
-            FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 1, null, "addressType=ZS01");
+            LOG.debug(" - getting details for CMR No. " + record.getCmrNo());
+            String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
+            FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 5, null, overrides);
             if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
               return result.getItems().get(0);
             }
@@ -391,6 +398,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
     }
     // do a secondary check directly from RDC
+    LOG.debug("No CMR found using duplicate checks, querying database directly..");
     LOG.debug("No IBM Direct CMRs found in FindCMR. Checking directly on the database..");
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_IBM_DIRECT");
 
@@ -425,6 +433,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       record.setCmrNum((String) cmr[6]);
       record.setCmrIsic((String) cmr[7]);
       record.setCmrSubIndustry((String) cmr[8]);
+      LOG.debug(" - found CMR from DB: " + record.getCmrNum());
       return record;
     }
     LOG.debug("No IBM Direct CMRs found.");
@@ -751,7 +760,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       StringBuilder details, OverrideOutput overrides) {
     Data data = requestData.getData();
     if (ibmDirectCmr != null) {
-      details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " (" + ibmDirectCmr.getCmrSapNumber() + "): \n");
+      details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
+          + ibmDirectCmr.getCmrSapNumber() + "): \n");
 
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
         details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + "\n");
@@ -802,7 +812,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
       } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
         if (!"7NZ".equals(data.getMtkgArDept()) && !"2NS".equals(data.getMtkgArDept())) {
-          String msg = "Marketing A/R Department for End User - Maintenance request cannot be validated.";
+          String msg = "Marketing A/R Department for End User - Maintenance request cannot be validated. Should either be 7NZ or 2NS (Current: "
+              + data.getMtkgArDept() + ")";
           engineData.addNegativeCheckStatus("_usBpData", msg);
           details.append(msg + "\n");
           hasFieldError = true;
