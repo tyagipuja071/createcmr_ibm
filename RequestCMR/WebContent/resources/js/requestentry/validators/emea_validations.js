@@ -4865,8 +4865,8 @@ function showCommercialFinanced() {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
     FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER') {
-      FormManager.disable('custClass');
+    if(role == 'REQUESTER') {
+      FormManager.readOnly('custClass');
     } else {
       FormManager.enable('custClass');
     }
@@ -8053,8 +8053,10 @@ function setClassificationCodeTR() {
 function setCOFClassificationCodeTR() {
   var cofVal = FormManager.getActualValue('commercialFinanced');
   var field = FormManager.getField('custClass');
-  if (cofVal == 'R' || cofVal == 'S' || cofVal == 'T') {
-    FormManager.limitDropdownValues(field, [ '11' ]);
+  if(cofVal=='R' || cofVal=='S' || cofVal=='T') {
+    FormManager.limitDropdownValues(field, [ '11']);
+  } else {
+    setClassificationCodeTR();
   }
 }
 
