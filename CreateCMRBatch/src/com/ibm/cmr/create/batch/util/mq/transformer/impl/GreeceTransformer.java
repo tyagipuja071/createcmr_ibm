@@ -826,7 +826,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
     
     if (!StringUtils.isBlank(muData.getInacCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getInacCd().trim())) {
+      if ("@@@@".equals(muData.getInacCd().trim())) {
         cust.setInacCd("");
       } else {
         cust.setInacCd(muData.getInacCd());
@@ -908,11 +908,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
     
     if (!StringUtils.isBlank(addr.getPostCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getPostCd())) {
-        legacyAddr.setZipCode("");
-      } else {
-        legacyAddr.setZipCode(addr.getPostCd());
-      }
+      legacyAddr.setZipCode(addr.getPostCd());
     }
     
     String poBox = addr.getPoBox();
@@ -996,11 +992,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
         
     if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getLandCntry())) {
-        line6 = "";
-      } else {
-        line6 = massUpdtAddr.getLandCntry();
-      }
+      line6 = massUpdtAddr.getLandCntry();
     }
     
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
@@ -1020,7 +1012,7 @@ public class GreeceTransformer extends EMEATransformer {
     legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
     legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
     legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
-    legacyAddr.setAddrLine6(line5 != null ? line6.trim() : "");
+    legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
   }
   
   @Override
@@ -1035,7 +1027,7 @@ public class GreeceTransformer extends EMEATransformer {
             if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
               custExt.setiTaxCode("");
             } else {
-              custExt.setiTaxCode(muData.getNewEntpName1());
+              custExt.setiTaxCode(mua.getFloor());
             }
             break;
           }
