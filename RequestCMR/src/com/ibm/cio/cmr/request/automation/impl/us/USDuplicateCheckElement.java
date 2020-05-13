@@ -453,7 +453,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         Collections.copy(reqCheckMatches, reqCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
 
         if ("6".equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
@@ -677,7 +677,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         Collections.copy(cmrCheckMatches, cmrCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
 
         if ("6".equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {

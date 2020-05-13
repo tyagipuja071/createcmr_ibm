@@ -375,7 +375,10 @@ public class BluePagesHelper {
    * @throws CmrException
    */
   public static Person getPerson(String email) throws CmrException {
-    return getPerson(email, null);
+    if (StringUtils.isNotBlank(email)) {
+      return getPerson(email, null);
+    }
+    return null;
   }
 
   /**
