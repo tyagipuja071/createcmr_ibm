@@ -250,31 +250,17 @@ function setISUDefaultValueOnSubTypeChange() {
   // }
 }
 
-// CMR-2383 disable tax office
-function setTaxOfficeOnChange() {
-  for (var i = 0; i < _addrTypesForOnChange.length; i++) {
-    _addrTypeOnChangeHandler[i] = null;
-    if (_addrTypeOnChangeHandler[i] == null) {
-      _addrTypeOnChangeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForOnChange[i]), 'onClick', function(value) {
-        disableTaxOffice();
-      });
-    }
-  }
-}
-
-function disableTaxOffice() {
-  console.log("disableTaxOffice..............");
-  var addressTypeValue = FormManager.getActualValue('addrType');
+function disableTaxOfficeTR() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-    if (addressTypeValue == 'ZS01' || addressTypeValue == 'ZD01' || addressTypeValue == 'ZI01') {
-	    FormManager.disable('taxOffice');
-	    dojo.byId('ast-taxOffice').style.display = 'none';
-	    FormManager.removeValidator('taxOffice', Validators.REQUIRED);
-	} else if (addressTypeValue == 'ZP01' ) {
-		FormManager.enable('taxOffice');
-		FormManager.addValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ], 'MAIN_CUST_TAB');
-		dojo.byId('ast-taxOffice').style.display = 'inline-block';
-	}
+    console.log("disableTaxOfficeTR..............");
+    var addressTypeValue = FormManager.getActualValue('addrType');
+    if(addressTypeValue == 'ZP01'){
+      FormManager.show('TaxOffice', 'taxOffice');
+      checkAndAddValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ]);
+    }else{
+      FormManager.hide('TaxOffice', 'taxOffice');
+      FormManager.removeValidator('taxOffice', Validators.REQUIRED);
+    }
   }
 }
 
@@ -3466,6 +3452,7 @@ function addHandlersForGRCYTR() {
         disableAddrFieldsGR();
         preFillTranslationAddrWithSoldToForGR();
         preFillTranslationAddrWithSoldToForTR();
+        disableTaxOfficeTR();
       });
     }
   }
@@ -3922,12 +3909,6 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
     // for cross border
     if (custType == 'CROSS' && cmr.currentRequestType == 'U') {
       FormManager.readOnly('landCntry');
-    }
-    // for Turkey - cross border or update request
-    if (cntryCd == SysLoc.TURKEY && (custType == 'CROSS' || cmr.currentRequestType == 'U')) {
-      FormManager.removeValidator('taxOffice', Validators.REQUIRED);
-    } else if (cntryCd == SysLoc.TURKEY) {
-      checkAndAddValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ]);
     }
     // for Turkey - cross border
     if (cntryCd == SysLoc.TURKEY && custType == 'CROSS') {
@@ -8319,13 +8300,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setDefaultValueForPreferredLanguage, [ SysLoc.TURKEY ]);
   // CMR-1804 Turkey - Fields values validations - ISU Default on UI
   GEOHandler.addAfterConfig(setDefaultValueForISU, [ SysLoc.TURKEY ]);
-
   GEOHandler.addAfterConfig(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
-  
-  GEOHandler.addAfterConfig(disableTaxOffice, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setTaxOfficeOnChange, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setTaxOfficeOnChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(disableTaxOfficeTR, [ SysLoc.TURKEY ]);
 
   // CMR-2093
 
