@@ -86,7 +86,7 @@ public class DPLCheckElement extends ValidatingElement {
           validation.setSuccess(false);
           output.setOnError(true);
           engineData.addRejectionComment("MAPP", "This is a CMR record with a DPL/Embargo Code.",
-              " ERC approval will be needed to process this request.", "");
+              " ERC approval will be needed to process this request.", "Processor");
           log.debug(
               "This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.Hence sending back to processor.");
           details.append(details.toString());
@@ -240,7 +240,7 @@ public class DPLCheckElement extends ValidatingElement {
         validation.setSuccess(false);
         output.setOnError(true);
         engineData.addRejectionComment("MAPP", "This is a CMR record with a DPL/Embargo Code.",
-            " ERC approval will be needed to process this request.", "");
+            " ERC approval will be needed to process this request.", "Processor");
         log.debug(
             "This is a CMR record with a DENIAL DPL Block Code. ERC approval will be needed to process this request.Hence sending back to processor.");
         details.append("This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.");

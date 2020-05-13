@@ -52,6 +52,10 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       throws Exception {
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
+    String zs01Kunnr = null ;
+    if(soldTo != null){
+      zs01Kunnr = StringUtils.isNotBlank(soldTo.getSapNo()) ? soldTo.getSapNo().substring(1) : null;
+    }
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     boolean matchDepartment = false;
@@ -168,8 +172,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                           + StringUtils.join(dupCMRNos, ", "));
                 } else {
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR",
-                      cmrCheckMatches.size() + " possible duplicate CMR(s) found with the same data.",
-                      "\n Duplicate CMR(s): " + StringUtils.join(dupCMRNos, ", "));
+                      "Duplicate CMR(s): " + StringUtils.join(dupCMRNos, ", "), zs01Kunnr);
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
                   result.setOnError(true);

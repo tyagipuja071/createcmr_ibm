@@ -79,6 +79,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     Addr soldTo = requestData.getAddress("ZS01");
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
+      String soldToKunnr = StringUtils.isNotBlank(soldTo.getSapNo()) ? soldTo.getSapNo().substring(1) : null;
       int itemNo = 1;
       // perform duplicate request check
       // check if eligible for vat matching
@@ -252,7 +253,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           engineData.addNegativeCheckStatus("dupAllowed",
               "There were possible duplicate CMRs/Requests found with the same data but allowed for the scenario.");
         } else {
-          engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs/Requests found with the same data.", "", "");
+          if (dupReqFound && !reqCheckMatches.isEmpty()) {
+            engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
+                StringUtils.join(reqCheckMatches, ", "), "");
+          } else if (dupCMRFound && !cmrCheckMatches.isEmpty()) {
+            engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
+                "Duplicate CMRs : " + StringUtils.join(cmrCheckMatches, ", "), "SOLD TO KUNNR : " + soldToKunnr);
+          }
           result.setOnError(true);
         }
         result.setProcessOutput(output);
