@@ -7,14 +7,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.openjpa.kernel.FillStrategy.Map;
+import org.codehaus.jackson.node.NodeCursor.Object;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
@@ -29,7 +29,6 @@ import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -641,34 +640,22 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(addr.getCustNm4())) {
-      if ("@".equals(addr.getCustNm4())) {
+    if (!StringUtils.isBlank(addr.getCustNm3())) {
+      if ("@".equals(addr.getCustNm3())) {
         legacyAddr.setAddrLine3("");
-        legacyAddr.setContact("");
+        // legacyAddr.setContact("");
       } else {
-        legacyAddr.setAddrLine3(addr.getCustNm4());
-        legacyAddr.setContact(addr.getCustNm4());
+        legacyAddr.setAddrLine3(addr.getCustNm3());
+        // legacyAddr.setContact(addr.getCustNm3());
       }
 
       if (legacyFiscalAddr != null) {
-        if ("@".equals(addr.getCustNm4())) {
+        if ("@".equals(addr.getCustNm3())) {
           legacyAddr.setAddrLine3("");
           legacyAddr.setContact("");
         } else {
-          legacyFiscalAddr.setAddrLine3("CL" + addr.getCustNm4());
-          legacyFiscalAddr.setContact(addr.getCustNm4());
-        }
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      if ("@".equals(addr.getAddrTxt2())) {
-        legacyAddr.setAddrLine3("");
-      } else {
-        legacyAddr.setAddrLine3(addr.getAddrTxt2());
-
-        if (legacyFiscalAddr != null) {
-          legacyFiscalAddr.setAddrLine3(addr.getAddrTxt2());
+          legacyFiscalAddr.setAddrLine3("CL" + addr.getCustNm3());
+          // legacyFiscalAddr.setContact(addr.getCustNm4());
         }
       }
     }
@@ -1091,38 +1078,34 @@ public class CEETransformer extends EMEATransformer {
       cust.setAbbrevNm(muData.getAbbrevNm());
     }
 
+    // RBBXA :Bank Branch Number
+    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+      if ("@".equals(muData.getRestrictTo())) {
+        cust.setBankBranchNo("");
+      } else {
+        cust.setBankBranchNo(muData.getNewEntpName1());
+      }
+    }
+
+    // RABXA :Bank Account Number
+    if (!StringUtils.isBlank(muData.getEmail2())) {
+      if ("@".equals(muData.getEmail2())) {
+        cust.setBankAcctNo("");
+      } else {
+        cust.setBankAcctNo(muData.getEmail2());
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
-    // CMR-1728/CMR-2093, we use RestrictTo to store CoF in
-    // muData
+
+    // we use RestrictTo to store CoF in muData
     if (!StringUtils.isBlank(muData.getRestrictTo())) {
       if ("@".equals(muData.getRestrictTo())) {
         cust.setModeOfPayment("");
       } else {
         cust.setModeOfPayment(muData.getRestrictTo());
-      }
-    }
-    // CMR-1728 we use CsoSite to store EconomicCode in muData
-    if (!StringUtils.isBlank(muData.getCsoSite())) {
-      if ("@".equals(muData.getCsoSite())) {
-        cust.setEconomicCd("");
-      } else {
-        cust.setEconomicCd(muData.getCsoSite());
-      }
-    }
-    // CMR-3059 use CurrencyCd to represent Type of Customer
-    if (!StringUtils.isBlank(muData.getCurrencyCd())) {
-      if ("@".equals(muData.getCurrencyCd())) {
-        cust.setCustType("");
-        cust.setMrcCd("3");
-      } else {
-        cust.setCustType(muData.getCurrencyCd());
-        if ("BP".equals(cust.getCustType())) {
-          cust.setMrcCd("5");
-        } else {
-          cust.setMrcCd("3");
-        }
       }
     }
 
@@ -1132,30 +1115,9 @@ public class CEETransformer extends EMEATransformer {
       cust.setIsuCd(isuClientTier);
     }
 
-    if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-      cust.setTaxCd(muData.getSpecialTaxCd());
-    }
-
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
       cust.setSalesRepNo(muData.getRepTeamMemberNo());
       cust.setSalesGroupRep(muData.getRepTeamMemberNo());
-    } else {
-      // CMR-2279:ISR set based on SBO
-      if (!StringUtils.isBlank(muData.getCustNm1())) {
-
-        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-        PreparedQuery q = new PreparedQuery(entityManager, sql);
-        q.setParameter("SBO", muData.getCustNm1());
-        q.setParameter("CNTRY", SystemLocation.TURKEY);
-        String isr = q.getSingleResult(String.class);
-        if (!StringUtils.isBlank(isr)) {
-          cust.setSalesRepNo(isr);
-          cmrObjects.getMassUpdateData().setRepTeamMemberNo(isr);
-        } else {
-          cust.setSalesRepNo("");
-          cmrObjects.getMassUpdateData().setRepTeamMemberNo("");
-        }
-      }
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
@@ -1166,25 +1128,30 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getCustNm2())) {
-      cust.setCeBo(muData.getCustNm2());
-    }
-
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getCustPhone())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
-              cust.setTelNoOrVat("");
-            } else {
-              cust.setTelNoOrVat(mua.getCustPhone());
-            }
-            break;
-          }
-        }
+    // Email1 used to store phone
+    if (!StringUtils.isBlank(muData.getEmail1())) {
+      if ("@".equals(muData.getEmail1())) {
+        cust.setTelNoOrVat("");
+      } else {
+        cust.setTelNoOrVat(muData.getEmail1());
       }
     }
+
+    // List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    // if (muaList != null && muaList.size() > 0) {
+    // for (MassUpdtAddr mua : muaList) {
+    // if ("ZP01".equals(mua.getId().getAddrType())) {
+    // if (!StringUtils.isBlank(mua.getCustPhone())) {
+    // if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
+    // cust.setTelNoOrVat("");
+    // } else {
+    // cust.setTelNoOrVat(mua.getCustPhone());
+    // }
+    // break;
+    // }
+    // }
+    // }
+    // }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
       if ("@".equals(muData.getCollectionCd())) {
@@ -1206,6 +1173,7 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
+    // SBO
     if (!StringUtils.isBlank(muData.getCustNm1())) {
       cust.setSbo(muData.getCustNm1());
       cust.setIbo(muData.getCustNm1());
@@ -1216,18 +1184,6 @@ public class CEETransformer extends EMEATransformer {
       } else {
         cust.setInacCd(muData.getInacCd());
       }
-    }
-
-    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if ("@".equals(muData.getMiscBillCd())) {
-        cust.setEmbargoCd("");
-      } else {
-        cust.setEmbargoCd(muData.getMiscBillCd());
-      }
-    }
-
-    if (!StringUtils.isBlank(muData.getOutCityLimit())) {
-      cust.setMailingCond(muData.getOutCityLimit());
     }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
@@ -1245,9 +1201,6 @@ public class CEETransformer extends EMEATransformer {
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
-    // CMR-2279 update massUpdateData
-    entityManager.merge(cmrObjects.getMassUpdateData());
-    entityManager.flush();
   }
 
   private void resetOrdBlockToData(EntityManager entityManager, Data data) {
