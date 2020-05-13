@@ -61,6 +61,23 @@ function addAfterConfigForSWISS() {
   if (reqType == 'C') {
     FormManager.readOnly('custNm3');
   }
+  
+  if(reqType == 'C' && (custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')){
+   FormManager.setValue("inacCd","");
+   FormManager.readOnly("inacCd");
+   FormManager.setValue("custClass","45");
+   FormManager.readOnly("custClass");
+  }
+  
+  if(reqType == 'C' && (custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM')){
+    FormManager.setValue("inacCd","");
+    FormManager.readOnly("inacCd");
+    FormManager.setValue("custClass","71");
+    FormManager.readOnly("custClass");
+    FormManager.setValue("vat","");
+    FormManager.readOnly("vat");
+   }
+
 
   setTaxCdFrCustClass();
   setClientTierValues();
