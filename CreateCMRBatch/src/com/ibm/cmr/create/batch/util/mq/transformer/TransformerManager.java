@@ -11,6 +11,7 @@ import com.ibm.cmr.create.batch.util.mq.transformer.impl.AustraliaTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.BELUXTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.BangladeshTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.BruneiTransformer;
+import com.ibm.cmr.create.batch.util.mq.transformer.impl.CEETransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.CEMEATransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.CEWATransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.CambodiaTransformer;
@@ -175,7 +176,7 @@ public class TransformerManager {
     addTransformer(new CEMEATransformer(SystemLocation.RUSSIAN_FEDERATION));
     addTransformer(new CEMEATransformer(SystemLocation.SAUDI_ARABIA));
     addTransformer(new CEMEATransformer(SystemLocation.SERBIA));
-    addTransformer(new CEMEATransformer(SystemLocation.SLOVAKIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.SLOVAKIA));
     addTransformer(new CEMEATransformer(SystemLocation.SLOVENIA));
     addTransformer(new CEMEATransformer(SystemLocation.SYRIAN_ARAB_REPUBLIC));
     addTransformer(new CEMEATransformer(SystemLocation.TAJIKISTAN));
@@ -195,6 +196,9 @@ public class TransformerManager {
     addTransformer(new BELUXTransformer(SystemLocation.BELGIUM));
     addTransformer(new NLTransformer(SystemLocation.NETHERLANDS));
     addTransformer(new TurkeyTransformer(SystemLocation.TURKEY));
+
+    // CEE - LD
+    addTransformer(new CEETransformer(SystemLocation.SLOVAKIA));
   }
 
   /**
