@@ -293,6 +293,13 @@ public class USUtil extends AutomationUtil {
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
+      if (BYMODEL.equals(scenarioSubType)) {
+        try {
+          scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
+        } catch (Exception e) {
+          LOG.error("CMR Scenario for Create by model request could not be determined.", e);
+        }
+      }
     }
 
     if (Arrays.asList(scenarioList).contains(scenarioSubType)) {
