@@ -66,6 +66,7 @@ public class DPLCheckElement extends ValidatingElement {
 
       Data data = requestData.getData();
       Admin admin = requestData.getAdmin();
+      Scorecard scorecard = requestData.getScorecard();
 
       if (data != null) {
         geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
@@ -96,10 +97,20 @@ public class DPLCheckElement extends ValidatingElement {
           return output;
         }
 
-        validation.setSuccess(true);
-        validation.setMessage("No DPL check needed.");
-        output.setResults("No DPL check needed.");
-        output.setDetails("DPL check already completed for all addresses. No DPL check needed.");
+        if (StringUtils.isNotEmpty(scorecard.getDplChkResult())
+            && ("AF".equals(scorecard.getDplChkResult()) || "SF".equals(scorecard.getDplChkResult()))) {
+          validation.setSuccess(false);
+          output.setOnError(true);
+          engineData.addRejectionComment("ADDR", "DPL check failed for one or more addresses on the request.", "DPL check failed", "");
+          validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
+          output.setResults(validation.getMessage());
+          output.setDetails("DPL check failed for one or more addresses on the request.");
+        } else {
+          validation.setSuccess(true);
+          validation.setMessage("No DPL check needed.");
+          output.setResults("No DPL check needed.");
+          output.setDetails("DPL check already completed for all addresses. No DPL check needed.");
+        }
         output.setProcessOutput(validation);
         return output;
       }
@@ -205,7 +216,7 @@ public class DPLCheckElement extends ValidatingElement {
       // compute the overall score
       recomputeDPLResult(user, entityManager, requestData);
 
-      Scorecard scorecard = requestData.getScorecard();
+      // Scorecard scorecard = requestData.getScorecard();
 
       switch (scorecard.getDplChkResult()) {
       case "NR":
