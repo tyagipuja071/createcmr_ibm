@@ -222,63 +222,65 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(scenarioSubType)) {
         scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
       }
-    }
-    LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
-    // computation start
-    if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
-      for (USBranchOffcMapping mapping : boMappings) {
-        if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
-          String csoSite = mapping.getCsoSite(entityManager, requestData);
-          String mktgDept = mapping.getMktgDept(entityManager, requestData);
-          String mtkgArDept = mapping.getMtkgArDept(entityManager, requestData);
-          String svcArOffice = mapping.getSvcArOffice(entityManager, requestData);
-          String pccArDept = mapping.getPccArDept(entityManager, requestData);
+      LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
+      // computation start
+      if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
+        for (USBranchOffcMapping mapping : boMappings) {
+          if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
+            String csoSite = mapping.getCsoSite(entityManager, requestData);
+            String mktgDept = mapping.getMktgDept(entityManager, requestData);
+            String mtkgArDept = mapping.getMtkgArDept(entityManager, requestData);
+            String svcArOffice = mapping.getSvcArOffice(entityManager, requestData);
+            String pccArDept = mapping.getPccArDept(entityManager, requestData);
 
-          details.append("Setting Fields based on US Scenarios:").append("\n");
-          details.append("CSO Site = " + csoSite).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CSO_SITE", data.getCsoSite(), csoSite);
+            details.append("Setting Fields based on US Scenarios:").append("\n");
+            details.append("CSO Site = " + csoSite).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CSO_SITE", data.getCsoSite(), csoSite);
 
-          details.append("Marketing Department = " + mktgDept).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MKTG_DEPT", data.getMktgDept(), mktgDept);
+            details.append("Marketing Department = " + mktgDept).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MKTG_DEPT", data.getMktgDept(), mktgDept);
 
-          details.append("Marketing A/R Department = " + mtkgArDept).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), mtkgArDept);
+            details.append("Marketing A/R Department = " + mtkgArDept).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), mtkgArDept);
 
-          details.append("SVC A/R Office = " + svcArOffice).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
+            details.append("SVC A/R Office = " + svcArOffice).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
 
-          details.append("PCC A/R Department = " + pccArDept).append("\n");
-          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
+            details.append("PCC A/R Department = " + pccArDept).append("\n");
+            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
 
-          if (StringUtils.isNotBlank(csoSite) && StringUtils.isNotBlank(mktgDept) && StringUtils.isNotBlank(mtkgArDept)
-              && StringUtils.isNotBlank(svcArOffice) && StringUtils.isNotBlank(pccArDept)) {
-            boCodesCalculated = true;
+            if (StringUtils.isNotBlank(csoSite) && StringUtils.isNotBlank(mktgDept) && StringUtils.isNotBlank(mtkgArDept)
+                && StringUtils.isNotBlank(svcArOffice) && StringUtils.isNotBlank(pccArDept)) {
+              boCodesCalculated = true;
+            }
+            break;
           }
-          break;
         }
       }
-    }
 
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
-      details.append("Branch Office codes computed by another element/external process.");
-    } else if (boCodesCalculated) {
-      details.append("Branch Office codes computed successfully.");
-    } else if (INTERNAL.equals(scenarioSubType)) {
-      if (SC_BYMODEL.equals(data.getCustSubGrp())) {
-        details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
+      if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
+        details.append("Branch Office codes computed by another element/external process.");
+      } else if (boCodesCalculated) {
+        details.append("Branch Office codes computed successfully.");
+      } else if (INTERNAL.equals(scenarioSubType)) {
+        if (SC_BYMODEL.equals(data.getCustSubGrp())) {
+          details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
+        } else {
+          details.append("Skipping calculation of Branch Office codes because the request is of INTERNAL Scenario.");
+        }
       } else {
-        details.append("Skipping calculation of Branch Office codes because the request is of INTERNAL Scenario.");
+        details.append("Branch Office codes could not be computed for this scenario.");
+        engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
+
       }
-    } else {
-      details.append("Branch Office codes could not be computed for this scenario.");
-      engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
-
-    }
-
-    // if scenario is OEMSW or OEMHW set isic to 357X
-    if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType)) {
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
+      // if scenario is OEMSW or OEMHW set isic to 357X
+      if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType)) {
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
+      }
+    } else if ("U".equals(admin.getReqType())) {
+      eleResults.append("Skipped");
+      details.append("Skipping BO codes computations for update requests.");
     }
 
     if (results == null || (results != null && results.isOnError())) {
@@ -348,7 +350,7 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    if (query.exists()) {
+    if (query.exists() && !"Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECKS_FOR_CMDE"))) {
       // skip checks if requester is from USCMDE team
       LOG.debug("Requester is from US CMDE team, skipping update checks.");
       output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
@@ -710,7 +712,7 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    if (query.exists()) {
+    if (query.exists() && !"Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECKS_FOR_CMDE"))) {
       // skip checks if requester is from USCMDE team
       validation.setSuccess(true);
     } else {
