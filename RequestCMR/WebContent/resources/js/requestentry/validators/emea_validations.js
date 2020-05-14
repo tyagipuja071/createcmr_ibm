@@ -3000,7 +3000,7 @@ function addGRAddressTypeValidator() {
               mismatchFields = getMismatchFields(zs01Data, zp01Data, true);
             }
             if (mismatchFields != '') {
-              return new ValidationResult(null, false, 'Sold-to mismatch, please update Language translation of Sold-to: ' + mismatchFields);
+              return new ValidationResult(null, false, 'Sold-to mismatch, please update Local Language translation of Sold-to: ' +  mismatchFields);	  
             }
           }
 
@@ -3201,19 +3201,20 @@ var _addrSelectionHistGR = '';
 function preFillTranslationAddrWithSoldToForGR(cntry, addressMode, saving) {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     var custType = FormManager.getActualValue('custGrp');
+
     // for local don't proceed
-    if (custType == 'LOCAL') {
-      return;
-    }
-    if (!saving) {
-      if (FormManager.getActualValue('addrType') == 'ZP01') {
-        populateTranslationAddrWithSoldToData();
-      } else if (FormManager.getActualValue('addrType') != 'ZP01' && addressMode != 'updateAddress' && _addrSelectionHistGR == 'ZP01') {
-        // clear address fields when switching
-        clearAddrFieldsForGR();
-      }
-    }
-    _addrSelectionHistGR = FormManager.getActualValue('addrType');
+	if (custType == 'LOCAL' || cmr.addressMode == 'copyAddress') {
+	  return;
+	}
+	if(!saving) {
+	  if (FormManager.getActualValue('addrType') == 'ZP01') {
+	    populateTranslationAddrWithSoldToData();	
+	  } else if (FormManager.getActualValue('addrType') != 'ZP01' && addressMode != 'updateAddress' && _addrSelectionHistGR == 'ZP01'){
+	    // clear address fields when switching
+	    clearAddrFieldsForGR();
+	  }  
+	}
+	_addrSelectionHistGR = FormManager.getActualValue('addrType');
   }
 }
 
@@ -3587,6 +3588,7 @@ function setFieldsBehaviourGR() {
     FormManager.resetValidations('repTeamMemberNo');
     FormManager.resetValidations('isuCd');
     FormManager.resetValidations('clientTier');
+    FormManager.readOnly('custPrefLang');
   }
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
