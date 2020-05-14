@@ -257,7 +257,7 @@ function disableTaxOfficeTR() {
     if (addressTypeValue == 'ZP01') {
       FormManager.show('TaxOffice', 'taxOffice');
       var custType = FormManager.getActualValue('custGrp');
-      if(custType == 'CROSS' || FormManager.getActualValue('reqType') == 'U'){
+      if(custType == 'CROSS' || cmr.currentRequestType == 'U'){
         FormManager.removeValidator('taxOffice', Validators.REQUIRED);
       }else{
         checkAndAddValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ]);
