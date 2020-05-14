@@ -58,7 +58,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
     rejCon.setRejCode(code);
     rejCon.setRejComment(comment);
     rejCon.setSupplInfo1(supplInf1);
-    rejCon.setSupplInfo2(supplInf1);
+    rejCon.setSupplInfo2(supplInf2);
     rejComments.add(rejCon);
   }
 
