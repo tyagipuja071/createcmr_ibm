@@ -122,15 +122,15 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
     String custGrp = data.getCustGrp();
     String custSubGrp = data.getCustSubGrp();
-    if ("BYMODEL".equals(data.getCustGrp())) {
-      if (!"E".equals(data.getBpAcctTyp())
+    if ("BYMODEL".equals(custSubGrp)) {
+      String type = admin.getCustType();
+      if (!USUtil.THIRD_P_BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
           || (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
         output.setResults("Skipped");
         output.setDetails("Non BP End User scenario not supported.");
         return output;
       }
-    }
-    if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
+    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
       output.setResults("Skipped");
       output.setDetails("Non BP End User scenario not supported.");
       return output;
