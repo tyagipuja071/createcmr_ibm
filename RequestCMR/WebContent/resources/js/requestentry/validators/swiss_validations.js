@@ -61,23 +61,38 @@ function addAfterConfigForSWISS() {
   if (reqType == 'C') {
     FormManager.readOnly('custNm3');
   }
-  
-  if(reqType == 'C' && (custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')){
-   FormManager.setValue("inacCd","");
-   FormManager.readOnly("inacCd");
-   FormManager.setValue("custClass","45");
-   FormManager.readOnly("custClass");
-  }
-  
-  if(reqType == 'C' && (custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM')){
-    FormManager.setValue("inacCd","");
-    FormManager.readOnly("inacCd");
-    FormManager.setValue("custClass","71");
-    FormManager.readOnly("custClass");
-    FormManager.setValue("vat","");
-    FormManager.readOnly("vat");
-   }
 
+  if (reqType == 'C' && (custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')) {
+    FormManager.setValue("inacCd", "");
+    FormManager.readOnly("inacCd");
+    FormManager.setValue("custClass", "45");
+    FormManager.readOnly("custClass");
+  }
+
+  if (reqType == 'C' && (custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM')) {
+    FormManager.setValue("inacCd", "");
+    FormManager.readOnly("inacCd");
+    FormManager.setValue("custClass", "71");
+    FormManager.readOnly("custClass");
+    FormManager.setValue("vat", "");
+    FormManager.readOnly("vat");
+  }
+
+  // Lock vat,inac,kukla for internal
+  if (reqType == 'C' && (custSubGrp == 'CHINT' || custSubGrp == 'LIINT')) {
+    FormManager.setValue("vat", "");
+    FormManager.readOnly("vat");
+    FormManager.setValue("custClass", "81");
+    FormManager.readOnly("custClass");
+    FormManager.setValue("inacCd", "");
+    FormManager.readOnly("inacCd");
+
+  }
+  // Lock for customer class code for local govt.
+  if (reqType == 'C' && (custSubGrp == 'CHGOV' || custSubGrp == 'LIGOV')) {
+    FormManager.setValue('custClass', '12');
+    FormManager.readOnly('custClass');
+  }
 
   setTaxCdFrCustClass();
   setClientTierValues();
@@ -848,7 +863,6 @@ function setFieldsMandtStatus() {
 
   if (reqType == 'C') {
     FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Customer Class' ], 'MAIN_CUST_TAB');
-    FormManager.enable('custClass');
     if (custSubGrp) {
       FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU' ], 'MAIN_IBM_TAB');
       FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier Code' ], 'MAIN_IBM_TAB');
@@ -1072,7 +1086,7 @@ function setCustClassCd() {
     case 'CHGOV':
     case 'LIGOV':
     case 'XCHGV':
-      FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '12', '13', '14', '17', '24' ]);
+      FormManager.limitDropdownValues(FormManager.getField('custClass'), [ '12' ]);
       break;
 
     case 'CHBUS':
