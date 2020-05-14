@@ -254,11 +254,19 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
               "There were possible duplicate CMRs/Requests found with the same data but allowed for the scenario.");
         } else {
           if (dupReqFound && !reqCheckMatches.isEmpty()) {
+            List<String> reqsList = new ArrayList<String>();
+            for (ReqCheckResponse reqChkRep : reqCheckMatches) {
+              reqsList.add(Long.toString(reqChkRep.getReqId()));
+            }
             engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
-                StringUtils.join(reqCheckMatches, ", "), "");
+                StringUtils.join(reqsList, ", "), "");
           } else if (dupCMRFound && !cmrCheckMatches.isEmpty()) {
+            List<String> cmrsList = new ArrayList<String>();
+            for (DuplicateCMRCheckResponse cmrChkRep : cmrCheckMatches) {
+              cmrsList.add(cmrChkRep.getCmrNo());
+            }
             engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
-                "Duplicate CMRs : " + StringUtils.join(cmrCheckMatches, ", "), "SOLD TO KUNNR : " + soldToKunnr);
+                "Duplicate CMRs : " + StringUtils.join(cmrsList, ", "), "SOLD TO KUNNR : " + soldToKunnr);
           }
           result.setOnError(true);
         }
