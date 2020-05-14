@@ -89,7 +89,8 @@ public abstract class AutomationUtil {
     }
   };
 
-  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", " CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC");
+  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", " CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
+      "INCORPORATED");
 
   /**
    * Holds the possible return values of
@@ -647,14 +648,14 @@ public abstract class AutomationUtil {
     }
 
     for (String gblEnding : GLOBAL_LEGAL_ENDINGS) {
-      if (name.contains(gblEnding)) {
+      if (name.toUpperCase().contains(gblEnding)) {
         return true;
       }
     }
     List<String> extendedEndings = getCountryLegalEndings();
     if (extendedEndings != null) {
       for (String cntryEnding : extendedEndings) {
-        if (name.contains(cntryEnding)) {
+        if (name.toUpperCase().contains(cntryEnding)) {
           return true;
         }
       }
