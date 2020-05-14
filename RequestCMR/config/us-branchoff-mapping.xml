@@ -114,7 +114,7 @@
 		<pccArDept>G8M</pccArDept>
 	</mapping>
 	<mapping>
-		<scenario>GRANTS</scenario>
+		<scenario>GRNTS</scenario>
 		<csoSite>request</csoSite>
 		<mktgDept>request</mktgDept>
 		<mtkgArDept>request</mtkgArDept>
@@ -393,6 +393,14 @@
 		<mtkgArDept>28W</mtkgArDept>
 		<svcArOffice>28W</svcArOffice>
 		<pccArDept>2CC</pccArDept>
+	</mapping>
+	<mapping>
+		<scenario>FEDSTATE</scenario>
+		<csoSite>PAH</csoSite>
+		<mktgDept>SVB</mktgDept>
+		<mtkgArDept>logic</mtkgArDept>
+		<svcArOffice>logic</svcArOffice>
+		<pccArDept>G8M</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>POA</scenario>
