@@ -174,7 +174,7 @@ public class USBranchOffcMapping {
       if (USUtil.SC_BYMODEL.equals(data.getCustSubGrp())
           && !(USUtil.SC_FED_REGULAR.equals(scenario) || USUtil.SC_FED_POA.equals(scenario) || USUtil.SC_REST_OIO.equals(scenario))) {
         USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, admin.getModelCmrNo());
-        if ("5AA".equalsIgnoreCase(data.getPccArDept())) {
+        if ("5AA".equalsIgnoreCase(usDetails.getPccArDept())) {
           calculatedPccArDept = "G8M";
         } else {
           calculatedPccArDept = usDetails.getPccArDept();
@@ -293,7 +293,7 @@ public class USBranchOffcMapping {
             Map<String, Object> record = response.getRecords().get(0);
             calculatedMtkgArDept = (String) record.get("I_CUST_OFF_3");
           }
-        } else if (StringUtils.isBlank(mtkgArDept)) {
+        } else if (StringUtils.isBlank(calculatedMtkgArDept)) {
           String indToMatch = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd().substring(0, 1);
           // iterate and display values
           for (Entry<String, List<String>> entry : indARBOMap.entrySet()) {
