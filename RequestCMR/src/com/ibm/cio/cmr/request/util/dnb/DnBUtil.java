@@ -451,10 +451,17 @@ public class DnBUtil {
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8) {
       result = false;
     }
-    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())
-        && StringUtils.getLevenshteinDistance(addr.getPostCd().toUpperCase(), dnbRecord.getDnbPostalCode().toUpperCase()) > 2) {
-      result = false;
+    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
+      String currentPostalCode = addr.getPostCd();
+      String dnbPostalCode = dnbRecord.getDnbPostalCode();
+      if (currentPostalCode.length() != dnbPostalCode.length()) {
+        result = calAlignPostalCodeLength(currentPostalCode, dnbPostalCode);
+      }
+      if (currentPostalCode.length() == dnbPostalCode.length()) {
+        result = isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode);
+      }
     }
+
     if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
         && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
       result = false;
@@ -594,6 +601,33 @@ public class DnBUtil {
       response = mapper.readValue(json, ref);
     }
     return response;
+  }
+
+  private static boolean calAlignPostalCodeLength(String currPostalCd, String dnBPostalCd) {
+    String shortPostalCd = "";
+    currPostalCd = currPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    dnBPostalCd = dnBPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    boolean res = true;
+    if (currPostalCd.length() > dnBPostalCd.length()) {
+      shortPostalCd = currPostalCd.substring(0, dnBPostalCd.length());
+      currPostalCd = shortPostalCd;
+    } else {
+      shortPostalCd = dnBPostalCd.substring(0, currPostalCd.length());
+      dnBPostalCd = shortPostalCd;
+    }
+    LOG.debug("Shortned postal code= " + shortPostalCd);
+    res = isPostalCdCloselyMatchesDnB(currPostalCd, dnBPostalCd);
+    return res;
+  }
+
+  private static boolean isPostalCdCloselyMatchesDnB(String currPostalCd, String dnBPostalCd) {
+    boolean res = true;
+    if (dnBPostalCd.length() <= 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 2) {
+      res = false;
+    } else if (dnBPostalCd.length() > 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 3) {
+      res = false;
+    }
+    return res;
   }
 
 }

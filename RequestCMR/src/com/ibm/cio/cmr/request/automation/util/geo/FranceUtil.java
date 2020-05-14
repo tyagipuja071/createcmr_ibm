@@ -135,6 +135,8 @@ public class FranceUtil extends AutomationUtil {
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    String zs01Kunnr = StringUtils.isNotBlank(zs01.getSapNo()) ? zs01.getSapNo().substring(1) : null;
+
     Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
@@ -179,7 +181,7 @@ public class FranceUtil extends AutomationUtil {
                 engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR.",
                     "The " + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
                         + " already has a record with CMR No. " + duplicateCMRNo,
-                    "");
+                    "SOLD-TO KUNNR : " + zs01Kunnr);
                 valid = false;
               } else {
                 details.append("No Duplicate CMRs were found with Name: " + name);

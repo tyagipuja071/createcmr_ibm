@@ -55,6 +55,7 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 /**
  * 
  * @author Rangoli Saxena
+ * @author RoopakChugh
  *
  */
 
@@ -63,12 +64,22 @@ public class USUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(USUtil.class);
   // Customer Type
   public static final String COMMERCIAL = "1";
-  public static final String STATE_LOCAL = "2";
-  public static final String LEASING = "3";
-  public static final String FEDERAL = "4";
-  public static final String INTERNAL = "5";
-  public static final String POWER_OF_ATTORNEY = "6";
-  public static final String BUSINESS_PARTNER = "7";
+  public static final String COMMERCIAL_FRANCHISE = "2";
+  public static final String COMMERCIAL_RESTRICTED = "3";
+  public static final String COMMERCIAL_REST_DEALER = "4";
+  public static final String THIRD_P_BUSINESS_PARTNER = "5";
+  public static final String THIRD_P_LEASING = "6";
+  public static final String STATE_LOCAL = "7";
+  public static final String STATE_LOCAL_PUBLIC = "8";
+  public static final String FEDERAL = "9";
+  public static final String FEDERAL_INDIAN = "10";
+  public static final String FEDERAL_ALASKA = "11";
+  public static final String IGS = "12";
+  public static final String INTERNAL = "13";
+  public static final String BY_MODEL = "14";
+
+  // addtional scenarios for determination
+  public static final String POWER_OF_ATTORNEY = "POA";
 
   // COMMERCIAL SUB_SCENARIOS
   public static final String SC_COMM_REGULAR = "REGULAR";
@@ -134,68 +145,14 @@ public class USUtil extends AutomationUtil {
   public static final String SC_BP_DEVELOP = "DEVELOP";
   public static final String SC_BP_E_HOST = "E-HOST";
 
-  public static String[] INDUSTRY_OCA = { "A", "U", "K", "B", "C" };
-  public static String[] INDUSTRY_WYK = { "J", "V", "L", "P", "M" };
-  public static String[] INDUSTRY_YUC = { "Y", "G", "E", "H", "X" };
-  public static String[] INDUSTRY_1QP = { "W" };
-  public static String[] INDUSTRY_WYL = { "R", "D", "W", "T" };
-  public static String[] INDUSTRY_WYR = { "F", "S", "N" };
-  public static Map<String, List<String>> indARBOMap = new HashMap<String, List<String>>();
+  public static final String SC_BYMODEL = "BYMODEL";
+
+  public static final String RESTRICT_TO_END_USER = "BPQS";
+  public static final String RESTRICT_TO_MAINTENANCE = "IRCSO";
+
   public static List<USBranchOffcMapping> svcARBOMappings = new ArrayList<USBranchOffcMapping>();
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
-  public static Map<String, List<String>> stateMktgDepMap = new HashMap<String, List<String>>();
-
   private static Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
-
-  public static String[] COMP_NO_LIST = { "12526663", "12464170", "12539858", "12489905", "12469039", "12329586", "12393039", "12118585", "11206715",
-      "12148960", "12501750", "12528315", "12126752", "12232055", "12543418", "12532055", "12550434", "12518669", "12411167", "12236746", "11873808",
-      "12489906", "12370209", "12404472", "11833282", "12262214", "12390240", "12323063", "12234259", "12489908", "12558232", "12368779", "12535192",
-      "12579643", "10782401", "12436301", "11363167" };
-
-  public static String[] STATE_K9Y = { "CT", "DE", "ME", "MA", "NH", "NJ", "NY", "RI", "VT" };
-  public static String[] STATE_M3B = { "IL", "IA", "IN", "KY", "MI", "MN", "NE", "ND", "OH", "SD", "WV", "WI" };
-  public static String[] STATE_S6H = { "MD", "DC", "VA" };
-  public static String[] STATE_K9W = { "AL", "FL", "GA", "MS", "NC", "SC", "TN" };
-  public static String[] STATE_M3A = { "AR", "CO", "KS", "LA", "NM", "OK", "TX", "WY", "PR", "VI" };
-  public static String[] STATE_S6G = { "AZ", "CA", "CZ", "ID", "MT", "NV", "OR", "UT", "WA", "AK", "HI", "GU", "AS", "FM", "MH", "MP", "PW", "AP",
-      "AE", "AA" };
-
-  public static String[] STATE_MO_M3A = { "001", "003", "005", "007", "009", "011", "013", "015", "019", "021", "025", "027", "029", "033", "037",
-      "039", "041", "043", "047", "049", "051", "053", "055", "057", "059", "061", "063", "065", "067", "073", "075", "077", "079", "081", "083",
-      "085", "087", "089", "091", "095", "097", "101", "103", "107", "109", "115", "117", "119", "121", "125", "129", "131", "135", "137", "139",
-      "141", "145", "147", "149", "151", "153", "157", "159", "161", "163", "165", "167", "169", "171", "173", "175", "177", "179", "181", "183",
-      "185", "186", "187", "189", "195", "197", "199", "201", "203", "205", "207", "209", "211", "213", "215", "217", "219", "221", "223", "225",
-      "227", "229", "510" };
-
-  public static String[] STATE_MO_M3B = { "017", "023", "031", "035", "045", "069", "071", "093", "099", "105", "111", "113", "123", "127", "133",
-      "143", "155" };
-
-  public static String[] STATE_PA_K9Y = { "001", "011", "015", "017", "023", "025", "027", "029", "035", "037", "041", "043", "045", "047", "053",
-      "055", "057", "061", "067", "069", "071", "075", "077", "079", "081", "083", "087", "089", "091", "093", "095", "097", "099", "101", "103",
-      "105", "107", "109", "113", "115", "117", "119", "123", "127", "131", "133" };
-
-  public static String[] STATE_PA_M3B = { "003", "005", "007", "009", "013", "019", "021", "031", "033", "039", "049", "051", "059", "063", "065",
-      "073", "085", "111", "121", "125", "129" };
-
-  static {
-    // create map to store mktg AR Dept and industry mapping
-    LOG.debug("US - creating map to store mktg AR Dept and industry mapping");
-    indARBOMap.put("OCA", Arrays.asList(INDUSTRY_OCA));
-    indARBOMap.put("WYK", Arrays.asList(INDUSTRY_WYK));
-    indARBOMap.put("YUC", Arrays.asList(INDUSTRY_YUC));
-    indARBOMap.put("1QP", Arrays.asList(INDUSTRY_1QP));
-    indARBOMap.put("WYL", Arrays.asList(INDUSTRY_WYL));
-    indARBOMap.put("WYR", Arrays.asList(INDUSTRY_WYR));
-
-    // create map to store mktg Dept and state mapping
-    LOG.debug("US - creating map to store mktg Dept and state mapping");
-    stateMktgDepMap.put("K9Y", Arrays.asList(STATE_K9Y));
-    stateMktgDepMap.put("M3B", Arrays.asList(STATE_M3B));
-    stateMktgDepMap.put("S6H", Arrays.asList(STATE_S6H));
-    stateMktgDepMap.put("K9W", Arrays.asList(STATE_K9W));
-    stateMktgDepMap.put("M3A", Arrays.asList(STATE_M3A));
-    stateMktgDepMap.put("S6G", Arrays.asList(STATE_S6G));
-  }
 
   @SuppressWarnings("unchecked")
   public USUtil() {
@@ -255,108 +212,67 @@ public class USUtil extends AutomationUtil {
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     // get request admin and data
-    long reqId = requestData.getAdmin().getId().getReqId();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     StringBuilder eleResults = new StringBuilder();
-    ArrayList<String> scenarioList = new ArrayList<String>();
     String scenarioSubType = "";
-
+    boolean boCodesCalculated = false;
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
-      if ("BYMODEL".equals(scenarioSubType)) {
-        scenarioSubType = determineCustScenario(entityManager, requestData, engineData);
+      if (SC_BYMODEL.equals(scenarioSubType)) {
+        scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
       }
     }
-    LOG.debug("US : Performing field computations for req_id : " + reqId);
+    LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
     // computation start
-    if (!boMappings.isEmpty()) {
+    if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
       for (USBranchOffcMapping mapping : boMappings) {
-        scenarioList.add((StringUtils.isBlank(mapping.getScenario()) ? "" : mapping.getScenario()));
-      }
-      if (StringUtils.isNotBlank(scenarioSubType) && scenarioList != null && scenarioList.contains(scenarioSubType)) {
-        for (USBranchOffcMapping mapping : boMappings) {
-          if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
-            String csoSite = "";
-            String mktgDept = "";
-            String mtkgArDept = "";
-            String svcArOffice = "";
-            String pccArDept = "";
+        if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
+          String csoSite = mapping.getCsoSite(entityManager, requestData);
+          String mktgDept = mapping.getMktgDept(entityManager, requestData);
+          String mtkgArDept = mapping.getMtkgArDept(entityManager, requestData);
+          String svcArOffice = mapping.getSvcArOffice(entityManager, requestData);
+          String pccArDept = mapping.getPccArDept(entityManager, requestData);
 
-            csoSite = ("request".equalsIgnoreCase(mapping.getCsoSite())) ? ((StringUtils.isBlank(data.getCsoSite()) ? "" : data.getCsoSite()))
-                : ((StringUtils.isBlank(mapping.getCsoSite()) ? "" : mapping.getCsoSite()));
+          details.append("Setting Fields based on US Scenarios:").append("\n");
+          details.append("CSO Site = " + csoSite).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CSO_SITE", data.getCsoSite(), csoSite);
 
-            if (!"logic".equalsIgnoreCase(mapping.getMktgDept())) {
-              mktgDept = ("request".equalsIgnoreCase(mapping.getMktgDept())) ? ((StringUtils.isBlank(data.getMktgDept()) ? "" : data.getMktgDept()))
-                  : ((StringUtils.isBlank(mapping.getMktgDept()) ? "" : mapping.getMktgDept()));
-            } else {
-              mktgDept = getMktgDept(entityManager, requestData, engineData, scenarioSubType);
-            }
+          details.append("Marketing Department = " + mktgDept).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MKTG_DEPT", data.getMktgDept(), mktgDept);
 
-            if (!"logic".equalsIgnoreCase(mapping.getMtkgArDept())) {
-              mtkgArDept = ("request".equalsIgnoreCase(mapping.getMtkgArDept()))
-                  ? ((StringUtils.isBlank(data.getMtkgArDept()) ? "" : data.getMtkgArDept()))
-                  : ((StringUtils.isBlank(mapping.getMtkgArDept()) ? "" : mapping.getMtkgArDept()));
-            } else {
-              mtkgArDept = getMtkgArDept(entityManager, requestData, engineData, scenarioSubType);
-            }
+          details.append("Marketing A/R Department = " + mtkgArDept).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), mtkgArDept);
 
-            if (!"logic".equalsIgnoreCase(mapping.getSvcArOffice())) {
-              svcArOffice = ("request".equalsIgnoreCase(mapping.getSvcArOffice()))
-                  ? ((StringUtils.isBlank(data.getSvcArOffice()) ? "" : data.getSvcArOffice()))
-                  : ((StringUtils.isBlank(mapping.getSvcArOffice()) ? "" : mapping.getSvcArOffice()));
-            } else {
-              svcArOffice = getSvcArOffice(entityManager, requestData, engineData, mtkgArDept);
-            }
+          details.append("SVC A/R Office = " + svcArOffice).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
 
-            if ("BYMODEL".equals(data.getCustSubGrp())) {
-              USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
-              if ("5AA".equalsIgnoreCase(usDetails.getPccArDept())) {
-                pccArDept = "G8M";
-              } else {
-                pccArDept = StringUtils.isNotBlank(usDetails.getPccArDept()) ? usDetails.getPccArDept() : "";
-              }
-            } else {
-              if (!"logic".equalsIgnoreCase(mapping.getPccArDept())) {
-                pccArDept = ("request".equalsIgnoreCase(mapping.getPccArDept()))
-                    ? ((StringUtils.isBlank(data.getPccArDept()) ? "" : data.getPccArDept()))
-                    : ((StringUtils.isBlank(mapping.getPccArDept()) ? "" : mapping.getPccArDept()));
-              } else {
-                pccArDept = getPccArDept(entityManager, requestData, engineData);
-              }
-            }
+          details.append("PCC A/R Department = " + pccArDept).append("\n");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
 
-            details.append("\nSetting Fields based on US Scenarios:");
-            details.append("\nCSO Site = " + csoSite);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CSO_SITE", data.getCsoSite(), csoSite);
-
-            details.append("\nMarketing Department = " + mktgDept);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MKTG_DEPT", data.getMktgDept(), mktgDept);
-
-            details.append("\nMarketing A/R Department = " + mtkgArDept);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), mtkgArDept);
-
-            details.append("\nSVC A/R Office = " + svcArOffice);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
-
-            details.append("\nPCC A/R Department = " + pccArDept);
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
-
-            if (StringUtils.isNotBlank(csoSite) && StringUtils.isNotBlank(mktgDept) && StringUtils.isNotBlank(mtkgArDept)
-                && StringUtils.isNotBlank(pccArDept)) {
-              break;
-            }
-
+          if (StringUtils.isNotBlank(csoSite) && StringUtils.isNotBlank(mktgDept) && StringUtils.isNotBlank(mtkgArDept)
+              && StringUtils.isNotBlank(svcArOffice) && StringUtils.isNotBlank(pccArDept)) {
+            boCodesCalculated = true;
           }
-        }
-      } else {
-        if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
-          details.append("Branch Office codes computed by another element/external process.");
-        } else {
-          details.append("Automatic computation of Branch Office codes cannot be done for this scenario.");
-          engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
+          break;
         }
       }
+    }
+
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
+      details.append("Branch Office codes computed by another element/external process.");
+    } else if (boCodesCalculated) {
+      details.append("Branch Office codes computed successfully.");
+    } else if (INTERNAL.equals(scenarioSubType)) {
+      if (SC_BYMODEL.equals(data.getCustSubGrp())) {
+        details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
+      } else {
+        details.append("Skipping calculation of Branch Office codes because the request is of INTERNAL Scenario.");
+      }
+    } else {
+      details.append("Branch Office codes could not be computed for this scenario.");
+      engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
+
     }
 
     // if scenario is OEMSW or OEMHW set isic to 357X
@@ -365,9 +281,7 @@ public class USUtil extends AutomationUtil {
       overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
     }
 
-    if (results != null && !results.isOnError()) {
-
-    } else {
+    if (results == null || (results != null && results.isOnError())) {
       eleResults.append("Error On Field Calculation.");
     }
     // computation end
@@ -378,126 +292,6 @@ public class USUtil extends AutomationUtil {
     return results;
   }
 
-  private String getPccArDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    String pccArDept = "";
-    // get request admin and data
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
-    String scenarioSubType = "";
-    if ("C".equals(admin.getReqType()) && data != null) {
-      scenarioSubType = data.getCustSubGrp();
-    }
-    if ("BYMODEL".equals(scenarioSubType)) {
-      if ("5AA".equalsIgnoreCase(data.getPccArDept())) {
-        pccArDept = "G8M";
-      } else {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
-        pccArDept = usDetails.getPccArDept();
-      }
-    }
-    return pccArDept;
-  }
-
-  private String getMktgDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String scenarioSubType)
-      throws Exception {
-    String mktgDept = "";
-    Addr installAt = requestData.getAddress("ZI01");
-    String stateToMatch = "";
-    String countyToMatch = "";
-
-    if (installAt != null) {
-      stateToMatch = StringUtils.isBlank(installAt.getStateProv()) ? "" : installAt.getStateProv();
-      countyToMatch = StringUtils.isBlank(installAt.getCounty()) ? "" : installAt.getCounty();
-    }
-
-    if ("FEDERAL".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType) || "POA".equals(scenarioSubType)) {
-      if ("MO".equals(stateToMatch)) {
-        if (Arrays.asList(STATE_MO_M3A) != null && Arrays.asList(STATE_MO_M3A).size() != 0 && Arrays.asList(STATE_MO_M3A).contains(countyToMatch)) {
-          mktgDept = "M3A";
-        } else if (Arrays.asList(STATE_MO_M3B) != null && Arrays.asList(STATE_MO_M3B).size() != 0
-            && Arrays.asList(STATE_MO_M3B).contains(countyToMatch)) {
-          mktgDept = "M3B";
-        }
-      } else if ("PA".equals(stateToMatch)) {
-        if (Arrays.asList(STATE_PA_K9Y) != null && Arrays.asList(STATE_PA_K9Y).size() != 0 && Arrays.asList(STATE_PA_K9Y).contains(countyToMatch)) {
-          mktgDept = "K9Y";
-        } else if (Arrays.asList(STATE_PA_M3B) != null && Arrays.asList(STATE_PA_M3B).size() != 0
-            && Arrays.asList(STATE_PA_M3B).contains(countyToMatch)) {
-          mktgDept = "M3B";
-        }
-      } else {
-        for (Map.Entry<String, List<String>> entry : stateMktgDepMap.entrySet()) {
-          List<String> stateList = entry.getValue();
-          if (stateList != null && stateList.size() != 0 && stateList.contains(stateToMatch)) {
-            mktgDept = entry.getKey();
-            break;
-          }
-        }
-      }
-    }
-    return mktgDept;
-  }
-
-  private String getMtkgArDept(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String scenarioSubType)
-      throws Exception {
-    String mtkgArDept = "";
-    Data data = requestData.getData();
-
-    if ("POA".equals(scenarioSubType)) {
-      if (data != null && StringUtils.isNotBlank(data.getCompany()) && Arrays.asList(COMP_NO_LIST).contains(data.getCompany())) {
-        mtkgArDept = "14W";
-      } else {
-        mtkgArDept = "28W";
-      }
-    } else {
-      if (data != null && StringUtils.isNotBlank(data.getEnterprise())) {
-
-        String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
-        String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
-        String sql = ExternalizedQuery.getSql("AUTO.GET_MKTG_AR_DEPT_USCMR", usSchema);
-        String dbId = QueryClient.USCMR_APP_ID;
-
-        QueryRequest query = new QueryRequest();
-        query.setSql(sql);
-        query.setRows(1);
-        query.addField("I_CUST_OFF_3");
-
-        QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
-        QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
-        if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
-          Map<String, Object> record = response.getRecords().get(0);
-          mtkgArDept = (String) record.get("I_CUST_OFF_3");
-        }
-      } else if ("".equals(mtkgArDept)) {
-        String indToMatch = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd().substring(0, 1);
-        // iterate and display values
-        for (Map.Entry<String, List<String>> entry : indARBOMap.entrySet()) {
-          List<String> indstryList = entry.getValue();
-          if (indstryList != null && indstryList.size() != 0 && indstryList.contains(indToMatch)) {
-            mtkgArDept = entry.getKey();
-            break;
-          }
-        }
-      }
-    }
-
-    return mtkgArDept;
-  }
-
-  private String getSvcArOffice(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData, String mtkgArDept)
-      throws Exception {
-    String svcArOffice = "";
-    if (!USUtil.svcARBOMappings.isEmpty()) {
-      for (USBranchOffcMapping mapping : USUtil.svcARBOMappings) {
-        if (mtkgArDept.equalsIgnoreCase(mapping.getMktgDepartmentAR())) {
-          svcArOffice = StringUtils.isNotBlank(mapping.getSvcOfficeAR()) ? mapping.getSvcOfficeAR() : "";
-          break;
-        }
-      }
-    }
-    return svcArOffice;
-  }
-
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
@@ -505,14 +299,23 @@ public class USUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     boolean valid = true;
-    String[] scnarioList = { "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV", "SCHOOL PAROCHL", "SCHOOL COLLEGE", "STATE", "SPEC DIST",
-        "COUNTY", "CITY", "32C", "TPPS", "3CC", "SVR CONT", "POOL", "DEVELOP", "E-HOST", "FEDSTATE", "FEDERAL", "POA" };
+    String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
+        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_POOL, SC_BP_DEVELOP,
+        SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP,
+        SC_FED_POA, SC_FED_TRIBAL_BUS };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
+      if (SC_BYMODEL.equals(scenarioSubType)) {
+        try {
+          scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
+        } catch (Exception e) {
+          LOG.error("CMR Scenario for Create by model request could not be determined.", e);
+        }
+      }
     }
 
-    if (Arrays.asList(scnarioList).contains(scenarioSubType)) {
+    if (StringUtils.isBlank(scenarioSubType) || Arrays.asList(scenarioList).contains(scenarioSubType)) {
       engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Automated checks cannot be performed for this scenario.");
       details.append("\nAutomated checks cannot be performed for this scenario.").append("\n");
       valid = true;
@@ -554,7 +357,7 @@ public class USUtil extends AutomationUtil {
     } else {
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       boolean hasNegativeCheck = false;
-      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
       String custTypeCd = detailsCont.getCustTypCd();
       List<String> allowedCodesAddition = Arrays.asList("F", "G", "C", "D", "V", "W", "X");
       List<String> allowedCodesRemoval = Arrays.asList("F", "G", "C", "D", "A", "B", "H", "M", "N");
@@ -588,7 +391,7 @@ public class USUtil extends AutomationUtil {
             case "Marketing Department":
             case "Marketing A/R Department":
               // set negative check status for FEDERAL Power of Attorney and BP
-              if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || BUSINESS_PARTNER.equals(custTypeCd))) {
+              if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || THIRD_P_BUSINESS_PARTNER.equals(custTypeCd))) {
                 failedChecks.put(field, field + " updated.");
                 hasNegativeCheck = true;
               }
@@ -632,7 +435,7 @@ public class USUtil extends AutomationUtil {
             case "Enterprise Number":
             case "Affiliate Number":
               if (!enterpriseAffiliateUpdated) {
-                if (BUSINESS_PARTNER.equals(custTypeCd)) {
+                if (THIRD_P_BUSINESS_PARTNER.equals(custTypeCd)) {
                   engineData.addNegativeCheckStatus("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
                   failedChecks.put("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
                 } else {
@@ -726,6 +529,16 @@ public class USUtil extends AutomationUtil {
     return true;
   }
 
+  /**
+   * Checks to perform if ISIC updated
+   * 
+   * @param cedpManager
+   * @param entityManager
+   * @param requestData
+   * @return a string with error message if some issues encountered during
+   *         checks, null if validated.
+   * @throws Exception
+   */
   private String performISICCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
     String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
@@ -782,6 +595,15 @@ public class USUtil extends AutomationUtil {
     return null;
   }
 
+  /**
+   * Checks to perform if Enterprise or Affiliate field updated.
+   * 
+   * @param cedpManager
+   * @param entityManager
+   * @param requestData
+   * @return An error message if validation failed, null if validated.
+   * @throws Exception
+   */
   private String performEnterpriseAffiliateCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
     String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
@@ -833,6 +655,15 @@ public class USUtil extends AutomationUtil {
     return null;
   }
 
+  /**
+   * Performs check if ISU updated to 5B or the request is a CSP update
+   * 
+   * @param cedpManager
+   * @param entityManager
+   * @param data
+   * @param admin
+   * @return error message if any encountered, null if validated
+   */
   private String performCSPCheck(EntityManager cedpManager, EntityManager entityManager, Data data, Admin admin) {
     if (!BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getString("US.CSP_HEAD"))) {
       return "Only members of the CSP team can request for converting a CMR to CSP.  Kindly check with CMDE or your manager.";
@@ -885,15 +716,15 @@ public class USUtil extends AutomationUtil {
     } else {
       StringBuilder details = new StringBuilder(output.getDetails());
       details.append("\n");
-      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo(), engineData);
+      USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
       String custTypCd = detailsCont.getCustTypCd();
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
-        if (LEASING.equals(custTypCd) || BUSINESS_PARTNER.equals(custTypCd)) {
+        if (THIRD_P_LEASING.equals(custTypCd) || THIRD_P_BUSINESS_PARTNER.equals(custTypCd)) {
           engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
-              "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
-          details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
+              "Address updates for " + (custTypCd.equals(THIRD_P_LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
+          details.append("Address updates for " + (custTypCd.equals(THIRD_P_LEASING) ? "Leasing" : "Business Partner")
               + " scenario found. Processor review will be required.").append("\n");
           validation.setMessage("Review needed");
           validation.setSuccess(false);
@@ -957,6 +788,16 @@ public class USUtil extends AutomationUtil {
     return true;
   }
 
+  /**
+   * Validates if address closely matches with DnB records matched.
+   * 
+   * @param requestData
+   * @param engineData
+   * @param addrType
+   * @param details
+   * @param validation
+   * @throws Exception
+   */
   private void closelyMatchAddressWithDnbRecords(RequestData requestData, AutomationEngineData engineData, String addrType, StringBuilder details,
       ValidationOutput validation) throws Exception {
     String addrDesc = "ZS01".equals(addrType) ? "Install-at" : "Invoice-at";
@@ -1005,10 +846,16 @@ public class USUtil extends AutomationUtil {
     }
   }
 
-  public static String determineCustScenario(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+  /**
+   * determines CustSubScenario for Model CMR requests/Update requests
+   * 
+   * @param entityManager
+   * @param cmrNo
+   * @return
+   * @throws Exception
+   */
+  public static String determineCustSubScenario(EntityManager entityManager, String cmrNo) throws Exception {
     // get request admin and data
-    Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
     String custSubGroup = "";
 
     String custTypCd = "";
@@ -1021,18 +868,11 @@ public class USUtil extends AutomationUtil {
     String isicCd = "";
     String subIndustryCd = "";
     String affiliate = "";
-    String cmrNo = "";
     String name3 = "";
     String name4 = "";
 
-    // get USCMR values
-    if ("C".equals(admin.getReqType())) {
-      cmrNo = StringUtils.isBlank(admin.getModelCmrNo()) ? "" : admin.getModelCmrNo();
-    } else if ("U".equals(admin.getReqType())) {
-      cmrNo = StringUtils.isNotBlank(data.getCmrNo()) ? data.getCmrNo() : "";
-    }
+    USDetailsContainer usDetails = determineUSCMRDetails(entityManager, cmrNo);
 
-    USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, cmrNo, engineData);
     custTypCd = usDetails.getCustTypCd();
     usRestricTo = usDetails.getUsRestrictTo();
     companyNo = usDetails.getCompanyNo();
@@ -1126,7 +966,7 @@ public class USUtil extends AutomationUtil {
           && StringUtils.isBlank(usRestricTo)) {
         custSubGroup = SC_STATE_DIST;
       }
-    } else if (LEASING.equals(custTypCd)) {
+    } else if (THIRD_P_LEASING.equals(custTypCd)) {
       custSubGroup = SC_LEASE_3CC;
     } else if (FEDERAL.equals(custTypCd)) {
       if ("12".equals(custClass)) {
@@ -1142,7 +982,7 @@ public class USUtil extends AutomationUtil {
       if ("81".equals(custClass)) {
         custSubGroup = SC_INTERNAL;
       }
-    } else if (BUSINESS_PARTNER.equals(custTypCd)) {
+    } else if (THIRD_P_BUSINESS_PARTNER.equals(custTypCd)) {
       if (("IRCSO".equals(usRestricTo) || "BPQS".equals(usRestricTo)) && "E".equals(bpAccTyp)) {
         custSubGroup = SC_BP_END_USER;
       } else if ("P".equals(bpAccTyp)) {
@@ -1180,8 +1020,7 @@ public class USUtil extends AutomationUtil {
     return custSubGroup;
   }
 
-  public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo, AutomationEngineData engineData)
-      throws Exception {
+  public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo) throws Exception {
     // get request admin and data
     if (usDetailsMap.containsKey(cmrNo) && usDetailsMap.get(cmrNo) != null) {
       return usDetailsMap.get(cmrNo);
@@ -1240,9 +1079,9 @@ public class USUtil extends AutomationUtil {
       } else if ("I".equals(entType)) {
         custTypCd = INTERNAL;
       } else if ("C".equals(entType) || StringUtils.isNotBlank(leasingCo)) {
-        custTypCd = LEASING;
+        custTypCd = THIRD_P_LEASING;
       } else if (StringUtils.isNotBlank(bpAccTyp)) {
-        custTypCd = BUSINESS_PARTNER;
+        custTypCd = THIRD_P_BUSINESS_PARTNER;
       } else if ("2".equals(cGem)) {
         custTypCd = STATE_LOCAL;
       } else {

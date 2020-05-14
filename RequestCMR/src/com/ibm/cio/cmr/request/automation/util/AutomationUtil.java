@@ -2,6 +2,7 @@ package com.ibm.cio.cmr.request.automation.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -31,13 +33,21 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.PPSServiceClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.pps.PPSRequest;
+import com.ibm.cmr.services.client.pps.PPSResponse;
 
 /**
  *
@@ -73,8 +83,25 @@ public abstract class AutomationUtil {
       put(SystemLocation.COMOROS, FranceUtil.class);
       put(SystemLocation.SAINT_PIERRE_MIQUELON, FranceUtil.class);
 
+      put(SystemLocation.SWITZERLAND, SwitzerlandUtil.class);
+      put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
+
     }
   };
+
+  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", " CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
+      "INCORPORATED");
+
+  /**
+   * Holds the possible return values of
+   * {@link SwitzerlandUtil#checkPrivatePersonRecord(Addr, boolean)}
+   * 
+   * @author JeffZAMORA
+   *
+   */
+  protected static enum PrivatePersonCheckStatus {
+    Passed, PassedBoth, DuplicateCMR, NoIBMRecord, DuplicateCheckError, BluepagesError;
+  }
 
   private static final List<String> VAT_CHECK_COUNTRIES = Arrays.asList(SystemLocation.BRAZIL);
 
@@ -418,6 +445,279 @@ public abstract class AutomationUtil {
     }
 
     return result;
+  }
+
+  /**
+   * Does the private person and IBM employee checks
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param result
+   * @param details
+   * @param output
+   * @return
+   */
+  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
+      boolean checkBluepages) {
+
+    if (hasLegalEndings(name)) {
+      engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
+      details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
+      return false;
+    }
+
+    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
+    PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+
+    switch (checkStatus) {
+    case BluepagesError:
+      engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
+      break;
+    case DuplicateCMR:
+      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
+      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
+          " Duplicate CMR No : " + checkResult.getCmrNo() + ". ", null);
+      return false;
+    case DuplicateCheckError:
+      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      break;
+    case NoIBMRecord:
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+      details.append("Employee details not found in IBM BluePages.").append("\n");
+      break;
+    case Passed:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      break;
+    case PassedBoth:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      details.append("Name validated against IBM BluePages successfully.").append("\n");
+      break;
+    }
+    return true;
+  }
+
+  /**
+   * Checks the private person record against current CMR records and optionally
+   * against BluePages
+   * 
+   * @param soldTo
+   * @param checkBluePages
+   * @return
+   */
+  protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages) {
+    LOG.debug("Validating Private Person record for " + name);
+    try {
+      DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
+      String cmrNo = checkResponse.getCmrNo();
+      // TODO find kunnr String kunnr = checkResponse.get
+      if (!StringUtils.isBlank(cmrNo)) {
+        LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCMR, cmrNo, null);
+      }
+    } catch (Exception e) {
+      LOG.warn("Duplicate CMR check error.", e);
+      return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCheckError);
+    }
+    if (checkBluePages) {
+      LOG.debug("Checking against BluePages..");
+      Person person = null;
+      try {
+        person = BluePagesHelper.getPersonByName(name);
+        if (person == null) {
+          LOG.debug("NO BluePages record found");
+          return new PrivatePersonCheckResult(PrivatePersonCheckStatus.NoIBMRecord);
+        } else {
+          LOG.debug("BluePages record found: " + person.getName() + "/" + person.getEmail());
+          return new PrivatePersonCheckResult(PrivatePersonCheckStatus.PassedBoth);
+        }
+      } catch (Exception e) {
+        LOG.warn("BluePages check error.", e);
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.BluepagesError);
+      }
+    } else {
+      LOG.debug("No duplicate CMR found.");
+      return new PrivatePersonCheckResult(PrivatePersonCheckStatus.Passed);
+    }
+
+  }
+
+  /**
+   * Generic matching logic to check NAME against private person records
+   * 
+   * @param name
+   * @param issuingCountry
+   * @param landedCountry
+   * @return CMR No. of the duplicate record
+   */
+  protected DuplicateCMRCheckResponse checkDuplicatePrivatePersonRecord(String name, String issuingCountry, String landedCountry) throws Exception {
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+    request.setCustomerName(name);
+    request.setIssuingCountry(issuingCountry);
+    request.setLandedCountry(landedCountry);
+    request.setIsicCd(AutomationConst.ISIC_PRIVATE_PERSON);
+    request.setNameMatch("Y");
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
+    };
+
+    MatchingResponse<DuplicateCMRCheckResponse> response = mapper.readValue(json, ref);
+
+    if (response.getSuccess()) {
+      if (response.getMatched() && response.getMatches().size() > 0) {
+        return response.getMatches().get(0);
+      }
+    }
+    return null;
+
+  }
+
+  /**
+   * Connects to PPS and checks the validity of the supplied CE ID
+   * 
+   * @param engineData
+   * @param ceId
+   * @param details
+   * @return
+   */
+  protected boolean doBusinessPartnerChecks(AutomationEngineData engineData, String ceId, StringBuilder details) {
+    if (StringUtils.isBlank(ceId)) {
+      engineData.addRejectionComment("OTH", "PPS CEID is required for Business Partner scenarios.", "", "");
+      details.append("PPS CEID is required for Business Partner scenarios.").append("\n");
+      return false;
+    }
+    try {
+      if (!checkPPSCEID(ceId)) {
+        engineData.addRejectionComment("OTH", "CEID " + ceId + "  is not valid as checked against the PartnerWorld Profile System.", "", "");
+        details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.").append("\n");
+        return false;
+      }
+    } catch (Exception e) {
+      LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
+      details.append("Not able to validate PPS CEID " + ceId + " against PPS. An issue occurred during the validation.").append("\n");
+      engineData.addNegativeCheckStatus("PPSCEID",
+          "Not able to validate PPS CEID " + ceId + " against PPS. An issue occurred during the validation.");
+    }
+    return true;
+  }
+
+  /**
+   * Connects to the PPS Service and checks whether the PPS CEID is valid
+   * 
+   * @param ppsCeId
+   * @return
+   * @throws Exception
+   */
+  protected boolean checkPPSCEID(String ppsCeId) throws Exception {
+    if (StringUtils.isBlank(ppsCeId)) {
+      return false;
+    }
+    PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        PPSServiceClient.class);
+    client.setRequestMethod(Method.Get);
+    client.setReadTimeout(1000 * 60 * 5);
+    PPSRequest request = new PPSRequest();
+    request.setCeid(ppsCeId);
+    PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
+    if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Checks if the given name has legal endings. This checks the globally
+   * defined legal identifiers and has support for country-specific legal
+   * endings
+   * 
+   * @param name
+   * @return
+   */
+  protected boolean hasLegalEndings(String name) {
+    if (name == null) {
+      return false;
+    }
+
+    for (String gblEnding : GLOBAL_LEGAL_ENDINGS) {
+      if (name.toUpperCase().contains(gblEnding)) {
+        return true;
+      }
+    }
+    List<String> extendedEndings = getCountryLegalEndings();
+    if (extendedEndings != null) {
+      for (String cntryEnding : extendedEndings) {
+        if (name.toUpperCase().contains(cntryEnding)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 
+   * Extended legal endings apart from the global values. Override in
+   * country-specific utilities to extend the {@link #hasLegalEndings(String)}
+   * method
+   * 
+   * @return
+   */
+  protected List<String> getCountryLegalEndings() {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Container class, extended to hold extra info for the matched CMR No.
+   * 
+   * @author JeffZAMORA
+   *
+   */
+  protected class PrivatePersonCheckResult {
+    private PrivatePersonCheckStatus status;
+    private String cmrNo;
+    private String kunnr;
+
+    public PrivatePersonCheckResult(PrivatePersonCheckStatus status) {
+      this(status, null, null);
+    }
+
+    public PrivatePersonCheckResult(PrivatePersonCheckStatus status, String cmrNo, String kunnr) {
+      this.status = status;
+      this.cmrNo = cmrNo;
+    }
+
+    public PrivatePersonCheckStatus getStatus() {
+      return status;
+    }
+
+    public void setStatus(PrivatePersonCheckStatus status) {
+      this.status = status;
+    }
+
+    public String getCmrNo() {
+      return cmrNo;
+    }
+
+    public void setCmrNo(String cmrNo) {
+      this.cmrNo = cmrNo;
+    }
+
+    public String getKunnr() {
+      return kunnr;
+    }
+
+    public void setKunnr(String kunnr) {
+      this.kunnr = kunnr;
+    }
   }
 
 }
