@@ -64,13 +64,22 @@ public class USUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(USUtil.class);
   // Customer Type
   public static final String COMMERCIAL = "1";
-  public static final String STATE_LOCAL = "2";
-  public static final String LEASING = "3";
-  public static final String FEDERAL = "4";
-  public static final String INTERNAL = "5";
-  public static final String POWER_OF_ATTORNEY = "6";
-  public static final String BUSINESS_PARTNER = "7";
-  public static final String BYMODEL = "BYMODEL";
+  public static final String COMMERCIAL_FRANCHISE = "2";
+  public static final String COMMERCIAL_RESTRICTED = "3";
+  public static final String COMMERCIAL_REST_DEALER = "4";
+  public static final String THIRD_P_BUSINESS_PARTNER = "5";
+  public static final String THIRD_P_LEASING = "6";
+  public static final String STATE_LOCAL = "7";
+  public static final String STATE_LOCAL_PUBLIC = "8";
+  public static final String FEDERAL = "9";
+  public static final String FEDERAL_INDIAN = "10";
+  public static final String FEDERAL_ALASKA = "11";
+  public static final String IGS = "12";
+  public static final String INTERNAL = "13";
+  public static final String BY_MODEL = "14";
+
+  // addtional scenarios for determination
+  public static final String POWER_OF_ATTORNEY = "POA";
 
   // COMMERCIAL SUB_SCENARIOS
   public static final String SC_COMM_REGULAR = "REGULAR";
@@ -135,6 +144,8 @@ public class USUtil extends AutomationUtil {
   public static final String SC_BP_POOL = "POOL";
   public static final String SC_BP_DEVELOP = "DEVELOP";
   public static final String SC_BP_E_HOST = "E-HOST";
+
+  public static final String SC_BYMODEL = "BYMODEL";
 
   public static final String RESTRICT_TO_END_USER = "BPQS";
   public static final String RESTRICT_TO_MAINTENANCE = "IRCSO";
@@ -208,7 +219,7 @@ public class USUtil extends AutomationUtil {
     boolean boCodesCalculated = false;
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
-      if (BYMODEL.equals(scenarioSubType)) {
+      if (SC_BYMODEL.equals(scenarioSubType)) {
         scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
       }
     }
@@ -253,7 +264,7 @@ public class USUtil extends AutomationUtil {
     } else if (boCodesCalculated) {
       details.append("Branch Office codes computed successfully.");
     } else if (INTERNAL.equals(scenarioSubType)) {
-      if (BYMODEL.equals(data.getCustSubGrp())) {
+      if (SC_BYMODEL.equals(data.getCustSubGrp())) {
         details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
       } else {
         details.append("Skipping calculation of Branch Office codes because the request is of INTERNAL Scenario.");
@@ -288,12 +299,14 @@ public class USUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     boolean valid = true;
-    String[] scenarioList = { "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV", "SCHOOL PAROCHL", "SCHOOL COLLEGE", "STATE", "SPEC DIST",
-        "COUNTY", "CITY", "32C", "TPPS", "3CC", "SVR CONT", "POOL", "DEVELOP", "E-HOST", "FEDSTATE", "FEDERAL", "POA" };
+    String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
+        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_POOL, SC_BP_DEVELOP,
+        SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP,
+        SC_FED_POA, SC_FED_TRIBAL_BUS };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
-      if (BYMODEL.equals(scenarioSubType)) {
+      if (SC_BYMODEL.equals(scenarioSubType)) {
         try {
           scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
         } catch (Exception e) {
@@ -302,7 +315,7 @@ public class USUtil extends AutomationUtil {
       }
     }
 
-    if (Arrays.asList(scenarioList).contains(scenarioSubType)) {
+    if (StringUtils.isBlank(scenarioSubType) || Arrays.asList(scenarioList).contains(scenarioSubType)) {
       engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Automated checks cannot be performed for this scenario.");
       details.append("\nAutomated checks cannot be performed for this scenario.").append("\n");
       valid = true;
@@ -378,7 +391,7 @@ public class USUtil extends AutomationUtil {
             case "Marketing Department":
             case "Marketing A/R Department":
               // set negative check status for FEDERAL Power of Attorney and BP
-              if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || BUSINESS_PARTNER.equals(custTypeCd))) {
+              if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || THIRD_P_BUSINESS_PARTNER.equals(custTypeCd))) {
                 failedChecks.put(field, field + " updated.");
                 hasNegativeCheck = true;
               }
@@ -422,7 +435,7 @@ public class USUtil extends AutomationUtil {
             case "Enterprise Number":
             case "Affiliate Number":
               if (!enterpriseAffiliateUpdated) {
-                if (BUSINESS_PARTNER.equals(custTypeCd)) {
+                if (THIRD_P_BUSINESS_PARTNER.equals(custTypeCd)) {
                   engineData.addNegativeCheckStatus("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
                   failedChecks.put("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
                 } else {
@@ -708,10 +721,10 @@ public class USUtil extends AutomationUtil {
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
-        if (LEASING.equals(custTypCd) || BUSINESS_PARTNER.equals(custTypCd)) {
+        if (THIRD_P_LEASING.equals(custTypCd) || THIRD_P_BUSINESS_PARTNER.equals(custTypCd)) {
           engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
-              "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
-          details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
+              "Address updates for " + (custTypCd.equals(THIRD_P_LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
+          details.append("Address updates for " + (custTypCd.equals(THIRD_P_LEASING) ? "Leasing" : "Business Partner")
               + " scenario found. Processor review will be required.").append("\n");
           validation.setMessage("Review needed");
           validation.setSuccess(false);
@@ -953,7 +966,7 @@ public class USUtil extends AutomationUtil {
           && StringUtils.isBlank(usRestricTo)) {
         custSubGroup = SC_STATE_DIST;
       }
-    } else if (LEASING.equals(custTypCd)) {
+    } else if (THIRD_P_LEASING.equals(custTypCd)) {
       custSubGroup = SC_LEASE_3CC;
     } else if (FEDERAL.equals(custTypCd)) {
       if ("12".equals(custClass)) {
@@ -969,7 +982,7 @@ public class USUtil extends AutomationUtil {
       if ("81".equals(custClass)) {
         custSubGroup = SC_INTERNAL;
       }
-    } else if (BUSINESS_PARTNER.equals(custTypCd)) {
+    } else if (THIRD_P_BUSINESS_PARTNER.equals(custTypCd)) {
       if (("IRCSO".equals(usRestricTo) || "BPQS".equals(usRestricTo)) && "E".equals(bpAccTyp)) {
         custSubGroup = SC_BP_END_USER;
       } else if ("P".equals(bpAccTyp)) {
@@ -1066,9 +1079,9 @@ public class USUtil extends AutomationUtil {
       } else if ("I".equals(entType)) {
         custTypCd = INTERNAL;
       } else if ("C".equals(entType) || StringUtils.isNotBlank(leasingCo)) {
-        custTypCd = LEASING;
+        custTypCd = THIRD_P_LEASING;
       } else if (StringUtils.isNotBlank(bpAccTyp)) {
-        custTypCd = BUSINESS_PARTNER;
+        custTypCd = THIRD_P_BUSINESS_PARTNER;
       } else if ("2".equals(cGem)) {
         custTypCd = STATE_LOCAL;
       } else {
