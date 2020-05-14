@@ -95,7 +95,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   public static final String SUB_TYPE_FEDERAL_POA = "POA";
   public static final String SUB_TYPE_FEDERAL_REGULAR_GOVT = "FEDERAL";
   public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
-  public static final String TYPE_BUSINESS_PARTNER_END_USER = "END USER";
+  public static final String SUB_TYPE_BUSINESS_PARTNER_END_USER = "END USER";
 
   public static final String AFFILIATE_FEDERAL = "9200000";
   private boolean waiting;
@@ -130,7 +130,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         output.setDetails("Non BP End User scenario not supported.");
         return output;
       }
-    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
+    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
       output.setResults("Skipped");
       output.setDetails("Non BP End User scenario not supported.");
       return output;
