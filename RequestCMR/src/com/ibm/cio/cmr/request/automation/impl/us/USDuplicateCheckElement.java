@@ -2,7 +2,6 @@ package com.ibm.cio.cmr.request.automation.impl.us;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -41,17 +40,17 @@ import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 /**
  * 
  * @author RangoliSaxena
+ * @author RoopakChugh
  *
  */
 public class USDuplicateCheckElement extends DuplicateCheckElement {
 
-  private static final Logger log = Logger.getLogger(USDuplicateCheckElement.class);
-
-  private static boolean reqChkSrvError = false;
-  private static boolean cmrChkSrvError = false;
-  private static boolean reqNegStatFlag = false;
-  private static boolean dupReqFound = false;
-  private static boolean dupCMRFound = false;
+  private static final Logger LOG = Logger.getLogger(USDuplicateCheckElement.class);
+  private static final List<String> negativeCheckScenarioList = Arrays.asList(USUtil.SC_IGS, USUtil.SC_IGSF, USUtil.SC_LEASE_NO_RESTRICT,
+      USUtil.SC_LEASE_32C, USUtil.SC_LEASE_IPMA, USUtil.SC_LEASE_LPMA, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_TRIBAL_BUS, USUtil.SC_FED_HEALTHCARE,
+      USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_CLINIC, USUtil.SC_FED_NATIVE_CORP, USUtil.SC_FED_CAMOUFLAGED, USUtil.SC_STATE_STATE,
+      USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_CITY, USUtil.SC_STATE_HOSPITALS, USUtil.SC_SCHOOL_PUBLIC, USUtil.SC_SCHOOL_CHARTER,
+      USUtil.SC_STATE_DIST, USUtil.SC_SCHOOL_PRIV, USUtil.SC_BYMODEL);
 
   public USDuplicateCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -65,6 +64,11 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   @Override
   public AutomationResult<MatchingOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
+    boolean dupReqFound = false;
+    boolean reqChkSrvError = false;
+    boolean dupCMRFound = false;
+    boolean cmrChkSrvError = false;
+
     String matchType = "NA";
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -72,13 +76,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
     StringBuilder details = new StringBuilder();
-    boolean matchDepartment = false;
-    if (engineData.get(AutomationEngineData.MATCH_DEPARTMENT) != null) {
-      matchDepartment = (boolean) engineData.get(AutomationEngineData.MATCH_DEPARTMENT);
-    }
-
     Addr soldTo = requestData.getAddress("ZS01");
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
+      List<DuplicateCMRCheckResponse> cmrCheckMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      List<ReqCheckResponse> reqCheckMatches = new ArrayList<ReqCheckResponse>();
+      MatchingResponse<ReqCheckResponse> responseREQ = new MatchingResponse<>();
+      MatchingResponse<DuplicateCMRCheckResponse> responseCMR = new MatchingResponse<>();
+
       String soldToKunnr = StringUtils.isNotBlank(soldTo.getSapNo()) ? soldTo.getSapNo().substring(1) : null;
       int itemNo = 1;
       // perform duplicate request check
@@ -86,170 +90,133 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
         matchType = "V";
       }
-
-      List<ReqCheckResponse> reqCheckMatches = new ArrayList<ReqCheckResponse>();
       // get duplicate req Matches
-      MatchingResponse<ReqCheckResponse> response = getReqMatches(entityManager, requestData, engineData);
-      if (response != null) {
-        if (response.getSuccess()) {
-          if (response.getMatched()) {
-            reqCheckMatches = response.getMatches();
-            reqCheckMatches = filterDupReqs(entityManager, requestData, engineData, reqCheckMatches);
-            if (reqCheckMatches.size() != 0) {
-              details.append(reqCheckMatches.size() + " record(s) found.");
-              if (reqCheckMatches.size() > 5) {
-                details.append("Showing top 5 matches only.");
-                reqCheckMatches = reqCheckMatches.subList(0, 5);
-              }
-
-              for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-                details.append("\n");
-                log.debug("Duplicate Requests Found, Req Id: " + reqCheckRecord.getReqId());
-                output.addMatch(getProcessCode(), "REQ_ID", reqCheckRecord.getReqId() + "", matchType, reqCheckRecord.getMatchGrade() + "", "REQ",
-                    itemNo++);
-                details.append("Request ID = " + reqCheckRecord.getReqId()).append("\n");
-                details.append("Match Type = " + matchType).append("\n");
-                details.append("Match Score = " + reqCheckRecord.getMatchGrade()).append("\n");
-                details.append("Issuing Country =  " + reqCheckRecord.getIssuingCntry()).append("\n");
-                details.append("Customer Name =  " + reqCheckRecord.getCustomerName()).append("\n");
-                details.append("Address =  " + reqCheckRecord.getStreetLine1()).append("\n");
-                if (!StringUtils.isBlank(reqCheckRecord.getStreetLine2())) {
-                  details.append("Address (cont)=  " + reqCheckRecord.getStreetLine2()).append("\n");
-                }
-                if (!StringUtils.isBlank(reqCheckRecord.getCity())) {
-                  details.append("City =  " + reqCheckRecord.getCity()).append("\n");
-                }
-                if (!StringUtils.isBlank(reqCheckRecord.getStateProv())) {
-                  details.append("State =  " + reqCheckRecord.getStateProv()).append("\n");
-                }
-                if (!StringUtils.isBlank(reqCheckRecord.getPostalCode())) {
-                  details.append("Postal Code =  " + reqCheckRecord.getPostalCode()).append("\n");
-                }
-                if (!StringUtils.isBlank(reqCheckRecord.getLandedCountry())) {
-                  details.append("Landed Country =  " + reqCheckRecord.getLandedCountry()).append("\n");
-                }
-                engineData.put("reqCheckMatches", reqCheckRecord);
-              }
-              dupReqFound = true;
-            } else {
-              dupReqFound = false;
-            }
-          } else {
-            dupReqFound = false;
+      responseREQ = getReqMatches(entityManager, requestData, engineData);
+      if (responseREQ != null && responseREQ.getSuccess()) {
+        if (responseREQ.getMatched() && !responseREQ.getMatches().isEmpty()) {
+          reqCheckMatches = responseREQ.getMatches();
+          details.append(reqCheckMatches.size() + " record(s) found.");
+          if (reqCheckMatches.size() > 5) {
+            details.append("Showing top 5 matches only.");
+            reqCheckMatches = reqCheckMatches.subList(0, 5);
           }
-        } else {
-          reqChkSrvError = true;
+
+          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+            details.append("\n");
+            LOG.debug("Duplicate Requests Found, Req Id: " + reqCheckRecord.getReqId());
+            output.addMatch(getProcessCode(), "REQ_ID", reqCheckRecord.getReqId() + "", matchType, reqCheckRecord.getMatchGrade() + "", "REQ",
+                itemNo++);
+            details.append("Request ID = " + reqCheckRecord.getReqId()).append("\n");
+            details.append("Match Type = " + matchType).append("\n");
+            details.append("Match Score = " + reqCheckRecord.getMatchGrade()).append("\n");
+            details.append("Issuing Country =  " + reqCheckRecord.getIssuingCntry()).append("\n");
+            details.append("Customer Name =  " + reqCheckRecord.getCustomerName()).append("\n");
+            details.append("Address =  " + reqCheckRecord.getStreetLine1()).append("\n");
+            if (!StringUtils.isBlank(reqCheckRecord.getStreetLine2())) {
+              details.append("Address (cont)=  " + reqCheckRecord.getStreetLine2()).append("\n");
+            }
+            if (!StringUtils.isBlank(reqCheckRecord.getCity())) {
+              details.append("City =  " + reqCheckRecord.getCity()).append("\n");
+            }
+            if (!StringUtils.isBlank(reqCheckRecord.getStateProv())) {
+              details.append("State =  " + reqCheckRecord.getStateProv()).append("\n");
+            }
+            if (!StringUtils.isBlank(reqCheckRecord.getPostalCode())) {
+              details.append("Postal Code =  " + reqCheckRecord.getPostalCode()).append("\n");
+            }
+            if (!StringUtils.isBlank(reqCheckRecord.getLandedCountry())) {
+              details.append("Landed Country =  " + reqCheckRecord.getLandedCountry()).append("\n");
+            }
+            engineData.put("reqCheckMatches", reqCheckRecord);
+          }
+          dupReqFound = true;
         }
       } else {
         reqChkSrvError = true;
       }
 
-      // perform duplicate request check
-      String department = StringUtils.isBlank(soldTo.getDept()) ? "" : soldTo.getDept();
-      List<DuplicateCMRCheckResponse> cmrCheckMatches = new ArrayList<DuplicateCMRCheckResponse>();
-      // get CMR Matches
-      MatchingResponse<DuplicateCMRCheckResponse> responseCMR = getCMRMatches(entityManager, requestData, engineData);
-      if (responseCMR != null) {
-        if (responseCMR.getSuccess()) {
-          if (responseCMR.getMatched()) {
+      // perform duplicate cmr check if no duplicate requests found
+      if (!dupReqFound) {
+        responseCMR = getCMRMatches(entityManager, requestData, engineData);
+        if (responseCMR != null && responseCMR.getSuccess()) {
+          if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty()) {
             cmrCheckMatches = responseCMR.getMatches();
-            cmrCheckMatches = filterDupCmrs(entityManager, requestData, engineData, cmrCheckMatches);
-            // cmr-2067 fix start
-            if (matchDepartment) {
-              List<DuplicateCMRCheckResponse> cmrCheckMatchesDept = new ArrayList<DuplicateCMRCheckResponse>();
-              for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-                if (department.equalsIgnoreCase(cmrCheckRecord.getDept()) || department.equalsIgnoreCase(cmrCheckRecord.getCust_name3())
-                    || department.equalsIgnoreCase(cmrCheckRecord.getCust_name4())) {
-                  cmrCheckMatchesDept.add(cmrCheckRecord);
-                }
-              }
-              Collections.copy(cmrCheckMatches, cmrCheckMatchesDept);
+            details.append(cmrCheckMatches.size() + " record(s) found.");
+            if (cmrCheckMatches.size() > 5) {
+              cmrCheckMatches = cmrCheckMatches.subList(0, 5);
+              details.append("Showing top 5 matches only.");
             }
-            if (cmrCheckMatches.size() != 0) {
-              // result.setResults("Matches Found");
-              details.append(cmrCheckMatches.size() + " record(s) found.");
-              if (cmrCheckMatches.size() > 5) {
-                cmrCheckMatches = cmrCheckMatches.subList(0, 5);
-                details.append("Showing top 5 matches only.");
-              }
 
-              // int itemNo = 1;
-              for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-                details.append("\n");
+            // int itemNo = 1;
+            for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+              details.append("\n");
 
-                log.debug("Duplicate CMRs Found..");
-                output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
-                    itemNo++);
-                if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
-                  details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getMatchGrade())) {
-                  details.append("Match Grade = " + cmrCheckRecord.getMatchGrade()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getIssuingCntry())) {
-                  details.append("Issuing Country =  " + cmrCheckRecord.getIssuingCntry()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getCustomerName())) {
-                  details.append("Customer Name =  " + cmrCheckRecord.getCustomerName()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getLandedCountry())) {
-                  details.append("Landed Country =  " + cmrCheckRecord.getLandedCountry()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine1())) {
-                  details.append("Address =  " + cmrCheckRecord.getStreetLine1()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine2())) {
-                  details.append("Address (cont)=  " + cmrCheckRecord.getStreetLine2()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getCity())) {
-                  details.append("City =  " + cmrCheckRecord.getCity()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getStateProv())) {
-                  details.append("State =  " + cmrCheckRecord.getStateProv()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getPostalCode())) {
-                  details.append("Postal Code =  " + cmrCheckRecord.getPostalCode()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getVat())) {
-                  details.append("VAT =  " + cmrCheckRecord.getVat()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getDunsNo())) {
-                  details.append("Duns No =  " + cmrCheckRecord.getDunsNo()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getParentDunsNo())) {
-                  details.append("Parent Duns No =  " + cmrCheckRecord.getParentDunsNo()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getGuDunsNo())) {
-                  details.append("Global Duns No =  " + cmrCheckRecord.getGuDunsNo()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getCoverageId())) {
-                  details.append("Coverage Id=  " + cmrCheckRecord.getCoverageId()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getIbmClientId())) {
-                  details.append("IBM Client Id =  " + cmrCheckRecord.getIbmClientId()).append("\n");
-                }
-                if (!StringUtils.isBlank(cmrCheckRecord.getCapInd())) {
-                  details.append("Cap Indicator =  " + cmrCheckRecord.getCapInd()).append("\n");
-                }
-                engineData.put("cmrCheckMatches", cmrCheckRecord);
+              LOG.debug("Duplicate CMRs Found..");
+              output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
+                  itemNo++);
+              if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
+                details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
               }
-              dupCMRFound = true;
-            } else {
-              dupCMRFound = false;
+              if (!StringUtils.isBlank(cmrCheckRecord.getMatchGrade())) {
+                details.append("Match Grade = " + cmrCheckRecord.getMatchGrade()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getIssuingCntry())) {
+                details.append("Issuing Country =  " + cmrCheckRecord.getIssuingCntry()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getCustomerName())) {
+                details.append("Customer Name =  " + cmrCheckRecord.getCustomerName()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getLandedCountry())) {
+                details.append("Landed Country =  " + cmrCheckRecord.getLandedCountry()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine1())) {
+                details.append("Address =  " + cmrCheckRecord.getStreetLine1()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine2())) {
+                details.append("Address (cont)=  " + cmrCheckRecord.getStreetLine2()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getCity())) {
+                details.append("City =  " + cmrCheckRecord.getCity()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getStateProv())) {
+                details.append("State =  " + cmrCheckRecord.getStateProv()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getPostalCode())) {
+                details.append("Postal Code =  " + cmrCheckRecord.getPostalCode()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getVat())) {
+                details.append("VAT =  " + cmrCheckRecord.getVat()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getDunsNo())) {
+                details.append("Duns No =  " + cmrCheckRecord.getDunsNo()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getParentDunsNo())) {
+                details.append("Parent Duns No =  " + cmrCheckRecord.getParentDunsNo()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getGuDunsNo())) {
+                details.append("Global Duns No =  " + cmrCheckRecord.getGuDunsNo()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getCoverageId())) {
+                details.append("Coverage Id=  " + cmrCheckRecord.getCoverageId()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getIbmClientId())) {
+                details.append("IBM Client Id =  " + cmrCheckRecord.getIbmClientId()).append("\n");
+              }
+              if (!StringUtils.isBlank(cmrCheckRecord.getCapInd())) {
+                details.append("Cap Indicator =  " + cmrCheckRecord.getCapInd()).append("\n");
+              }
+              engineData.put("cmrCheckMatches", cmrCheckRecord);
             }
-          } else {
-            dupCMRFound = false;
+            dupCMRFound = true;
           }
         } else {
           cmrChkSrvError = true;
         }
-      } else {
-        cmrChkSrvError = true;
       }
 
       if (dupReqFound || dupCMRFound) {
         result.setResults("Duplicates found.");
-        if (engineData.hasPositiveCheckStatus("allowDuplicates") || reqNegStatFlag) {
+        if (engineData.hasPositiveCheckStatus("allowDuplicates") || shouldSetNegativeCheck(entityManager, requestData, data.getCustSubGrp())) {
           engineData.addNegativeCheckStatus("dupAllowed",
               "There were possible duplicate CMRs/Requests found with the same data but allowed for the scenario.");
         } else {
@@ -277,9 +244,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         result.setResults("No Matches");
         result.setOnError(false);
       } else if (reqChkSrvError) {
-        if (response != null && StringUtils.isNotBlank(response.getMessage())) {
-          result.setDetails(response.getMessage());
-          engineData.addRejectionComment("OTH", response.getMessage(), "", "");
+        if (responseREQ != null && StringUtils.isNotBlank(responseREQ.getMessage())) {
+          result.setDetails(responseREQ.getMessage());
+          engineData.addRejectionComment("OTH", responseREQ.getMessage(), "", "");
           result.setOnError(true);
           result.setResults("Duplicate Request Check Encountered an error.");
         } else {
@@ -301,7 +268,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           result.setResults("Error on Duplicate CMR Check");
         }
       }
-    } else if (scenarioExceptions.isSkipDuplicateChecks()) {
+    } else if (scenarioExceptions.isSkipDuplicateChecks())
+
+    {
       result.setDetails("The request's scenario is configured to skip duplicate checks.");
       result.setResults("Skipped Duplicate Check");
       result.setOnError(false);
@@ -319,443 +288,227 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return result;
   }
 
-  public List<ReqCheckResponse> filterDupReqs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      List<ReqCheckResponse> reqCheckMatches) throws Exception {
-    // get request admin and data
+  private boolean shouldSetNegativeCheck(EntityManager entityManager, RequestData requestData, String custSubGrp) {
+    if (USUtil.BY_MODEL.equals(custSubGrp)) {
+      try {
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
+        if (!USUtil.COMMERCIAL.equals(usDetails.getCustTypCd())) {
+          return true;
+        }
+      } catch (Exception e) {
+        LOG.error("Unable to determine CMR details for create by model scenario", e);
+        return true;
+      }
+    } else if (negativeCheckScenarioList.contains(custSubGrp)) {
+      return true;
+    }
+    return false;
+  }
+
+  public void filterDupReqs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<ReqCheckResponse> response) throws Exception {
+    List<ReqCheckResponse> reqCheckMatches = response.getMatches();
+    List<ReqCheckResponse> reqCheckMatchesTmp = new ArrayList<ReqCheckResponse>();
+
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
-    String resToCode = StringUtils.isBlank(data.getRestrictTo()) ? "" : data.getRestrictTo();
-    String[] scnarioList = { "POA", "OIO", "OEMHW", "OEM-SW", "TPD", "RFBPO", "SSI", "ICC", "SVMP", "END USER", "POOL", "DEVELOP", "E-HOST", "IGS",
-        "IGSF", "NO RESTRICT", "32C", "TPPS", "3CC", "IPMA", "LPMA", "INDIAN TRIBE", "TRIBAL BUS", "HEALTHCARE", "HOSPITAL", "CLINIC", "NATIVE CORP",
-        "BYMODEL", "CAMOUFLAGED", "STATE", "SPEC DIST", "COUNTY", "CITY", "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV" };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
     }
 
-    if (Arrays.asList(scnarioList).contains(scenarioSubType)) {
-      List<ReqCheckResponse> reqCheckMatchesTmp = new ArrayList<ReqCheckResponse>();
-      if ("POA".equals(scenarioSubType) && subIndCode.startsWith("Y")) {
+    if (StringUtils.isNotBlank(data.getRestrictTo()) && !USUtil.SC_BYMODEL.equals(scenarioSubType)) {
+      for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+        if (data.getRestrictTo().equals(reqCheckRecord.getUsRestrictTo())) {
+          reqCheckMatchesTmp.add(reqCheckRecord);
+        }
+      }
+      reqCheckMatches = reqCheckMatchesTmp;
+      reqCheckMatchesTmp.clear();
+    }
+
+    switch (scenarioSubType) {
+    case USUtil.SC_FED_POA:
+      if (subIndCode.startsWith("Y")) {
         for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
           if (reqCheckRecord.getSubIndustryCd().startsWith("Y")) {
             reqCheckMatchesTmp.add(reqCheckRecord);
           }
         }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("OIO".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("OIO".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("OEMHW".equals(scenarioSubType) || "OEM-SW".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("OEMHQ".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("TPD".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("TPD".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("RFBPO".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("RFBPO".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("SSI".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("SSI".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("ICC".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("ICC".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("SVMP".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("SVMP".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("END USER".equals(scenarioSubType)) {
-        if ("BPQS".equals(resToCode)) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if ("BPQS".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-            }
-          }
-        } else if ("IRCSO".equals(resToCode)) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if ("IRCSO".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-            }
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("POOL".equals(scenarioSubType) || "DEVELOP".equals(scenarioSubType) || "E-HOST".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("BPQS".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("IGS".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("11505720".equals(reqCheckRecord.getCompany())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("IGSF".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("11774312".equals(reqCheckRecord.getCompany())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("NO RESTRICT".equals(scenarioSubType) || "32C".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if (StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("TPPS".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("TPPS".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("3CC".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("ICC".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo()) && "12003567".equals(reqCheckRecord.getCompany())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("IPMA".equals(scenarioSubType) || "LPMA".equals(scenarioSubType)) {
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if ("ICC".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo()) && !"12003567".equals(reqCheckRecord.getCompany())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-      } else if ("INDIAN TRIBE".equals(scenarioSubType) || "TRIBAL BUS".equals(scenarioSubType) || "HEALTHCARE".equals(scenarioSubType)
-          || "CLINIC".equals(scenarioSubType) || "NATIVE CORP".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType)
-          || "STATE".equals(scenarioSubType) || "SPEC DIST".equals(scenarioSubType) || "COUNTY".equals(scenarioSubType)
-          || "CITY".equals(scenarioSubType) || "HOSPITALS".equals(scenarioSubType) || "SCHOOL PUBLIC".equals(scenarioSubType)
-          || "SCHOOL CHARTER".equals(scenarioSubType) || "SCHOOL PRIV".equals(scenarioSubType)) {
-        Collections.copy(reqCheckMatches, reqCheckMatches);
-        reqNegStatFlag = true;
-      } else if ("BYMODEL".equals(scenarioSubType)) {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
-
-        if (USUtil.POWER_OF_ATTORNEY.equals(usDetails.getCustTypCd())) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if (USUtil.FEDERAL.equals(usDetails.getCustTypCd())) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if (USUtil.THIRD_P_LEASING.equals(usDetails.getCustTypCd())) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
-                && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if (USUtil.THIRD_P_BUSINESS_PARTNER.equals(usDetails.getCustTypCd())) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
-                && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if (USUtil.STATE_LOCAL.equals(usDetails.getCustTypCd())) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if (USUtil.COMMERCIAL.equals(usDetails.getCustTypCd())) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
-                && ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                    && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
-                    || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())))) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-            }
-          }
-          Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else {
-          Collections.copy(reqCheckMatches, reqCheckMatches);
-          reqNegStatFlag = true;
-        }
-      } else {
-        Collections.copy(reqCheckMatches, reqCheckMatches);
+        response.setMatches(reqCheckMatchesTmp);
       }
-      reqCheckMatchesTmp.clear();
+      break;
+    case USUtil.SC_IGSF:
+      for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+        if ("11774312".equals(reqCheckRecord.getCompany())) {
+          reqCheckMatchesTmp.add(reqCheckRecord);
+        }
+      }
+      response.setMatches(reqCheckMatchesTmp);
+      break;
+    case USUtil.SC_LEASE_3CC:
+      for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+        if ("ICC".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo()) && "12003567".equals(reqCheckRecord.getCompany())) {
+          reqCheckMatchesTmp.add(reqCheckRecord);
+        }
+      }
+      response.setMatches(reqCheckMatchesTmp);
+      break;
+    case USUtil.SC_LEASE_IPMA:
+    case USUtil.SC_LEASE_LPMA:
+      for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+        if ("ICC".equalsIgnoreCase(reqCheckRecord.getUsRestrictTo()) && !"12003567".equals(reqCheckRecord.getCompany())) {
+          reqCheckMatchesTmp.add(reqCheckRecord);
+        }
+      }
+      response.setMatches(reqCheckMatchesTmp);
+      break;
+    case USUtil.SC_BYMODEL:
+      USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
+      switch (usDetails.getCustTypCd()) {
+      case USUtil.POWER_OF_ATTORNEY:
+      case USUtil.FEDERAL:
+      case USUtil.STATE_LOCAL:
+        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
+            reqCheckMatchesTmp.add(reqCheckRecord);
+          }
+        }
+        response.setMatches(reqCheckMatchesTmp);
+        break;
+      case USUtil.THIRD_P_LEASING:
+      case USUtil.THIRD_P_BUSINESS_PARTNER:
+        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
+              && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+              && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
+            reqCheckMatchesTmp.add(reqCheckRecord);
+          }
+        }
+        response.setMatches(reqCheckMatchesTmp);
+        break;
+      case USUtil.COMMERCIAL:
+        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
+              && ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                  && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
+                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())))) {
+            reqCheckMatchesTmp.add(reqCheckRecord);
+          }
+        }
+        response.setMatches(reqCheckMatchesTmp);
+      }
+    default:
+      for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+        if (StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())) {
+          reqCheckMatchesTmp.add(reqCheckRecord);
+        }
+      }
+      response.setMatches(reqCheckMatchesTmp);
+      break;
     }
-    return reqCheckMatches;
-
   }
 
-  public List<DuplicateCMRCheckResponse> filterDupCmrs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      List<DuplicateCMRCheckResponse> cmrCheckMatches) throws Exception {
-    // get request admin and data
+  public void filterDupCmrs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) throws Exception {
+
+    List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
+    List<DuplicateCMRCheckResponse> cmrCheckMatchesTmp = new ArrayList<DuplicateCMRCheckResponse>();
+
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
-    String resToCode = StringUtils.isBlank(data.getRestrictTo()) ? "" : data.getRestrictTo();
-    String[] scnarioList = { "POA", "OIO", "OEMHW", "OEM-SW", "TPD", "RFBPO", "SSI", "ICC", "SVMP", "END USER", "POOL", "DEVELOP", "E-HOST", "IGS",
-        "IGSF", "NO RESTRICT", "32C", "TPPS", "3CC", "IPMA", "LPMA", "INDIAN TRIBE", "TRIBAL BUS", "HEALTHCARE", "HOSPITAL", "CLINIC", "NATIVE CORP",
-        "BYMODEL", "CAMOUFLAGED", "STATE", "SPEC DIST", "COUNTY", "CITY", "HOSPITALS", "SCHOOL PUBLIC", "SCHOOL CHARTER", "SCHOOL PRIV" };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
     }
-
-    if (Arrays.asList(scnarioList).contains(scenarioSubType)) {
-      List<DuplicateCMRCheckResponse> cmrCheckMatchesTmp = new ArrayList<DuplicateCMRCheckResponse>();
-      if ("POA".equals(scenarioSubType) && subIndCode.startsWith("Y")) {
+    switch (scenarioSubType) {
+    case USUtil.SC_FED_POA:
+      if (subIndCode.startsWith("Y")) {
         for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
           if (cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
             cmrCheckMatchesTmp.add(cmrCheckRecord);
           }
         }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("OIO".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("OIO".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("OEMHW".equals(scenarioSubType) || "OEM-SW".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("OEMHQ".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("TPD".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("TPD".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("RFBPO".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("RFBPO".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("SSI".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("SSI".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("ICC".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("ICC".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("SVMP".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("SVMP".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("END USER".equals(scenarioSubType)) {
-        if ("BPQS".equals(resToCode)) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-            }
-          }
-        } else if ("IRCSO".equals(resToCode)) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if ("IRCSO".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-            }
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("POOL".equals(scenarioSubType) || "DEVELOP".equals(scenarioSubType) || "E-HOST".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("IGS".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("11505720".equals(cmrCheckRecord.getCompany())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("IGSF".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("11774312".equals(cmrCheckRecord.getCompany())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("NO RESTRICT".equals(scenarioSubType) || "32C".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if (StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("TPPS".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("TPPS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("3CC".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("ICC".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()) && "12003567".equals(cmrCheckRecord.getCompany())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("IPMA".equals(scenarioSubType) || "LPMA".equals(scenarioSubType)) {
-        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-          if ("ICC".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()) && !"12003567".equals(cmrCheckRecord.getCompany())) {
-            cmrCheckMatchesTmp.add(cmrCheckRecord);
-            reqNegStatFlag = true;
-          }
-        }
-        Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-      } else if ("INDIAN TRIBE".equals(scenarioSubType) || "TRIBAL BUS".equals(scenarioSubType) || "HEALTHCARE".equals(scenarioSubType)
-          || "CLINIC".equals(scenarioSubType) || "NATIVE CORP".equals(scenarioSubType) || "CAMOUFLAGED".equals(scenarioSubType)
-          || "STATE".equals(scenarioSubType) || "SPEC DIST".equals(scenarioSubType) || "COUNTY".equals(scenarioSubType)
-          || "CITY".equals(scenarioSubType) || "HOSPITALS".equals(scenarioSubType) || "SCHOOL PUBLIC".equals(scenarioSubType)
-          || "SCHOOL CHARTER".equals(scenarioSubType) || "SCHOOL PRIV".equals(scenarioSubType)) {
-        Collections.copy(cmrCheckMatches, cmrCheckMatches);
-        reqNegStatFlag = true;
-      } else if ("BYMODEL".equals(scenarioSubType)) {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
-
-        if (USUtil.POWER_OF_ATTORNEY.equals(usDetails.getCustTypCd())) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if (USUtil.FEDERAL.equals(usDetails.getCustTypCd())) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if (USUtil.THIRD_P_LEASING.equals(usDetails.getCustTypCd())) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo())
-                && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if (USUtil.THIRD_P_BUSINESS_PARTNER.equals(usDetails.getCustTypCd())) {
-          Collections.copy(cmrCheckMatches, cmrCheckMatches);
-          reqNegStatFlag = true;
-        } else if (USUtil.STATE_LOCAL.equals(usDetails.getCustTypCd())) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-              reqNegStatFlag = true;
-            }
-          }
-          Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if (USUtil.COMMERCIAL.equals(usDetails.getCustTypCd())) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
-                && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                    && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
-                    || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-            }
-          }
-          Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else {
-          Collections.copy(cmrCheckMatches, cmrCheckMatches);
-          reqNegStatFlag = true;
-        }
-      } else {
-        Collections.copy(cmrCheckMatches, cmrCheckMatches);
+        response.setMatches(cmrCheckMatchesTmp);
       }
-      cmrCheckMatchesTmp.clear();
+      break;
+    case USUtil.SC_IGSF:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if ("11774312".equals(cmrCheckRecord.getCompany())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
+    case USUtil.SC_LEASE_3CC:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if ("ICC".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()) && "12003567".equals(cmrCheckRecord.getCompany())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
+    case USUtil.SC_LEASE_IPMA:
+    case USUtil.SC_LEASE_LPMA:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if ("ICC".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()) && !"12003567".equals(cmrCheckRecord.getCompany())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
+    case USUtil.SC_BYMODEL:
+      USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
+      switch (usDetails.getCustTypCd()) {
+      case USUtil.POWER_OF_ATTORNEY:
+      case USUtil.FEDERAL:
+      case USUtil.STATE_LOCAL:
+        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+          if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
+            cmrCheckMatchesTmp.add(cmrCheckRecord);
+          }
+        }
+        response.setMatches(cmrCheckMatchesTmp);
+        break;
+      case USUtil.THIRD_P_LEASING:
+      case USUtil.THIRD_P_BUSINESS_PARTNER:
+        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+          if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo())
+              && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+              && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
+            cmrCheckMatchesTmp.add(cmrCheckRecord);
+          }
+        }
+        response.setMatches(cmrCheckMatchesTmp);
+        break;
+      case USUtil.COMMERCIAL:
+        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+          if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
+              && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                  && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
+                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))) {
+            cmrCheckMatchesTmp.add(cmrCheckRecord);
+          }
+        }
+        response.setMatches(cmrCheckMatchesTmp);
+      }
+    default:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if (StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
     }
-    return cmrCheckMatches;
   }
 
   public MatchingResponse<ReqCheckResponse> getReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
@@ -766,7 +519,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
 
     // check if End user and has divn value
-    if ("END USER".equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
+    if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
       Addr zs01 = requestData.getAddress("ZS01");
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
@@ -784,7 +537,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       Addr addr = requestData.getAddress(addrType);
       if (addr != null) {
         ReqCheckRequest request = getRequestForReqChk(entityManager, data, admin, addr, scenarioExceptions);
-        log.debug("Executing Duplicate Request Check "
+        LOG.debug("Executing Duplicate Request Check "
             + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI") + " for AddrType: " + addrType);
         MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.REQ_SERVICE_ID, request, MatchingResponse.class);
         ObjectMapper mapper = new ObjectMapper();
@@ -805,9 +558,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
 
       } else {
-        log.debug("No '" + addrType + "' address on the request. Skipping duplicate check.");
+        LOG.debug("No '" + addrType + "' address on the request. Skipping duplicate check.");
         continue;
       }
+    }
+    // filter dup requests
+    if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
+      filterDupReqs(entityManager, requestData, engineData, response);
     }
 
     // reverify
@@ -847,7 +604,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       request.setAddrType(addr.getId().getAddrType());
       request.setCity(addr.getCity1());
 
-      if ("END USER".equals(scenarioSubType)) {
+      if (USUtil.SC_BP_END_USER.equals(scenarioSubType)) {
         if ("ZS01".equals(addr.getId().getAddrType()) && addr.getDivn() != null) {
           request.setCustomerName(StringUtils.isBlank(addr.getDivn()) ? "" : addr.getDivn());
         } else if ("ZI01".equals(addr.getId().getAddrType()) && admin.getMainCustNm1() != null) {
@@ -902,7 +659,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     MatchingResponse<DuplicateCMRCheckResponse> response = new MatchingResponse<DuplicateCMRCheckResponse>();
 
     // check if End user and has divn value
-    if ("END USER".equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
+    if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
       Addr zs01 = requestData.getAddress("ZS01");
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
@@ -923,13 +680,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     boolean first = true;
     List<String> rdcAddrTypes = null;
     for (String cmrAddrType : addrTypes.keySet()) {
-      log.debug("CmrAddrType= " + cmrAddrType);
+      LOG.debug("CmrAddrType= " + cmrAddrType);
       rdcAddrTypes = addrTypes.get(cmrAddrType);
       Addr addr = requestData.getAddress(cmrAddrType);
       for (String rdcAddrType : rdcAddrTypes) {
         if (addr != null) {
           DuplicateCMRCheckRequest request = getRequestForCmrChk(entityManager, data, admin, addr, rdcAddrType, vatMatchRequired);
-          log.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
+          LOG.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
               + " for AddrType: " + cmrAddrType + "-" + rdcAddrType);
           MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
           ObjectMapper mapper = new ObjectMapper();
@@ -950,10 +707,15 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           }
 
         } else {
-          log.debug("No '" + cmrAddrType + "' address on the request. Skipping duplicate check.");
+          LOG.debug("No '" + cmrAddrType + "' address on the request. Skipping duplicate check.");
           continue;
         }
       }
+    }
+
+    // filter dup requests
+    if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
+      filterDupCmrs(entityManager, requestData, engineData, response);
     }
 
     // reverify
@@ -993,7 +755,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
       request.setCity(addr.getCity1());
-
+      request.setUsRestrictTo(data.getRestrictTo());
       request.setStateProv(addr.getStateProv());
       request.setPostalCode(addr.getPostCd());
 
@@ -1029,7 +791,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
   @Override
   public String getProcessCode() {
-    // TODO Auto-generated method stub
     return AutomationElementRegistry.US_DUP_CHK;
   }
 
