@@ -26,4 +26,6 @@ public class AutomationConst {
   public static final int ITEM_NO_ALL = -1;
   public static final int ITEM_NO_FIRST = 1;
 
+  public static final String ISIC_PRIVATE_PERSON = "9500";
+
 }
