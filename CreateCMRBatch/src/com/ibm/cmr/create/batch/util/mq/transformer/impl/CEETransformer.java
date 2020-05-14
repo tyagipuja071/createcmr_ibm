@@ -7,14 +7,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.openjpa.kernel.FillStrategy.Map;
-import org.codehaus.jackson.node.NodeCursor.Object;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
@@ -77,12 +77,10 @@ public class CEETransformer extends EMEATransformer {
   private static final String ADDRESS_USE_COUNTRY_G = "G";
   private static final String ADDRESS_USE_COUNTRY_H = "H";
 
-
   public CEETransformer(String issuingCntry) {
     super(issuingCntry);
 
   }
-
 
   @Override
   public void formatDataLines(MQMessageHandler handler) {
@@ -291,7 +289,6 @@ public class CEETransformer extends EMEATransformer {
       addressDataMap.put("stdCityNm", addrData.getStdCityNm());
       addressDataMap.put("taxOffice", addrData.getTaxOffice());
 
-
       if (!(StringUtils.isEmpty(addressDataMap.get("addrTxt"))) && !(addressDataMap.get("addrTxt").equals(handler.addrData.getAddrTxt()))) {
         handler.addrData.setAddrTxt(addressDataMap.get("addrTxt"));
       }
@@ -407,7 +404,6 @@ public class CEETransformer extends EMEATransformer {
       return "";
     }
   }
-
 
   @Override
   public String getSysLocToUse() {
@@ -723,7 +719,6 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
-
     boolean crossBorder = false;
     if (!StringUtils.isEmpty(addr.getLandCntry()) && !"ES".equals(addr.getLandCntry())) {
       crossBorder = true;
@@ -747,9 +742,7 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
-
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
-
 
     if (legacyFiscalAddr != null) {
       formatMassUpdateAddressLines(entityManager, legacyFiscalAddr, addr, true);
