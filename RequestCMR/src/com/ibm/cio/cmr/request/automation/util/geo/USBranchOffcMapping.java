@@ -171,7 +171,7 @@ public class USBranchOffcMapping {
       }
       break;
     default:
-      if (USUtil.BYMODEL.equals(data.getCustSubGrp())
+      if (USUtil.SC_BYMODEL.equals(data.getCustSubGrp())
           && !(USUtil.SC_FED_REGULAR.equals(scenario) || USUtil.SC_FED_POA.equals(scenario) || USUtil.SC_REST_OIO.equals(scenario))) {
         USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, admin.getModelCmrNo());
         if ("5AA".equalsIgnoreCase(data.getPccArDept())) {
@@ -211,8 +211,9 @@ public class USBranchOffcMapping {
       calculatedMktgDept = StringUtils.isBlank(data.getMktgDept()) ? "" : data.getMktgDept();
       break;
     case LOGIC:
-      if ((USUtil.FEDERAL.equals(data.getCustGrp()) && !USUtil.SC_FED_FEDSTATE.equals(scenario)) || (USUtil.BYMODEL.equals(data.getCustSubGrp())
-          && (USUtil.SC_FED_REGULAR.equals(scenario) || USUtil.SC_FED_CAMOUFLAGED.equals(scenario) || USUtil.SC_FED_POA.equals(scenario)))) {
+      if (((USUtil.FEDERAL.equals(data.getCustGrp()) || USUtil.FEDERAL_INDIAN.equals(data.getCustGrp())
+          || USUtil.FEDERAL_ALASKA.equals(data.getCustGrp())) && !USUtil.SC_FED_FEDSTATE.equals(scenario))
+          || ((USUtil.SC_FED_REGULAR.equals(scenario) || USUtil.SC_FED_CAMOUFLAGED.equals(scenario) || USUtil.SC_FED_POA.equals(scenario)))) {
         if ("MO".equals(stateToMatch)) {
           if (STATE_MO_M3A != null && STATE_MO_M3A.contains(countyToMatch)) {
             calculatedMktgDept = "M3A";
