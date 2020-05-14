@@ -91,6 +91,7 @@ public class GermanyUtil extends AutomationUtil {
       AutomationResult<ValidationOutput> results, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
+    String zs01Kunnr = StringUtils.isNotBlank(zs01.getSapNo()) ? zs01.getSapNo().substring(1) : null;
     Admin admin = requestData.getAdmin();
     boolean valid = true;
     String scenario = data.getCustSubGrp();
@@ -143,7 +144,7 @@ public class GermanyUtil extends AutomationUtil {
                     .append("\n");
                 engineData.addRejectionComment("DUPC",
                     "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo,
-                    "", "");
+                    " Duplicate CMR No : " + duplicateCMRNo, "ZS01 KUNNR : " + zs01Kunnr);
                 valid = false;
               } else {
                 details.append("No Duplicate CMRs were found.").append("\n");

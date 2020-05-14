@@ -79,6 +79,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     Addr soldTo = requestData.getAddress("ZS01");
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
+      String soldToKunnr = StringUtils.isNotBlank(soldTo.getSapNo()) ? soldTo.getSapNo().substring(1) : null;
       int itemNo = 1;
       // perform duplicate request check
       // check if eligible for vat matching
@@ -252,7 +253,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           engineData.addNegativeCheckStatus("dupAllowed",
               "There were possible duplicate CMRs/Requests found with the same data but allowed for the scenario.");
         } else {
-          engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs/Requests found with the same data.", "", "");
+          if (dupReqFound && !reqCheckMatches.isEmpty()) {
+            engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
+                StringUtils.join(reqCheckMatches, ", "), "");
+          } else if (dupCMRFound && !cmrCheckMatches.isEmpty()) {
+            engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
+                "Duplicate CMRs : " + StringUtils.join(cmrCheckMatches, ", "), "SOLD TO KUNNR : " + soldToKunnr);
+          }
           result.setOnError(true);
         }
         result.setProcessOutput(output);
@@ -453,9 +460,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         Collections.copy(reqCheckMatches, reqCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
 
-        if ("6".equals(usDetails.getCustTypCd())) {
+        if (USUtil.POWER_OF_ATTORNEY.equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
@@ -464,7 +471,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("4".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.FEDERAL.equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
@@ -473,7 +480,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("3".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.THIRD_P_LEASING.equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
@@ -484,7 +491,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("7".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.THIRD_P_BUSINESS_PARTNER.equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
@@ -495,7 +502,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("2".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.STATE_LOCAL.equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
@@ -504,7 +511,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(reqCheckMatches, reqCheckMatchesTmp);
-        } else if ("1".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.COMMERCIAL.equals(usDetails.getCustTypCd())) {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
@@ -677,9 +684,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         Collections.copy(cmrCheckMatches, cmrCheckMatches);
         reqNegStatFlag = true;
       } else if ("BYMODEL".equals(scenarioSubType)) {
-        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo(), engineData);
+        USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
 
-        if ("6".equals(usDetails.getCustTypCd())) {
+        if (USUtil.POWER_OF_ATTORNEY.equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
             if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
@@ -688,7 +695,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("4".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.FEDERAL.equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
             if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
@@ -697,7 +704,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("3".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.THIRD_P_LEASING.equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
             if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo())
@@ -708,10 +715,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("7".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.THIRD_P_BUSINESS_PARTNER.equals(usDetails.getCustTypCd())) {
           Collections.copy(cmrCheckMatches, cmrCheckMatches);
           reqNegStatFlag = true;
-        } else if ("2".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.STATE_LOCAL.equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
             if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
@@ -720,7 +727,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             }
           }
           Collections.copy(cmrCheckMatches, cmrCheckMatchesTmp);
-        } else if ("1".equals(usDetails.getCustTypCd())) {
+        } else if (USUtil.COMMERCIAL.equals(usDetails.getCustTypCd())) {
           for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
             if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
                 && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())

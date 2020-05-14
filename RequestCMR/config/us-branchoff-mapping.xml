@@ -81,11 +81,43 @@
     <pccArDept>DB4</pccArDept>
   </mapping>
   <mapping>
+  	<scenario>NO RESTRICT</scenario>
+    <csoSite>request</csoSite>
+    <mktgDept>request</mktgDept>
+    <mtkgArDept>request</mtkgArDept>
+    <svcArOffice>request</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>SVR CONT</scenario>
+    <csoSite>request</csoSite>
+    <mktgDept>request</mktgDept>
+    <mtkgArDept>request</mtkgArDept>
+    <svcArOffice>request</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>32C</scenario>
+    <csoSite>32C</csoSite>
+    <mktgDept>request</mktgDept>
+    <mtkgArDept>32C</mtkgArDept>
+    <svcArOffice>request</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>TPPS</scenario>
+    <csoSite>32C</csoSite>
+    <mktgDept>request</mktgDept>
+    <mtkgArDept>32C</mtkgArDept>
+    <svcArOffice>NRV</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
   	<scenario>3CC</scenario>
     <csoSite>3CC</csoSite>
-    <mktgDept>SVB</mktgDept>
+    <mktgDept>request</mktgDept>
     <mtkgArDept>3CC</mtkgArDept>
-    <svcArOffice>IKE</svcArOffice>
+    <svcArOffice>request</svcArOffice>
     <pccArDept>G8M</pccArDept>
   </mapping>
   <mapping>
@@ -282,6 +314,54 @@
     <pccArDept>2CC</pccArDept>
   </mapping>
   <mapping>
+  	<scenario>INDIAN TRIBE</scenario>
+    <csoSite>GRD</csoSite>
+    <mktgDept>logic</mktgDept>
+    <mtkgArDept>28W</mtkgArDept>
+    <svcArOffice>28W</svcArOffice>
+    <pccArDept>2CC</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>TRIBAL BUS</scenario>
+    <csoSite>GRD</csoSite>
+    <mktgDept>logic</mktgDept>
+    <mtkgArDept>28W</mtkgArDept>
+    <svcArOffice>28W</svcArOffice>
+    <pccArDept>2CC</pccArDept>
+  </mapping>
+   <mapping>
+  	<scenario>HEALTHCARE</scenario>
+    <csoSite>GRD</csoSite>
+    <mktgDept>logic</mktgDept>
+    <mtkgArDept>28W</mtkgArDept>
+    <svcArOffice>28W</svcArOffice>
+    <pccArDept>2CC</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>HOSPITAL</scenario>
+    <csoSite>GRD</csoSite>
+    <mktgDept>logic</mktgDept>
+    <mtkgArDept>28W</mtkgArDept>
+    <svcArOffice>28W</svcArOffice>
+    <pccArDept>2CC</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>CLINIC</scenario>
+    <csoSite>GRD</csoSite>
+    <mktgDept>logic</mktgDept>
+    <mtkgArDept>28W</mtkgArDept>
+    <svcArOffice>28W</svcArOffice>
+    <pccArDept>2CC</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>NATIVE CORP</scenario>
+    <csoSite>GRD</csoSite>
+    <mktgDept>logic</mktgDept>
+    <mtkgArDept>28W</mtkgArDept>
+    <svcArOffice>28W</svcArOffice>
+    <pccArDept>2CC</pccArDept>
+  </mapping>
+  <mapping>
   	<scenario>CAMOUFLAGED</scenario>
     <csoSite>GRD</csoSite>
     <mktgDept>logic</mktgDept>
@@ -296,5 +376,45 @@
     <mtkgArDept>logic</mtkgArDept>
     <svcArOffice>28W</svcArOffice>
     <pccArDept>2CC</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>POOL</scenario>
+    <csoSite>logic</csoSite>
+    <mktgDept>EI3</mktgDept>
+    <mtkgArDept>logic</mtkgArDept>
+    <svcArOffice>IKE</svcArOffice>
+    <pccArDept>logic</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>DEVELOP</scenario>
+    <csoSite>YBV</csoSite>
+    <mktgDept>EI3</mktgDept>
+    <mtkgArDept>DI3</mtkgArDept>
+    <svcArOffice>IKE</svcArOffice>
+    <pccArDept>G8G</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>E-HOST</scenario>
+    <csoSite>YBV</csoSite>
+    <mktgDept>EI3</mktgDept>
+    <mtkgArDept>DI3</mtkgArDept>
+    <svcArOffice>IKE</svcArOffice>
+    <pccArDept>G8G</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>GRANTS</scenario>
+    <csoSite>request</csoSite>
+    <mktgDept>request</mktgDept>
+    <mtkgArDept>request</mtkgArDept>
+    <svcArOffice>request</svcArOffice>
+    <pccArDept>G8M</pccArDept>
+  </mapping>
+  <mapping>
+  	<scenario>SSI</scenario>
+    <csoSite>request</csoSite>
+    <mktgDept>request</mktgDept>
+    <mtkgArDept>request</mtkgArDept>
+    <svcArOffice>request</svcArOffice>
+    <pccArDept>request</pccArDept>
   </mapping>
 </mappings>
