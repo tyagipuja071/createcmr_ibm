@@ -217,10 +217,6 @@ public class PortugalTransformer extends MessageTransformer {
     messageHash.put("AccAdBo", "");
     messageHash.put("AccAdmDSC", "");
 
-    if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
-      messageHash.put("CEdivision", "2");
-    }
-
     boolean create = "C".equals(handler.adminData.getReqType());
     if (create) {
       messageHash.put("NationalCust", "N");
@@ -398,15 +394,6 @@ public class PortugalTransformer extends MessageTransformer {
         legacyCust.setMrcCd("3");
       }
 
-      // Type Of Customer
-      if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custSubType)) {
-        legacyCust.setCustType("G");
-      } else if (MQMsgConstants.CUSTSUBGRP_INTSO.equals(custSubType) || "CRISO".equals(custSubType)) {
-        legacyCust.setCustType("91");
-      } else {
-        legacyCust.setCustType("");
-      }
-
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -448,6 +435,10 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     // common data for C/U
+    
+    // Type of Customer : CMRTCUST.CCUAI
+    legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ? data.getCrosSubTyp() : "");
+    
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
       legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
     }
@@ -463,9 +454,11 @@ public class PortugalTransformer extends MessageTransformer {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       }
     }
+    
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
+    
     legacyCust.setDistrictCd(data.getTerritoryCd() != null ? data.getTerritoryCd() : "");
     legacyCust.setBankBranchNo(data.getCollectionCd() != null ? data.getCollectionCd() : "");
   }
@@ -499,10 +492,9 @@ public class PortugalTransformer extends MessageTransformer {
     if (custSubGrp != null && ("INTER".equals(custSubGrp) || "CRINT".equals(custSubGrp))) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(998999);
-    }
-    
-    if (custSubGrp != null && ("INTSO".equals(custSubGrp) || "CRISO".equals(custSubGrp))) {
+    } else if (custSubGrp != null && ("INTSO".equals(custSubGrp) || "CRISO".equals(custSubGrp))) {
       generateCMRNoObj.setMin(997000);
+      generateCMRNoObj.setMax(999999);
     }
   }
 
