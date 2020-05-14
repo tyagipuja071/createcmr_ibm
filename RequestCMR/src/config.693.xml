@@ -489,7 +489,7 @@
 			</columns>
 		</tab>
 		<tab name="Address in Local language" data="false" type="Address"
-			typeCode="ZI01">
+			typeCode="ZS02">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
