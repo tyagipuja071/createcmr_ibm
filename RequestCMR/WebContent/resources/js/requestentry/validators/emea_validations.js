@@ -256,8 +256,13 @@ function disableTaxOfficeTR() {
     var addressTypeValue = FormManager.getActualValue('addrType');
     if (addressTypeValue == 'ZP01') {
       FormManager.show('TaxOffice', 'taxOffice');
-      checkAndAddValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ]);
-    } else {
+      var custType = FormManager.getActualValue('custGrp');
+      if(custType == 'CROSS' || FormManager.getActualValue('reqType') == 'U'){
+        FormManager.removeValidator('taxOffice', Validators.REQUIRED);
+      }else{
+        checkAndAddValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ]);
+      }
+    }else{
       FormManager.hide('TaxOffice', 'taxOffice');
       FormManager.removeValidator('taxOffice', Validators.REQUIRED);
     }
