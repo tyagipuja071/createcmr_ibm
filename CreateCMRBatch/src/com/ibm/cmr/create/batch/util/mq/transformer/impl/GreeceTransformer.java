@@ -469,6 +469,26 @@ public class GreeceTransformer extends EMEATransformer {
         legacyCust.setAbbrevNm("");
       }
 
+      String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+          + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+      if (isuClientTier != null && isuClientTier.length() == 3) {
+        legacyCust.setIsuCd(isuClientTier);
+      } else {
+        legacyCust.setIsuCd("");
+      }
+      
+      if (!StringUtils.isBlank(data.getIsicCd())) {
+        legacyCust.setIsicCd(data.getIsicCd());
+      } else {
+        legacyCust.setIsicCd("");
+      }
+      
+      if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+        legacyCust.setImsCd(data.getSubIndustryCd());
+      } else {
+        legacyCust.setImsCd("");
+      }
+      
     } // common data for C/U
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {

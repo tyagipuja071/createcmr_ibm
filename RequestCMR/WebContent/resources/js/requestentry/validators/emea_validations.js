@@ -2905,7 +2905,7 @@ function addGRAddressTypeValidator() {
         		  mismatchFields = getMismatchFields(zs01Data, zp01Data, true);
         	  }
         	  if(mismatchFields != '') {
-        		  return new ValidationResult(null, false, 'Sold-to mismatch, please update Language translation of Sold-to: ' +  mismatchFields);	  
+        		  return new ValidationResult(null, false, 'Sold-to mismatch, please update Local Language translation of Sold-to: ' +  mismatchFields);	  
         	  }
           } 
 
@@ -2949,7 +2949,6 @@ function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
 }
 
 function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
-    console.log('isCrossborder: ' + isCrossborder);
 
 	var mismatchFields = '';
 	  if(!hasMatchingFieldsFilled(zs01Data.addrTxt[0], zp01Data.addrTxt[0], isCrossborder)) {
@@ -2987,7 +2986,6 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
 }
 
 function hasMatchingFieldsFilled(zs01Field, zp01Field, isCrossborder) {
-	console.log(zs01Field + ' : ' + zp01Field);
   if(!isCrossborder) {
 	  // local just check if empty or not
     if (zs01Field != '' && zs01Field != null) {
@@ -3111,8 +3109,9 @@ var _addrSelectionHistGR = '';
 function preFillTranslationAddrWithSoldToForGR(cntry, addressMode, saving) {
   if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
     var custType = FormManager.getActualValue('custGrp');
-	// for local don't proceed
-	if (custType == 'LOCAL') {
+
+    // for local don't proceed
+	if (custType == 'LOCAL' || cmr.addressMode == 'copyAddress') {
 	  return;
 	}
 	if(!saving) {
@@ -3471,6 +3470,7 @@ function setFieldsBehaviourGR() {
       FormManager.resetValidations('repTeamMemberNo');
       FormManager.resetValidations('isuCd');
       FormManager.resetValidations('clientTier');
+      FormManager.readOnly('custPrefLang');
   }
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
