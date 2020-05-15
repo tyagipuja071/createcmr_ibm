@@ -318,10 +318,17 @@ public class USUtil extends AutomationUtil {
     }
 
     if (StringUtils.isBlank(scenarioSubType) || Arrays.asList(scenarioList).contains(scenarioSubType)) {
-      engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Automated checks cannot be performed for this scenario.");
-      details.append("\nAutomated checks cannot be performed for this scenario.").append("\n");
+      String scenarioDesc = getScenarioDesc(entityManager, scenarioSubType);
+      if (SC_BYMODEL.equals(data.getCustSubGrp())) {
+        engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
+        details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
+      } else {
+        engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as the request is for " + scenarioDesc + " scenario.");
+        details.append("Processor review required as the request is for " + scenarioDesc + " scenario.").append("\n");
+      }
+
       valid = true;
-    } else if ("CAMOUFLAGED".equals(scenarioSubType)) {
+    } else if (SC_FED_CAMOUFLAGED.equals(scenarioSubType)) {
       String sql = ExternalizedQuery.getSql("AUTO.CHK_CMDE_USER");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQUESTER_ID", admin.getRequesterId());
@@ -337,6 +344,14 @@ public class USUtil extends AutomationUtil {
       }
     }
     return valid;
+  }
+
+  private String getScenarioDesc(EntityManager entityManager, String scenarioSubType) {
+    String sql = ExternalizedQuery.getSql("GET_SCENARIO_DESC_US");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SUB_SCENARIO", scenarioSubType);
+    query.setForReadOnly(true);
+    return query.getSingleResult(String.class);
   }
 
   @Override
