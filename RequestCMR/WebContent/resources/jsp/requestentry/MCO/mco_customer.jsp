@@ -25,6 +25,18 @@
   <form:hidden path="sitePartyId" />
   <form:hidden path="searchTerm" />
 
+<cmr:row addBackground="true">
+        <cmr:column span="1" containerForField="VATExempt" forCountry="780">
+          <p>
+            <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+            <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
+            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+              <cmr:fieldLabel fieldId="VATExempt" />
+              <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
+            </cmr:label>
+          </p>
+        </cmr:column>
+</cmr:row>
   <cmr:row addBackground="false">
     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
@@ -58,7 +70,7 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-     <cmr:view forGEO="MCO,MCO1,MCO2">
+     <cmr:view forGEO="MCO,MCO1,MCO2" exceptForCountry="780">
       <cmr:column span="2" containerForField="EmbargoCode">
       <p>
         <cmr:label fieldId="embargoCd">
@@ -81,7 +93,27 @@
     </cmr:column>
     </cmr:view>
   </cmr:row>
-
+  <%--New Fields for Malta 
+ <cmr:row addBackground="false">
+	<cmr:column span="2" containerForField="OrdBlk" forCountry="780">
+      <p>
+        <cmr:label fieldId="ordBlk">
+          <cmr:fieldLabel fieldId="OrdBlk" />:
+            <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
+        </cmr:label>
+        <cmr:field path="ordBlk" id="ordBlk" fieldId="OrdBlk" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+    <cmr:column span="2" containerForField="CustClass" forCountry="780">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
+        </p>
+    </cmr:column>
+   </cmr:row>
+ --%>
   <cmr:view forCountry="XXXX">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="OrgNo">

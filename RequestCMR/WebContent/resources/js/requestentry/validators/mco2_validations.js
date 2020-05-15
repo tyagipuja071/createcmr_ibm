@@ -73,13 +73,22 @@ function disableAddrFieldsCEWA() {
   } else {
     FormManager.enable('landCntry');
   }
-
-  // Phone - for shipping and EPL addresses
-  if (addrType == 'ZD01' || addrType == 'ZS02') {
-    FormManager.enable('custPhone');
-  } else {
-    FormManager.setValue('custPhone', '');
-    FormManager.disable('custPhone');
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MALTA) {
+ // Phone - for shipping
+    if (addrType == 'ZD01') {
+      FormManager.enable('custPhone');
+    } else {
+      FormManager.setValue('custPhone', '');
+      FormManager.disable('custPhone');
+    }  
+  }else{
+ // Phone - for shipping and EPL addresses
+    if (addrType == 'ZD01' || addrType == 'ZS02') {
+      FormManager.enable('custPhone');
+    } else {
+      FormManager.setValue('custPhone', '');
+      FormManager.disable('custPhone');
+    }
   }
 
 }
@@ -684,11 +693,12 @@ function setEntpMaltaValues(){
   var custSubGrp =  FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole');
 
-  if((cntry == '780' && req == 'C')){
-    if(custSubGrp != 'BUSPR' && custSubGrp != 'XBP'){
+  if(req != 'C'){
+    return;
+  }
+    if(custSubGrp != 'BUSPR' && custSubGrp != 'XBP' &&  custSubGrp != 'INTER'){
       FormManager.setValue('enterprise','985204');
-    }
-    else {
+    } else {
       FormManager.clearValue('enterprise');
     } 
    
@@ -697,8 +707,7 @@ function setEntpMaltaValues(){
   }
   else{
     FormManager.enable('enterprise');  
-  }
-  }
+  } 
 }
 
 function streetValidatorCustom() {
@@ -767,11 +776,13 @@ function addValidatorStreet() {
 }
 
 function setSalesRepValue(){
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp != "BUSPR" && custSubGrp != "XBP") {
-    FormManager.setValue('repTeamMemberNo', '016757');
-  } else {
-    FormManager.setValue('repTeamMemberNo', '780780');
+  if('780' != FormManager.getActualValue('cmrIssuingCntry')){
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (custSubGrp != "BUSPR" && custSubGrp != "XBP") {
+      FormManager.setValue('repTeamMemberNo', '016757');
+    } else {
+      FormManager.setValue('repTeamMemberNo', '780780');
+    }
   }
 }
 
@@ -946,10 +957,12 @@ function addTinBillingValidator() {
 
 function addAfterConfigMalta() {
   mandatoryForBusinessPartnerMT();
+  disableEnableFieldsForMT();
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
   mandatoryForBusinessPartnerMT();
+  setEntpMaltaValues();
 }
 
 function addAddrFunctionMalta(cntry, addressMode, saving, finalSave) {
@@ -978,6 +991,18 @@ function mandatoryForBusinessPartnerMT() {
   }
 }
 
+function disableEnableFieldsForMT(){
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  
+    if (reqType == 'C'){
+      if(role == 'REQUESTER') {
+        FormManager.readOnly('specialTaxCd');
+      }else{
+        FormManager.enable('specialTaxCd');
+      }
+    }
+}
 
 
 /* End 1430539 */
@@ -1000,7 +1025,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(streetAvenueValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(enterpriseMalta, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
+//  GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);

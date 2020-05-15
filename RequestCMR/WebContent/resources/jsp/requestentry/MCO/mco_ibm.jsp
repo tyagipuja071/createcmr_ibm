@@ -17,7 +17,7 @@
 %>
 <cmr:view forGEO="MCO,MCO1,MCO2">
   <cmr:row topPad="10">
-    <cmr:column span="2" containerForField="SalRepNameNo">
+    <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="780">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
           <cmr:fieldLabel fieldId="SalRepNameNo" />:

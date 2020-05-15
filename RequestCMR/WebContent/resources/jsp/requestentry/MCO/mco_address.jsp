@@ -118,7 +118,7 @@
   </cmr:column>
    <!-- We are using for Tin number -->
   <div id="tin">
-  <cmr:column span="2" containerForField="Department">
+  <cmr:column span="2" containerForField="Department" exceptForCountry="780">
     <p>
       <cmr:label fieldId="dept">
         <cmr:fieldLabel fieldId="Department" />:
