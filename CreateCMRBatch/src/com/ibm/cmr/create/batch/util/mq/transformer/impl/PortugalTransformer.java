@@ -436,6 +436,9 @@ public class PortugalTransformer extends MessageTransformer {
 
     // common data for C/U
     
+    // LANG_CD
+    legacyCust.setLangCd("1");
+    
     // Type of Customer : CMRTCUST.CCUAI
     legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ? data.getCrosSubTyp() : "");
     
