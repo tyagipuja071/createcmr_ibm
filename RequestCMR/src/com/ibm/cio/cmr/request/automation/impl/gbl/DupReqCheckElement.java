@@ -24,7 +24,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -88,29 +89,9 @@ public class DupReqCheckElement extends DuplicateCheckElement {
               LOG.debug("Duplicate Requests Found, Req Id: " + reqCheckRecord.getReqId());
               output.addMatch(getProcessCode(), "REQ_ID", reqCheckRecord.getReqId() + "", matchType, reqCheckRecord.getMatchGrade() + "", "REQ",
                   itemNo);
-              details.append("Request ID = " + reqCheckRecord.getReqId()).append("\n");
-              details.append("Match Type = " + matchType).append("\n");
-              details.append("Match Score = " + reqCheckRecord.getMatchGrade()).append("\n");
-              details.append("Issuing Country =  " + reqCheckRecord.getIssuingCntry()).append("\n");
-              details.append("Customer Name =  " + reqCheckRecord.getCustomerName()).append("\n");
-              details.append("Address =  " + reqCheckRecord.getStreetLine1()).append("\n");
-              if (!StringUtils.isBlank(reqCheckRecord.getStreetLine2())) {
-                details.append("Address (cont)=  " + reqCheckRecord.getStreetLine2()).append("\n");
-              }
-              if (!StringUtils.isBlank(reqCheckRecord.getCity())) {
-                details.append("City =  " + reqCheckRecord.getCity()).append("\n");
-              }
-              if (!StringUtils.isBlank(reqCheckRecord.getStateProv())) {
-                details.append("State =  " + reqCheckRecord.getStateProv()).append("\n");
-              }
-              if (!StringUtils.isBlank(reqCheckRecord.getPostalCode())) {
-                details.append("Postal Code =  " + reqCheckRecord.getPostalCode()).append("\n");
-              }
-              if (!StringUtils.isBlank(reqCheckRecord.getLandedCountry())) {
-                details.append("Landed Country =  " + reqCheckRecord.getLandedCountry()).append("\n");
-              }
-              engineData.put("reqCheckMatches", reqCheckRecord);
+              logDuplicateRequest(details, reqCheckRecord, matchType);
             }
+            engineData.put("reqCheckMatches", reqCheckMatches);
             result.setResults("Found Duplicate Requests.");
             engineData.addRejectionComment("DUPR", reqCheckMatches.size() + " possible duplicate request(s) found with the same data.",
                 "\n Duplicate Request(s): " + StringUtils.join(dupReqIds, ", "), "");
@@ -153,6 +134,30 @@ public class DupReqCheckElement extends DuplicateCheckElement {
 
     return result;
 
+  }
+
+  public void logDuplicateRequest(StringBuilder details, ReqCheckResponse reqCheckRecord, String matchType) {
+    details.append("Request ID = " + reqCheckRecord.getReqId()).append("\n");
+    details.append("Match Type = " + matchType).append("\n");
+    details.append("Match Score = " + reqCheckRecord.getMatchGrade()).append("\n");
+    details.append("Issuing Country =  " + reqCheckRecord.getIssuingCntry()).append("\n");
+    details.append("Customer Name =  " + reqCheckRecord.getCustomerName()).append("\n");
+    details.append("Address =  " + reqCheckRecord.getStreetLine1()).append("\n");
+    if (!StringUtils.isBlank(reqCheckRecord.getStreetLine2())) {
+      details.append("Address (cont)=  " + reqCheckRecord.getStreetLine2()).append("\n");
+    }
+    if (!StringUtils.isBlank(reqCheckRecord.getCity())) {
+      details.append("City =  " + reqCheckRecord.getCity()).append("\n");
+    }
+    if (!StringUtils.isBlank(reqCheckRecord.getStateProv())) {
+      details.append("State =  " + reqCheckRecord.getStateProv()).append("\n");
+    }
+    if (!StringUtils.isBlank(reqCheckRecord.getPostalCode())) {
+      details.append("Postal Code =  " + reqCheckRecord.getPostalCode()).append("\n");
+    }
+    if (!StringUtils.isBlank(reqCheckRecord.getLandedCountry())) {
+      details.append("Landed Country =  " + reqCheckRecord.getLandedCountry()).append("\n");
+    }
   }
 
   public MatchingResponse<ReqCheckResponse> getMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
@@ -226,7 +231,8 @@ public class DupReqCheckElement extends DuplicateCheckElement {
     if (addr != null) {
       request.setAddrType(addr.getId().getAddrType());
       request.setCity(addr.getCity1());
-      if (admin.getMainCustNm1() != null) {
+      GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+      if (handler != null && !handler.customerNamesOnAddress()) {
         request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
       } else {
         request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
@@ -242,18 +248,12 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       } else if (StringUtils.isNotBlank(addr.getVat())) {
         request.setVat(addr.getVat());
       }
-
-      if (StringUtils.isNotBlank(request.getIssuingCountry())) {
-        if (StringUtils.isNotBlank(data.getCustSubGrp()) && SystemLocation.BRAZIL.equals(request.getIssuingCountry())) {
-          request.setScenario(data.getCustSubGrp());
-        }
-
-        if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
-          request.setMatchType("V");
-        }
+      if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
+        request.setMatchType("V");
       }
 
       DuplicateChecksUtil.setCountrySpecificsForRequestChecks(entityManager, admin, data, addr, request);
+
     }
     return request;
   }
