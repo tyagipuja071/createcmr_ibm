@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -52,6 +53,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
@@ -2315,7 +2317,7 @@ public class EMEAHandler extends BaseSOFHandler {
         // Sync Sold to and Local lauguage address
         if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp())
             && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
-          updateSoldToAndTranslation(entityManager, addr);
+          updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
         }
         if(admin.getReqType().equals("C")){
           Addr zs01addr = getCurrentInstallingAddress(entityManager,admin.getId().getReqId() );
@@ -2328,7 +2330,7 @@ public class EMEAHandler extends BaseSOFHandler {
       if (data != null && admin.getReqType().equals("U")) {
         // Sync Sold to and Local lauguage address
         if (!"TR".equals(addr.getLandCntry()) && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
-          updateSoldToAndTranslation(entityManager, addr);
+          updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
         }
       }
 
@@ -2751,26 +2753,42 @@ public class EMEAHandler extends BaseSOFHandler {
     query.executeSql();
   }
 
-  private void updateSoldToAndTranslation(EntityManager entityManager, Addr addr) throws Exception {
+  private void updateSoldToAndTranslation(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     // If Sold-to is updated, then also Translation address must be updated and
     // vice versa
     String addrType = "ZP01".equals(addr.getId().getAddrType()) ? "ZS01" : "ZP01";
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.SoldToOrTranslation"));
-    query.setParameter("Addr_Type", addrType);
-    query.setParameter("LAND_CNTRY", addr.getLandCntry());
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE"));
     query.setParameter("REQ_ID", addr.getId().getReqId());
-    query.setParameter("Customer_Name", addr.getCustNm1());
-    query.setParameter("Customer_Name_Cont", addr.getCustNm2());
-    query.setParameter("Street", addr.getAddrTxt());
-    query.setParameter("Street_Cont", addr.getAddrTxt2());
-    query.setParameter("City", addr.getCity1());
-    query.setParameter("Province", addr.getStateProv());
-    query.setParameter("Postal_Code", addr.getPostCd());
-    query.setParameter("District", addr.getDept());
-    query.setParameter("PO_Box", addr.getPoBox());
-    query.setParameter("Name_4", addr.getCustNm4());
-
-    query.executeSql();
+    query.setParameter("Addr_Type", addrType);
+    Addr addrSource = query.getSingleResult(Addr.class);
+    if (addrSource != null) {
+      String importInd = addrSource.getImportInd();
+      Addr addrCopy = new Addr();
+      AddrPK addrPkCopy = new AddrPK();
+      PropertyUtils.copyProperties(addrCopy, addrSource);
+      PropertyUtils.copyProperties(addrPkCopy, addrSource.getId());
+      addrCopy.setId(addrPkCopy);
+      addrCopy.setLandCntry(addr.getLandCntry());
+      addrCopy.setCustNm1(addr.getCustNm1());
+      addrCopy.setCustNm2(addr.getCustNm2());
+      addrCopy.setCustNm4(addr.getCustNm4());
+      addrCopy.setAddrTxt(addr.getAddrTxt());
+      addrCopy.setAddrTxt2(addr.getAddrTxt2());
+      addrCopy.setCity1(addr.getCity1());
+      addrCopy.setStateProv(addr.getStateProv());
+      addrCopy.setPostCd(addr.getPostCd());
+      addrCopy.setDept(addr.getDept());
+      addrCopy.setPoBox(addr.getPoBox());
+      if (!"N".equals(importInd)) {
+        entityManager.detach(addrSource);
+        boolean changed = RequestUtils.isUpdated(entityManager, addrCopy, cmrIssuingCntry);
+        addrCopy.setChangedIndc(changed ? "Y" : null);
+      } else {
+        addrCopy.setChangedIndc(null);
+      }
+      entityManager.merge(addrCopy);
+      entityManager.flush();
+    }
   }
 
   @Override
