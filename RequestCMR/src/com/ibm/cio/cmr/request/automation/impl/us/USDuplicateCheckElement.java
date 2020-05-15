@@ -3,49 +3,46 @@ package com.ibm.cio.cmr.request.automation.impl.us;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
+import com.ibm.cio.cmr.request.automation.AutomationElement;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.DuplicateCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DupReqCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
-import com.ibm.cio.cmr.request.automation.util.DuplicateChecksUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
-import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
-import com.ibm.cmr.services.client.matching.request.ReqCheckRequest;
 import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 
 /**
  * 
- * @author RangoliSaxena
+ * {@link AutomationElement} handling the US - Duplicate Checks
+ * 
  * @author RoopakChugh
  *
  */
 public class USDuplicateCheckElement extends DuplicateCheckElement {
 
   private static final Logger LOG = Logger.getLogger(USDuplicateCheckElement.class);
+  private static DupReqCheckElement dupReqCheckElement = new DupReqCheckElement(null, null, false, false);
+  private static DupCMRCheckElement dupCMRCheckElement = new DupCMRCheckElement(null, null, false, false);
+
   private static final List<String> negativeCheckScenarioList = Arrays.asList(USUtil.SC_IGS, USUtil.SC_IGSF, USUtil.SC_LEASE_NO_RESTRICT,
       USUtil.SC_LEASE_32C, USUtil.SC_LEASE_IPMA, USUtil.SC_LEASE_LPMA, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_TRIBAL_BUS, USUtil.SC_FED_HEALTHCARE,
       USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_CLINIC, USUtil.SC_FED_NATIVE_CORP, USUtil.SC_FED_CAMOUFLAGED, USUtil.SC_STATE_STATE,
@@ -54,11 +51,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
   public USDuplicateCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
-  }
-
-  @Override
-  public boolean importMatch(EntityManager entityManager, RequestData requestData, AutomationMatching match) {
-    return false;
   }
 
   @Override
@@ -78,6 +70,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     StringBuilder details = new StringBuilder();
     Addr soldTo = requestData.getAddress("ZS01");
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
+      List<String> duplicateList = new ArrayList<String>();
       List<DuplicateCMRCheckResponse> cmrCheckMatches = new ArrayList<DuplicateCMRCheckResponse>();
       List<ReqCheckResponse> reqCheckMatches = new ArrayList<ReqCheckResponse>();
       MatchingResponse<ReqCheckResponse> responseREQ = new MatchingResponse<>();
@@ -91,7 +84,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         matchType = "V";
       }
       // get duplicate req Matches
-      responseREQ = getReqMatches(entityManager, requestData, engineData);
+      responseREQ = getRequestMatches(entityManager, requestData, engineData);
       if (responseREQ != null && responseREQ.getSuccess()) {
         if (responseREQ.getMatched() && !responseREQ.getMatches().isEmpty()) {
           reqCheckMatches = responseREQ.getMatches();
@@ -104,31 +97,12 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
             details.append("\n");
             LOG.debug("Duplicate Requests Found, Req Id: " + reqCheckRecord.getReqId());
+            duplicateList.add("" + reqCheckRecord.getReqId());
             output.addMatch(getProcessCode(), "REQ_ID", reqCheckRecord.getReqId() + "", matchType, reqCheckRecord.getMatchGrade() + "", "REQ",
                 itemNo++);
-            details.append("Request ID = " + reqCheckRecord.getReqId()).append("\n");
-            details.append("Match Type = " + matchType).append("\n");
-            details.append("Match Score = " + reqCheckRecord.getMatchGrade()).append("\n");
-            details.append("Issuing Country =  " + reqCheckRecord.getIssuingCntry()).append("\n");
-            details.append("Customer Name =  " + reqCheckRecord.getCustomerName()).append("\n");
-            details.append("Address =  " + reqCheckRecord.getStreetLine1()).append("\n");
-            if (!StringUtils.isBlank(reqCheckRecord.getStreetLine2())) {
-              details.append("Address (cont)=  " + reqCheckRecord.getStreetLine2()).append("\n");
-            }
-            if (!StringUtils.isBlank(reqCheckRecord.getCity())) {
-              details.append("City =  " + reqCheckRecord.getCity()).append("\n");
-            }
-            if (!StringUtils.isBlank(reqCheckRecord.getStateProv())) {
-              details.append("State =  " + reqCheckRecord.getStateProv()).append("\n");
-            }
-            if (!StringUtils.isBlank(reqCheckRecord.getPostalCode())) {
-              details.append("Postal Code =  " + reqCheckRecord.getPostalCode()).append("\n");
-            }
-            if (!StringUtils.isBlank(reqCheckRecord.getLandedCountry())) {
-              details.append("Landed Country =  " + reqCheckRecord.getLandedCountry()).append("\n");
-            }
-            engineData.put("reqCheckMatches", reqCheckRecord);
+            dupReqCheckElement.logDuplicateRequest(details, reqCheckRecord, matchType);
           }
+          engineData.put("reqCheckMatches", reqCheckMatches);
           dupReqFound = true;
         }
       } else {
@@ -150,60 +124,15 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             // int itemNo = 1;
             for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
               details.append("\n");
-
               LOG.debug("Duplicate CMRs Found..");
               output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
                   itemNo++);
-              if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
-                details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getMatchGrade())) {
-                details.append("Match Grade = " + cmrCheckRecord.getMatchGrade()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getIssuingCntry())) {
-                details.append("Issuing Country =  " + cmrCheckRecord.getIssuingCntry()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getCustomerName())) {
-                details.append("Customer Name =  " + cmrCheckRecord.getCustomerName()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getLandedCountry())) {
-                details.append("Landed Country =  " + cmrCheckRecord.getLandedCountry()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine1())) {
-                details.append("Address =  " + cmrCheckRecord.getStreetLine1()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine2())) {
-                details.append("Address (cont)=  " + cmrCheckRecord.getStreetLine2()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getCity())) {
-                details.append("City =  " + cmrCheckRecord.getCity()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getStateProv())) {
-                details.append("State =  " + cmrCheckRecord.getStateProv()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getPostalCode())) {
-                details.append("Postal Code =  " + cmrCheckRecord.getPostalCode()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getVat())) {
-                details.append("VAT =  " + cmrCheckRecord.getVat()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getDunsNo())) {
-                details.append("Duns No =  " + cmrCheckRecord.getDunsNo()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getParentDunsNo())) {
-                details.append("Parent Duns No =  " + cmrCheckRecord.getParentDunsNo()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getGuDunsNo())) {
-                details.append("Global Duns No =  " + cmrCheckRecord.getGuDunsNo()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getCoverageId())) {
-                details.append("Coverage Id=  " + cmrCheckRecord.getCoverageId()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getIbmClientId())) {
-                details.append("IBM Client Id =  " + cmrCheckRecord.getIbmClientId()).append("\n");
-              }
-              if (!StringUtils.isBlank(cmrCheckRecord.getCapInd())) {
-                details.append("Cap Indicator =  " + cmrCheckRecord.getCapInd()).append("\n");
+              duplicateList.add(cmrCheckRecord.getCmrNo());
+              dupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
+              if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
+                details.append("US Restrict To =  " + cmrCheckRecord.getUsRestrictTo()).append("\n");
+              } else {
+                details.append("US Restrict To = -blank- ").append("\n");
               }
               engineData.put("cmrCheckMatches", cmrCheckRecord);
             }
@@ -220,20 +149,16 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           engineData.addNegativeCheckStatus("dupAllowed",
               "There were possible duplicate CMRs/Requests found with the same data but allowed for the scenario.");
         } else {
-          if (dupReqFound && !reqCheckMatches.isEmpty()) {
-            List<String> reqsList = new ArrayList<String>();
-            for (ReqCheckResponse reqChkRep : reqCheckMatches) {
-              reqsList.add(Long.toString(reqChkRep.getReqId()));
-            }
+          if (duplicateList.size() > 3) {
+            duplicateList = duplicateList.subList(0, 3);
+          }
+
+          if (dupReqFound) {
             engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
-                StringUtils.join(reqsList, ", "), "");
-          } else if (dupCMRFound && !cmrCheckMatches.isEmpty()) {
-            List<String> cmrsList = new ArrayList<String>();
-            for (DuplicateCMRCheckResponse cmrChkRep : cmrCheckMatches) {
-              cmrsList.add(cmrChkRep.getCmrNo());
-            }
+                "Duplicate Requests : " + StringUtils.join(duplicateList, ", "), "");
+          } else if (dupCMRFound) {
             engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
-                "Duplicate CMRs : " + StringUtils.join(cmrsList, ", "), "SOLD TO KUNNR : " + soldToKunnr);
+                "Duplicate CMRs : " + StringUtils.join(duplicateList, ", "), "SOLD TO KUNNR : " + soldToKunnr);
           }
           result.setOnError(true);
         }
@@ -268,9 +193,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           result.setResults("Error on Duplicate CMR Check");
         }
       }
-    } else if (scenarioExceptions.isSkipDuplicateChecks())
-
-    {
+    } else if (scenarioExceptions.isSkipDuplicateChecks()) {
       result.setDetails("The request's scenario is configured to skip duplicate checks.");
       result.setResults("Skipped Duplicate Check");
       result.setOnError(false);
@@ -289,7 +212,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   }
 
   private boolean shouldSetNegativeCheck(EntityManager entityManager, RequestData requestData, String custSubGrp) {
-    if (USUtil.BY_MODEL.equals(custSubGrp)) {
+    if (USUtil.SC_BYMODEL.equals(custSubGrp)) {
       try {
         USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
         if (!USUtil.COMMERCIAL.equals(usDetails.getCustTypCd())) {
@@ -305,7 +228,16 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return false;
   }
 
-  public void filterDupReqs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+  /**
+   * Filters duplicate requests based on scenario criteria
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param response
+   * @throws Exception
+   */
+  public void filterDuplicateRequests(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<ReqCheckResponse> response) throws Exception {
     List<ReqCheckResponse> reqCheckMatches = response.getMatches();
     List<ReqCheckResponse> reqCheckMatchesTmp = new ArrayList<ReqCheckResponse>();
@@ -413,7 +345,16 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     }
   }
 
-  public void filterDupCmrs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+  /**
+   * Filters for Duplicate CMR Records
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param response
+   * @throws Exception
+   */
+  public void filterDuplicateCmrRecords(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       MatchingResponse<DuplicateCMRCheckResponse> response) throws Exception {
 
     List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
@@ -511,11 +452,19 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     }
   }
 
-  public MatchingResponse<ReqCheckResponse> getReqMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
+  /**
+   * Gets filtered duplicate requests
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   * @throws Exception
+   */
+  public MatchingResponse<ReqCheckResponse> getRequestMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
 
     // check if End user and has divn value
@@ -529,42 +478,12 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
     }
 
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
-    client.setReadTimeout(1000 * 60 * 5);
-    boolean first = true;
-    for (String addrType : scenarioExceptions.getAddressTypesForDuplicateRequestCheck()) {
-      Addr addr = requestData.getAddress(addrType);
-      if (addr != null) {
-        ReqCheckRequest request = getRequestForReqChk(entityManager, data, admin, addr, scenarioExceptions);
-        LOG.debug("Executing Duplicate Request Check "
-            + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI") + " for AddrType: " + addrType);
-        MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.REQ_SERVICE_ID, request, MatchingResponse.class);
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(rawResponse);
-        TypeReference<MatchingResponse<ReqCheckResponse>> ref = new TypeReference<MatchingResponse<ReqCheckResponse>>() {
-        };
-        MatchingResponse<ReqCheckResponse> res = mapper.readValue(json, ref);
+    // get duplicates
+    response = dupReqCheckElement.getMatches(entityManager, requestData, engineData);
 
-        if (first) {
-          if (res.getSuccess()) {
-            response = res;
-            first = false;
-          } else {
-            return res;
-          }
-        } else if (response.getMatches().size() > 0 && res.getSuccess()) {
-          updateReqMatches(response, res);
-        }
-
-      } else {
-        LOG.debug("No '" + addrType + "' address on the request. Skipping duplicate check.");
-        continue;
-      }
-    }
     // filter dup requests
     if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
-      filterDupReqs(entityManager, requestData, engineData, response);
+      filterDuplicateRequests(entityManager, requestData, engineData, response);
     }
 
     // reverify
@@ -576,86 +495,19 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return response;
   }
 
-  private void updateReqMatches(MatchingResponse<ReqCheckResponse> global, MatchingResponse<ReqCheckResponse> iteration) {
-    List<ReqCheckResponse> updated = new ArrayList<ReqCheckResponse>();
-    for (ReqCheckResponse i : global.getMatches()) {
-      for (ReqCheckResponse j : iteration.getMatches()) {
-        if (i.getReqId() == j.getReqId()) {
-          updated.add(i);
-          break;
-        }
-      }
-    }
-
-    global.setSuccess(true);
-    global.setMatches(updated);
-    global.setMatched(updated.size() > 0);
-  }
-
-  private ReqCheckRequest getRequestForReqChk(EntityManager entityManager, Data data, Admin admin, Addr addr,
-      ScenarioExceptionsUtil scenarioExceptions) {
-    ReqCheckRequest request = new ReqCheckRequest();
-    request.setReqId(admin.getId().getReqId());
-    String scenarioSubType = "";
-    if ("C".equals(admin.getReqType()) && data != null) {
-      scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
-    }
-    if (addr != null) {
-      request.setAddrType(addr.getId().getAddrType());
-      request.setCity(addr.getCity1());
-
-      if (USUtil.SC_BP_END_USER.equals(scenarioSubType)) {
-        if ("ZS01".equals(addr.getId().getAddrType()) && addr.getDivn() != null) {
-          request.setCustomerName(StringUtils.isBlank(addr.getDivn()) ? "" : addr.getDivn());
-        } else if ("ZI01".equals(addr.getId().getAddrType()) && admin.getMainCustNm1() != null) {
-          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
-        } else {
-          if (admin.getMainCustNm1() != null) {
-            request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
-          } else {
-            request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
-          }
-        }
-      } else {
-        if (admin.getMainCustNm1() != null) {
-          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
-        } else {
-          request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
-        }
-      }
-
-      request.setStreetLine1(addr.getAddrTxt());
-      request.setStreetLine2(addr.getAddrTxt2());
-      request.setLandedCountry(addr.getLandCntry());
-      request.setIssuingCountry(data.getCmrIssuingCntry());
-      request.setPostalCode(addr.getPostCd());
-      request.setStateProv(addr.getStateProv());
-      if (StringUtils.isNotBlank(data.getVat())) {
-        request.setVat(data.getVat());
-      } else if (StringUtils.isNotBlank(addr.getVat())) {
-        request.setVat(addr.getVat());
-      }
-
-      if (StringUtils.isNotBlank(request.getIssuingCountry())) {
-        if (StringUtils.isNotBlank(data.getCustSubGrp()) && SystemLocation.BRAZIL.equals(request.getIssuingCountry())) {
-          request.setScenario(data.getCustSubGrp());
-        }
-
-        if (AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry())) {
-          request.setMatchType("V");
-        }
-      }
-
-      DuplicateChecksUtil.setCountrySpecificsForRequestChecks(entityManager, admin, data, addr, request);
-    }
-    return request;
-  }
-
-  public MatchingResponse<DuplicateCMRCheckResponse> getCMRMatches(EntityManager entityManager, RequestData requestData,
+  /**
+   * Get filtered CMR Matches
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   * @throws Exception
+   */
+  private MatchingResponse<DuplicateCMRCheckResponse> getCMRMatches(EntityManager entityManager, RequestData requestData,
       AutomationEngineData engineData) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-    ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     MatchingResponse<DuplicateCMRCheckResponse> response = new MatchingResponse<DuplicateCMRCheckResponse>();
 
     // check if End user and has divn value
@@ -669,53 +521,12 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
     }
 
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
-    client.setReadTimeout(1000 * 60 * 5);
-    Map<String, List<String>> addrTypes = scenarioExceptions.getAddressTypesForDuplicateCMRCheck();
-    boolean vatMatchRequired = AutomationUtil.isCheckVatForDuplicates(data.getCmrIssuingCntry());
-    if (addrTypes.isEmpty()) {
-      addrTypes.put("ZS01", Arrays.asList("ZS01"));
-    }
-    boolean first = true;
-    List<String> rdcAddrTypes = null;
-    for (String cmrAddrType : addrTypes.keySet()) {
-      LOG.debug("CmrAddrType= " + cmrAddrType);
-      rdcAddrTypes = addrTypes.get(cmrAddrType);
-      Addr addr = requestData.getAddress(cmrAddrType);
-      for (String rdcAddrType : rdcAddrTypes) {
-        if (addr != null) {
-          DuplicateCMRCheckRequest request = getRequestForCmrChk(entityManager, data, admin, addr, rdcAddrType, vatMatchRequired);
-          LOG.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
-              + " for AddrType: " + cmrAddrType + "-" + rdcAddrType);
-          MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
-          ObjectMapper mapper = new ObjectMapper();
-          String json = mapper.writeValueAsString(rawResponse);
-          TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
-          };
-          MatchingResponse<DuplicateCMRCheckResponse> res = mapper.readValue(json, ref);
-
-          if (first) {
-            if (res.getSuccess()) {
-              response = res;
-              first = false;
-            } else {
-              return res;
-            }
-          } else if (response.getMatches().size() > 0 && res.getSuccess()) {
-            updateCmrMatches(response, res);
-          }
-
-        } else {
-          LOG.debug("No '" + cmrAddrType + "' address on the request. Skipping duplicate check.");
-          continue;
-        }
-      }
-    }
+    // get duplicates
+    response = dupCMRCheckElement.getMatches(entityManager, requestData, engineData);
 
     // filter dup requests
     if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
-      filterDupCmrs(entityManager, requestData, engineData, response);
+      filterDuplicateCmrRecords(entityManager, requestData, engineData, response);
     }
 
     // reverify
@@ -727,66 +538,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return response;
   }
 
-  private DuplicateCMRCheckRequest getRequestForCmrChk(EntityManager entityManager, Data data, Admin admin, Addr addr, String rdcAddrType,
-      boolean vatMatchRequired) {
-    DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
-    String scenarioSubType = "";
-    if ("C".equals(admin.getReqType()) && data != null) {
-      scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
-    }
-    if (addr != null) {
-      request.setIssuingCountry(data.getCmrIssuingCntry());
-      request.setLandedCountry(addr.getLandCntry());
-
-      if ("END USER".equals(scenarioSubType)) {
-        if ("ZS01".equals(addr.getId().getAddrType())) {
-          request.setCustomerName(StringUtils.isBlank(addr.getDivn()) ? "" : addr.getDivn());
-        } else if ("ZI01".equals(addr.getId().getAddrType()) && admin.getMainCustNm1() != null) {
-          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
-        }
-      } else {
-        if (admin.getMainCustNm1() != null) {
-          request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
-        } else {
-          request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
-        }
-      }
-
-      request.setStreetLine1(addr.getAddrTxt());
-      request.setStreetLine2(StringUtils.isEmpty(addr.getAddrTxt2()) ? "" : addr.getAddrTxt2());
-      request.setCity(addr.getCity1());
-      request.setUsRestrictTo(data.getRestrictTo());
-      request.setStateProv(addr.getStateProv());
-      request.setPostalCode(addr.getPostCd());
-
-      if (vatMatchRequired) {
-        if (StringUtils.isNotBlank(data.getVat())) {
-          request.setVat(data.getVat());
-        } else if (StringUtils.isNotBlank(addr.getVat())) {
-          request.setVat(addr.getVat());
-        }
-      }
-      request.setAddrType(rdcAddrType);
-
-      DuplicateChecksUtil.setCountrySpecificsForCMRChecks(entityManager, admin, data, addr, request);
-    }
-    return request;
-  }
-
-  private void updateCmrMatches(MatchingResponse<DuplicateCMRCheckResponse> global, MatchingResponse<DuplicateCMRCheckResponse> iteration) {
-    List<DuplicateCMRCheckResponse> updated = new ArrayList<DuplicateCMRCheckResponse>();
-    for (DuplicateCMRCheckResponse resp1 : global.getMatches()) {
-      for (DuplicateCMRCheckResponse resp2 : iteration.getMatches()) {
-        if (resp1.getCmrNo().equals(resp2.getCmrNo())) {
-          updated.add(resp1);
-          break;
-        }
-      }
-    }
-
-    global.setSuccess(true);
-    global.setMatches(updated);
-    global.setMatched(updated.size() > 0);
+  @Override
+  public boolean importMatch(EntityManager entityManager, RequestData requestData, AutomationMatching match) {
+    return false;
   }
 
   @Override
