@@ -94,6 +94,10 @@ function addAfterConfigForSWISS() {
     FormManager.readOnly('custClass');
   }
 
+  if (FormManager.getActualValue('custGrp') == 'CROSS') {
+    FormManager.setValue('custLangCd', 'E');
+  }
+
   setTaxCdFrCustClass();
   setClientTierValues();
   setVatValidatorSWISS();
@@ -318,6 +322,7 @@ function addHandlersForSWISS() {
     _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
       setMubotyOnPostalCodeIMS(value);
       setMubotyOnPostalCodeIMS32N(value);
+      setPreferredLangAddr(value);
     });
   }
 
@@ -431,7 +436,7 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if ((custSubGrp == 'CHBUS') || (custSubGrp == 'XCHBP') || (custSubGrp == 'CHINT') || (custSubGrp == 'XCHIN') || (custSubGrp == 'LIINT') || (custSubGrp == 'LIBUS')) {
     return;
@@ -623,6 +628,9 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
               muboty.push(data.muboty);
               FormManager.limitDropdownValues(FormManager.getField('searchTerm'), muboty);
               if (muboty.length == 1) {
+                if (role == 'REQUESTER') {
+                  FormManager.readOnly('searchTerm');
+                }
                 FormManager.setValue('searchTerm', muboty[0]);
               }
               if (muboty.length == 0 || postCd.length > 4) {
@@ -647,6 +655,7 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
     return;
   }
 
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if ((custSubGrp == 'CHBUS') || (custSubGrp == 'XCHBP') || (custSubGrp == 'CHINT') || (custSubGrp == 'XCHIN') || (custSubGrp == 'LIINT') || (custSubGrp == 'LIBUS')) {
     return;
@@ -742,6 +751,9 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
               FormManager.limitDropdownValues(FormManager.getField('searchTerm'), muboty);
               if (muboty.length == 1) {
                 FormManager.setValue('searchTerm', muboty[0]);
+                if (role == 'REQUESTER') {
+                  FormManager.readOnly('searchTerm');
+                }
               }
               if (muboty.length == 0 || postCd.length > 4) {
                 FormManager.setValue('searchTerm', '');
@@ -776,8 +788,9 @@ function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
     var addrType = FormManager.getActualValue('addrType');
     if ((addrType == 'ZS01' || copyingToA)) {
       if (reqType == 'C')
-        autoSetAbbrevNmLogic();
+      autoSetAbbrevNmLogic();
       setCurrencyCd();
+      addVatSuffixForCustLangCd();
     }
 
   }
@@ -976,20 +989,14 @@ function addEmbargoCdValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function addVatValidatorForCustLangCd() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (dijit.byId('vatExempt').get('checked')) {
-          return new ValidationResult(null, true);
-        }
+function addVatSuffixForCustLangCd() {   
         var zs01ReqId = FormManager.getActualValue('reqId');
         var landCntry = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
           REQ_ID : zs01ReqId,
           ADDR_TYPE : 'ZS01'
         });
         if (landCntry != 'CH' && landCntry != 'LI') {
-          return new ValidationResult(null, true);
+          return;
         }
         var qParams = {
           REQ_ID : zs01ReqId,
@@ -1002,17 +1009,16 @@ function addVatValidatorForCustLangCd() {
         var vat = FormManager.getActualValue('vat');
 
         if ((vat != '' && vat != null) && (custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
-          return new ValidationResult(null, false, 'For Preffered Language English and German, Vat Suffix should be "Mwst".');
+          FormManager.setValue('vat',vat.concat("Mwst"));
         } else if ((vat != '' && vat != null) && (custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
-          return new ValidationResult(null, false, 'For Preffered Language Italian, vat Suffix should be "IVA".');
+          FormManager.setValue('vat',vat.concat("IVA"));
         } else if ((vat != '' && vat != null) && custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
-          return new ValidationResult(null, false, 'For Preffered Language French, vat Suffix should be "TVA".');
+          FormManager.setValue('vat',vat.concat("TVA"));
         } else {
           return new ValidationResult(null, true);
         }
       }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
+    }
 }
 
 function setCurrencyCd() {
@@ -1389,6 +1395,33 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   return canRemoveAddress(value, rowIndex, grid);
 }
 
+function setPreferredLangAddr() {
+  // Based on the value of postal code Customer Language field should be
+  // populated on each address:
+  //
+  // 3000 - 6499 and 6999 - 9999 it is D (German)
+  // 6500 - 6999 it is I (Italian)
+  // 0000 - 3000 it is F (French)
+  //
+  // Cross Border it is E (English)
+
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+
+  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
+  var postCd = FormManager.getActualValue('postCd');
+  postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
+
+  if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+    FormManager.setValue('custLangCd', 'D');
+  } else if (postCd >= 6500 && postCd <= 6999) {
+    FormManager.setValue('custLangCd', 'I');
+  } else if (postCd >= 0000 && postCd <= 3000) {
+    FormManager.setValue('custLangCd', 'F');
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
