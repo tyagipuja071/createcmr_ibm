@@ -369,7 +369,7 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    if (query.exists() && !"Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECKS_FOR_CMDE"))) {
+    if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECKS_FOR_CMDE"))) {
       // skip checks if requester is from USCMDE team
       LOG.debug("Requester is from US CMDE team, skipping update checks.");
       output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
@@ -731,7 +731,7 @@ public class USUtil extends AutomationUtil {
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
     query.setParameter("EMAIL", admin.getRequesterId());
     query.setForReadOnly(true);
-    if (query.exists() && !"Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECKS_FOR_CMDE"))) {
+    if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECKS_FOR_CMDE"))) {
       // skip checks if requester is from USCMDE team
       validation.setSuccess(true);
     } else {
