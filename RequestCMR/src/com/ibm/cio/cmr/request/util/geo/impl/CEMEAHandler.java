@@ -247,7 +247,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 
 				FindCMRRecordModel record = null;
 
-				if ("AT".equals(mainRecord.getCmrCountryLanded())) {
+        if ("618".equals(reqEntry.getCmrIssuingCntry())) {
 					return;
 				}
 
