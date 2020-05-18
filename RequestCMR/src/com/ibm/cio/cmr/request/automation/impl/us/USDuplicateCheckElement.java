@@ -310,8 +310,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         response.setMatches(reqCheckMatchesTmp);
         break;
-      case USUtil.THIRD_P_LEASING:
-      case USUtil.THIRD_P_BUSINESS_PARTNER:
+      case USUtil.LEASING:
+      case USUtil.BUSINESS_PARTNER:
         for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
           if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
               && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
@@ -417,8 +417,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         response.setMatches(cmrCheckMatchesTmp);
         break;
-      case USUtil.THIRD_P_LEASING:
-      case USUtil.THIRD_P_BUSINESS_PARTNER:
+      case USUtil.LEASING:
+      case USUtil.BUSINESS_PARTNER:
         for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
           if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
               && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo())
