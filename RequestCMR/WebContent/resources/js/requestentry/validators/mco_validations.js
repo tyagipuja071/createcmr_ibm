@@ -301,15 +301,11 @@ function addAddressFieldValidators() {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var poBox = FormManager.getActualValue('poBox');
-        if (cntry != SysLoc.SPAIN) {
+        var poBoxRegEx = /^[0-9]*$/;
+        if (poBox != '' && poBoxRegEx.test(poBox)) {
           return new ValidationResult(null, true);
-        } else {
-          var poBoxRegEx = /^[0-9]*$/;
-          if (poBox != '' && poBoxRegEx.test(poBox)) {
-            return new ValidationResult(null, true);
-          } else if (poBox != undefined && poBox != '') {
-            return new ValidationResult(null, false, 'PO Box format error. Only digits are allowed.');
-          }
+        } else if (poBox != undefined && poBox != '') {
+          return new ValidationResult(null, false, 'PO Box format error. Only digits are allowed.');
         }
         return new ValidationResult(null, true);
       }
@@ -635,12 +631,20 @@ function disableAddrFieldsPTES() {
   if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && FormManager.getActualValue('addrType') == 'ZD01') {
     FormManager.enable('custPhone');
   } else if (FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZD01') {
-    FormManager.setValue('custPhone', '');
     FormManager.readOnly('custPhone');
+    FormManager.setValue('custPhone', '');
   } else {
     FormManager.enable('custPhone');
   }
-
+  
+  // Legacy PT
+  if (cntryCd == SysLoc.PORTUGAL && FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZP01') {
+    FormManager.enable('poBox');
+  } else {
+    FormManager.readOnly('poBox');
+    FormManager.setValue('custPhone', '');
+  }
+  
   // Sequence Number - enable for additional shipping
   if (cmr.currentRequestType == 'U' && FormManager.getActualValue('importInd') != 'Y' && FormManager.getActualValue('addrType') == 'ZD01') {
     FormManager.enable('prefSeqNo');
