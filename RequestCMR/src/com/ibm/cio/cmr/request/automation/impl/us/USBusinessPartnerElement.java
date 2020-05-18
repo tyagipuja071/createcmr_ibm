@@ -817,11 +817,14 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
 
     USCeIdMapping mapping = null;
+    String mappingRule = null;
     if (!StringUtils.isBlank(data.getEnterprise())) {
       mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+      mappingRule = "E";
     }
     if (mapping == null && !StringUtils.isBlank(data.getPpsceid())) {
       mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+      mappingRule = "C";
     }
     details.append("\n");
     if (mapping == null) {
@@ -834,7 +837,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
       }
       boolean distributor = mapping.isDistributor();
-      details.append("BP is a distributor based on records.\n");
+      details.append("BP is a distributor based on (" + ("E".equals(mappingRule) ? "Enterprise No." : "CE ID") + ").\n");
       if (distributor) {
         overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
         overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
