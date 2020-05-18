@@ -89,6 +89,7 @@ public class DuplicateChecksUtil {
           request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
         }
       }
+      request.setUsRestrictTo(data.getRestrictTo());
       break;
     }
 
