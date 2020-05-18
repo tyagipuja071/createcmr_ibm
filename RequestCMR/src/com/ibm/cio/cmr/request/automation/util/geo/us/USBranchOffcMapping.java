@@ -280,6 +280,7 @@ public class USBranchOffcMapping {
           String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
           String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
           String sql = ExternalizedQuery.getSql("AUTO.GET_MKTG_AR_DEPT_USCMR", usSchema);
+          sql.replace(":ENTERPRISE", "'" + (StringUtils.isNotBlank(data.getEnterprise()) ? data.getEnterprise() : "") + "'");
           String dbId = QueryClient.USCMR_APP_ID;
 
           QueryRequest query = new QueryRequest();
@@ -293,7 +294,8 @@ public class USBranchOffcMapping {
             Map<String, Object> record = response.getRecords().get(0);
             calculatedMtkgArDept = (String) record.get("I_CUST_OFF_3");
           }
-        } else if (StringUtils.isBlank(calculatedMtkgArDept)) {
+        }
+        if (StringUtils.isBlank(calculatedMtkgArDept)) {
           String indToMatch = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd().substring(0, 1);
           // iterate and display values
           for (Entry<String, List<String>> entry : indARBOMap.entrySet()) {
