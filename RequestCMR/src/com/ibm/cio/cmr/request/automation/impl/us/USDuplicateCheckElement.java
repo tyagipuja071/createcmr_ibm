@@ -3,6 +3,7 @@ package com.ibm.cio.cmr.request.automation.impl.us;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -22,13 +23,19 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
@@ -76,7 +83,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       MatchingResponse<ReqCheckResponse> responseREQ = new MatchingResponse<>();
       MatchingResponse<DuplicateCMRCheckResponse> responseCMR = new MatchingResponse<>();
 
-      String soldToKunnr = StringUtils.isNotBlank(soldTo.getSapNo()) ? soldTo.getSapNo().substring(1) : null;
       int itemNo = 1;
       // perform duplicate request check
       // check if eligible for vat matching
@@ -157,8 +163,14 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
                 "Duplicate Requests : " + StringUtils.join(duplicateList, ", "), "");
           } else if (dupCMRFound) {
+            List<String> cmrsList = new ArrayList<String>();
+            List<String> soldToKunnrsList = new ArrayList<String>();
+            for (DuplicateCMRCheckResponse cmrChkRep : cmrCheckMatches) {
+              cmrsList.add(cmrChkRep.getCmrNo());
+              soldToKunnrsList.add(getZS01Kunnr(cmrChkRep.getCmrNo()));
+            }
             engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
-                "Duplicate CMRs : " + StringUtils.join(duplicateList, ", "), "SOLD TO KUNNR : " + soldToKunnr);
+                "Duplicate CMRs : " + StringUtils.join(duplicateList, ", "), "SOLD TO KUNNR : " + StringUtils.join(soldToKunnrsList, ", "));
           }
           result.setOnError(true);
         }
@@ -556,6 +568,33 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   @Override
   public boolean isNonImportable() {
     return true;
+  }
+
+  private String getZS01Kunnr(String cmrNo) throws Exception {
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+    }
+    return kunnr;
   }
 
 }
