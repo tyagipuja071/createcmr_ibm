@@ -7768,6 +7768,39 @@ function mandatoryForBusinessPartnerCY() {
   }
 }
 
+function validateSingleReactParentCMR() {
+  
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking Inactive Parents of Single Reactivation CMR..');
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        console.log('ReqType:'+reqType +' <>cmrNo:'+cmrNo +' <>cntry:'+cntry);
+        if (reqType == 'X' && cmrNo) {
+          var qParams = {
+              COUNTRY : cntry,
+                  CMR_NO : cmrNo
+            };
+          var results = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT', qParams);
+          if (results.ret1 != null && 'C' == results.ret1) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'Parents CMR#' + results.ret2 + ' is inactive So, first reactivate this.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+    return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+ 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7931,6 +7964,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateEnterpriseNumForIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(checkIfStateProvBlankForProcIT, [ SysLoc.ITALY ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(stateProvValidatorCBforIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(validateSingleReactParentCMR, [ SysLoc.ITALY ], null, true);
   // CMR-2085 Turkey:CMR number: manual insertion for processor, validation
   // numeric, existing
   // *abner revert begin
