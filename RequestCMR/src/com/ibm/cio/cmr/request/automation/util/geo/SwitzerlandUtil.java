@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -202,7 +203,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       validation.setMessage("Duplicate Address");
     } else if (resultCodes.contains("R")) {
       validation.setSuccess(false);
-      validation.setMessage("Validation Required");
+      validation.setMessage("Not Validated");
       engineData.addNegativeCheckStatus("_chCheckFailed", "Updated elements cannot be checked automatically.");
     } else {
       validation.setSuccess(true);
@@ -227,9 +228,75 @@ public class SwitzerlandUtil extends AutomationUtil {
       return true;
     }
 
+    StringBuilder details = new StringBuilder();
+    boolean cmdeReview = false;
+    List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
+      switch (change.getDataField()) {
+      case "VAT #":
+        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          boolean matchesDnb = false;
+          if (matches != null) {
+            // check against D&B
+            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+          }
+          if (!matchesDnb) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_chVATCheckFailed", "VAT # on the request did not match D&B");
+            details.append("VAT # on the request did not match D&B\n");
+          } else {
+            details.append("VAT # on the request matches D&B\n");
+          }
 
+        }
+        break;
+      case "Order Block Code":
+        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData())) {
+          cmdeReview = true;
+        }
+        break;
+      case "ISIC":
+      case "Subindustry":
+      case "INAC/NAC Code":
+        cmdeReview = true;
+        break;
+      case "Tax Code":
+        // noop, for switch handling only
+        break;
+      case "Client Tier Code":
+        // noop, for switch handling only
+        break;
+      case "ISU Code":
+        // noop, for switch handling only
+        break;
+      case "MUBOTY(SORTL)":
+        // noop, for switch handling only
+        break;
+      default:
+        ignoredUpdates.add(change.getDataField());
+        break;
+      }
     }
+
+    if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_chDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      details.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
+      }
+    }
+    output.setDetails(details.toString());
+    output.setProcessOutput(validation);
 
     return true;
   }
