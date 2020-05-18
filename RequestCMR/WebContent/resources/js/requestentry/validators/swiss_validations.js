@@ -990,31 +990,32 @@ function addEmbargoCdValidator() {
 }
 
 function addVatSuffixForCustLangCd() {
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var landCntry = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
-    REQ_ID : zs01ReqId,
+  var reqId = FormManager.getActualValue('reqId');
+  var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
+    REQ_ID : reqId,
     ADDR_TYPE : 'ZS01'
   });
+  var landCntry = result.ret1;
   if (landCntry != 'CH' && landCntry != 'LI') {
     return;
   }
   var qParams = {
-    REQ_ID : zs01ReqId,
+    REQ_ID : reqId,
   };
   var custLangCd = FormManager.getActualValue('custLangCd');
-  var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
-  if (custLangCd == '')
-    custLangCd = result.ret1;
-
-  var vat = FormManager.getActualValue('vat');
-
-  if ((vat != '' && vat != null) && (custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
-    FormManager.setValue('vat', vat.concat("Mwst"));
-  } else if ((vat != '' && vat != null) && (custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
-    FormManager.setValue('vat', vat.concat("IVA"));
-  } else if ((vat != '' && vat != null) && custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
-    FormManager.setValue('vat', vat.concat("TVA"));
+  var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
+  var vat = result.ret1;
+  if (vat != '' && vat != null && vat != undefined) {
+    vat = vat.substring(0, vat.indexOf(' '));
+    if ((custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
+      FormManager.setValue('vat', vat.concat(" Mwst"));
+    } else if ((custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
+      FormManager.setValue('vat', vat.concat(" IVA"));
+    } else if (custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
+      FormManager.setValue('vat', vat.concat(" TVA"));
+    }
   }
+
 }
 
 function setCurrencyCd() {
@@ -1453,7 +1454,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.SWISS, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addEmbargoCdValidator, GEOHandler.SWISS, null, true);
-  GEOHandler.registerValidator(addVatValidatorForCustLangCd, GEOHandler.SWISS, null, true);
+  // GEOHandler.registerValidator(addVatValidatorForCustLangCd,
+  // GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SWITZERLAND, 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.SWITZERLAND ], null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorFrSWISS, SysLoc.SWITZERLAND, null, true);
   GEOHandler.registerValidator(resetAddrTypeValidation, GEOHandler.SWISS, null, true);
