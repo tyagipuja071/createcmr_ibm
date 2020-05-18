@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -27,8 +28,10 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -170,7 +173,109 @@ public class CEMEAHandler extends BaseSOFHandler {
 				record.setCmrAddrSeq("1");
 			}
 			converted.add(record);
-		} else {
+    } else {
+      String cmrIssueCd = reqEntry.getCmrIssuingCntry();
+      String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
+      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+        if (source.getItems() != null) {
+          String addrType = null;
+          String seqNo = null;
+          List<String> sofUses = null;
+          FindCMRRecordModel addr = null;
+
+          // map RDc - SOF - CreateCMR by sequence no
+          for (FindCMRRecordModel record : source.getItems()) {
+            seqNo = record.getCmrAddrSeq();
+
+            seqNo = record.getCmrAddrSeq();
+            System.out.println("seqNo = " + seqNo);
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+              addrType = record.getCmrAddrTypeCode();
+              if (!StringUtils.isEmpty(addrType)) {
+                addr = cloneAddress(record, addrType);
+                addr.setCmrDept(record.getCmrCity2());
+                converted.add(addr);
+              }
+              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+                String kunnr = addr.getCmrSapNumber();
+                String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
+                    addr.getCmrAddrSeq());
+                int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
+                    record.getCmrNum());
+                String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
+                if (!StringUtils.isBlank(adrnr)) {
+                  Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
+                  if (sadr != null) {
+                    Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
+                    if (installingAddr != null) {
+                      LOG.debug("Adding installing to the records");
+                      FindCMRRecordModel installing = new FindCMRRecordModel();
+                      PropertyUtils.copyProperties(installing, mainRecord);
+                      copyAddrData(installing, installingAddr, maxSeq);
+                      // installing.setParentCMRNo(mainRecord.getCmrNum());
+                      installing.setCmrName1Plain(sadr.getName1());
+                      installing.setCmrName2Plain(sadr.getName2());
+                      installing.setCmrCity(sadr.getOrt01());
+                      installing.setCmrCity2(sadr.getOrt02());
+                      installing.setCmrStreetAddress(sadr.getStras());
+                      installing.setCmrName3(sadr.getName3());
+                      installing.setCmrName4(sadr.getName4());
+                      installing.setCmrCountryLanded(sadr.getLand1());
+                      installing.setCmrCountry(sadr.getSpras());
+                      installing.setCmrStreetAddressCont(sadr.getStrs2());
+                      installing.setCmrState(sadr.getRegio());
+                      installing.setCmrPostalCode(sadr.getPstlz());
+                      installing.setCmrDept(sadr.getOrt02());
+                      if (!StringUtils.isBlank(sadr.getTxjcd())) {
+                        installing.setCmrTaxOffice(sadr.getTxjcd());
+                      }
+                      if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
+                        installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
+                      }
+                      installing.setCmrSapNumber("");
+                      converted.add(installing);
+                    }
+                  }
+                }
+                if (StringUtils.isBlank(adrnr)) {
+                  CmrtAddr mailingAddr = getLegacyMailingAddress(entityManager, searchModel.getCmrNum());
+                  if (mailingAddr != null) {
+                    Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
+                    if (installingAddr != null) {
+                      LOG.debug("Adding installing to the records");
+                      FindCMRRecordModel installing = new FindCMRRecordModel();
+                      PropertyUtils.copyProperties(installing, mainRecord);
+                      copyAddrData(installing, installingAddr, maxSeq);
+                      // add value
+                      installing.setCmrName1Plain(mailingAddr.getAddrLine1());
+                      if (!StringUtils.isBlank(mailingAddr.getAddrLine2())) {
+                        installing.setCmrName2Plain(mailingAddr.getAddrLine2());
+                      } else {
+                        installing.setCmrName2Plain("");
+                      }
+                      installing.setCmrStreetAddress(mailingAddr.getAddrLine3());
+                      installing.setCmrCity(record.getCmrCity());
+                      installing.setCmrCity2(record.getCmrCity2());
+                      installing.setCmrCountry(mailingAddr.getAddrLine6());
+                      installing.setCmrCountryLanded("");
+                      installing.setCmrPostalCode(record.getCmrPostalCode());
+                      installing.setCmrState(record.getCmrState());
+                      if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
+                        installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
+                      } else {
+                        installing.setCmrStreetAddressCont("");
+                      }
+                      converted.add(installing);
+                    }
+                  }
+                }
+              }
+            }
+
+          }
+
+        }
+      } else {
 
 			Map<String, FindCMRRecordModel> zi01Map = new HashMap<String, FindCMRRecordModel>();
 
@@ -276,6 +381,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 			}
 		}
 	}
+  }
 
 	protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry,
 			Map<String, FindCMRRecordModel> zi01Map, List<FindCMRRecordModel> converted) {
@@ -1442,4 +1548,94 @@ public class CEMEAHandler extends BaseSOFHandler {
 		}
 		return knvpParvmCount;
 	}
+
+  public String getaddAddressAdrnr(EntityManager entityManager, String katr6, String mandt, String kunnr, String ktokd, String seq) {
+    String adrnr = "";
+    String sql = ExternalizedQuery.getSql("CEE.GETADRNR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("ADDR_TYPE", ktokd);
+    query.setParameter("ADDR_SEQ", seq);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      adrnr = sResult[1].toString();
+    }
+    System.out.println("adrnr = " + adrnr);
+
+    return adrnr;
+  }
+
+  public Sadr getCEEAddtlAddr(EntityManager entityManager, String adrnr, String mandt) {
+    Sadr sadr = new Sadr();
+    String qryAddlAddr = ExternalizedQuery.getSql("GET.CEE_SADR_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, qryAddlAddr);
+    query.setParameter("ADRNR", adrnr);
+    query.setParameter("MANDT", mandt);
+    sadr = query.getSingleResult(Sadr.class);
+
+    return sadr;
+  }
+
+  private Addr getCurrentInstallingAddress(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("CEE.GETINSTALLING");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Addr.class);
+  }
+
+  private void copyAddrData(FindCMRRecordModel record, Addr addr, String seq) {
+    record.setCmrAddrTypeCode("ZP02");
+    record.setCmrAddrSeq(seq);
+    record.setCmrName1Plain(addr.getCustNm1());
+    record.setCmrName2Plain(addr.getCustNm2());
+    record.setCmrName3(addr.getCustNm3());
+    record.setCmrName4(addr.getCustNm4());
+    record.setCmrStreetAddress(addr.getAddrTxt());
+    record.setCmrCity(addr.getCity1());
+    record.setCmrCity2(addr.getCity2());
+    record.setCmrState(addr.getStateProv());
+    record.setCmrCountryLanded(addr.getLandCntry());
+    record.setCmrCountry(addr.getLandCntry());
+    record.setCmrPOBox(addr.getPoBox());
+    record.setCmrPostalCode(addr.getPostCd());
+    record.setParentCMRNo(addr.getParCmrNo());
+  }
+
+  private CmrtAddr getLegacyMailingAddress(EntityManager entityManager, String cmrNo) {
+    String sql = ExternalizedQuery.getSql("TR.GETLEGACYMAIL");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setForReadOnly(true);
+    return query.getSingleResult(CmrtAddr.class);
+  }
+
+  private int getMaxSequenceOnAddr(EntityManager entityManager, String mandt, String katr6, String cmrNo) {
+    String maxAddrSeq = null;
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("CEE.GETADDRSEQ.MAX");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 ? result[0] : "0");
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "0";
+      }
+      addrSeq = Integer.parseInt(maxAddrSeq);
+      addrSeq = ++addrSeq;
+      System.out.println("maxseq = " + addrSeq);
+    }
+
+    return addrSeq;
+  }
+
 }
