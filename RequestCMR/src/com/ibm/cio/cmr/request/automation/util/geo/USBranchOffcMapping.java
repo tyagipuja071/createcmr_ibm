@@ -280,7 +280,7 @@ public class USBranchOffcMapping {
           String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
           String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
           String sql = ExternalizedQuery.getSql("AUTO.GET_MKTG_AR_DEPT_USCMR", usSchema);
-          sql.replace(":ENTERPRISE", "'" + (StringUtils.isNotBlank(data.getEnterprise()) ? data.getEnterprise() : "") + "'");
+          sql = StringUtils.replace(sql, ":ENTERPRISE", "'" + (StringUtils.isNotBlank(data.getEnterprise()) ? data.getEnterprise() : "") + "'");
           String dbId = QueryClient.USCMR_APP_ID;
 
           QueryRequest query = new QueryRequest();
