@@ -124,7 +124,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     String custSubGrp = data.getCustSubGrp();
     if ("BYMODEL".equals(custSubGrp)) {
       String type = admin.getCustType();
-      if (!TYPE_BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
+      if (!USUtil.BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
           || (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
         output.setResults("Skipped");
         output.setDetails("Non BP End User create by model scenario not supported.");
@@ -798,7 +798,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     overrides.addOverride(getProcessCode(), "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
     overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
     overrides.addOverride(getProcessCode(), "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
-    overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
     overrides.addOverride(getProcessCode(), "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
     boolean hasFieldError = false;
@@ -810,23 +809,22 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     } else {
       if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())) {
         overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
+        overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8G");
       } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
-        if (!"7NZ".equals(data.getMtkgArDept()) && !"2NS".equals(data.getMtkgArDept())) {
-          String msg = "Marketing A/R Department for End User - Maintenance request cannot be validated. Should either be 7NZ or 2NS (Current: "
-              + data.getMtkgArDept() + ")";
-          engineData.addNegativeCheckStatus("_usBpData", msg);
-          details.append(msg + "\n");
-          hasFieldError = true;
-        }
+        overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "2NS");
+        overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
       }
     }
 
     USCeIdMapping mapping = null;
+    String mappingRule = null;
     if (!StringUtils.isBlank(data.getEnterprise())) {
       mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+      mappingRule = "E";
     }
     if (mapping == null && !StringUtils.isBlank(data.getPpsceid())) {
       mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+      mappingRule = "C";
     }
     details.append("\n");
     if (mapping == null) {
@@ -839,7 +837,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
       }
       boolean distributor = mapping.isDistributor();
-      details.append("BP is a distributor based on records.\n");
+      details.append("BP is a distributor based on (" + ("E".equals(mappingRule) ? "Enterprise No." : "CE ID") + ").\n");
       if (distributor) {
         overrides.addOverride(getProcessCode(), "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
         overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);

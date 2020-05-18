@@ -31,6 +31,8 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -635,6 +637,96 @@ public abstract class AutomationUtil {
   }
 
   /**
+   * Generic method for ignoring Private Customer record updates
+   * 
+   * @param entityManager
+   * @param admin
+   * @param output
+   * @param validation
+   * @param engineData
+   * @return
+   */
+  protected boolean handlePrivatePersonRecord(EntityManager entityManager, Admin admin, AutomationResult<ValidationOutput> output,
+      ValidationOutput validation, AutomationEngineData engineData) {
+    DataRdc rdc = getDataRdc(entityManager, admin);
+    if ("9500".equals(rdc.getIsicCd())) {
+      LOG.debug("Private customer record. Skipping validations.");
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
+      output.setDetails("Update checks skipped for Private Customer record.");
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Checks if the address already exists on the Request
+   *
+   * @param addrToCheck
+   * @param reqId
+   * @return
+   */
+  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
+
+    String sql = ExternalizedQuery.getSql("AUTO.DE.CHECK_IF_ADDRESS_EXIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
+    query.setParameter("NAME1", addrToCheck.getCustNm1());
+    query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
+    query.setParameter("CITY", addrToCheck.getCity1());
+    query.setParameter("TRANSPORT_ZONE", addrToCheck.getTransportZone());
+    if (addrToCheck.getAddrTxt() != null) {
+      query.append(" and ADDR_TXT = :ADDR_TXT");
+      query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
+    }
+    if (addrToCheck.getCustNm2() != null) {
+      query.append(" and CUST_NM2 = :NAME2");
+      query.setParameter("NAME2", addrToCheck.getCustNm2());
+    }
+    if (addrToCheck.getDept() != null) {
+      query.append(" and DEPT = :DEPT");
+      query.setParameter("DEPT", addrToCheck.getDept());
+    }
+    if (addrToCheck.getFloor() != null) {
+      query.append(" and FLOOR= :FLOOR");
+      query.setParameter("FLOOR", addrToCheck.getFloor());
+    }
+    if (addrToCheck.getBldg() != null) {
+      query.append(" and BLDG= :BLDG");
+      query.setParameter("BLDG", addrToCheck.getBldg());
+    }
+    if (addrToCheck.getOffice() != null) {
+      query.append(" and OFFICE =:OFFICE");
+      query.setParameter("OFFICE", addrToCheck.getOffice());
+    }
+    if (addrToCheck.getStateProv() != null) {
+      query.append(" and STATE_PROV = :STATE");
+      query.setParameter("STATE", addrToCheck.getStateProv());
+    }
+    if (addrToCheck.getPoBox() != null) {
+      query.append(" and PO_BOX = :PO_BOX");
+      query.setParameter("PO_BOX", addrToCheck.getPoBox());
+    }
+    if (addrToCheck.getPostCd() != null) {
+      query.append(" and POST_CD= :POST_CD");
+      query.setParameter("POST_CD", addrToCheck.getPostCd());
+    }
+    if (addrToCheck.getCustPhone() != null) {
+      query.append(" and CUST_PHONE = :PHONE");
+      query.setParameter("PHONE", addrToCheck.getCustPhone());
+    }
+    if (addrToCheck.getCounty() != null) {
+      query.append(" and COUNTY= :COUNTY");
+      query.setParameter("COUNTY", addrToCheck.getCounty());
+    }
+
+    return query.exists();
+  }
+
+  /**
    * Checks if the given name has legal endings. This checks the globally
    * defined legal identifiers and has support for country-specific legal
    * endings
@@ -673,6 +765,20 @@ public abstract class AutomationUtil {
    */
   protected List<String> getCountryLegalEndings() {
     return Collections.emptyList();
+  }
+
+  /**
+   * Gets the {@link DataRdc} record for the given request
+   * 
+   * @param entityManager
+   * @param admin
+   * @return
+   */
+  protected DataRdc getDataRdc(EntityManager entityManager, Admin admin) {
+    DataPK rdcPk = new DataPK();
+    rdcPk.setReqId(admin.getId().getReqId());
+    DataRdc rdc = entityManager.find(DataRdc.class, rdcPk);
+    return rdc;
   }
 
   /**

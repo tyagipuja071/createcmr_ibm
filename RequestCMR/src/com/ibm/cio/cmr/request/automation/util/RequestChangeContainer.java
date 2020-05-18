@@ -163,6 +163,22 @@ public class RequestChangeContainer {
   }
 
   /**
+   * Gets the change connected with the specific fieldId on the address type
+   *
+   * @param fieldId
+   * @return
+   */
+  public List<UpdatedNameAddrModel> getAddressChanges(String addrType, String addrSeq) {
+    List<UpdatedNameAddrModel> changes = new ArrayList<UpdatedNameAddrModel>();
+    for (UpdatedNameAddrModel addrChange : this.addressUpdates) {
+      if (addrType.equals(addrChange.getAddrTypeCode()) && addrSeq.equals(addrChange.getAddrSeq())) {
+        changes.add(addrChange);
+      }
+    }
+    return changes;
+  }
+
+  /**
    * Checks if the legal name has been changed for this request
    *
    * @return

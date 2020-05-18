@@ -30,7 +30,6 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
@@ -795,13 +794,6 @@ public class FranceUtil extends AutomationUtil {
     }
 
     return isOnlyFieldUpdated;
-  }
-
-  private DataRdc getDataRdc(EntityManager entityManager, Admin admin) {
-    DataPK rdcPk = new DataPK();
-    rdcPk.setReqId(admin.getId().getReqId());
-    DataRdc rdc = entityManager.find(DataRdc.class, rdcPk);
-    return rdc;
   }
 
 }

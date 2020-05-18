@@ -614,7 +614,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
         // Check If Address already exists on request
-        isShipToExistOnReq = isAddressAleardyExists(entityManager, shipTo, reqId);
+        isShipToExistOnReq = addressExists(entityManager, shipTo);
         if (isShipToExistOnReq) {
           detail.append("Ship To details provided matches an existing address.");
           validation.setMessage("ShipTo already exists");
@@ -631,7 +631,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
         // Check If Address already exists on request
-        isInstallAtExistOnReq = isAddressAleardyExists(entityManager, installAt, reqId);
+        isInstallAtExistOnReq = addressExists(entityManager, installAt);
         if (isInstallAtExistOnReq) {
           detail.append("Install At details provided matches an existing address.");
           engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address.",
@@ -660,7 +660,7 @@ public class GermanyUtil extends AutomationUtil {
 
       if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
         // Check If Address already exists on request
-        isBillToExistOnReq = isAddressAleardyExists(entityManager, billTo, reqId);
+        isBillToExistOnReq = addressExists(entityManager, billTo);
         if (isBillToExistOnReq) {
           detail.append("Bill To details provided matches an existing address.");
           engineData.addRejectionComment("ADDR", "Bill To details provided matches an existing address.", "", "");
@@ -748,78 +748,6 @@ public class GermanyUtil extends AutomationUtil {
       return true;
     }
     return false;
-  }
-
-  /**
-   * Checks if the address already exists on the Request
-   *
-   * @param addrToBeCHecked
-   * @param reqId
-   * @return
-   */
-  private boolean isAddressAleardyExists(EntityManager entityManager, Addr addrToBeCHecked, long reqId) {
-    boolean addrExists = false;
-    String sql = ExternalizedQuery.getSql("AUTO.DE.CHECK_IF_ADDRESS_EXIST");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setParameter("ADDR_SEQ", addrToBeCHecked.getId().getAddrSeq());
-    query.setParameter("NAME1", addrToBeCHecked.getCustNm1());
-    query.setParameter("LAND_CNTRY", addrToBeCHecked.getLandCntry());
-    query.setParameter("CITY", addrToBeCHecked.getCity1());
-    query.setParameter("TRANSPORT_ZONE", addrToBeCHecked.getTransportZone());
-    if (addrToBeCHecked.getAddrTxt() != null) {
-      query.append(" and ADDR_TXT = :ADDR_TXT");
-      query.setParameter("ADDR_TXT", addrToBeCHecked.getAddrTxt());
-    }
-    if (addrToBeCHecked.getCustNm2() != null) {
-      query.append(" and CUST_NM2 = :NAME2");
-      query.setParameter("NAME2", addrToBeCHecked.getCustNm2());
-    }
-    if (addrToBeCHecked.getDept() != null) {
-      query.append(" and DEPT = :DEPT");
-      query.setParameter("DEPT", addrToBeCHecked.getDept());
-    }
-    if (addrToBeCHecked.getFloor() != null) {
-      query.append(" and FLOOR= :FLOOR");
-      query.setParameter("FLOOR", addrToBeCHecked.getFloor());
-    }
-    if (addrToBeCHecked.getBldg() != null) {
-      query.append(" and BLDG= :BLDG");
-      query.setParameter("BLDG", addrToBeCHecked.getBldg());
-    }
-    if (addrToBeCHecked.getOffice() != null) {
-      query.append(" and OFFICE =:OFFICE");
-      query.setParameter("OFFICE", addrToBeCHecked.getOffice());
-    }
-    if (addrToBeCHecked.getStateProv() != null) {
-      query.append(" and STATE_PROV = :STATE");
-      query.setParameter("STATE", addrToBeCHecked.getStateProv());
-    }
-    if (addrToBeCHecked.getPoBox() != null) {
-      query.append(" and PO_BOX = :PO_BOX");
-      query.setParameter("PO_BOX", addrToBeCHecked.getPoBox());
-    }
-    if (addrToBeCHecked.getPostCd() != null) {
-      query.append(" and POST_CD= :POST_CD");
-      query.setParameter("POST_CD", addrToBeCHecked.getPostCd());
-    }
-    if (addrToBeCHecked.getCustPhone() != null) {
-      query.append(" and CUST_PHONE = :PHONE");
-      query.setParameter("PHONE", addrToBeCHecked.getCustPhone());
-    }
-    if (addrToBeCHecked.getCounty() != null) {
-      query.append(" and COUNTY= :COUNTY");
-      query.setParameter("COUNTY", addrToBeCHecked.getCounty());
-    }
-
-    // query.append(" fetch first 1 row only");
-
-    // query.setParameter("ADDR_TYPE", addrToBeCHecked.getId().getAddrType());
-
-    if (query.exists()) {
-      addrExists = true;
-    }
-    return addrExists;
   }
 
   private boolean isOnlyDeptUpdated(RequestChangeContainer changes) {
