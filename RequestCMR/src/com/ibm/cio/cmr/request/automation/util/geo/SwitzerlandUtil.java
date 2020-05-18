@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -19,7 +20,9 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
@@ -39,6 +42,9 @@ public class SwitzerlandUtil extends AutomationUtil {
   private static final String SCENARIO_IBM_EMPLOYEE = "IBM";
   private static final String SCENARIO_BUSINESS_PARTNER = "BUS";
   private static final String SCENARIO_CROSS_BORDER = "XCHCM";
+
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT);
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -95,21 +101,56 @@ public class SwitzerlandUtil extends AutomationUtil {
   }
 
   @Override
-  public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
-      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    return null;
-  }
-
-  @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    return super.runUpdateChecksForAddress(entityManager, engineData, requestData, changes, output, validation);
+
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+
+    List<Addr> addresses = null;
+    Addr addr = null;
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        addr = requestData.getAddress(addrType);
+        if (addr != null) {
+          // new address
+          if ("N".equals(addr.getImportInd())) {
+
+          } else {
+            engineData.addNegativeCheckStatus("_chAddrUpdated", "Updates to ");
+          }
+        }
+      }
+    }
+
+    return true;
   }
 
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-    return super.runUpdateChecksForData(entityManager, engineData, requestData, changes, output, validation);
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+
+    for (UpdatedDataModel change : changes.getDataUpdates()) {
+
+    }
+
+    return true;
+  }
+
+  @Override
+  public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
+      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    return null;
   }
 
 }
