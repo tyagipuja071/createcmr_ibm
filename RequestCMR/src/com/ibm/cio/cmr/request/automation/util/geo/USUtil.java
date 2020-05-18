@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.automation.util.geo.us.USBranchOffcMapping;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -62,25 +63,32 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 public class USUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(USUtil.class);
-  // Customer Type
+  // Customer Groups
+  public static final String CG_COMMERCIAL = "1";
+  public static final String CG_COMMERCIAL_FRANCHISE = "2";
+  public static final String CG_COMMERCIAL_RESTRICTED = "3";
+  public static final String CG_COMMERCIAL_REST_DEALER = "4";
+  public static final String CG_THIRD_P_BUSINESS_PARTNER = "5";
+  public static final String CG_THIRD_P_LEASING = "6";
+  public static final String CG_STATE_LOCAL = "7";
+  public static final String CG_STATE_LOCAL_PUBLIC = "8";
+  public static final String CG_FEDERAL = "9";
+  public static final String CG_FEDERAL_INDIAN = "10";
+  public static final String CG_FEDERAL_ALASKA = "11";
+  public static final String CG_IGS = "12";
+  public static final String CG_INTERNAL = "13";
+  public static final String CG_BY_MODEL = "14";
+
+  // Cust Types for determination
   public static final String COMMERCIAL = "1";
-  public static final String COMMERCIAL_FRANCHISE = "2";
-  public static final String COMMERCIAL_RESTRICTED = "3";
-  public static final String COMMERCIAL_REST_DEALER = "4";
-  public static final String THIRD_P_BUSINESS_PARTNER = "5";
-  public static final String THIRD_P_LEASING = "6";
-  public static final String STATE_LOCAL = "7";
-  public static final String STATE_LOCAL_PUBLIC = "8";
-  public static final String FEDERAL = "9";
-  public static final String FEDERAL_INDIAN = "10";
-  public static final String FEDERAL_ALASKA = "11";
-  public static final String IGS = "12";
-  public static final String INTERNAL = "13";
-  public static final String BY_MODEL = "14";
+  public static final String STATE_LOCAL = "2";
+  public static final String LEASING = "3";
+  public static final String FEDERAL = "4";
+  public static final String INTERNAL = "5";
+  public static final String POWER_OF_ATTORNEY = "6";
+  public static final String BUSINESS_PARTNER = "7";
 
-  // addtional scenarios for determination
-  public static final String POWER_OF_ATTORNEY = "POA";
-
+  // SUB SCENARIOS
   // COMMERCIAL SUB_SCENARIOS
   public static final String SC_COMM_REGULAR = "REGULAR";
   public static final String SC_PVT_HOUSEHOLD = "PRIV";
@@ -144,11 +152,8 @@ public class USUtil extends AutomationUtil {
   public static final String SC_BP_POOL = "POOL";
   public static final String SC_BP_DEVELOP = "DEVELOP";
   public static final String SC_BP_E_HOST = "E-HOST";
-
+  // BYMODEL
   public static final String SC_BYMODEL = "BYMODEL";
-
-  public static final String RESTRICT_TO_END_USER = "BPQS";
-  public static final String RESTRICT_TO_MAINTENANCE = "IRCSO";
 
   public static List<USBranchOffcMapping> svcARBOMappings = new ArrayList<USBranchOffcMapping>();
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
@@ -408,7 +413,7 @@ public class USUtil extends AutomationUtil {
             case "Marketing Department":
             case "Marketing A/R Department":
               // set negative check status for FEDERAL Power of Attorney and BP
-              if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || THIRD_P_BUSINESS_PARTNER.equals(custTypeCd))) {
+              if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || BUSINESS_PARTNER.equals(custTypeCd))) {
                 failedChecks.put(field, field + " updated.");
                 hasNegativeCheck = true;
               }
@@ -452,7 +457,7 @@ public class USUtil extends AutomationUtil {
             case "Enterprise Number":
             case "Affiliate Number":
               if (!enterpriseAffiliateUpdated) {
-                if (THIRD_P_BUSINESS_PARTNER.equals(custTypeCd)) {
+                if (BUSINESS_PARTNER.equals(custTypeCd)) {
                   engineData.addNegativeCheckStatus("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
                   failedChecks.put("ENT_AFF_BUSPR", "Enterprise/Affiliate change on a Business Partner record needs validation.");
                 } else {
@@ -646,7 +651,7 @@ public class USUtil extends AutomationUtil {
         query.setForReadOnly(true);
         results = query.getResults(1);
         if (results != null && !results.isEmpty()) {
-          String guDunsNo = (String) results.get(0)[0];
+          // String guDunsNo = (String) results.get(0)[0];
           String gbgIdDb = (String) results.get(0)[1];
 
           CmrClientService odmService = new CmrClientService();
@@ -654,7 +659,7 @@ public class USUtil extends AutomationUtil {
           Addr soldTo = requestData.getAddress("ZS01");
           ModelMap response = new ModelMap();
 
-          boolean success = odmService.getBuyingGroup(entityManager, soldTo, model, response);
+          odmService.getBuyingGroup(entityManager, soldTo, model, response);
           String gbgId = (String) response.get("globalBuyingGroupID");
           if (StringUtils.isBlank(gbgId)) {
             gbgId = gbgIdDb;
@@ -738,10 +743,10 @@ public class USUtil extends AutomationUtil {
 
       // check addresses
       if (StringUtils.isNotBlank(custTypCd) && !"NA".equals(custTypCd)) {
-        if (THIRD_P_LEASING.equals(custTypCd) || THIRD_P_BUSINESS_PARTNER.equals(custTypCd)) {
+        if (BUSINESS_PARTNER.equals(custTypCd) || LEASING.equals(custTypCd)) {
           engineData.addNegativeCheckStatus("UPD_REVIEW_NEEDED",
-              "Address updates for " + (custTypCd.equals(THIRD_P_LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
-          details.append("Address updates for " + (custTypCd.equals(THIRD_P_LEASING) ? "Leasing" : "Business Partner")
+              "Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner") + " scenario found.");
+          details.append("Address updates for " + (custTypCd.equals(LEASING) ? "Leasing" : "Business Partner")
               + " scenario found. Processor review will be required.").append("\n");
           validation.setMessage("Review needed");
           validation.setSuccess(false);
@@ -983,7 +988,7 @@ public class USUtil extends AutomationUtil {
           && StringUtils.isBlank(usRestricTo)) {
         custSubGroup = SC_STATE_DIST;
       }
-    } else if (THIRD_P_LEASING.equals(custTypCd)) {
+    } else if (LEASING.equals(custTypCd)) {
       custSubGroup = SC_LEASE_3CC;
     } else if (FEDERAL.equals(custTypCd)) {
       if ("12".equals(custClass)) {
@@ -999,7 +1004,7 @@ public class USUtil extends AutomationUtil {
       if ("81".equals(custClass)) {
         custSubGroup = SC_INTERNAL;
       }
-    } else if (THIRD_P_BUSINESS_PARTNER.equals(custTypCd)) {
+    } else if (BUSINESS_PARTNER.equals(custTypCd)) {
       if (("IRCSO".equals(usRestricTo) || "BPQS".equals(usRestricTo)) && "E".equals(bpAccTyp)) {
         custSubGroup = SC_BP_END_USER;
       } else if ("P".equals(bpAccTyp)) {
@@ -1096,9 +1101,9 @@ public class USUtil extends AutomationUtil {
       } else if ("I".equals(entType)) {
         custTypCd = INTERNAL;
       } else if ("C".equals(entType) || StringUtils.isNotBlank(leasingCo)) {
-        custTypCd = THIRD_P_LEASING;
+        custTypCd = LEASING;
       } else if (StringUtils.isNotBlank(bpAccTyp)) {
-        custTypCd = THIRD_P_BUSINESS_PARTNER;
+        custTypCd = BUSINESS_PARTNER;
       } else if ("2".equals(cGem)) {
         custTypCd = STATE_LOCAL;
       } else {
