@@ -1248,7 +1248,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 		 */
     if ("618".equals(issuingCountry) || "693".equals(issuingCountry)) {
 			return true;
-		}
+		} 
 		return false;
 	}
 
