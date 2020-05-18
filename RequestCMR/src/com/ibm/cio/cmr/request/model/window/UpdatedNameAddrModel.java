@@ -12,6 +12,7 @@ public class UpdatedNameAddrModel extends UpdatedDataModel {
   private String addrType;
   private String sapNumber;
   private String addrTypeCode;
+  private String addrSeq;
 
   public String getAddrType() {
     return addrType;
@@ -35,6 +36,14 @@ public class UpdatedNameAddrModel extends UpdatedDataModel {
 
   public void setAddrTypeCode(String addrTypeCode) {
     this.addrTypeCode = addrTypeCode;
+  }
+
+  public String getAddrSeq() {
+    return addrSeq;
+  }
+
+  public void setAddrSeq(String addrSeq) {
+    this.addrSeq = addrSeq;
   }
 
 }
