@@ -179,18 +179,21 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           }
 
           // save the highest matched record
+          DnBMatchingResponse attachRecord = null;
           if (perfectMatch != null || highestCloseMatch != null) {
-            ImportDnBService dnbService = new ImportDnBService();
-            DnBMatchingResponse highestMatch = perfectMatch != null ? perfectMatch : highestCloseMatch;
-            AppUser user = (AppUser) engineData.get("appUser");
-            LOG.debug("Saving DnB Highest match attachment for DUNS " + highestMatch.getDunsNo() + "..");
-            try {
-              dnbService.saveDnBAttachment(entityManager, user, admin.getId().getReqId(), highestMatch.getDunsNo(), "DnBHighestMatch",
-                  highestMatch.getConfidenceCode());
-            } catch (Exception e) {
-              // ignore attachment issues
-              LOG.warn("Error in saving D&B attachment", e);
-            }
+            attachRecord = perfectMatch != null ? perfectMatch : highestCloseMatch;
+          } else {
+            attachRecord = dnbMatches.get(0);
+          }
+          ImportDnBService dnbService = new ImportDnBService();
+          AppUser user = (AppUser) engineData.get("appUser");
+          LOG.debug("Saving DnB Highest match attachment for DUNS " + attachRecord.getDunsNo() + "..");
+          try {
+            dnbService.saveDnBAttachment(entityManager, user, admin.getId().getReqId(), attachRecord.getDunsNo(), "DnBHighestMatch",
+                attachRecord.getConfidenceCode());
+          } catch (Exception e) {
+            // ignore attachment issues
+            LOG.warn("Error in saving D&B attachment", e);
           }
           result.setDetails(details.toString().trim());
           result.setProcessOutput(output);
