@@ -788,7 +788,7 @@ function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
     var addrType = FormManager.getActualValue('addrType');
     if ((addrType == 'ZS01' || copyingToA)) {
       if (reqType == 'C')
-      autoSetAbbrevNmLogic();
+        autoSetAbbrevNmLogic();
       setCurrencyCd();
       addVatSuffixForCustLangCd();
     }
@@ -989,36 +989,32 @@ function addEmbargoCdValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function addVatSuffixForCustLangCd() {   
-        var zs01ReqId = FormManager.getActualValue('reqId');
-        var landCntry = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
-          REQ_ID : zs01ReqId,
-          ADDR_TYPE : 'ZS01'
-        });
-        if (landCntry != 'CH' && landCntry != 'LI') {
-          return;
-        }
-        var qParams = {
-          REQ_ID : zs01ReqId,
-        };
-        var custLangCd = FormManager.getActualValue('custLangCd');
-        var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
-        if (custLangCd == '')
-          custLangCd = result.ret1;
+function addVatSuffixForCustLangCd() {
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var landCntry = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
+    REQ_ID : zs01ReqId,
+    ADDR_TYPE : 'ZS01'
+  });
+  if (landCntry != 'CH' && landCntry != 'LI') {
+    return;
+  }
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+  var custLangCd = FormManager.getActualValue('custLangCd');
+  var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
+  if (custLangCd == '')
+    custLangCd = result.ret1;
 
-        var vat = FormManager.getActualValue('vat');
+  var vat = FormManager.getActualValue('vat');
 
-        if ((vat != '' && vat != null) && (custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
-          FormManager.setValue('vat',vat.concat("Mwst"));
-        } else if ((vat != '' && vat != null) && (custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
-          FormManager.setValue('vat',vat.concat("IVA"));
-        } else if ((vat != '' && vat != null) && custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
-          FormManager.setValue('vat',vat.concat("TVA"));
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    }
+  if ((vat != '' && vat != null) && (custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
+    FormManager.setValue('vat', vat.concat("Mwst"));
+  } else if ((vat != '' && vat != null) && (custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
+    FormManager.setValue('vat', vat.concat("IVA"));
+  } else if ((vat != '' && vat != null) && custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
+    FormManager.setValue('vat', vat.concat("TVA"));
+  }
 }
 
 function setCurrencyCd() {
