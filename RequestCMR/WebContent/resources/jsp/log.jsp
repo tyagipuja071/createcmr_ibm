@@ -53,6 +53,15 @@ ul {
       <th width="*">Changes</th>
     </tr>
     <tr>
+      <td>R5.0 b-R5131</td>
+      <td>May 16, 2020</td>
+      <td>
+        <ul>
+          <li>Defect Fixes for CreateCMR</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
       <td>R5.0 b-R5127</td>
       <td>May 9, 2020</td>
       <td>
