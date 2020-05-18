@@ -798,7 +798,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     overrides.addOverride(getProcessCode(), "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
     overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
     overrides.addOverride(getProcessCode(), "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
-    overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
     overrides.addOverride(getProcessCode(), "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
     boolean hasFieldError = false;
@@ -810,14 +809,10 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     } else {
       if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())) {
         overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
+        overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8G");
       } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
-        if (!"7NZ".equals(data.getMtkgArDept()) && !"2NS".equals(data.getMtkgArDept())) {
-          String msg = "Marketing A/R Department for End User - Maintenance request cannot be validated. Should either be 7NZ or 2NS (Current: "
-              + data.getMtkgArDept() + ")";
-          engineData.addNegativeCheckStatus("_usBpData", msg);
-          details.append(msg + "\n");
-          hasFieldError = true;
-        }
+        overrides.addOverride(getProcessCode(), "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "2NS");
+        overrides.addOverride(getProcessCode(), "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
       }
     }
 
