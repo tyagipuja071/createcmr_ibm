@@ -374,12 +374,11 @@ public class PortugalTransformer extends MessageTransformer {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
-      legacyCust.setCeDivision("2");
-
+      
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-          legacyCust.setTelNoOrVat(addr.getCustPhone());
+          legacyCust.setTelNoOrVat("TF"+addr.getCustPhone());
           landedCntry = addr.getLandCntry();
           break;
         }
@@ -393,12 +392,18 @@ public class PortugalTransformer extends MessageTransformer {
       } else {
         legacyCust.setMrcCd("3");
       }
+      
+      if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custSubType)) {
+        legacyCust.setCustType("G");
+      } else if (MQMsgConstants.CUSTSUBGRP_INTSO.equals(custSubType) || MQMsgConstants.CUSTSUBGRP_INTSO.equals(custSubType)) {
+        legacyCust.setCustType("91");
+      }
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           if (!StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyCust.setTelNoOrVat(addr.getCustPhone());
+            legacyCust.setTelNoOrVat("TF"+addr.getCustPhone());
           }
           landedCntry = addr.getLandCntry();
           break;
@@ -435,6 +440,8 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     // common data for C/U
+    
+    legacyCust.setCeDivision("3");
     
     // LANG_CD
     legacyCust.setLangCd("1");
