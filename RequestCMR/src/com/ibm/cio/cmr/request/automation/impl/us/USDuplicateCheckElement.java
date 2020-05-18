@@ -257,7 +257,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
       }
       reqCheckMatches = reqCheckMatchesTmp;
-      reqCheckMatchesTmp.clear();
+      reqCheckMatchesTmp = new ArrayList<ReqCheckResponse>();
     }
 
     switch (scenarioSubType) {
@@ -336,7 +336,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
     default:
       for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-        if (StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())) {
+        if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo()))
+            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()))) {
           reqCheckMatchesTmp.add(reqCheckRecord);
         }
       }
