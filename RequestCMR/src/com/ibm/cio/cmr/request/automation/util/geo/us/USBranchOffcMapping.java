@@ -1,4 +1,4 @@
-package com.ibm.cio.cmr.request.automation.util.geo;
+package com.ibm.cio.cmr.request.automation.util.geo.us;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.us.USBusinessPartnerElement;
-import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -211,9 +211,9 @@ public class USBranchOffcMapping {
       calculatedMktgDept = StringUtils.isBlank(data.getMktgDept()) ? "" : data.getMktgDept();
       break;
     case LOGIC:
-      if (((USUtil.FEDERAL.equals(data.getCustGrp()) || USUtil.FEDERAL_INDIAN.equals(data.getCustGrp())
-          || USUtil.FEDERAL_ALASKA.equals(data.getCustGrp())) && !USUtil.SC_FED_FEDSTATE.equals(scenario))
-          || ((USUtil.SC_FED_REGULAR.equals(scenario) || USUtil.SC_FED_CAMOUFLAGED.equals(scenario) || USUtil.SC_FED_POA.equals(scenario)))) {
+      List<String> scenarioList = Arrays.asList(USUtil.SC_FED_CAMOUFLAGED, USUtil.SC_FED_CLINIC, USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL,
+          USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_NATIVE_CORP, USUtil.SC_FED_POA, USUtil.SC_FED_REGULAR, USUtil.SC_FED_TRIBAL_BUS);
+      if (scenarioList.contains(scenario)) {
         if ("MO".equals(stateToMatch)) {
           if (STATE_MO_M3A != null && STATE_MO_M3A.contains(countyToMatch)) {
             calculatedMktgDept = "M3A";
