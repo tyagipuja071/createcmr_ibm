@@ -26,7 +26,6 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
-import com.ibm.cio.cmr.request.automation.util.geo.us.USBranchOffcMapping;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
