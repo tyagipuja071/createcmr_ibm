@@ -662,6 +662,71 @@ public abstract class AutomationUtil {
   }
 
   /**
+   * Checks if the address already exists on the Request
+   *
+   * @param addrToCheck
+   * @param reqId
+   * @return
+   */
+  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
+
+    String sql = ExternalizedQuery.getSql("AUTO.DE.CHECK_IF_ADDRESS_EXIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
+    query.setParameter("NAME1", addrToCheck.getCustNm1());
+    query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
+    query.setParameter("CITY", addrToCheck.getCity1());
+    query.setParameter("TRANSPORT_ZONE", addrToCheck.getTransportZone());
+    if (addrToCheck.getAddrTxt() != null) {
+      query.append(" and ADDR_TXT = :ADDR_TXT");
+      query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
+    }
+    if (addrToCheck.getCustNm2() != null) {
+      query.append(" and CUST_NM2 = :NAME2");
+      query.setParameter("NAME2", addrToCheck.getCustNm2());
+    }
+    if (addrToCheck.getDept() != null) {
+      query.append(" and DEPT = :DEPT");
+      query.setParameter("DEPT", addrToCheck.getDept());
+    }
+    if (addrToCheck.getFloor() != null) {
+      query.append(" and FLOOR= :FLOOR");
+      query.setParameter("FLOOR", addrToCheck.getFloor());
+    }
+    if (addrToCheck.getBldg() != null) {
+      query.append(" and BLDG= :BLDG");
+      query.setParameter("BLDG", addrToCheck.getBldg());
+    }
+    if (addrToCheck.getOffice() != null) {
+      query.append(" and OFFICE =:OFFICE");
+      query.setParameter("OFFICE", addrToCheck.getOffice());
+    }
+    if (addrToCheck.getStateProv() != null) {
+      query.append(" and STATE_PROV = :STATE");
+      query.setParameter("STATE", addrToCheck.getStateProv());
+    }
+    if (addrToCheck.getPoBox() != null) {
+      query.append(" and PO_BOX = :PO_BOX");
+      query.setParameter("PO_BOX", addrToCheck.getPoBox());
+    }
+    if (addrToCheck.getPostCd() != null) {
+      query.append(" and POST_CD= :POST_CD");
+      query.setParameter("POST_CD", addrToCheck.getPostCd());
+    }
+    if (addrToCheck.getCustPhone() != null) {
+      query.append(" and CUST_PHONE = :PHONE");
+      query.setParameter("PHONE", addrToCheck.getCustPhone());
+    }
+    if (addrToCheck.getCounty() != null) {
+      query.append(" and COUNTY= :COUNTY");
+      query.setParameter("COUNTY", addrToCheck.getCounty());
+    }
+
+    return query.exists();
+  }
+
+  /**
    * Checks if the given name has legal endings. This checks the globally
    * defined legal identifiers and has support for country-specific legal
    * endings

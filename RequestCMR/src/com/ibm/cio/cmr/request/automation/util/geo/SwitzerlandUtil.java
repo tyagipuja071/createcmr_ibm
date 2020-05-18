@@ -25,6 +25,8 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 /**
  * {@link AutomationUtil} for Switzwerland/LI country specific validations
  * 
@@ -71,7 +73,7 @@ public class SwitzerlandUtil extends AutomationUtil {
     }
 
     if (SCENARIO_CROSS_BORDER.equals(scenario)) {
-
+      // noop
     } else {
       switch (actualScenario) {
       case SCENARIO_COMMERCIAL:
@@ -100,26 +102,31 @@ public class SwitzerlandUtil extends AutomationUtil {
     return Arrays.asList("GMBH", "KLG", " AG", "Sàrl", "SARL", " SA", "S.A.", "SAGL");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
 
     Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
 
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
 
     List<Addr> addresses = null;
-    Addr addr = null;
     for (String addrType : RELEVANT_ADDRESSES) {
       if (changes.isAddressChanged(addrType)) {
-        addr = requestData.getAddress(addrType);
-        if (addr != null) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        boolean hasAddition = false;
+        boolean hasUpdate = false;
+        for (Addr addr : addresses) {
           // new address
           if ("N".equals(addr.getImportInd())) {
-
+            boolean duplicate = addressExists(entityManager, addr);
           } else {
             engineData.addNegativeCheckStatus("_chAddrUpdated", "Updates to ");
           }
