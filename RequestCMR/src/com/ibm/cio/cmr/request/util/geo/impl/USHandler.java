@@ -942,6 +942,7 @@ public class USHandler extends GEOHandler {
     if (results != null && !results.isEmpty()) {
       Object[] top = results.get(0);
       LOG.debug("Found Affiliate: " + top[0] + " with " + top[1] + " CMRs assigned.");
+      return (String) top[0];
     }
     return null;
   }
@@ -964,6 +965,7 @@ public class USHandler extends GEOHandler {
     if (results != null && !results.isEmpty()) {
       Object[] top = results.get(0);
       LOG.debug("Found INAC: " + top[0] + " with " + top[1] + " CMRs assigned.");
+      return (String) top[0];
     }
     return null;
   }
