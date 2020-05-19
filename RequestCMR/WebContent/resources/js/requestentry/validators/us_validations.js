@@ -4,6 +4,7 @@
  * Contains the specific validations and configuration adjustments for US (897)
  */
 
+var _usSicmenHandler = null;
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -77,7 +78,7 @@ function addAddressRecordTypeValidator() {
           var type = null;
           var invoiceToCnt = 0;
           var installAtCnt = 0;
-          for ( var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             type = record.addrType;
             if (typeof (type) == 'object') {
@@ -130,6 +131,21 @@ function afterConfigForUS() {
         }
       }
     });
+  }
+
+  if (FormManager.getActualValue('reqType') == 'C') {
+    if (_usSicmenHandler == null) {
+      _usSicmenHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
+        var sicmen = FormManager.getActualValue('usSicmen');
+        var _custType = FormManager.getActualValue('custSubGrp');
+        if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
+          FormManager.setValue('isicCd', '357X');
+        } else {
+          FormManager.setValue('isicCd', sicmen);
+        }
+      });
+    }
+    _usSicmenHandler[0].onChange();
   }
 }
 
@@ -200,15 +216,20 @@ function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  if (reqType == 'C' && (scenario == 'OEMHW' || scenario == 'OEM-SW')) {
-    FormManager.addValidator('usSicmen', Validators.REQUIRED, [ 'SICMEN' ], 'MAIN_CUST_TAB');
-    FormManager.enable('usSicmen');
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'C') {
+    FormManager.readOnly('isicCd');
   } else if (reqType == 'U') {
-    FormManager.enable('usSicmen');
-    FormManager.resetValidations('usSicmen');
+    if (role == 'Processor') {
+      FormManager.enable('isicCd');
+    } else {
+      FormManager.readOnly('isicCd');
+    }
   } else {
-    FormManager.readOnly('usSicmen');
-    FormManager.resetValidations('usSicmen');
+    FormManager.readOnly('isicCd');
   }
 }
 

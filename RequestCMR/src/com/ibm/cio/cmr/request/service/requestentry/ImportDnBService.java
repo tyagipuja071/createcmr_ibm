@@ -341,6 +341,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       }
       if (geoHandler != null) {
         geoHandler.createOtherAddressesOnDNBImport(entityManager, admin, data);
+        geoHandler.convertDnBImportValues(entityManager, admin, data);
       }
       if (newRequest) {
         RequestUtils.createWorkflowHistory(reqEntryService, entityManager, request, admin, "AUTO: Request created.", CmrConstants.Save());
