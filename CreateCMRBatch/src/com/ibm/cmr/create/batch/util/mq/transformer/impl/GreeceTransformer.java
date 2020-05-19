@@ -927,6 +927,14 @@ public class GreeceTransformer extends EMEATransformer {
       legacyAddr.setCity(addr.getCity1());
     }
     
+    if (!StringUtils.isBlank(addr.getCustPhone())) {
+      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+        legacyAddr.setAddrPhone("");
+      } else {
+        legacyAddr.setAddrPhone(addr.getCustPhone());
+      }
+    }
+    
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
     }
