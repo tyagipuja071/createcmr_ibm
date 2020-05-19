@@ -1927,6 +1927,11 @@ public class EMEAHandler extends BaseSOFHandler {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
       data.setMemLvl(mainRecord.getCmrMembLevel());
       data.setBpRelType(mainRecord.getCmrBPRelType());
+      data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
+      if(!StringUtils.isEmpty(mainRecord.getCmrSortl())) {
+        String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
+        data.setRepTeamMemberNo(repTeamMmberNo);
+      }
     }
   }
 

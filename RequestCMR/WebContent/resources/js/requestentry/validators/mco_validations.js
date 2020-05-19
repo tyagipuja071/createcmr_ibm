@@ -93,6 +93,21 @@ function mandatoryForBusinessPartnerPT() {
   }
 }
 
+function typeOfCustomerPT(){
+  
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGroup = FormManager.getActualValue('custSubGrp');
+  if (cntry == SysLoc.PORTUGAL) {
+    if (custSubGroup == 'INTER' || custSubGroup == 'INTSO' || custSubGroup == 'GOVRN') {
+      FormManager.show('CrosSubTyp', 'crosSubTyp');
+      FormManager.ReadOnly('crosSubTyp');
+    } else {
+      FormManager.hide('CrosSubTyp', 'crosSubTyp');
+    }
+  }
+
+}
+
 function addMCOLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -1859,4 +1874,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(typeOfCustomerPT, [ SysLoc.PORTUGAL ]);
 });
