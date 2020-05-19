@@ -102,9 +102,10 @@ public class GermanyUtil extends AutomationUtil {
         engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
         skipAllChecks(engineData);
       } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+        // BP skip checks - remove after BP is enabled
         details.append("Processor review is required for BP Portal requests.").append("\n");
         engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-        skipAllChecks(engineData);
+        skipAllChecks(engineData); // remove after BP is enabled
       }
     } else if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
