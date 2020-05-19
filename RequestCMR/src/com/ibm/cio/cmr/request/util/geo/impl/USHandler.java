@@ -153,6 +153,7 @@ public class USHandler extends GEOHandler {
     } else {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
+
   }
 
   private boolean queryAndAssign(String url, String sql, FindCMRResultModel model, Data data, String dbId) throws Exception {
@@ -253,13 +254,14 @@ public class USHandler extends GEOHandler {
         this.legalName = (String) record.get("COMPANY_NM");
       }
 
-      if (record.get("ISIC") != null && !StringUtils.isEmpty(record.get("ISIC").toString()) && !StringUtils.isBlank((String) record.get("SICMEN"))
-          && !(record.get("SICMEN").toString()).equals(record.get("ISIC").toString())) {
-        data.setIsicCd(record.get("ISIC").toString());
-        String newSubInd = getSubIndusryValue(entityManager, record.get("ISIC").toString());
-        if (StringUtils.isNotBlank(newSubInd)) {
-          data.setSubIndustryCd(newSubInd);
-        }
+      String isic = (String) record.get("ISIC");
+      if (!StringUtils.isBlank(isic)) {
+        data.setIsicCd((String) record.get("ISIC"));
+        // String newSubInd = getSubIndusryValue(entityManager,
+        // record.get("ISIC").toString());
+        // if (StringUtils.isNotBlank(newSubInd)) {
+        // data.setSubIndustryCd(newSubInd);
+        // }
       }
 
       if ((model.getItems() != null && model.getItems().size() == 1)) {
@@ -513,6 +515,15 @@ public class USHandler extends GEOHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIsicCd(), newData.getIsicCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "USSicmen", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getIsicCd(), "USSicmen", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getIsicCd(), "USSicmen", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getRestrictTo(), newData.getRestrictTo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "RestrictTo", "-"));
@@ -572,7 +583,7 @@ public class USHandler extends GEOHandler {
       update.setOldData(oldData.getIccTaxClass());
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIccTaxExemptStatus(), newData.getIccTaxClass())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIccTaxExemptStatus(), newData.getIccTaxExemptStatus())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "ICCTaxExemptStatus", "-"));
       update.setNewData(newData.getIccTaxExemptStatus());
@@ -709,9 +720,9 @@ public class USHandler extends GEOHandler {
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getUsSicmen(), newData.getUsSicmen())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "USSicmen", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getUsSicmen(), "USSicmen", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getUsSicmen(), "USSicmen", cmrCountry));
+      update.setDataField(PageManager.getLabel(cmrCountry, "ISIC", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getUsSicmen(), "ISIC", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getUsSicmen(), "ISIC", cmrCountry));
       results.add(update);
     }
 
@@ -783,6 +794,9 @@ public class USHandler extends GEOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
+    if ("ISIC".equals(field)) {
+      return true;
+    }
     return false;
   }
 
@@ -803,6 +817,12 @@ public class USHandler extends GEOHandler {
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+  }
+
+  @Override
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+    // move ISIC to SICMEN
+    data.setUsSicmen(data.getIsicCd());
   }
 
   @Override

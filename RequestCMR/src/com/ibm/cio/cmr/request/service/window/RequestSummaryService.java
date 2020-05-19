@@ -996,10 +996,10 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
    */
   public boolean equals(String val1, String val2) {
     if (val1 == null && val2 != null) {
-      return StringUtils.isEmpty(val2.trim());
+      return StringUtils.isBlank(val2.trim());
     }
     if (val1 != null && val2 == null) {
-      return StringUtils.isEmpty(val1.trim());
+      return StringUtils.isBlank(val1.trim());
     }
     if (val1 == null && val2 == null) {
       return true;
