@@ -955,7 +955,7 @@ public class USHandler extends GEOHandler {
    */
   private String getINACForAffiliate(EntityManager entityManager, String affiliate) {
     LOG.debug("Getting INAC for Affiliate " + affiliate);
-    String sql = ExternalizedQuery.getSql("AUTO.US.GET_AFF_FOR_INAC");
+    String sql = ExternalizedQuery.getSql("GET_INAC_FOR_AFF");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     query.setParameter("AFFILIATE", affiliate);
