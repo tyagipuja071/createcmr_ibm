@@ -91,7 +91,15 @@
        </p>
      </cmr:column>
 	</cmr:view>
-    <cmr:column span="4" containerForField="ISIC">
+    <cmr:column span="4" containerForField="ISIC" forCountry="897">
+      <p>
+        <label for="usSicmen"> <cmr:fieldLabel fieldId="ISIC" />: <cmr:delta text="${rdcdata.usSicmen}" oldValue="${reqentry.usSicmen}" />
+        </label>
+        <cmr:field path="usSicmen" id="usSicmen" fieldId="ISIC" tabId="MAIN_CUST_TAB" size="500" />
+      </p>
+
+    </cmr:column>
+    <cmr:column span="4" containerForField="ISIC" exceptForCountry="897">
       <p>
         <label for="isicCd"> <cmr:fieldLabel fieldId="ISIC" />: <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}" code="L" />
         </label>
@@ -152,9 +160,12 @@
       <cmr:view forCountry="897">
          <cmr:column span="2" containerForField="USSicmen">
         <p>
-          <label for="usSicmen"> <cmr:fieldLabel fieldId="USSicmen" />: <cmr:delta text="${rdcdata.usSicmen}" oldValue="${reqentry.usSicmen}" />
+          <label for="isicCd">
+            <%--
+               <cmr:fieldLabel fieldId="USSicmen" />: <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}"/>
+             --%>
            </label>
-          <cmr:field path="usSicmen" id="usSicmen" fieldId="USSicmen" tabId="MAIN_CUST_TAB"  size="500" />
+          <cmr:field path="isicCd" id="isicCd" fieldId="USSicmen" tabId="MAIN_CUST_TAB"  size="500" />
         </p>
       </cmr:column>
       </cmr:view>

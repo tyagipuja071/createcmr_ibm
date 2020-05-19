@@ -228,54 +228,56 @@ public class USUtil extends AutomationUtil {
       }
       LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
       // computation start
-      if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
-        for (USBranchOffcMapping mapping : boMappings) {
-          if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
-            String csoSite = mapping.getCsoSite(entityManager, requestData);
-            String mktgDept = mapping.getMktgDept(entityManager, requestData);
-            String mtkgArDept = mapping.getMtkgArDept(entityManager, requestData);
-            String svcArOffice = mapping.getSvcArOffice(entityManager, requestData);
-            String pccArDept = mapping.getPccArDept(entityManager, requestData);
-
-            details.append("Setting Fields based on US Scenarios:").append("\n");
-            details.append("CSO Site = " + csoSite).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CSO_SITE", data.getCsoSite(), csoSite);
-
-            details.append("Marketing Department = " + mktgDept).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MKTG_DEPT", data.getMktgDept(), mktgDept);
-
-            details.append("Marketing A/R Department = " + mtkgArDept).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), mtkgArDept);
-
-            details.append("SVC A/R Office = " + svcArOffice).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
-
-            details.append("PCC A/R Department = " + pccArDept).append("\n");
-            overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
-
-            if (StringUtils.isNotBlank(csoSite) && StringUtils.isNotBlank(mktgDept) && StringUtils.isNotBlank(mtkgArDept)
-                && StringUtils.isNotBlank(svcArOffice) && StringUtils.isNotBlank(pccArDept)) {
-              boCodesCalculated = true;
-            }
-            break;
-          }
-        }
-      }
-
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
         details.append("Branch Office codes computed by another element/external process.");
-      } else if (boCodesCalculated) {
-        details.append("Branch Office codes computed successfully.");
-      } else if (INTERNAL.equals(scenarioSubType)) {
-        if (SC_BYMODEL.equals(data.getCustSubGrp())) {
-          details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
-        } else {
-          details.append("Skipping calculation of Branch Office codes because the request is of INTERNAL Scenario.");
-        }
       } else {
-        details.append("Branch Office codes could not be computed for this scenario.");
-        engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
+        if (!boMappings.isEmpty() && StringUtils.isNotBlank(scenarioSubType) && !SC_INTERNAL.equals(scenarioSubType)) {
+          for (USBranchOffcMapping mapping : boMappings) {
+            if (mapping.getScenario().equalsIgnoreCase(scenarioSubType)) {
+              String csoSite = mapping.getCsoSite(entityManager, requestData);
+              String mktgDept = mapping.getMktgDept(entityManager, requestData);
+              String mtkgArDept = mapping.getMtkgArDept(entityManager, requestData);
+              String svcArOffice = mapping.getSvcArOffice(entityManager, requestData);
+              String pccArDept = mapping.getPccArDept(entityManager, requestData);
 
+              details.append("Setting Fields based on US Scenarios:").append("\n");
+              details.append("CSO Site = " + csoSite).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CSO_SITE", data.getCsoSite(), csoSite);
+
+              details.append("Marketing Department = " + mktgDept).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MKTG_DEPT", data.getMktgDept(), mktgDept);
+
+              details.append("Marketing A/R Department = " + mtkgArDept).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), mtkgArDept);
+
+              details.append("SVC A/R Office = " + svcArOffice).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArOffice);
+
+              details.append("PCC A/R Department = " + pccArDept).append("\n");
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "PCC_AR_DEPT", data.getPccArDept(), pccArDept);
+
+              if (StringUtils.isNotBlank(csoSite) && StringUtils.isNotBlank(mktgDept) && StringUtils.isNotBlank(mtkgArDept)
+                  && StringUtils.isNotBlank(svcArOffice) && StringUtils.isNotBlank(pccArDept)) {
+                boCodesCalculated = true;
+              }
+              break;
+            }
+          }
+        }
+
+        if (boCodesCalculated) {
+          details.append("Branch Office codes computed successfully.");
+        } else if (INTERNAL.equals(scenarioSubType)) {
+          if (SC_BYMODEL.equals(data.getCustSubGrp())) {
+            details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
+          } else {
+            details.append("Skipping calculation of Branch Office codes because the request is of INTERNAL Scenario.");
+          }
+        } else {
+          details.append("Branch Office codes could not be computed for this scenario.");
+          engineData.addNegativeCheckStatus("verifyBranchOffc", "Branch Office Codes need to be verified.");
+
+        }
       }
       // if scenario is OEMSW or OEMHW set isic to 357X
       if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType)) {
