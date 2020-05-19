@@ -161,8 +161,9 @@
          <cmr:column span="2" containerForField="USSicmen">
         <p>
           <label for="isicCd">
+            <cmr:fieldLabel fieldId="USSicmen" />: 
             <%--
-               <cmr:fieldLabel fieldId="USSicmen" />: <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}"/>
+               <cmr:delta text="${rdcdata.isicCd}" oldValue="${reqentry.isicCd}"/>
              --%>
            </label>
           <cmr:field path="isicCd" id="isicCd" fieldId="USSicmen" tabId="MAIN_CUST_TAB"  size="500" />
