@@ -901,12 +901,73 @@ public class USHandler extends GEOHandler {
   public void setGBGValues(EntityManager entityManager, RequestData requestData, String ldeField, String ldeValue) {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
+    if (!"C".equals(admin.getReqType())) {
+      return;
+    }
     if ("AFFNO".equals(ldeField)) {
-      // if not BP
-      if (!data.getCustGrp().equals("7") && "C".equals(admin.getReqType())) {
+      if (StringUtils.isNumeric(ldeValue)) {
         data.setEnterprise(ldeValue);
       }
+      String inac = getINACForAffiliate(entityManager, ldeValue);
+      if (!StringUtils.isBlank(inac)) {
+        data.setInacCd(inac);
+        data.setInacType(StringUtils.isNumeric(inac) ? "I" : "N");
+      }
+    } else if ("INAC".equals(ldeField)) {
+      String affiliate = getAffiliateForINAC(entityManager, ldeValue);
+      if (!StringUtils.isBlank(affiliate)) {
+        data.setAffiliate(affiliate);
+        if (StringUtils.isNumeric(affiliate)) {
+          data.setEnterprise(affiliate);
+        }
+      }
     }
+  }
+
+  /**
+   * Gets the Affiliate value assigned with the most CMRs under the INAC
+   * 
+   * @param entityManager
+   * @param inac
+   * @return
+   */
+  private String getAffiliateForINAC(EntityManager entityManager, String inac) {
+    LOG.debug("Getting Affiliate for INAC " + inac);
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_AFF_FOR_INAC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("INAC", inac);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] top = results.get(0);
+      LOG.debug("Found Affiliate: " + top[0] + " with " + top[1] + " CMRs assigned.");
+      return (String) top[0];
+    }
+    return null;
+  }
+
+  /**
+   * Gets the Affiliate value assigned with the most CMRs under the INAC
+   * 
+   * @param entityManager
+   * @param inac
+   * @return
+   */
+  private String getINACForAffiliate(EntityManager entityManager, String affiliate) {
+    LOG.debug("Getting INAC for Affiliate " + affiliate);
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_INAC_FOR_AFF");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("AFFILIATE", affiliate);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] top = results.get(0);
+      LOG.debug("Found INAC: " + top[0] + " with " + top[1] + " CMRs assigned.");
+      return (String) top[0];
+    }
+    return null;
   }
 
   @Override
