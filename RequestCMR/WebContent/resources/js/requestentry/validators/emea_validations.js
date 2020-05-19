@@ -3543,10 +3543,17 @@ function setISRValuesGR() {
     setISRValues();
   }
   if (repTeamMemberNo == '') {
-    FormManager.setValue('salesSR', '');
-  }
+	  FormManager.setValue('salesSR', '');
+	  FormManager.setValue('salesTeamCd', '');
+	  FormManager.setValue('salesBusOffCd', '');
+  }   
 }
 
+function setISRValuesGROnUpdate() {
+	if(FormManager.getActualValue('reqType') == 'U') {
+		setISRValuesGR();
+	}
+}
 function setFieldsBehaviourGR() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -3589,6 +3596,7 @@ function setFieldsBehaviourGR() {
     FormManager.resetValidations('isuCd');
     FormManager.resetValidations('clientTier');
     FormManager.readOnly('custPrefLang');
+    FormManager.resetValidations('salesTeamCd');
   }
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
@@ -8221,6 +8229,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.GREECE, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addHandlerForCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(setISRValuesGROnUpdate, [ SysLoc.GREECE ]);
 
   // Cyprus
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.CYPRUS ]);

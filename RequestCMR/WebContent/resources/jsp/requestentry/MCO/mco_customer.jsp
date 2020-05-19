@@ -159,7 +159,6 @@
       </cmr:column>
       
       <cmr:view forCountry="822">
-		<c:if test="${reqentry.reqType != 'C'}">
 			<cmr:column span="2" containerForField="CrosSubTyp">
 				<p>
 					<cmr:label fieldId="crosSubTyp">
@@ -170,9 +169,7 @@
 						tabId="MAIN_CUST_TAB" />
 				</p>
 			</cmr:column>
-		</c:if>
 	</cmr:view>
-	
     </cmr:row>
   </cmr:view>
   
