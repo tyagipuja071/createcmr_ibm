@@ -60,6 +60,7 @@ function addAfterConfigForSWISS() {
 
   if (reqType == 'C') {
     FormManager.readOnly('custNm3');
+    FormManager.readOnly('custLangCd');
   }
 
   if (reqType == 'C' && (custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')) {
@@ -644,7 +645,7 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
               muboty.push(data.muboty);
               FormManager.limitDropdownValues(FormManager.getField('searchTerm'), muboty);
               if (muboty.length == 1) {
-                if (role == 'REQUESTER') {
+                if (role == 'REQUESTER' && (custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM' || custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI')) {
                   FormManager.readOnly('searchTerm');
                 }
                 FormManager.setValue('searchTerm', muboty[0]);
@@ -767,7 +768,7 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
               FormManager.limitDropdownValues(FormManager.getField('searchTerm'), muboty);
               if (muboty.length == 1) {
                 FormManager.setValue('searchTerm', muboty[0]);
-                if (role == 'REQUESTER') {
+                if (role == 'REQUESTER' && (custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM' || custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI')) {
                   FormManager.readOnly('searchTerm');
                 }
               }
