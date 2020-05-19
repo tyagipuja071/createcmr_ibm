@@ -109,11 +109,9 @@ public class GreeceTransformer extends EMEATransformer {
     messageHash.put("EnterpriseNo", cmrData.getEnterprise());
     messageHash.put("CustomerLanguage", "1");
 
-    if (update) {
-      messageHash.put("CollectionCode", cmrData.getCollectionCd());
-    } else {
-      messageHash.put("CollectionCode", "");
-    }
+
+    messageHash.put("CollectionCode", "");
+
     messageHash.put("EconomicCode", "");
     messageHash.put("InvNumber", "");
     messageHash.put("TaxCode", "");
@@ -489,6 +487,32 @@ public class GreeceTransformer extends EMEATransformer {
         legacyCust.setImsCd("");
       }
       
+      //SBO,IBO,REMXA,REMXD   
+    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+        legacyCust.setIbo(data.getSalesBusOffCd());
+         legacyCust.setSbo(data.getSalesBusOffCd());
+      } else {
+        legacyCust.setIbo("");
+        legacyCust.setSbo("");
+      }
+      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      } else {
+        legacyCust.setSalesRepNo("");
+      }
+      
+      if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+        legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+      } else {
+        legacyCust.setSalesGroupRep("");
+      }
+      
+      if (!StringUtils.isBlank(data.getCollectionCd())) {
+        legacyCust.setCollectionCd(data.getCollectionCd());
+      } else {
+        legacyCust.setCollectionCd("");
+      }
+      
     } // common data for C/U
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
@@ -513,7 +537,7 @@ public class GreeceTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     } // other fields to be transformed is pending
-    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
+//    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
     legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
