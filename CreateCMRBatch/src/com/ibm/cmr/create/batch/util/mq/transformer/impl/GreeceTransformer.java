@@ -981,7 +981,10 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         line3 = massUpdtAddr.getAddrTxt2();
       }
-    } else if (!StringUtils.isBlank(massUpdtAddr.getCustNm4() ) && line3.toUpperCase().startsWith("ATT")) {
+    } else if (!StringUtils.isBlank(massUpdtAddr.getCustNm4())) {
+      if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
+        line3 = "ATT " + line3;
+      }
       if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm4())) {
         line3 = "";
       } else {
