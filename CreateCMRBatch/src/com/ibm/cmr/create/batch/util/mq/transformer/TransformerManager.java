@@ -161,7 +161,7 @@ public class TransformerManager {
     addTransformer(new CEMEATransformer(SystemLocation.JORDAN));
     addTransformer(new CEMEATransformer(SystemLocation.KAZAKHSTAN));
     addTransformer(new CEMEATransformer(SystemLocation.KUWAIT));
-    addTransformer(new CEMEATransformer(SystemLocation.KYRGYZSTAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.KYRGYZSTAN));
     addTransformer(new CEMEATransformer(SystemLocation.LEBANON));
     addTransformer(new CEMEATransformer(SystemLocation.LIBYA));
     addTransformer(new CEMEATransformer(SystemLocation.MACEDONIA));
@@ -199,6 +199,7 @@ public class TransformerManager {
 
     // CEE - LD
     addTransformer(new CEETransformer(SystemLocation.SLOVAKIA));
+    addTransformer(new CEETransformer(SystemLocation.KYRGYZSTAN));
   }
 
   /**
