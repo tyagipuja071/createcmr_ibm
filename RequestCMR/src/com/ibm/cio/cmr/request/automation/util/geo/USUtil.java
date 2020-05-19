@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -310,7 +311,7 @@ public class USUtil extends AutomationUtil {
     String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
         SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_POOL, SC_BP_DEVELOP,
         SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP,
-        SC_FED_POA, SC_FED_TRIBAL_BUS };
+        SC_FED_POA, SC_FED_TRIBAL_BUS, SC_BP_END_USER };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
@@ -328,6 +329,13 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
+        if (SC_BP_POOL.equals(scenarioSubType) || SC_BP_DEVELOP.equals(scenarioSubType) || SC_BP_E_HOST.equals(scenarioSubType)
+            || SC_BP_END_USER.equals(scenarioSubType)) {
+          ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+          if (scenarioExceptions != null) {
+            scenarioExceptions.setSkipCompanyVerification(true);
+          }
+        }
       } else {
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as the request is for " + scenarioDesc + " scenario.");
         details.append("Processor review required as the request is for " + scenarioDesc + " scenario.").append("\n");
@@ -916,13 +924,22 @@ public class USUtil extends AutomationUtil {
       affiliate = (String) results.get(0)[3];
     }
 
-    // determine cust scenarios
-    if (COMMERCIAL.equals(custTypCd)) {
+    // US restrict to LOV mapping
+    String usRestrictToLOV = "";
       if (StringUtils.isNotBlank(usRestricTo)) {
         sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
         query = new PreparedQuery(entityManager, sql);
         query.setParameter("RESTRICT_TO", usRestricTo);
-        String usRestrictToLOV = query.getSingleResult(String.class);
+      usRestrictToLOV = query.getSingleResult(String.class);
+    }
+
+    // determine cust scenarios
+    if (COMMERCIAL.equals(custTypCd)) {
+      if (StringUtils.isNotBlank(usRestrictToLOV)) {
+        // sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
+        // query = new PreparedQuery(entityManager, sql);
+        // query.setParameter("RESTRICT_TO", usRestricTo);
+        // String usRestrictToLOV = query.getSingleResult(String.class);
         // US restrict to filters
         if ("OIO".equals(usRestrictToLOV)) {
           custSubGroup = SC_REST_OIO;
@@ -1006,7 +1023,7 @@ public class USUtil extends AutomationUtil {
         custSubGroup = SC_INTERNAL;
       }
     } else if (BUSINESS_PARTNER.equals(custTypCd)) {
-      if (("IRCSO".equals(usRestricTo) || "BPQS".equals(usRestricTo)) && "E".equals(bpAccTyp)) {
+      if (("IRCSO".equals(usRestrictToLOV) || "BPQS".equals(usRestrictToLOV)) && "E".equals(bpAccTyp)) {
         custSubGroup = SC_BP_END_USER;
       } else if ("P".equals(bpAccTyp)) {
         custSubGroup = SC_BP_POOL;
