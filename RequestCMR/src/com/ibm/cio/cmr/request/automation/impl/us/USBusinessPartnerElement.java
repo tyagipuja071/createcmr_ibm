@@ -53,6 +53,7 @@ import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
+import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
@@ -63,6 +64,8 @@ import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.pps.PPSProfile;
 import com.ibm.cmr.services.client.pps.PPSRequest;
 import com.ibm.cmr.services.client.pps.PPSResponse;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.json.java.JSONObject;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -386,55 +389,67 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
           LOG.debug(" - Duplicate: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")" + record.getCompany()
               + " - " + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
           if (StringUtils.isBlank(record.getUsRestrictTo())) {
-            // IBM Direct CMRs have blank restrict to
-            LOG.debug(" - getting details for CMR No. " + record.getCmrNo());
-            String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
-            FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 5, null, overrides);
-            if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
-              return result.getItems().get(0);
+            // check US CMR DB first to confirm no restriction
+            if (hasBlankRestrictionCodeInUSCMR(record.getCmrNo())) {
+
+              // IBM Direct CMRs have blank restrict to
+              LOG.debug("CMR No. " + record.getCmrNo() + " has BLANK restriction code in US CMR. Getting CMR Details..");
+              String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
+              FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 5, null, overrides);
+              if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
+                return result.getItems().get(0);
+              }
+            } else {
+              LOG.debug("CMR No. " + record.getCmrNo() + " has non-blank restriction code in US CMR");
             }
           }
         }
       }
     }
-    // do a secondary check directly from RDC
-    LOG.debug("No CMR found using duplicate checks, querying database directly..");
-    LOG.debug("No IBM Direct CMRs found in FindCMR. Checking directly on the database..");
-    String sql = ExternalizedQuery.getSql("AUTO.US.GET_IBM_DIRECT");
 
-    if (!StringUtils.isBlank(directCmrNo)) {
-      sql = ExternalizedQuery.getSql("AUTO.US.GET_IBM_DIRECT");
-    }
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setForReadOnly(true);
-    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    query.setParameter("NAME", addr.getDivn().toUpperCase() + "%");
-    query.setParameter("CMR_NO", directCmrNo);
+    // for now use findcmr directly for matching
+    boolean doSecondaryChecks = false;
 
-    List<Object[]> results = query.getResults(1);
-    if (results != null && !results.isEmpty()) {
-      Object[] cmr = results.get(0);
-      // 0 - affiliate
-      // 1 - client tier
-      // 2 - ISU
-      // 3 - INAC type
-      // 4 - INAC code
-      // 5 - KUNNR
-      // 6 - CMR No.
-      // 7 - ISIC
-      // 8 - sub industry
-      FindCMRRecordModel record = new FindCMRRecordModel();
-      record.setCmrAffiliate((String) cmr[0]);
-      record.setCmrTier((String) cmr[1]);
-      record.setCmrIsu((String) cmr[2]);
-      record.setCmrInacType((String) cmr[3]);
-      record.setCmrInac((String) cmr[4]);
-      record.setCmrSapNumber((String) cmr[5]);
-      record.setCmrNum((String) cmr[6]);
-      record.setCmrIsic((String) cmr[7]);
-      record.setCmrSubIndustry((String) cmr[8]);
-      LOG.debug(" - found CMR from DB: " + record.getCmrNum());
-      return record;
+    if (doSecondaryChecks) {
+      // do a secondary check directly from RDC
+      LOG.debug("No CMR found using duplicate checks, querying database directly..");
+      LOG.debug("No IBM Direct CMRs found in FindCMR. Checking directly on the database..");
+      String sql = ExternalizedQuery.getSql("AUTO.US.GET_IBM_DIRECT");
+
+      if (!StringUtils.isBlank(directCmrNo)) {
+        sql = ExternalizedQuery.getSql("AUTO.US.GET_IBM_DIRECT");
+      }
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setForReadOnly(true);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setParameter("NAME", addr.getDivn().toUpperCase() + "%");
+      query.setParameter("CMR_NO", directCmrNo);
+
+      List<Object[]> results = query.getResults(1);
+      if (results != null && !results.isEmpty()) {
+        Object[] cmr = results.get(0);
+        // 0 - affiliate
+        // 1 - client tier
+        // 2 - ISU
+        // 3 - INAC type
+        // 4 - INAC code
+        // 5 - KUNNR
+        // 6 - CMR No.
+        // 7 - ISIC
+        // 8 - sub industry
+        FindCMRRecordModel record = new FindCMRRecordModel();
+        record.setCmrAffiliate((String) cmr[0]);
+        record.setCmrTier((String) cmr[1]);
+        record.setCmrIsu((String) cmr[2]);
+        record.setCmrInacType((String) cmr[3]);
+        record.setCmrInac((String) cmr[4]);
+        record.setCmrSapNumber((String) cmr[5]);
+        record.setCmrNum((String) cmr[6]);
+        record.setCmrIsic((String) cmr[7]);
+        record.setCmrSubIndustry((String) cmr[8]);
+        LOG.debug(" - found CMR from DB: " + record.getCmrNum());
+        return record;
+      }
     }
     LOG.debug("No IBM Direct CMRs found.");
     return null;
@@ -849,6 +864,44 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     if (!hasFieldError) {
       details.append("Branch Office codes computed successfully.");
       engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
+    }
+
+  }
+
+  /**
+   * Checks if the cmrNo has a blank restriction code in US CMR DB
+   * 
+   * @param cmrNo
+   * @return
+   */
+  private boolean hasBlankRestrictionCodeInUSCMR(String cmrNo) {
+    String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+    String sql = ExternalizedQuery.getSql("AUTO.USBP.CHECK_RESTRICTION", usSchema);
+    sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.setRows(1);
+    query.addField("C_COM_RESTRCT_CODE");
+    query.addField("I_CUST_ENTITY");
+
+    try {
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+      QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
+
+      if (!response.isSuccess()) {
+        LOG.warn("Not successful executiong of US CMR query");
+        return true;
+      } else if (response.getRecords() == null || response.getRecords().size() == 0) {
+        LOG.warn("No records in US CMR DB");
+        return true;
+      } else {
+        Map<String, Object> record = response.getRecords().get(0);
+        return StringUtils.isBlank((String) record.get("C_COM_RESTRCT_CODE"));
+      }
+    } catch (Exception e) {
+      LOG.warn("Error in executing US CMR query", e);
+      return true;
     }
 
   }
