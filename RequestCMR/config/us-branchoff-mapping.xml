@@ -427,7 +427,7 @@
 		<mktgDept>EI3</mktgDept>
 		<mtkgArDept>DI3</mtkgArDept>
 		<svcArOffice>IKE</svcArOffice>
-		<pccArDept>G8G</pccArDept>
+		<pccArDept>logic</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>E-HOST</scenario>
@@ -435,7 +435,7 @@
 		<mktgDept>EI3</mktgDept>
 		<mtkgArDept>DI3</mtkgArDept>
 		<svcArOffice>IKE</svcArOffice>
-		<pccArDept>G8G</pccArDept>
+		<pccArDept>logic</pccArDept>
 	</mapping>
 	<!-- Business Partner End -->
 </mappings>
