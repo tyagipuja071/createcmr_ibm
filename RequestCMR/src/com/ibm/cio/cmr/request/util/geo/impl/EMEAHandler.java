@@ -1898,8 +1898,8 @@ public class EMEAHandler extends BaseSOFHandler {
       data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
       
       if(!StringUtils.isEmpty(mainRecord.getCmrSortl())) {
-        String[] srSBO = mainRecord.getCmrSortl().split(" ");
-        data.setRepTeamMemberNo(srSBO[0]);
+        String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
+        data.setRepTeamMemberNo(repTeamMmberNo);
       }
     }
 	}
