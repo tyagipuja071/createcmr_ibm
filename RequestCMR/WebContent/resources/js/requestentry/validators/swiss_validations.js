@@ -98,6 +98,22 @@ function addAfterConfigForSWISS() {
     FormManager.setValue('custLangCd', 'E');
   }
 
+  // abbrev name locked optional for requester
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('abbrevNm')
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+  } else {
+    FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+  }
+
+  if (reqType == 'C') {
+    FormManager.getField('capInd').set('checked', true);
+    FormManager.readOnly('capInd');
+  }
+
+  // disable copy address
+  GEOHandler.disableCopyAddress();
+
   setTaxCdFrCustClass();
   setClientTierValues();
   setVatValidatorSWISS();
@@ -389,11 +405,11 @@ function checkEmbargoCd(value) {
   };
 
   var result = cmr.query('GET.DATA_RDC.EMBARGO_BY_REQID_SWISS', qParams);
-  if (result.ret1 == '88' && (emabargoCd == '' || emabargoCd == null || emabargoCd == undefined)) {
+  if ((result.ret1 == '88' || result.ret1 == '94') && (emabargoCd == '' || emabargoCd == null || emabargoCd == undefined)) {
 
   } else {
     FormManager.clearValue('reqReason');
-    cmr.showAlert('This Request reason can be chosen only if imported record has 88 embargo code and Embargo code field has blank value.');
+    cmr.showAlert('This Request reason can be chosen only if imported record has 88 or 94 embargo code and Embargo code field has blank value.');
     return;
   }
 }
@@ -853,7 +869,6 @@ function setFieldsMandtStatus() {
   FormManager.addValidator('cmrOwner', Validators.REQUIRED, [ 'CMR Owner' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-  FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
 
   if (role == 'REQUESTER') {
     FormManager.readOnly('sensitiveFlag');
@@ -979,10 +994,10 @@ function addEmbargoCdValidator() {
         if (typeof (_pagemodel) != 'undefined') {
           reqType = FormManager.getActualValue('reqType');
         }
-        if (emabrgoCd == null || emabrgoCd == '88' || emabrgoCd == '') {
+        if (emabrgoCd == null || emabrgoCd == '88' || emabrgoCd == '94' || emabrgoCd == '') {
           return new ValidationResult(null, true);
         } else {
-          return new ValidationResult(null, false, 'Value of Emabrgo code can only be 88 or blank.');
+          return new ValidationResult(null, false, 'Value of Emabrgo code can only be 88, 94 or blank.');
         }
       }
     };
@@ -1388,6 +1403,9 @@ function canRemoveAddress(value, rowIndex, grid) {
   return true;
 }
 
+function canCopyAddress(value, rowIndex, grid) {
+  return false;
+}
 function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   return canRemoveAddress(value, rowIndex, grid);
 }
@@ -1423,7 +1441,6 @@ dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
   GEOHandler.setRevertIsicBehavior(false);
-  GEOHandler.enableCopyAddress(GEOHandler.SWISS);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.SWISS);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(onSavingAddress, GEOHandler.SWISS);
