@@ -329,6 +329,7 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
+        // skip Dnn check and matching for BP
         if (SC_BP_POOL.equals(scenarioSubType) || SC_BP_DEVELOP.equals(scenarioSubType) || SC_BP_E_HOST.equals(scenarioSubType)
             || SC_BP_END_USER.equals(scenarioSubType)) {
           ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
