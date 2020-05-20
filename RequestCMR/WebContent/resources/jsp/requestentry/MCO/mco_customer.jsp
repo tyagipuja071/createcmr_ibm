@@ -93,7 +93,7 @@
     </cmr:column>
     </cmr:view>
   </cmr:row>
-  <%--New Fields for Malta 
+  <%--New Fields for Malta --%> 
  <cmr:row addBackground="false">
 	<cmr:column span="2" containerForField="OrdBlk" forCountry="780">
       <p>
@@ -104,7 +104,7 @@
         <cmr:field path="ordBlk" id="ordBlk" fieldId="OrdBlk" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="CustClass" forCountry="780">
+  <cmr:column span="2" containerForField="CustClass" forCountry="780">
         <p>
           <cmr:label fieldId="custClass">
             <cmr:fieldLabel fieldId="CustClass" />:
@@ -113,7 +113,7 @@
         </p>
     </cmr:column>
    </cmr:row>
- --%>
+
   <cmr:view forCountry="XXXX">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="OrgNo">
