@@ -203,7 +203,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       LOG.debug("IBM Direct CMR Found: " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName());
     }
     // match against D&B
-    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, ibmDirectCmr != null);
+    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmDirectCmr != null);
 
     // check CEID
     boolean t1 = isTier1BP(data);
@@ -305,13 +305,14 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    * @throws Exception
    */
   private DnBMatchingResponse matchAgainstDnB(GEOHandler handler, RequestData requestData, Addr addr, AutomationEngineData engineData,
-      StringBuilder details, boolean hasExistingCmr) throws Exception {
+      StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
     List<DnBMatchingResponse> dnbMatches = USUtil.getMatchesForBPEndUser(handler, requestData, engineData);
     if (dnbMatches.isEmpty()) {
       LOG.debug("No D&B matches found for the End User " + addr.getDivn());
       String msg = "No high quality D&B matches for the End User " + addr.getDivn();
       details.append(msg + "\n");
       if (hasExistingCmr) {
+        overrides.addOverride(getProcessCode(), "ADMIN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
         details.append("- A current active CMR exists for the company.");
       } else {
         engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
@@ -328,6 +329,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       if (!StringUtils.isBlank(dnbMatch.getDnbStreetLine2())) {
         details.append(dnbMatch.getDnbStreetLine2() + "\n");
       }
+      overrides.addOverride(getProcessCode(), "ADMIN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
       details.append(dnbMatch.getDnbCity() + ", " + dnbMatch.getDnbStateProv() + "\n");
       details.append(dnbMatch.getDnbCountry() + " " + dnbMatch.getDnbPostalCode() + "\n\n");
       return dnbMatch;
