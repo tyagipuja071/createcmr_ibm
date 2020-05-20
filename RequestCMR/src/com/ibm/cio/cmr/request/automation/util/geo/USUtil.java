@@ -225,7 +225,7 @@ public class USUtil extends AutomationUtil {
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
-        scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
+        scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData);
       }
       LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
       // computation start
@@ -311,13 +311,17 @@ public class USUtil extends AutomationUtil {
     String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
         SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_POOL, SC_BP_DEVELOP,
         SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP,
-        SC_FED_POA, SC_FED_TRIBAL_BUS, SC_BP_END_USER };
+        SC_FED_POA, SC_FED_TRIBAL_BUS, SC_BP_END_USER, SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_INTERNAL };
+    String[] skipCompanyChecksScenarioList = { SC_BP_POOL, SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL,
+        SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
+        SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
+        SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
         try {
-          scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo());
+          scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData);
         } catch (Exception e) {
           LOG.error("CMR Scenario for Create by model request could not be determined.", e);
         }
@@ -329,9 +333,8 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
-        // skip Dnn check and matching for BP
-        if (SC_BP_POOL.equals(scenarioSubType) || SC_BP_DEVELOP.equals(scenarioSubType) || SC_BP_E_HOST.equals(scenarioSubType)
-            || SC_BP_END_USER.equals(scenarioSubType)) {
+        // skip Dnb check and matching
+        if (engineData.hasPositiveCheckStatus("SKIP_COMP_CHECK") || Arrays.asList(skipCompanyChecksScenarioList).contains(scenarioSubType)) {
           ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
           if (scenarioExceptions != null) {
             scenarioExceptions.setSkipCompanyVerification(true);
@@ -886,7 +889,7 @@ public class USUtil extends AutomationUtil {
    * @return
    * @throws Exception
    */
-  public static String determineCustSubScenario(EntityManager entityManager, String cmrNo) throws Exception {
+  public static String determineCustSubScenario(EntityManager entityManager, String cmrNo, AutomationEngineData engineData) throws Exception {
     // get request admin and data
     String custSubGroup = "";
 
@@ -927,10 +930,10 @@ public class USUtil extends AutomationUtil {
 
     // US restrict to LOV mapping
     String usRestrictToLOV = "";
-      if (StringUtils.isNotBlank(usRestricTo)) {
-        sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
-        query = new PreparedQuery(entityManager, sql);
-        query.setParameter("RESTRICT_TO", usRestricTo);
+    if (StringUtils.isNotBlank(usRestricTo)) {
+      sql = ExternalizedQuery.getSql("AUTO.US.GET_US_RESTR_TO_LOV");
+      query = new PreparedQuery(entityManager, sql);
+      query.setParameter("RESTRICT_TO", usRestricTo);
       usRestrictToLOV = query.getSingleResult(String.class);
     }
 
@@ -1007,12 +1010,15 @@ public class USUtil extends AutomationUtil {
           && StringUtils.isBlank(usRestricTo)) {
         custSubGroup = SC_STATE_DIST;
       }
+      engineData.addPositiveCheckStatus("SKIP_COMP_CHECK");
     } else if (LEASING.equals(custTypCd)) {
       custSubGroup = SC_LEASE_3CC;
+      engineData.addPositiveCheckStatus("SKIP_COMP_CHECK");
     } else if (FEDERAL.equals(custTypCd)) {
       if ("12".equals(custClass)) {
         custSubGroup = SC_FED_REGULAR;
       }
+      engineData.addPositiveCheckStatus("SKIP_COMP_CHECK");
     } else if (POWER_OF_ATTORNEY.equals(custTypCd)) {
       if ("15".equals(custClass) && StringUtils.isNotBlank(subIndustryCd) && !subIndustryCd.startsWith("Y")) {
         custSubGroup = SC_FED_FEDSTATE;
