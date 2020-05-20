@@ -281,8 +281,8 @@ public class USUtil extends AutomationUtil {
         }
       }
 
-      if (StringUtils.isNotEmpty(data.getIsicCd()) && StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd())
-          && !data.getIsicCd().equals(data.getUsSicmen())) {
+      if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getIsicCd()) && StringUtils.isNotEmpty(data.getUsSicmen())
+          && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
       }
       // if scenario is OEMSW or OEMHW set isic to 357X
