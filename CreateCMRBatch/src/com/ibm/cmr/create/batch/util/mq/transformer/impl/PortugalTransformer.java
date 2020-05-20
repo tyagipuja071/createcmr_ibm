@@ -73,10 +73,8 @@ public class PortugalTransformer extends MessageTransformer {
     messageHash.put("EnterpriseNo", !StringUtils.isEmpty(cmrData.getEnterprise()) ? cmrData.getEnterprise() : "");
     messageHash.put("ModeOfPayment", !StringUtils.isEmpty(cmrData.getModeOfPayment()) ? cmrData.getModeOfPayment() : "");
     messageHash.put("DistrictCode", !StringUtils.isEmpty(cmrData.getTerritoryCd()) ? cmrData.getTerritoryCd() : "");
+    messageHash.put("EmbargoCode", !StringUtils.isEmpty(cmrData.getEmbargoCd()) ? cmrData.getEmbargoCd() : "");
     messageHash.put("EconomicCode", "");
-
-    String embargoCode = !StringUtils.isEmpty(cmrData.getEmbargoCd()) ? cmrData.getEmbargoCd() : "";
-    messageHash.put("EmbargoCode", embargoCode);
 
     if (update) {
       String phone = getBillingPhone(handler);
@@ -86,6 +84,7 @@ public class PortugalTransformer extends MessageTransformer {
         messageHash.put("ISU", "");
       }
     }
+    handleDataDefaults(handler, messageHash, cmrData, crossBorder, addrData);
   }
 
   @Override
@@ -95,11 +94,11 @@ public class PortugalTransformer extends MessageTransformer {
     boolean update = "U".equals(handler.adminData.getReqType());
     boolean crossBorder = isCrossBorder(addrData);
 
-    String addrKey = getAddressKey(addrData.getId().getAddrType());
-    LOG.trace("Handling " + (update ? "update" : "create") + " request.");
     Map<String, String> messageHash = handler.messageHash;
+    String addrKey = getAddressKey(addrData.getId().getAddrType());
+    LOG.debug("Handling " + (update ? "update" : "create") + " request.");
 
-    messageHash.put("SourceCode", "FO5");
+    handler.messageHash.put("SourceCode", "FO5");
     messageHash.remove(addrKey + "Name");
     messageHash.remove(addrKey + "ZipCode");
     messageHash.remove(addrKey + "City");
@@ -203,14 +202,14 @@ public class PortugalTransformer extends MessageTransformer {
       messageHash.put("MarketingResponseCode", "5");
       messageHash.put("CEdivision", "2");
       messageHash.put("ARemark", "YES");
-    } else if ("GOVRN".equals(custType)) {
+    } else if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType)) {
       messageHash.put("CustomerType", "G");
-    } else if ("INTER".equals(custType) || "INTSO".equals(custType) || "CRINT".equals(custType) || "CRISO".equals(custType)) {
+    } else if (MQMsgConstants.CUSTSUBGRP_INTER.equals(custType) || MQMsgConstants.CUSTSUBGRP_INTSO.equals(custType)) {
       messageHash.put("CustomerType", "91");
     } else {
       messageHash.put("ARemark", "");
     }
-    
+
     messageHash.put("LangCode", "1");
     messageHash.put("CICode", "3");
     messageHash.put("CustomerLanguage", "1");
