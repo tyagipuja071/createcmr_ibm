@@ -86,9 +86,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       MatchingResponse<ReqCheckResponse> responseREQ = new MatchingResponse<>();
       MatchingResponse<DuplicateCMRCheckResponse> responseCMR = new MatchingResponse<>();
 
-      // if (scenarioExceptions != null && invoiceTo==null) {
-      // scenarioExceptions.getAddressTypesForDuplicateCMRCheck().get("ZS01").add("ZP01");
-      // }
+      if (scenarioExceptions != null && invoiceTo == null) {
+        scenarioExceptions.getAddressTypesForDuplicateCMRCheck().get("ZS01").add("ZP01");
+      }
 
       int itemNo = 1;
       // perform duplicate request check
