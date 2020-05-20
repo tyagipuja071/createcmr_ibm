@@ -251,8 +251,9 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       log.debug("CmrAddrType= " + cmrAddrType);
       rdcAddrTypes = addrTypes.get(cmrAddrType);
       Addr addr = requestData.getAddress(cmrAddrType);
-      for (String rdcAddrType : rdcAddrTypes) {
-        if (addr != null) {
+      if (addr != null) {
+        for (String rdcAddrType : rdcAddrTypes) {
+
           DuplicateCMRCheckRequest request = getRequest(entityManager, data, admin, addr, rdcAddrType, vatMatchRequired);
           log.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
               + " for AddrType: " + cmrAddrType + "-" + rdcAddrType);
@@ -270,14 +271,13 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
             } else {
               return res;
             }
-          } else if (response.getMatches().size() > 0 && res.getSuccess()) {
+          } else if (res.getSuccess()) {
             updateMatches(response, res);
           }
-
-        } else {
-          log.debug("No '" + cmrAddrType + "' address on the request. Skipping duplicate check.");
-          continue;
         }
+      } else {
+        log.debug("No '" + cmrAddrType + "' address on the request. Skipping duplicate check.");
+        continue;
       }
     }
 
