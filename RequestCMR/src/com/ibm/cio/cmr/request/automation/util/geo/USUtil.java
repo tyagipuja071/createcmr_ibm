@@ -280,10 +280,17 @@ public class USUtil extends AutomationUtil {
 
         }
       }
+
+      if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getIsicCd()) && StringUtils.isNotEmpty(data.getUsSicmen())
+          && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
+      }
       // if scenario is OEMSW or OEMHW set isic to 357X
-      if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType)) {
+      if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType) || SC_REST_TPD.equals(scenarioSubType)
+          || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
+        // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
+        // "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
       }
     } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
