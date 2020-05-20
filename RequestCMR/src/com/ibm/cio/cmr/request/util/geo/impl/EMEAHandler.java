@@ -3930,7 +3930,9 @@ public class EMEAHandler extends BaseSOFHandler {
       XSSFSheet sheet = book.getSheet(name);      
       if (sheet != null ) {
         for (Row row : sheet) {
-          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {           
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {     
+          String cmrNo = ""; // 0
+          String seqNo = "";//1
           String localCity = ""; // 7  
           String crossCity = ""; // 8
           String localPostal = ""; // 9
@@ -3938,8 +3940,17 @@ public class EMEAHandler extends BaseSOFHandler {
           String street = ""; // 4
           String addressCont = ""; // 5
           String poBox = ""; // 12
-          String attPerson = ""; // 11  
+          String attPerson = ""; // 11
+          
+          if(row.getRowNum() == 2001){
+            continue;
+          }
+          
           // iterate all the rows and check each column value
+          currCell = (XSSFCell) row.getCell(0);
+          cmrNo = validateColValFromCell((XSSFCell) currCell);
+          currCell = (XSSFCell) row.getCell(1);
+          seqNo = validateColValFromCell((XSSFCell) currCell);
           currCell = (XSSFCell) row.getCell(6);
           localCity = validateColValFromCell((XSSFCell) currCell);
           currCell = (XSSFCell) row.getCell(7);
@@ -3956,7 +3967,7 @@ public class EMEAHandler extends BaseSOFHandler {
           attPerson = validateColValFromCell((XSSFCell) currCell);
           currCell = (XSSFCell) row.getCell(12);
           poBox = validateColValFromCell((XSSFCell) currCell);
-           
+         
           TemplateValidation error = new TemplateValidation(name);          
           if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
             LOG.trace(
@@ -3987,6 +3998,13 @@ public class EMEAHandler extends BaseSOFHandler {
               error.addError(row.getRowNum(), "Address Con't/Att. Person",
                   "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
               validations.add(error);              
+            }
+            
+            if(!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              validations.add(error);   
             }
           }
         }
