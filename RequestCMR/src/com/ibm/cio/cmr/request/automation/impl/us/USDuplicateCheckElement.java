@@ -76,12 +76,19 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     MatchingOutput output = new MatchingOutput();
     StringBuilder details = new StringBuilder();
     Addr soldTo = requestData.getAddress("ZS01");
+    Addr invoiceTo = requestData.getAddress("ZI01");
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
       List<String> duplicateList = new ArrayList<String>();
+      List<String> soldToKunnrsList = new ArrayList<String>();
+
       List<DuplicateCMRCheckResponse> cmrCheckMatches = new ArrayList<DuplicateCMRCheckResponse>();
       List<ReqCheckResponse> reqCheckMatches = new ArrayList<ReqCheckResponse>();
       MatchingResponse<ReqCheckResponse> responseREQ = new MatchingResponse<>();
       MatchingResponse<DuplicateCMRCheckResponse> responseCMR = new MatchingResponse<>();
+
+      // if (scenarioExceptions != null && invoiceTo==null) {
+      // scenarioExceptions.getAddressTypesForDuplicateCMRCheck().get("ZS01").add("ZP01");
+      // }
 
       int itemNo = 1;
       // perform duplicate request check
@@ -107,6 +114,11 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             output.addMatch(getProcessCode(), "REQ_ID", reqCheckRecord.getReqId() + "", matchType, reqCheckRecord.getMatchGrade() + "", "REQ",
                 itemNo++);
             dupReqCheckElement.logDuplicateRequest(details, reqCheckRecord, matchType);
+            if (!StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())) {
+              details.append("US Restrict To =  " + reqCheckRecord.getUsRestrictTo()).append("\n");
+            } else {
+              details.append("US Restrict To = -blank- ").append("\n");
+            }
           }
           engineData.put("reqCheckMatches", reqCheckMatches);
           dupReqFound = true;
@@ -115,40 +127,53 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         reqChkSrvError = true;
       }
 
-      // perform duplicate cmr check if no duplicate requests found
       if (!dupReqFound) {
-        responseCMR = getCMRMatches(entityManager, requestData, engineData);
-        if (responseCMR != null && responseCMR.getSuccess()) {
-          if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty()) {
-            cmrCheckMatches = responseCMR.getMatches();
-            details.append(cmrCheckMatches.size() + " record(s) found.");
-            if (cmrCheckMatches.size() > 5) {
-              cmrCheckMatches = cmrCheckMatches.subList(0, 5);
-              details.append("Showing top 5 matches only.");
-            }
-
-            // int itemNo = 1;
-            for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-              details.append("\n");
-              LOG.debug("Duplicate CMRs Found..");
-              output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
-                  itemNo++);
-              duplicateList.add(cmrCheckRecord.getCmrNo());
-              dupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
-              if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
-                details.append("US Restrict To =  " + cmrCheckRecord.getUsRestrictTo()).append("\n");
-              } else {
-                details.append("US Restrict To = -blank- ").append("\n");
-              }
-              engineData.put("cmrCheckMatches", cmrCheckRecord);
-            }
-            dupCMRFound = true;
-          }
+        // perform duplicate cmr check if no duplicate requests found
+        if (StringUtils.isNotBlank(admin.getDupCmrReason())) {
+          // skip if only duplicate cmr and override reason is provided
+          details.setLength(0);
+          details.append("User requested to proceed with Duplicate CMR Creation.").append("\n");
+          details.append("Reason provided - ").append("\n");
+          details.append(admin.getDupCmrReason()).append("\n");
+          result.setDetails(details.toString());
+          result.setResults("Overridden");
+          result.setOnError(false);
+          return result;
         } else {
-          cmrChkSrvError = true;
+          responseCMR = getCMRMatches(entityManager, requestData, engineData);
+          if (responseCMR != null && responseCMR.getSuccess()) {
+            if (responseCMR.getMatched() && !responseCMR.getMatches().isEmpty()) {
+              cmrCheckMatches = responseCMR.getMatches();
+              details.append(cmrCheckMatches.size() + " record(s) found.");
+              if (cmrCheckMatches.size() > 5) {
+                cmrCheckMatches = cmrCheckMatches.subList(0, 5);
+                details.append("Showing top 5 matches only.");
+              }
+
+              // int itemNo = 1;
+              for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+                details.append("\n");
+                LOG.debug("Duplicate CMRs Found..");
+                output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
+                    itemNo++);
+                duplicateList.add(cmrCheckRecord.getCmrNo());
+                soldToKunnrsList.add(getZS01Kunnr(cmrCheckRecord.getCmrNo()));
+
+                dupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
+                if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
+                  details.append("US Restrict To =  " + cmrCheckRecord.getUsRestrictTo()).append("\n");
+                } else {
+                  details.append("US Restrict To = -blank- ").append("\n");
+                }
+                engineData.put("cmrCheckMatches", cmrCheckRecord);
+              }
+              dupCMRFound = true;
+            }
+          } else {
+            cmrChkSrvError = true;
+          }
         }
       }
-
       if (dupReqFound || dupCMRFound) {
         result.setResults("Duplicates found.");
         if (engineData.hasPositiveCheckStatus("allowDuplicates") || shouldSetNegativeCheck(entityManager, requestData, data.getCustSubGrp())) {
@@ -158,19 +183,17 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           if (duplicateList.size() > 3) {
             duplicateList = duplicateList.subList(0, 3);
           }
+          if (soldToKunnrsList.size() > 3) {
+            soldToKunnrsList = soldToKunnrsList.subList(0, 3);
+          }
 
           if (dupReqFound) {
             engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
                 "Duplicate Requests : " + StringUtils.join(duplicateList, ", "), "");
           } else if (dupCMRFound) {
-            List<String> cmrsList = new ArrayList<String>();
-            List<String> soldToKunnrsList = new ArrayList<String>();
-            for (DuplicateCMRCheckResponse cmrChkRep : cmrCheckMatches) {
-              cmrsList.add(cmrChkRep.getCmrNo());
-              soldToKunnrsList.add(getZS01Kunnr(cmrChkRep.getCmrNo()));
-            }
             engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
                 "Duplicate CMRs : " + StringUtils.join(duplicateList, ", "), "SOLD TO KUNNR : " + StringUtils.join(soldToKunnrsList, ", "));
+            admin.setMatchIndc("C");
           }
           result.setOnError(true);
         }
@@ -349,7 +372,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     default:
       for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
         if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo()))
-            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()))) {
+            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()))
+                && data.getRestrictTo().equals(reqCheckRecord.getUsRestrictTo())) {
           reqCheckMatchesTmp.add(reqCheckRecord);
         }
       }
@@ -456,7 +480,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
     default:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-        if (StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
+        if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
+            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
+                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo())) {
           cmrCheckMatchesTmp.add(cmrCheckRecord);
         }
       }
