@@ -150,7 +150,7 @@ function addAddressTypeValidator() {
       }else{
         console.log("Address Type Validator Malta..............");
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-          return new ValidationResult(null, false, 'All addresses are mandatory. Only multiple Shipping & Installing addresses are allowed.');
+          return new ValidationResult(null, false, 'Mailing address is mandatory. Only multiple Shipping & Installing addresses are allowed.');
         }
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
@@ -181,10 +181,11 @@ function addAddressTypeValidator() {
               eplCnt++;
             }
           }
-          if (installCnt == 0 || mailingCnt == 0 || billingCnt == 0 || shippingCnt == 0 || eplCnt == 0) {
-            return new ValidationResult(null, false,
-                'All five addresses are mandatory. Only multiple Shipping & Installing addresses are allowed.');
-          } else if (billingCnt > 1) {
+//          if (installCnt == 0 || mailingCnt == 0 || billingCnt == 0 || shippingCnt == 0 || eplCnt == 0) {
+//            return new ValidationResult(null, false,
+//                'Only mailing address is mandatory. Only multiple Shipping & Installing addresses are allowed.');
+//          } else
+          if (billingCnt > 1) {
             return new ValidationResult(null, false, 'What we need is to have only One Billing address. Please remove the additional Billing address.');
           } else if (mailingCnt > 1) {
             return new ValidationResult(null, false, 'What we need is to have only One Mailing address. Please remove the additional Mailing address.');
