@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -23,17 +21,13 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
-import com.ibm.cio.cmr.request.query.ExternalizedQuery;
-import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
-import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
-import com.ibm.cmr.services.client.StandardCityServiceClient;
 import com.ibm.cmr.services.client.ValidatorClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
@@ -41,8 +35,6 @@ import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
-import com.ibm.cmr.services.client.stdcity.StandardCityRequest;
-import com.ibm.cmr.services.client.stdcity.StandardCityResponse;
 import com.ibm.cmr.services.client.validator.ValidationResult;
 import com.ibm.cmr.services.client.validator.VatValidateRequest;
 
@@ -234,96 +226,9 @@ public class DnBUtil {
 
     // derive county information
     if (SystemLocation.UNITED_STATES.equals(issuingCntry)) {
-      deriveUSCounty(cmrRecord, company);
+      RequestUtils.deriveUSCounty(cmrRecord, company);
     }
     return cmrRecord;
-  }
-
-  /**
-   * Derives country information for the US
-   * 
-   * @param cmrRecord
-   * @param company
-   */
-  private static void deriveUSCounty(FindCMRRecordModel cmrRecord, DnBCompany company) {
-    String countyName = null;
-    String stateCode = cmrRecord.getCmrState();
-    if (!StringUtils.isBlank(company.getPrimaryCounty())) {
-      countyName = company.getPrimaryCounty().toUpperCase();
-    } else if (!StringUtils.isBlank(company.getMailingCounty())) {
-      countyName = company.getMailingCounty().toUpperCase();
-    }
-    if (countyName != null && stateCode != null) {
-      LOG.debug("Deriving county code from County " + countyName + " State " + stateCode);
-      if (countyName.endsWith("COUNTY")) {
-        // get name without county
-        countyName = countyName.substring(0, countyName.lastIndexOf("COUNTY")).trim();
-        String sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY");
-        EntityManager entityManager = JpaManager.getEntityManager();
-        try {
-          PreparedQuery query = new PreparedQuery(entityManager, sql);
-          query.setForReadOnly(true);
-          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT", "100"));
-          query.setParameter("STATE", stateCode);
-          query.setParameter("COUNTY", "%" + countyName + "%");
-          List<Object[]> results = query.getResults();
-          if (results != null) {
-            for (Object[] result : results) {
-              if (result[1].equals(countyName)) {
-                cmrRecord.setCmrCountyCode((String) result[0]);
-                cmrRecord.setCmrCounty((String) result[1]);
-                break;
-              }
-            }
-          }
-          if (cmrRecord.getCmrCountyCode() == null) {
-            sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY.ALL");
-            query = new PreparedQuery(entityManager, sql);
-            query.setForReadOnly(true);
-            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT", "100"));
-            query.setParameter("STATE", stateCode);
-            results = query.getResults();
-            if (results != null) {
-              // two iterations, equals first then like
-              for (Object[] result : results) {
-                String checkCounty = (String) result[1];
-                if (StringUtils.getLevenshteinDistance(countyName, checkCounty) <= 4) {
-                  cmrRecord.setCmrCountyCode((String) result[0]);
-                  cmrRecord.setCmrCounty((String) result[1]);
-                  break;
-                }
-              }
-            }
-          }
-          String standardCity = getUSStandardCityName(cmrRecord);
-          cmrRecord.setCmrCity(standardCity);
-          LOG.debug("City/County Computed: City: " + cmrRecord.getCmrCity() + " " + cmrRecord.getCmrCountyCode() + " - " + cmrRecord.getCmrCounty());
-        } catch (Exception e) {
-          LOG.warn("County and City computation error.", e);
-        } finally {
-          entityManager.close();
-        }
-      }
-    }
-  }
-
-  private static String getUSStandardCityName(FindCMRRecordModel cmrRecord) throws Exception {
-    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
-    StandardCityServiceClient stdCityClient = CmrServicesFactory.getInstance().createClient(baseUrl, StandardCityServiceClient.class);
-    StandardCityRequest stdCityRequest = new StandardCityRequest();
-    stdCityRequest.setCountry(cmrRecord.getCmrCountryLanded());
-    stdCityRequest.setCity(cmrRecord.getCmrCity());
-    stdCityRequest.setState(cmrRecord.getCmrState());
-    stdCityRequest.setSysLoc(SystemLocation.UNITED_STATES);
-    stdCityRequest.setCountyName(cmrRecord.getCmrCounty());
-    stdCityRequest.setPostalCode(cmrRecord.getCmrPostalCode());
-    stdCityClient.setStandardCityRequest(stdCityRequest);
-
-    StandardCityResponse resp = stdCityClient.executeAndWrap(StandardCityResponse.class);
-    if (resp != null && resp.isSuccess()) {
-      return resp.getStandardCity();
-    }
-    return cmrRecord.getCmrCity();
   }
 
   /**
