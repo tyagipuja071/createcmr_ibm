@@ -153,6 +153,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     StringBuilder details = new StringBuilder();
     Addr addr = requestData.getAddress("ZS01");
 
+    FindCMRRecordModel ibmDirectCmr = null;
     long childReqId = admin.getChildReqId();
     String childCmrNo = null;
     if (childReqId > 0) {
@@ -172,17 +173,33 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
       String childReqStatus = childRequest.getAdmin().getReqStatus();
       if ("PRJ".equals(childReqStatus) || "DRA".equals(childReqStatus) || "CAN".endsWith(childReqStatus)) {
-        LOG.debug("Child request processing has been stopped (Rejected or Sent back to requesters). Sending to processors.");
-        String msg = "IBM Direct Request " + childReqId + " has been sent back to requesters. The request needs to be manually processed.";
-        details.append(msg);
-        details.append("\n");
-        details.append("No field value has been computed for this record.");
-        // engineData.addNegativeCheckStatus("_usBpRejected", msg);
-        engineData.addRejectionComment("OTH", msg, "", "");
-        output.setOnError(true);
-        output.setDetails(details.toString());
-        output.setResults("Issues Encountered");
-        return output;
+        boolean setError = true;
+        // try to check once if an ibm direct cmr is available
+        LOG.debug("Trying to check once for a Direct CMR for the record");
+        ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, null);
+        if (ibmDirectCmr != null) {
+          setError = false;
+        }
+
+        if (setError) {
+          LOG.debug("Child request processing has been stopped (Rejected or Sent back to requesters). Sending to processors.");
+          String msg = "IBM Direct Request " + childReqId
+              + " has been sent back to requesters and no IBM Direct CMRs were found. The request needs to be manually processed.";
+          details.append(msg);
+          details.append("\n");
+          details.append("No field value has been computed for this record.");
+          // engineData.addNegativeCheckStatus("_usBpRejected", msg);
+          engineData.addRejectionComment("OTH", msg, "", "");
+          output.setOnError(true);
+          output.setDetails(details.toString());
+          output.setResults("Issues Encountered");
+          return output;
+        } else {
+          LOG.debug("Child Request was not completed, but IBM Direct CMR " + ibmDirectCmr.getCmrNum() + "(" + ibmDirectCmr.getCmrName() + ") found.");
+          details.append(
+              "Child Request was not completed, but IBM Direct CMR " + ibmDirectCmr.getCmrNum() + "(" + ibmDirectCmr.getCmrName() + ") found.\n");
+        }
+
       } else if (!"COM".equals(childReqStatus)) {
         LOG.debug("Child request not yet completed. Checking waiting time..");
         this.waiting = true;
@@ -198,7 +215,10 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
 
     // check IBM Direct CMR
-    FindCMRRecordModel ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
+    if (ibmDirectCmr == null) {
+      // if a rejected child caused the retrieval of a child cmr
+      ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
+    }
     if (ibmDirectCmr != null) {
       LOG.debug("IBM Direct CMR Found: " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName());
     }
