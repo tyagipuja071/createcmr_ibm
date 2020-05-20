@@ -190,7 +190,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
           } else {
             return res;
           }
-        } else if (response.getMatches().size() > 0 && res.getSuccess()) {
+        } else if (res.getSuccess()) {
           updateMatches(response, res);
         }
 
