@@ -37,7 +37,7 @@
           <dbColumn>EMBARGO_CD</dbColumn>
           <width>20</width>
           <length>1</length>
-          <lovId>EmbargoCode</lovId>
+          <lovId>EmbargoCode2</lovId>
         </column>  
         <column>
           <label>Collection Code</label>
@@ -77,7 +77,7 @@
           <label>Mode of Payment</label>
           <dbColumn>MODE_OF_PAYMENT</dbColumn>
           <width>20</width>
-          <lovId>ModeOfPayment</lovId>
+          <lovId>ModeOfPayment2</lovId>
         </column>
       </columns>
     </tab>
@@ -123,13 +123,13 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>30</length>
+          <length>24</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>22</length>
+          <length>24</length>
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -153,7 +153,7 @@
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
-          <length>16</length>
+          <length>26</length>
         </column>
         <column number="true" exactLength="false">
           <label>PO Box</label>
@@ -211,13 +211,13 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>30</length>
+          <length>24</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>22</length>
+          <length>24</length>
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -241,7 +241,7 @@
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
-          <length>16</length>
+          <length>26</length>
         </column>
         <column number="true" exactLength="false">
           <label>PO Box</label>
@@ -298,13 +298,13 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>30</length>
+          <length>24</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>20</length>
+          <length>24</length>
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -324,17 +324,11 @@
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
         </column>
-        <!-- <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column> -->
         <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
-          <length>16</length>
+          <length>26</length>
         </column>
         <column>
           <label>Phone #</label>
@@ -385,13 +379,13 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>30</length>
+          <length>24</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>20</length>
+          <length>24</length>
         </column>
         <column>
           <label>Local Postal Code</label>
@@ -415,7 +409,7 @@
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
-          <length>16</length>
+          <length>26</length>
         </column>
       </columns>
     </tab>

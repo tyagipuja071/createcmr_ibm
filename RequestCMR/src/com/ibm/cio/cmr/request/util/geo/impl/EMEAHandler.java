@@ -1928,7 +1928,7 @@ public class EMEAHandler extends BaseSOFHandler {
       data.setMemLvl(mainRecord.getCmrMembLevel());
       data.setBpRelType(mainRecord.getCmrBPRelType());
       data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
-      if(!StringUtils.isEmpty(mainRecord.getCmrSortl())) {
+      if (!StringUtils.isEmpty(mainRecord.getCmrSortl())) {
         String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
@@ -4010,7 +4010,16 @@ public class EMEAHandler extends BaseSOFHandler {
             String addressCont = ""; // 5
             String poBox = ""; // 12
             String attPerson = ""; // 11
+            String cmrNo = ""; // 0
+            String seqNo = "";// 1
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
             // iterate all the rows and check each column value
+            currCell = (XSSFCell) row.getCell(0);
+            cmrNo = validateColValFromCell(currCell);
+            currCell = (XSSFCell) row.getCell(1);
+            seqNo = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(6);
             localCity = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(7);
@@ -4056,6 +4065,13 @@ public class EMEAHandler extends BaseSOFHandler {
                     "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
                 validations.add(error);
               }
+            }
+
+            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
             }
           }
         }
