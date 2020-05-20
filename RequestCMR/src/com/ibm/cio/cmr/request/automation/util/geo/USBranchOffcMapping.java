@@ -212,9 +212,7 @@ public class USBranchOffcMapping {
       calculatedMktgDept = StringUtils.isBlank(data.getMktgDept()) ? "" : data.getMktgDept();
       break;
     case LOGIC:
-      List<String> scenarioList = Arrays.asList(USUtil.SC_FED_CAMOUFLAGED, USUtil.SC_FED_CLINIC, USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL,
-          USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_NATIVE_CORP, USUtil.SC_FED_POA, USUtil.SC_FED_REGULAR, USUtil.SC_FED_TRIBAL_BUS);
-      if (scenarioList.contains(scenario)) {
+      if (USUtil.FEDERAL_SCENARIOS.contains(scenario) && !USUtil.SC_FED_FEDSTATE.equals(scenario)) {
         if ("MO".equals(stateToMatch)) {
           if (STATE_MO_M3A != null && STATE_MO_M3A.contains(countyToMatch)) {
             calculatedMktgDept = "M3A";
