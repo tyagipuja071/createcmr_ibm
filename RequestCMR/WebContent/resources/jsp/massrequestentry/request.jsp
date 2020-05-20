@@ -83,7 +83,7 @@ dojo.addOnLoad(function() {
         addEnterpriseValidator();
     <%}%>
     <%--Defect 1745740: SPAIN_PP_Mass Delete Request_Requests getting completed even after no CMR are being added for deletion --%>
-    <%if ((reqentry.getCmrIssuingCntry().equalsIgnoreCase("838") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("866") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("754") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("758")) && reqentry.getReqType()!= null && (CmrConstants.REQ_TYPE_DELETE.equals(reqentry.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(reqentry.getReqType())) && reqentry.getReqId() > 0){%>
+    <%if ((reqentry.getCmrIssuingCntry().equalsIgnoreCase("838") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("822") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("866") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("754") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("758")) && reqentry.getReqType()!= null && (CmrConstants.REQ_TYPE_DELETE.equals(reqentry.getReqType()) || CmrConstants.REQ_TYPE_REACTIVATE.equals(reqentry.getReqType())) && reqentry.getReqId() > 0){%>
         cmrsListGridValidator();
     <%}%>
     
