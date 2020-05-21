@@ -2,8 +2,10 @@ package com.ibm.cio.cmr.request.automation.impl.us;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -29,6 +31,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -85,10 +89,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       List<ReqCheckResponse> reqCheckMatches = new ArrayList<ReqCheckResponse>();
       MatchingResponse<ReqCheckResponse> responseREQ = new MatchingResponse<>();
       MatchingResponse<DuplicateCMRCheckResponse> responseCMR = new MatchingResponse<>();
-
-      if (scenarioExceptions != null && invoiceTo == null) {
-        scenarioExceptions.getAddressTypesForDuplicateCMRCheck().get("ZS01").add("ZP01");
-      }
 
       int itemNo = 1;
       // perform duplicate request check
@@ -157,7 +157,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
                 output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
                     itemNo++);
                 duplicateList.add(cmrCheckRecord.getCmrNo());
-                soldToKunnrsList.add(getZS01Kunnr(cmrCheckRecord.getCmrNo()));
+                soldToKunnrsList.add(getZS01Kunnr(cmrCheckRecord.getCmrNo(), SystemLocation.UNITED_STATES));
 
                 dupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
                 if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
@@ -191,8 +191,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
                 "Duplicate Requests : " + StringUtils.join(duplicateList, ", "), "");
           } else if (dupCMRFound) {
+            List<String> dupFiltered = removeDupEntriesFrmList(duplicateList);
+            List<String> kunnrsFiltered = removeDupEntriesFrmList(soldToKunnrsList);
             engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
-                "Duplicate CMRs : " + StringUtils.join(duplicateList, ", "), "SOLD TO KUNNR : " + StringUtils.join(soldToKunnrsList, ", "));
+                "Duplicate CMRs : " + StringUtils.join(dupFiltered, ", "), "SOLD TO KUNNR : " + StringUtils.join(kunnrsFiltered, ", "));
             admin.setMatchIndc("C");
           }
           result.setOnError(true);
@@ -547,11 +549,12 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       AutomationEngineData engineData) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    Addr zs01 = requestData.getAddress("ZS01");
+    Addr zi01 = requestData.getAddress("ZI01");
     MatchingResponse<DuplicateCMRCheckResponse> response = new MatchingResponse<DuplicateCMRCheckResponse>();
-
+    ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     // check if End user and has divn value
     if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
-      Addr zs01 = requestData.getAddress("ZS01");
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
         response.setMatched(false);
@@ -562,6 +565,54 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     // get duplicates
     response = dupCMRCheckElement.getMatches(entityManager, requestData, engineData);
+
+    if (response != null && response.getSuccess() && response.getMatched() && zi01 == null) {
+      List<DuplicateCMRCheckResponse> dirtyMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      List<DuplicateCMRCheckResponse> pureMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      // this means that we only received ZS01 matches.
+      // check if matches have ZP01 addresses, if not consider pure match and
+      // include always
+      // if matches have ZP01 address, then remove mapping of ZS01-ZS01 and add
+      // ZS01-ZP01 in scenario exceptions to get invoice to address duplicates
+      // only
+      for (DuplicateCMRCheckResponse record : response.getMatches()) {
+        String sql = ExternalizedQuery.getSql("AUTO.US.CHECK_ZP01_ADDRESS");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("CMR_NO", record.getCmrNo());
+        query.setForReadOnly(true);
+        if (query.exists()) {
+          // has ZP01 add to dirtyMatches
+          dirtyMatches.add(record);
+        } else {
+          // has only zs01 add to pure matches
+          pureMatches.add(record);
+        }
+      }
+      if (!dirtyMatches.isEmpty()) {
+        // if we found dirty matches we need to filter them again
+        scenarioExceptions.getAddressTypesForDuplicateCMRCheck().clear();
+        scenarioExceptions.getAddressTypesForDuplicateCMRCheck().put("ZS01", Arrays.asList("ZP01"));
+        // adding this to scenario exceptions will check only ZS01-ZP01 matches
+        response = dupCMRCheckElement.getMatches(entityManager, requestData, engineData);
+        if (response != null && response.getSuccess() && response.getMatched()) {
+          dirtyMatches = updateCMRMatches(dirtyMatches, response.getMatches());
+          if (dirtyMatches.size() > 0) {
+            // if matches found for ZP01 we add them to pure matches
+            pureMatches.addAll(dirtyMatches);
+          }
+        }
+        if (!pureMatches.isEmpty()) {
+          response.setSuccess(true);
+          response.setMatched(true);
+          response.setMatches(pureMatches);
+        } else {
+          response.setSuccess(true);
+          response.setMatched(false);
+          response.setMessage("No matches found for the given search criteria.");
+        }
+      }
+
+    }
 
     // filter dup requests
     if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
@@ -597,7 +648,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return true;
   }
 
-  private String getZS01Kunnr(String cmrNo) throws Exception {
+  private String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
     String kunnr = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
@@ -605,6 +656,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
 
     String dbId = QueryClient.RDC_APP_ID;
 
@@ -624,4 +676,24 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return kunnr;
   }
 
+  private List<DuplicateCMRCheckResponse> updateCMRMatches(List<DuplicateCMRCheckResponse> global, List<DuplicateCMRCheckResponse> iteration) {
+    List<DuplicateCMRCheckResponse> updated = new ArrayList<DuplicateCMRCheckResponse>();
+    for (DuplicateCMRCheckResponse resp1 : global) {
+      for (DuplicateCMRCheckResponse resp2 : iteration) {
+        if (resp1.getCmrNo().equals(resp2.getCmrNo())) {
+          updated.add(resp1);
+          break;
+        }
+      }
+    }
+    return updated;
+  }
+
+  private List<String> removeDupEntriesFrmList(List<String> duplList) {
+    Set<String> s = new LinkedHashSet<String>();
+    s.addAll(duplList);
+    duplList.clear();
+    duplList.addAll(s);
+    return duplList;
+  }
 }

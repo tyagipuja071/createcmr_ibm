@@ -332,7 +332,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       String msg = "No high quality D&B matches for the End User " + addr.getDivn();
       details.append(msg + "\n");
       if (hasExistingCmr) {
-        overrides.addOverride(getProcessCode(), "ADMIN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
+        overrides.addOverride(getProcessCode(), "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
         details.append("- A current active CMR exists for the company.");
       } else {
         engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
@@ -349,7 +349,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       if (!StringUtils.isBlank(dnbMatch.getDnbStreetLine2())) {
         details.append(dnbMatch.getDnbStreetLine2() + "\n");
       }
-      overrides.addOverride(getProcessCode(), "ADMIN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
+      overrides.addOverride(getProcessCode(), "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
       details.append(dnbMatch.getDnbCity() + ", " + dnbMatch.getDnbStateProv() + "\n");
       details.append(dnbMatch.getDnbCountry() + " " + dnbMatch.getDnbPostalCode() + "\n\n");
       return dnbMatch;
@@ -496,6 +496,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     } catch (Exception e) {
       LOG.warn("Cannot copy properties.", e);
     }
+    model.setModelCmrNo(null);
     model.setCmrIssuingCntry(SystemLocation.UNITED_STATES);
     RequestEntryService service = new RequestEntryService();
     AppUser user = new AppUser();
