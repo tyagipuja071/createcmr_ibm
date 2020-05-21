@@ -626,9 +626,9 @@ public class MTService extends TransConnService {
               }
             }
           }
-////Check by mukesh
+
           updateEntity(addr, entityManager);
-          System.out.println("Address Updated in CreateCMR addr Type:"+addr.getId().getAddrType() +" seq No:"+addr.getId().getAddrSeq());
+          LOG.info("Address Updated in CreateCMR addr Type:"+addr.getId().getAddrType() +" seq No:"+addr.getId().getAddrSeq());
         }
         index++;
       }
