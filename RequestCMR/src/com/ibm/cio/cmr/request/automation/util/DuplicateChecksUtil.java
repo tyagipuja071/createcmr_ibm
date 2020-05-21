@@ -56,6 +56,11 @@ public class DuplicateChecksUtil {
           request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
         }
       }
+
+      // fix for cust sub group
+      if (StringUtils.isNotBlank(data.getCustSubGrp()) && !USUtil.SC_BYMODEL.equals(data.getCustSubGrp())) {
+        request.setScenario(data.getCustSubGrp());
+      }
       break;
     }
   }
