@@ -284,13 +284,21 @@ public class USUtil extends AutomationUtil {
         }
       }
 
+      // set ISU CTC if not found
+      if (StringUtils.isBlank(data.getIsuCd()) || StringUtils.isBlank(data.getClientTier())) {
+        details.append("ISU/Client Tier blank on the request. Setting ISU-CTC to 32-S.").append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
+      }
+
       if (StringUtils.isNotEmpty(data.getIsicCd())) {
         if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
         }
 
-        if ((data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
-            && FEDERAL_SCENARIOS.contains(scenarioSubType)) {
+        if ("C".equals(admin.getReqType())
+            && (data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
+            && !FEDERAL_SCENARIOS.contains(scenarioSubType)) {
           details.append("Federal ISIC found on the request for non-Federal scenario.\n");
           engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
         }
