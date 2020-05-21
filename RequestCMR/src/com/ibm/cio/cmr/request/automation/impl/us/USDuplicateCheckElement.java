@@ -2,8 +2,10 @@ package com.ibm.cio.cmr.request.automation.impl.us;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -30,6 +32,7 @@ import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -154,7 +157,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
                 output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
                     itemNo++);
                 duplicateList.add(cmrCheckRecord.getCmrNo());
-                soldToKunnrsList.add(getZS01Kunnr(cmrCheckRecord.getCmrNo()));
+                soldToKunnrsList.add(getZS01Kunnr(cmrCheckRecord.getCmrNo(), SystemLocation.UNITED_STATES));
 
                 dupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
                 if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
@@ -188,8 +191,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
             engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
                 "Duplicate Requests : " + StringUtils.join(duplicateList, ", "), "");
           } else if (dupCMRFound) {
+            List<String> dupFiltered = removeDupEntriesFrmList(duplicateList);
+            List<String> kunnrsFiltered = removeDupEntriesFrmList(soldToKunnrsList);
             engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
-                "Duplicate CMRs : " + StringUtils.join(duplicateList, ", "), "SOLD TO KUNNR : " + StringUtils.join(soldToKunnrsList, ", "));
+                "Duplicate CMRs : " + StringUtils.join(dupFiltered, ", "), "SOLD TO KUNNR : " + StringUtils.join(kunnrsFiltered, ", "));
             admin.setMatchIndc("C");
           }
           result.setOnError(true);
@@ -643,7 +648,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return true;
   }
 
-  private String getZS01Kunnr(String cmrNo) throws Exception {
+  private String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
     String kunnr = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
@@ -651,6 +656,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
 
     String dbId = QueryClient.RDC_APP_ID;
 
@@ -681,5 +687,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
     }
     return updated;
+  }
+
+  private List<String> removeDupEntriesFrmList(List<String> duplList) {
+    Set<String> s = new LinkedHashSet<String>();
+    s.addAll(duplList);
+    duplList.clear();
+    duplList.addAll(s);
+    return duplList;
   }
 }
