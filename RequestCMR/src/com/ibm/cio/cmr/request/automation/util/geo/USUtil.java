@@ -284,7 +284,7 @@ public class USUtil extends AutomationUtil {
         }
       }
 
-      if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getIsicCd())) {
+      if (StringUtils.isNotEmpty(data.getIsicCd())) {
         if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
         }
