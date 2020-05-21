@@ -4587,10 +4587,9 @@ function setSalesRepValuesIT(isuCd, clientTier) {
       FormManager.setValue('isuCd', '21');
       FormManager.readOnly('clientTier', '7');
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
-      FormManager.setValue('repTeamMemberNo', '09ZPB0');
-      FormManager.readOnly('repTeamMemberNo');
-    } else {
       FormManager.enable('repTeamMemberNo');
+      FormManager.setValue('repTeamMemberNo', '09ZPA0');
+      FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), [ '09ZPA0', '09ZPB0' ]);
     }
     if (isuCd != '32' && clientTier != 'S'
         && !(custSubType == 'BUSPR' || custSubType == 'BUSSM' || custSubType == 'BUSVA' || custSubType == 'CROBP' || (custSubType == 'PRISM' && role == "REQUESTER"))) {
@@ -4606,6 +4605,8 @@ function setSalesRepValuesIT(isuCd, clientTier) {
       FormManager.readOnly('repTeamMemberNo');
     } else if (isuCd != '32' && clientTier != 'S' && custSubType == 'PRISM' && role == "REQUESTER") {
       FormManager.readOnly('repTeamMemberNo');
+    } else {
+      FormManager.enable('repTeamMemberNo');
     }
   } else if (isuCd == '32') {
     FormManager.clearValue('repTeamMemberNo');
