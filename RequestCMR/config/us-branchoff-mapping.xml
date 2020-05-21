@@ -79,7 +79,7 @@
 		<mktgDept>SWM</mktgDept>
 		<mtkgArDept>logic</mtkgArDept>
 		<svcArOffice>logic</svcArOffice>
-		<pccArDept>SWM</pccArDept>
+		<pccArDept>G8M</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>OEM-SW</scenario>
@@ -87,7 +87,7 @@
 		<mktgDept>JWQ</mktgDept>
 		<mtkgArDept>logic</mtkgArDept>
 		<svcArOffice>logic</svcArOffice>
-		<pccArDept>JWQ</pccArDept>
+		<pccArDept>G8M</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>TPD</scenario>
