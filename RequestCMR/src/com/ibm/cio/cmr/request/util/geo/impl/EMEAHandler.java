@@ -270,12 +270,14 @@ public class EMEAHandler extends BaseSOFHandler {
                     Sadr sadr = getTRAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
                     if (sadr != null) {
                       Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                      if (installingAddr != null) {
+                      if (record != null) {
                         LOG.debug("Adding installing to the records");
                         FindCMRRecordModel installing = new FindCMRRecordModel();
                         PropertyUtils.copyProperties(installing, mainRecord);
-                        copyAddrData(installing, installingAddr);
+                        // copyAddrData(installing, installingAddr);
                         // installing.setParentCMRNo(mainRecord.getCmrNum());
+                        installing.setCmrAddrTypeCode("ZP01");
+                        installing.setCmrAddrSeq("00002");
                         installing.setCmrName1Plain(sadr.getName1());
                         installing.setCmrName2Plain(sadr.getName2());
                         installing.setCmrCity(sadr.getOrt01());
