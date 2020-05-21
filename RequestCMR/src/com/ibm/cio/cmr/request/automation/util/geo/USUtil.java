@@ -296,7 +296,8 @@ public class USUtil extends AutomationUtil {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
         }
 
-        if ((data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
+        if ("C".equals(admin.getReqType())
+            && (data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
             && !FEDERAL_SCENARIOS.contains(scenarioSubType)) {
           details.append("Federal ISIC found on the request for non-Federal scenario.\n");
           engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
