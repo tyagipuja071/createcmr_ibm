@@ -496,6 +496,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     } catch (Exception e) {
       LOG.warn("Cannot copy properties.", e);
     }
+    model.setModelCmrNo(null);
     model.setCmrIssuingCntry(SystemLocation.UNITED_STATES);
     RequestEntryService service = new RequestEntryService();
     AppUser user = new AppUser();
