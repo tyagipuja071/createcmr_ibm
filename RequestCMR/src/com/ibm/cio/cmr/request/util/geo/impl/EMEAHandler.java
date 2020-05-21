@@ -1788,7 +1788,7 @@ public class EMEAHandler extends BaseSOFHandler {
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
       }
 
-      if (SystemLocation.TURKEY.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+      if (SystemLocation.TURKEY.equalsIgnoreCase(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
         CmrtCust cust = this.legacyObjects.getCustomer();
         if (cust != null) {
           String customerType = cust.getCustType();
