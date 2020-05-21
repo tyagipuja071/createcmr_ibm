@@ -348,13 +348,30 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         response.setMatches(reqCheckMatchesTmp);
         break;
       case USUtil.LEASING:
-      case USUtil.BUSINESS_PARTNER:
         for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
           if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
               && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
               && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
               && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
             reqCheckMatchesTmp.add(reqCheckRecord);
+          }
+        }
+        response.setMatches(reqCheckMatchesTmp);
+        break;
+      case USUtil.BUSINESS_PARTNER:
+        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
+              && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+              && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
+            String sql = ExternalizedQuery.getSql("AUTO.US.BP_ACCOUNT_TYPE");
+            PreparedQuery query = new PreparedQuery(entityManager, sql);
+            query.setParameter("REQ_ID", reqCheckRecord.getReqId());
+            query.setForReadOnly(true);
+            String bpAccType = query.getSingleResult(String.class);
+            if (StringUtils.isNotBlank(bpAccType) && bpAccType.equals(data.getBpAcctTyp())) {
+              reqCheckMatchesTmp.add(reqCheckRecord);
+            }
           }
         }
         response.setMatches(reqCheckMatchesTmp);
@@ -370,7 +387,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
           }
         }
         response.setMatches(reqCheckMatchesTmp);
+        break;
       }
+      break;
     default:
       for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
         if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo()))
