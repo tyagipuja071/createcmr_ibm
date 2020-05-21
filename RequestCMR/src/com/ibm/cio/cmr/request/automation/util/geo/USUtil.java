@@ -285,6 +285,16 @@ public class USUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
       }
+
+      if (SC_BYMODEL.equals(scenarioSubType) && StringUtils.isNotEmpty(data.getMiscBillCd())) {
+        String miscBillCode = "";
+        miscBillCode = data.getMiscBillCd();
+        System.out.println(miscBillCode + "" + data.getMiscBillCd());
+        if (miscBillCode.toUpperCase().matches("[A+B+M+N+H+]")) {
+          miscBillCode = miscBillCode.replaceAll("[A+B+M+N+H+]", "");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
+        }
+      }
     } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");
