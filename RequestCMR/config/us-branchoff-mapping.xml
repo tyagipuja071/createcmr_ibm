@@ -75,19 +75,19 @@
 	</mapping>
 	<mapping>
 		<scenario>OEMHW</scenario>
-		<csoSite>PAH</csoSite>
-		<mktgDept>SVB</mktgDept>
+		<csoSite>SWM</csoSite>
+		<mktgDept>SWM</mktgDept>
 		<mtkgArDept>logic</mtkgArDept>
 		<svcArOffice>logic</svcArOffice>
-		<pccArDept>G8M</pccArDept>
+		<pccArDept>SWM</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>OEM-SW</scenario>
-		<csoSite>PAH</csoSite>
-		<mktgDept>SVB</mktgDept>
+		<csoSite>JWQ</csoSite>
+		<mktgDept>JWQ</mktgDept>
 		<mtkgArDept>logic</mtkgArDept>
 		<svcArOffice>logic</svcArOffice>
-		<pccArDept>G8M</pccArDept>
+		<pccArDept>JWQ</pccArDept>
 	</mapping>
 	<mapping>
 		<scenario>TPD</scenario>
