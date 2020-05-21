@@ -117,10 +117,14 @@ public class MCOHandler extends BaseSOFHandler {
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
         record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
       }
-      if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-        record.setCmrAddrSeq("00001");
-      } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+      if (SystemLocation.MALTA.equals(mainRecord.getCmrIssuedBy())) {
+          record.setCmrAddrSeq(StringUtils.isEmpty(record.getCmrAddrSeq()) ? "1" : record.getCmrAddrSeq());
+      }else{
+        if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+          record.setCmrAddrSeq("00001");
+        } else {
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        }
       }
 
       record.setCmrName2Plain(record.getCmrName2Plain());
@@ -176,11 +180,8 @@ public class MCOHandler extends BaseSOFHandler {
           if (!StringUtils.isBlank(record.getCmrPOBox())) {
             record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
           }
-
-          if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-            record.setCmrAddrSeq("00001");
-          } else {
-            record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+          if (SystemLocation.MALTA.equals(mainRecord.getCmrIssuedBy())) {
+            record.setCmrAddrSeq(StringUtils.isEmpty(record.getCmrAddrSeq()) ? "1" : record.getCmrAddrSeq());
           }
 
           converted.add(record);
@@ -845,43 +846,44 @@ public class MCOHandler extends BaseSOFHandler {
  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {  
   if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
   
-   String newSeq = null;
+   String newSeq = null;   
    String maxSeq =  getMaxSeqNumber(entityManager,addrType,reqId,cmrIssuingCntry);
    if(maxSeq == null){
     if("ZS01".equals(addrType)){
-      newSeq = "00001";
+      newSeq = "1";
     }
     if("ZP01".equals(addrType)){
-      newSeq = "00002";
+      newSeq = "2";
     }
     if("ZI01".equals(addrType)){
-      newSeq = "00003";
+      newSeq = "3";
     }
     if("ZD01".equals(addrType)){
-      newSeq = "00004";
+      newSeq = "4";
     }
     if("ZS02".equals(addrType)){
-      newSeq = "00005";
+      newSeq = "5";
     }
    }else{
      if(Integer.parseInt(maxSeq) <=5){
        if("ZS01".equals(addrType)){
-         newSeq = "00001";
+         newSeq = "1";
        }
        if("ZP01".equals(addrType)){
-         newSeq = "00002";
+         newSeq = "2";
        }
        if("ZI01".equals(addrType)){
-         newSeq = "00003";
+         newSeq = "3";
        }
        if("ZD01".equals(addrType)){
-         newSeq = "00004";
+         newSeq = "4";
        }
        if("ZS02".equals(addrType)){
-         newSeq = "00005";
+         newSeq = "5";
        }
      }else{
-       newSeq = StringUtils.leftPad(maxSeq, 5, '0');
+//       newSeq = StringUtils.leftPad(maxSeq, 5, '0');
+       newSeq = maxSeq;
      }
    }
    return newSeq;
