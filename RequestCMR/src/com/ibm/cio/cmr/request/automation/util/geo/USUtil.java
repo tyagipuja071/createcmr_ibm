@@ -284,7 +284,7 @@ public class USUtil extends AutomationUtil {
         }
       }
 
-      if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getIsicCd())) {
+      if (StringUtils.isNotEmpty(data.getIsicCd())) {
         if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
         }
@@ -329,7 +329,7 @@ public class USUtil extends AutomationUtil {
     String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
         SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_POOL, SC_BP_DEVELOP,
         SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP,
-        SC_FED_POA, SC_FED_TRIBAL_BUS, SC_BP_END_USER, SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_INTERNAL };
+        SC_FED_POA, SC_FED_TRIBAL_BUS };
     String[] skipCompanyChecksScenarioList = { SC_BP_POOL, SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL,
         SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
@@ -343,6 +343,15 @@ public class USUtil extends AutomationUtil {
         } catch (Exception e) {
           LOG.error("CMR Scenario for Create by model request could not be determined.", e);
         }
+
+        // skip Dnb check and matching
+        if (engineData.hasPositiveCheckStatus("SKIP_COMP_CHECK") || Arrays.asList(skipCompanyChecksScenarioList).contains(scenarioSubType)) {
+          ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+          if (scenarioExceptions != null) {
+            scenarioExceptions.setSkipCompanyVerification(true);
+          }
+        }
+
       }
     }
 
@@ -351,13 +360,6 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(data.getCustSubGrp())) {
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.");
         details.append("Processor review required as imported CMR belongs to " + scenarioDesc + " scenario.").append("\n");
-        // skip Dnb check and matching
-        if (engineData.hasPositiveCheckStatus("SKIP_COMP_CHECK") || Arrays.asList(skipCompanyChecksScenarioList).contains(scenarioSubType)) {
-          ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
-          if (scenarioExceptions != null) {
-            scenarioExceptions.setSkipCompanyVerification(true);
-          }
-        }
       } else {
         engineData.addNegativeCheckStatus("US_SCENARIO_CHK", "Processor review required as the request is for " + scenarioDesc + " scenario.");
         details.append("Processor review required as the request is for " + scenarioDesc + " scenario.").append("\n");
