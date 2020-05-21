@@ -155,6 +155,9 @@ public class USUtil extends AutomationUtil {
   // BYMODEL
   public static final String SC_BYMODEL = "BYMODEL";
 
+  public static final List<String> FEDERAL_SCENARIOS = Arrays.asList(SC_FED_CAMOUFLAGED, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
+      SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_REGULAR, SC_FED_TRIBAL_BUS);
+
   public static List<USBranchOffcMapping> svcARBOMappings = new ArrayList<USBranchOffcMapping>();
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
   private static Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
@@ -281,10 +284,18 @@ public class USUtil extends AutomationUtil {
         }
       }
 
-      if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getIsicCd()) && StringUtils.isNotEmpty(data.getUsSicmen())
-          && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
+      if ("C".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getIsicCd())) {
+        if (StringUtils.isNotEmpty(data.getUsSicmen()) && !"357X".equals(data.getIsicCd()) && !data.getIsicCd().equals(data.getUsSicmen())) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), data.getIsicCd());
+        }
+
+        if ((data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
+            && FEDERAL_SCENARIOS.contains(scenarioSubType)) {
+          details.append("Federal ISIC found on the request for non-Federal scenario.\n");
+          engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
+        }
       }
+
       // if scenario is OEMSW or OEMHW set isic to 357X
       if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType) || SC_REST_TPD.equals(scenarioSubType)
           || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
