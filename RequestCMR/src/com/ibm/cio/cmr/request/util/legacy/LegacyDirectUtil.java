@@ -81,7 +81,6 @@ public class LegacyDirectUtil {
   static {
     FIELDS_CLEAR_LIST.add("CollectionCd");
     FIELDS_CLEAR_LIST.add("SpecialTaxCd");
-    FIELDS_CLEAR_LIST.add("LandedCountry");
     FIELDS_CLEAR_LIST.add("ModeOfPayment");
     FIELDS_CLEAR_LIST.add("CrosSubTyp");
     FIELDS_CLEAR_LIST.add("TipoCliente");
