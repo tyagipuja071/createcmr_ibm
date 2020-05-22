@@ -401,7 +401,7 @@ public class USUtil extends AutomationUtil {
     return valid;
   }
 
-  private String getScenarioDesc(EntityManager entityManager, String scenarioSubType) {
+  public static String getScenarioDesc(EntityManager entityManager, String scenarioSubType) {
     String sql = ExternalizedQuery.getSql("GET_SCENARIO_DESC_US");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("SUB_SCENARIO", scenarioSubType);
@@ -436,6 +436,7 @@ public class USUtil extends AutomationUtil {
       Map<String, String> failedChecks = new HashMap<String, String>();
       boolean requesterFromTaxTeam = false;
       boolean enterpriseAffiliateUpdated = false;
+      boolean isicCheckDone = false;
 
       try {
         for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
@@ -540,15 +541,19 @@ public class USUtil extends AutomationUtil {
               }
               break;
             case "ISIC":
-              String error = performISICCheck(cedpManager, entityManager, requestData);
-              if (StringUtils.isNotBlank(error)) {
-                engineData.addRejectionComment("OTH", error, "", "");
-                LOG.debug(error);
-                output.setDetails(error);
-                output.setOnError(true);
-                validation.setMessage("Validation Failed");
-                validation.setSuccess(false);
-                return true;
+            case "SICMEN":
+              if (!isicCheckDone) {
+                String error = performISICCheck(cedpManager, entityManager, requestData, updatedDataModel);
+                if (StringUtils.isNotBlank(error)) {
+                  engineData.addRejectionComment("OTH", error, "", "");
+                  LOG.debug(error);
+                  output.setDetails(error);
+                  output.setOnError(true);
+                  validation.setMessage("Validation Failed");
+                  validation.setSuccess(false);
+                  return true;
+                }
+                isicCheckDone = true;
               }
               break;
 
@@ -610,17 +615,20 @@ public class USUtil extends AutomationUtil {
   }
 
   /**
-   * Checks to perform if ISIC updated
+   * Checks to perform if ISIC/SICMEN updated
    * 
    * @param cedpManager
    * @param entityManager
    * @param requestData
+   * @param updatedDataModel
    * @return a string with error message if some issues encountered during
    *         checks, null if validated.
    * @throws Exception
    */
-  private String performISICCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
+  private String performISICCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData, UpdatedDataModel updatedDataModel)
+      throws Exception {
     Data data = requestData.getData();
+    String updatedValue = updatedDataModel.getNewData();
     String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
@@ -651,13 +659,13 @@ public class USUtil extends AutomationUtil {
         if (StringUtils.isNotBlank(dunsNo)) {
           DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
           if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
-            if (!dnbData.getIbmIsic().equals(data.getIsicCd())) {
+            if (!dnbData.getIbmIsic().equals(updatedValue)) {
               return error;
             } else {
               sql = ExternalizedQuery.getSql("AUTO.US.GET_ISU_BY_ISIC");
               query = new PreparedQuery(entityManager, sql);
               query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-              query.setParameter("ISIC", data.getIsicCd());
+              query.setParameter("ISIC", updatedValue);
               query.setForReadOnly(true);
               String brsch = query.getSingleResult(String.class);
               if (!data.getIsuCd().equals(brsch)) {
