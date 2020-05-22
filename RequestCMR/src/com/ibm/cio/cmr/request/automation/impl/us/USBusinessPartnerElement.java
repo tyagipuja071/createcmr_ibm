@@ -264,6 +264,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
           return output;
         } else {
           details.append("Child Request " + childReqId + " created for the IBM Direct CMR record of " + addr.getDivn()
+              + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
               + ".\nThe system will wait for completion of the child record bfore processing the request.\n");
           details.append(childDetails + "\n");
           this.waiting = true;
@@ -279,7 +280,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     if (completedChildData != null && ibmDirectCmr != null) {
       // make sure we switch the codes to use directly from child
       ibmDirectCmr.setCmrNum(completedChildData.getCmrNo());
-      ibmDirectCmr.setCmrAffiliate(completedChildData.getAffiliate());
+      String affiliate = completedChildData.getAffiliate();
+      if (StringUtils.isBlank(affiliate)) {
+        affiliate = getUSCMRAffiliate(completedChildData.getCmrNo());
+      }
+      if (!StringUtils.isBlank(affiliate)) {
+        ibmDirectCmr.setCmrAffiliate(affiliate);
+      }
       ibmDirectCmr.setCmrIsu(completedChildData.getIsuCd());
       ibmDirectCmr.setCmrTier(completedChildData.getClientTier());
       ibmDirectCmr.setCmrInac(completedChildData.getInacCd());
@@ -343,8 +350,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
     List<DnBMatchingResponse> dnbMatches = USUtil.getMatchesForBPEndUser(handler, requestData, engineData);
     if (dnbMatches.isEmpty()) {
-      LOG.debug("No D&B matches found for the End User " + addr.getDivn());
-      String msg = "No high quality D&B matches for the End User " + addr.getDivn();
+      LOG.debug("No D&B matches found for the End User " + addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : ""));
+      String msg = "No high quality D&B matches for the End User " + addr.getDivn()
+          + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "");
       details.append(msg + "\n");
       if (hasExistingCmr) {
         overrides.addOverride(getProcessCode(), "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(), "Y");
@@ -356,8 +364,10 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       return null;
     } else {
       DnBMatchingResponse dnbMatch = dnbMatches.get(0);
-      LOG.debug("D&B match found for " + addr.getDivn() + " with DUNS " + dnbMatch.getDunsNo());
-      details.append("D&B match/es found for the End User " + addr.getDivn() + ". Highest Match:\n");
+      LOG.debug("D&B match found for " + addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "") + " with DUNS "
+          + dnbMatch.getDunsNo());
+      details.append("D&B match/es found for the End User " + addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
+          + ". Highest Match:\n");
       details.append("\n");
       details.append(dnbMatch.getDnbName() + "\n");
       details.append(dnbMatch.getDnbStreetLine1() + "\n");
@@ -403,7 +413,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
       request.setIssuingCountry(SystemLocation.UNITED_STATES);
       request.setLandedCountry(addr.getLandCntry());
-      request.setCustomerName(addr.getDivn());
+      request.setCustomerName(addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : ""));
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(addr.getAddrTxt2());
       request.setCity(addr.getCity1());
@@ -826,6 +836,10 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
           + ibmDirectCmr.getCmrSapNumber() + "): \n");
 
+      if (StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
+        // try to get affiliate from US CMR
+
+      }
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
         details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), ibmDirectCmr.getCmrAffiliate());
@@ -952,6 +966,44 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     } catch (Exception e) {
       LOG.warn("Error in executing US CMR query", e);
       return true;
+    }
+
+  }
+
+  /**
+   * Checks if the cmrNo has a blank restriction code in US CMR DB
+   * 
+   * @param cmrNo
+   * @return
+   */
+  private String getUSCMRAffiliate(String cmrNo) {
+    String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+    String sql = ExternalizedQuery.getSql("AUTO.USBP.CHECK_RESTRICTION", usSchema);
+    sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.setRows(1);
+    query.addField("I_MKT_AFFLTN");
+    query.addField("I_CUST_ENTITY");
+
+    try {
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+      QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
+
+      if (!response.isSuccess()) {
+        LOG.warn("Not successful executiong of US CMR query");
+        return null;
+      } else if (response.getRecords() == null || response.getRecords().size() == 0) {
+        LOG.warn("No records in US CMR DB");
+        return null;
+      } else {
+        Map<String, Object> record = response.getRecords().get(0);
+        return (String) record.get("I_MKT_AFFLTN");
+      }
+    } catch (Exception e) {
+      LOG.warn("Error in executing US CMR query", e);
+      return null;
     }
 
   }
