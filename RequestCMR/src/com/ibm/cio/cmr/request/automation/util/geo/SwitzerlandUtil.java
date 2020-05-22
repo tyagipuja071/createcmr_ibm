@@ -357,22 +357,50 @@ public class SwitzerlandUtil extends AutomationUtil {
       results.setDetails(details.toString());
       return true;
     }
-    String scenario = requestData.getData().getCustSubGrp();
+    Data data = requestData.getData();
+    Addr soldTo = requestData.getAddress("ZS01");
+    String scenario = data.getCustSubGrp();
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
     String actualScenario = scenario.substring(2);
+
+    boolean returnStatus = true;
     switch (actualScenario) {
     case SCENARIO_COMMERCIAL:
+      if (!isCoverageCalculated) {
+        ChMubotyMapping muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+        if (muboty != null) {
+          details.append("Setting MUBOTY to " + muboty.getIsu() + " based on Postal Code rules.");
+          overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
+          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+        } else {
+          String msg = "Coverage cannot be calculated. No valid MUBOTY mapping from request data.";
+          details.append(msg);
+          results.setResults("Cannot Calculate");
+          results.setDetails(details.toString());
+          engineData.addNegativeCheckStatus("_chMuboty", msg);
+        }
+      }
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
+      ChMubotyMapping muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), "32", "S");
+      if (muboty != null) {
+        details.append("Setting MUBOTY to " + muboty.getIsu() + " based on Postal Code rules.");
+        overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
+        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+      } else {
+        String msg = "Coverage cannot be calculated. No valid MUBOTY mapping from request data.";
+        details.append(msg);
+        results.setResults("Cannot Calculate");
+        results.setDetails(details.toString());
+        engineData.addNegativeCheckStatus("_chMuboty", msg);
+      }
       break;
     default:
+      returnStatus = false;
       break;
     }
-    if (!isCoverageCalculated) {
-
-    }
-    return true;
+    return returnStatus;
   }
 
   /**
