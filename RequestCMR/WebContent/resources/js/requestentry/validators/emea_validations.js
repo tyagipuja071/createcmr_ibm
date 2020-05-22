@@ -1620,6 +1620,34 @@ function addStreetAddressFormValidatorGR() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function addCrossLandedCntryFormValidatorGR() {
+  console.log("addCrossLandedCntryFormValidatorGR..............");
+
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	        
+	        if (FormManager.getActualValue('custGrp') == 'CROSS' && (FormManager.getActualValue('addrType') == 'ZP01' || FormManager.getActualValue('addrType') == 'ZS01') 
+	        		&& FormManager.getActualValue('landCntry') == 'GR') {
+		          return new ValidationResult(null, false, 'Landed Country value should not be \'Greece - GR\' for Cross-border customers.');
+		    }
+	        return new ValidationResult(null, true);
+	      }
+	    };
+	  })(), null, 'frmCMR_addressModal');
+}
+
+function clearPhoneNoFromGrid() {
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    if (_allAddressData != null && _allAddressData[i] != null) {
+	  if(!(_allAddressData[i].addrType[0] == 'ZS01' || _allAddressData[i].addrType[0] == 'ZD01')) {
+	    _allAddressData[i].custPhone[0] = ''; 
+	  }
+	}
+  }
+}
+
 /*
  * Disable VAT ID when user role is requester and request type is update
  */
@@ -2984,25 +3012,22 @@ function addGRAddressTypeValidator() {
               missingFields += missingFields != '' ? ', ' : '';
               missingFields += 'PO Box';
             }
-            if (missingFields != '') {
-              return new ValidationResult(null, false, 'Sold-to mismatch, missing data in Language translation of Sold-to: ' + missingFields);
-            }
-          } else if (FormManager.getActualValue('custGrp') == 'CROSS' && !isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data)) {
-            return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
-          } else if (FormManager.getActualValue('reqType') == 'U' && !isLandedCntryMatch(zs01Data, zp01Data)) {
-            return new ValidationResult(null, false, '\'Country (Landed)\' of Local Language translation of Sold-to should match Sold-to.');
-          } else if ((FormManager.getActualValue('reqType') == 'U')) {
-            var mismatchFields = '';
-            // GR then not crossborder
-            if (zs01Data.landCntry[0] == 'GR') {
-              mismatchFields = getMismatchFields(zs01Data, zp01Data, false);
-            } else if (zs01Data.landCntry[0] != 'GR') {
-              mismatchFields = getMismatchFields(zs01Data, zp01Data, true);
-            }
-            if (mismatchFields != '') {
-              return new ValidationResult(null, false, 'Sold-to mismatch, please update Local Language translation of Sold-to: ' +  mismatchFields);	  
-            }
-          }
+          } else if(FormManager.getActualValue('custGrp') == 'CROSS' && zs01Data != null && zp01Data != null && !isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data)) {
+              return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
+          } else if(FormManager.getActualValue('reqType') == 'U' && !isLandedCntryMatch(zs01Data, zp01Data)) {
+              return new ValidationResult(null, false, '\'Country (Landed)\' of Local Language translation of Sold-to should match Sold-to.');
+          } else if((FormManager.getActualValue('reqType') == 'U')) {
+        	  var mismatchFields = '';
+        	  // GR then not crossborder
+        	  if(zs01Data.landCntry[0] == 'GR') {
+        		  mismatchFields = getMismatchFields(zs01Data, zp01Data, false);
+        	  } else if(zs01Data.landCntry[0] != 'GR') {
+        		  mismatchFields = getMismatchFields(zs01Data, zp01Data, true);
+        	  }
+        	  if(mismatchFields != '') {
+        		  return new ValidationResult(null, false, 'Sold-to mismatch, please update Local Language translation of Sold-to: ' +  mismatchFields);	  
+        	  }
+          } 
 
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
             return new ValidationResult(null, false, 'Local Language translation of Sold-to, Sold To, Ship To, and Install At addresses are required.');
@@ -8220,7 +8245,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addOccupationPOBoxValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addOccupationPOBoxAttnPersonValidatorForGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addStreetAddressFormValidatorGR, [ SysLoc.GREECE ], null, true);
-
+  GEOHandler.registerValidator(addCrossLandedCntryFormValidatorGR, [ SysLoc.GREECE ], null, true);
+  GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
+  
+  
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator, [
   // SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ], null, true);
   GEOHandler.addAddrFunction(setPostalCodeTurGreCypValidator, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
