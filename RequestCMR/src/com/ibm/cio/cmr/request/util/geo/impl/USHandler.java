@@ -145,6 +145,11 @@ public class USHandler extends GEOHandler {
         closeMgr = true;
       }
       setCodesFromLOV(this.entityManager, url, data);
+      // Check if OEM CMR, throw error if yes
+      if ("C".equals(admin.getReqType()) && StringUtils.isNotBlank(data.getRestrictTo()) && "OEMHQ".equals(data.getRestrictTo())) {
+        throw new CmrException(MessageUtil.OEM_IMPORT_US_CREATE);
+      }
+
       if (closeMgr) {
         this.entityManager.clear();
         this.entityManager.close();
