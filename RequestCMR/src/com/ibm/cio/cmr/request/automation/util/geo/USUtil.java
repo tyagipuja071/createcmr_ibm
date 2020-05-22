@@ -271,7 +271,7 @@ public class USUtil extends AutomationUtil {
 
         if (boCodesCalculated) {
           details.append("Branch Office codes computed successfully.");
-        } else if (INTERNAL.equals(scenarioSubType)) {
+        } else if (SC_INTERNAL.equals(scenarioSubType)) {
           if (SC_BYMODEL.equals(data.getCustSubGrp())) {
             details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
           } else {
@@ -502,12 +502,16 @@ public class USUtil extends AutomationUtil {
               if ("5B".equals(updatedDataModel.getNewData())) {
                 String error = performCSPCheck(cedpManager, entityManager, data, admin);
                 if (StringUtils.isNotBlank(error)) {
-                  engineData.addRejectionComment("OTH", error, "", "");
                   LOG.debug(error);
                   output.setDetails(error);
-                  output.setOnError(true);
                   validation.setMessage("Validation Failed");
                   validation.setSuccess(false);
+                  if (StringUtils.isBlank(admin.getSourceSystId())) {
+                    engineData.addRejectionComment("OTH", error, "", "");
+                    output.setOnError(true);
+                  } else {
+                    engineData.addNegativeCheckStatus("BP_" + field, error);
+                  }
                   return true;
                 }
               } else {
@@ -529,12 +533,16 @@ public class USUtil extends AutomationUtil {
                       failedChecks.put(error,
                           "The projected global buying group during Enterprise/Affiliate checks did not match the one on the request.");
                     } else {
-                      engineData.addRejectionComment("OTH", error, "", "");
                       LOG.debug(error);
                       output.setDetails(error);
-                      output.setOnError(true);
                       validation.setMessage("Validation Failed");
                       validation.setSuccess(false);
+                      if (StringUtils.isBlank(admin.getSourceSystId())) {
+                        engineData.addRejectionComment("OTH", error, "", "");
+                        output.setOnError(true);
+                      } else {
+                        engineData.addNegativeCheckStatus("BP_" + field, error);
+                      }
                       return true;
                     }
                   }
@@ -547,12 +555,16 @@ public class USUtil extends AutomationUtil {
               if (!isicCheckDone) {
                 String error = performISICCheck(cedpManager, entityManager, requestData, updatedDataModel);
                 if (StringUtils.isNotBlank(error)) {
-                  engineData.addRejectionComment("OTH", error, "", "");
                   LOG.debug(error);
                   output.setDetails(error);
-                  output.setOnError(true);
                   validation.setMessage("Validation Failed");
                   validation.setSuccess(false);
+                  if (StringUtils.isBlank(admin.getSourceSystId())) {
+                    engineData.addRejectionComment("OTH", error, "", "");
+                    output.setOnError(true);
+                  } else {
+                    engineData.addNegativeCheckStatus("BP_" + field, error);
+                  }
                   return true;
                 }
                 isicCheckDone = true;
@@ -579,12 +591,16 @@ public class USUtil extends AutomationUtil {
         if ("CSP".equals(admin.getReqReason()) && !changes.isDataChanged("ISIC")) {
           String error = performCSPCheck(cedpManager, entityManager, data, admin);
           if (StringUtils.isNotBlank(error)) {
-            engineData.addRejectionComment("OTH", error, "", "");
             LOG.debug(error);
-            output.setOnError(true);
             output.setDetails(error);
             validation.setMessage("Validation Failed");
             validation.setSuccess(false);
+            if (StringUtils.isBlank(admin.getSourceSystId())) {
+              engineData.addRejectionComment("OTH", error, "", "");
+              output.setOnError(true);
+            } else {
+              engineData.addNegativeCheckStatus("BP_CSP", error);
+            }
             return true;
           }
         }
