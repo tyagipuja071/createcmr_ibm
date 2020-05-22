@@ -930,7 +930,7 @@ public class USHandler extends GEOHandler {
       return;
     }
     if ("AFFNO".equals(ldeField)) {
-      if (StringUtils.isNumeric(ldeValue) && StringUtils.isBlank(data.getEnterprise())) {
+      if (StringUtils.isNumeric(ldeValue)) {
         data.setEnterprise(ldeValue);
       }
       String inac = getINACForAffiliate(entityManager, ldeValue);
@@ -942,7 +942,7 @@ public class USHandler extends GEOHandler {
       String affiliate = getAffiliateForINAC(entityManager, ldeValue);
       if (!StringUtils.isBlank(affiliate)) {
         data.setAffiliate(affiliate);
-        if (StringUtils.isNumeric(affiliate) && StringUtils.isBlank(data.getEnterprise())) {
+        if (StringUtils.isNumeric(affiliate)) {
           data.setEnterprise(affiliate);
         }
       }
