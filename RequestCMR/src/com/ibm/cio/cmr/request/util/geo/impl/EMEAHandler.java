@@ -2321,8 +2321,9 @@ public class EMEAHandler extends BaseSOFHandler {
           entityManager.flush();
         }
 
-        if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"GR".equals(addr.getLandCntry())) {
-          updateLandCntry(entityManager, addr);
+        if ((CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"GR".equals(addr.getLandCntry()))
+            && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
+          updateLandCntryGR(entityManager, addr);
         }
       }
 
@@ -2865,6 +2866,13 @@ public class EMEAHandler extends BaseSOFHandler {
       entityManager.merge(addrCopy);
       entityManager.flush();
     }
+  }
+
+  private void updateLandCntryGR(EntityManager entityManager, Addr addr) throws Exception {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.LANDEDCNTRY.GR"));
+    query.setParameter("LAND_CNTRY", addr.getLandCntry());
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.executeSql();
   }
 
   @Override
