@@ -113,6 +113,13 @@ public class SWISSHandler extends GEOHandler {
                 && !zs01kunnr.equalsIgnoreCase(tempRec.getCmrSapNumber())) {
               tempRec.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZS02.toString());
             }
+            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode()) && "598".equals(tempRec.getCmrAddrSeq())) {
+              tempRec.setCmrAddrTypeCode("ZD02");
+            }
+
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
+              tempRec.setCmrAddrTypeCode("ZP02");
+            }
             recordsToReturn.add(tempRec);
           }
         }
@@ -244,6 +251,11 @@ public class SWISSHandler extends GEOHandler {
     String reqType = "";
 
     if (!StringUtils.isEmpty(addrType)) {
+      if ("ZD02".equals(addrType)) {
+        return "598";
+      } else if ("ZP02".equals(addrType)) {
+        return "599";
+      }
       int addrSeq = 00000;
       String minAddrSeq = "00000";
       String maxAddrSeq = "99999";
