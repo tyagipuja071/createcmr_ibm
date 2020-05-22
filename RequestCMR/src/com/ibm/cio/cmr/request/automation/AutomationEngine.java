@@ -325,7 +325,7 @@ public class AutomationEngine {
             if (rejectInfo != null && !rejectInfo.isEmpty()) {
               rejCmtBuilder.append(":");
               for (RejectionContainer rejCont : rejectInfo) {
-                rejCmtBuilder.append(rejCont.getRejComment());
+                rejCmtBuilder.append("\n" + rejCont.getRejComment());
               }
             } else {
               rejCmtBuilder.append(".");
@@ -357,7 +357,7 @@ public class AutomationEngine {
               rejectCmt.append(":");
               if (rejectionInfo != null && !rejectionInfo.isEmpty()) {
                 for (RejectionContainer rejCont : rejectionInfo) {
-                  rejectCmt.append(rejCont.getRejComment() + "\n");
+                  rejectCmt.append("\n" + rejCont.getRejComment());
                 }
               }
               // append pending checks
@@ -445,7 +445,7 @@ public class AutomationEngine {
               rejCmtBuilder.append("The request needs further review due to some issues found during automated checks");
               rejCmtBuilder.append(":");
               for (RejectionContainer rejCont : rejectInfo) {
-                rejCmtBuilder.append(rejCont.getRejComment() + "\n");
+                rejCmtBuilder.append("\n" + rejCont.getRejComment());
               }
               // append pending checks
               for (String pendingCheck : pendingChecks.values()) {
