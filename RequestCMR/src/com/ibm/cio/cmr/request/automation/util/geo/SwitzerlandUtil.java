@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,8 +12,10 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -22,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
+import com.ibm.cio.cmr.request.automation.util.geo.mappings.ChMubotyMapping;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -54,6 +58,37 @@ public class SwitzerlandUtil extends AutomationUtil {
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Phone #", "FAX", "Customer Name 4");
+
+  private static List<ChMubotyMapping> mubotyMappings = new ArrayList<ChMubotyMapping>();
+
+  @SuppressWarnings("unchecked")
+  public SwitzerlandUtil() {
+    if (SwitzerlandUtil.mubotyMappings.isEmpty()) {
+      Digester digester = new Digester();
+      digester.setValidating(false);
+      digester.addObjectCreate("mappings", ArrayList.class);
+
+      digester.addObjectCreate("mappings/mapping", ChMubotyMapping.class);
+
+      digester.addBeanPropertySetter("mappings/mapping/ims", "ims");
+      digester.addBeanPropertySetter("mappings/mapping/postalCdMin", "postalCdMin");
+      digester.addBeanPropertySetter("mappings/mapping/postalCdMax", "postalCdMax");
+      digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
+      digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
+      digester.addBeanPropertySetter("mappings/mapping/muboty", "muboty");
+      digester.addSetNext("mappings/mapping", "add");
+      try {
+        ClassLoader loader = GermanyUtil.class.getClassLoader();
+        InputStream is = loader.getResourceAsStream("ch-muboty-mapping.xml");
+        SwitzerlandUtil.mubotyMappings = (ArrayList<ChMubotyMapping>) digester.parse(is);
+        // test
+        ChMubotyMapping mapping = getMubotyFromMapping("C", "1000", "32", "S");
+        LOG.debug(new ObjectMapper().writeValueAsString(mapping));
+      } catch (Exception e) {
+        LOG.error("Error occured while digesting xml.", e);
+      }
+    }
+  }
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -330,4 +365,28 @@ public class SwitzerlandUtil extends AutomationUtil {
     }
     return false;
   }
+
+  public ChMubotyMapping getMubotyFromMapping(String subIndustryCd, String postCd, String isuCd, String clientTier) {
+    if (!mubotyMappings.isEmpty()) {
+      int postalCd = Integer.parseInt(postCd);
+      if (StringUtils.isNotBlank(subIndustryCd) && subIndustryCd.length() > 1) {
+        subIndustryCd = subIndustryCd.substring(0, 1);
+      }
+      for (ChMubotyMapping mapping : mubotyMappings) {
+        List<String> subIndustryCds = Arrays.asList(mapping.getIms().split(","));
+        if (StringUtils.isNotBlank(subIndustryCd) && subIndustryCds.contains(subIndustryCd) && isuCd.equals(mapping.getIsu())
+            && clientTier.equals(mapping.getCtc())) {
+          if (StringUtils.isNotBlank(mapping.getPostalCdMin()) && StringUtils.isNotBlank(mapping.getPostalCdMax())) {
+            int start = Integer.parseInt(mapping.getPostalCdMin());
+            int end = Integer.parseInt(mapping.getPostalCdMin());
+            if (postalCd >= start && postalCd <= end) {
+              return mapping;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
 }
