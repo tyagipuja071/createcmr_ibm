@@ -156,6 +156,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     FindCMRRecordModel ibmDirectCmr = null;
     long childReqId = admin.getChildReqId();
     String childCmrNo = null;
+
+    Data completedChildData = null;
     if (childReqId > 0) {
       // check child reqId processing first
       LOG.debug("Getting child request data for Request " + childReqId);
@@ -211,6 +213,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         LOG.debug("Child request " + childReqId + " completed.");
         details.append("Child Request " + childReqId + " completed. Proceeding with automated checks.\n");
         childCmrNo = childRequest.getData().getCmrNo();
+        completedChildData = childRequest.getData();
       }
     }
 
@@ -271,6 +274,18 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         }
 
       }
+    }
+
+    if (completedChildData != null && ibmDirectCmr != null) {
+      // make sure we switch the codes to use directly from child
+      ibmDirectCmr.setCmrNum(completedChildData.getCmrNo());
+      ibmDirectCmr.setCmrAffiliate(completedChildData.getAffiliate());
+      ibmDirectCmr.setCmrIsu(completedChildData.getIsuCd());
+      ibmDirectCmr.setCmrTier(completedChildData.getClientTier());
+      ibmDirectCmr.setCmrInac(completedChildData.getInacCd());
+      ibmDirectCmr.setCmrInacType(completedChildData.getInacType());
+      ibmDirectCmr.setCmrSubIndustry(completedChildData.getSubIndustryCd());
+      ibmDirectCmr.setCmrIsic(completedChildData.getUsSicmen());
     }
 
     // copy from IBM Direct if found, and fill the rest of BO codes
@@ -498,6 +513,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
     model.setModelCmrNo(null);
     model.setCmrIssuingCntry(SystemLocation.UNITED_STATES);
+    model.setEnterprise(requestData.getData().getEnterprise());
     RequestEntryService service = new RequestEntryService();
     AppUser user = new AppUser();
     user.setIntranetId(requestData.getAdmin().getRequesterId());
@@ -565,7 +581,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     Admin childAdmin = childReqData.getAdmin();
     childAdmin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     childAdmin.setSourceSystId("CreateCMR");
-    String[] names = handler.doSplitName(cleanName(bpAddr.getDivn()), "", 28, 22);
+    String[] names = handler.doSplitName(cleanName(bpAddr.getDivn()), cleanName(bpAddr.getDept()), 28, 22);
     childAdmin.setMainCustNm1(names[0]);
     childAdmin.setMainCustNm2(names[1]);
     childAdmin.setLockBy(null);
@@ -586,6 +602,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       childData.setIsicCd(data.getIsicCd());
       childData.setSubIndustryCd(data.getSubIndustryCd());
     }
+    childData.setUsSicmen(childData.getIsicCd());
     Scorecard childScoreCard = childReqData.getScorecard();
     childScoreCard.setFindCmrResult(CmrConstants.RESULT_NO_RESULT);
     childScoreCard.setFindCmrTs(SystemUtil.getCurrentTimestamp());
@@ -598,6 +615,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       if (dnbCompany != null) {
         if (dnbCompany.getIbmIsic() != null) {
           childData.setIsicCd(dnbCompany.getIbmIsic());
+          childData.setUsSicmen(dnbCompany.getIbmIsic());
           String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbCompany.getIbmIsic(), SystemLocation.UNITED_STATES);
           childData.setSubIndustryCd(subInd);
         }
@@ -824,10 +842,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
 
       details.append((StringUtils.isBlank(ibmDirectCmr.getCmrInac()) ? " - " + ibmDirectCmr.getCmrInac() : "") + "\n");
+      details.append(" - SICMEN: " + ibmDirectCmr.getCmrIsic() + "\n");
       details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
       details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
 
       overrides.addOverride(getProcessCode(), "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
+      overrides.addOverride(getProcessCode(), "DATA", "US_SICMEN", data.getUsSicmen(), ibmDirectCmr.getCmrIsic());
       overrides.addOverride(getProcessCode(), "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmDirectCmr.getCmrSubIndustry());
     }
 
