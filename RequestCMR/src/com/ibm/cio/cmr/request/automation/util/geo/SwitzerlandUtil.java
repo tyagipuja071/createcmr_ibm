@@ -20,10 +20,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.geo.mappings.ChMubotyMapping;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -339,11 +341,38 @@ public class SwitzerlandUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    details.append("Fields Computation Element development is in progress...\n");
-    results.setResults("Fields Computation Element development is in progress...");
+    details.append("No specific field value to calculate.\n");
+    results.setResults("Skipped");
     results.setDetails(details.toString());
-
     return results;
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    if (!"C".equals(requestData.getAdmin().getReqType())) {
+      details.append("Coverage Calculation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return true;
+    }
+    String scenario = requestData.getData().getCustSubGrp();
+    LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
+    String actualScenario = scenario.substring(2);
+    switch (actualScenario) {
+    case SCENARIO_COMMERCIAL:
+      break;
+    case SCENARIO_PRIVATE_CUSTOMER:
+    case SCENARIO_IBM_EMPLOYEE:
+      break;
+    default:
+      break;
+    }
+    if (!isCoverageCalculated) {
+
+    }
+    return true;
   }
 
   /**
