@@ -112,66 +112,64 @@ public class USAddrStdElement extends OverridingElement {
         throw new Exception("TGME Error");
       }
       // data1 holds response data from service
-      AddressStdData data1 = response.getData();
+      AddressStdData tgmeData = response.getData();
 
-      LOG.debug("Tgme Resonse code is : " + data1.getTgmeResponseCode());
-      if (StringUtils.isBlank(data1.getTgmeResponseCode())) {
+      LOG.debug("Tgme Resonse code is : " + tgmeData.getTgmeResponseCode());
+      if (StringUtils.isBlank(tgmeData.getTgmeResponseCode())) {
         throw new Exception("TGME Code is null, service may be down.");
       }
 
-      TgmeCodes codeDesc = getTgmeCode(entityManager, data1.getTgmeResponseCode());
+      TgmeCodes codeDesc = getTgmeCode(entityManager, tgmeData.getTgmeResponseCode());
       if (codeDesc != null) {
         LOG.debug("Address Standardization result : " + codeDesc.getText());
         details.append("Address Standardization result : " + codeDesc.getText() + "\n");
       }
 
       // create data elements for import for Street, City, and Postal Code.
-      if (!StringUtils.isBlank(data1.getPostalCode())) {
-        LOG.debug(" Postal code is  : " + data1.getPostalCode());
-        details.append("Postal Code: " + data1.getPostalCode() + "\n");
-        if (!data1.getPostalCode().toUpperCase().equals(addr.getPostCd().toUpperCase())) {
-          // overrides.addOverride(getProcessCode(),
-          // addr.getId().getAddrType(), "POST_CD", addr.getPostCd(),
-          // data1.getPostalCode());
+      if (!StringUtils.isBlank(tgmeData.getPostalCode())) {
+        LOG.debug(" Postal code is  : " + tgmeData.getPostalCode());
+        details.append("Postal Code: " + tgmeData.getPostalCode() + "\n");
+        if (tgmeData.getPostalCode().trim().length() > addr.getPostCd().length()) {
+          overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), tgmeData.getPostalCode().trim());
         }
       }
 
-      if (!StringUtils.isBlank(data1.getCity())) {
-        LOG.debug("City is : " + data1.getCity());
-        details.append("City: " + data1.getCity() + "\n");
-        if (!data1.getCity().toUpperCase().equals(addr.getCity1().toUpperCase())) {
+      if (!StringUtils.isBlank(tgmeData.getCity())) {
+        LOG.debug("City is : " + tgmeData.getCity());
+        details.append("City: " + tgmeData.getCity() + "\n");
+        if (!tgmeData.getCity().toUpperCase().equals(addr.getCity1().toUpperCase())) {
           // overrides.addOverride(getProcessCode(),
           // addr.getId().getAddrType(), "CITY1", addr.getCity1(),
           // data1.getCity());
         }
       }
 
-      if (!StringUtils.isBlank(data1.getStreetAddressLine1())) {
-        LOG.debug("Address is : " + data1.getStreetAddressLine1());
-        details.append("Address Line 1: " + data1.getStreetAddressLine1() + "\n");
+      if (!StringUtils.isBlank(tgmeData.getStreetAddressLine1())) {
+        LOG.debug("Address is : " + tgmeData.getStreetAddressLine1());
+        details.append("Address Line 1: " + tgmeData.getStreetAddressLine1() + "\n");
         // overrides.addOverride(getProcessCode(), addr.getId().getAddrType(),
         // "CITY1", addr.getCity1(), data1.getCity());
-        if (!data1.getStreetAddressLine1().toUpperCase().equals(addr.getAddrTxt().toUpperCase())) {
+        if (!tgmeData.getStreetAddressLine1().toUpperCase().equals(addr.getAddrTxt().toUpperCase())) {
           // overrides.addOverride(getProcessCode(),
           // addr.getId().getAddrType(), "ADDR_TXT", addr.getAddrTxt(),
           // data1.getStreetAddressLine1());
         }
       }
 
-      if (!StringUtils.isBlank(data1.getStreetAddressLine2())) {
-        LOG.debug("Address is : " + data1.getStreetAddressLine2());
-        details.append("AddressLine 2: " + data1.getStreetAddressLine2() + "\n");
-        if (!data1.getStreetAddressLine2().toUpperCase().equals(addr.getAddrTxt2() != null ? addr.getAddrTxt2().toUpperCase() : "")) {
+      if (!StringUtils.isBlank(tgmeData.getStreetAddressLine2())) {
+        LOG.debug("Address is : " + tgmeData.getStreetAddressLine2());
+        details.append("AddressLine 2: " + tgmeData.getStreetAddressLine2() + "\n");
+        if (!tgmeData.getStreetAddressLine2().toUpperCase().equals(addr.getAddrTxt2() != null ? addr.getAddrTxt2().toUpperCase() : "")) {
           // overrides.addOverride(getProcessCode(),
           // addr.getId().getAddrType(), "ADDR_TXT_2", addr.getAddrTxt2(),
           // data1.getStreetAddressLine2());
         }
       }
 
-      if (!StringUtils.isBlank(data1.getStateProvinceCode())) {
-        LOG.debug("State is : " + data1.getStateProvinceCode());
-        details.append("State/Province Code: " + data1.getStateProvinceCode() + "\n");
-        if (!data1.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase())) {
+      if (!StringUtils.isBlank(tgmeData.getStateProvinceCode())) {
+        LOG.debug("State is : " + tgmeData.getStateProvinceCode());
+        details.append("State/Province Code: " + tgmeData.getStateProvinceCode() + "\n");
+        if (!tgmeData.getStateProvinceCode().toUpperCase().equals(addr.getStateProv().toUpperCase())) {
           // overrides.addOverride(getProcessCode(),
           // addr.getId().getAddrType(), "STATE_PROV", addr.getStateProv(),
           // data1.getStateProvinceCode());
@@ -189,7 +187,6 @@ public class USAddrStdElement extends OverridingElement {
       PropertyUtils.copyProperties(addrModel, addr);
       addrModel.setCmrIssuingCntry(SystemLocation.UNITED_STATES);
 
-      details.append("\n");
       CmrClientService stdCity = new CmrClientService();
       ModelMap map = new ModelMap();
       stdCity.getStandardCity(addrModel, SystemLocation.UNITED_STATES, map);
@@ -226,6 +223,9 @@ public class USAddrStdElement extends OverridingElement {
         details.append("-System error when connecting to the standard city service-.\n");
         hasIssues = true;
       }
+
+      details.append("\n");
+
     }
     if (hasIssues) {
       String msg = "City and/or County Name for one or more addresses cannot be determined.";
