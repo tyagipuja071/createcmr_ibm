@@ -276,7 +276,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
     }
 
-    if (completedChildData != null) {
+    if (completedChildData != null && ibmDirectCmr != null) {
       // make sure we switch the codes to use directly from child
       ibmDirectCmr.setCmrNum(completedChildData.getCmrNo());
       ibmDirectCmr.setCmrAffiliate(completedChildData.getAffiliate());
