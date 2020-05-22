@@ -59,6 +59,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_CLINIC, USUtil.SC_FED_NATIVE_CORP, USUtil.SC_FED_CAMOUFLAGED, USUtil.SC_STATE_STATE,
       USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_CITY, USUtil.SC_STATE_HOSPITALS, USUtil.SC_SCHOOL_PUBLIC, USUtil.SC_SCHOOL_CHARTER,
       USUtil.SC_STATE_DIST, USUtil.SC_SCHOOL_PRIV, USUtil.SC_BYMODEL);
+  private static final List<String> skipScenariosForBYMODEL = Arrays.asList(USUtil.SC_INTERNAL, USUtil.SC_FED_CAMOUFLAGED, USUtil.SC_FED_CLINIC,
+      USUtil.SC_FED_FEDSTATE, USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_NATIVE_CORP,
+      USUtil.SC_FED_REGULAR, USUtil.SC_FED_TRIBAL_BUS, USUtil.SC_STATE_CITY, USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_DIST, USUtil.SC_STATE_HOSPITALS,
+      USUtil.SC_STATE_STATE);
 
   public USDuplicateCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -80,7 +84,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     MatchingOutput output = new MatchingOutput();
     StringBuilder details = new StringBuilder();
     Addr soldTo = requestData.getAddress("ZS01");
-    Addr invoiceTo = requestData.getAddress("ZI01");
     if (soldTo != null && !scenarioExceptions.isSkipDuplicateChecks()) {
       List<String> duplicateList = new ArrayList<String>();
       List<String> soldToKunnrsList = new ArrayList<String>();
@@ -89,6 +92,21 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       List<ReqCheckResponse> reqCheckMatches = new ArrayList<ReqCheckResponse>();
       MatchingResponse<ReqCheckResponse> responseREQ = new MatchingResponse<>();
       MatchingResponse<DuplicateCMRCheckResponse> responseCMR = new MatchingResponse<>();
+
+      if (USUtil.SC_BYMODEL.equals(data.getCustSubGrp())) {
+        // SKIP duplicate checks for BYMODEL internal, federal except POA, and
+        // STATE/LOCAL scenarios
+        String subScenario = USUtil.determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData);
+        if (subScenario != null && skipScenariosForBYMODEL.contains(subScenario)) {
+          String scenarioDesc = USUtil.getScenarioDesc(entityManager, subScenario);
+          details.append("Skipping Duplicate checks for Create By Model request"
+              + (StringUtils.isNotBlank(scenarioDesc) ? " with '" + scenarioDesc + "' CMR imported." : ".")).append("\n");
+          result.setDetails(details.toString());
+          result.setResults("Skipped");
+          result.setOnError(false);
+          return result;
+        }
+      }
 
       int itemNo = 1;
       // perform duplicate request check

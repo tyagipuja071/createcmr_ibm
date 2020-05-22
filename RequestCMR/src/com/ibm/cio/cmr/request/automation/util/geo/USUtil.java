@@ -401,7 +401,7 @@ public class USUtil extends AutomationUtil {
     return valid;
   }
 
-  private String getScenarioDesc(EntityManager entityManager, String scenarioSubType) {
+  public static String getScenarioDesc(EntityManager entityManager, String scenarioSubType) {
     String sql = ExternalizedQuery.getSql("GET_SCENARIO_DESC_US");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("SUB_SCENARIO", scenarioSubType);
