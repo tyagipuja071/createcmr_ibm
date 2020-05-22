@@ -352,7 +352,7 @@ public class USUtil extends AutomationUtil {
     String[] skipCompanyChecksScenarioList = { SC_BP_POOL, SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL,
         SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
-        SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA };
+        SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
@@ -464,9 +464,17 @@ public class USUtil extends AutomationUtil {
               break;
             case "CSO Site":
             case "Marketing Department":
-            case "Marketing A/R Department":
               // set negative check status for FEDERAL Power of Attorney and BP
               if ((FEDERAL.equals(custTypeCd) || POWER_OF_ATTORNEY.equals(custTypeCd) || BUSINESS_PARTNER.equals(custTypeCd))) {
+                failedChecks.put(field, field + " updated.");
+                hasNegativeCheck = true;
+              }
+              break;
+            case "Marketing A/R Department":
+              // set negative check status if requester id is different than
+              // specified
+              if (SystemParameters.getString("US.AR_UPDT_REQUESTER") != null
+                  && !admin.getRequesterId().equals(SystemParameters.getString("US.AR_UPDT_REQUESTER"))) {
                 failedChecks.put(field, field + " updated.");
                 hasNegativeCheck = true;
               }
