@@ -311,6 +311,15 @@ public class USUtil extends AutomationUtil {
         // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
         // "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
       }
+
+      if (CG_BY_MODEL.equals(data.getCustGrp()) && StringUtils.isNotEmpty(data.getMiscBillCd())) {
+        String miscBillCode = "";
+        miscBillCode = data.getMiscBillCd().toUpperCase();
+        if (miscBillCode.matches(".*[ABMNH]+.*")) {
+          miscBillCode = miscBillCode.replaceAll("[ABMNH]", "");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
+        }
+      }
     } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");

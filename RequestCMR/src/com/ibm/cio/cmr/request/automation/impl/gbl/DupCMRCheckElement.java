@@ -27,13 +27,17 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 
 public class DupCMRCheckElement extends DuplicateCheckElement {
 
@@ -54,10 +58,6 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       throws Exception {
     Addr soldTo = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
-    String zs01Kunnr = null;
-    if (soldTo != null) {
-      zs01Kunnr = StringUtils.isNotBlank(soldTo.getSapNo()) ? soldTo.getSapNo().substring(1) : null;
-    }
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     boolean matchDepartment = false;
@@ -122,8 +122,12 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                           + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
                           + StringUtils.join(dupCMRNos, ", "));
                 } else {
+                  List<String> zs01KunnrsList = new ArrayList<String>();
+                  for (String dupCMR : dupCMRNos) {
+                    zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
+                  }
                   engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR",
-                      "Duplicate CMR(s): " + StringUtils.join(dupCMRNos, ", "), zs01Kunnr);
+                      "Duplicate CMR(s): " + StringUtils.join(dupCMRNos, ", "), "SOLD-TO KUNNR(S) : " + StringUtils.join(zs01KunnrsList, ", "));
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
                   result.setOnError(true);
@@ -339,4 +343,31 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     global.setMatched(updated.size() > 0);
   }
 
+  protected String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+    }
+    return kunnr;
+  }
 }
