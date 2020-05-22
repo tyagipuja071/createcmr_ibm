@@ -655,7 +655,14 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    * @param childAdmin
    */
   private void setChildRequestScenario(Data data, Data childData, Admin childAdmin, StringBuilder details) {
-    String isic = data.getIsicCd();
+    String isic = data.getUsSicmen();
+    if (StringUtils.isBlank(isic)) {
+      isic = data.getIsicCd();
+    }
+    if (StringUtils.isBlank(isic)) {
+      isic = "";
+    }
+
     String affiliate = data.getAffiliate();
 
     String typeDesc = null;
