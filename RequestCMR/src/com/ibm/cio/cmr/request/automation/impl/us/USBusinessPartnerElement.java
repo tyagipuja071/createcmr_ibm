@@ -978,7 +978,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    */
   private String getUSCMRAffiliate(String cmrNo) {
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
-    String sql = ExternalizedQuery.getSql("AUTO.USBP.CHECK_RESTRICTION", usSchema);
+    String sql = ExternalizedQuery.getSql("AUTO.US.USCMR.AFFILIATE", usSchema);
     sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
