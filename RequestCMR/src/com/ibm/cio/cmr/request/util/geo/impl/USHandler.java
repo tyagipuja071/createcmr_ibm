@@ -930,7 +930,7 @@ public class USHandler extends GEOHandler {
       return;
     }
     if ("AFFNO".equals(ldeField)) {
-      if (StringUtils.isNumeric(ldeValue)) {
+      if (StringUtils.isNumeric(ldeValue) && StringUtils.isBlank(data.getEnterprise())) {
         data.setEnterprise(ldeValue);
       }
       String inac = getINACForAffiliate(entityManager, ldeValue);
@@ -942,7 +942,7 @@ public class USHandler extends GEOHandler {
       String affiliate = getAffiliateForINAC(entityManager, ldeValue);
       if (!StringUtils.isBlank(affiliate)) {
         data.setAffiliate(affiliate);
-        if (StringUtils.isNumeric(affiliate)) {
+        if (StringUtils.isNumeric(affiliate) && StringUtils.isBlank(data.getEnterprise())) {
           data.setEnterprise(affiliate);
         }
       }
@@ -1000,7 +1000,7 @@ public class USHandler extends GEOHandler {
     return false;
   }
 
-  private String getSubIndusryValue(EntityManager entityManager, String isic) {
+  protected String getSubIndusryValue(EntityManager entityManager, String isic) {
     String subInd = "";
     String sql = ExternalizedQuery.getSql("US.GET.SUBIND_FOR_ISIC");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
