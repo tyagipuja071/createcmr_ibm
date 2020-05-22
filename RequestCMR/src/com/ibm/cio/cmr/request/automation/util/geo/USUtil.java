@@ -688,6 +688,16 @@ public class USUtil extends AutomationUtil {
               String brsch = query.getSingleResult(String.class);
               if (!data.getIsuCd().equals(brsch)) {
                 return error;
+              } else {
+                // check if isic and sicmen are equal if not set them equal
+                if (data.getIsicCd() != null && !data.getIsicCd().equals(data.getUsSicmen())) {
+                  if ("ISIC".equals(updatedDataModel.getDataField())) {
+                    data.setUsSicmen(updatedValue);
+                  } else {
+                    data.setIsicCd(updatedValue);
+                  }
+                }
+
               }
             }
           } else {
