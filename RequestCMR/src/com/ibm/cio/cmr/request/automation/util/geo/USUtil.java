@@ -271,7 +271,7 @@ public class USUtil extends AutomationUtil {
 
         if (boCodesCalculated) {
           details.append("Branch Office codes computed successfully.");
-        } else if (INTERNAL.equals(scenarioSubType)) {
+        } else if (SC_INTERNAL.equals(scenarioSubType)) {
           if (SC_BYMODEL.equals(data.getCustSubGrp())) {
             details.append("Skipping calculation of Branch Office codes because the CMR imported on the request is of INTERNAL Scenario.");
           } else {
