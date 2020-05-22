@@ -523,7 +523,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
     model.setModelCmrNo(null);
     model.setCmrIssuingCntry(SystemLocation.UNITED_STATES);
-    model.setEnterprise(requestData.getData().getEnterprise());
+    // model.setEnterprise(requestData.getData().getEnterprise());
     RequestEntryService service = new RequestEntryService();
     AppUser user = new AppUser();
     user.setIntranetId(requestData.getAdmin().getRequesterId());
