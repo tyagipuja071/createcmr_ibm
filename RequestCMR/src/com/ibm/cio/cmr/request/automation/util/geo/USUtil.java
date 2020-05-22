@@ -308,8 +308,10 @@ public class USUtil extends AutomationUtil {
       if (SC_REST_OEMSW.equals(scenarioSubType) || SC_REST_OEMHW.equals(scenarioSubType) || SC_REST_TPD.equals(scenarioSubType)
           || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "357X");
-        // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-        // "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
+        if (SC_REST_TPD.equals(scenarioSubType) || SC_REST_SSD.equals(scenarioSubType) || SC_REST_DB4.equals(scenarioSubType)) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), "ZC");
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "US_SICMEN", data.getUsSicmen(), "357X");
+        }
       }
 
       if (CG_BY_MODEL.equals(data.getCustGrp()) && StringUtils.isNotEmpty(data.getMiscBillCd())) {
