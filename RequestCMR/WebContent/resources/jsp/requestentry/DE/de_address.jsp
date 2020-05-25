@@ -11,7 +11,7 @@
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
 %>
 <cmr:row topPad="10">
-  <cmr:column span="2">
+  <cmr:column span="4">
 
     <cmr:label fieldId="addrType">
       <cmr:fieldLabel fieldId="AddressType" />: 
