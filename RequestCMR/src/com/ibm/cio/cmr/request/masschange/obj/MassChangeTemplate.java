@@ -293,9 +293,9 @@ public class MassChangeTemplate {
               // name3 += floor;
               // }
               if (name3.length() > 30) {
-                LOG.debug("Total computed length of building, department and floor should not exeed 30. Sheet: " + name + " Row: " + row.getRowNum());
+                LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
                 TemplateValidation error = new TemplateValidation(name);
-                error.addError(row.getRowNum(), "building", "Total computed length of building, department and floor should not exeed 30");
+                error.addError(row.getRowNum(), "building", "Total computed length of customer name3 should not exeed 30");
                 validations.add(error);
               }
             }
