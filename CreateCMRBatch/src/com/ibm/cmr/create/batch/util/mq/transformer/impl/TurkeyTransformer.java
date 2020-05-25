@@ -1091,9 +1091,11 @@ public class TurkeyTransformer extends EMEATransformer {
         String isr = q.getSingleResult(String.class);
         if (!StringUtils.isBlank(isr)) {
           legacyCust.setSalesRepNo(isr);
+          legacyCust.setSalesGroupRep(isr);
           cmrObjects.getData().setRepTeamMemberNo(isr);
         } else {
           legacyCust.setSalesRepNo("");
+          legacyCust.setSalesGroupRep("");
           cmrObjects.getData().setRepTeamMemberNo("");
         }
       }
@@ -1144,12 +1146,13 @@ public class TurkeyTransformer extends EMEATransformer {
         String isr = q.getSingleResult(String.class);
         if (!StringUtils.isBlank(isr)) {
           legacyCust.setSalesRepNo(isr);
+          legacyCust.setSalesGroupRep(isr);
           cmrObjects.getData().setRepTeamMemberNo(isr);
+        } else {
+          legacyCust.setSalesRepNo("");
+          legacyCust.setSalesGroupRep("");
+          cmrObjects.getData().setRepTeamMemberNo("");
         }
-        // else {
-        // legacyCust.setSalesRepNo("");
-        // cmrObjects.getData().setRepTeamMemberNo("");
-        // }
       }
 
       String dataEmbargoCd = data.getEmbargoCd();
@@ -1322,9 +1325,11 @@ public class TurkeyTransformer extends EMEATransformer {
         String isr = q.getSingleResult(String.class);
         if (!StringUtils.isBlank(isr)) {
           cust.setSalesRepNo(isr);
+          cust.setSalesGroupRep(isr);
           cmrObjects.getMassUpdateData().setRepTeamMemberNo(isr);
         } else {
           cust.setSalesRepNo("");
+          cust.setSalesGroupRep("");
           cmrObjects.getMassUpdateData().setRepTeamMemberNo("");
         }
       }
