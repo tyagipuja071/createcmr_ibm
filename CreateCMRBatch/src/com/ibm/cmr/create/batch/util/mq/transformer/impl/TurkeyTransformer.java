@@ -1209,11 +1209,14 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      legacyCust.setSbo(data.getSalesBusOffCd());
-      legacyCust.setIbo(data.getSalesBusOffCd());
+      String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
+      legacyCust.setSbo(sbo);
+      legacyCust.setIbo(sbo);
+      legacyCust.setCeBo(sbo);
     } else {
       legacyCust.setSbo("");
       legacyCust.setIbo("");
+      legacyCust.setCeBo("");
     }
 
     // common data for C/U
@@ -1339,7 +1342,8 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {
-      cust.setCeBo(muData.getCustNm2());
+      String cebo = StringUtils.rightPad(muData.getCustNm2(), 7, '0');
+      cust.setCeBo(cebo);
     }
 
     List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
@@ -1379,8 +1383,9 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getCustNm1())) {
-      cust.setSbo(muData.getCustNm1());
-      cust.setIbo(muData.getCustNm1());
+      String sbo = StringUtils.rightPad(muData.getCustNm1(), 7, '0');
+      cust.setSbo(sbo);
+      cust.setIbo(sbo);
     }
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@".equals(muData.getInacCd())) {
