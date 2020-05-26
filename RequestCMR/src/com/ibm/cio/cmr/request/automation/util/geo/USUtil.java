@@ -606,16 +606,10 @@ public class USUtil extends AutomationUtil {
         }
 
         // Admin update checks
-        if (StringUtils.isNotBlank(admin.getOldCustNm1())) {
-          // custname is updated
-          String oldCustNm = admin.getOldCustNm1() + (StringUtils.isNotBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2() : "");
-          String newCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
-          if (!oldCustNm.equals(newCustNm)) {
-            failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is updated.");
-            hasNegativeCheck = true;
-          }
+        if (changes.isLegalNameChanged()) {
+          failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is updated.");
+          hasNegativeCheck = true;
         }
-
       } finally {
         cedpManager.clear();
         cedpManager.close();
