@@ -76,38 +76,6 @@ function setTaxCodeOnPostalCodePT(postCd){
   }
 }
 
-function mandatoryForBusinessPartnerPT() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'C') {
-    var _custType = FormManager.getActualValue('custSubGrp');
-    if (_custType == 'BUSPR' || _custType == 'XBP') {
-      FormManager.show('PPSCEID', 'ppsceid');
-      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
-    } else {
-      FormManager.resetValidations('ppsceid');
-      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-    }
-  }
-}
-
-function typeOfCustomerPT(){
-  
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGroup = FormManager.getActualValue('custSubGrp');
-  if (cntry == SysLoc.PORTUGAL) {
-    if (custSubGroup == 'INTER' || custSubGroup == 'INTSO' || custSubGroup == 'GOVRN') {
-      FormManager.show('CrosSubTyp', 'crosSubTyp');
-      FormManager.ReadOnly('crosSubTyp');
-    } else {
-      FormManager.hide('CrosSubTyp', 'crosSubTyp');
-    }
-  }
-
-}
-
 function addMCOLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -170,6 +138,32 @@ function afterConfigForMCO() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.readOnly('cmrOwner');
+}
+
+function afterConfigForPT() {
+  
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  FormManager.readOnly('custPrefLang');
+
+  // Control Type Of Customer
+  if (custSubGrp != 'BUSPR' && custSubGrp != 'GOVRN' && custSubGrp != 'INTER' 
+    && custSubGrp != 'XINT' && custSubGrp != 'XGOV' && custSubGrp != 'XBP') {
+    FormManager.setValue('crosSubTyp', '');
+  }
+
+  if ((role == 'REQUESTER') && reqType != 'C') {
+    FormManager.readOnly('crosSubTyp');
+  } else {
+    FormManager.enable('crosSubTyp');
+  }
+
 }
 
 function addAddressTypeValidator() {
@@ -633,40 +627,38 @@ function setSBOAndEBO() {
 function disableAddrFieldsPTES() {
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
   var custType = FormManager.getActualValue('custGrp');
-
-  if (custType == 'LOCAL' && FormManager.getActualValue('addrType') == 'ZS01') {
+  var addrType = FormManager.getActualValue('addrType');
+  var checkImportIndc = getImportedIndcForPT();
+  
+  // Sequence Number - enable for additional shipping
+  if (cmr.currentRequestType == 'U' && checkImportIndc != 'Y' && addrType == 'ZD01') {
+    FormManager.enable('prefSeqNo');
+  } else {
+    FormManager.setValue('prefSeqNo', '');
+    FormManager.readOnly('prefSeqNo');
+  }
+  
+  if (custType != 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
   }
-  FormManager.setValue('dept', '');
-  FormManager.readOnly('dept');
-
-  // Phone: Create-billing address only, Update-also shipping address for ES
-  if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && FormManager.getActualValue('addrType') == 'ZD01') {
-    FormManager.enable('custPhone');
-  } else if (FormManager.getActualValue('addrType') != 'ZS01' && FormManager.getActualValue('addrType') != 'ZD01') {
+  
+  if (addrType != 'ZS01' && addrType != 'ZD01') {
     FormManager.readOnly('custPhone');
     FormManager.setValue('custPhone', '');
   } else {
     FormManager.enable('custPhone');
   }
   
-  // Legacy PT
-  if (cntryCd == SysLoc.PORTUGAL && FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZP01') {
-    FormManager.enable('poBox');
-  } else {
-    FormManager.readOnly('poBox');
-    FormManager.setValue('custPhone', '');
+  FormManager.setValue('dept', '');
+  FormManager.readOnly('dept');
+  
+  //Phone: Create-billing address only, Update-also shipping address for ES
+  if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && addrType == 'ZD01') {
+    FormManager.enable('custPhone');
   }
   
-  // Sequence Number - enable for additional shipping
-  if (cmr.currentRequestType == 'U' && FormManager.getActualValue('importInd') != 'Y' && FormManager.getActualValue('addrType') == 'ZD01') {
-    FormManager.enable('prefSeqNo');
-  } else {
-    FormManager.setValue('prefSeqNo', '');
-    FormManager.readOnly('prefSeqNo');
-  }
 }
 
 function setVatValidatorPTES() {
@@ -1801,6 +1793,7 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
+  GEOHandler.addAfterConfig(afterConfigForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(afterConfigForMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(addHandlersForPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
@@ -1866,13 +1859,9 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
   
-  // PT Legacy
-  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
-  
+  // PT Legacy 
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterTemplateLoad(typeOfCustomerPT, [ SysLoc.PORTUGAL ]);
+  
 });
