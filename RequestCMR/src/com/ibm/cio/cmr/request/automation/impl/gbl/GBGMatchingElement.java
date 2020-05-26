@@ -218,7 +218,7 @@ public class GBGMatchingElement extends MatchingElement {
       }
     } else {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address.", "Missing main address on the request.", "");
+      engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
       result.setResults("Missing Address");
       result.setOnError(true);
     }

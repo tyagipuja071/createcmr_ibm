@@ -122,7 +122,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
       result.setOnError(false);
     } else if (soldTo == null) {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("ADDR", "Missing main address on the request.", "", "");
+      engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
       result.setResults("No Matches");
       result.setOnError(true);
     } else {

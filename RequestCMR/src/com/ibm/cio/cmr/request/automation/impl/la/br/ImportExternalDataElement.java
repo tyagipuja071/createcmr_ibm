@@ -107,10 +107,10 @@ public class ImportExternalDataElement extends OverridingElement {
       } else {
         if (requestData.getAddress("ZS01") == null) {
           details.append("Main address(ZS01) not found on the request,so skipping MIDAS import.\n");
-          engineData.addRejectionComment("ADDR", "Invalid/incomplete address(es).", "Main address(ZS01) not found on the request", "");
+          engineData.addRejectionComment("OTH", "Main address(ZS01) not found on the request.", "", "");
         } else if (StringUtils.isEmpty(scenarioSubType)) {
           details.append("Scenario can't be identified");
-          engineData.addRejectionComment("UNCL", "Unclear request. Clarification needed..", "Scenario can't be identified", "");
+          engineData.addRejectionComment("OTH", "Scenario can't be identified.", "", "");
         }
         results.setResults("Skip MIDAS import");
         results.setDetails(details.toString());
