@@ -190,13 +190,7 @@ public class PortugalTransformer extends MessageTransformer {
   }
 
   protected void handleDataDefaults(MQMessageHandler handler, Map<String, String> messageHash, Data cmrData, boolean crossBorder, Addr addrData) {
-    handler.messageHash.put("SourceCode", "FO5");
-    messageHash.put("CEdivision", "3");
-
-    String sbo = messageHash.get("SBO");
-    messageHash.put("IBO", sbo);
-    messageHash.put("MarketingResponseCode", "3");
-
+    
     String custType = cmrData.getCustSubGrp();
     if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
       messageHash.put("MarketingResponseCode", "5");
@@ -208,14 +202,21 @@ public class PortugalTransformer extends MessageTransformer {
       messageHash.put("CustomerType", "91");
     } else {
       messageHash.put("ARemark", "");
+      messageHash.put("MarketingResponseCode", "3");
     }
 
-    messageHash.put("LangCode", "1");
+    String sbo = messageHash.get("SBO");
+    messageHash.put("IBO", sbo);
+    
     messageHash.put("CICode", "3");
-    messageHash.put("CustomerLanguage", "1");
     messageHash.put("AccAdBo", "");
+    messageHash.put("LangCode", "1");
     messageHash.put("AccAdmDSC", "");
-
+    messageHash.put("CEdivision", "3");
+    messageHash.put("CustomerLanguage", "1");
+    handler.messageHash.put("SourceCode", "FO5");
+    messageHash.put("MarketingResponseCode", "3");
+    
     boolean create = "C".equals(handler.adminData.getReqType());
     if (create) {
       messageHash.put("NationalCust", "N");
@@ -382,7 +383,7 @@ public class PortugalTransformer extends MessageTransformer {
           break;
         }
       }
-
+      
       // mrc
       String custSubType = data.getCustSubGrp();
       if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custSubType) || "XBP".equals(custSubType)) {

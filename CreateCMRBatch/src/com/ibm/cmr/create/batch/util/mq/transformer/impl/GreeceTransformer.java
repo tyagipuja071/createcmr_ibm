@@ -840,22 +840,6 @@ public class GreeceTransformer extends EMEATransformer {
         cust.setEnterpriseNo(muData.getEnterprise());
       }
     }
-    
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZS01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getCustPhone())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
-              cust.setTelNoOrVat("");
-            } else {
-              cust.setTelNoOrVat(mua.getCustPhone());
-            }
-            break;
-          }
-        }
-      }
-    }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getCollectionCd())) {
@@ -898,8 +882,12 @@ public class GreeceTransformer extends EMEATransformer {
       }
     }
     
-    if (!StringUtils.isBlank(muData.getOutCityLimit())) {
-      cust.setMailingCond(muData.getOutCityLimit());
+    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getRestrictTo())) {
+        cust.setTelNoOrVat("");
+      } else {
+        cust.setTelNoOrVat(muData.getRestrictTo());
+      }
     }
     
     if (!StringUtils.isBlank(muData.getVat())) {
