@@ -70,7 +70,24 @@ public class GBGMatchingElement extends MatchingElement {
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
-    boolean continueCheck = true;
+    // added flow to skip gbg matching
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_GBG)) {
+      // ensure a GBG is set
+      GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
+      if (gbg != null) {
+        StringBuilder details = new StringBuilder();
+        details.append("GBG already computed by external process: ");
+        details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+        details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+        details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+        result.setDetails(details.toString());
+        result.setResults("Skipped");
+        result.setProcessOutput(output);
+        return result;
+      }
+    }
+
+    // boolean continueCheck = true;
     // List<String> usedNames = new ArrayList<String>();
     // while (continueCheck) {
     if (currentAddress != null) {
@@ -218,7 +235,7 @@ public class GBGMatchingElement extends MatchingElement {
       }
     } else {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address.", "Missing main address on the request.", "");
+      engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
       result.setResults("Missing Address");
       result.setOnError(true);
     }

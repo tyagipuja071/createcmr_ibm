@@ -16,6 +16,7 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 /**
  * Connects to the ODM services to retrieve GBG, GLC, Coverage, and LH
@@ -70,19 +71,32 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     if (!success) {
       details.append("Buying Group details were not successfully retrieved.\n");
     } else {
+      GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
       if (bgId != null) {
         details.append("BG = " + bgId + " (" + (bgDesc != null ? bgDesc : "no description") + ")\n");
-        overrides.addOverride(getProcessCode(), "DATA", "BG_ID", model.getBgId(), bgId);
-        overrides.addOverride(getProcessCode(), "DATA", "BG_DESC", model.getBgDesc(), bgDesc);
+        if (gbg != null && !bgId.equals(gbg.getBgId())) {
+          details.append(" - Mismatch against calculated BG: " + gbg.getBgId() + "\n");
+        } else {
+          overrides.addOverride(getProcessCode(), "DATA", "BG_ID", model.getBgId(), bgId);
+          overrides.addOverride(getProcessCode(), "DATA", "BG_DESC", model.getBgDesc(), bgDesc);
+        }
       }
       if (gbgId != null) {
         details.append("GBG = " + gbgId + " (" + (gbgDesc != null ? gbgDesc : "no description") + ")\n");
-        overrides.addOverride(getProcessCode(), "DATA", "GBG_ID", model.getGbgId(), gbgId);
-        overrides.addOverride(getProcessCode(), "DATA", "GBG_DESC", model.getGbgDesc(), gbgDesc);
+        if (gbg != null && !gbgId.equals(gbg.getGbgId())) {
+          details.append(" - Mismatch against calculated GBG: " + gbg.getBgId() + "\n");
+        } else {
+          overrides.addOverride(getProcessCode(), "DATA", "GBG_ID", model.getGbgId(), gbgId);
+          overrides.addOverride(getProcessCode(), "DATA", "GBG_DESC", model.getGbgDesc(), gbgDesc);
+        }
       }
       if (ldeRule != null) {
         details.append("LDE Rule = " + ldeRule + " \n");
-        overrides.addOverride(getProcessCode(), "DATA", "BG_RULE_ID", model.getBgRuleId(), ldeRule);
+        if (gbg != null && !ldeRule.equals(gbg.getLdeRule())) {
+          details.append(" - Mismatch against calculated LDE Rule: " + gbg.getLdeRule() + "\n");
+        } else {
+          overrides.addOverride(getProcessCode(), "DATA", "BG_RULE_ID", model.getBgRuleId(), ldeRule);
+        }
       }
     }
 
@@ -101,8 +115,13 @@ public class RetrieveIBMValuesElement extends OverridingElement {
     } else {
       if (covId != null) {
         details.append("Coverage = " + covType + covId + " (" + covDesc + ")\n");
-        overrides.addOverride(getProcessCode(), "DATA", "COV_ID", model.getCovId(), covType + covId);
-        overrides.addOverride(getProcessCode(), "DATA", "COV_DESC", model.getCovDesc(), covDesc);
+        String calculatedCovId = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
+        if (calculatedCovId != null && !(covType + covId).equals(calculatedCovId)) {
+          details.append(" - Mismatch against calculated Coverage: " + calculatedCovId + "\n");
+        } else {
+          overrides.addOverride(getProcessCode(), "DATA", "COV_ID", model.getCovId(), covType + covId);
+          overrides.addOverride(getProcessCode(), "DATA", "COV_DESC", model.getCovDesc(), covDesc);
+        }
       }
     }
 

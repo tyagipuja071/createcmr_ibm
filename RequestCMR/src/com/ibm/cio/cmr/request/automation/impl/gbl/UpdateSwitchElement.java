@@ -78,7 +78,7 @@ public class UpdateSwitchElement extends ValidatingElement {
           validation.setMessage("Not Validated");
           output.setDetails("Updates to CMR code fields need verification");
           engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to CMR code fields need verification");
-          engineData.addRejectionComment("IBM", "Invalid IBM data.", "IBM/Legacy codes values changed.", "");
+          engineData.addRejectionComment("OTH", "IBM/Legacy codes values changed.", "", "");
           log.debug("Updates to CMR code fields need verification");
         }
 

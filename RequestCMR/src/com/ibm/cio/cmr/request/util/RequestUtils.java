@@ -655,7 +655,7 @@ public class RequestUtils {
     PreparedQuery typeQuery = new PreparedQuery(entityManager, typeSql);
     typeQuery.setParameter("REQ_TYPE", reqType);
     typeQuery.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCountry);
-
+    typeQuery.setForReadOnly(true);
     List<CmrInternalTypes> types = typeQuery.getResults(CmrInternalTypes.class);
     String checkSql = "";
     PreparedQuery query = null;
@@ -1358,6 +1358,22 @@ public class RequestUtils {
       return resp.getStandardCity();
     }
     return city;
+  }
+
+  /**
+   * Gets the default coverage per country
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String getDefaultCoverage(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTO.GET_DEFAULT_COVERAGE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", country);
+    query.setForReadOnly(true);
+    return query.getSingleResult(String.class);
   }
 
 }
