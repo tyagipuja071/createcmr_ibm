@@ -1072,7 +1072,7 @@ public class TurkeyTransformer extends EMEATransformer {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
-      legacyCust.setAccAdminBo("Y60382");
+      legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("2");
 
       if (!StringUtils.isBlank(data.getCrosSubTyp())) {
