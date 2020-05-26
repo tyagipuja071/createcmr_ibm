@@ -62,13 +62,13 @@ public class AustraliaUtil extends AutomationUtil {
       details.append("\nThe combination of Salesman No. and Cluster is valid.\n");
     } else if ("INVALID".equalsIgnoreCase(validCode)) {
       LOG.debug("The combination of Salesman No. and Cluster is INVALID.");
-      engineData.addRejectionComment("TYPR", "The combination of Salesman No. and Cluster is invalid.", "", "");
+      engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is invalid.", "", "");
       results.setOnError(true);
       // eleResults.append("Invalid Cluster and Salesman No. combination.\n");
       details.append("\nThe combination of Salesman No. and Cluster is invalid.\n");
     } else {
       LOG.debug("Salesman No.-Cluster combination not present.");
-      engineData.addRejectionComment("TYPR", "No combination of Salesman No. and Cluster is present.", "", "");
+      engineData.addRejectionComment("OTH", "No combination of Salesman No. and Cluster is present.", "", "");
       results.setOnError(true);
       // eleResults.append("No combination of Salesman No. and Cluster
       // present.\n");
