@@ -158,21 +158,21 @@
         </p>
       </cmr:column>
       
-      <cmr:view forCountry="822">
-			<cmr:column span="2" containerForField="CrosSubTyp">
-				<p>
-					<cmr:label fieldId="crosSubTyp">
-						<cmr:fieldLabel fieldId="CrosSubTyp" />:
-			<cmr:info text="${ui.info.taxPayerCustCd}" />
-					</cmr:label>
-					<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="CrosSubTyp"
-						tabId="MAIN_CUST_TAB" />
-				</p>
-			</cmr:column>
+			<cmr:view forCountry="822">
+				<c:if test="${reqentry.reqType != 'C'}">
+				<cmr:column span="2" containerForField="TypeOfCustomer">
+		        	<p>
+		          	<cmr:label fieldId="crosSubTyp">
+		            <cmr:fieldLabel fieldId="TypeOfCustomer" />:
+		          	</cmr:label>
+		          <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+		        </p>
+		    	</cmr:column>
+				</c:if>
+			</cmr:view>
+		</cmr:row>
 	</cmr:view>
-    </cmr:row>
-  </cmr:view>
-  
+
   <cmr:view forCountry="822">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="DistrictCd">

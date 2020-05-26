@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
+import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -166,7 +167,6 @@ public class MCOPtEsHandler extends MCOHandler {
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
                   }
-
                   converted.add(addr);
                 }
               }
@@ -226,9 +226,7 @@ public class MCOPtEsHandler extends MCOHandler {
             } else {
               record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
             }
-
             converted.add(record);
-
           }
         }
 
@@ -276,9 +274,7 @@ public class MCOPtEsHandler extends MCOHandler {
             record.setCmrAddrSeq("A");
             record.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZP02.toString());
           }
-
         }
-
       }
     }
   }
@@ -415,7 +411,6 @@ public class MCOPtEsHandler extends MCOHandler {
     LOG.trace("Phone: " + address.getCmrCustPhone());
     LOG.trace("City: " + address.getCmrCity());
     LOG.trace("Country: " + address.getCmrCountryLanded());
-
   }
 
   private String removeATT(String addrLine) {
@@ -425,7 +420,6 @@ public class MCOPtEsHandler extends MCOHandler {
     addrLine = StringUtils.replace(addrLine, "ATT:", "");
     addrLine = StringUtils.replace(addrLine, "ATT :", "");
     addrLine = StringUtils.replace(addrLine, "ATT ", "");
-
     return addrLine.trim();
   }
 
@@ -457,8 +451,7 @@ public class MCOPtEsHandler extends MCOHandler {
     LOG.trace("SBO: " + data.getSalesBusOffCd());
     data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
     LOG.trace("EmbargoCode: " + data.getEmbargoCd());
-    // Mukesh: Defect 1698949: FVT: Mismatch between Data.AC_ADMIN_BO and
-    // CMRTCUST.RACBO
+    // Mukesh: Defect 1698949: FVT: Mismatch between Data.AC_ADMIN_BO and CMRTCUST.RACBO
     data.setAcAdminBo(this.currentImportValues.get("AccAdBo"));
     LOG.trace("AccAdBo: " + data.getAcAdminBo());
 
@@ -472,6 +465,15 @@ public class MCOPtEsHandler extends MCOHandler {
         data.getAbbrevLocn();
       }
     }
+    
+    if (SystemLocation.PORTUGAL.equalsIgnoreCase(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
+      CmrtCust cust = this.legacyObjects.getCustomer();
+      if (cust != null) {
+        String customerType = cust.getCustType();
+        data.setCrosSubTyp(customerType);
+      }
+    }
+    
   }
 
   @Override
@@ -486,31 +488,29 @@ public class MCOPtEsHandler extends MCOHandler {
       address.setCustNm4(removeATT(currentRecord.getCmrName4()));
     }
     address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-    if (SystemLocation.SPAIN.equals(currentRecord.getCmrIssuedBy())) {
-      address.setTransportZone("Z000000001");
-      if ("ZD01".equals(address.getId().getAddrType()) && address.getCustPhone() != null) {
-        removeTFFromShipingAddr(address);
-      }
-      address.setDept("");
+    address.setTransportZone("Z000000001");
+    if ("ZD01".equals(address.getId().getAddrType()) && address.getCustPhone() != null) {
+      removeTFFromShipingAddr(address);
+    }
+    address.setDept("");
 
-      if (!StringUtils.isEmpty(address.getCustPhone())) {
-        if (!"ZS01".equals(address.getId().getAddrType()) && !"ZD01".equals(address.getId().getAddrType())
-            && !"ZP02".equals(address.getId().getAddrType())) {
-          address.setCustPhone("");
-        }
-      }
-
-      if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-        String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
-        address.getId().setAddrSeq(seq);
-      }
-
-      if (!StringUtils.isEmpty(currentRecord.getCmrStreetAddress()) && currentRecord.getCmrStreetAddress().length() > 30) {
-        address.setAddrTxt(currentRecord.getCmrStreetAddress().substring(0, 30));
+    if (!StringUtils.isEmpty(address.getCustPhone())) {
+      if (!"ZS01".equals(address.getId().getAddrType()) && !"ZD01".equals(address.getId().getAddrType())
+          && !"ZP02".equals(address.getId().getAddrType())) {
+        address.setCustPhone("");
       }
     }
 
-    if ("D".equals(address.getImportInd()) && SystemLocation.SPAIN.equals(currentRecord.getCmrIssuedBy())) {
+    if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
+      address.getId().setAddrSeq(seq);
+    }
+
+    if (!StringUtils.isEmpty(currentRecord.getCmrStreetAddress()) && currentRecord.getCmrStreetAddress().length() > 30) {
+      address.setAddrTxt(currentRecord.getCmrStreetAddress().substring(0, 30));
+    }
+
+    if ("D".equals(address.getImportInd())) {
       String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
       address.getId().setAddrSeq(seq);
     }
@@ -536,13 +536,14 @@ public class MCOPtEsHandler extends MCOHandler {
         address.setCmrCity(cmrtAddr.getAddrLine4());
         address.setCmrPostalCode(cmrtAddr.getAddrLine5());
         address.setCmrCustPhone(cmrtAddr.getAddrPhone());
-
       }
     }
+    
   }
 
   @Override
   public void setAdminDefaultsOnCreate(Admin admin) {
+    // TO DO
   }
 
   @Override
@@ -558,10 +559,12 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public void appendExtraModelEntries(EntityManager entityManager, ModelAndView mv, RequestEntryModel model) throws Exception {
+    // TO DO
   }
 
   @Override
   public void convertCoverageInput(EntityManager entityManager, CoverageInput request, Addr mainAddr, RequestEntryModel data) {
+    // TO DO
   }
 
   @Override
@@ -570,8 +573,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-
-    if (SystemLocation.SPAIN.equalsIgnoreCase(cmrIssuingCntry) && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
       // 1. Get old data
       DataRdc rdcData = null;
       rdcData = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
@@ -610,10 +612,8 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
-      addr.setTransportZone("Z000000001");
-      serBlankFieldsAtCopy(addr);
-    }
+    addr.setTransportZone("Z000000001");
+    serBlankFieldsAtCopy(addr);
     addEditFiscalAddress(entityManager, addr);
   }
 
@@ -691,8 +691,6 @@ public class MCOPtEsHandler extends MCOHandler {
     }
   }
 
-  // Mukesh : Defect 1704156: FVT: Sales Rep and SBO when updated is not getting
-  // reflected in Request summary for Update Requests
   @Override
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
@@ -735,6 +733,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
+    // To Do
   }
 
   @Override
