@@ -132,10 +132,24 @@ public class CalculateCoverageElement extends OverridingElement {
       CoverageContainer calculatedCoverageContainer = new CoverageContainer();
       boolean coverageNotFound = false;
       boolean isCoverageCalculated = false;
-      String negativeCheck = "";
+      // String negativeCheck = "";
       List<CoverageContainer> coverages = null;
       boolean withCmrData = false;
       StringBuilder details = new StringBuilder();
+
+      // added flow to skip gbg matching
+      if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE)) {
+        // ensure a GBG is set
+        String covId = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
+        if (covId != null) {
+          details.append("Coverage already computed by external process: ");
+          details.append("\n").append("Coverage ID: " + covId);
+          result.setDetails(details.toString());
+          result.setResults("Skipped");
+          result.setProcessOutput(output);
+          return result;
+        }
+      }
 
       // check if coverage rules are initialized or not
       if (this.noInit) {
@@ -294,11 +308,13 @@ public class CalculateCoverageElement extends OverridingElement {
                 isCoverageCalculated = true;
               } else if (finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())) {
                 result.setResults("Review Needed");
-                negativeCheck = "Calculated Coverage is same as the coverage calculated using Request Data.";
+                // negativeCheck = "Calculated Coverage is same as the coverage
+                // calculated using Request Data.";
                 details.append("\nCalculated Coverage is same as the coverage calculated using Request Data.").append("\n");
               } else if (finalCoverage.equals(defaultCoverage)) {
                 result.setResults("Default Coverage");
-                negativeCheck = "Calculated Coverage is same as the Default Coverage.";
+                // negativeCheck = "Calculated Coverage is same as the Default
+                // Coverage.";
                 details.append("\nCalculated Coverage is same as the Default Coverage.").append("\n");
               }
             }
