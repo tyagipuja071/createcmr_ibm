@@ -86,8 +86,8 @@ public class DPLCheckElement extends ValidatingElement {
         if ("U".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getEmbargoCd()) && !"N".equals(data.getEmbargoCd())) {
           validation.setSuccess(false);
           output.setOnError(true);
-          engineData.addRejectionComment("MAPP", "This is a CMR record with a DPL/Embargo Code.",
-              " ERC approval will be needed to process this request.", "Processor");
+          engineData.addRejectionComment("OTH", "This is a CMR record with a DPL/Embargo Code.ERC approval will be needed to process this request.",
+              "", "");
           log.debug(
               "This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.Hence sending back to processor.");
           details.append(details.toString());
@@ -101,7 +101,7 @@ public class DPLCheckElement extends ValidatingElement {
             && ("AF".equals(scorecard.getDplChkResult()) || "SF".equals(scorecard.getDplChkResult()))) {
           validation.setSuccess(false);
           output.setOnError(true);
-          engineData.addRejectionComment("ADDR", "DPL check failed for one or more addresses on the request.", "DPL check failed", "");
+          engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
           validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
           output.setResults(validation.getMessage());
           output.setDetails("DPL check failed for one or more addresses on the request.");
@@ -230,13 +230,13 @@ public class DPLCheckElement extends ValidatingElement {
       case "SF":
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address", "DPL Check Failed for some addresses.", "");
+        engineData.addRejectionComment("OTH", "Invalid / incomplete name and/or address.DPL Check Failed for some addresses.", "", "");
         validation.setMessage("Some Failed");
         break;
       case "AF":
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address", "DPL Check Failed.", "");
+        engineData.addRejectionComment("OTH", "Invalid / incomplete name and/or address", "", "");
         validation.setMessage("All Failed");
         break;
       default:
@@ -250,8 +250,8 @@ public class DPLCheckElement extends ValidatingElement {
       if ("U".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getEmbargoCd()) && !"N".equals(data.getEmbargoCd())) {
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("MAPP", "This is a CMR record with a DPL/Embargo Code.",
-            " ERC approval will be needed to process this request.", "Processor");
+        engineData.addRejectionComment("OTH", "This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.",
+            "", "");
         log.debug(
             "This is a CMR record with a DENIAL DPL Block Code. ERC approval will be needed to process this request.Hence sending back to processor.");
         details.append("This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.");

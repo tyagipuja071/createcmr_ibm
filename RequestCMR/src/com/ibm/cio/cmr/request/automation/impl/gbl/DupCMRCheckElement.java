@@ -158,7 +158,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
         }
       } else {
         result.setDetails("Missing main address on the request.");
-        engineData.addRejectionComment("ADDR", "Missing main address on the request.", "", "");
+        engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
         result.setResults("No Matches");
         result.setOnError(true);
       }
