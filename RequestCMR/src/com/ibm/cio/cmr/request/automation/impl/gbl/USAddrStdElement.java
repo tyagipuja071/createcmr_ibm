@@ -130,6 +130,7 @@ public class USAddrStdElement extends OverridingElement {
         LOG.debug(" Postal code is  : " + tgmeData.getPostalCode());
         details.append("Postal Code: " + tgmeData.getPostalCode() + "\n");
         if (tgmeData.getPostalCode().trim().length() > addr.getPostCd().length()) {
+          details.append(" - Postal Code overwritten on request.\n");
           overrides.addOverride(getProcessCode(), addr.getId().getAddrType(), "POST_CD", addr.getPostCd(), tgmeData.getPostalCode().trim());
         }
       }
@@ -215,9 +216,15 @@ public class USAddrStdElement extends OverridingElement {
                 stdCityResp.getStandardCountyName());
           }
         } else {
-          details.append("County cannot be determined. Multiple counties match the address. "
-              + ("ZS01".equals(addr.getId().getAddrType()) ? "Install-at" : "Invoice-to") + " Address record needs to be checked.\n");
-          hasIssues = true;
+          if (!StringUtils.isBlank(addr.getCounty()) && !StringUtils.isBlank(addr.getCountyName())) {
+            details
+                .append("County cannot be determined. Multiple counties match the address. Using " + addr.getCounty() + " - " + addr.getCountyName()
+                    + " for the " + ("ZS01".equals(addr.getId().getAddrType()) ? "Install-at" : "Invoice-to") + " Address record.\n");
+          } else {
+            details.append("County cannot be determined and no county data on the request. Multiple counties match the address. "
+                + ("ZS01".equals(addr.getId().getAddrType()) ? "Install-at" : "Invoice-to") + " Address record needs to be checked.\n");
+            hasIssues = true;
+          }
         }
       } else {
         details.append("-System error when connecting to the standard city service-.\n");

@@ -289,7 +289,7 @@ public class FranceUtil extends AutomationUtil {
         case "CBIFL":
           String mainCustNm = zs01.getCustNm1();
           if (StringUtils.isNotBlank(mainCustNm) && !mainCustNm.toUpperCase().contains("IBM") && !(data.getCountryUse().length() > 3)) {
-            engineData.addRejectionComment("ADDR", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
+            engineData.addRejectionComment("OTH", "Wrong Customer Name on the main address. IBM should be part of the name.", "", "");
             details.append("Wrong Customer Name on the main address. IBM should be part of the name.").append("\n");
             valid = false;
           }
@@ -303,8 +303,7 @@ public class FranceUtil extends AutomationUtil {
             if (StringUtils.isNotBlank(custNm) && custNm.toUpperCase().contains("CHEZ")) {
               valid = true;
             } else {
-              engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address",
-                  "Wrong Customer Name on Host address. CHEZ should be part of the name.", "");
+              engineData.addRejectionComment("OTH", "Wrong Customer Name on Host address. CHEZ should be part of the name.", "", "");
               details.append("Wrong Customer Name on Host address. CHEZ should be part of the name.").append("\n");
               valid = false;
             }
@@ -339,7 +338,7 @@ public class FranceUtil extends AutomationUtil {
             if (mailDetails.equalsIgnoreCase(billDetails)) {
               valid = true;
             } else {
-              engineData.addRejectionComment("ADDR", "Invalid Billing/Mailing address found on the request. The addresses should be the same.", "",
+              engineData.addRejectionComment("OTH", "Invalid Billing/Mailing address found on the request. The addresses should be the same.", "",
                   "");
               details.append("Invalid Billing/Mailing address found on the request. The addresses should be the same.").append("\n");
               valid = false;
@@ -357,7 +356,7 @@ public class FranceUtil extends AutomationUtil {
     } else {
       if (StringUtils.isBlank(scenario)) {
         valid = false;
-        engineData.addRejectionComment("TYPR", "No Scenario found on the request", "", "");
+        engineData.addRejectionComment("OTH", "No Scenario found on the request", "", "");
         details.append("No Scenario found on the request");
       }
     }

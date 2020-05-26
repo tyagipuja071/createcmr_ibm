@@ -619,7 +619,7 @@ public class GermanyUtil extends AutomationUtil {
         if (isShipToExistOnReq) {
           detail.append("Ship To details provided matches an existing address.");
           validation.setMessage("ShipTo already exists");
-          engineData.addRejectionComment("ADDR", "Ship To details provided matches an existing address.", "", "");
+          engineData.addRejectionComment("OTH", "Ship To details provided matches an existing address.", "", "");
           output.setOnError(true);
           validation.setSuccess(false);
           validation.setMessage("Not validated");
@@ -635,8 +635,7 @@ public class GermanyUtil extends AutomationUtil {
         isInstallAtExistOnReq = addressExists(entityManager, installAt);
         if (isInstallAtExistOnReq) {
           detail.append("Install At details provided matches an existing address.");
-          engineData.addRejectionComment("ADDR", "Invalid / incomplete name and/or address.",
-              "Install At details provided matches an existing address.", "");
+          engineData.addRejectionComment("OTH", "Install At details provided matches an existing address.", "", "");
           LOG.debug("Install At details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);
@@ -664,7 +663,7 @@ public class GermanyUtil extends AutomationUtil {
         isBillToExistOnReq = addressExists(entityManager, billTo);
         if (isBillToExistOnReq) {
           detail.append("Bill To details provided matches an existing address.");
-          engineData.addRejectionComment("ADDR", "Bill To details provided matches an existing address.", "", "");
+          engineData.addRejectionComment("OTH", "Bill To details provided matches an existing address.", "", "");
           LOG.debug("Bill To details provided matches an existing address.");
           output.setOnError(true);
           validation.setSuccess(false);

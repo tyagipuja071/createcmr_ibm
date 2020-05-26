@@ -104,7 +104,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
               validation.setMessage("Review needed.");
               output.setDetails("VAT is invalid. Need review.");
               output.setOnError(true);
-              engineData.addRejectionComment("VAT", "VAT is invalid.", null, null);
+              engineData.addRejectionComment("OTH", "VAT is invalid.", "", "");
               LOG.debug("VAT is invalid.Need review.");
             }
           } else {

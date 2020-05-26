@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 
 /**
@@ -35,6 +36,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String MATCH_DEPARTMENT = "matchDepartment";
 
   public static final String BO_COMPUTATION = "_usBOComputation";
+
+  public static final String SKIP_GBG = "_gblSkipGbg";
+  public static final String SKIP_COVERAGE = "_gblSkipCoverage";
 
   /**
    * 
