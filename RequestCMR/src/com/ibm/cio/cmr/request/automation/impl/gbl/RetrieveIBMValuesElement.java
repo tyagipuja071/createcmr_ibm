@@ -116,7 +116,7 @@ public class RetrieveIBMValuesElement extends OverridingElement {
       if (covId != null) {
         details.append("Coverage = " + covType + covId + " (" + covDesc + ")\n");
         String calculatedCovId = (String) engineData.get(AutomationEngineData.COVERAGE_CALCULATED);
-        if (calculatedCovId != null && !covId.equals(calculatedCovId)) {
+        if (calculatedCovId != null && !(covType + covId).equals(calculatedCovId)) {
           details.append(" - Mismatch against calculated Coverage: " + calculatedCovId + "\n");
         } else {
           overrides.addOverride(getProcessCode(), "DATA", "COV_ID", model.getCovId(), covType + covId);

@@ -849,16 +849,14 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrIsu())) {
         details.append(" - ISU: " + ibmDirectCmr.getCmrIsu() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "ISU_CD", data.getIsuCd(), ibmDirectCmr.getCmrIsu());
-      }
-
-      if (!StringUtils.isBlank(ibmDirectCmr.getCmrTier())) {
         details.append(" - Client Tier: " + ibmDirectCmr.getCmrTier() + "\n");
         overrides.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", data.getClientTier(), ibmDirectCmr.getCmrTier());
       }
 
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrInac())) {
-        details.append(
-            " - NAC/INAC: " + ("I".equals(ibmDirectCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmDirectCmr.getCmrInacType()) ? "NAC" : "-")));
+        details
+            .append(" - NAC/INAC: " + ("I".equals(ibmDirectCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmDirectCmr.getCmrInacType()) ? "NAC" : "-"))
+                + " " + ibmDirectCmr.getCmrInac() + (ibmDirectCmr.getCmrInacDesc() != null ? "( " + ibmDirectCmr.getCmrInacDesc() + ")" : ""));
         overrides.addOverride(getProcessCode(), "DATA", "INAC_TYPE", data.getInacType(), ibmDirectCmr.getCmrInacType());
         overrides.addOverride(getProcessCode(), "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
       }
@@ -869,6 +867,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
 
       // add here gbg and cov
+      LOG.debug("Getting Buying Group/Coverage values");
       String bgId = ibmDirectCmr.getCmrBuyingGroup();
       GBGResponse calcGbg = new GBGResponse();
       if (!StringUtils.isBlank(bgId)) {
@@ -892,11 +891,14 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
 
+      LOG.debug("BG ID: " + calcGbg.getBgId());
       String calcCovId = ibmDirectCmr.getCmrCoverage();
       if (StringUtils.isBlank(calcCovId)) {
         calcCovId = RequestUtils.getDefaultCoverage(entityManager, "US");
       }
-      details.append(" - Coverage: " + calcCovId + "\n");
+      details.append(
+          " - Coverage: " + calcCovId + (ibmDirectCmr.getCmrCoverageName() != null ? " (" + ibmDirectCmr.getCmrCoverageName() + ")" : "") + "\n");
+      LOG.debug("Coverage: " + calcCovId);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       engineData.put(AutomationEngineData.COVERAGE_CALCULATED, calcCovId);
 
@@ -975,6 +977,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
     String sql = ExternalizedQuery.getSql("AUTO.USBP.CHECK_RESTRICTION", usSchema);
     sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
+    System.err.println(sql);
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
     query.setRows(1);
@@ -987,7 +990,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
 
       if (!response.isSuccess()) {
-        LOG.warn("Not successful executiong of US CMR query");
+        LOG.warn("Not successful executiong of US CMR query: " + response.getMsg());
         return true;
       } else if (response.getRecords() == null || response.getRecords().size() == 0) {
         LOG.warn("No records in US CMR DB");

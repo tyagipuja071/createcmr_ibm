@@ -655,7 +655,7 @@ public class RequestUtils {
     PreparedQuery typeQuery = new PreparedQuery(entityManager, typeSql);
     typeQuery.setParameter("REQ_TYPE", reqType);
     typeQuery.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCountry);
-
+    typeQuery.setForReadOnly(true);
     List<CmrInternalTypes> types = typeQuery.getResults(CmrInternalTypes.class);
     String checkSql = "";
     PreparedQuery query = null;
