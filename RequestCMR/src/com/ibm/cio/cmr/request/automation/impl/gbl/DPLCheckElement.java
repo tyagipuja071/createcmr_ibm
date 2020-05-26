@@ -230,13 +230,13 @@ public class DPLCheckElement extends ValidatingElement {
       case "SF":
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("OTH", "Invalid / incomplete name and/or address.DPL Check Failed for some addresses.", "", "");
+        engineData.addRejectionComment("OTH", "DPL Check Failed for some addresses.", "", "");
         validation.setMessage("Some Failed");
         break;
       case "AF":
         validation.setSuccess(false);
         output.setOnError(true);
-        engineData.addRejectionComment("OTH", "Invalid / incomplete name and/or address", "", "");
+        engineData.addRejectionComment("OTH", "DPL Check Failed for all addresses.", "", "");
         validation.setMessage("All Failed");
         break;
       default:
