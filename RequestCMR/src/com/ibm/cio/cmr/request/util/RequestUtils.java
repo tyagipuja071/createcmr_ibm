@@ -1284,52 +1284,52 @@ public class RequestUtils {
       if (countyName.endsWith("COUNTY")) {
         // get name without county
         countyName = countyName.substring(0, countyName.lastIndexOf("COUNTY")).trim();
-        String sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY");
-        EntityManager entityManager = JpaManager.getEntityManager();
-        try {
-          PreparedQuery query = new PreparedQuery(entityManager, sql);
+      }
+      String sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY");
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setForReadOnly(true);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT", "100"));
+        query.setParameter("STATE", stateCode);
+        query.setParameter("COUNTY", "%" + countyName + "%");
+        List<Object[]> results = query.getResults();
+        if (results != null) {
+          for (Object[] result : results) {
+            if (result[1].equals(countyName)) {
+              cmrRecord.setCmrCountyCode((String) result[0]);
+              cmrRecord.setCmrCounty((String) result[1]);
+              break;
+            }
+          }
+        }
+        if (cmrRecord.getCmrCountyCode() == null) {
+          sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY.ALL");
+          query = new PreparedQuery(entityManager, sql);
           query.setForReadOnly(true);
           query.setParameter("MANDT", SystemConfiguration.getValue("MANDT", "100"));
           query.setParameter("STATE", stateCode);
-          query.setParameter("COUNTY", "%" + countyName + "%");
-          List<Object[]> results = query.getResults();
+          results = query.getResults();
           if (results != null) {
+            // two iterations, equals first then like
             for (Object[] result : results) {
-              if (result[1].equals(countyName)) {
+              String checkCounty = (String) result[1];
+              if (StringUtils.getLevenshteinDistance(countyName, checkCounty) <= 4) {
                 cmrRecord.setCmrCountyCode((String) result[0]);
                 cmrRecord.setCmrCounty((String) result[1]);
                 break;
               }
             }
           }
-          if (cmrRecord.getCmrCountyCode() == null) {
-            sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY.ALL");
-            query = new PreparedQuery(entityManager, sql);
-            query.setForReadOnly(true);
-            query.setParameter("MANDT", SystemConfiguration.getValue("MANDT", "100"));
-            query.setParameter("STATE", stateCode);
-            results = query.getResults();
-            if (results != null) {
-              // two iterations, equals first then like
-              for (Object[] result : results) {
-                String checkCounty = (String) result[1];
-                if (StringUtils.getLevenshteinDistance(countyName, checkCounty) <= 4) {
-                  cmrRecord.setCmrCountyCode((String) result[0]);
-                  cmrRecord.setCmrCounty((String) result[1]);
-                  break;
-                }
-              }
-            }
-          }
-          String standardCity = getUSStandardCityName(cmrRecord.getCmrCountryLanded(), cmrRecord.getCmrCity(), cmrRecord.getCmrState(),
-              cmrRecord.getCmrCounty(), cmrRecord.getCmrPostalCode());
-          cmrRecord.setCmrCity(standardCity);
-          LOG.debug("City/County Computed: City: " + cmrRecord.getCmrCity() + " " + cmrRecord.getCmrCountyCode() + " - " + cmrRecord.getCmrCounty());
-        } catch (Exception e) {
-          LOG.warn("County and City computation error.", e);
-        } finally {
-          entityManager.close();
         }
+        String standardCity = getUSStandardCityName(cmrRecord.getCmrCountryLanded(), cmrRecord.getCmrCity(), cmrRecord.getCmrState(),
+            cmrRecord.getCmrCounty(), cmrRecord.getCmrPostalCode());
+        cmrRecord.setCmrCity(standardCity);
+        LOG.debug("City/County Computed: City: " + cmrRecord.getCmrCity() + " " + cmrRecord.getCmrCountyCode() + " - " + cmrRecord.getCmrCounty());
+      } catch (Exception e) {
+        LOG.warn("County and City computation error.", e);
+      } finally {
+        entityManager.close();
       }
     }
   }
