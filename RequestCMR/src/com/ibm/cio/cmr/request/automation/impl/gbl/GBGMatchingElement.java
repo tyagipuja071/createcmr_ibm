@@ -202,7 +202,7 @@ public class GBGMatchingElement extends MatchingElement {
         }
         result.setProcessOutput(output);
         result.setDetails(details.toString());
-        continueCheck = false;
+        // continueCheck = false;
       } else {
         // boolean nextFound = false;
         // if (geoHandler != null && geoHandler.customerNamesOnAddress()) {
@@ -223,7 +223,7 @@ public class GBGMatchingElement extends MatchingElement {
         // }
 
         // if (!nextFound) {
-        continueCheck = false;
+        // continueCheck = false;
         // result.setDetails("No GBG was found using DUNS hierarchy matching
         // and Name matching.");
         result.setDetails("No GBG was found using DUNS hierarchy matching.");
