@@ -79,6 +79,11 @@
           <width>20</width>
           <lovId>ModeOfPayment2</lovId>
         </column>
+        <column>
+          <label>Phone #</label>
+          <dbColumn>RESTRICT_TO</dbColumn>
+          <length>16</length>
+        </column>
       </columns>
     </tab>
     <tab name="Local Lang translation Sold-to" type="Address" typeCode="ZP01">
@@ -248,11 +253,6 @@
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>
           <length>23</length>
-        </column>
-        <column>
-          <label>Phone #</label>
-          <dbColumn>CUST_PHONE</dbColumn>
-          <length>16</length>
         </column>
       </columns>
     </tab>
