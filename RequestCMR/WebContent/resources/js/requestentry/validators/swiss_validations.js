@@ -1467,6 +1467,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(setMubotyOnPostalCodeIMS, GEOHandler.SWISS);
   GEOHandler.addAddrFunction(setMubotyOnPostalCodeIMS32N, GEOHandler.SWISS);
 
+  GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addAfterConfigForSWISS, GEOHandler.SWISS);
 
@@ -1478,7 +1479,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setMubotyOnPostalCodeIMS32N, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(defaultCapIndicator, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(setAbbrvNmSwiss, GEOHandler.SWISS);
-  GEOHandler.addAfterConfig(reqReasonOnChange, GEOHandler.SWISS);
 
   GEOHandler.registerValidator(addHwMstrInstFlgValidator, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(addPreferedLangValidator, GEOHandler.SWISS, null, true);
