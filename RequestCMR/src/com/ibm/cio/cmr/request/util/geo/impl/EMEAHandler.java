@@ -2302,10 +2302,6 @@ public class EMEAHandler extends BaseSOFHandler {
             }
 					}
 				}
-			} else if (data != null && admin.getReqType().equals("U")) {
-			  if (!"GR".equals(addr.getLandCntry()) && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
-	         updateLandCntryGR(entityManager, addr);
-			  }
 			}
 
 			break;
