@@ -323,6 +323,12 @@ public class USUtil extends AutomationUtil {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), miscBillCode.trim());
         }
       }
+
+      if ("X".equals(data.getSpecialTaxCd())) {
+        details.append("Tax Exempt Status cannot be 'X'. Clearing Tax Exempt Status value.").append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
+      }
+
     } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");
@@ -1122,9 +1128,7 @@ public class USUtil extends AutomationUtil {
         custSubGroup = SC_INTERNAL;
       }
     } else if (BUSINESS_PARTNER.equals(custTypCd)) {
-      if (("IRCSO".equals(usRestrictToLOV) || "BPQS".equals(usRestrictToLOV)) && "E".equals(bpAccTyp)) {
-        custSubGroup = SC_BP_END_USER;
-      } else if ("P".equals(bpAccTyp)) {
+      if ("P".equals(bpAccTyp)) {
         custSubGroup = SC_BP_POOL;
       } else if ("D".equals(bpAccTyp)) {
         custSubGroup = SC_BP_DEVELOP;
@@ -1145,13 +1149,13 @@ public class USUtil extends AutomationUtil {
           }
 
           if ((StringUtils.isNotBlank(name3)
-              && (name3.toUpperCase().contains("e-hosting".toUpperCase()) || name3.toUpperCase().contains("e-host".toUpperCase())
-                  || name3.toUpperCase().contains("ehosting".toUpperCase()) || name3.toUpperCase().contains("ehost".toUpperCase())))
+              && (name3.toUpperCase().contains("e-host".toUpperCase()) || name3.toUpperCase().contains("ehost".toUpperCase())))
               || (StringUtils.isNotBlank(name4)
-                  && (name4.toUpperCase().contains("e-hosting".toUpperCase()) || name4.toUpperCase().contains("e-host".toUpperCase())
-                      || name4.toUpperCase().contains("ehosting".toUpperCase()) || name4.toUpperCase().contains("ehost".toUpperCase())))) {
+                  && (name4.toUpperCase().contains("e-host".toUpperCase()) || name4.toUpperCase().contains("ehost".toUpperCase())))) {
             custSubGroup = SC_BP_E_HOST;
             break;
+          } else if ("IRCSO".equals(usRestrictToLOV) || "BPQS".equals(usRestrictToLOV)) {
+            custSubGroup = SC_BP_END_USER;
           }
         }
       }

@@ -237,7 +237,10 @@ public class USHandler extends GEOHandler {
         data.setMiscBillCd(data.getMiscBillCd().trim().substring(0, 3));
       }
       data.setTaxCd3((String) record.get("TAX_CD3"));
-      data.setSpecialTaxCd((String) record.get("TAX_EXEMPT_STATUS"));
+      // commenting this for JIRA CMR-3872
+      // data.setSpecialTaxCd((String) record.get("TAX_EXEMPT_STATUS"));
+      // always reset to blank
+      data.setSpecialTaxCd("");
       data.setBpName((String) record.get("BP_NAME"));
       data.setIccTaxClass((String) record.get("ICC_TAX_CLASS"));
       data.setIccTaxExemptStatus((String) record.get("ICC_TAX_EXEMPT_STATUS"));
