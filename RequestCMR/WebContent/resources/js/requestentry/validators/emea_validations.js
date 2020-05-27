@@ -3924,6 +3924,21 @@ function hideMOPAFieldForGR() {
   }
 }
 
+function setTypeOfCustomerBehaviorForGR() {
+	
+  if (FormManager.getActualValue('reqType') == 'C') {
+    FormManager.hide('CrosSubTyp', 'crosSubTyp');
+  } else if(FormManager.getActualValue('reqType') == 'U') {
+    FormManager.show('CrosSubTyp', 'crosSubTyp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if(role == 'REQUESTER') {
+      FormManager.readOnly('crosSubTyp');
+    } else if (role == 'PROCESSOR') {
+      FormManager.enable('crosSubTyp');
+    }
+  }
+}
+
 function addPostalCodeLenForTurGreCypValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -7936,6 +7951,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE, SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(setTypeOfCustomerBehaviorForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(disableAddrFieldsGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addNonLatinCharValidator, [ SysLoc.GREECE ]);
