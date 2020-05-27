@@ -197,9 +197,9 @@ public class PortugalTransformer extends MessageTransformer {
       messageHash.put("CEdivision", "2");
       messageHash.put("ARemark", "YES");
     } else if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType)) {
-      messageHash.put("CustomerType", "G");
+      cmrData.setCrosSubTyp("G");
     } else if (MQMsgConstants.CUSTSUBGRP_INTER.equals(custType) || MQMsgConstants.CUSTSUBGRP_INTSO.equals(custType)) {
-      messageHash.put("CustomerType", "91");
+      cmrData.setCrosSubTyp("91");
     } else {
       messageHash.put("ARemark", "");
       messageHash.put("MarketingResponseCode", "3");
@@ -410,6 +410,9 @@ public class PortugalTransformer extends MessageTransformer {
         }
       }
 
+      // Type of Customer : CMRTCUST.CCUAI
+      legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ? data.getCrosSubTyp() : "");
+      
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 
@@ -445,9 +448,6 @@ public class PortugalTransformer extends MessageTransformer {
     
     // LANG_CD
     legacyCust.setLangCd("1");
-    
-    // Type of Customer : CMRTCUST.CCUAI
-    legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ? data.getCrosSubTyp() : "");
     
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
       legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));

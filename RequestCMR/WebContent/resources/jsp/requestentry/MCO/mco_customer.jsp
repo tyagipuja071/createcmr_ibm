@@ -162,9 +162,7 @@
 				<c:if test="${reqentry.reqType != 'C'}">
 				<cmr:column span="2" containerForField="TypeOfCustomer">
 		        	<p>
-		          	<cmr:label fieldId="crosSubTyp">
-		            <cmr:fieldLabel fieldId="TypeOfCustomer" />:
-		          	</cmr:label>
+		          	<label for="crosSubTyp"> <cmr:fieldLabel fieldId="TypeOfCustomer" />: </label>
 		          <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
 		        </p>
 		    	</cmr:column>
