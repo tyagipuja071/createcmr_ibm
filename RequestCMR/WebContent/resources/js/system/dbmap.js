@@ -266,6 +266,9 @@ var DB_DATA_FIELDS = [ {
   id : 'Province/TerritoryID',
   name : 'TERRITORY_CD'
 }, {
+  id : 'OrderBlock',
+  name : 'ORD_BLK'
+}, {
   id : 'Cluster',
   name : 'AP_CUST_CLUSTER_ID'
 }, {
