@@ -70,6 +70,15 @@ function addAfterConfigForSWISS() {
     FormManager.readOnly("custClass");
   }
 
+  if (reqType == 'C' && (custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI')) {
+    FormManager.setValue("inacCd", "");
+    FormManager.readOnly("inacCd");
+    FormManager.setValue("vat", "");
+    FormManager.readOnly("vat");
+    FormManager.setValue("custClass", "60");
+    FormManager.readOnly("custClass");
+  }
+
   if (reqType == 'C' && (custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM')) {
     FormManager.setValue("inacCd", "");
     FormManager.readOnly("inacCd");
