@@ -341,9 +341,16 @@ public class SwitzerlandUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    details.append("No specific field value to calculate.\n");
-    results.setResults("Skipped");
-    results.setDetails(details.toString());
+    if (!"C".equals(requestData.getAdmin().getReqType())) {
+      details.append("Skipped computations for non-Create requests.\n");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+
+    // remove duplicates
+    removeDuplicateAddresses(entityManager, requestData, details);
+
     return results;
   }
 
