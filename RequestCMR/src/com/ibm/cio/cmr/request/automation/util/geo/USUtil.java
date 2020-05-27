@@ -286,7 +286,7 @@ public class USUtil extends AutomationUtil {
       }
 
       // set ISU CTC if not found
-      if (StringUtils.isBlank(data.getIsuCd()) || StringUtils.isBlank(data.getClientTier())) {
+      if (StringUtils.isBlank(data.getIsuCd())) {
         details.append("ISU/Client Tier blank on the request. Setting ISU-CTC to 32-S.").append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
@@ -612,16 +612,10 @@ public class USUtil extends AutomationUtil {
         }
 
         // Admin update checks
-        if (StringUtils.isNotBlank(admin.getOldCustNm1())) {
-          // custname is updated
-          String oldCustNm = admin.getOldCustNm1() + (StringUtils.isNotBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2() : "");
-          String newCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
-          if (!oldCustNm.equals(newCustNm)) {
-            failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is updated.");
-            hasNegativeCheck = true;
-          }
+        if (changes.isLegalNameChanged()) {
+          failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is updated.");
+          hasNegativeCheck = true;
         }
-
       } finally {
         cedpManager.clear();
         cedpManager.close();

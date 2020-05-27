@@ -181,7 +181,7 @@ public class RequestChangeContainer {
   /**
    * Checks if the legal name has been changed for this request
    *
-   * @return
+   * @return true if changed
    */
   public boolean isLegalNameChanged() {
     String newName = this.admin.getMainCustNm1().toUpperCase();
@@ -190,7 +190,7 @@ public class RequestChangeContainer {
     String oldName = !StringUtils.isBlank(this.admin.getOldCustNm1()) ? this.admin.getOldCustNm1().toUpperCase() : "";
     oldName += !StringUtils.isBlank(this.admin.getOldCustNm2()) ? " " + this.admin.getOldCustNm2().toUpperCase() : "";
 
-    return newName.equals(oldName);
+    return !newName.equals(oldName);
   }
 
   /**

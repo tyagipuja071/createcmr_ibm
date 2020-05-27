@@ -97,7 +97,18 @@ public class GermanyUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     // cmr-2067 fix
     engineData.setMatchDepartment(true);
-    if (StringUtils.isNotBlank(scenario)) {
+    if (admin.getSourceSystId() != null) {
+      if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+        details.append("Processor review is required for MARKETPLACE requests.").append("\n");
+        engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
+        skipAllChecks(engineData);
+      } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+        // BP skip checks - remove after BP is enabled
+        details.append("Processor review is required for BP Portal requests.").append("\n");
+        engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
+        skipAllChecks(engineData); // remove after BP is enabled
+      }
+    } else if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
       case "PRIPE":
       case "IBMEM":
@@ -280,14 +291,6 @@ public class GermanyUtil extends AutomationUtil {
           }
         }
       }
-      if (admin.getSourceSystId() != null) {
-        if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-          engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
-        } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-          engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-        }
-      }
-
       // String[] skipCompanyCheckList = { "PRIPE", "IBMEM" };
       // skipCompanyCheckForScenario(requestData, engineData,
       // Arrays.asList(skipCompanyCheckList), false);
