@@ -94,8 +94,8 @@ public abstract class AutomationUtil {
     }
   };
 
-  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", " CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
-      "INCORPORATED");
+  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", " CO", "CORP", "CORPORATION", "LTD",
+      "LIMITED", "LLC", "INC", "INCORPORATED");
 
   /**
    * Holds the possible return values of
@@ -118,7 +118,8 @@ public abstract class AutomationUtil {
    * @throws InstantiationException
    * @throws IllegalAccessException
    */
-  public static AutomationUtil getNewCountryUtil(String cmrIssuingCntry) throws IllegalAccessException, InstantiationException {
+  public static AutomationUtil getNewCountryUtil(String cmrIssuingCntry)
+      throws IllegalAccessException, InstantiationException {
     if (!GEO_UTILS.containsKey(cmrIssuingCntry)) {
       return null;
     }
@@ -143,8 +144,9 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  public abstract AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
-      StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception;
+  public abstract AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides,
+      RequestData requestData, AutomationEngineData engineData) throws Exception;
 
   /**
    * validates if the scenario on request is correct or not
@@ -158,8 +160,9 @@ public abstract class AutomationUtil {
    * @param rejectionComment
    * @return
    */
-  public abstract boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output);
+  public abstract boolean performScenarioValidation(EntityManager entityManager, RequestData requestData,
+      AutomationEngineData engineData, AutomationResult<ValidationOutput> result, StringBuilder details,
+      ValidationOutput output);
 
   /**
    * This method should be overridden by implementing classes and
@@ -178,9 +181,10 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
-      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
-      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement,
+      EntityManager entityManager, AutomationResult<OverrideOutput> results, StringBuilder details,
+      OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData, String covFrom,
+      CoverageContainer container, boolean isCoverageCalculated) throws Exception {
     return false;
   }
 
@@ -195,7 +199,8 @@ public abstract class AutomationUtil {
    * @param engineData
    * @return
    */
-  public String getDefaultCluster(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
+  public String getDefaultCluster(EntityManager entityManager, RequestData requestData,
+      AutomationEngineData engineData) {
     String defaultClusterCd = "";
     Data data = requestData.getData();
     String sql = ExternalizedQuery.getSql("AUTO.GET.DEFAULT_CLUSTER");
@@ -213,8 +218,8 @@ public abstract class AutomationUtil {
    * Validates the Cluster and SalesMan Combination.
    *
    * @return a) validCode = "NO_RESULTS" if no rows found on CREQCMR.REP_TEAM b)
-   *         validCode = "INVALID" if cluster exist but with different SalesMan
-   *         on CREQCMR.REP_TEAM c) validCode = "VALID" if cluster exist with
+   *         validCode = "INVALID" if cluster exist but with different SalesMan on
+   *         CREQCMR.REP_TEAM c) validCode = "VALID" if cluster exist with
    *         request's SalesMan on CREQCMR.REP_TEAM
    */
   public String checkIfClusterSalesmanIsValid(EntityManager entityManager, RequestData requestData) {
@@ -278,7 +283,8 @@ public abstract class AutomationUtil {
       subindustry = data.getSubIndustryCd();
     }
 
-    if (scenarioSubType != null && StringUtils.isNotBlank(scenarioSubType) && scenarioList != null && scenarioList.contains(scenarioSubType)) {
+    if (scenarioSubType != null && StringUtils.isNotBlank(scenarioSubType) && scenarioList != null
+        && scenarioList.contains(scenarioSubType)) {
       // check if ISIC does not contains letters
       if (isicCode != null && StringUtils.isNotBlank(isicCode) && isicCode.matches("[0-9]*[a-zA-Z]")) {
         isIsicValid = false;
@@ -309,8 +315,9 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData,
+      RequestData requestData, RequestChangeContainer changes, AutomationResult<ValidationOutput> output,
+      ValidationOutput validation) throws Exception {
     return false; // false denotes no country specific runs
   }
 
@@ -327,8 +334,9 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData,
+      RequestData requestData, RequestChangeContainer changes, AutomationResult<ValidationOutput> output,
+      ValidationOutput validation) throws Exception {
     return false; // false denotes no country specific runs
   }
 
@@ -338,7 +346,8 @@ public abstract class AutomationUtil {
    * @param scenarioList
    * @return
    */
-  public void allowDuplicatesForScenario(AutomationEngineData engineData, RequestData requestData, List<String> scenarioList) {
+  public void allowDuplicatesForScenario(AutomationEngineData engineData, RequestData requestData,
+      List<String> scenarioList) {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
 
@@ -383,7 +392,8 @@ public abstract class AutomationUtil {
         request.setLandedCountry(addr.getLandCntry());
       } else {
         request.setCity(addr.getCity1());
-        request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
+        request.setCustomerName(
+            addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
         request.setStreetLine1(addr.getAddrTxt());
         request.setStreetLine2(addr.getAddrTxt2());
         request.setLandedCountry(addr.getLandCntry());
@@ -404,8 +414,8 @@ public abstract class AutomationUtil {
    * @param addr
    * @return
    */
-  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr, boolean isOrgIdMatchOnly)
-      throws Exception {
+  public List<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, Addr addr,
+      boolean isOrgIdMatchOnly) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     List<DnBMatchingResponse> dnbMatches = new ArrayList<DnBMatchingResponse>();
@@ -413,11 +423,13 @@ public abstract class AutomationUtil {
       addr = requestData.getAddress("ZS01");
     }
     GBGFinderRequest request = createRequest(admin, data, addr, isOrgIdMatchOnly);
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
+    MatchingServiceClient client = CmrServicesFactory.getInstance()
+        .createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"), MatchingServiceClient.class);
     client.setReadTimeout(1000 * 60 * 5);
-    LOG.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
+    LOG.debug(
+        "Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request,
+        MatchingResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponse);
 
@@ -463,8 +475,8 @@ public abstract class AutomationUtil {
    * @param output
    * @return
    */
-  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages) {
+  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry,
+      String name, StringBuilder details, boolean checkBluepages) {
 
     if (hasLegalEndings(name)) {
       engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
@@ -476,29 +488,31 @@ public abstract class AutomationUtil {
     PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
 
     switch (checkStatus) {
-    case BluepagesError:
-      engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
-      break;
-    case DuplicateCMR:
-      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
-      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-          " Duplicate CMR No : " + checkResult.getCmrNo() + ". ", null);
-      return false;
-    case DuplicateCheckError:
-      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
-      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
-      break;
-    case NoIBMRecord:
-      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
-      details.append("Employee details not found in IBM BluePages.").append("\n");
-      break;
-    case Passed:
-      details.append("No Duplicate CMRs were found.").append("\n");
-      break;
-    case PassedBoth:
-      details.append("No Duplicate CMRs were found.").append("\n");
-      details.append("Name validated against IBM BluePages successfully.").append("\n");
-      break;
+      case BluepagesError:
+        engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
+        break;
+      case DuplicateCMR:
+        details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
+        engineData.addRejectionComment("DUPC",
+            "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
+            " Duplicate CMR No : " + checkResult.getCmrNo() + ". ", null);
+        return false;
+      case DuplicateCheckError:
+        details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+        engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR",
+            "Duplicate CMR check using customer name match failed to execute.");
+        break;
+      case NoIBMRecord:
+        engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+        details.append("Employee details not found in IBM BluePages.").append("\n");
+        break;
+      case Passed:
+        details.append("No Duplicate CMRs were found.").append("\n");
+        break;
+      case PassedBoth:
+        details.append("No Duplicate CMRs were found.").append("\n");
+        details.append("Name validated against IBM BluePages successfully.").append("\n");
+        break;
     }
     return true;
   }
@@ -511,7 +525,8 @@ public abstract class AutomationUtil {
    * @param checkBluePages
    * @return
    */
-  protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages) {
+  protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name,
+      boolean checkBluePages) {
     LOG.debug("Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
@@ -556,9 +571,10 @@ public abstract class AutomationUtil {
    * @param landedCountry
    * @return CMR No. of the duplicate record
    */
-  protected DuplicateCMRCheckResponse checkDuplicatePrivatePersonRecord(String name, String issuingCountry, String landedCountry) throws Exception {
-    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        MatchingServiceClient.class);
+  protected DuplicateCMRCheckResponse checkDuplicatePrivatePersonRecord(String name, String issuingCountry,
+      String landedCountry) throws Exception {
+    MatchingServiceClient client = CmrServicesFactory.getInstance()
+        .createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"), MatchingServiceClient.class);
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
     request.setCustomerName(name);
     request.setIssuingCountry(issuingCountry);
@@ -567,7 +583,8 @@ public abstract class AutomationUtil {
     request.setNameMatch("Y");
     client.setReadTimeout(1000 * 60 * 5);
     LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request,
+        MatchingResponse.class);
     ObjectMapper mapper = new ObjectMapper();
     String json = mapper.writeValueAsString(rawResponse);
 
@@ -601,13 +618,16 @@ public abstract class AutomationUtil {
     }
     try {
       if (!checkPPSCEID(ceId)) {
-        engineData.addRejectionComment("OTH", "CEID " + ceId + "  is not valid as checked against the PartnerWorld Profile System.", "", "");
-        details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.").append("\n");
+        engineData.addRejectionComment("OTH",
+            "CEID " + ceId + "  is not valid as checked against the PartnerWorld Profile System.", "", "");
+        details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.")
+            .append("\n");
         return false;
       }
     } catch (Exception e) {
       LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
-      details.append("Not able to validate PPS CEID " + ceId + " against PPS. An issue occurred during the validation.").append("\n");
+      details.append("Not able to validate PPS CEID " + ceId + " against PPS. An issue occurred during the validation.")
+          .append("\n");
       engineData.addNegativeCheckStatus("PPSCEID",
           "Not able to validate PPS CEID " + ceId + " against PPS. An issue occurred during the validation.");
     }
@@ -625,8 +645,8 @@ public abstract class AutomationUtil {
     if (StringUtils.isBlank(ppsCeId)) {
       return false;
     }
-    PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        PPSServiceClient.class);
+    PPSServiceClient client = CmrServicesFactory.getInstance()
+        .createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"), PPSServiceClient.class);
     client.setRequestMethod(Method.Get);
     client.setReadTimeout(1000 * 60 * 5);
     PPSRequest request = new PPSRequest();
@@ -649,8 +669,8 @@ public abstract class AutomationUtil {
    * @param engineData
    * @return
    */
-  protected boolean handlePrivatePersonRecord(EntityManager entityManager, Admin admin, AutomationResult<ValidationOutput> output,
-      ValidationOutput validation, AutomationEngineData engineData) {
+  protected boolean handlePrivatePersonRecord(EntityManager entityManager, Admin admin,
+      AutomationResult<ValidationOutput> output, ValidationOutput validation, AutomationEngineData engineData) {
     DataRdc rdc = getDataRdc(entityManager, admin);
     if ("9500".equals(rdc.getIsicCd())) {
       LOG.debug("Private customer record. Skipping validations.");
@@ -730,9 +750,8 @@ public abstract class AutomationUtil {
   }
 
   /**
-   * Checks if the given name has legal endings. This checks the globally
-   * defined legal identifiers and has support for country-specific legal
-   * endings
+   * Checks if the given name has legal endings. This checks the globally defined
+   * legal identifiers and has support for country-specific legal endings
    * 
    * @param name
    * @return
@@ -856,4 +875,14 @@ public abstract class AutomationUtil {
     }
     return kunnr;
   }
+
+  public void skipAllChecks(AutomationEngineData engineData) {
+    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
+      ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      scenarioExceptions.setSkipDuplicateChecks(true);
+      scenarioExceptions.setSkipChecks(true);
+      scenarioExceptions.setSkipCompanyVerification(true);
+    }
+  }
+
 }
