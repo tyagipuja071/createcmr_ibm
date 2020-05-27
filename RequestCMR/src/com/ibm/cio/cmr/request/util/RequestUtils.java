@@ -690,6 +690,13 @@ public class RequestUtils {
 
   public static synchronized WfHist createWorkflowHistoryFromBatch(EntityManager entityManager, String user, Admin admin, String cmt, String action,
       String sendToId, String sendToNm, boolean complete, boolean sendMail, String rejReason) throws CmrException, SQLException {
+    return createWorkflowHistoryFromBatch(entityManager, user, admin, cmt, action, sendToId, sendToNm, complete, sendMail, rejReason, "OTH", null,
+        null);
+  }
+
+  public static synchronized WfHist createWorkflowHistoryFromBatch(EntityManager entityManager, String user, Admin admin, String cmt, String action,
+      String sendToId, String sendToNm, boolean complete, boolean sendMail, String rejReason, String rejCode, String info1, String info2)
+      throws CmrException, SQLException {
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
 
     WfHist hist = new WfHist();
