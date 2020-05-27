@@ -774,6 +774,7 @@ public class FranceUtil extends AutomationUtil {
         case "Top List Speciale":
           String designatedUser = SystemParameters.getString("TOP_LST_SPECI_USER");
           if (!admin.getRequesterId().equalsIgnoreCase(designatedUser)) {
+            hasNegativeCheck = true;
             failedChecks.put(field, field + " updated. Updates to " + field + " needs verification.");
             LOG.debug("Updates to Top List Speciale need verification.");
           }
@@ -784,6 +785,7 @@ public class FranceUtil extends AutomationUtil {
         case "Installing BO":
           String designatedISUCTCUser = SystemParameters.getString("ISU_CTC_SBO_USER");
           if (!admin.getRequesterId().equalsIgnoreCase(designatedISUCTCUser)) {
+            hasNegativeCheck = true;
             failedChecks.put(field, field + " updated. Updates to " + field + " needs verification.");
             LOG.debug("Updates to ISU/CTC/SBO/IBO need verification.");
           }
@@ -905,22 +907,22 @@ public class FranceUtil extends AutomationUtil {
     if (hasNegativeCheck) {
       engineData.addNegativeCheckStatus("RESTRICED_ADDR_UPDATED", "Updated elements cannot be checked automatically.");
       output.setDetails("Updated elements cannot be checked automatically.\n");
+      StringBuilder details = new StringBuilder();
       if (failedChecks != null && failedChecks.size() > 0) {
-        StringBuilder details = new StringBuilder();
         details.append("Updated elements cannot be checked automatically.\nDetails:").append("\n");
         for (String failedCheck : failedChecks.values()) {
           details.append(" - " + failedCheck).append("\n");
         }
-        output.setDetails(details.toString());
       }
       validation.setMessage("Review needed.");
       validation.setSuccess(false);
+      output.setDetails(details.toString());
     } else {
       validation.setSuccess(true);
       detail.append("Updates to relevant addresses found but have been marked as Verified.");
       validation.setMessage("Validated");
+      output.setDetails(detail.toString());
     }
-    output.setDetails(detail.toString());
     return true;
   }
 
