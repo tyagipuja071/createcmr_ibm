@@ -99,7 +99,7 @@ public class USDelReacCheckElement extends ValidatingElement {
                   Date usCmrDate = formatter.parse(dateString);
                   if (usCmrDate != null && usCmrDate.before(dateSixMonthsAgo)) {
                     oldCMRExist = true;
-                    engineData.setScenarioVerifiedIndc("N");
+                    admin.setScenarioVerifiedIndc("N");
                     details.append("CMR No. " + cmrNo + " updated more than 6 months ago.").append("\n");
                   }
                 }
