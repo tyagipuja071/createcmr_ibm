@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -2289,7 +2290,22 @@ public class EMEAHandler extends BaseSOFHandler {
 				if ((CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"GR".equals(addr.getLandCntry())) 
 				    && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
 					updateLandCntryGR(entityManager, addr);
+
+					// auto generate zp01/zs01 if either one is created 
+					if("ZS01".equals(addr.getId().getAddrType())) {
+					  if(getAddressByType(entityManager,"ZP01", data.getId().getReqId()) == null) {
+		           saveAddrCopyForGR(entityManager, addr, "ZP01");
+					  }
+					} else if("ZP01".equals(addr.getId().getAddrType())) {
+	           if(getAddressByType(entityManager,"ZS01", data.getId().getReqId()) == null) {
+               saveAddrCopyForGR(entityManager, addr, "ZS01");
+            }
+					}
 				}
+			} else if (data != null && admin.getReqType().equals("U")) {
+			  if (!"GR".equals(addr.getLandCntry()) && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
+	         updateLandCntryGR(entityManager, addr);
+			  }
 			}
 
 			break;
@@ -4019,6 +4035,30 @@ public class EMEAHandler extends BaseSOFHandler {
       }
     }
    }    
+  }
+  
+  private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
+    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    addrCopy.getId().setAddrType(addrType);
+    
+    if(addrType.equals("ZP01")) {
+      addrCopy.setCustPhone(null);  
+    }
+    
+    entityManager.persist(addrCopy);
+    entityManager.flush();
+  }
+  
+  private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    List<Addr> addrList = query.getResults(1, Addr.class);
+    if (addrList != null && addrList.size() > 0) {
+      return addrList.get(0);
+    }
+    return null;
   }
 
 }
