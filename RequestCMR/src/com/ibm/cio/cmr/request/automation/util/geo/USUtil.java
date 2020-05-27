@@ -50,6 +50,7 @@ import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 
@@ -369,6 +370,11 @@ public class USUtil extends AutomationUtil {
           if (scenarioExceptions != null) {
             scenarioExceptions.setSkipCompanyVerification(true);
           }
+        }
+
+        // skip GBG for Internal -create by model
+        if (SC_INTERNAL.equals(scenarioSubType)) {
+          setDummyGBGMatchForInternal(engineData);
         }
 
       }
@@ -1286,4 +1292,15 @@ public class USUtil extends AutomationUtil {
     return closeMatches;
   }
 
+  private void setDummyGBGMatchForInternal(AutomationEngineData engineData) {
+    GBGResponse calcGbg = new GBGResponse();
+    calcGbg.setBgId("DB22C85F");
+    calcGbg.setBgName("INTERNATIONAL BUSINESS MACHINE CORPORATION");
+    calcGbg.setCmrCount(1);
+    calcGbg.setGbgId("GB000W0K");
+    calcGbg.setGbgName("INTERNATIONAL BUSINESS MACHINE CORPORATION");
+    calcGbg.setLdeRule("BG_CNTRY_US_Affno_4600000");
+    engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+    engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
+  }
 }
