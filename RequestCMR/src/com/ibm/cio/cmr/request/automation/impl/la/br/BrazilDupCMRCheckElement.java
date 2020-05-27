@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -221,8 +220,7 @@ public class BrazilDupCMRCheckElement extends DuplicateCheckElement {
 
             // add support to override duplicate CMR checks later
             requestData.getAdmin().setMatchIndc("C");
-            engineData.addRejectionComment("DUPC", "Duplicate CMR matches found.", "Duplicate CMR(s): " + StringUtils.join(cmrList, ", "),
-                "SOLD-TO KUNNR :" + zs01Kunnr);
+            engineData.addRejectionComment("DUPC", "Duplicate CMR matches found.", StringUtils.join(cmrList, ", "), zs01Kunnr);
             result.setOnError(true);
           }
           result.setDetails(details.toString().trim());

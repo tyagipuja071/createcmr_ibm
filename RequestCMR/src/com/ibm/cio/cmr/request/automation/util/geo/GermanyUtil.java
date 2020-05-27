@@ -156,7 +156,7 @@ public class GermanyUtil extends AutomationUtil {
                     .append("\n");
                 engineData.addRejectionComment("DUPC",
                     "The " + (scenario.equals("PRIPE") ? "Private Person" : "IBM Employee") + " already has a record with CMR No. " + duplicateCMRNo,
-                    " Duplicate CMR No : " + duplicateCMRNo, "ZS01 KUNNR : " + zs01Kunnr);
+                    duplicateCMRNo, zs01Kunnr);
                 valid = false;
               } else {
                 details.append("No Duplicate CMRs were found.").append("\n");
@@ -437,8 +437,9 @@ public class GermanyUtil extends AutomationUtil {
 
   private String insertGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
-          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
+      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö")
+          .replace("OE", "Ö").replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß")
+          .replace("Ss", "ß");
       return str;
     }
     return null;
