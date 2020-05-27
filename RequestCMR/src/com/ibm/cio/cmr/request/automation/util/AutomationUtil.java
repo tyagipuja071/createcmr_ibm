@@ -420,4 +420,13 @@ public abstract class AutomationUtil {
     return result;
   }
 
+  public void skipAllChecks(AutomationEngineData engineData) {
+    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
+      ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      scenarioExceptions.setSkipDuplicateChecks(true);
+      scenarioExceptions.setSkipChecks(true);
+      scenarioExceptions.setSkipCompanyVerification(true);
+    }
+  }
+
 }
