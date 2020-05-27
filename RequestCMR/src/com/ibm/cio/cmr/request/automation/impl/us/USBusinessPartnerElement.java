@@ -116,6 +116,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     long reqId = admin.getId().getReqId();
     Data data = requestData.getData();
     AutomationResult<OverrideOutput> output = buildResult(reqId);
+    Addr addr = requestData.getAddress("ZS01");
 
     // check the scenario
     if ("U".equals(admin.getReqType())) {
@@ -130,6 +131,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       String type = admin.getCustType();
       if (!USUtil.BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
           || (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
+        output.setResults("Skipped");
+        output.setDetails("Non BP End User create by model scenario not supported.");
+        return output;
+      }
+      // CMR-3856 add check for ehosting
+      String deptAttn = addr.getDept() != null ? addr.getDept().toLowerCase() : "";
+      if (deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host")) {
         output.setResults("Skipped");
         output.setDetails("Non BP End User create by model scenario not supported.");
         return output;
@@ -152,7 +160,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     USHandler handler = new USHandler();
     OverrideOutput overrides = new OverrideOutput(false);
     StringBuilder details = new StringBuilder();
-    Addr addr = requestData.getAddress("ZS01");
 
     FindCMRRecordModel ibmDirectCmr = null;
     long childReqId = admin.getChildReqId();
