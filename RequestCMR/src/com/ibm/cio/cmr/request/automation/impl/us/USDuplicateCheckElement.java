@@ -207,12 +207,12 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
           if (dupReqFound) {
             engineData.addRejectionComment("DUPR", "There were possible duplicate requests found with the same data.",
-                "Duplicate Requests : " + StringUtils.join(duplicateList, ", "), "");
+                StringUtils.join(duplicateList, ", "), "");
           } else if (dupCMRFound) {
             List<String> dupFiltered = removeDupEntriesFrmList(duplicateList);
             List<String> kunnrsFiltered = removeDupEntriesFrmList(soldToKunnrsList);
             engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
-                "Duplicate CMRs : " + StringUtils.join(dupFiltered, ", "), "SOLD TO KUNNR : " + StringUtils.join(kunnrsFiltered, ", "));
+                StringUtils.join(dupFiltered, ", "), StringUtils.join(kunnrsFiltered, ", "));
             admin.setMatchIndc("C");
           }
           result.setOnError(true);

@@ -494,8 +494,7 @@ public abstract class AutomationUtil {
       case DuplicateCMR:
         details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
         engineData.addRejectionComment("DUPC",
-            "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
-            " Duplicate CMR No : " + checkResult.getCmrNo() + ". ", null);
+            "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(), checkResult.getCmrNo(), "");
         return false;
       case DuplicateCheckError:
         details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
