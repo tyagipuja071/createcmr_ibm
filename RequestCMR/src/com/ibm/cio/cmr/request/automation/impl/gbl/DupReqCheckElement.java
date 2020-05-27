@@ -95,7 +95,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
             engineData.put("reqCheckMatches", reqCheckMatches);
             result.setResults("Found Duplicate Requests.");
             engineData.addRejectionComment("DUPR", reqCheckMatches.size() + " possible duplicate request(s) found with the same data.",
-                "Duplicate Request(s): " + StringUtils.join(dupReqIds, ", "), "");
+                StringUtils.join(dupReqIds, ", "), "");
             result.setOnError(true);
             result.setProcessOutput(output);
             result.setDetails(details.toString().trim());

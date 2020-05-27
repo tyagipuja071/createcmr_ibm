@@ -179,10 +179,11 @@ public class FranceUtil extends AutomationUtil {
                 String zs01Kunnr = getZS01Kunnr(duplicateCMRNo, SystemLocation.FRANCE);
                 details.append("The " + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
                     + " already has a record with CMR No. " + duplicateCMRNo);
-                engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR.",
-                    "The " + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
+                engineData.addRejectionComment("DUPC",
+                    "Customer already exists / duplicate CMR.The "
+                        + ((scenario.equals("PRICU") || scenario.equals("CBICU")) ? "Private Customer" : "IBM Employee")
                         + " already has a record with CMR No. " + duplicateCMRNo,
-                    "SOLD-TO KUNNR : " + zs01Kunnr);
+                    duplicateCMRNo, zs01Kunnr);
                 valid = false;
               } else {
                 details.append("No Duplicate CMRs were found with Name: " + name);

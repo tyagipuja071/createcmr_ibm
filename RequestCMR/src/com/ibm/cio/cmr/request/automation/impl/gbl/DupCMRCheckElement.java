@@ -126,8 +126,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   for (String dupCMR : dupCMRNos) {
                     zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
                   }
-                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR",
-                      "Duplicate CMR(s): " + StringUtils.join(dupCMRNos, ", "), "SOLD-TO KUNNR(S) : " + StringUtils.join(zs01KunnrsList, ", "));
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(dupCMRNos, ", "),
+                      StringUtils.join(zs01KunnrsList, ", "));
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
                   result.setOnError(true);
