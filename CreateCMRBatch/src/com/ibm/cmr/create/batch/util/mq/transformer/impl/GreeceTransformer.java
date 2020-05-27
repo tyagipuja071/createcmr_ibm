@@ -217,7 +217,11 @@ public class GreeceTransformer extends EMEATransformer {
     // country
     String line6 = "";
 
-    line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    if(!crossBorder && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line6 =  "Ελλάδα";
+    } else {
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());  
+    }
 
     int lineNo = 1;
     String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
