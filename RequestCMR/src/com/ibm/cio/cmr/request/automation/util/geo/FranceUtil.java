@@ -879,8 +879,10 @@ public class FranceUtil extends AutomationUtil {
 
     if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString()) || addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP02.toString())) {
       List<Addr> addrsToChk = new ArrayList<Addr>();
-      addrsToChk.add(payment);
-      addrsToChk.add(installing);
+      if (payment != null)
+        addrsToChk.add(payment);
+      if (installing != null)
+        addrsToChk.add(installing);
 
       for (Addr addr : addrsToChk) {
         if ("Y".equals(addr.getImportInd())) {
