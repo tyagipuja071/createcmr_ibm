@@ -73,6 +73,14 @@ function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
       FilteringDropdown['val_landCntry'] = null;
     }
   }
+  
+  var landCntry = FormManager.getActualValue('landCntry');
+  if(landCntry == 'GR') {
+	  var scenario = FormManager.getActualValue('custGrp');
+	  if ((scenario == 'LOCAL' || FormManager.getActualValue('reqType') == 'U') && FormManager.getActualValue('addrType') == 'ZP01') {
+          GEOHandler.disableCopyAddress();
+      }
+  }
 }
 
 /**
@@ -1817,6 +1825,7 @@ function addNonLatinCharValidator() {
       checkAndAddValidator('addrTxt2', Validators.NON_LATIN, [ 'Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'District' ]);
       checkAndAddValidator('taxOffice', Validators.NON_LATIN, [ 'Tax Office' ]);
+      checkAndAddValidator('custNm4', Validators.NON_LATIN, [ 'Att. Person' ]);
     }
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.NON_LATIN, [ 'City' ]);
@@ -3914,6 +3923,15 @@ function disableAddrFieldsGR() {
     FormManager.disable('poBox');
 
   }
+  
+  var landCntry = FormManager.getActualValue('landCntry');
+  if(!(FormManager.getActualValue('custGrp') == 'CROSS') && landCntry == 'GR' && 
+		  (FormManager.getActualValue('addrType') == 'ZP01'
+		|| FormManager.getActualValue('addrType') == 'ZS01') ) {
+	  FormManager.readOnly('landCntry');
+  } else {
+	  FormManager.enable('landCntry');
+  }
 }
 
 function hideMOPAFieldForGR() {
@@ -5243,11 +5261,25 @@ function canUpdateAddress(value, rowIndex, grid) {
 // Defect 1509289 :Mukesh
 function canCopyAddress(value, rowIndex, grid) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+
+  if(cntry == '726') {
+	  return shouldShowCopyAddressInGrid(rowIndex, grid);
+  }
+  
   if (cntry != '758') {
     return true;
   }
   if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 2) {
     return false;
+  }
+  return true;
+}
+
+function shouldShowCopyAddressInGrid(rowIndex, grid) {
+  if(grid != null && rowIndex != null && grid.getItem(rowIndex) != null) {
+	  if(grid.getItem(rowIndex).addrType[0] == 'ZP01' && grid.getItem(rowIndex).landCntry[0] == 'GR') {
+	    return false;
+	  }
   }
   return true;
 }
