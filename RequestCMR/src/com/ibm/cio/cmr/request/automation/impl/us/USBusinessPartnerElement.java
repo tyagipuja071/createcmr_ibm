@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.impl.us;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,9 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
@@ -164,12 +167,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     FindCMRRecordModel ibmDirectCmr = null;
     long childReqId = admin.getChildReqId();
     String childCmrNo = null;
-
+    RequestData childRequest = null;
     Data completedChildData = null;
     if (childReqId > 0) {
       // check child reqId processing first
       LOG.debug("Getting child request data for Request " + childReqId);
-      RequestData childRequest = new RequestData(entityManager, childReqId);
+      childRequest = new RequestData(entityManager, childReqId);
       if (childRequest == null || childRequest.getAdmin() == null) {
         String msg = "Child request " + childReqId + " missing. The request needs to be manually processed.";
         details.append(msg);
@@ -184,22 +187,39 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       String childReqStatus = childRequest.getAdmin().getReqStatus();
       if ("PRJ".equals(childReqStatus) || "DRA".equals(childReqStatus) || "CAN".endsWith(childReqStatus)) {
         boolean setError = true;
+        String rejectionCmrNo = null;
+        WfHist rejectHist = null;
+        if ("PRJ".equals(childReqStatus)) {
+          rejectHist = getWfHistForRejection(entityManager, childReqId);
+          if (rejectHist != null) {
+            // Duplicate CMR
+            if ("DUPC".equals(rejectHist.getRejReasonCd())) {
+              rejectionCmrNo = rejectHist.getRejSupplInfo1();
+              if (!StringUtils.isBlank(rejectionCmrNo)) {
+                details.append("Child CMR Rejected and specified IBM Direct CMR No. :" + rejectionCmrNo).append("\n");
+              }
+            }
+          }
+        }
+        if (rejectHist == null) {
+          rejectHist = new WfHist();
+          rejectHist.setRejReasonCd("OTH");
+        }
+
         // try to check once if an ibm direct cmr is available
         LOG.debug("Trying to check once for a Direct CMR for the record");
-        ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, null);
+        ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, rejectionCmrNo);
         if (ibmDirectCmr != null) {
           setError = false;
         }
 
+        processChildCancellation(entityManager, details, requestData, childRequest, engineData, setError ? rejectHist : null);
+
         if (setError) {
-          LOG.debug("Child request processing has been stopped (Rejected or Sent back to requesters). Sending to processors.");
-          String msg = "IBM Direct Request " + childReqId
-              + " has been sent back to requesters and no IBM Direct CMRs were found. The request needs to be manually processed.";
+          LOG.debug("Child request processing has been stopped (Rejected or Sent back to requesters). Returning error.");
+          String msg = "IBM Direct Request " + childReqId + " has been rejected and no IBM Direct CMRs were found.";
           details.append(msg);
           details.append("\n");
-          details.append("No field value has been computed for this record.");
-          // engineData.addNegativeCheckStatus("_usBpRejected", msg);
-          engineData.addRejectionComment("OTH", msg, "", "");
           output.setOnError(true);
           output.setDetails(details.toString());
           output.setResults("Issues Encountered");
@@ -301,10 +321,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       ibmDirectCmr.setCmrInacType(completedChildData.getInacType());
       ibmDirectCmr.setCmrSubIndustry(completedChildData.getSubIndustryCd());
       ibmDirectCmr.setCmrIsic(completedChildData.getUsSicmen());
+      Addr childInstallAt = childRequest.getAddress("ZS01");
+      ibmDirectCmr.setCmrCountyCode(childInstallAt.getCounty());
+      ibmDirectCmr.setCmrCounty(childInstallAt.getCountyName());
     }
 
     // copy from IBM Direct if found, and fill the rest of BO codes
-    copyAndFillIBMData(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides);
+    copyAndFillIBMData(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides, childRequest);
 
     // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
     details.append("\n");
@@ -838,7 +861,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    * @param details
    */
   private void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmDirectCmr, RequestData requestData,
-      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides) {
+      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
     Data data = requestData.getData();
     if (ibmDirectCmr != null) {
       details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
@@ -967,6 +990,37 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
       }
     }
+
+    // do some name + address changes
+    if (childRequest != null && "COM".equals(childRequest.getAdmin().getReqStatus())) {
+      // match name + address from completed child
+      Addr childInstallAt = childRequest.getAddress("ZS01");
+      Addr installAt = requestData.getAddress("ZS01");
+      Admin childAdmin = childRequest.getAdmin();
+      if (!StringUtils.equals(installAt.getDivn(), childAdmin.getMainCustNm1())) {
+        overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), childAdmin.getMainCustNm1());
+        overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), childAdmin.getMainCustNm2());
+      }
+      if (!StringUtils.equals(installAt.getAddrTxt(), childInstallAt.getAddrTxt())) {
+        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), childInstallAt.getAddrTxt());
+      }
+      if (!StringUtils.equals(installAt.getAddrTxt2(), childInstallAt.getAddrTxt2())) {
+        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT2", installAt.getAddrTxt2(), childInstallAt.getAddrTxt2());
+      }
+      if (!StringUtils.equals(installAt.getCity1(), childInstallAt.getCity1())) {
+        overrides.addOverride(getProcessCode(), "ZS01", "CITY1", installAt.getCity1(), childInstallAt.getCity1());
+      }
+      if (!StringUtils.equals(installAt.getPostCd(), childInstallAt.getPostCd())) {
+        overrides.addOverride(getProcessCode(), "ZS01", "POST_CD", installAt.getPostCd(), childInstallAt.getPostCd());
+      }
+      if (!StringUtils.equals(installAt.getStateProv(), childInstallAt.getStateProv())) {
+        overrides.addOverride(getProcessCode(), "ZS01", "STATE_PROV", installAt.getStateProv(), childInstallAt.getStateProv());
+      }
+      if (!StringUtils.equals(installAt.getCounty(), childInstallAt.getCounty())) {
+        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), childInstallAt.getCounty());
+        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NM", installAt.getCountyName(), childInstallAt.getCountyName());
+      }
+    }
     if (!hasFieldError) {
       details.append("Branch Office codes computed successfully.");
       engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
@@ -1049,6 +1103,63 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       return null;
     }
 
+  }
+
+  /**
+   * Gets the CMR no from the child rejection. If null, it means the rejection
+   * is not due to duplicate CMR
+   * 
+   * @param reqId
+   * @return
+   */
+  private WfHist getWfHistForRejection(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_REJECTION");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    return query.getSingleResult(WfHist.class);
+  }
+
+  /**
+   * Processes cancellation of the child request and setting parent to correct
+   * statuses
+   * 
+   * @param entityManager
+   * @param details
+   * @param requestData
+   * @param childRequestData
+   * @throws SQLException
+   * @throws CmrException
+   */
+  private void processChildCancellation(EntityManager entityManager, StringBuilder details, RequestData requestData, RequestData childRequestData,
+      AutomationEngineData engineData, WfHist rejectionHist) throws CmrException, SQLException {
+    // set child to CANCELLED
+    long childReqId = childRequestData.getAdmin().getId().getReqId();
+    LOG.debug("Cancelling child request " + childReqId);
+    childRequestData.getAdmin().setReqStatus("CAN");
+    RequestUtils.createWorkflowHistoryFromBatch(entityManager, "AutomationEngine", childRequestData.getAdmin(),
+        "Automatically cancelled by CreateCMR", "Cancel", null, null, true, false, null);
+
+    if (rejectionHist != null) {
+
+      engineData.addRejectionComment(rejectionHist.getRejReasonCd(),
+          StringUtils.isBlank(rejectionHist.getCmt()) ? "Request rejected by processor. Please check comments." : rejectionHist.getCmt(),
+          rejectionHist.getRejSupplInfo1(), rejectionHist.getRejSupplInfo2());
+      requestData.getAdmin().setChildReqId(0);
+
+      // copy comments
+      LOG.debug("Copying comments from Child Request " + childReqId);
+      String sql = ExternalizedQuery.getSql("AUTO.US.GET_COMMENTS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", childReqId);
+      query.setForReadOnly(true);
+      List<ReqCmtLog> cmts = query.getResults(ReqCmtLog.class);
+      if (cmts != null) {
+        for (ReqCmtLog cmt : cmts) {
+          RequestUtils.createCommentLogFromBatch(entityManager, "AutomationEngine", requestData.getAdmin().getId().getReqId(), cmt.getCmt());
+        }
+      }
+    }
   }
 
   /**
