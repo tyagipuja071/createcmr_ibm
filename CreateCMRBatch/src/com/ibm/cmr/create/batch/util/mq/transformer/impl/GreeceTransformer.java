@@ -145,7 +145,11 @@ public class GreeceTransformer extends EMEATransformer {
         messageHash.put("CustomerType", "");
       }
     } else {
-      messageHash.put("CustomerType", "");
+      if(update) {
+        messageHash.put("CustomerType", !StringUtils.isBlank(cmrData.getCrosSubTyp()) ? cmrData.getCrosSubTyp() : "");  
+      } else {
+        messageHash.put("CustomerType", "");
+      }
     }
     if (update) {
       for (String field : NO_UPDATE_FIELDS) {
@@ -534,10 +538,12 @@ public class GreeceTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("ModeOfPayment"))) {
       legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
     }
+    
+    legacyCust.setCustType(dummyHandler.messageHash.get("CustomerType"));
+    
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     } // other fields to be transformed is pending
-//    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
     legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
