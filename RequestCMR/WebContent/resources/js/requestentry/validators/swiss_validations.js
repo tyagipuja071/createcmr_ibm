@@ -1650,7 +1650,14 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCdValidator, GEOHandler.SWISS, null, true);
   // GEOHandler.registerValidator(addVatValidatorForCustLangCd,
   // GEOHandler.SWISS, null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SWITZERLAND, 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.SWITZERLAND ], null, true);
+  var countryUse = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    countryUse = _pagemodel.countryUse;
+  }
+  if (countryUse != '848LI') {
+
+    GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SWITZERLAND, 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.SWITZERLAND ], null, true);
+  }
   GEOHandler.registerValidator(addCrossBorderValidatorFrSWISS, SysLoc.SWITZERLAND, null, true);
   GEOHandler.registerValidator(resetAddrTypeValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(name3LengthValidation, GEOHandler.SWISS, null, true);
