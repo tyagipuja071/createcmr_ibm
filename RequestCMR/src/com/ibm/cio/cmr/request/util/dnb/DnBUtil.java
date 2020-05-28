@@ -16,6 +16,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -434,14 +435,29 @@ public class DnBUtil {
    */
   public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse) {
 
-    boolean result = true;
-
     GEOHandler handler = RequestUtils.getGEOHandler(country);
 
     String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
-    if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())
-        && StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 16) {
-      result = false;
+
+    if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 8) {
+        return false;
+      } else {
+        // do a comparison of common words first
+        List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
+        List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
+        boolean foundMinimal = false;
+        for (String phraseA : commonA) {
+          for (String phraseB : commonB) {
+            if (StringUtils.getLevenshteinDistance(phraseA, phraseB) > 6) {
+              foundMinimal = true;
+            }
+          }
+        }
+        if (!foundMinimal) {
+          return false;
+        }
+      }
     }
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
     address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
@@ -453,25 +469,29 @@ public class DnBUtil {
 
     if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8) {
-      result = false;
+      return false;
     }
     if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
       String currentPostalCode = addr.getPostCd();
       String dnbPostalCode = dnbRecord.getDnbPostalCode();
       if (currentPostalCode.length() != dnbPostalCode.length()) {
-        result = calAlignPostalCodeLength(currentPostalCode, dnbPostalCode);
+        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode)) {
+          return false;
+        }
       }
       if (currentPostalCode.length() == dnbPostalCode.length()) {
-        result = isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode);
+        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode)) {
+          return false;
+        }
       }
     }
 
     if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
         && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
-      result = false;
+      return false;
     }
 
-    return result;
+    return true;
   }
 
   /**
