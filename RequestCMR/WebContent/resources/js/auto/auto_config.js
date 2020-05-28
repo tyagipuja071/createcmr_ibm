@@ -923,6 +923,8 @@ app
               $scope.subScenarios = [];
               $scope.cmrTypes = [];
               $scope.exceptions = [];
+              $scope.viewMode = 'N';
+              $scope.categories = [];
 
               $scope.title = {
                 skipDupChecksIndc : 'Controls whether duplicate checks should be skipped for this particular scenario. For example, IBM Internal records can have duplicates so the check can be skipped.\n\nDefault: No',
@@ -1191,30 +1193,41 @@ app
               };
 
               $scope.cleanException = function(exc) {
-                console.log(exc);
-                console.log($scope.mainScenarios);
                 if (exc.custTyp.trim() == '*') {
-                  exc.description = 'All Scenarios'
+                  exc.description = 'All Scenarios';
+                  exc.typeDesc = 'All Scenarios';
                 } else {
                   $scope.mainScenarios.forEach(function(s, i) {
                     if (s.id == exc.custTyp) {
                       exc.description = s.name;
+                      exc.typeDesc = s.name;
                     }
                   });
                   if (exc.custSubTyp == '*') {
                     exc.description += ' (All Sub Scenarios)';
+                    exc.subTypeDesc = '- All -';
                   } else {
                     if ($scope.scenarioMap[exc.custTyp]) {
                       $scope.scenarioMap[exc.custTyp].forEach(function(s, i) {
                         if (s.id == exc.custSubTyp) {
                           exc.description += ' (' + s.name + ')';
+                          exc.subTypeDesc = s.name;
                         }
                       });
                     }
                   }
                 }
+                if (!exc.subTypeDesc && exc.custSubTyp == '*') {
+                  exc.subTypeDesc = ' - All -';
+                }
                 $scope.exceptions.push(exc);
                 $scope.exceptions.sort(excComparator);
+                $scope.categories = [];
+                $scope.exceptions.forEach(function(exc, index) {
+                  if ($scope.categories.indexOf(exc.typeDesc) < 0) {
+                    $scope.categories.push(exc.typeDesc);
+                  }
+                });
               };
               $scope.dirtyException = function(exc) {
                 if (exc.status == 'E') {

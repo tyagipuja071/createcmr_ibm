@@ -44,6 +44,7 @@ import com.ibm.cio.cmr.request.entity.StatusDesc;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.model.requestentry.CheckListModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -58,6 +59,11 @@ import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFile;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileParser;
 import com.ibm.cio.cmr.request.util.masscreate.MassCreateFileRow;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.StandardCityServiceClient;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
+import com.ibm.cmr.services.client.stdcity.StandardCityRequest;
+import com.ibm.cmr.services.client.stdcity.StandardCityResponse;
 
 /**
  * Contains utilities for Request workflow processing
@@ -649,7 +655,7 @@ public class RequestUtils {
     PreparedQuery typeQuery = new PreparedQuery(entityManager, typeSql);
     typeQuery.setParameter("REQ_TYPE", reqType);
     typeQuery.setParameter("CMR_ISSUING_CNTRY", cmrIssuingCountry);
-
+    typeQuery.setForReadOnly(true);
     List<CmrInternalTypes> types = typeQuery.getResults(CmrInternalTypes.class);
     String checkSql = "";
     PreparedQuery query = null;
@@ -684,6 +690,13 @@ public class RequestUtils {
 
   public static synchronized WfHist createWorkflowHistoryFromBatch(EntityManager entityManager, String user, Admin admin, String cmt, String action,
       String sendToId, String sendToNm, boolean complete, boolean sendMail, String rejReason) throws CmrException, SQLException {
+    return createWorkflowHistoryFromBatch(entityManager, user, admin, cmt, action, sendToId, sendToNm, complete, sendMail, rejReason, "OTH", null,
+        null);
+  }
+
+  public static synchronized WfHist createWorkflowHistoryFromBatch(EntityManager entityManager, String user, Admin admin, String cmt, String action,
+      String sendToId, String sendToNm, boolean complete, boolean sendMail, String rejReason, String rejCode, String info1, String info2)
+      throws CmrException, SQLException {
     completeLastHistoryRecord(entityManager, admin.getId().getReqId());
 
     WfHist hist = new WfHist();
@@ -1258,4 +1271,116 @@ public class RequestUtils {
     query.setForReadOnly(true);
     return query.getSingleResult(String.class);
   }
+
+  /**
+   * Derives country information for the US
+   * 
+   * @param cmrRecord
+   * @param company
+   */
+  public static void deriveUSCounty(FindCMRRecordModel cmrRecord, DnBCompany company) {
+    String countyName = null;
+    String stateCode = cmrRecord.getCmrState();
+    if (!StringUtils.isBlank(company.getPrimaryCounty())) {
+      countyName = company.getPrimaryCounty().toUpperCase();
+    } else if (!StringUtils.isBlank(company.getMailingCounty())) {
+      countyName = company.getMailingCounty().toUpperCase();
+    }
+    if (countyName != null && stateCode != null) {
+      LOG.debug("Deriving county code from County " + countyName + " State " + stateCode);
+      if (countyName.endsWith("COUNTY")) {
+        // get name without county
+        countyName = countyName.substring(0, countyName.lastIndexOf("COUNTY")).trim();
+      }
+      String sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY");
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setForReadOnly(true);
+        query.setParameter("MANDT", SystemConfiguration.getValue("MANDT", "100"));
+        query.setParameter("STATE", stateCode);
+        query.setParameter("COUNTY", "%" + countyName + "%");
+        List<Object[]> results = query.getResults();
+        if (results != null) {
+          for (Object[] result : results) {
+            if (result[1].equals(countyName)) {
+              cmrRecord.setCmrCountyCode((String) result[0]);
+              cmrRecord.setCmrCounty((String) result[1]);
+              break;
+            }
+          }
+        }
+        if (cmrRecord.getCmrCountyCode() == null) {
+          sql = ExternalizedQuery.getSql("QUICK_SEARCH.DNB.USCOUNTY.ALL");
+          query = new PreparedQuery(entityManager, sql);
+          query.setForReadOnly(true);
+          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT", "100"));
+          query.setParameter("STATE", stateCode);
+          results = query.getResults();
+          if (results != null) {
+            // two iterations, equals first then like
+            for (Object[] result : results) {
+              String checkCounty = (String) result[1];
+              if (StringUtils.getLevenshteinDistance(countyName, checkCounty) <= 4) {
+                cmrRecord.setCmrCountyCode((String) result[0]);
+                cmrRecord.setCmrCounty((String) result[1]);
+                break;
+              }
+            }
+          }
+        }
+        String standardCity = getUSStandardCityName(cmrRecord.getCmrCountryLanded(), cmrRecord.getCmrCity(), cmrRecord.getCmrState(),
+            cmrRecord.getCmrCounty(), cmrRecord.getCmrPostalCode());
+        cmrRecord.setCmrCity(standardCity);
+        LOG.debug("City/County Computed: City: " + cmrRecord.getCmrCity() + " " + cmrRecord.getCmrCountyCode() + " - " + cmrRecord.getCmrCounty());
+      } catch (Exception e) {
+        LOG.warn("County and City computation error.", e);
+      } finally {
+        entityManager.close();
+      }
+    }
+  }
+
+  /**
+   * Determines the City Name to use
+   * 
+   * @param cmrRecord
+   * @return
+   * @throws Exception
+   */
+  public static String getUSStandardCityName(String landedCounty, String city, String state, String county, String postalCode) throws Exception {
+    String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    StandardCityServiceClient stdCityClient = CmrServicesFactory.getInstance().createClient(baseUrl, StandardCityServiceClient.class);
+    StandardCityRequest stdCityRequest = new StandardCityRequest();
+    stdCityRequest.setCountry(landedCounty);
+    stdCityRequest.setCity(city);
+    stdCityRequest.setState(state);
+    stdCityRequest.setSysLoc(SystemLocation.UNITED_STATES);
+    stdCityRequest.setCountyName(county);
+    stdCityRequest.setPostalCode(postalCode);
+    stdCityClient.setStandardCityRequest(stdCityRequest);
+
+    StandardCityResponse resp = stdCityClient.executeAndWrap(StandardCityResponse.class);
+    if (resp != null && resp.isSuccess()) {
+      return resp.getStandardCity();
+    }
+    return city;
+  }
+
+  /**
+   * Gets the default coverage per country
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String getDefaultCoverage(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTO.GET_DEFAULT_COVERAGE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("COUNTRY", country);
+    query.setForReadOnly(true);
+    return query.getSingleResult(String.class);
+  }
+
 }

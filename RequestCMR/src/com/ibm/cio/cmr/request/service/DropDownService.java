@@ -647,6 +647,20 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       query.append("  and CMR_ISSUING_CNTRY = :CNTRY");
       query.setParameter("CNTRY", params.getParam("cmrIssuingCntry"));
     }
+
+    if ("USSicmen".equalsIgnoreCase(fieldId)) {
+      if (SystemLocation.UNITED_STATES.equals(cntry)) {
+        query.append("  and GEO_CD = 'US' ");
+      } else {
+        query.append("  and GEO_CD = 'WW' ");
+      }
+      if (!StringUtils.isEmpty((String) params.getParam("usSicmen"))) {
+        String usSicmenVal = (String) params.getParam("usSicmen");
+        query.append("  and REFT_UNSIC_CD in (" + usSicmenVal.toString() + ")");
+      }
+
+    }
+
   }
 
   /**

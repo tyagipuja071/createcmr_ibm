@@ -54,30 +54,6 @@
 		</cmr:column>
 	</cmr:row>
 	<cmr:row addBackground="false">
-		<cmr:column span="2" containerForField="EmbargoCode">
-			<p>
-				<cmr:label fieldId="embargoCd">
-					<cmr:fieldLabel fieldId="EmbargoCode" />:
-            <cmr:delta text="${rdcdata.ordBlk}"
-						oldValue="${reqentry.ordBlk}" />
-				</cmr:label>
-				<cmr:field path="ordBlk" id="ordBlk" fieldId="EmbargoCode"
-					tabId="MAIN_CUST_TAB" />
-			</p>
-		</cmr:column>
-		<cmr:column span="2" containerForField="CurrencyCode">
-			<p>
-				<cmr:label fieldId="currencyCd">
-					<cmr:fieldLabel fieldId="CurrencyCode" />:
-          <cmr:delta text="${rdcdata.currencyCd}"
-						oldValue="${reqentry.currencyCd}" id="delta-currencyCd" />
-				</cmr:label>
-				<cmr:field fieldId="CurrencyCode" id="currencyCd" path="currencyCd"
-					tabId="MAIN_CUST_TAB" />
-			</p>
-		</cmr:column>
-	</cmr:row>
-	<cmr:row addBackground="false">
 		<cmr:column span="2" containerForField="CustClass">
 			<p>
 				<cmr:label fieldId="custClass">
@@ -87,6 +63,17 @@
 				</cmr:label>
 				<cmr:field fieldId="CustClass" id="custClass" path="custClass"
 					tabId="MAIN_CUST_TAB" />
+		</cmr:column>
+				<cmr:column span="2" containerForField="EmbargoCode">
+			<p>
+				<cmr:label fieldId="embargoCd">
+					<cmr:fieldLabel fieldId="EmbargoCode" />:
+            <cmr:delta text="${rdcdata.ordBlk}"
+						oldValue="${reqentry.ordBlk}" />
+				</cmr:label>
+				<cmr:field path="ordBlk" id="ordBlk" fieldId="EmbargoCode"
+					tabId="MAIN_CUST_TAB" />
+			</p>
 		</cmr:column>
 	</cmr:row>
 </cmr:view>

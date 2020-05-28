@@ -23,6 +23,8 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 
 /**
  *
@@ -63,9 +65,9 @@ public class UpdateSwitchElement extends ValidatingElement {
     } else if ("U".equals(admin.getReqType())) {
 
       RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, reqId);
+      GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
-      if (changes.hasDataChanges()) {
-
+      if (changes.hasDataChanges() || (handler != null && !handler.customerNamesOnAddress() && changes.isLegalNameChanged())) {
         boolean hasCountryLogic = false;
         if (automationUtil != null) {
           hasCountryLogic = automationUtil.runUpdateChecksForData(entityManager, engineData, requestData, changes, output, validation);
@@ -78,7 +80,7 @@ public class UpdateSwitchElement extends ValidatingElement {
           validation.setMessage("Not Validated");
           output.setDetails("Updates to CMR code fields need verification");
           engineData.addNegativeCheckStatus("UPDT_REVIEW_NEEDED", "Updates to CMR code fields need verification");
-          engineData.addRejectionComment("IBM/Legacy codes values changed.");
+          engineData.addRejectionComment("OTH", "IBM/Legacy codes values changed.", "", "");
           log.debug("Updates to CMR code fields need verification");
         }
 

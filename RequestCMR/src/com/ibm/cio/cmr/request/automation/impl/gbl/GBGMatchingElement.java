@@ -70,7 +70,24 @@ public class GBGMatchingElement extends MatchingElement {
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
-    boolean continueCheck = true;
+    // added flow to skip gbg matching
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_GBG)) {
+      // ensure a GBG is set
+      GBGResponse gbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
+      if (gbg != null) {
+        StringBuilder details = new StringBuilder();
+        details.append("GBG already computed by external process: ");
+        details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+        details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+        details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+        result.setDetails(details.toString());
+        result.setResults("Skipped");
+        result.setProcessOutput(output);
+        return result;
+      }
+    }
+
+    // boolean continueCheck = true;
     // List<String> usedNames = new ArrayList<String>();
     // while (continueCheck) {
     if (currentAddress != null) {
@@ -138,46 +155,54 @@ public class GBGMatchingElement extends MatchingElement {
         }
         int itemNo = 1;
         for (GBGResponse gbg : gbgMatches) {
-          details.append("\n");
-          if (gbg.isDnbMatch()) {
-            LOG.debug("Matches found via D&B matching..");
-            details.append("\n").append("Found via DUNS matching:");
-            output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                itemNo);
-          } else if (gbg.isVatMatch()) {
-            LOG.debug("Matches found via ORG ID matching..");
-            details.append("\n").append("Found via ORG ID matching:");
-            output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
-                itemNo);
-          }
-          // else {
-          // LOG.debug("Matches found via Name matching..");
-          // details.append("\n").append("Found via Name matching [" +
-          // CommonWordsUtil.minimize(nameUsed) + "]):");
-          // output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(),
-          // "Name-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(),
-          // "GBG",
-          // itemNo);
-          // }
-          details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
-          details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
-          details.append("\n").append("Country: " + gbg.getCountry());
-          details.append("\n").append("CMR Count: " + gbg.getCmrCount());
-          details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
-          details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
-          if (gbg.isDnbMatch()) {
-            details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
-          }
+          if (!currentAddress.getLandCntry().equals(gbg.getCountry())) {
+            LOG.debug("Non-Local gbg found as highest match..");
+            details.append("\n")
+                .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
+            break;
+          } else {
+            details.append("\n");
+            if (gbg.isDnbMatch()) {
+              LOG.debug("Matches found via D&B matching..");
+              details.append("\n").append("Found via DUNS matching:");
+              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "DUNS-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
+                  itemNo);
+            } else if (gbg.isVatMatch()) {
+              LOG.debug("Matches found via ORG ID matching..");
+              details.append("\n").append("Found via ORG ID matching:");
+              output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
+                  itemNo);
+            }
+            // else {
+            // LOG.debug("Matches found via Name matching..");
+            // details.append("\n").append("Found via Name matching [" +
+            // CommonWordsUtil.minimize(nameUsed) + "]):");
+            // output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(),
+            // "Name-Ctry/CMR Count", gbg.getCountry() + "/" +
+            // gbg.getCmrCount(),
+            // "GBG",
+            // itemNo);
+            // }
+            details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
+            details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
+            details.append("\n").append("Country: " + gbg.getCountry());
+            details.append("\n").append("CMR Count: " + gbg.getCmrCount());
+            details.append("\n").append("LDE Rule: " + gbg.getLdeRule());
+            details.append("\n").append("IA Account: " + (gbg.getIntAcctType() != null ? gbg.getIntAcctType() : "-"));
+            if (gbg.isDnbMatch()) {
+              details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
+            }
 
-          if (itemNo == 1) {
-            engineData.put(AutomationEngineData.GBG_MATCH, gbg);
-          }
+            if (itemNo == 1) {
+              engineData.put(AutomationEngineData.GBG_MATCH, gbg);
+            }
 
-          itemNo++;
+            itemNo++;
+          }
         }
         result.setProcessOutput(output);
         result.setDetails(details.toString());
-        continueCheck = false;
+        // continueCheck = false;
       } else {
         // boolean nextFound = false;
         // if (geoHandler != null && geoHandler.customerNamesOnAddress()) {
@@ -198,7 +223,7 @@ public class GBGMatchingElement extends MatchingElement {
         // }
 
         // if (!nextFound) {
-        continueCheck = false;
+        // continueCheck = false;
         // result.setDetails("No GBG was found using DUNS hierarchy matching
         // and Name matching.");
         result.setDetails("No GBG was found using DUNS hierarchy matching.");
@@ -210,7 +235,7 @@ public class GBGMatchingElement extends MatchingElement {
       }
     } else {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("Missing main address on the request.");
+      engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
       result.setResults("Missing Address");
       result.setOnError(true);
     }

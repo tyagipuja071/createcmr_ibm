@@ -475,18 +475,26 @@ public class SWISSHandler extends GEOHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
+    String seqNo = addr.getId().getAddrSeq();
+    String addrType = addr.getId().getAddrType();
     UpdatedNameAddrModel update = new UpdatedNameAddrModel();
     if (!equals(addr.getCustFax(), addr.getCustFaxOld())) {
+      update.setAddrTypeCode(addrType);
+      update.setAddrSeq(seqNo);
       update.setAddrType(addrTypeDesc);
       update.setSapNumber(sapNumber);
+      update.setAddrSeq(seqNo);
       update.setDataField(PageManager.getLabel(cmrCountry, "CustFAX", "-"));
       update.setNewData(addr.getCustFax());
       update.setOldData(addr.getCustFax());
       results.add(update);
     }
 
-    if (Arrays.asList(HRDWRE_MSTR_FLAG_ADDRS).contains(addr.getId().getAddrType()) && !equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
+    if (Arrays.asList(HRDWRE_MSTR_FLAG_ADDRS).contains(addr.getId().getAddrType())
+        && !equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
       update = new UpdatedNameAddrModel();
+      update.setAddrTypeCode(addrType);
+      update.setAddrSeq(seqNo);
       update.setAddrType(addrTypeDesc);
       update.setSapNumber(sapNumber);
       update.setDataField(PageManager.getLabel(cmrCountry, "HwInstlMasterFlag", "-"));
@@ -723,9 +731,9 @@ public class SWISSHandler extends GEOHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO"));
+    fields.addAll(
+        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
+            "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
     return fields;
   }
 
@@ -900,7 +908,7 @@ public class SWISSHandler extends GEOHandler {
 
       for (int i = idxStart; i < tmpAr.length; i++) {
         namePart3 = namePart3 + " " + tmpAr[i];
-      }// namePart3 = temp2;
+      } // namePart3 = temp2;
 
       namePart3 = namePart3.trim();
 
@@ -1015,8 +1023,8 @@ public class SWISSHandler extends GEOHandler {
         // check if field is part of exemption list or is part of what to check
         // for the handler, if specified
         if (GEOHandler.ADDRESS_FIELDS_SKIP_CHECK.contains(srcName)
-            || (handler != null && handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry) != null && !handler.getAddressFieldsForUpdateCheck(
-                cmrIssuingCntry).contains(srcName))) {
+            || (handler != null && handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry) != null
+                && !handler.getAddressFieldsForUpdateCheck(cmrIssuingCntry).contains(srcName))) {
           continue;
         }
 

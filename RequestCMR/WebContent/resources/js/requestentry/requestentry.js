@@ -592,6 +592,7 @@ var _enterCMRHandler = null;
 var _templateHandler = null;
 var defaultLandCntry = null;
 var _rejSupplInfoHandler = null;
+var _dnbSearchHandler = null;
 
 /**
  * Executed after PageManager loads all the scripts. Place here code that needs
@@ -776,6 +777,8 @@ function afterConfigChange() {
   } else {
     cmr.hideNode('dupCMRReasonDiv');
   }
+  // check if dnbManadatory
+  handleRequiredDnBSearch();
 
   FormManager.ready();
 }
@@ -1192,7 +1195,7 @@ function duplicateCMRMatchesNotif() {
   if (duplicateCMRMatchesCheck()) {
     cmr
         .showAlert(
-            'Existing CMR(s) were found with the similar information as the current request. Please check the CMR(s) provided in the request comments.<br><br>To proceed with duplicate CMR creation, please provide the override reason while sending for processing.<br><b>Note: </b>Duplicate CMR creation will trigger approvals',
+            'Existing CMR(s) were found with the similar information as the current request. Please check the CMR(s) provided in the request comments.<br><br>To proceed with duplicate CMR creation, please provide the override reason while sending the request for processing.<br><b>Note: </b>Duplicate CMR creation will trigger approvals',
             'Duplicate CMR(s) Found');
   }
 }
@@ -1333,5 +1336,64 @@ function setRejSupplInfoFields(value) {
     cmr.hideNode('rejInfo1Div');
     cmr.hideNode('rejInfo2Div');
     break;
+  }
+}
+
+/**
+ * Method to check whether for a scenario dnb matching is allowed or not
+ */
+function isSkipDnbMatching() {
+  var custGrp = FormManager.getActualValue('custGrp');
+  var custSubGroup = FormManager.getActualValue('custSubGrp');
+  var dnbPrimary = FormManager.getActualValue("dnbPrimary");
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var countryUse = FormManager.getActualValue("countryUse");
+  var subRegionCd = countryUse != null && countryUse.length > 0 ? countryUse : cntry;
+  if (custGrp != null && custGrp != '' && custSubGrp != null && custSubGrp != '' && dnbPrimary == 'Y') {
+    var qParams = {
+      CNTRY : cntry,
+      CUST_TYP : custGrp,
+      CUST_SUB_TYP : custSubGroup,
+      SUBREGION_CD : subRegionCd
+    };
+    var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+    if (result.ret1 != null && result.ret1 == "Y") {
+      return true;
+    } else {
+      qParams.CUST_SUB_GRP = "*";
+      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+      if (result.ret1 != null && result.ret1 == 'Y') {
+        return true;
+      } else {
+        qParams.CUST_GRP = "*";
+        result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+        if (result.ret1 != null && result.ret1 == 'Y') {
+          return true;
+        }
+      }
+    }
+  } else if (dnbPrimary == 'N') {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * universal handler to make dnb search mandatory or optional on scenario change
+ */
+function handleRequiredDnBSearch() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  if (reqId != null && reqId != '' && reqType == 'C' && reqStatus == 'DRA' && _dnbSearchHandler == null) {
+    _dnbSearchHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      if (!isSkipDnbMatching()) {
+        cmr.showNode('dnbRequired');
+        cmr.showNode('dnbRequiredIndc');
+      } else {
+        cmr.hideNode('dnbRequired');
+        cmr.hideNode('dnbRequiredIndc');
+      }
+    });
   }
 }
