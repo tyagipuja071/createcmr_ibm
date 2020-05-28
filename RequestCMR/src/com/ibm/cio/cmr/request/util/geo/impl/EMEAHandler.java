@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
@@ -4087,6 +4088,30 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+  }
+  
+  private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
+    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    addrCopy.getId().setAddrType(addrType);
+    
+    if(addrType.equals("ZP01")) {
+      addrCopy.setCustPhone(null);  
+    }
+    
+    entityManager.persist(addrCopy);
+    entityManager.flush();
+  }
+  
+  private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+    List<Addr> addrList = query.getResults(1, Addr.class);
+    if (addrList != null && addrList.size() > 0) {
+      return addrList.get(0);
+    }
+    return null;
   }
 
 }
