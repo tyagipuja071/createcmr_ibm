@@ -58,7 +58,7 @@ public class SWISSHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("848");
 
   private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "City2", "Affiliate",
-      "Company", "INACType", "POBoxPostalCode", "TransportZone" };
+      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode" };
 
   public static final String SWISS_MASSCHANGE_TEMPLATE_ID = "SWISS";
 
@@ -377,13 +377,16 @@ public class SWISSHandler extends GEOHandler {
       update.setOldData(oldData.getOrdBlk());
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCurrencyCd(), newData.getCurrencyCd())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
-      update.setNewData(newData.getCurrencyCd());
-      update.setOldData(oldData.getCurrencyCd());
-      results.add(update);
-    }
+    // commented as part of defect CMR - 3242
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getCurrencyCd(), newData.getCurrencyCd())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode",
+    // "-"));
+    // update.setNewData(newData.getCurrencyCd());
+    // update.setOldData(oldData.getCurrencyCd());
+    // results.add(update);
+    // }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
