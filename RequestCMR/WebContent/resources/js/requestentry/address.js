@@ -1831,7 +1831,7 @@ function applyAddrChangesModal_onLoad() {
         }
       } else if (cntry == '848') {
         var reqReason = FormManager.getActualValue('reqReason');
-        if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR())) {
+        if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
           continue;
         }
         if (type.ret1 != 'ZS02') {
