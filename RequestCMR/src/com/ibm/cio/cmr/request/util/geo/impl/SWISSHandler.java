@@ -58,7 +58,7 @@ public class SWISSHandler extends GEOHandler {
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("848");
 
   private static final String[] CH_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax2", "SitePartyID", "Division", "POBoxCity", "City2", "Affiliate",
-      "Company", "INACType", "POBoxPostalCode", "TransportZone" };
+      "Company", "INACType", "POBoxPostalCode", "TransportZone", "CurrencyCode" };
 
   public static final String SWISS_MASSCHANGE_TEMPLATE_ID = "SWISS";
 
@@ -167,14 +167,19 @@ public class SWISSHandler extends GEOHandler {
       data.setOrdBlk("");
       data.setCmrNo("");
     }
-    try {
-      if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
-        data.setCurrencyCd(geCurrencyCode(zs01sapNo));
-        data.setTaxCd1(getTaxCode(zs01sapNo));
+    // changes made as part of defect CMR - 3242
+    if ("U".equals(admin.getReqType())) {
+      try {
+        if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
+          data.setCurrencyCd(geCurrencyCode(zs01sapNo));
+          data.setTaxCd1(getTaxCode(zs01sapNo));
+        }
+      } catch (Exception e) {
+        LOG.error("Error occured on setting Currency Code/ tax code value during import.");
+        e.printStackTrace();
       }
-    } catch (Exception e) {
-      LOG.error("Error occured on setting Currency Code/ tax code value during import.");
-      e.printStackTrace();
+    } else if ("C".equals(admin.getReqType())) {
+      data.setCurrencyCd("CHF");
     }
   }
 
@@ -372,13 +377,16 @@ public class SWISSHandler extends GEOHandler {
       update.setOldData(oldData.getOrdBlk());
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCurrencyCd(), newData.getCurrencyCd())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
-      update.setNewData(newData.getCurrencyCd());
-      update.setOldData(oldData.getCurrencyCd());
-      results.add(update);
-    }
+    // commented as part of defect CMR - 3242
+    // if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+    // !equals(oldData.getCurrencyCd(), newData.getCurrencyCd())) {
+    // update = new UpdatedDataModel();
+    // update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode",
+    // "-"));
+    // update.setNewData(newData.getCurrencyCd());
+    // update.setOldData(oldData.getCurrencyCd());
+    // results.add(update);
+    // }
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));

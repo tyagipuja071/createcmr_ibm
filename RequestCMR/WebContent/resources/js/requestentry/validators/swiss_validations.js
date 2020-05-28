@@ -35,12 +35,12 @@ function addAfterConfigForSWISS() {
 
   if (reqType == 'U') {
     FormManager.enable('clientTier');
-    FormManager.enable('currencyCd');
+    // FormManager.enable('currencyCd');
   } else {
-    FormManager.readOnly('currencyCd');
+    // FormManager.readOnly('currencyCd');
   }
   if (role == 'PROCESSOR') {
-    FormManager.enable('currencyCd');
+    // FormManager.enable('currencyCd');
   }
 
   if (reqType == 'C'
@@ -405,6 +405,10 @@ function getImportedIndcForSwiss() {
 
 }
 function addVatSuffixForCustLangCdScrtch() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   // get custlangCd
   var reqId = FormManager.getActualValue('reqId');
   var qParams = {
@@ -869,7 +873,7 @@ function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
     if ((addrType == 'ZS01' || copyingToA)) {
       if (reqType == 'C')
         autoSetAbbrevNmLogic();
-      setCurrencyCd();
+      // setCurrencyCd();
       addVatSuffixForCustLangCd();
     }
 
@@ -973,9 +977,10 @@ function setFieldsMandtStatus() {
     }
   }
   if (custGrp == 'CROSS' || (reqType == 'U' && custGrp == '') || (countryUse == '848LI' && landCntry != 'LI')) {
-    FormManager.removeValidator('currencyCd', Validators.REQUIRED);
+    // FormManager.removeValidator('currencyCd', Validators.REQUIRED);
   } else if (custGrp == 'LILOC' || custGrp == 'CHLOC') {
-    FormManager.addValidator('currencyCd', Validators.REQUIRED, [ 'Currency Code' ], 'MAIN_CUST_TAB');
+    // FormManager.addValidator('currencyCd', Validators.REQUIRED, [ 'Currency
+    // Code' ], 'MAIN_CUST_TAB');
   }
 
   // set Muboty mandt status
@@ -1070,6 +1075,10 @@ function addEmbargoCdValidator() {
 
 function addVatSuffixForCustLangCd() {
   var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
     REQ_ID : reqId,
     ADDR_TYPE : 'ZS01'
@@ -1483,7 +1492,10 @@ function setPreferredLangAddr() {
   // 0000 - 3000 it is F (French)
   //
   // Cross Border it is E (English)
-
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
     REQ_ID : zs01ReqId,
@@ -1612,7 +1624,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addAfterConfigForSWISS, GEOHandler.SWISS);
 
-  GEOHandler.addAfterTemplateLoad(setCurrencyCd, GEOHandler.SWISS);
+  // GEOHandler.addAfterTemplateLoad(setCurrencyCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCustClassCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatValidatorSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(addAfterConfigForSWISS, GEOHandler.SWISS);
