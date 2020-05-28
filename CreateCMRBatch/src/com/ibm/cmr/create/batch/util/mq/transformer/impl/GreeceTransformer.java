@@ -145,7 +145,11 @@ public class GreeceTransformer extends EMEATransformer {
         messageHash.put("CustomerType", "");
       }
     } else {
-      messageHash.put("CustomerType", "");
+      if(update) {
+        messageHash.put("CustomerType", !StringUtils.isBlank(cmrData.getCrosSubTyp()) ? cmrData.getCrosSubTyp() : "");  
+      } else {
+        messageHash.put("CustomerType", "");
+      }
     }
     if (update) {
       for (String field : NO_UPDATE_FIELDS) {
@@ -213,7 +217,11 @@ public class GreeceTransformer extends EMEATransformer {
     // country
     String line6 = "";
 
-    line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    if(!crossBorder && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line6 =  "Ελλάδα";
+    } else {
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());  
+    }
 
     int lineNo = 1;
     String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
@@ -534,10 +542,12 @@ public class GreeceTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("ModeOfPayment"))) {
       legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
     }
+    
+    legacyCust.setCustType(dummyHandler.messageHash.get("CustomerType"));
+    
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     } // other fields to be transformed is pending
-//    legacyCust.setDistrictCd(data.getCollectionCd() != null ? data.getCollectionCd() : "");
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
     legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
@@ -1035,7 +1045,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
         
     if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
-      line6 = massUpdtAddr.getLandCntry();
+      line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
     }
     
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
