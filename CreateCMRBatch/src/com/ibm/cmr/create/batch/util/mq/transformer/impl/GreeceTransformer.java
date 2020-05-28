@@ -1045,7 +1045,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
         
     if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
-      line6 = massUpdtAddr.getLandCntry();
+      line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
     }
     
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
