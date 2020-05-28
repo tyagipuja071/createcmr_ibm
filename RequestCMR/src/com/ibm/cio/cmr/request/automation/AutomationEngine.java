@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.entity.AutoEngineConfig;
 import com.ibm.cio.cmr.request.entity.AutomationResults;
 import com.ibm.cio.cmr.request.entity.AutomationResultsPK;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Lov;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
@@ -57,6 +58,7 @@ public class AutomationEngine {
   private static final Logger LOG = Logger.getLogger(AutomationEngine.class);
   private final List<AutomationElement<?>> elements = new ArrayList<>();
   private static ThreadLocal<AutomationEngineData> engineData = new ThreadLocal<>();
+  private static Map<String, String> rejectionReasons = new HashMap<String, String>();
 
   /**
    * Creates an instance of the {@link AutomationEngine}
@@ -83,6 +85,12 @@ public class AutomationEngine {
         } else {
           LOG.warn("Element " + config.getProcessCd() + " cannot be initialized on the engine.");
         }
+      }
+    }
+
+    synchronized (this) {
+      if (rejectionReasons.isEmpty()) {
+        initRejectReasons(entityManager);
       }
     }
   }
@@ -336,7 +344,8 @@ public class AutomationEngine {
             }
             admin.setReqStatus("PRJ");
             for (RejectionContainer r : rejectInfo) {
-              createHistory(entityManager, admin, cmt, "PRJ", "Automated Processing", reqId, appUser, null, "Errors in automated checks", true, r);
+              createHistory(entityManager, admin, r.getRejComment(), "PRJ", "Automated Processing", reqId, appUser, null,
+                  "Errors in automated checks", true, r);
             }
             admin.setLastProcCenterNm(null);
             admin.setLockInd("N");
@@ -607,6 +616,7 @@ public class AutomationEngine {
     String rejCd = null;
     String supplInfo1 = null;
     String supplInfo2 = null;
+    String reason = null;
 
     if (rejectCont != null) {
       if (StringUtils.isNotBlank(rejectCont.getRejCode())) {
@@ -618,7 +628,12 @@ public class AutomationEngine {
       if (StringUtils.isNotBlank(rejectCont.getSupplInfo2())) {
         supplInfo2 = rejectCont.getSupplInfo2().length() > 50 ? rejectCont.getSupplInfo2().substring(0, 49) : rejectCont.getSupplInfo2();
       }
+      reason = getRejectionReason(rejCd);
+      if (reason == null) {
+        reason = rejectReason;
+      }
     }
+
     histpk.setWfId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "WF_ID"));
     hist.setId(histpk);
     hist.setCmt(comment);
@@ -627,7 +642,7 @@ public class AutomationEngine {
     hist.setCreateByNm(user.getIntranetId());
     hist.setCreateTs(SystemUtil.getCurrentTimestamp());
     hist.setReqId(admin.getId().getReqId());
-    hist.setRejReason(rejectReason);
+    hist.setRejReason(reason);
     hist.setReqStatusAct(action);
     hist.setRejReasonCd(rejCd);
     hist.setRejSupplInfo1(supplInfo1);
@@ -719,5 +734,33 @@ public class AutomationEngine {
     PreparedQuery update = new PreparedQuery(entityManager, ExternalizedQuery.getSql("WORK_FLOW.COMPLETE_LAST"));
     update.setParameter("REQ_ID", reqId);
     update.executeSql();
+  }
+
+  /**
+   * Initializes the LOVs for Rejection Reason
+   * 
+   * @param entityManager
+   */
+  private void initRejectReasons(EntityManager entityManager) {
+    LOG.debug("Initializing Rejection Reasons");
+    String sql = ExternalizedQuery.getSql("AUTO.REJECTION_CODES");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    List<Lov> codes = query.getResults(Lov.class);
+    if (codes != null) {
+      for (Lov code : codes) {
+        rejectionReasons.put(code.getId().getCd(), code.getTxt());
+      }
+    }
+  }
+
+  /**
+   * Gets the standard rejection reason given the code
+   * 
+   * @param code
+   * @return
+   */
+  public String getRejectionReason(String code) {
+    return rejectionReasons.get(code);
   }
 }
