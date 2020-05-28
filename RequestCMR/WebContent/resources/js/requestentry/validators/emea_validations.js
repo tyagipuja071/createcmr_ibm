@@ -7868,18 +7868,27 @@ function validateSingleReactParentCMR() {
               COUNTRY : cntry,
                   CMR_NO : cmrNo
             };
-          var results = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT', qParams);
-          if (results.ret1 != null && 'C' == results.ret1) {
+          var resultComp = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT_COMPANY', qParams);
+          
+          var resultBill = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT_BILLING', qParams);
+          
+          if (resultComp.ret1 != null && 'C' == resultComp.ret1) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'Parents CMR#' + results.ret2 + ' is inactive So, first reactivate this.');
-          } else {
+            }, false, 'Parents CMR#' + resultComp.ret2 + ' is inactive So, first reactivate this.');
+          }  else if (resultBill.ret1 != null && ('C' == resultBill.ret1 && cmrNo != resultBill.ret2)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'Parents CMR#' + resultBill.ret2 + ' is inactive So, first reactivate this.');
+          }else {
             return new ValidationResult(null, true);
           }
         }
-    return new ValidationResult(null, true);
+        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
