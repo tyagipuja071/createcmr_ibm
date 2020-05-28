@@ -480,11 +480,12 @@ public class RequestUtils {
       StringBuffer temp = new StringBuffer(email);
       int tempstart = temp.indexOf("{5}");
       int insertstart = tempstart + 17;
-      String rejRes = "<tr><th style=\"text-align:left;width:200px\">Reject Reason:</th><td>{10}</td></tr>";
+      String rejRes = "<tr><th style=\"background:#EEE;text-align:left;width:200px\">Reject Reason:</th><td style=\"background:#EEE;\">{10}</td></tr>";
       if (cmrIssuingCountry != null && US_CMRISSUINGCOUNTRY.equalsIgnoreCase(cmrIssuingCountry) && !StringUtils.isBlank(admin.getSourceSystId())
           && SOURCE.equalsIgnoreCase(admin.getSourceSystId())) {
-        rejRes = "<tr><th style=\"text-align:left;width:200px\">Input Required Reason:</th><td>{10}</td></tr>";
+        rejRes = "<tr><th style=\"background:#EEE;text-align:left;width:200px\">Input Required Reason:</th><td style=\"background:#EEE;\">{10}</td></tr>";
       }
+      rejRes = formatRejectionInfo(rejRes, history);
       temp.insert(insertstart, rejRes);
       email = temp.toString();
     } else {
@@ -508,7 +509,11 @@ public class RequestUtils {
     } else {
       params.add(status); // {5}
     }
-    params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
+    if (history.getCreateById().equals(history.getCreateByNm())) {
+      params.add(history.getCreateById()); // {6}
+    } else {
+      params.add(history.getCreateByNm() + " (" + history.getCreateById() + ")"); // {6}
+    }
     params.add(CmrConstants.DATE_FORMAT().format(history.getCreateTs())); // {7}
     params.add(histContent); // {8}
     params.add(directUrlLink); // {9}
@@ -533,6 +538,60 @@ public class RequestUtils {
 
     mail.send(host);
 
+  }
+
+  private static String formatRejectionInfo(String current, WfHist rejection) {
+    StringBuilder rejInfo = new StringBuilder();
+    rejInfo.append(current);
+    String info1 = rejection.getRejSupplInfo1();
+    if (StringUtils.isBlank(info1)) {
+      info1 = "(not specified)";
+    }
+    String info2 = rejection.getRejSupplInfo2();
+    if (StringUtils.isBlank(info2)) {
+      info2 = "(not specified)";
+    }
+    if (!StringUtils.isBlank(rejection.getRejReasonCd())) {
+      switch (rejection.getRejReasonCd()) {
+      case "DUPC":
+        rejInfo.append("<tr><th style=\"background:#EEE;text-align:left;width:200px\">Duplicate CMR#:</th><td style=\"background:#EEE;\">" + info1
+            + "</td></tr>");
+        rejInfo.append("<tr><th style=\"background:#EEE;text-align:left;width:200px\">Sold-to KUNNR:</th><td style=\"background:#EEE;\">" + info2
+            + "</td></tr>");
+        break;
+      case "ADDR":
+        break;
+      case "IBM":
+        break;
+      case "VAT":
+        break;
+      case "MDOC":
+        rejInfo.append("<tr><th style=\"background:#EEE;text-align:left;width:200px\">Missing Document:</th><td style=\"background:#EEE;\">" + info1
+            + "</td></tr>");
+        break;
+      case "MAPP":
+        rejInfo.append("<tr><th style=\"background:#EEE;text-align:left;width:200px\">Approval Type:</th><td style=\"background:#EEE;\">" + info1
+            + "</td></tr>");
+        rejInfo.append(
+            "<tr><th style=\"background:#EEE;text-align:left;width:200px\">Approver:</th><td style=\"background:#EEE;\">" + info2 + "</td></tr>");
+        break;
+      case "OTH":
+        break;
+      case "DUPR":
+        rejInfo.append("<tr><th style=\"background:#EEE;text-align:left;width:200px\">Duplicate Request ID:</th><td style=\"background:#EEE;\">"
+            + info1 + "</td></tr>");
+        break;
+      case "UNCL":
+        break;
+      case "PROS":
+        break;
+      case "TYPR":
+        rejInfo.append(
+            "<tr><th style=\"background:#EEE;text-align:left;width:200px\">Correct Type:</th><td style=\"background:#EEE;\">" + info1 + "</td></tr>");
+        break;
+      }
+    }
+    return rejInfo.toString();
   }
 
   private static String getStatusDesc(EntityManager entityManager, String reqStatus) {
