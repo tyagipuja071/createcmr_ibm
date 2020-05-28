@@ -2291,6 +2291,7 @@ public class EMEAHandler extends BaseSOFHandler {
 				    && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
 					updateLandCntryGR(entityManager, addr);
 
+					// -- START --- missing codes in main 
 					// auto generate zp01/zs01 if either one is created 
 					if("ZS01".equals(addr.getId().getAddrType())) {
 					  if(getAddressByType(entityManager,"ZP01", data.getId().getReqId()) == null) {
@@ -2301,6 +2302,7 @@ public class EMEAHandler extends BaseSOFHandler {
                saveAddrCopyForGR(entityManager, addr, "ZS01");
             }
 					}
+	         // -- END --- missing codes in main
 				}
 			}
 
