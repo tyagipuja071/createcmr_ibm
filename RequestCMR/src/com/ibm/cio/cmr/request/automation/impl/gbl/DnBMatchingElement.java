@@ -162,6 +162,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else {
 
+            LOG.debug("No D&B record matched the request data.");
             // by now this is sure to be on error with no data match
             details.append("Matches against D&B were found but no record matched the request data.\n");
             details.append("Showing D&B matches:\n");
