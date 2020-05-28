@@ -544,6 +544,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
+    MatchingResponse<ReqCheckResponse> byModelResponse = new MatchingResponse<>();
 
     // check if End user and has divn value
     if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
@@ -557,7 +558,34 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     }
 
     // get duplicates
-    response = dupReqCheckElement.getMatches(entityManager, requestData, engineData);
+    if (!USUtil.SC_BYMODEL.equals(data.getCustSubGrp())) {
+      engineData.put(AutomationEngineData.REQ_MATCH_SCENARIO, data.getCustSubGrp());
+      response = dupReqCheckElement.getMatches(entityManager, requestData, engineData);
+      engineData.put(AutomationEngineData.REQ_MATCH_SCENARIO, USUtil.SC_BYMODEL);
+      byModelResponse = dupReqCheckElement.getMatches(entityManager, requestData, engineData);
+    } else {
+      engineData.put(AutomationEngineData.REQ_MATCH_SCENARIO, "");
+      response = dupReqCheckElement.getMatches(entityManager, requestData, engineData);
+    }
+
+    if ((response == null || !response.getSuccess() || !response.getMatched())
+        && (byModelResponse.getSuccess() && byModelResponse.getMatched() && !byModelResponse.getMatches().isEmpty())) {
+      response = byModelResponse;
+    } else if ((response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty())
+        && (byModelResponse.getSuccess() && byModelResponse.getMatched() && !byModelResponse.getMatches().isEmpty())) {
+      for (ReqCheckResponse record1 : byModelResponse.getMatches()) {
+        boolean found = false;
+        for (ReqCheckResponse record2 : response.getMatches()) {
+          if (record2.getReqId() == record1.getReqId()) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          response.addMatch(record1);
+        }
+      }
+    }
 
     // filter dup requests
     if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
