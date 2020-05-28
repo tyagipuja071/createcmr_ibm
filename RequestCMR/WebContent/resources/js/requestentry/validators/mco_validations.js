@@ -153,8 +153,8 @@ function afterConfigForPT() {
   FormManager.readOnly('custPrefLang');
 
   // Control Type Of Customer
-  if (custSubGrp != 'BUSPR' && custSubGrp != 'GOVRN' && custSubGrp != 'INTER' 
-    && custSubGrp != 'XINT' && custSubGrp != 'XGOV' && custSubGrp != 'XBP') {
+  if ((custSubGrp != 'GOVRN' && custSubGrp != 'INTER' && custSubGrp != 'INTSO' 
+    && custSubGrp != 'XGOV' && custSubGrp != 'XBP') && (reqType != 'U')) {
     FormManager.setValue('crosSubTyp', '');
   }
 
