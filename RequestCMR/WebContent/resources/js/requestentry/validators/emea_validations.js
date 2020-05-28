@@ -1521,9 +1521,6 @@ function addStreetAddressFormValidatorGR() {
 	        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.GREECE) {
 	          return new ValidationResult(null, true);
 	        }
-	        if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('addrTxt2') != '') {
-		          return new ValidationResult(null, false, 'Address Con\'t cannot be filled if Street is empty.');
-		    }
 	        if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
 	          return new ValidationResult(null, false, 'Please fill-out either Street Address or PO Box.');
 	        }
@@ -1556,6 +1553,17 @@ function clearPhoneNoFromGrid() {
     if (_allAddressData != null && _allAddressData[i] != null) {
 	  if(!(_allAddressData[i].addrType[0] == 'ZS01' || _allAddressData[i].addrType[0] == 'ZD01')) {
 	    _allAddressData[i].custPhone[0] = ''; 
+	  }
+	}
+  }
+}
+
+function clearPOBoxFromGrid() {
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    if (_allAddressData != null && _allAddressData[i] != null) {
+	  if(!(_allAddressData[i].addrType[0] == 'ZS01' || _allAddressData[i].addrType[0] == 'ZP01')) {
+	    _allAddressData[i].poBox[0] = ''; 
 	  }
 	}
   }
@@ -2910,24 +2918,9 @@ function addGRAddressTypeValidator() {
           }
           
           if (FormManager.getActualValue('custGrp') == 'LOCAL') {
-        	var missingFields = '';
-            if(!isTranslationAddrFieldsFilledForGR(zs01Data.addrTxt, zp01Data.addrTxt)) {
-          	  missingFields += 'Street Address';
-        	}
-            if(!isTranslationAddrFieldsFilledForGR(zs01Data.custNm2, zp01Data.custNm2)) {
-              missingFields += missingFields != '' ? ', ' : '';
-              missingFields += 'Customer Name Con\'t';
-          	}
-            if(!isTranslationAddrFieldsFilledForGR(zs01Data.addrTxt2, zp01Data.addrTxt2)) {
-              missingFields += missingFields != '' ? ', ' : '';
-              missingFields += 'Address Con\'t/Occupation';
-           	}
-            if(!isTranslationAddrFieldsFilledForGR(zs01Data.poBox, zp01Data.poBox)) {
-              missingFields += missingFields != '' ? ', ' : '';
-              missingFields += 'PO Box';
-           	}
-            if(missingFields != '') {
-            	return new ValidationResult(null, false, 'Sold-to mismatch, missing data in Language translation of Sold-to: ' +  missingFields);
+        	mismatchFields = getMismatchFields(zs01Data, zp01Data, false);
+        	if(mismatchFields != '') {
+        	  return new ValidationResult(null, false, 'Sold-to mismatch, please update Local Language translation of Sold-to: ' +  mismatchFields);	  
             }
           } else if(FormManager.getActualValue('custGrp') == 'CROSS' && zs01Data != null && zp01Data != null && !isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data)) {
               return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
@@ -2961,19 +2954,11 @@ function addGRAddressTypeValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function isTranslationAddrFieldsFilledForGR(zs01Field, zp01Field) {
-  if (zs01Field != '') {
-    if (zp01Field == '') {
-      return false;
-  	} 
-  } 
-  return true;
-}
-
 function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
 	
   if(zs01Data.custNm1[0]  == zp01Data.custNm1[0] 
-  && zs01Data.custNm2[0]  == zp01Data.custNm2[0] 
+  && zs01Data.custNm2[0]  == zp01Data.custNm2[0]
+  && zs01Data.custNm4[0]  == zp01Data.custNm4[0]
   && zs01Data.addrTxt[0]  == zp01Data.addrTxt[0] 
   && zs01Data.addrTxt2[0] == zp01Data.addrTxt2[0] 
   && zs01Data.poBox[0]    == zp01Data.poBox[0]
@@ -3003,6 +2988,10 @@ function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
     	  mismatchFields += mismatchFields != '' ? ', ' : '';
     	  mismatchFields += 'PO Box';
      	}
+      if(!hasMatchingFieldsFilled(zs01Data.custNm4[0], zp01Data.custNm4[0], isCrossborder)) {
+    	  mismatchFields += mismatchFields != '' ? ', ' : '';
+    	  mismatchFields += 'Att. Person';
+    	}
       
       if(isCrossborder) {
         if(!hasMatchingFieldsFilled(zs01Data.custNm1[0], zp01Data.custNm1[0], isCrossborder)) {
@@ -7998,6 +7987,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetAddressFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.GREECE ]);
   
   
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator, [
