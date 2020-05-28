@@ -1,6 +1,7 @@
 /* Register MCO Javascripts */
 var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876", "879", "880", "881" ];
 var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883", "780" ];
+var _vatExemptHandler = null;
 
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
@@ -959,6 +960,12 @@ function addTinBillingValidator() {
 function addAfterConfigMalta() {
   mandatoryForBusinessPartnerMT();
   disableEnableFieldsForMT();
+  
+  if (_vatExemptHandler == null) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidatorMalra();
+    });
+  } 
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
@@ -1005,6 +1012,44 @@ function disableEnableFieldsForMT(){
     }
 }
 
+function addOrdBlkValidator() {
+  console.log("addOrdBlkValidator for Malta..");
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var reqType = null;
+          var ordBlk = FormManager.getActualValue('ordBlk');
+          if (typeof (_pagemodel) != 'undefined') {
+            reqType = FormManager.getActualValue('reqType');
+          }
+      if("C" == reqType){
+        if (ordBlk == null || ordBlk == '88' || ordBlk == '94' || ordBlk == '') {
+          return new ValidationResult(null, true);
+        } else {
+          return new ValidationResult(null, false, 'Value of Order block can only be 88 or 94 or blank.');
+        }
+      }else{
+        if (ordBlk == null || ordBlk == '88' || ordBlk == '94' || ordBlk == '@' || ordBlk == '') {
+          return new ValidationResult(null, true);
+        } else {
+          return new ValidationResult(null, false, 'Value of Order block can only be 88 or 94 or @ or blank.');
+        }
+      }     
+     }
+      };
+    })(), 'MAIN_CUST_TAB', 'frmCMR');
+  }
+function setVatValidatorMalra() {
+  console.log("setVatValidatorMalra for Malta..");
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+    if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.resetValidations('vat');
+    } else {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
 
 /* End 1430539 */
 dojo.addOnLoad(function() {
@@ -1065,4 +1110,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrFunctionMalta, [ SysLoc.MALTA ]);
+  GEOHandler.registerValidator(addOrdBlkValidator, SysLoc.MALTA, null, true);
 });
