@@ -220,6 +220,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
           String msg = "IBM Direct Request " + childReqId + " has been rejected and no IBM Direct CMRs were found.";
           details.append(msg);
           details.append("\n");
+          if (rejectHist != null) {
+            details.append("Rejection: ").append(rejectHist.getRejReason()).append("\n");
+            if (!StringUtils.isBlank(rejectHist.getCmt())) {
+              details.append("Comments: ").append(rejectHist.getCmt()).append("\n");
+            }
+          }
           output.setOnError(true);
           output.setDetails(details.toString());
           output.setResults("Issues Encountered");
@@ -554,6 +560,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     }
     model.setModelCmrNo(null);
     model.setCmrIssuingCntry(SystemLocation.UNITED_STATES);
+    // CMR-3880 - ensure scenarios are editable
+    model.setDelInd(null);
     // model.setEnterprise(requestData.getData().getEnterprise());
     RequestEntryService service = new RequestEntryService();
     AppUser user = new AppUser();
@@ -1142,9 +1150,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
     if (rejectionHist != null) {
 
-      engineData.addRejectionComment(rejectionHist.getRejReasonCd(),
-          StringUtils.isBlank(rejectionHist.getCmt()) ? "Request rejected by processor. Please check comments." : rejectionHist.getCmt(),
-          rejectionHist.getRejSupplInfo1(), rejectionHist.getRejSupplInfo2());
+      String rejectCmt = StringUtils.isBlank(rejectionHist.getCmt()) ? "Request rejected by processor. Please check comments."
+          : rejectionHist.getCmt();
+      if ("DUPR".equals(rejectionHist.getRejReasonCd())) {
+        rejectCmt = "An ongoing request for the Direct CMR is being processed at the moment. Please try to resubmit the request after 15 mins.";
+      }
+      engineData.addRejectionComment(rejectionHist.getRejReasonCd(), rejectCmt, rejectionHist.getRejSupplInfo1(), rejectionHist.getRejSupplInfo2());
       requestData.getAdmin().setChildReqId(0);
 
       // copy comments
@@ -1156,7 +1167,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       List<ReqCmtLog> cmts = query.getResults(ReqCmtLog.class);
       if (cmts != null) {
         for (ReqCmtLog cmt : cmts) {
-          RequestUtils.createCommentLogFromBatch(entityManager, "AutomationEngine", requestData.getAdmin().getId().getReqId(), cmt.getCmt());
+          RequestUtils.createCommentLogFromBatch(entityManager, cmt.getCreateById(), requestData.getAdmin().getId().getReqId(), cmt.getCmt());
         }
       }
     }

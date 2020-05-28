@@ -159,6 +159,8 @@ public class USUtil extends AutomationUtil {
   public static final List<String> FEDERAL_SCENARIOS = Arrays.asList(SC_FED_CAMOUFLAGED, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
       SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_REGULAR, SC_FED_TRIBAL_BUS);
 
+  private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
+
   public static List<USBranchOffcMapping> svcARBOMappings = new ArrayList<USBranchOffcMapping>();
   public static List<USBranchOffcMapping> boMappings = new ArrayList<USBranchOffcMapping>();
   private static Map<String, USDetailsContainer> usDetailsMap = new HashMap<String, USDetailsContainer>();
@@ -411,6 +413,13 @@ public class USUtil extends AutomationUtil {
             .append("\n");
         valid = false;
       }
+    } else if (SC_COMM_REGULAR.equals(scenarioSubType)
+        && (HEALTH_CARE_EDUCATION_ISIC.contains(data.getUsSicmen()) || HEALTH_CARE_EDUCATION_ISIC.contains(data.getIsicCd()))) {
+      // CMR-3880 - add check for SUBIND/ISIC here for Health/Educ
+      engineData.addNegativeCheckStatus("US_SCENARIO_CHK",
+          "Processor review required since ISIC belongs to Healthcare/Education. Scenario verification needed.");
+      details.append("Processor review required since ISIC belongs to Healthcare/Education. Scenario verification needed.").append("\n");
+      valid = true;
     }
     return valid;
   }
