@@ -242,7 +242,7 @@ function setISUDefaultValueOnSubTypeChange() {
   if (_scenarioSubTypeHandler == null && FormManager.getField('custSubGrp')) {
     _scenarioSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
       setDefaultValueForISU();
-      setClasificationCodeTR(value);
+      controlFieldsBySubScenarioTR(value);
     });
   }
   // if (_scenarioSubTypeHandler && _scenarioSubTypeHandler[0]) {
@@ -4071,10 +4071,6 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('custClass', '');
       FormManager.resetValidations('custClass');
     }
-    // Control Type Of Customer
-    if (custType != 'BUSPR' && custType != 'GOVRN' && custType != 'INTER' && custType != 'XINT' && custType != 'XGOV' && custType != 'XBP') {
-      FormManager.setValue('crosSubTyp', '');
-    }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (custType == 'BUSPR') {
@@ -7046,9 +7042,6 @@ function toggleTypeOfCustomerForTR() {
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
   }
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
   if (reqType == 'U') {
     FormManager.show('TypeOfCustomer', 'crosSubTyp');
   } else {
@@ -8007,20 +8000,29 @@ function setTypeOfCustomerClassificationCodeTR() {
   }
 }
 
-function setClasificationCodeTR(value) {
-  var field = FormManager.getField('custClass');
-  if (!value) {
-    value = FormManager.getActualValue('crosSubTyp');
+function controlFieldsBySubScenarioTR(value) {
+  var reqType = FormManager.getActualValue('reqType');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
   }
-  if (value == 'BUSPR' || value == 'XBP') {
-    FormManager.limitDropdownValues(field, [ '45', '46' ]);
-    FormManager.setValue('crosSubTyp', 'BP');
-  } else if (value == 'XGOV' || value == 'GOVRN') {
-    FormManager.limitDropdownValues(field, [ '13' ]);
-    FormManager.setValue('crosSubTyp', 'G');
-  } else if (value == 'INTER' || value == 'XINT') {
-    FormManager.limitDropdownValues(field, [ '91' ]);
-    FormManager.setValue('crosSubTyp', '91');
+  if (reqType != 'C') {
+    return;
+  }
+  if (reqType == 'C') {
+    if (!value) {
+      value = FormManager.getActualValue('custSubGrp');
+    }
+    // Control Type Of Customer
+    if (value == 'BUSPR' || value == 'XBP') {
+      FormManager.setValue('crosSubTyp', 'BP');
+    } else if (value == 'XGOV' || value == 'GOVRN') {
+      FormManager.setValue('crosSubTyp', 'G');
+    } else if (value == 'INTER' || value == 'XINT') {
+      FormManager.setValue('crosSubTyp', '91');
+    } else if (value == 'COMME' || value == 'IGF' || value == 'OEM' || value == 'PRICU' || value == 'THDPT' 
+      || value == 'XINTS' || value == 'XPC' || value == 'XIBME' || value == 'XTP' || value == 'XIGF'){
+      FormManager.setValue('crosSubTyp', '');
+    }
   }
 }
 
@@ -8133,8 +8135,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setISUCTCBasedScenarios, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setVatValidatorGRCYTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleTypeOfCustomerForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
