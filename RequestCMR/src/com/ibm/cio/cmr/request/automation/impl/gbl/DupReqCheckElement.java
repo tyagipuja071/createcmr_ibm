@@ -174,7 +174,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
     for (String addrType : scenarioExceptions.getAddressTypesForDuplicateRequestCheck()) {
       Addr addr = requestData.getAddress(addrType);
       if (addr != null) {
-        ReqCheckRequest request = getRequest(entityManager, data, admin, addr, scenarioExceptions);
+        ReqCheckRequest request = getRequest(entityManager, data, admin, addr, scenarioExceptions, engineData);
         LOG.debug("Executing Duplicate Request Check "
             + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI") + " for AddrType: " + addrType);
         MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.REQ_SERVICE_ID, request, MatchingResponse.class);
@@ -226,7 +226,8 @@ public class DupReqCheckElement extends DuplicateCheckElement {
     global.setMatched(updated.size() > 0);
   }
 
-  private ReqCheckRequest getRequest(EntityManager entityManager, Data data, Admin admin, Addr addr, ScenarioExceptionsUtil scenarioExceptions) {
+  private ReqCheckRequest getRequest(EntityManager entityManager, Data data, Admin admin, Addr addr, ScenarioExceptionsUtil scenarioExceptions,
+      AutomationEngineData engineData) {
     ReqCheckRequest request = new ReqCheckRequest();
     request.setReqId(admin.getId().getReqId());
     if (addr != null) {
@@ -253,7 +254,7 @@ public class DupReqCheckElement extends DuplicateCheckElement {
         request.setMatchType("V");
       }
 
-      DuplicateChecksUtil.setCountrySpecificsForRequestChecks(entityManager, admin, data, addr, request);
+      DuplicateChecksUtil.setCountrySpecificsForRequestChecks(entityManager, admin, data, addr, request, engineData);
 
     }
     return request;
