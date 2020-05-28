@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -31,9 +32,10 @@ public class DuplicateChecksUtil {
    * @param admin
    * @param data
    * @param currAddr
+   * @param engineData
    */
-  public static void setCountrySpecificsForRequestChecks(EntityManager entityManager, Admin admin, Data data, Addr currAddr,
-      ReqCheckRequest request) {
+  public static void setCountrySpecificsForRequestChecks(EntityManager entityManager, Admin admin, Data data, Addr currAddr, ReqCheckRequest request,
+      AutomationEngineData engineData) {
     String cmrIssuingCntry = StringUtils.isNotBlank(data.getCmrIssuingCntry()) ? data.getCmrIssuingCntry() : "";
 
     switch (cmrIssuingCntry) {
@@ -57,9 +59,10 @@ public class DuplicateChecksUtil {
         }
       }
 
-      // fix for cust sub group
-      if (StringUtils.isNotBlank(data.getCustSubGrp()) && !USUtil.SC_BYMODEL.equals(data.getCustSubGrp())) {
-        request.setScenario(data.getCustSubGrp());
+      String scenarioToMatch = (String) engineData.get(AutomationEngineData.REQ_MATCH_SCENARIO);
+
+      if (StringUtils.isNotBlank(scenarioToMatch)) {
+        request.setScenario(scenarioToMatch);
       }
       break;
     }
