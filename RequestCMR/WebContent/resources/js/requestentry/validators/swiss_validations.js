@@ -35,12 +35,12 @@ function addAfterConfigForSWISS() {
 
   if (reqType == 'U') {
     FormManager.enable('clientTier');
-    FormManager.enable('currencyCd');
+    // FormManager.enable('currencyCd');
   } else {
-    FormManager.readOnly('currencyCd');
+    // FormManager.readOnly('currencyCd');
   }
   if (role == 'PROCESSOR') {
-    FormManager.enable('currencyCd');
+    // FormManager.enable('currencyCd');
   }
 
   if (reqType == 'C'
@@ -873,7 +873,7 @@ function onSavingAddress(cntry, addressMode, saving, finalSave, force) {
     if ((addrType == 'ZS01' || copyingToA)) {
       if (reqType == 'C')
         autoSetAbbrevNmLogic();
-      setCurrencyCd();
+      // setCurrencyCd();
       addVatSuffixForCustLangCd();
     }
 
@@ -977,9 +977,10 @@ function setFieldsMandtStatus() {
     }
   }
   if (custGrp == 'CROSS' || (reqType == 'U' && custGrp == '') || (countryUse == '848LI' && landCntry != 'LI')) {
-    FormManager.removeValidator('currencyCd', Validators.REQUIRED);
+    // FormManager.removeValidator('currencyCd', Validators.REQUIRED);
   } else if (custGrp == 'LILOC' || custGrp == 'CHLOC') {
-    FormManager.addValidator('currencyCd', Validators.REQUIRED, [ 'Currency Code' ], 'MAIN_CUST_TAB');
+    // FormManager.addValidator('currencyCd', Validators.REQUIRED, [ 'Currency
+    // Code' ], 'MAIN_CUST_TAB');
   }
 
   // set Muboty mandt status
@@ -1623,7 +1624,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterConfig(addAfterConfigForSWISS, GEOHandler.SWISS);
 
-  GEOHandler.addAfterTemplateLoad(setCurrencyCd, GEOHandler.SWISS);
+  // GEOHandler.addAfterTemplateLoad(setCurrencyCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setCustClassCd, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setVatValidatorSWISS, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(addAfterConfigForSWISS, GEOHandler.SWISS);
