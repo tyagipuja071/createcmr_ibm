@@ -106,6 +106,11 @@ public class SwitzerlandUtil extends AutomationUtil {
       return true;
     }
 
+    if ("C".equals(requestData.getAdmin().getReqType())) {
+      // remove duplicates
+      removeDuplicateAddresses(entityManager, requestData, details);
+    }
+
     String actualScenario = scenario.substring(2);
     String customerName = soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
 
@@ -341,16 +346,9 @@ public class SwitzerlandUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    if (!"C".equals(requestData.getAdmin().getReqType())) {
-      details.append("Skipped computations for non-Create requests.\n");
-      results.setResults("Skipped");
-      results.setDetails(details.toString());
-      return results;
-    }
-
-    // remove duplicates
-    removeDuplicateAddresses(entityManager, requestData, details);
-
+    details.append("No specific fields to compute.\n");
+    results.setResults("Skipped");
+    results.setDetails(details.toString());
     return results;
   }
 
@@ -370,31 +368,30 @@ public class SwitzerlandUtil extends AutomationUtil {
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
     String actualScenario = scenario.substring(2);
 
-    boolean returnStatus = true;
+    ChMubotyMapping muboty = null;
     switch (actualScenario) {
     case SCENARIO_COMMERCIAL:
       if (!isCoverageCalculated) {
-        ChMubotyMapping muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
-        if (muboty != null) {
-          details.append("Setting MUBOTY to " + muboty.getIsu() + " based on Postal Code rules.");
-          overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
-          engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-        } else {
-          String msg = "Coverage cannot be calculated. No valid MUBOTY mapping from request data.";
-          details.append(msg);
-          results.setResults("Cannot Calculate");
-          results.setDetails(details.toString());
-          engineData.addNegativeCheckStatus("_chMuboty", msg);
-        }
+        muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       }
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
-      ChMubotyMapping muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), "32", "S");
-      if (muboty != null) {
-        details.append("Setting MUBOTY to " + muboty.getIsu() + " based on Postal Code rules.");
-        overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
-        engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+      muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), "32", "S");
+      break;
+    }
+
+    if (muboty != null) {
+      details.append("Setting MUBOTY to " + muboty.getMuboty() + " based on Postal Code rules.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
+      engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+    } else {
+      String sortl = data.getSearchTerm();
+      if (!StringUtils.isBlank(sortl)) {
+        String msg = "No valid MUBOTY mapping from request data. Using MUBOTY " + sortl + " from request.";
+        details.append(msg);
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
       } else {
         String msg = "Coverage cannot be calculated. No valid MUBOTY mapping from request data.";
         details.append(msg);
@@ -402,12 +399,9 @@ public class SwitzerlandUtil extends AutomationUtil {
         results.setDetails(details.toString());
         engineData.addNegativeCheckStatus("_chMuboty", msg);
       }
-      break;
-    default:
-      returnStatus = false;
-      break;
     }
-    return returnStatus;
+
+    return true;
   }
 
   /**
