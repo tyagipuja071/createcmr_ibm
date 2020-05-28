@@ -405,6 +405,10 @@ function getImportedIndcForSwiss() {
 
 }
 function addVatSuffixForCustLangCdScrtch() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   // get custlangCd
   var reqId = FormManager.getActualValue('reqId');
   var qParams = {
@@ -1070,6 +1074,10 @@ function addEmbargoCdValidator() {
 
 function addVatSuffixForCustLangCd() {
   var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
     REQ_ID : reqId,
     ADDR_TYPE : 'ZS01'
@@ -1483,7 +1491,10 @@ function setPreferredLangAddr() {
   // 0000 - 3000 it is F (French)
   //
   // Cross Border it is E (English)
-
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
     REQ_ID : zs01ReqId,
