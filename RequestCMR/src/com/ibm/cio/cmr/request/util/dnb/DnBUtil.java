@@ -440,6 +440,9 @@ public class DnBUtil {
     String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
 
     if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
+        return false;
+      }
       if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
         // do a comparison of common words first
         List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
