@@ -100,8 +100,9 @@ public class SWISSHandler extends GEOHandler {
             sapNoListSoldTo.add(tempRec1.getCmrSapNumber());
           }
         }
-        if (!sapNoListSoldTo.isEmpty() && sapNoListSoldTo.size() > 0)
+        if (!sapNoListSoldTo.isEmpty() && sapNoListSoldTo.size() > 0) {
           zs01kunnr = Collections.min(sapNoListSoldTo);
+        }
 
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
@@ -137,8 +138,9 @@ public class SWISSHandler extends GEOHandler {
             sapNoListSoldTo.add(tempRec1.getCmrSapNumber());
           }
         }
-        if (!sapNoListSoldTo.isEmpty() && sapNoListSoldTo.size() > 0)
+        if (!sapNoListSoldTo.isEmpty() && sapNoListSoldTo.size() > 0) {
           zs01kunnr = Collections.min(sapNoListSoldTo);
+        }
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
@@ -214,12 +216,15 @@ public class SWISSHandler extends GEOHandler {
         address.setFloor(addlAddDetail.getFloor() != null ? addlAddDetail.getFloor() : "");
         address.setDept(addlAddDetail.getDepartment() != null ? addlAddDetail.getDepartment() : "");
 
-        if (!StringUtils.isEmpty(address.getDept()))
+        if (!StringUtils.isEmpty(address.getDept())) {
           addrDetailsList.add(address.getDept());
-        if (!StringUtils.isEmpty(address.getBldg()))
+        }
+        if (!StringUtils.isEmpty(address.getBldg())) {
           addrDetailsList.add(address.getBldg());
-        if (!StringUtils.isEmpty(address.getFloor()))
+        }
+        if (!StringUtils.isEmpty(address.getFloor())) {
           addrDetailsList.add(address.getFloor());
+        }
 
       }
       String name3 = getName3FrmKna1(currentRecord.getCmrSapNumber());
@@ -245,6 +250,17 @@ public class SWISSHandler extends GEOHandler {
       address.setAddrTxt(currentRecord.getCmrStreetAddress());
       if ("D".equals(address.getImportInd())) {
         address.setAddrTxt(currentRecord.getCmrStreet());
+      }
+      // if custLangCd is blank for create
+      if (StringUtils.isBlank(address.getCustLangCd()) && StringUtils.isNotBlank(address.getPostCd()) && StringUtils.isNumeric(address.getPostCd())) {
+        int postCd = Integer.parseInt(address.getPostCd());
+        if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+          address.setCustLangCd("D");
+        } else if (postCd >= 6500 && postCd <= 6999) {
+          address.setCustLangCd("I");
+        } else if (postCd >= 0000 && postCd <= 3000) {
+          address.setCustLangCd("F");
+        }
       }
     }
   }
@@ -296,8 +312,9 @@ public class SWISSHandler extends GEOHandler {
       }
       newAddrSeq = String.format("%05d", Integer.parseInt(Integer.toString(addrSeq)));
       // newAddrSeq = Integer.toString(addrSeq);
-      if (!StringUtils.isEmpty(cmrNo))
+      if (!StringUtils.isEmpty(cmrNo)) {
         newAddrSeq = "000" + cmrNo + "L" + newAddrSeq;
+      }
     }
     return newAddrSeq;
   }
@@ -439,12 +456,15 @@ public class SWISSHandler extends GEOHandler {
       addr.setHwInstlMstrFlg("");
     }
 
-    if (!StringUtils.isEmpty(addr.getDept()))
+    if (!StringUtils.isEmpty(addr.getDept())) {
       addrDetailsList.add(addr.getDept());
-    if (!StringUtils.isEmpty(addr.getBldg()))
+    }
+    if (!StringUtils.isEmpty(addr.getBldg())) {
       addrDetailsList.add(addr.getBldg());
-    if (!StringUtils.isEmpty(addr.getFloor()))
+    }
+    if (!StringUtils.isEmpty(addr.getFloor())) {
       addrDetailsList.add(addr.getFloor());
+    }
 
     if (!addrDetailsList.isEmpty() && "C".equals(admin.getReqType())) {
       addr.setCustNm3(StringUtils.join(addrDetailsList, ", "));
