@@ -133,7 +133,7 @@ function addAfterConfigForSWISS() {
   showDeptNoForInternalsOnlySWISS();
   setMubotyOnPostalCodeIMS32N();
   if (impIndc != 'N') {
-    setPreferredLangAddr();
+    // setPreferredLangAddr();
     addVatSuffixForCustLangCd();
   }
 }
@@ -505,7 +505,7 @@ function setClientTierValues(isuCd) {
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
   }
-  if (tierValues.length == 1) {
+  if (tierValues != null && tierValues.length == 1) {
     FormManager.setValue('clientTier', tierValues[0]);
   }
 }
@@ -1090,7 +1090,13 @@ function addVatSuffixForCustLangCd() {
   var qParams = {
     REQ_ID : reqId,
   };
-  var custLangCd = FormManager.getActualValue('custLangCd');
+
+  var custLangCd = '';
+  var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
+  if (result.ret1 != null && result.ret1 != '') {
+    custLangCd = result.ret1;
+  }
+
   var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
   var vat = result.ret1;
   if (vat != '' && vat != null && vat != undefined) {
