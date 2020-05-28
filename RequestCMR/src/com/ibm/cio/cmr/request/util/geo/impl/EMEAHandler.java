@@ -2325,6 +2325,18 @@ public class EMEAHandler extends BaseSOFHandler {
         if ((CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"GR".equals(addr.getLandCntry()))
             && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
           updateLandCntryGR(entityManager, addr);
+          // -- START --- missing codes in main
+          // auto generate zp01/zs01 if either one is created
+          if ("ZS01".equals(addr.getId().getAddrType())) {
+            if (getAddressByType(entityManager, "ZP01", data.getId().getReqId()) == null) {
+              saveAddrCopyForGR(entityManager, addr, "ZP01");
+            }
+          } else if ("ZP01".equals(addr.getId().getAddrType())) {
+            if (getAddressByType(entityManager, "ZS01", data.getId().getReqId()) == null) {
+              saveAddrCopyForGR(entityManager, addr, "ZS01");
+            }
+          }
+          // -- END --- missing codes in main
         }
       }
 
@@ -4089,19 +4101,19 @@ public class EMEAHandler extends BaseSOFHandler {
       }
     }
   }
-  
+
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
     Addr addrCopy = (Addr) SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
-    
-    if(addrType.equals("ZP01")) {
-      addrCopy.setCustPhone(null);  
+
+    if (addrType.equals("ZP01")) {
+      addrCopy.setCustPhone(null);
     }
-    
+
     entityManager.persist(addrCopy);
     entityManager.flush();
   }
-  
+
   private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
     String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
