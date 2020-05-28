@@ -212,7 +212,7 @@ var _reqReasonHandler = null;
 var _vatExemptHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
-
+var _vatHandler = null;
 var _addrTypesForSWISS = [ 'ZD01', 'ZP01', 'ZI01', 'ZS01', 'ZS02' ];
 
 function displayHwMstrInstallFlag() {
@@ -371,6 +371,35 @@ function addHandlersForSWISS() {
     });
   }
 
+  if (_vatHandler == null) {
+    _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
+      addVatSuffixForCustLangCdScrtch();
+    });
+  }
+
+}
+
+function addVatSuffixForCustLangCdScrtch() {
+  // get custlangCd
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : reqId
+  };
+  var result = cmr.query('GET.CUSTLANGCD.ZS01', qParams);
+  if (result != null) {
+    var custLang = result.ret1;
+    // set vat suffix
+    var vat = FormManager.getActualValue('vat');
+    if (vat != '' && vat != null && vat != undefined) {
+      if ((custLang == 'E' || custLang == 'D') && vat.substring(16, 20) != 'Mwst' && vat.length == 15) {
+        FormManager.setValue('vat', vat.concat(" Mwst"));
+      } else if ((custLang == 'I') && vat.substring(16, 19) != 'IVA' && vat.length == 16) {
+        FormManager.setValue('vat', vat.concat(" IVA"));
+      } else if (custLang == 'F' && vat.substring(16, 19) != 'TVA' && vat.length == 16) {
+        FormManager.setValue('vat', vat.concat(" TVA"));
+      }
+    }
+  }
 }
 
 /* Vat Exempt Handler */
