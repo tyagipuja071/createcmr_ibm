@@ -5,7 +5,7 @@ function addAfterConfigForSWISS() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-
+  var impIndc = getImportedIndcForSwiss();
   if (role == 'REQUESTER') {
     FormManager.removeValidator('custLangCd', Validators.REQUIRED);
   } else {
@@ -132,6 +132,10 @@ function addAfterConfigForSWISS() {
   setMubotyOnPostalCodeIMS();
   showDeptNoForInternalsOnlySWISS();
   setMubotyOnPostalCodeIMS32N();
+  if (impIndc != 'N') {
+    setPreferredLangAddr();
+    addVatSuffixForCustLangCd();
+  }
 }
 
 function resetAddrTypeValidation() {
@@ -373,12 +377,33 @@ function addHandlersForSWISS() {
 
   if (_vatHandler == null) {
     _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-      addVatSuffixForCustLangCdScrtch();
+      var impIndc = getImportedIndcForSwiss();
+      if (impIndc == 'N') {
+        addVatSuffixForCustLangCdScrtch();
+      }
     });
   }
 
 }
 
+var _importedIndc = null;
+function getImportedIndcForSwiss() {
+  if (_importedIndc) {
+    console.log('Returning imported indc = ' + _importedIndc);
+    return _importedIndc;
+  }
+  var results = cmr.query('IMPORTED_ADDR_SWISS', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  console.log('saving imported ind as ' + _importedIndc);
+  return _importedIndc;
+
+}
 function addVatSuffixForCustLangCdScrtch() {
   // get custlangCd
   var reqId = FormManager.getActualValue('reqId');
@@ -1060,7 +1085,7 @@ function addVatSuffixForCustLangCd() {
   var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
   var vat = result.ret1;
   if (vat != '' && vat != null && vat != undefined) {
-    vat = vat.substring(0, vat.indexOf(' '));
+    vat = vat.substring(0, 15);
     if ((custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
       FormManager.setValue('vat', vat.concat(" Mwst"));
     } else if ((custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
