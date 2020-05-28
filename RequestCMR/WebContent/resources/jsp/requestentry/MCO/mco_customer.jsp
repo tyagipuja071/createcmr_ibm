@@ -158,17 +158,21 @@
         </p>
       </cmr:column>
       
-			<cmr:view forCountry="822">
-				<c:if test="${reqentry.reqType != 'C'}">
-				<cmr:column span="2" containerForField="TypeOfCustomer">
-		        	<p>
-		          	<label for="crosSubTyp"> <cmr:fieldLabel fieldId="TypeOfCustomer" />: </label>
-		          <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
-		        </p>
-		    	</cmr:column>
-				</c:if>
-			</cmr:view>
-		</cmr:row>
+	<cmr:view forCountry="822">
+		<c:if test="${reqentry.reqType != 'C'}">
+			<cmr:column span="2" containerForField="TypeOfCustomer">
+        		<p>
+          			<cmr:label fieldId="crosSubTyp">
+						<cmr:fieldLabel fieldId="TypeOfCustomer" />:
+						<cmr:info text="${ui.info.crosSubTyp}" />
+					</cmr:label>
+          			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+        		</p>
+      		</cmr:column>
+		</c:if>
+	</cmr:view>
+	
+	</cmr:row>
 	</cmr:view>
 
   <cmr:view forCountry="822">
@@ -217,6 +221,11 @@
   </cmr:view>
   <cmr:view forCountry="838">
     <form:hidden path="acAdminBo" id="acAdminBo"/>
+  </cmr:view>
+  <cmr:view forCountry="822">
+  	<c:if test="${reqentry.reqType == 'C'}">
+    	<form:hidden path="crosSubTyp" id="crosSubTyp"/>
+    </c:if>
   </cmr:view>
     
   <form:hidden path="economicCd" id="economicCd"/>
