@@ -440,16 +440,14 @@ public class DnBUtil {
     String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
 
     if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 8) {
-        return false;
-      } else {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
         // do a comparison of common words first
         List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
         List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
         boolean foundMinimal = false;
         for (String phraseA : commonA) {
           for (String phraseB : commonB) {
-            if (StringUtils.getLevenshteinDistance(phraseA, phraseB) > 6) {
+            if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
               foundMinimal = true;
             }
           }
@@ -457,6 +455,8 @@ public class DnBUtil {
         if (!foundMinimal) {
           return false;
         }
+      } else {
+        LOG.debug("Name " + compareName + " close to " + dnbRecord.getDnbName());
       }
     }
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
