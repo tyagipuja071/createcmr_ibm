@@ -408,6 +408,7 @@ function addVatSuffixForCustLangCdScrtch() {
   if (reqType != 'C') {
     return;
   }
+  var reqId = FormManager.getActualValue('reqId');
   var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
     REQ_ID : reqId,
     ADDR_TYPE : 'ZS01'
@@ -1515,11 +1516,14 @@ function setPreferredLangAddr() {
     REQ_ID : zs01ReqId,
   };
 
-  var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
-    REQ_ID : reqId,
-    ADDR_TYPE : 'ZS01'
-  });
-  var landCntry = result.ret1;
+  var landCntry = FormManager.getActualValue('landCntry');
+  if (landCntry == null || landCntry == '' || landCntry == undefined) {
+    var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
+      REQ_ID : reqId,
+      ADDR_TYPE : 'ZS01'
+    });
+    landCntry = result.ret1;
+  }
   if (landCntry == 'CH' || landCntry == 'LI') {
     var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
     var postCd = FormManager.getActualValue('postCd');
