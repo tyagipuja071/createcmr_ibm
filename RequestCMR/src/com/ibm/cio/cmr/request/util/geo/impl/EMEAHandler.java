@@ -1902,6 +1902,8 @@ public class EMEAHandler extends BaseSOFHandler {
         String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
+
+      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
     }
 	}
 
