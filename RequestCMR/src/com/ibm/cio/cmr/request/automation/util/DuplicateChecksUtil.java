@@ -64,6 +64,11 @@ public class DuplicateChecksUtil {
       if (StringUtils.isNotBlank(scenarioToMatch)) {
         request.setScenario(scenarioToMatch);
       }
+
+      if (engineData.hasPositiveCheckStatus("US_ZI01_REQ_MATCH")) {
+        request.setAddrType("ZI01");
+      }
+
       break;
     }
   }
