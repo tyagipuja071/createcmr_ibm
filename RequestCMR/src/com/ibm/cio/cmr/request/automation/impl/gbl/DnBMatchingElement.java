@@ -337,8 +337,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
       if (!StringUtils.isEmpty(companyNm)) {
         String[] nameParts = handler.doSplitName(companyNm, "", handler.getName1Length(), handler.getName2Length());
-        name1 = nameParts[1];
-        name2 = nameParts[2];
+        name1 = nameParts[0];
+        name2 = nameParts[1];
         if (!handler.customerNamesOnAddress() && !mainCustNameAdded) {
           output.addMatch(getProcessCode(), "MAIN_CUST_NM1", name1, "Derived", "Derived", "D&B", itemNo);
           output.addMatch(getProcessCode(), "MAIN_CUST_NM2", name2, "Derived", "Derived", "D&B", itemNo);
