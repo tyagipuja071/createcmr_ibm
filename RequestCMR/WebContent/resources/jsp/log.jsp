@@ -58,7 +58,7 @@ ul {
       <td>
         <ul>
           <li>CreateCMR 2.0 - United States</li>
-          <li>UI Enhancements for Switzerland</li>
+          <li>UI Enhancements for CreateCMR 2.0 - Switzerland</li>
           <li>Internal Defect Fixes and Enhancements</li>
         </ul>
       </td>
