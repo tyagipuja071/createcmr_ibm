@@ -341,7 +341,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         name2 = nameParts[1];
         if (!handler.customerNamesOnAddress() && !mainCustNameAdded) {
           output.addMatch(getProcessCode(), "MAIN_CUST_NM1", name1, "Derived", "Derived", "D&B", itemNo);
-          output.addMatch(getProcessCode(), "MAIN_CUST_NM2", name2, "Derived", "Derived", "D&B", itemNo);
+          output.addMatch(getProcessCode(), "MAIN_CUST_NM2", StringUtils.isBlank(name2) ? "-BLANK-" : name2, "Derived", "Derived", "D&B", itemNo);
           mainCustNameAdded = true;
         } else {
           output.addMatch(getProcessCode(), addrType + "::CUST_NM1", name1, "Derived", "Derived", "D&B", itemNo);
@@ -361,7 +361,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         // street line1
         output.addMatch(getProcessCode(), addrType + "::ADDR_TXT", addrTxt1, "Derived", "Derived", "D&B", itemNo);
         if (StringUtils.isNotBlank(addrTxt2)) {
-          output.addMatch(getProcessCode(), addrType + "::ADDR_TXT_2", addrTxt2, "Derived", "Derived", "D&B", itemNo);
+          output.addMatch(getProcessCode(), addrType + "::ADDR_TXT_2", StringUtils.isBlank(addrTxt2) ? "-BLANK-" : addrTxt2, "Derived", "Derived",
+              "D&B", itemNo);
         }
       }
       if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
@@ -402,11 +403,19 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         Addr addr = requestData.getAddress(addressInfoField[0]);
         if (Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "STATE_PROV", "LAND_CNTRY", "POST_CD")
             .contains(addressInfoField[1])) {
-          setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue());
+          if ("-BLANK-".equals(match.getId().getMatchKeyValue())) {
+            setEntityValue(addr, addressInfoField[1], null);
+          } else {
+            setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue());
+          }
         }
       }
     } else if (Arrays.asList("MAIN_CUST_NM1", "MAIN_CUST_NM2").contains(field)) {
-      setEntityValue(admin, field, match.getId().getMatchKeyValue());
+      if ("-BLANK-".equals(match.getId().getMatchKeyValue())) {
+        setEntityValue(admin, field, null);
+      } else {
+        setEntityValue(admin, field, match.getId().getMatchKeyValue());
+      }
     }
     return true;
   }
