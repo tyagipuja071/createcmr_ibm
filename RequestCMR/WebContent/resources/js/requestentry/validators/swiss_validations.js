@@ -408,6 +408,14 @@ function addVatSuffixForCustLangCdScrtch() {
   if (reqType != 'C') {
     return;
   }
+  var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
+    REQ_ID : reqId,
+    ADDR_TYPE : 'ZS01'
+  });
+  var landCntry = result.ret1;
+  if (landCntry != 'CH' && landCntry != 'LI') {
+    return;
+  }
   // get custlangCd
   var reqId = FormManager.getActualValue('reqId');
   var qParams = {
@@ -1507,16 +1515,25 @@ function setPreferredLangAddr() {
     REQ_ID : zs01ReqId,
   };
 
-  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
-  var postCd = FormManager.getActualValue('postCd');
-  postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
+  var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
+    REQ_ID : reqId,
+    ADDR_TYPE : 'ZS01'
+  });
+  var landCntry = result.ret1;
+  if (landCntry == 'CH' || landCntry == 'LI') {
+    var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
+    var postCd = FormManager.getActualValue('postCd');
+    postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
 
-  if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
-    FormManager.setValue('custLangCd', 'D');
-  } else if (postCd >= 6500 && postCd <= 6999) {
-    FormManager.setValue('custLangCd', 'I');
-  } else if (postCd >= 0000 && postCd <= 3000) {
-    FormManager.setValue('custLangCd', 'F');
+    if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+      FormManager.setValue('custLangCd', 'D');
+    } else if (postCd >= 6500 && postCd <= 6999) {
+      FormManager.setValue('custLangCd', 'I');
+    } else if (postCd >= 0000 && postCd <= 3000) {
+      FormManager.setValue('custLangCd', 'F');
+    }
+  } else {
+    FormManager.setValue('custLangCd', 'E');
   }
 }
 function reqReasonOnChange() {
