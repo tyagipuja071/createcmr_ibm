@@ -408,6 +408,7 @@ function addVatSuffixForCustLangCdScrtch() {
   if (reqType != 'C') {
     return;
   }
+  var reqId = FormManager.getActualValue('reqId');
   var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
     REQ_ID : reqId,
     ADDR_TYPE : 'ZS01'
