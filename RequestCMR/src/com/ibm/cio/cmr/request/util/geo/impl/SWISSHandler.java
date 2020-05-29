@@ -170,19 +170,16 @@ public class SWISSHandler extends GEOHandler {
       data.setCmrNo("");
     }
     // changes made as part of defect CMR - 3242
-    if ("U".equals(admin.getReqType())) {
-      try {
-        if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
-          data.setCurrencyCd(geCurrencyCode(zs01sapNo));
-          data.setTaxCd1(getTaxCode(zs01sapNo));
-        }
-      } catch (Exception e) {
-        LOG.error("Error occured on setting Currency Code/ tax code value during import.");
-        e.printStackTrace();
+    try {
+      if ("88".equals(mainRecord.getCmrOrderBlock()) || "".equals(mainRecord.getCmrOrderBlock())) {
+        data.setCurrencyCd(geCurrencyCode(zs01sapNo));
+        data.setTaxCd1(getTaxCode(zs01sapNo));
       }
-    } else if ("C".equals(admin.getReqType())) {
-      data.setCurrencyCd("CHF");
+    } catch (Exception e) {
+      LOG.error("Error occured on setting Currency Code/ tax code value during import.");
+      e.printStackTrace();
     }
+
   }
 
   @Override
@@ -436,6 +433,10 @@ public class SWISSHandler extends GEOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+
+    if ("C".equals(admin.getReqType())) {
+      data.setCurrencyCd("CHF");
+    }
 
   }
 
