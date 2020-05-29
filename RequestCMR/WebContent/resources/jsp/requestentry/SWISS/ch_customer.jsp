@@ -18,6 +18,7 @@
 %>
 
 <cmr:view forCountry="848">
+    <form:hidden path="currencyCd" />
 	<cmr:row>
 		<cmr:column span="2" containerForField="LocalTax1">
 			<p>
