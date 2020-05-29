@@ -1051,6 +1051,29 @@ function setVatValidatorMalra() {
   }
 }
 
+function addISICValidatorForScenario() {
+  console.log("addISICValidatorForScenario for Malta..");
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var reqType = null;
+          var _custType = FormManager.getActualValue('custSubGrp');
+          var _isicCd = FormManager.getActualValue('isicCd');
+       if (typeof (_pagemodel) != 'undefined') {
+          reqType = FormManager.getActualValue('reqType');
+       }
+      if("C" == reqType){
+        if ((_custType != null && _isicCd != null) &&  _custType !='PRICU' && _isicCd=='9500') {
+          return new ValidationResult(null, false, 'ISIC value 9500 is not allow to other scenario than Private Customer.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }   
+     }
+      };
+    })(), 'MAIN_CUST_TAB', 'frmCMR');
+  }
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1111,4 +1134,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrFunctionMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, SysLoc.MALTA, null, true);
+  GEOHandler.registerValidator(addISICValidatorForScenario, SysLoc.MALTA, null, true);
 });
