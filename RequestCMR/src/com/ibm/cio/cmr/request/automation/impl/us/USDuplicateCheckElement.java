@@ -357,19 +357,11 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       case USUtil.POWER_OF_ATTORNEY:
       case USUtil.FEDERAL:
       case USUtil.STATE_LOCAL:
-        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())) {
-            reqCheckMatchesTmp.add(reqCheckRecord);
-          }
-        }
-        response.setMatches(reqCheckMatchesTmp);
+        response.setMatches(reqCheckMatches);
         break;
       case USUtil.LEASING:
         for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
-              && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+          if (StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
               && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
             reqCheckMatchesTmp.add(reqCheckRecord);
           }
@@ -378,9 +370,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         break;
       case USUtil.BUSINESS_PARTNER:
         for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo()) && StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo())
-              && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+          if (StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
               && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo())) {
             String sql = ExternalizedQuery.getSql("AUTO.US.BP_ACCOUNT_TYPE");
             PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -396,11 +386,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         break;
       case USUtil.COMMERCIAL:
         for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-          if (StringUtils.isNotBlank(reqCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-              && reqCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
-              && ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                  && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
-                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo())))) {
+          if ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+              && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
+              || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo()))) {
             reqCheckMatchesTmp.add(reqCheckRecord);
           }
         }
@@ -544,11 +532,13 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
-    MatchingResponse<ReqCheckResponse> byModelResponse = new MatchingResponse<>();
+    Addr zs01 = requestData.getAddress("ZS01");
+    Addr zi01 = requestData.getAddress("ZI01");
+    ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
+    boolean requiresZI01Match = false;
 
     // check if End user and has divn value
     if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
-      Addr zs01 = requestData.getAddress("ZS01");
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
         response.setMatched(false);
@@ -557,6 +547,74 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
     }
 
+    // check if ZI01 is to be matched and is it unique
+    if (scenarioExceptions.getAddressTypesForDuplicateRequestCheck().contains("ZI01") && (zi01 == null || isAddressDuplicate(zs01, zi01))) {
+      scenarioExceptions.getAddressTypesForDuplicateRequestCheck().remove("ZI01");
+      requiresZI01Match = true;
+    }
+
+    response = getUSRequestMatches(entityManager, requestData, engineData);
+
+    if (response != null && response.getSuccess() && response.getMatched() && requiresZI01Match) {
+      List<ReqCheckResponse> dirtyMatches = new ArrayList<>();
+      List<ReqCheckResponse> pureMatches = new ArrayList<>();
+      for (ReqCheckResponse record : response.getMatches()) {
+        String sql = ExternalizedQuery.getSql("AUTO.US.CHECK_ZI01_ON_REQ");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", record.getReqId());
+        query.setForReadOnly(true);
+        if (query.exists()) {
+          // has ZI01 add to dirtyMatches
+          dirtyMatches.add(record);
+        } else {
+          // has only zs01 add to pure matches
+          pureMatches.add(record);
+        }
+      }
+      if (!dirtyMatches.isEmpty()) {
+        // if we found dirty matches we need to filter them again
+        engineData.addPositiveCheckStatus("US_ZI01_REQ_MATCH");
+        // adding this to scenario exceptions will check only ZS01-ZP01 matches
+        response = getUSRequestMatches(entityManager, requestData, engineData);
+        if (response != null && response.getSuccess() && response.getMatched()) {
+          dirtyMatches = updateREQMatches(dirtyMatches, response.getMatches());
+          if (dirtyMatches.size() > 0) {
+            // if matches found for ZI01 we add them to pure matches
+            pureMatches.addAll(dirtyMatches);
+          }
+        }
+        if (!pureMatches.isEmpty()) {
+          response.setSuccess(true);
+          response.setMatched(true);
+          response.setMatches(pureMatches);
+        } else {
+          response.setSuccess(true);
+          response.setMatched(false);
+          response.setMessage("No matches found for the given search criteria.");
+        }
+      }
+
+    }
+
+    // filter dup requests
+    if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
+      filterDuplicateRequests(entityManager, requestData, engineData, response);
+    }
+
+    // reverify
+    if (response.getMatches().size() == 0) {
+      response.setMatched(false);
+      response.setMessage("No matches found for the given search criteria.");
+    }
+
+    return response;
+  }
+
+  private MatchingResponse<ReqCheckResponse> getUSRequestMatches(EntityManager entityManager, RequestData requestData,
+      AutomationEngineData engineData) throws Exception {
+    MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
+    MatchingResponse<ReqCheckResponse> byModelResponse = new MatchingResponse<>();
+    Data data = requestData.getData();
     // get duplicates
     if (!USUtil.SC_BYMODEL.equals(data.getCustSubGrp())) {
       engineData.put(AutomationEngineData.REQ_MATCH_SCENARIO, data.getCustSubGrp());
@@ -586,18 +644,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
       }
     }
-
-    // filter dup requests
-    if (response.getSuccess() && response.getMatched() && !response.getMatches().isEmpty()) {
-      filterDuplicateRequests(entityManager, requestData, engineData, response);
-    }
-
-    // reverify
-    if (response.getMatches().size() == 0) {
-      response.setMatched(false);
-      response.setMessage("No matches found for the given search criteria.");
-    }
-
     return response;
   }
 
@@ -754,11 +800,57 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return updated;
   }
 
+  private List<ReqCheckResponse> updateREQMatches(List<ReqCheckResponse> global, List<ReqCheckResponse> iteration) {
+    List<ReqCheckResponse> updated = new ArrayList<>();
+    for (ReqCheckResponse resp1 : global) {
+      for (ReqCheckResponse resp2 : iteration) {
+        if (resp1.getReqId() == resp2.getReqId()) {
+          updated.add(resp1);
+          break;
+        }
+      }
+    }
+    return updated;
+
+  }
+
   private List<String> removeDupEntriesFrmList(List<String> duplList) {
     Set<String> s = new LinkedHashSet<String>();
     s.addAll(duplList);
     duplList.clear();
     duplList.addAll(s);
     return duplList;
+  }
+
+  private boolean isAddressDuplicate(Addr first, Addr second) {
+    String firstStreetAddress1 = (StringUtils.isNotBlank(first.getAddrTxt()) ? first.getAddrTxt() : "").trim().toUpperCase();
+    String firstStreetAddress2 = (StringUtils.isNotBlank(first.getAddrTxt2()) ? first.getAddrTxt2() : "").trim().toUpperCase();
+    String firstStreetAddress = firstStreetAddress1;
+    if (StringUtils.isBlank(firstStreetAddress)) {
+      firstStreetAddress = firstStreetAddress2;
+    } else if (StringUtils.isNotBlank(firstStreetAddress2)) {
+      firstStreetAddress += " " + firstStreetAddress2;
+    }
+    firstStreetAddress = StringUtils.isNotBlank(firstStreetAddress) ? firstStreetAddress : "";
+    String firstCity = (StringUtils.isNotBlank(first.getCity1()) ? first.getCity1() : "").trim().toUpperCase();
+    String firstPostalCd = (StringUtils.isNotBlank(first.getPostCd()) ? first.getPostCd() : "").trim();
+
+    String secondStreetAddress1 = (StringUtils.isNotBlank(second.getAddrTxt()) ? second.getAddrTxt() : "").trim().toUpperCase();
+    String secondStreetAddress2 = (StringUtils.isNotBlank(second.getAddrTxt2()) ? second.getAddrTxt2() : "").trim().toUpperCase();
+    String secondStreetAddress = secondStreetAddress1;
+    if (StringUtils.isBlank(secondStreetAddress)) {
+      secondStreetAddress = secondStreetAddress2;
+    } else if (StringUtils.isNotBlank(secondStreetAddress2)) {
+      secondStreetAddress += " " + secondStreetAddress2;
+    }
+    secondStreetAddress = StringUtils.isNotBlank(secondStreetAddress) ? secondStreetAddress : "";
+    String secondCity = (StringUtils.isNotBlank(second.getCity1()) ? second.getCity1() : "").trim().toUpperCase();
+    String secondPostalCd = (StringUtils.isNotBlank(second.getPostCd()) ? second.getPostCd() : "").trim();
+
+    if (secondStreetAddress.equals(firstStreetAddress) && secondCity.equals(firstCity) && secondPostalCd.equals(firstPostalCd)) {
+      return true;
+    }
+    return false;
+
   }
 }
