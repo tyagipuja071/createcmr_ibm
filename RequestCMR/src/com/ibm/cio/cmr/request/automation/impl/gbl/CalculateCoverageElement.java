@@ -176,12 +176,12 @@ public class CalculateCoverageElement extends OverridingElement {
       if (bgId != null) {
         coverages = computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_BG", bgId, data.getCmrIssuingCntry(), false);
         if (coverages != null && !coverages.isEmpty()) {
-          CoverageContainer prefferedCoverage = coverages.get(0);
-          if (prefferedCoverage.getFinalCoverageRules() == null) {
-            details.append("The preffered coverage '" + prefferedCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
+          CoverageContainer preferredCoverage = coverages.get(0);
+          if (preferredCoverage.getFinalCoverageRules() == null) {
+            details.append("The preferred coverage '" + preferredCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
                 + "' was not found in coverage rules.").append("\n");
             details.append("Proceeding with other calculated coverages - ").append("\n");
-            engineData.addNegativeCheckStatus("PREFFERED_COVERAGE_ERROR", "The preffered coverage '" + prefferedCoverage.getFinalCoverage()
+            engineData.addNegativeCheckStatus("PREFERRED_COVERAGE_ERROR", "The preferred coverage '" + preferredCoverage.getFinalCoverage()
                 + "' determined using Buying Group '" + bgId + "' was not found in coverage rules.");
             coverages = getValidCoverages(coverages);
           }
