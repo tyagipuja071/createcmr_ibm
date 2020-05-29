@@ -1718,11 +1718,9 @@ function applyAddrChangesModal_onLoad() {
         break;
       }
 
-      // update TR
-      // Rollback TR change
-      // if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01')
-      // {
-      if ((SysLoc.TURKEY == cntry || SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
+      // update For TR
+
+      if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
         break;
       }
       
