@@ -377,8 +377,7 @@ function addHandlersForSWISS() {
 
   if (_vatHandler == null) {
     _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-      var impIndc = getImportedIndcForSwiss();
-      if (impIndc == 'N') {
+      if (value.length == 15) {
         addVatSuffixForCustLangCdScrtch();
       }
     });
@@ -419,13 +418,14 @@ function addVatSuffixForCustLangCdScrtch() {
     var custLang = result.ret1;
     // set vat suffix
     var vat = FormManager.getActualValue('vat');
-    if (vat != '' && vat != null && vat != undefined) {
-      if ((custLang == 'E' || custLang == 'D') && vat.substring(16, 20) != 'Mwst' && vat.length == 15) {
-        FormManager.setValue('vat', vat.concat(" Mwst"));
-      } else if ((custLang == 'I') && vat.substring(16, 19) != 'IVA' && vat.length == 16) {
-        FormManager.setValue('vat', vat.concat(" IVA"));
-      } else if (custLang == 'F' && vat.substring(16, 19) != 'TVA' && vat.length == 16) {
-        FormManager.setValue('vat', vat.concat(" TVA"));
+    if (vat != '' && vat != null && vat != undefined && vat.length >= 15) {
+      var vatOnly = vat.substring(0, 15);
+      if ((custLang == 'E' || custLang == 'D') && vat.substring(16, 20) != 'Mwst') {
+        FormManager.setValue('vat', vatOnly.concat(" Mwst"));
+      } else if ((custLang == 'I') && vat.substring(16, 19) != 'IVA') {
+        FormManager.setValue('vat', vatOnly.concat(" IVA"));
+      } else if (custLang == 'F' && vat.substring(16, 19) != 'TVA') {
+        FormManager.setValue('vat', vatOnly.concat(" TVA"));
       }
     }
   }
@@ -1099,14 +1099,14 @@ function addVatSuffixForCustLangCd() {
 
   var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
   var vat = result.ret1;
-  if (vat != '' && vat != null && vat != undefined) {
-    vat = vat.substring(0, 15);
+  if (vat != '' && vat != null && vat != undefined && vat.length >= 15) {
+    var vatOnly = vat.substring(0, 15);
     if ((custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
-      FormManager.setValue('vat', vat.concat(" Mwst"));
+      FormManager.setValue('vat', vatOnly.concat(" Mwst"));
     } else if ((custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
-      FormManager.setValue('vat', vat.concat(" IVA"));
+      FormManager.setValue('vat', vatOnly.concat(" IVA"));
     } else if (custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
-      FormManager.setValue('vat', vat.concat(" TVA"));
+      FormManager.setValue('vat', vatOnly.concat(" TVA"));
     }
   }
 
