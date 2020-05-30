@@ -284,7 +284,7 @@ public class CalculateCoverageElement extends OverridingElement {
         boolean logNegativeCheck = true;
         for (CoverageContainer container : coverages) {
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
-          logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, FINAL, logNegativeCheck);
+          logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, FINAL, logNegativeCheck, computedGbg);
           logNegativeCheck = false;
 
           boolean logBaseCoverage = false;
@@ -293,7 +293,7 @@ public class CalculateCoverageElement extends OverridingElement {
             // don't log base for now
             if (container.getBaseCoverage() != null) {
               LOG.debug("Logging Base Coverage ID: " + container.getBaseCoverage());
-              logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, BASE, false);
+              logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, BASE, false, computedGbg);
             }
           }
 
@@ -422,7 +422,8 @@ public class CalculateCoverageElement extends OverridingElement {
    * @param logNegativeCheck
    */
   public void logCoverage(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData, List<String> coverageIds,
-      StringBuilder details, OverrideOutput output, CoverageContainer coverageContainer, String currCovLevel, boolean logNegativeCheck) {
+      StringBuilder details, OverrideOutput output, CoverageContainer coverageContainer, String currCovLevel, boolean logNegativeCheck,
+      GBGResponse gbg) {
     if (coverageIds == null) {
       // check for null
       coverageIds = new ArrayList<>();
@@ -565,12 +566,21 @@ public class CalculateCoverageElement extends OverridingElement {
                         } else {
                           details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                         }
+                        // special case, pls fix on monday
                         if (("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) && !"BGNONE".equals(fieldValue)) {
-                          // don't let cov element compute gbg
-                          details.append("- Value for " + field + " under the coverage is different from the request.\n");
-                          if (logNegativeCheck) {
-                            engineData.addNegativeCheckStatus(field, "Value for " + field + " under the coverage is different from the request.");
-                            // notDeterminedFields.put(field, val);
+                          if ("GBG_ID".equals(dbField) && gbg != null && condition.getValues() != null
+                              && condition.getValues().contains(gbg.getGbgId())) {
+                            // noop
+                          } else if ("BG_ID".equals(dbField) && gbg != null && condition.getValues() != null
+                              && condition.getValues().contains(gbg.getBgId())) {
+                            // noop
+                          } else {
+                            // don't let cov element compute gbg
+                            details.append("- Value for " + field + " under the coverage is different from the request.\n");
+                            if (logNegativeCheck) {
+                              engineData.addNegativeCheckStatus(field, "Value for " + field + " under the coverage is different from the request.");
+                              // notDeterminedFields.put(field, val);
+                            }
                           }
                         } else {
                           if (createOverrides) {
