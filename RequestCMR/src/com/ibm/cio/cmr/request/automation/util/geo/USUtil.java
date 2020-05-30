@@ -1144,10 +1144,10 @@ public class USUtil extends AutomationUtil {
         Addr zs01 = requestData.getAddress("ZS01");
         String divn = zs01.getDivn();
         String dept = zs01.getDept();
-        if ((StringUtils.isNotBlank(divn)
-            && (divn.toUpperCase().contains("e-host".toUpperCase()) || divn.toUpperCase().contains("ehost".toUpperCase())))
-            || (StringUtils.isNotBlank(dept)
-                && (dept.toUpperCase().contains("e-host".toUpperCase()) || dept.toUpperCase().contains("ehost".toUpperCase())))) {
+        if ((StringUtils.isNotBlank(divn) && (divn.toUpperCase().contains("e-host".toUpperCase())
+            || divn.toUpperCase().contains("ehost".toUpperCase()) || divn.toUpperCase().contains("e host".toUpperCase())))
+            || (StringUtils.isNotBlank(dept) && (dept.toUpperCase().contains("e-host".toUpperCase())
+                || dept.toUpperCase().contains("ehost".toUpperCase()) || dept.toUpperCase().contains("e host".toUpperCase())))) {
           custSubGroup = SC_BP_E_HOST;
         } else if ("IRCSO".equals(usRestrictToLOV) || "BPQS".equals(usRestrictToLOV)) {
           custSubGroup = SC_BP_END_USER;
