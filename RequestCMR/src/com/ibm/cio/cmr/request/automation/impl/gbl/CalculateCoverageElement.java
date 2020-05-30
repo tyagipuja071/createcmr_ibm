@@ -549,7 +549,7 @@ public class CalculateCoverageElement extends OverridingElement {
                       } else {
                         fieldValue = getColumnValueFromData(requestData.getData(), dbField);
                       }
-                      if (condition.getValues() != null && condition.getValues().contains(fieldValue)) {
+                      if (containsValue(condition, fieldValue)) {
                         // no override using first value, the list already
                         // contains current value
                         details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + fieldValue + "\n");
@@ -649,6 +649,17 @@ public class CalculateCoverageElement extends OverridingElement {
       }
       coverageIds.add(currCovId);
     }
+  }
+
+  private boolean containsValue(Condition condition, String fieldValue) {
+    if (fieldValue != null && condition.getValues() != null && !condition.getValues().isEmpty()) {
+      for (String value : condition.getValues()) {
+        if (value != null && value.trim().equals(fieldValue.trim())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private String getColumnValueFromAddr(Addr addr, String dbField) {
