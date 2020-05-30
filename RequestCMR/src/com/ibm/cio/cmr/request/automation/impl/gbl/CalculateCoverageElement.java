@@ -442,6 +442,8 @@ public class CalculateCoverageElement extends OverridingElement {
 
     if (!coverageIds.contains(currCovId)) {
       GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+      // create overrides for first logged coverage only
+      boolean createOverrides = coverageIds.isEmpty();
       details.append("\nCoverage ID = " + currCovId).append(" (" + currCovLevel + ")").append("\n");
       details.append("Coverage Name = " + getCoverageDescription(entityManager, currCovId)).append("\n");
       List<Rule> rules = currCovRules;
@@ -474,15 +476,17 @@ public class CalculateCoverageElement extends OverridingElement {
                   String val = condition.getFirstUsableValue();
                   if (val != null && !val.startsWith("!")) {
                     String operation = condition.getOperation().toString();
+                    String fieldValue = "";
                     switch (operation) {
-                    case "In":
                     case "StartsOrEndsWith":
                     case "Equals":
                       details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
-                      output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
+                      if (createOverrides) {
+                        output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
+                      }
                       break;
                     case "StartsWith":
-                      String fieldValue = "";
+                      fieldValue = "";
                       if (addr) {
                         fieldValue = getColumnValueFromAddr(requestData.getAddress("ZS01"), dbField);
                       } else {
@@ -518,7 +522,9 @@ public class CalculateCoverageElement extends OverridingElement {
                           String value = query.getSingleResult(String.class);
                           if (StringUtils.isNotBlank(value)) {
                             details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
-                            output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
+                            if (createOverrides) {
+                              output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
+                            }
                           } else {
                             if (logNegativeCheck) {
                               engineData.addNegativeCheckStatus(dbField,
@@ -532,6 +538,34 @@ public class CalculateCoverageElement extends OverridingElement {
                                 "The override value could not be determined for the field - " + field + " during coverage calculation.");
                           }
                           notDeterminedFields.put(field, val);
+                        }
+                      }
+                      break;
+                    case "In":
+                      fieldValue = "";
+                      if (addr) {
+                        fieldValue = getColumnValueFromAddr(requestData.getAddress("ZS01"), dbField);
+                      } else {
+                        fieldValue = getColumnValueFromData(requestData.getData(), dbField);
+                      }
+                      if (condition.getValues() != null && condition.getValues().contains(fieldValue)) {
+                        // no override using first value, the list already
+                        // contains current value
+                        details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + fieldValue + "\n");
+                        // output.addOverride(getProcessCode(), addr ? "ZS01" :
+                        // "DATA", dbField, "", fieldValue);
+                        break;
+                      } else if (val.startsWith("!") && (fieldValue == null || !fieldValue.equals(val.substring(1)))) {
+                        // for ! cases on IN, if the field value is not the
+                        // value, also currently a match, no override
+                        details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + fieldValue + "\n");
+                      } else {
+                        if ("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) {
+                          // don't let cov element compute gbg
+                          notDeterminedFields.put(field, val);
+                        } else {
+                          details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
+                          output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
                         }
                       }
                       break;
@@ -587,9 +621,11 @@ public class CalculateCoverageElement extends OverridingElement {
         details.append("\nOverrides based on CMR data:").append("\n");
         details.append(" - ISU Code = " + coverageContainer.getIsuCd()).append("\n");
         details.append(" - Client Tier = " + coverageContainer.getClientTierCd()).append("\n");
-        output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
-        output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
-            StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
+        if (createOverrides) {
+          output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
+          output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
+              StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
+        }
       }
       coverageIds.add(currCovId);
     }
