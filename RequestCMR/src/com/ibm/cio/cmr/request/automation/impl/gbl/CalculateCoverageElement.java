@@ -549,7 +549,7 @@ public class CalculateCoverageElement extends OverridingElement {
                       } else {
                         fieldValue = getColumnValueFromData(requestData.getData(), dbField);
                       }
-                      if (condition.containsValue(fieldValue)) {
+                      if (condition.getValues() != null && condition.getValues().contains(fieldValue)) {
                         // no override using first value, the list already
                         // contains current value
                         details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + fieldValue + "\n");
