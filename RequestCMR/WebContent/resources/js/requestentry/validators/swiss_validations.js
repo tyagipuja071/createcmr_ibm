@@ -377,7 +377,7 @@ function addHandlersForSWISS() {
 
   if (_vatHandler == null) {
     _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-      if (value.length == 15) {
+      if (value.length >= 15) {
         addVatSuffixForCustLangCdScrtch();
       }
     });
