@@ -560,13 +560,15 @@ public class CalculateCoverageElement extends OverridingElement {
                         // value, also currently a match, no override
                         details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + fieldValue + "\n");
                       } else {
-                        if ("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) {
+                        details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
+                        if (("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) && !"BGNONE".equals(val)) {
                           // don't let cov element compute gbg
-                          details.append("- Value for " + field + "under the coverage is different from the request.");
-                          engineData.addNegativeCheckStatus(field, "Value for " + field + "under the coverage is different from the request.");
-                          // notDeterminedFields.put(field, val);
+                          details.append("- Value for " + field + " under the coverage is different from the request.\n");
+                          if (logNegativeCheck) {
+                            engineData.addNegativeCheckStatus(field, "Value for " + field + " under the coverage is different from the request.");
+                            // notDeterminedFields.put(field, val);
+                          }
                         } else {
-                          details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                           output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
                         }
                       }
