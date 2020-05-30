@@ -231,7 +231,7 @@ public class USUtil extends AutomationUtil {
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
-        scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData);
+        scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
       }
       LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
       // computation start
@@ -367,7 +367,7 @@ public class USUtil extends AutomationUtil {
       scenarioSubType = StringUtils.isBlank(data.getCustSubGrp()) ? "" : data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
         try {
-          scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData);
+          scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
         } catch (Exception e) {
           LOG.error("CMR Scenario for Create by model request could not be determined.", e);
         }
@@ -996,7 +996,8 @@ public class USUtil extends AutomationUtil {
    * @return
    * @throws Exception
    */
-  public static String determineCustSubScenario(EntityManager entityManager, String cmrNo, AutomationEngineData engineData) throws Exception {
+  public static String determineCustSubScenario(EntityManager entityManager, String cmrNo, AutomationEngineData engineData, RequestData requestData)
+      throws Exception {
     // get request admin and data
     String custSubGroup = "";
 
@@ -1010,8 +1011,6 @@ public class USUtil extends AutomationUtil {
     String isicCd = "";
     String subIndustryCd = "";
     String affiliate = "";
-    String name3 = "";
-    String name4 = "";
 
     USDetailsContainer usDetails = determineUSCMRDetails(entityManager, cmrNo);
 
@@ -1142,34 +1141,21 @@ public class USUtil extends AutomationUtil {
       } else if ("D".equals(bpAccTyp)) {
         custSubGroup = SC_BP_DEVELOP;
       } else if ("E".equals(bpAccTyp)) {
-        String[] addrTypList = { "ZS01", "ZI01" };
-        for (String addrTyp : Arrays.asList(addrTypList)) {
-          // get RDC values
-          sql = ExternalizedQuery.getSql("AUTO.US.GET_ATTN_RDC");
-          query = new PreparedQuery(entityManager, sql);
-          query.setParameter("CMR_NO", cmrNo);
-          query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-          query.setParameter("ADDR_TYP", addrTyp);
-          query.setForReadOnly(true);
-          List<Object[]> resultList = query.getResults(1);
-          if (resultList != null && resultList.size() > 0) {
-            name3 = (String) resultList.get(0)[0];
-            name4 = (String) resultList.get(0)[1];
-          }
-
-          if ((StringUtils.isNotBlank(name3)
-              && (name3.toUpperCase().contains("e-host".toUpperCase()) || name3.toUpperCase().contains("ehost".toUpperCase())))
-              || (StringUtils.isNotBlank(name4)
-                  && (name4.toUpperCase().contains("e-host".toUpperCase()) || name4.toUpperCase().contains("ehost".toUpperCase())))) {
-            custSubGroup = SC_BP_E_HOST;
-            break;
-          } else if ("IRCSO".equals(usRestrictToLOV) || "BPQS".equals(usRestrictToLOV)) {
-            custSubGroup = SC_BP_END_USER;
-          }
+        Addr zs01 = requestData.getAddress("ZS01");
+        String divn = zs01.getDivn();
+        String dept = zs01.getDept();
+        if ((StringUtils.isNotBlank(divn)
+            && (divn.toUpperCase().contains("e-host".toUpperCase()) || divn.toUpperCase().contains("ehost".toUpperCase())))
+            || (StringUtils.isNotBlank(dept)
+                && (dept.toUpperCase().contains("e-host".toUpperCase()) || dept.toUpperCase().contains("ehost".toUpperCase())))) {
+          custSubGroup = SC_BP_E_HOST;
+        } else if ("IRCSO".equals(usRestrictToLOV) || "BPQS".equals(usRestrictToLOV)) {
+          custSubGroup = SC_BP_END_USER;
         }
       }
     }
     return custSubGroup;
+
   }
 
   public static USDetailsContainer determineUSCMRDetails(EntityManager entityManager, String cmrNo) throws Exception {
