@@ -562,6 +562,8 @@ public class CalculateCoverageElement extends OverridingElement {
                       } else {
                         if ("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) {
                           // don't let cov element compute gbg
+                          details.append("- Value for " + field + "under the coverage is different from the request.");
+                          engineData.addNegativeCheckStatus(field, "Value for " + field + "under the coverage is different from the request.");
                           notDeterminedFields.put(field, val);
                         } else {
                           details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
