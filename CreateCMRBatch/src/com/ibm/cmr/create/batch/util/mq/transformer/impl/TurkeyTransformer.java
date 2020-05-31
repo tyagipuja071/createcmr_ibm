@@ -1203,14 +1203,6 @@ public class TurkeyTransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-      // legacyCust.setSalesRepNo(data.getSalesTeamCd());
-      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
-    } else {
-      // legacyCust.setSalesRepNo("");
-      legacyCust.setSalesGroupRep("");
-    }
-
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
       String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
       legacyCust.setSbo(sbo);

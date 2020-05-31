@@ -149,7 +149,11 @@ public class AutomationEngine {
     int lastElementIndex = 0;
 
     boolean hasOverrideOrMatchingApplied = false;
+
+    // failsafes before engine run for any request
     requestData.getAdmin().setReviewReqIndc("N");
+    requestData.getAdmin().setDisableAutoProc("N");
+
     for (AutomationElement<?> element : this.elements) {
       ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
 
