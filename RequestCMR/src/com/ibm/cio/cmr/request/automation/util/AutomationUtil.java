@@ -516,7 +516,10 @@ public abstract class AutomationUtil {
     LOG.debug("Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
-      String cmrNo = checkResponse.getCmrNo();
+      String cmrNo = "";
+      if (checkResponse != null) {
+        cmrNo = checkResponse.getCmrNo();
+      }
       // TODO find kunnr String kunnr = checkResponse.get
       if (!StringUtils.isBlank(cmrNo)) {
         LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
