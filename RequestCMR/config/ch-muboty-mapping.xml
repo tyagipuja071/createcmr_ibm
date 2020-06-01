@@ -119,7 +119,7 @@
 	<!-- 32N postal code muboty mappings, ordered in increasing order of last 
 		2 digits of MUBOTY -->
 <mapping>
-		<muboty>0421234</muboty>
+		<muboty>0421435</muboty>
 		<ims>B</ims>
 		<postalCdMin>3000</postalCdMin>
 		<postalCdMax>9999</postalCdMax>
@@ -127,7 +127,7 @@
 		<ctc>N</ctc>
 	</mapping>
 	<mapping>
-		<muboty>0421435</muboty>
+		<muboty>0421234</muboty>
 		<ims>B</ims>
 		<postalCdMin>1000</postalCdMin>
 		<postalCdMax>2999</postalCdMax>

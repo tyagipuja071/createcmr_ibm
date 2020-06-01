@@ -516,7 +516,10 @@ public abstract class AutomationUtil {
     LOG.debug("Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
-      String cmrNo = checkResponse.getCmrNo();
+      String cmrNo = "";
+      if (checkResponse != null) {
+        cmrNo = checkResponse.getCmrNo();
+      }
       // TODO find kunnr String kunnr = checkResponse.get
       if (!StringUtils.isBlank(cmrNo)) {
         LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
@@ -605,6 +608,8 @@ public abstract class AutomationUtil {
         engineData.addRejectionComment("OTH", "CEID " + ceId + "  is not valid as checked against the PartnerWorld Profile System.", "", "");
         details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.").append("\n");
         return false;
+      } else {
+        details.append("CEID " + ceId + " is validated against the PartnerWorld Profile System.").append("\n");
       }
     } catch (Exception e) {
       LOG.error("Not able to validate PPS CE ID using PPS Service.", e);

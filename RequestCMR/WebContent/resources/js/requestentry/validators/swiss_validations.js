@@ -73,8 +73,6 @@ function addAfterConfigForSWISS() {
   if (reqType == 'C' && (custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI')) {
     FormManager.setValue("inacCd", "");
     FormManager.readOnly("inacCd");
-    FormManager.setValue("vat", "");
-    FormManager.readOnly("vat");
     FormManager.setValue("custClass", "60");
     FormManager.readOnly("custClass");
   }
@@ -84,14 +82,10 @@ function addAfterConfigForSWISS() {
     FormManager.readOnly("inacCd");
     FormManager.setValue("custClass", "71");
     FormManager.readOnly("custClass");
-    FormManager.setValue("vat", "");
-    FormManager.readOnly("vat");
   }
 
   // Lock vat,inac,kukla for internal
   if (reqType == 'C' && (custSubGrp == 'CHINT' || custSubGrp == 'LIINT')) {
-    FormManager.setValue("vat", "");
-    FormManager.readOnly("vat");
     FormManager.setValue("custClass", "81");
     FormManager.readOnly("custClass");
     FormManager.setValue("inacCd", "");
@@ -1085,6 +1079,8 @@ function addEmbargoCdValidator() {
 function addVatSuffixForCustLangCd() {
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var custSubGrpList = [ 'CHIBM', 'LIIBM', 'CHPRI', 'LIPRI', 'CHINT', 'LIINT' ];
   if (reqType != 'C') {
     return;
   }
@@ -1106,19 +1102,23 @@ function addVatSuffixForCustLangCd() {
     custLangCd = result.ret1;
   }
 
-  var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
-  var vat = result.ret1;
-  if (vat != '' && vat != null && vat != undefined && vat.length >= 15) {
-    var vatOnly = vat.substring(0, 15);
-    if ((custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
-      FormManager.setValue('vat', vatOnly.concat(" Mwst"));
-    } else if ((custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
-      FormManager.setValue('vat', vatOnly.concat(" IVA"));
-    } else if (custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
-      FormManager.setValue('vat', vatOnly.concat(" TVA"));
+  if (!custSubGrpList.includes(custSubGrp)) {
+    var result = cmr.query('ADDR.GET.VAT_REQID', qParams);
+    var vat = result.ret1;
+    if (vat != '' && vat != null && vat != undefined && vat.length >= 15) {
+      var vatOnly = vat.substring(0, 15);
+      if ((custLangCd == 'E' || custLangCd == 'D') && vat.substring(16, 20) != 'Mwst') {
+        FormManager.setValue('vat', vatOnly.concat(" Mwst"));
+      } else if ((custLangCd == 'I') && vat.substring(16, 19) != 'IVA') {
+        FormManager.setValue('vat', vatOnly.concat(" IVA"));
+      } else if (custLangCd == 'F' && vat.substring(16, 19) != 'TVA') {
+        FormManager.setValue('vat', vatOnly.concat(" TVA"));
+      }
     }
+  } else {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
   }
-
 }
 
 function setCurrencyCd() {
