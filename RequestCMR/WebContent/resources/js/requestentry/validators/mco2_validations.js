@@ -1004,6 +1004,10 @@ function disableEnableFieldsForMT(){
   var reqType = FormManager.getActualValue('reqType');
   
     if (reqType == 'C'){
+      
+      FormManager.readOnly('custPrefLang');
+      FormManager.readOnly('cmrOwner');
+      FormManager.readOnly('sensitiveFlag');
       if(role == 'REQUESTER') {
         FormManager.readOnly('specialTaxCd');
       }else{
