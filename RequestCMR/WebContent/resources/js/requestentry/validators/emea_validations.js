@@ -7828,25 +7828,20 @@ function setSBOValuesForIsuCtc() {
 }
 
 function setSBOLogicOnISUChange() {
-  console.log("setSBOLogicOnISUChange 1:");
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      console.log("setSBOLogicOnISUChange 2:");
       setSBOValuesForIsuCtc();
     });
   }
   if (_isuCdHandler && _isuCdHandler[0]) {
-    console.log("setSBOLogicOnISUChange 4");
     _isuCdHandler[0].onChange();
   }
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      console.log("setSBOLogicOnISUChange 3:");
       setSBOValuesForIsuCtc();
     });
   }
   if (_clientTierHandler && _clientTierHandler[0]) {
-    console.log("setSBOLogicOnISUChange 5:");
     _clientTierHandler[0].onChange();
   }
 }
