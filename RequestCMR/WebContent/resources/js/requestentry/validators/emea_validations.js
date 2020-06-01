@@ -7828,20 +7828,25 @@ function setSBOValuesForIsuCtc() {
 }
 
 function setSBOLogicOnISUChange() {
+  console.log("setSBOLogicOnISUChange 1:");
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      console.log("setSBOLogicOnISUChange 2:");
       setSBOValuesForIsuCtc();
     });
   }
   if (_isuCdHandler && _isuCdHandler[0]) {
+    console.log("setSBOLogicOnISUChange 4");
     _isuCdHandler[0].onChange();
   }
   if (_clientTierHandler == null && FormManager.getField('clientTier')) {
     _clientTierHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      console.log("setSBOLogicOnISUChange 3:");
       setSBOValuesForIsuCtc();
     });
   }
   if (_clientTierHandler && _clientTierHandler[0]) {
+    console.log("setSBOLogicOnISUChange 5:");
     _clientTierHandler[0].onChange();
   }
 }
@@ -8056,6 +8061,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addIEClientTierISULogic, [ SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(addUKClientTierISULogic, [ SysLoc.UK ]);
   GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
+  GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);  
   GEOHandler.addAfterConfig(addSBOSalesRepLogicIreland, [ SysLoc.IRELAND ]);
   // GEOHandler.addAfterConfig(addSBODependcyLogicUK, [ SysLoc.UK ]);
   // GEOHandler.addAfterConfig(addSalesRepDependcyLogicUK, [ SysLoc.UK ]);
@@ -8266,8 +8273,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(resetSubIndustryCdGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(showCommercialFinanced, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
 
   // CYPRUS Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
