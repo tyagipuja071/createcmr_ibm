@@ -96,7 +96,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       if (USUtil.SC_BYMODEL.equals(data.getCustSubGrp())) {
         // SKIP duplicate checks for BYMODEL internal, federal except POA, and
         // STATE/LOCAL scenarios
-        String subScenario = USUtil.determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData);
+        String subScenario = USUtil.determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
         if (subScenario != null && skipScenariosForBYMODEL.contains(subScenario)) {
           String scenarioDesc = USUtil.getScenarioDesc(entityManager, subScenario);
           details.append("Skipping Duplicate checks for Create By Model request"
