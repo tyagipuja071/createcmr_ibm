@@ -68,6 +68,7 @@ function addAfterConfigForSWISS() {
     FormManager.readOnly("inacCd");
     FormManager.setValue("custClass", "45");
     FormManager.readOnly("custClass");
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   }
 
   if (reqType == 'C' && (custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI')) {
