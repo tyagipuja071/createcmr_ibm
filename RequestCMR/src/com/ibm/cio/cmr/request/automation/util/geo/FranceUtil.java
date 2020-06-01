@@ -435,7 +435,8 @@ public class FranceUtil extends AutomationUtil {
           CoverageContainer coverage = coverages.get(0);
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, container, CalculateCoverageElement.FINAL, true);
+          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, container, CalculateCoverageElement.FINAL, true,
+              null);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {
@@ -880,10 +881,12 @@ public class FranceUtil extends AutomationUtil {
 
     if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZS01.toString()) || addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP02.toString())) {
       List<Addr> addrsToChk = new ArrayList<Addr>();
-      if (payment != null)
+      if (payment != null) {
         addrsToChk.add(payment);
-      if (installing != null)
+      }
+      if (installing != null) {
         addrsToChk.add(installing);
+      }
 
       for (Addr addr : addrsToChk) {
         if ("Y".equals(addr.getImportInd())) {

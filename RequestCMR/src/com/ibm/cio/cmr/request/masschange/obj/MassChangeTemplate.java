@@ -216,7 +216,29 @@ public class MassChangeTemplate {
           LOG.debug("validating name 3 for sheet " + name);
           for (Row row : sheet) {
             if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-              String name3 = row.getCell(4).getStringCellValue();
+              Cell cmrCell1 = row.getCell(4);
+              if (cmrCell1 != null) {
+                String name3 = "";
+                switch (cmrCell1.getCellTypeEnum()) {
+                case STRING:
+                  name3 = cmrCell1.getStringCellValue();
+                  break;
+                case NUMERIC:
+                  double nvalue = cmrCell1.getNumericCellValue();
+                  if (nvalue > 0) {
+                    name3 = "" + nvalue;
+                    break;
+                  }
+                default:
+                  continue;
+                }
+                if (name3.length() > 30) {
+                  LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
+                  TemplateValidation error = new TemplateValidation(name);
+                  error.addError(row.getRowNum(), "building", "Total computed length of customer name3 should not exeed 30");
+                  validations.add(error);
+                }
+              }
               // String dept = "";
               // String building = "";
               // String floor = "";
@@ -268,7 +290,7 @@ public class MassChangeTemplate {
               // continue;
               // }
               // }
-              // String name3 = "";
+              //
               // if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept,
               // "@")) {
               // name3 += dept;
@@ -292,12 +314,6 @@ public class MassChangeTemplate {
               // "@")) {
               // name3 += floor;
               // }
-              if (name3.length() > 30) {
-                LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
-                TemplateValidation error = new TemplateValidation(name);
-                error.addError(row.getRowNum(), "building", "Total computed length of customer name3 should not exeed 30");
-                validations.add(error);
-              }
             }
           }
         }
