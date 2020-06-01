@@ -4802,7 +4802,7 @@ function showCommercialFinanced() {
   }
 }
 function lockCmrOwner() {
-  // FormManager.setValue('cmrOwner', 'IBM');
+  FormManager.setValue('cmrOwner', 'IBM');
   FormManager.readOnly('cmrOwner');
 }
 function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
@@ -8267,6 +8267,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetSubIndustryCdGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(showCommercialFinanced, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);
 
   // CYPRUS Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
