@@ -213,4 +213,5 @@ public class SystemLocation {
 
   /* CH */
   public static final String SWITZERLAND = "848";
+  public static final String LIECHTENSTEIN = "848LI";
 }

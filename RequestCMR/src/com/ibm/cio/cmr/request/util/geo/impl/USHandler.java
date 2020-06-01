@@ -145,6 +145,11 @@ public class USHandler extends GEOHandler {
         closeMgr = true;
       }
       setCodesFromLOV(this.entityManager, url, data);
+      // Check if OEM CMR, throw error if yes
+      if ("C".equals(admin.getReqType()) && StringUtils.isNotBlank(data.getRestrictTo()) && "OEMHQ".equals(data.getRestrictTo())) {
+        throw new CmrException(MessageUtil.OEM_IMPORT_US_CREATE);
+      }
+
       if (closeMgr) {
         this.entityManager.clear();
         this.entityManager.close();
@@ -153,6 +158,7 @@ public class USHandler extends GEOHandler {
     } else {
       throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
     }
+
   }
 
   private boolean queryAndAssign(String url, String sql, FindCMRResultModel model, Data data, String dbId) throws Exception {
@@ -191,6 +197,9 @@ public class USHandler extends GEOHandler {
     query.addField("TAX_CD2");
     query.addField("TAX_CD1");
     query.addField("ABBREV_NM");
+    query.addField("TAX_EXEMPT_STATUS");
+    query.addField("SICMEN");
+    query.addField("ISIC");
     query.addField("I_CUST_ADDR_TYPE");
 
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
@@ -228,6 +237,10 @@ public class USHandler extends GEOHandler {
         data.setMiscBillCd(data.getMiscBillCd().trim().substring(0, 3));
       }
       data.setTaxCd3((String) record.get("TAX_CD3"));
+      // commenting this for JIRA CMR-3872
+      // data.setSpecialTaxCd((String) record.get("TAX_EXEMPT_STATUS"));
+      // always reset to blank
+      data.setSpecialTaxCd("");
       data.setBpName((String) record.get("BP_NAME"));
       data.setIccTaxClass((String) record.get("ICC_TAX_CLASS"));
       data.setIccTaxExemptStatus((String) record.get("ICC_TAX_EXEMPT_STATUS"));
@@ -239,6 +252,7 @@ public class USHandler extends GEOHandler {
       data.setUser((String) record.get("USER"));
       data.setLoc((String) record.get("LOC"));
       data.setTaxCd2((String) record.get("TAX_CD2"));
+      data.setUsSicmen((String) record.get("SICMEN"));
       // data.set((String) record.get("TAX_CD1"));
       if (StringUtils.isBlank(data.getAbbrevNm())) {
         data.setAbbrevNm((String) record.get("ABBREV_NM"));
@@ -246,6 +260,16 @@ public class USHandler extends GEOHandler {
 
       if (record.get("COMPANY_NM") != null && !StringUtils.isEmpty(record.get("COMPANY_NM").toString())) {
         this.legalName = (String) record.get("COMPANY_NM");
+      }
+
+      String isic = (String) record.get("ISIC");
+      if (!StringUtils.isBlank(isic)) {
+        data.setIsicCd((String) record.get("ISIC"));
+        // String newSubInd = getSubIndusryValue(entityManager,
+        // record.get("ISIC").toString());
+        // if (StringUtils.isNotBlank(newSubInd)) {
+        // data.setSubIndustryCd(newSubInd);
+        // }
       }
 
       if ((model.getItems() != null && model.getItems().size() == 1)) {
@@ -499,6 +523,15 @@ public class USHandler extends GEOHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIsicCd(), newData.getIsicCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "USSicmen", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getIsicCd(), "USSicmen", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getIsicCd(), "USSicmen", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getRestrictTo(), newData.getRestrictTo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "RestrictTo", "-"));
@@ -558,7 +591,7 @@ public class USHandler extends GEOHandler {
       update.setOldData(oldData.getIccTaxClass());
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIccTaxExemptStatus(), newData.getIccTaxClass())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getIccTaxExemptStatus(), newData.getIccTaxExemptStatus())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "ICCTaxExemptStatus", "-"));
       update.setNewData(newData.getIccTaxExemptStatus());
@@ -685,6 +718,22 @@ public class USHandler extends GEOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSpecialTaxCd(), newData.getSpecialTaxCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SpecialTaxCd", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSpecialTaxCd(), "SpecialTaxCd", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSpecialTaxCd(), "SpecialTaxCd", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getUsSicmen(), newData.getUsSicmen())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ISIC", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getUsSicmen(), "ISIC", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getUsSicmen(), "ISIC", cmrCountry));
+      results.add(update);
+    }
+
   }
 
   /**
@@ -753,6 +802,9 @@ public class USHandler extends GEOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
+    if ("ISIC".equals(field)) {
+      return true;
+    }
     return false;
   }
 
@@ -773,6 +825,12 @@ public class USHandler extends GEOHandler {
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+  }
+
+  @Override
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+    // move ISIC to SICMEN
+    data.setUsSicmen(data.getIsicCd());
   }
 
   @Override
@@ -871,16 +929,89 @@ public class USHandler extends GEOHandler {
   public void setGBGValues(EntityManager entityManager, RequestData requestData, String ldeField, String ldeValue) {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
+    if (!"C".equals(admin.getReqType())) {
+      return;
+    }
     if ("AFFNO".equals(ldeField)) {
-      // if not BP
-      if (!data.getCustGrp().equals("7") && "C".equals(admin.getReqType())) {
+      if (StringUtils.isNumeric(ldeValue)) {
         data.setEnterprise(ldeValue);
       }
+      String inac = getINACForAffiliate(entityManager, ldeValue);
+      if (!StringUtils.isBlank(inac)) {
+        data.setInacCd(inac);
+        data.setInacType(StringUtils.isNumeric(inac) ? "I" : "N");
+      }
+    } else if ("INAC".equals(ldeField)) {
+      String affiliate = getAffiliateForINAC(entityManager, ldeValue);
+      if (!StringUtils.isBlank(affiliate)) {
+        data.setAffiliate(affiliate);
+        if (StringUtils.isNumeric(affiliate)) {
+          data.setEnterprise(affiliate);
+        }
+      }
     }
+  }
+
+  /**
+   * Gets the Affiliate value assigned with the most CMRs under the INAC
+   * 
+   * @param entityManager
+   * @param inac
+   * @return
+   */
+  private String getAffiliateForINAC(EntityManager entityManager, String inac) {
+    LOG.debug("Getting Affiliate for INAC " + inac);
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_AFF_FOR_INAC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("INAC", inac);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] top = results.get(0);
+      LOG.debug("Found Affiliate: " + top[0] + " with " + top[1] + " CMRs assigned.");
+      return (String) top[0];
+    }
+    return null;
+  }
+
+  /**
+   * Gets the Affiliate value assigned with the most CMRs under the INAC
+   * 
+   * @param entityManager
+   * @param inac
+   * @return
+   */
+  private String getINACForAffiliate(EntityManager entityManager, String affiliate) {
+    LOG.debug("Getting INAC for Affiliate " + affiliate);
+    String sql = ExternalizedQuery.getSql("AUTO.US.GET_INAC_FOR_AFF");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setParameter("AFFILIATE", affiliate);
+    query.setForReadOnly(true);
+    List<Object[]> results = query.getResults();
+    if (results != null && !results.isEmpty()) {
+      Object[] top = results.get(0);
+      LOG.debug("Found INAC: " + top[0] + " with " + top[1] + " CMRs assigned.");
+      return (String) top[0];
+    }
+    return null;
   }
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
+  }
+
+  protected String getSubIndusryValue(EntityManager entityManager, String isic) {
+    String subInd = "";
+    String sql = ExternalizedQuery.getSql("US.GET.SUBIND_FOR_ISIC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ISIC", isic);
+    subInd = query.getSingleResult(String.class);
+    if (subInd != null) {
+      return subInd;
+    }
+    return subInd;
   }
 }

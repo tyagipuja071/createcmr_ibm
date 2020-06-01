@@ -15,8 +15,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -225,6 +225,10 @@ public class DnBUtil {
       LOG.debug("VAT: " + vat + " Tax Code 1: " + taxCd1);
     }
 
+    // derive county information
+    if (SystemLocation.UNITED_STATES.equals(issuingCntry)) {
+      RequestUtils.deriveUSCounty(cmrRecord, company);
+    }
     return cmrRecord;
   }
 
@@ -414,13 +418,49 @@ public class DnBUtil {
    * @return
    */
   public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord) {
+    return closelyMatchesDnb(country, addr, admin, dnbRecord, null);
+  }
 
-    boolean result = true;
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   *
+   * @param handler
+   * @param admin
+   * @param addresses
+   * @param dnbRecord
+   * @param nameToUse
+   * @return
+   */
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse) {
 
     GEOHandler handler = RequestUtils.getGEOHandler(country);
-    if (StringUtils.isNotBlank(getCustomerName(handler, admin, addr)) && StringUtils.isNotBlank(dnbRecord.getDnbName())
-        && StringUtils.getLevenshteinDistance(getCustomerName(handler, admin, addr).toUpperCase(), dnbRecord.getDnbName().toUpperCase()) > 16) {
-      result = false;
+
+    String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+
+    if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
+        return false;
+      }
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
+        // do a comparison of common words first
+        List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
+        List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
+        boolean foundMinimal = false;
+        for (String phraseA : commonA) {
+          for (String phraseB : commonB) {
+            if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+              foundMinimal = true;
+            }
+          }
+        }
+        if (!foundMinimal) {
+          return false;
+        }
+      } else {
+        LOG.debug("Name " + compareName + " close to " + dnbRecord.getDnbName());
+      }
     }
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
     address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
@@ -432,18 +472,29 @@ public class DnBUtil {
 
     if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
         && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8) {
-      result = false;
+      return false;
     }
-    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())
-        && StringUtils.getLevenshteinDistance(addr.getPostCd().toUpperCase(), dnbRecord.getDnbPostalCode().toUpperCase()) > 2) {
-      result = false;
-    }
-    if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
-        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
-      result = false;
+    if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
+      String currentPostalCode = addr.getPostCd();
+      String dnbPostalCode = dnbRecord.getDnbPostalCode();
+      if (currentPostalCode.length() != dnbPostalCode.length()) {
+        if (!calAlignPostalCodeLength(currentPostalCode, dnbPostalCode)) {
+          return false;
+        }
+      }
+      if (currentPostalCode.length() == dnbPostalCode.length()) {
+        if (!isPostalCdCloselyMatchesDnB(currentPostalCode, dnbPostalCode)) {
+          return false;
+        }
+      }
     }
 
-    return result;
+    if (StringUtils.isNotBlank(addr.getCity1()) && StringUtils.isNotBlank(dnbRecord.getDnbCity())
+        && StringUtils.getLevenshteinDistance(addr.getCity1().toUpperCase(), dnbRecord.getDnbCity().toUpperCase()) > 6) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -481,7 +532,7 @@ public class DnBUtil {
    */
   private static String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
     String customerName = null;
-    if (!handler.customerNamesOnAddress()) {
+    if (handler != null && !handler.customerNamesOnAddress()) {
       customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
     } else {
       customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
@@ -507,23 +558,37 @@ public class DnBUtil {
   }
 
   /**
+   * Connects to the details service and gets the details of the DUNS NO from
+   * D&B
+   *
+   * @param dunsNo
+   * @return
+   * @throws Exception
+   */
+  public static DnBCompany getDnBDetails(String dunsNo) throws Exception {
+    DnbData data = CompanyFinder.getDnBDetails(dunsNo);
+    if (data != null && data.getResults() != null && !data.getResults().isEmpty()) {
+      return data.getResults().get(0);
+    }
+    return null;
+  }
+
+  /**
    * 
    * gets DnB matches on the basis of input data for the provided addr type
    * 
-   * @param handler
    * @param requestData
-   * @param engineData
    * @param addrType
    * @return
    * @throws Exception
    */
-  public static MatchingResponse<DnBMatchingResponse> getMatches(GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      String addrType) throws Exception {
+  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, String addrType) throws Exception {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
+    GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
@@ -563,6 +628,33 @@ public class DnBUtil {
       response = mapper.readValue(json, ref);
     }
     return response;
+  }
+
+  private static boolean calAlignPostalCodeLength(String currPostalCd, String dnBPostalCd) {
+    String shortPostalCd = "";
+    currPostalCd = currPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    dnBPostalCd = dnBPostalCd.replaceAll("[^\\w\\s]+", "").trim();
+    boolean res = true;
+    if (currPostalCd.length() > dnBPostalCd.length()) {
+      shortPostalCd = currPostalCd.substring(0, dnBPostalCd.length());
+      currPostalCd = shortPostalCd;
+    } else {
+      shortPostalCd = dnBPostalCd.substring(0, currPostalCd.length());
+      dnBPostalCd = shortPostalCd;
+    }
+    LOG.debug("Shortned postal code= " + shortPostalCd);
+    res = isPostalCdCloselyMatchesDnB(currPostalCd, dnBPostalCd);
+    return res;
+  }
+
+  private static boolean isPostalCdCloselyMatchesDnB(String currPostalCd, String dnBPostalCd) {
+    boolean res = true;
+    if (dnBPostalCd.length() <= 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 2) {
+      res = false;
+    } else if (dnBPostalCd.length() > 5 && StringUtils.getLevenshteinDistance(currPostalCd.toUpperCase(), dnBPostalCd.toUpperCase()) > 3) {
+      res = false;
+    }
+    return res;
   }
 
 }

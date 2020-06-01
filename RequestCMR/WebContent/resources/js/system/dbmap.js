@@ -266,6 +266,9 @@ var DB_DATA_FIELDS = [ {
   id : 'Province/TerritoryID',
   name : 'TERRITORY_CD'
 }, {
+  id : 'OrderBlock',
+  name : 'ORD_BLK'
+}, {
   id : 'Cluster',
   name : 'AP_CUST_CLUSTER_ID'
 }, {
@@ -700,4 +703,7 @@ var DB_DELETE_DATA_FIELDS = [ {
 }, {
   id : 'RequesterID',
   name : 'ADMIN.REQUESTER_ID'
+}, {
+  id : 'ScenarioVerifiedIndc',
+  name : 'ADMIN.SCENARIO_VERIFIED_INDC'
 } ];

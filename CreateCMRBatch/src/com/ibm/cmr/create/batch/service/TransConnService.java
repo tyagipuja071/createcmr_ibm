@@ -1218,9 +1218,10 @@ public class TransConnService extends BaseBatchService {
     dummyuser.setBluePagesName(user);
     String issuingCntry = data.getCmrIssuingCntry();
 
-    if (SystemLocation.UNITED_STATES.equals(issuingCntry)
+    if (SystemLocation.UNITED_STATES.equals(issuingCntry) && !StringUtils.isBlank(data.getCmrNo())
         && (!StringUtils.isBlank(data.getAffiliate()) || !StringUtils.isBlank(data.getEnterprise()) || !StringUtils.isBlank(data.getIccTaxClass())
-            || !StringUtils.isBlank(data.getIccTaxExemptStatus()) || !StringUtils.isBlank(data.getNonIbmCompanyInd()))) {
+            || !StringUtils.isBlank(data.getIccTaxExemptStatus()) || !StringUtils.isBlank(data.getNonIbmCompanyInd())
+            || !StringUtils.isBlank(data.getUsSicmen()) || !StringUtils.isBlank(data.getSpecialTaxCd()))) {
       LOG.info("Required update needed for Request " + reqId + " - Force to Update");
 
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());

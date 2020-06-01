@@ -138,6 +138,12 @@
                                <th>Tax Code 1:</th>
                                <td>{{rec.cmrBusinessReg}}</td>
                              </tr>
+                             <tr ng-show="rec.cmrIssuedBy == '897'">
+                               <th>Restrict To:</th>
+                               <td>{{rec.usCmrRestrictTo}}</td>
+                               <th>BP Account Type:</th>
+                               <td>{{rec.usCmrBpAccountType}}</td>
+                             </tr>
                            </table>
                            <br>
                          </div>

@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.system.MetricsModel;
 import com.ibm.cio.cmr.request.model.system.RequestStatsModel;
@@ -62,6 +64,17 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     RequestStatsContainer container = new RequestStatsContainer();
     MetricsModel model = (MetricsModel) params.getParam("model");
 
+    Date from = null;
+    Date to = null;
+    from = FORMATTER.parse(model.getDateFrom());
+    to = FORMATTER.parse(model.getDateTo());
+
+    long diff = to.getTime() - from.getTime();
+    double diffDays = Math.floor((diff / 1000) / 60 / 60 / 24);
+    if (diffDays > 180 || diffDays < 0) {
+      throw new CmrException(new Exception("Date range is either invalid or greater than 180 days."));
+    }
+
     LOG.info("Extracting data from " + model.getDateFrom() + " to " + model.getDateTo());
     String sql = ExternalizedQuery.getSql("METRICS.REQUEST_STAT");
     String geo = model.getGroupByGeo();
@@ -82,12 +95,25 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     query.setForReadOnly(true);
 
     List<RequestStatsModel> stats = query.getResults(RequestStatsModel.class);
+    long smallestReqId = Long.MAX_VALUE;
+    long largestReqId = 0;
+    for (RequestStatsModel stat : stats) {
+      if (stat.getId().getReqId() > largestReqId) {
+        largestReqId = stat.getId().getReqId();
+      }
+      if (stat.getId().getReqId() < smallestReqId) {
+        smallestReqId = stat.getId().getReqId();
+      }
+    }
     container.setRecords(stats);
-    LOG.debug("Records retrieved.");
+    LOG.debug("Records retrieved. Request ID range: " + smallestReqId + " to " + largestReqId);
 
     Map<Long, List<String>> rejections = new HashMap<Long, List<String>>();
     sql = ExternalizedQuery.getSql("METRICS.REJECTIONS");
     query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SMALLEST", smallestReqId);
+    query.setParameter("LARGEST", largestReqId);
+    query.setForReadOnly(true);
     List<Object[]> results = query.getResults();
 
     Long reqId = null;
@@ -119,8 +145,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  public void exportToExcel(RequestStatsContainer container, MetricsModel model, HttpServletResponse response) throws IOException, ParseException,
-      IllegalArgumentException, IllegalAccessException {
+  public void exportToExcel(RequestStatsContainer container, MetricsModel model, HttpServletResponse response)
+      throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     if (config == null) {
       initConfig();
@@ -284,8 +310,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
           Long lVal = (Long) value;
           if (lVal != null && lVal.longValue() >= 0) {
             long millis = lVal.longValue() * 1000;
-            String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis), TimeUnit.MILLISECONDS.toMinutes(millis)
-                - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+            String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
                 TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
             cell.setCellValue(hms);
           }
@@ -346,6 +372,7 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("Scenario Type", "SCENARIO_TYPE_DESC", 20, null));
     config.add(new StatXLSConfig("Scenario Subtype", "SCENARIO_SUBTYPE_DESC", 20, null));
     config.add(new StatXLSConfig("Record Type", "CUST_TYPE", 10, null));
+    config.add(new StatXLSConfig("Source System", "SOURCE_SYST_ID", 20, null));
     config.add(new StatXLSConfig("Requester", "REQUESTER_NM", 20, null));
     config.add(new StatXLSConfig("Requester ID", "REQUESTER_ID", 25, null));
     config.add(new StatXLSConfig("Reviewer", "REVIEWER_NM", 20, null));
@@ -364,8 +391,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("Due Date", "REQUEST_DUE_DATE", 16, null));
     config.add(new StatXLSConfig("Final Status", "FINAL_STATUS", 24, null));
     config.add(new StatXLSConfig("# of Rejections", "REJECT_TOTAL", 14, null));
-    config.add(new StatXLSConfig("Last Reject Reason", "LAST_REJ_REASON", 25,
-        "If at anytime the request was rejected, the reason for the last rejection"));
+    config.add(
+        new StatXLSConfig("Last Reject Reason", "LAST_REJ_REASON", 25, "If at anytime the request was rejected, the reason for the last rejection"));
     config.add(new StatXLSConfig("Other Rejection Reasons", "REJECTIONS", 25, null));
     config.add(new StatXLSConfig("Processed within 24 Hrs", "DAY_PROCESS", 23, null));
     config.add(new StatXLSConfig("Request TAT", "REQUEST_TAT", 12,
@@ -395,8 +422,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  public void exportToSquadReport(RequestStatsContainer container, MetricsModel model, HttpServletResponse response) throws IOException,
-      ParseException, IllegalArgumentException, IllegalAccessException {
+  public void exportToSquadReport(RequestStatsContainer container, MetricsModel model, HttpServletResponse response)
+      throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     List<StatXLSConfig> config = new ArrayList<StatXLSConfig>();
     config.add(new StatXLSConfig("Squad", "SQUAD", 22, null));

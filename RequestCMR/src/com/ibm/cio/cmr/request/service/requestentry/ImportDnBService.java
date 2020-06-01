@@ -341,6 +341,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       }
       if (geoHandler != null) {
         geoHandler.createOtherAddressesOnDNBImport(entityManager, admin, data);
+        geoHandler.convertDnBImportValues(entityManager, admin, data);
       }
       if (newRequest) {
         RequestUtils.createWorkflowHistory(reqEntryService, entityManager, request, admin, "AUTO: Request created.", CmrConstants.Save());
@@ -560,7 +561,8 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     if (addr.getLandCntry() != null && addr.getLandCntry().length() > 2) {
       addr.setLandCntry(null);
     }
-    addr.setCounty(cmr.getCmrCountry());
+    addr.setCounty(cmr.getCmrCountyCode());
+    addr.setCountyName(cmr.getCmrCounty());
     if (!StringUtils.isBlank(addr.getCounty()) && addr.getCounty().length() > 3) {
       addr.setCounty(null);
     }
@@ -808,8 +810,12 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
         LOG.debug("Creating request attachment..");
         try (ByteArrayInputStream bis = new ByteArrayInputStream(pdfBytes)) {
-          attachmentService.addExternalAttachment(entityManager, user, reqId, "DNB", fileNamePrefix + "_" + dunsNo + ".pdf",
-              "Details of record imported from D&B", bis);
+          try {
+            attachmentService.addExternalAttachment(entityManager, user, reqId, "DNB", fileNamePrefix + "_" + dunsNo + ".pdf",
+                "Details of record imported from D&B", bis);
+          } catch (Exception e) {
+            LOG.warn("Unable to save DnB attachment.", e);
+          }
         }
       }
     } else {

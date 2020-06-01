@@ -4,6 +4,7 @@
  * Contains the specific validations and configuration adjustments for US (897)
  */
 
+var _usSicmenHandler = null;
 /**
  * Adds the validator for Invoice-to that only 3 address lines can be specified
  */
@@ -77,7 +78,7 @@ function addAddressRecordTypeValidator() {
           var type = null;
           var invoiceToCnt = 0;
           var installAtCnt = 0;
-          for ( var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             type = record.addrType;
             if (typeof (type) == 'object') {
@@ -105,6 +106,18 @@ function addAddressRecordTypeValidator() {
  * After configuration for US
  */
 function afterConfigForUS() {
+  // PPS CEID field as mandatory for BP scenario
+  var custTypeHandler = null;
+  if (custTypeHandler == null) {
+    var custTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
+      if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' && FormManager.getActualValue('reqType') == 'C' && FormManager.getActualValue('custType') == '7') {
+        FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPSCEID' ], 'MAIN_IBM_TAB');
+      } else {
+        FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+      }
+    });
+  }
+
   var usCntryHandler = null;
   if (usCntryHandler == null) {
     // set the postal code to 0000 for non-US landed countries and disable
@@ -130,6 +143,21 @@ function afterConfigForUS() {
         }
       }
     });
+  }
+
+  if (FormManager.getActualValue('reqType') == 'C') {
+    if (_usSicmenHandler == null) {
+      _usSicmenHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
+        var sicmen = FormManager.getActualValue('usSicmen');
+        var _custType = FormManager.getActualValue('custSubGrp');
+        if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
+          FormManager.setValue('isicCd', '357X');
+        } else {
+          FormManager.setValue('isicCd', sicmen);
+        }
+      });
+    }
+    _usSicmenHandler[0].onChange();
   }
 }
 
@@ -194,6 +222,29 @@ function setCSPValues(fromAddress, scenario, scenarioChanged) {
   }
 }
 
+function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
+  var reqType = FormManager.getActualValue('reqType');
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'C') {
+    FormManager.readOnly('isicCd');
+  } else if (reqType == 'U') {
+    if (role == 'Processor') {
+      FormManager.enable('isicCd');
+    } else {
+      FormManager.readOnly('isicCd');
+    }
+  } else {
+    FormManager.readOnly('isicCd');
+  }
+}
+
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
@@ -204,4 +255,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addUSAddressHandler, [ SysLoc.USA ]);
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(setCSPValues, [ SysLoc.USA ]);
+  GEOHandler.addAfterTemplateLoad(enableUSSicMenForScenarios, [ SysLoc.USA ]);
+  GEOHandler.addAfterConfig(enableUSSicMenForScenarios, [ SysLoc.USA ]);
 });
