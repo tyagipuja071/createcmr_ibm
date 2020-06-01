@@ -97,6 +97,7 @@ public class CommonWordsUtil {
     addEqual("8th", "eighth");
     addEqual("9th", "ninth");
     addEqual("10th", "tenth");
+    addEqual("bhd", "berhad");
 
     addIrrelevant("llc", "gmbh");
 

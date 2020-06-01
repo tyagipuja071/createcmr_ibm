@@ -81,7 +81,7 @@ public class ImportCMRElement extends StandardProcessElement {
       result.setOnError(true);
       result.setDetails("CMR No. " + data.getCmrNo() + " not found for Issuing Country " + data.getCmrIssuingCntry());
       result.setResults("CMR Not Found");
-      engineData.addRejectionComment("CMR " + data.getCmrNo() + " not found.");
+      engineData.addRejectionComment("OTH", "CMR " + data.getCmrNo() + " not found.", "", "");
       return result;
     }
 

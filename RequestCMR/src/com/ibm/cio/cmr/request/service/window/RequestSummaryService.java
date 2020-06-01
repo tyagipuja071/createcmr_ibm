@@ -595,6 +595,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
     String sapNumber = addr.getSapNo();
     String addrType = addr.getId().getAddrType();
     String cmrCountry = addr.getCmrCountry();
+    String seqNo = addr.getId().getAddrSeq();
 
     String addrTypeDesc = addressTypes.get(addrType);
     if (StringUtils.isEmpty(addrTypeDesc)) {
@@ -611,6 +612,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       update = new UpdatedNameAddrModel();
       update.setAddrTypeCode(addrType);
       update.setAddrType(addrTypeDesc);
+      update.setAddrSeq(seqNo);
       update.setSapNumber("[removed]");
       update.setDataField("- Address Removed -");
       results.add(update);
@@ -618,6 +620,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
       update = new UpdatedNameAddrModel();
       update.setAddrTypeCode(addrType);
       update.setAddrType(addrTypeDesc);
+      update.setAddrSeq(seqNo);
       update.setSapNumber("[new]");
       update.setDataField("All fields");
       results.add(update);
@@ -626,6 +629,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         update = new UpdatedNameAddrModel();
         update.setAddrTypeCode(addrType);
         update.setAddrType(addrTypeDesc);
+        update.setAddrSeq(seqNo);
         update.setSapNumber(addr.getSapNo());
         update.setDataField(PageManager.getLabel(cmrCountry, "SAPNumber", "-"));
         update.setNewData(addr.getSapNo());
@@ -638,6 +642,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update = new UpdatedNameAddrModel();
             update.setAddrTypeCode(addrType);
             update.setAddrType(addrTypeDesc);
+            update.setAddrSeq(seqNo);
             update.setSapNumber(sapNumber);
             update.setDataField(PageManager.getLabel(cmrCountry, "CustomerName1", "-"));
             update.setNewData(addr.getCustNm1());
@@ -649,6 +654,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update = new UpdatedNameAddrModel();
             update.setAddrTypeCode(addrType);
             update.setAddrType(addrTypeDesc);
+            update.setAddrSeq(seqNo);
             update.setSapNumber(sapNumber);
             update.setDataField(PageManager.getLabel(cmrCountry, "CustomerName2", "-"));
             update.setNewData(addr.getCustNm2());
@@ -660,6 +666,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update = new UpdatedNameAddrModel();
             update.setAddrTypeCode(addrType);
             update.setAddrType(addrTypeDesc);
+            update.setAddrSeq(seqNo);
             update.setSapNumber(sapNumber);
             update.setDataField(PageManager.getLabel(cmrCountry, "CustomerName3", "-"));
             update.setNewData(addr.getCustNm3());
@@ -671,6 +678,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update = new UpdatedNameAddrModel();
             update.setAddrTypeCode(addrType);
             update.setAddrType(addrTypeDesc);
+            update.setAddrSeq(seqNo);
             update.setSapNumber(sapNumber);
             update.setDataField(PageManager.getLabel(cmrCountry, "CustomerName4", "-"));
             update.setNewData(addr.getCustNm4());
@@ -707,6 +715,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "StreetAddress1", "-"));
           update.setNewData(addr.getAddrTxt());
@@ -717,6 +726,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "City1", "-"));
           update.setNewData(addr.getCity1());
@@ -727,6 +737,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "City2", "-"));
           update.setNewData(addr.getCity2());
@@ -738,6 +749,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "StateProv", "-"));
           update.setNewData(addr.getStateProv());
@@ -748,6 +760,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "PostalCode", "-"));
           update.setNewData(addr.getPostCd());
@@ -759,6 +772,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "LandedCountry", "-"));
           update.setNewData(addr.getLandCntry());
@@ -769,6 +783,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "County", "-"));
           update.setNewData(addr.getCounty());
@@ -779,6 +794,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "Building", "-"));
           update.setNewData(addr.getBldg());
@@ -789,6 +805,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "Floor", "-"));
           update.setNewData(addr.getFloor());
@@ -799,6 +816,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "Office", "-"));
           update.setNewData(addr.getOffice());
@@ -809,6 +827,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "Department", "-"));
           update.setNewData(addr.getDept());
@@ -819,6 +838,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "POBox", "-"));
           update.setNewData(addr.getPoBox());
@@ -830,6 +850,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "POBoxCity", "-"));
           update.setNewData(addr.getPoBoxCity());
@@ -841,6 +862,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "POBoxPostalCode", "-"));
           update.setNewData(addr.getPoBoxPostCd());
@@ -851,6 +873,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "CustFAX", "-"));
           update.setNewData(addr.getCustFax());
@@ -862,6 +885,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "CustLangCd", "-"));
           update.setNewData(addr.getCustLangCd());
@@ -873,6 +897,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "CustPhone", "-"));
           update.setNewData(addr.getCustPhone());
@@ -884,6 +909,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "TransportZone", "-"));
           update.setNewData(addr.getTransportZone());
@@ -894,6 +920,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "Division", "-"));
           update.setNewData(addr.getDivn());
@@ -905,6 +932,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "StreetAddress2", "-"));
           update.setNewData(addr.getAddrTxt2());
@@ -920,6 +948,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(DropdownListController.getDescription("AddressType", addrType, cmrCountry));
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax1", "-"));
           update.setNewData(addr.getTaxCd1());
@@ -931,6 +960,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(DropdownListController.getDescription("AddressType", addrType, cmrCountry));
+          update.setAddrSeq(seqNo);
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
           update.setNewData(addr.getTaxCd2());
@@ -941,6 +971,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         if (!equals(addr.getVat(), addr.getVatOld())) {
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
+          update.setAddrSeq(seqNo);
           update.setAddrType(DropdownListController.getDescription("AddressType", addrType, cmrCountry));
           update.setSapNumber(sapNumber);
           update.setDataField(PageManager.getLabel(cmrCountry, "VAT", "-"));
@@ -965,10 +996,10 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
    */
   public boolean equals(String val1, String val2) {
     if (val1 == null && val2 != null) {
-      return StringUtils.isEmpty(val2.trim());
+      return StringUtils.isBlank(val2.trim());
     }
     if (val1 != null && val2 == null) {
-      return StringUtils.isEmpty(val1.trim());
+      return StringUtils.isBlank(val1.trim());
     }
     if (val1 == null && val2 == null) {
       return true;

@@ -424,6 +424,9 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
   @Column(name = "CROS_SUB_TYP")
   private String crosSubTyp;
 
+  @Column(name = "US_SICMEN")
+  private String usSicmen;
+
   public String getAbbrevNm() {
     return this.abbrevNm;
   }
@@ -1510,6 +1513,14 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setCrosSubTyp(String crosSubTyp) {
     this.crosSubTyp = crosSubTyp;
+  }
+
+  public String getUsSicmen() {
+    return usSicmen;
+  }
+
+  public void setUsSicmen(String usSicmen) {
+    this.usSicmen = usSicmen;
   }
 
 }

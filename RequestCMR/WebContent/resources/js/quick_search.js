@@ -576,6 +576,7 @@ function buildSearchCriteria() {
     cmrNo : FormManager.getActualValue('cmrNo'),
     vat : FormManager.getActualValue('vat'),
     taxCd1 : FormManager.getActualValue('taxCd1'),
+    restrictTo : FormManager.getActualValue('restrictTo'),
   };
   var issuingCntry = FormManager.getActualValue('issuingCntry');
   if (issuingCntry.length > 3) {

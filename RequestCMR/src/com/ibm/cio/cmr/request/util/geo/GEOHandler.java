@@ -803,6 +803,10 @@ public abstract class GEOHandler {
     // NO OP
   }
 
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+    // noop
+  }
+
   protected static String validateColValFromCell(XSSFCell cell) {
     String colVal = "";
     if (cell != null) {

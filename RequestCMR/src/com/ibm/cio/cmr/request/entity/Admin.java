@@ -33,35 +33,33 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
  */
 @Entity
 @Table(name = "ADMIN", schema = "CREQCMR")
-@SqlResultSetMappings({
-    @SqlResultSetMapping(name = "MQRequestsMapping", columns = { @ColumnResult(name = "REQ_ID"), @ColumnResult(name = "REQ_TYPE"),
-        @ColumnResult(name = "LAST_UPDT_TS"), @ColumnResult(name = "LAST_UPDT_BY"), @ColumnResult(name = "CMR_NO"),
-        @ColumnResult(name = "CMR_ISSUING_CNTRY") }),
+@SqlResultSetMappings({ @SqlResultSetMapping(name = "MQRequestsMapping", columns = { @ColumnResult(name = "REQ_ID"), @ColumnResult(name = "REQ_TYPE"),
+    @ColumnResult(name = "LAST_UPDT_TS"), @ColumnResult(name = "LAST_UPDT_BY"), @ColumnResult(name = "CMR_NO"),
+    @ColumnResult(name = "CMR_ISSUING_CNTRY") }),
 
     @SqlResultSetMapping(name = "WorkflowRequestsMapping", entities = { @EntityResult(entityClass = Admin.class),
         @EntityResult(entityClass = Data.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"), @ColumnResult(name = "REQ_TYPE_TEXT"),
-        @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"), @ColumnResult(name = "COUNTRY_DESC"),
-        @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
-        @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS") }),
+            @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"), @ColumnResult(name = "COUNTRY_DESC"),
+            @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
+            @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS") }),
 
     @SqlResultSetMapping(name = "WorkflowRejectedRequestsMapping", entities = { @EntityResult(entityClass = WfHist.class),
         @EntityResult(entityClass = Admin.class), @EntityResult(entityClass = Data.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"),
-        @ColumnResult(name = "REQ_TYPE_TEXT"), @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"),
-        @ColumnResult(name = "COUNTRY_DESC"), @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"),
-        @ColumnResult(name = "CAN_CLAIM_ALL"), @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS") }),
+            @ColumnResult(name = "REQ_TYPE_TEXT"), @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"),
+            @ColumnResult(name = "COUNTRY_DESC"), @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"),
+            @ColumnResult(name = "CAN_CLAIM_ALL"), @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS") }),
     @SqlResultSetMapping(name = "SearchWithCustomerMapping", entities = { @EntityResult(entityClass = Admin.class),
         @EntityResult(entityClass = Data.class), @EntityResult(entityClass = Addr.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"),
-        @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "REQ_TYPE_TEXT"), @ColumnResult(name = "OWNER_DESC"),
-        @ColumnResult(name = "COUNTRY_DESC"), @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"),
-        @ColumnResult(name = "CAN_CLAIM_ALL"), @ColumnResult(name = "TYPE_DESCRIPTION") }),
-    @SqlResultSetMapping(name = "BatchServiceMapping", entities = {
-        @EntityResult(entityClass = Admin.class),
-        @EntityResult(entityClass = Data.class),
+            @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "REQ_TYPE_TEXT"), @ColumnResult(name = "OWNER_DESC"),
+            @ColumnResult(name = "COUNTRY_DESC"), @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"),
+            @ColumnResult(name = "CAN_CLAIM_ALL"), @ColumnResult(name = "TYPE_DESCRIPTION") }),
+    @SqlResultSetMapping(name = "BatchServiceMapping", entities = { @EntityResult(entityClass = Admin.class), @EntityResult(entityClass = Data.class),
         @EntityResult(entityClass = WfHist.class, fields = { @FieldResult(column = "REQ_STATUS1", name = "reqStatus"),
             @FieldResult(column = "CMT1", name = "cmt") }) }, columns = {}),
     @SqlResultSetMapping(name = "BatchUpdateAddrServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
         @EntityResult(entityClass = MassUpdt.class), @EntityResult(entityClass = MassUpdtAddr.class), }),
-    @SqlResultSetMapping(name = "PDFMapping", entities = { @EntityResult(entityClass = Admin.class), @EntityResult(entityClass = Data.class) }, columns = @ColumnResult(name = "SYS_LOC")),
+    @SqlResultSetMapping(name = "PDFMapping", entities = { @EntityResult(entityClass = Admin.class),
+        @EntityResult(entityClass = Data.class) }, columns = @ColumnResult(name = "SYS_LOC")),
     @SqlResultSetMapping(name = "BatchUpdateDataServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
         @EntityResult(entityClass = MassUpdt.class), @EntityResult(entityClass = MassUpdtData.class), }),
     @SqlResultSetMapping(name = "BatchCreateDataServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
@@ -78,9 +76,9 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
         @EntityResult(entityClass = Data.class) }),
     @SqlResultSetMapping(name = "RequestEntryServiceMapping", entities = { @EntityResult(entityClass = Admin.class),
         @EntityResult(entityClass = Data.class), @EntityResult(entityClass = Scorecard.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"),
-        @ColumnResult(name = "CLAIM_ROLE"), @ColumnResult(name = "SUB_INDUSTRY_DESC"), @ColumnResult(name = "ISIC_DESC"),
-        @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
-        @ColumnResult(name = "AUTO_PROCESSING") }), })
+            @ColumnResult(name = "CLAIM_ROLE"), @ColumnResult(name = "SUB_INDUSTRY_DESC"), @ColumnResult(name = "ISIC_DESC"),
+            @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
+            @ColumnResult(name = "AUTO_PROCESSING") }), })
 @EntityListeners({ TrimListener.class, ChangeLogListener.class })
 @AutoTrimStrings
 @ChangeLogDetails(reqId = "id.reqId", userId = "lastUpdtBy", reqStatus = "reqStatus", childTable = false)
@@ -294,12 +292,15 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
 
   @Column(name = "MATCH_OVERRIDE_INDC")
   private String matchOverrideIndc;
-  
+
   @Column(name = "REVIEW_REQUIRED_INDC")
   private String reviewReqIndc;
 
   @Transient
   private String saveIndAftrTempLoad;
+
+  @Column(name = "CHILD_REQ_ID")
+  private long childReqId;
 
   public String getRequesterId() {
     return this.requesterId;
@@ -732,7 +733,13 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   public void setReviewReqIndc(String reviewReqIndc) {
     this.reviewReqIndc = reviewReqIndc;
   }
-  
-  
+
+  public long getChildReqId() {
+    return childReqId;
+  }
+
+  public void setChildReqId(long childReqId) {
+    this.childReqId = childReqId;
+  }
 
 }
