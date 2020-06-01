@@ -971,6 +971,15 @@ public class GreeceTransformer extends EMEATransformer {
     }
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
+    
+    if("Y".equals(legacyAddr.getIsAddrUseBilling())) {
+      CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(legacyAddr);
+      newMailingAddr.getId().setAddrNo(String.format("%05d", 1));
+      modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
+      newMailingAddr.setForUpdate(true);
+      legacyObjects.addAddress(newMailingAddr);
+    }
+
   }
   
   @Override

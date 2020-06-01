@@ -53,7 +53,7 @@
          <length>6</length>
          <lovId>Enterprise</lovId>
         </column>
-        <column>
+        <column exactLength="true">
           <label>INAC/NAC Code</label>
           <dbColumn>INAC_CD</dbColumn>
           <length>4</length>
