@@ -4060,6 +4060,7 @@ public class EMEAHandler extends BaseSOFHandler {
    }    
   }
   
+  //  START -- missing code greece code   
   private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
     Addr addrCopy = (Addr) SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
@@ -4071,6 +4072,8 @@ public class EMEAHandler extends BaseSOFHandler {
     entityManager.persist(addrCopy);
     entityManager.flush();
   }
+  
+  //  END -- missing code greece code
   
   private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
     String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
