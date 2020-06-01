@@ -3099,6 +3099,16 @@ public class EMEAHandler extends BaseSOFHandler {
       abbrevNmValue = results.get(0);
     }
 
+		String abbrevNmSoldto = null;
+    String sql2 = ExternalizedQuery.getSql("QUERY.ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP");
+    PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+    query2.setParameter("REQ_ID", data.getId().getReqId());
+    query2.setParameter("ADDR_TYPE", "ZS01");
+    List<String> record = query2.getResults(String.class);
+    if (record != null && !record.isEmpty()) {
+      abbrevNmSoldto = record.get(0);
+    }
+
     if (abbrevNmValue != null && abbrevNmValue.length() > 22) {
       abbrevNmValue = abbrevNmValue.substring(0, 22);
     }

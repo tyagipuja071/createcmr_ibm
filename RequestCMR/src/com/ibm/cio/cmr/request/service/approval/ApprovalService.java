@@ -1162,6 +1162,15 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
               this.log.debug("Handling Adding user..");
               target = BluePagesHelper.getPerson(recipients.getId().getIntranetId());
             }
+            if (target == null && recipients.getId().getIntranetId().toLowerCase().endsWith("ibm.com")) {
+              // only check if the ID is from IBM as a functional id
+              String id = recipients.getId().getIntranetId();
+              target = new Person();
+              target.setEmail(id);
+              target.setName(id);
+              target.setId(id);
+              target.setNotesEmail(id);
+            }
             if (target != null) {
               ApprovalReq approver = new ApprovalReq();
               long approverId = SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "APPROVAL_ID", "CREQCMR");

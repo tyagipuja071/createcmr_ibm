@@ -290,7 +290,7 @@ public class MassChangeTemplate {
               // continue;
               // }
               // }
-              // String name3 = "";
+              //
               // if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept,
               // "@")) {
               // name3 += dept;

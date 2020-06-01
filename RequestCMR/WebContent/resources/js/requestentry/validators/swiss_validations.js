@@ -377,7 +377,7 @@ function addHandlersForSWISS() {
 
   if (_vatHandler == null) {
     _vatHandler = dojo.connect(FormManager.getField('vat'), 'onChange', function(value) {
-      if (value.length == 15) {
+      if (value.length >= 15) {
         addVatSuffixForCustLangCdScrtch();
       }
     });
@@ -1636,25 +1636,29 @@ function setPreferredLangAddr() {
 }
 function reqReasonOnChange() {
   var reqReason = FormManager.getActualValue('reqReason');
-  if (reqReason == 'IGF' && isZD01OrZP01ExistOnCMR()) {
-    dojo.byId('radiocont_ZP02').style.display = 'inline-block';
-    dojo.byId('radiocont_ZD02').style.display = 'inline-block';
-  } else {
-    dojo.byId('radiocont_ZP02').style.display = 'none';
-    dojo.byId('radiocont_ZD02').style.display = 'none';
+  var addressListIGF = [ 'ZP02', 'ZD02' ];
+  for (var i = 0; i < addressListIGF.length; i++) {
+    var addressType = addressListIGF[i];
+    if (reqReason == 'IGF' && isZD01OrZP01ExistOnCMR(addressType)) {
+      dojo.byId('radiocont_' + addressType).style.display = 'inline-block';
+    } else {
+      dojo.byId('radiocont_' + addressType).style.display = 'none';
+    }
   }
   dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-    if (value == 'IGF' && isZD01OrZP01ExistOnCMR()) {
-      dojo.byId('radiocont_ZP02').style.display = 'inline-block';
-      dojo.byId('radiocont_ZD02').style.display = 'inline-block';
-    } else {
-      dojo.byId('radiocont_ZP02').style.display = 'none';
-      dojo.byId('radiocont_ZD02').style.display = 'none';
+    for (var i = 0; i < addressListIGF.length; i++) {
+      var addressType = addressListIGF[i];
+      if (value == 'IGF' && isZD01OrZP01ExistOnCMR(addressType)) {
+        dojo.byId('radiocont_' + addressType).style.display = 'inline-block';
+      } else {
+        dojo.byId('radiocont_' + addressType).style.display = 'none';
+      }
     }
   });
 }
 
-function isZD01OrZP01ExistOnCMR() {
+function isZD01OrZP01ExistOnCMR(addressType) {
+  addressType = addressType.replace('2', '1');
   for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
     record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
     if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -1666,7 +1670,7 @@ function isZD01OrZP01ExistOnCMR() {
     }
     var importInd = record.importInd[0];
     var reqType = FormManager.getActualValue('reqType');
-    if ('U' == reqType && 'Y' == importInd && (type == 'ZD01' || type == 'ZP01')) {
+    if ('U' == reqType && 'Y' == importInd && type == addressType) {
       return true;
     }
   }
