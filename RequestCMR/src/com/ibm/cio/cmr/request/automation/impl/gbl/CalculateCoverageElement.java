@@ -589,20 +589,24 @@ public class CalculateCoverageElement extends OverridingElement {
 
         // Check if BG ID calculated
         if (gbg != null && createOverrides && output.getData() != null && !output.getData().isEmpty()) {
-          FieldResult bgResult = output.getData().get(new FieldResultKey("DATA", "BG_ID"));
+          FieldResultKey bgKey = new FieldResultKey("DATA", "BG_ID");
+          FieldResult bgResult = output.getData().get(bgKey);
           if (bgResult != null && StringUtils.isNotBlank(data.getBgId()) && !"BGNONE".equals(data.getBgId())
               && !data.getBgId().equals(bgResult.getNewValue())) {
             // calculated buying group is different from coverage buying group.
             details.append("\nBuying Group ID under coverage overrides is different from the one on request.\n");
             engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+            output.getData().remove(bgKey);
           }
-          FieldResult gbgResult = output.getData().get(new FieldResultKey("DATA", "GBG_ID"));
+          FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
+          FieldResult gbgResult = output.getData().get(gbgKey);
           if (gbgResult != null && StringUtils.isNotBlank(data.getGbgId()) && !"BGNONE".equals(data.getGbgId())
               && !data.getGbgId().equals(gbgResult.getNewValue())) {
             // calculated global buying group is different from coverage global
             // buying group.
             details.append("\nGlobal Buying Group ID under coverage overrides is different from the one on request.\n");
             engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+            output.getData().remove(gbgKey);
           }
         }
 
