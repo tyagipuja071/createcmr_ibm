@@ -27,11 +27,17 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 
 public class DupCMRCheckElement extends DuplicateCheckElement {
 
@@ -106,60 +112,9 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                   output.addMatch(getProcessCode(), "CMR_NO", cmrCheckRecord.getCmrNo(), "Matching Logic", cmrCheckRecord.getMatchGrade() + "", "CMR",
                       itemNo++);
                   dupCMRNos.add(cmrCheckRecord.getCmrNo());
-                  if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
-                    details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getMatchGrade())) {
-                    details.append("Match Grade = " + cmrCheckRecord.getMatchGrade()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getIssuingCntry())) {
-                    details.append("Issuing Country =  " + cmrCheckRecord.getIssuingCntry()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getCustomerName())) {
-                    details.append("Customer Name =  " + cmrCheckRecord.getCustomerName()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getLandedCountry())) {
-                    details.append("Landed Country =  " + cmrCheckRecord.getLandedCountry()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine1())) {
-                    details.append("Address =  " + cmrCheckRecord.getStreetLine1()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine2())) {
-                    details.append("Address (cont)=  " + cmrCheckRecord.getStreetLine2()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getCity())) {
-                    details.append("City =  " + cmrCheckRecord.getCity()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getStateProv())) {
-                    details.append("State =  " + cmrCheckRecord.getStateProv()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getPostalCode())) {
-                    details.append("Postal Code =  " + cmrCheckRecord.getPostalCode()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getVat())) {
-                    details.append("VAT =  " + cmrCheckRecord.getVat()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getDunsNo())) {
-                    details.append("Duns No =  " + cmrCheckRecord.getDunsNo()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getParentDunsNo())) {
-                    details.append("Parent Duns No =  " + cmrCheckRecord.getParentDunsNo()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getGuDunsNo())) {
-                    details.append("Global Duns No =  " + cmrCheckRecord.getGuDunsNo()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getCoverageId())) {
-                    details.append("Coverage Id=  " + cmrCheckRecord.getCoverageId()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getIbmClientId())) {
-                    details.append("IBM Client Id =  " + cmrCheckRecord.getIbmClientId()).append("\n");
-                  }
-                  if (!StringUtils.isBlank(cmrCheckRecord.getCapInd())) {
-                    details.append("Cap Indicator =  " + cmrCheckRecord.getCapInd()).append("\n");
-                  }
-
-                  engineData.put("cmrCheckMatches", cmrCheckRecord);
+                  logDuplicateCMR(details, cmrCheckRecord);
                 }
+                engineData.put("cmrCheckMatches", cmrCheckMatches);
                 result.setResults("Found Duplicate CMRs.");
                 if (engineData.hasPositiveCheckStatus("allowDuplicates")) {
                   engineData.addNegativeCheckStatus("dupAllowed",
@@ -167,8 +122,12 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
                           + " possible duplicate CMR(s) found with the same data but allowed for the scenario.\n Duplicate CMR(s) found: "
                           + StringUtils.join(dupCMRNos, ", "));
                 } else {
-                  engineData.addRejectionComment(cmrCheckMatches.size() + " possible duplicate CMR(s) found with the same data.\n Duplicate CMR(s): "
-                      + StringUtils.join(dupCMRNos, ", "));
+                  List<String> zs01KunnrsList = new ArrayList<String>();
+                  for (String dupCMR : dupCMRNos) {
+                    zs01KunnrsList.add(getZS01Kunnr(dupCMR, requestData.getData().getCmrIssuingCntry()));
+                  }
+                  engineData.addRejectionComment("DUPC", "Customer already exists / duplicate CMR", StringUtils.join(dupCMRNos, ", "),
+                      StringUtils.join(zs01KunnrsList, ", "));
                   // to allow overides later
                   requestData.getAdmin().setMatchIndc("C");
                   result.setOnError(true);
@@ -187,19 +146,19 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
             }
           } else {
             result.setDetails(response.getMessage());
-            engineData.addRejectionComment(response.getMessage());
+            engineData.addRejectionComment("OTH", response.getMessage(), "", "");
             result.setOnError(true);
             result.setResults("Error on Duplicate CMR Check.");
           }
         } else {
           result.setDetails("Duplicate CMR Check Encountered an error.");
-          engineData.addRejectionComment("Duplicate CMR Check Encountered an error.");
+          engineData.addRejectionComment("OTH", "Duplicate CMR Check Encountered an error.", "", "");
           result.setOnError(true);
           result.setResults("Error on Duplicate CMR Check");
         }
       } else {
         result.setDetails("Missing main address on the request.");
-        engineData.addRejectionComment("Missing main address on the request.");
+        engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
         result.setResults("No Matches");
         result.setOnError(true);
       }
@@ -210,6 +169,60 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       result.setOnError(false);
     }
     return result;
+  }
+
+  public void logDuplicateCMR(StringBuilder details, DuplicateCMRCheckResponse cmrCheckRecord) {
+    if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
+      details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getMatchGrade())) {
+      details.append("Match Grade = " + cmrCheckRecord.getMatchGrade()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getIssuingCntry())) {
+      details.append("Issuing Country =  " + cmrCheckRecord.getIssuingCntry()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getCustomerName())) {
+      details.append("Customer Name =  " + cmrCheckRecord.getCustomerName()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getLandedCountry())) {
+      details.append("Landed Country =  " + cmrCheckRecord.getLandedCountry()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine1())) {
+      details.append("Address =  " + cmrCheckRecord.getStreetLine1()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getStreetLine2())) {
+      details.append("Address (cont)=  " + cmrCheckRecord.getStreetLine2()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getCity())) {
+      details.append("City =  " + cmrCheckRecord.getCity()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getStateProv())) {
+      details.append("State =  " + cmrCheckRecord.getStateProv()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getPostalCode())) {
+      details.append("Postal Code =  " + cmrCheckRecord.getPostalCode()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getVat())) {
+      details.append("VAT =  " + cmrCheckRecord.getVat()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getDunsNo())) {
+      details.append("Duns No =  " + cmrCheckRecord.getDunsNo()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getParentDunsNo())) {
+      details.append("Parent Duns No =  " + cmrCheckRecord.getParentDunsNo()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getGuDunsNo())) {
+      details.append("Global Duns No =  " + cmrCheckRecord.getGuDunsNo()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getCoverageId())) {
+      details.append("Coverage Id=  " + cmrCheckRecord.getCoverageId()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getIbmClientId())) {
+      details.append("IBM Client Id =  " + cmrCheckRecord.getIbmClientId()).append("\n");
+    }
+    if (!StringUtils.isBlank(cmrCheckRecord.getCapInd())) {
+      details.append("Cap Indicator =  " + cmrCheckRecord.getCapInd()).append("\n");
+    }
   }
 
   @Override
@@ -242,8 +255,9 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       log.debug("CmrAddrType= " + cmrAddrType);
       rdcAddrTypes = addrTypes.get(cmrAddrType);
       Addr addr = requestData.getAddress(cmrAddrType);
-      for (String rdcAddrType : rdcAddrTypes) {
-        if (addr != null) {
+      if (addr != null) {
+        for (String rdcAddrType : rdcAddrTypes) {
+
           DuplicateCMRCheckRequest request = getRequest(entityManager, data, admin, addr, rdcAddrType, vatMatchRequired);
           log.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
               + " for AddrType: " + cmrAddrType + "-" + rdcAddrType);
@@ -261,14 +275,13 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
             } else {
               return res;
             }
-          } else if (response.getMatches().size() > 0 && res.getSuccess()) {
+          } else if (res.getSuccess()) {
             updateMatches(response, res);
           }
-
-        } else {
-          log.debug("No '" + cmrAddrType + "' address on the request. Skipping duplicate check.");
-          continue;
         }
+      } else {
+        log.debug("No '" + cmrAddrType + "' address on the request. Skipping duplicate check.");
+        continue;
       }
     }
 
@@ -287,7 +300,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     if (addr != null) {
       request.setIssuingCountry(data.getCmrIssuingCntry());
       request.setLandedCountry(addr.getLandCntry());
-      if (admin.getMainCustNm1() != null) {
+      GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+      if (handler != null && !handler.customerNamesOnAddress()) {
         request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
       } else {
         request.setCustomerName(addr.getCustNm1() + (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " + addr.getCustNm2()));
@@ -329,4 +343,31 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     global.setMatched(updated.size() > 0);
   }
 
+  protected String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+    }
+    return kunnr;
+  }
 }

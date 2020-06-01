@@ -54,6 +54,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
     boolean ifDnBAccepted = false;
     boolean ifDnBRejected = false;
     boolean ifDnBNotRequired = false;
+    boolean isSourceSysIDBlank = StringUtils.isBlank(admin.getSourceSystId()) ? true : false;
 
     LOG.debug("Entering DnB Check Element");
     if (requestData.getAdmin().getReqType().equalsIgnoreCase("U")) {
@@ -88,20 +89,20 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             || (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && !admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES))) {
           MatchingResponse<DnBMatchingResponse> dnbMatchingResult = new MatchingResponse<DnBMatchingResponse>();
           try {
-            dnbMatchingResult = DnBUtil.getMatches(handler, requestData, engineData, "ZS01");
+            dnbMatchingResult = DnBUtil.getMatches(requestData, "ZS01");
           } catch (Exception e) {
             LOG.debug("Error on DNB Matching" + e.getMessage());
           }
           boolean hasValidMatches = DnBUtil.hasValidMatches(dnbMatchingResult);
-          if (dnbMatchingResult != null && hasValidMatches) {
+          if (dnbMatchingResult != null && hasValidMatches && isSourceSysIDBlank) {
             requestData.getAdmin().setMatchIndc("D");
             validation.setSuccess(false);
             validation.setMessage("Matches found");
             result.setDetails("High confidence D&B matches were found. No override from users was recorded.");
             result.setOnError(true);
-            engineData.addRejectionComment("High confidence D&B matches were found. No override from users was recorded.");
+            engineData.addRejectionComment("OTH", "High confidence D&B matches were found. No override from users was recorded.", "", "");
             LOG.debug("High confidence D&B matches were found. No override from user was recorded.\n");
-          } else if (!hasValidMatches) {
+          } else if (!hasValidMatches && isSourceSysIDBlank) {
             validation.setSuccess(true);
             validation.setMessage("Review Needed");
             result.setDetails("Processor review is required as no high confidence D&B matches were found.");
@@ -112,6 +113,11 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
              */
             engineData.addNegativeCheckStatus("DNBCheck", "No high confidence D&B matches were found.");
             LOG.debug("Processor review is required as no high confidence D&B matches were found.");
+          } else if (!isSourceSysIDBlank) {
+            validation.setSuccess(true);
+            validation.setMessage("Skipped");
+            result.setDetails("The request was created from an external system and D&B searches is not available.");
+            LOG.debug("The request was created from an external system and D&B searches is not available.");
           }
         } else if (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES)) {
           validation.setSuccess(true);
@@ -135,7 +141,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             validation.setSuccess(false);
             validation.setMessage("Failed");
             result.setDetails("Company is Out of Business based on D&B records.");
-            engineData.addRejectionComment("Company is Out of Business based on D&B records.");
+            engineData.addRejectionComment("OTH", "Company is Out of Business based on D&B records.", "", "");
             // admin.setCompVerifiedIndc(COMPANY_VERIFIED_INDC_YES);
             // admin.setCompInfoSrc("D&B");
             engineData.setCompanySource("D&B");

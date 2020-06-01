@@ -152,6 +152,42 @@ public class RequestData {
     return null;
   }
 
+  /**
+   * Gets all {@link Addr} records with the given address type
+   * 
+   * @param addrType
+   * @return
+   */
+  public List<Addr> getAddresses(String addrType) {
+    List<Addr> addresses = new ArrayList<Addr>();
+    if (this.addresses != null) {
+      for (Addr addr : this.addresses) {
+        if (addrType.equals(addr.getId().getAddrType())) {
+          addresses.add(addr);
+        }
+      }
+    }
+    return addresses;
+  }
+
+  /**
+   * Gets an {@link Addr} object registered to this container based on the
+   * address type
+   * 
+   * @param addrType
+   * @return
+   */
+  public Addr getAddress(String addrType, String seqNo) {
+    if (this.addresses != null) {
+      for (Addr addr : this.addresses) {
+        if (addrType.equals(addr.getId().getAddrType()) && seqNo.equals(addr.getId().getAddrSeq())) {
+          return addr;
+        }
+      }
+    }
+    return null;
+  }
+
   public Admin getAdmin() {
     return admin;
   }

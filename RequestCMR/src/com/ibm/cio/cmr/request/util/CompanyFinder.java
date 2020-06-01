@@ -148,6 +148,7 @@ public class CompanyFinder {
         request.setVat(searchModel.getTaxCd1());
       }
       request.setAddrType(addrType);
+      request.setUsRestrictTo(searchModel.getRestrictTo());
 
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
       // connect to the duplicate CMR check service
@@ -182,6 +183,7 @@ public class CompanyFinder {
           match.setAltCity(record.getAltCity());
           match.setAltStreet(record.getAltStreet());
 
+          match.setRestrictTo(record.getUsRestrictTo());
           match.setRevenue(record.getRevenue());
           if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
             match.setOrgIdMatch(searchModel.getVat().equals(match.getVat()) || searchModel.getTaxCd1().equals(match.getTaxCd1()));
@@ -241,6 +243,7 @@ public class CompanyFinder {
         cmr.setAltName(record.getCmrIntlName1() + (record.getCmrIntlName2() != null ? record.getCmrIntlName2() : ""));
         cmr.setAltStreet(record.getCmrIntlAddress() + (record.getCmrIntlName3() != null ? record.getCmrIntlName3() : ""));
         cmr.setAltCity(record.getCmrIntlCity1());
+        cmr.setRestrictTo(record.getUsCmrRestrictTo());
         cmrRecords.add(cmr);
         if (dunsList == null) {
           // only import 1 record for non duns matching
@@ -404,8 +407,12 @@ public class CompanyFinder {
     if (sbDuns.length() > 0) {
       // try to do a secondary matching against FindCMR using DUNS Information
       LOG.debug("Trying to find CMRs with DUNS: " + sbDuns.toString());
-      List<CompanyRecordModel> cmrs = findCMRsViaService(searchModel.getIssuingCntry(), null, 3, "showCmrType=R,P&addressType="
-          + ("897".equals(searchModel.getIssuingCntry()) ? "ZS01,ZI01" : "ZS01") + "&dunsNumberList=" + sbDuns.toString());
+      String params = "showCmrType=R,P&addressType=" + ("897".equals(searchModel.getIssuingCntry()) ? "ZS01,ZI01" : "ZS01") + "&dunsNumberList="
+          + sbDuns.toString();
+      if (!StringUtils.isBlank(searchModel.getRestrictTo())) {
+        params += "&usRestrictTo=" + searchModel.getRestrictTo();
+      }
+      List<CompanyRecordModel> cmrs = findCMRsViaService(searchModel.getIssuingCntry(), null, 3, params);
       if (cmrs != null) {
         for (CompanyRecordModel cmr : cmrs) {
           cmr.setMatchGrade("DUNS");

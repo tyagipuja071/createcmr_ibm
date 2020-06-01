@@ -17,12 +17,10 @@ public class RequestStatsModel {
   @EmbeddedId
   private StatsPK id;
 
-  @Column(
-      name = "CNTRY_CD")
+  @Column(name = "CNTRY_CD")
   private String cntryCd;
 
-  @Column(
-      name = "CNTRY_DESC")
+  @Column(name = "CNTRY_DESC")
   private String cntryDesc;
 
   private String iot;
@@ -31,148 +29,115 @@ public class RequestStatsModel {
 
   private String lob;
 
-  @Column(
-      name = "REQ_TYPE")
+  @Column(name = "REQ_TYPE")
   private String reqType;
 
-  @Column(
-      name = "PROSPECT")
+  @Column(name = "PROSPECT")
   private String prospectConversion;
 
-  @Column(
-      name = "CUST_NM")
+  @Column(name = "CUST_NM")
   private String custNm;
 
-  @Column(
-      name = "CMR_NO")
+  @Column(name = "CMR_NO")
   private String cmrNo;
 
-  @Column(
-      name = "REQ_REASON")
+  @Column(name = "REQ_REASON")
   private String reqReason;
 
-  @Column(
-      name = "REQUESTER_NM")
+  @Column(name = "SOURCE_SYST_ID")
+  private String sourceSystId;
+
+  @Column(name = "REQUESTER_NM")
   private String requesterNm;
 
-  @Column(
-      name = "REQUESTER_ID")
+  @Column(name = "REQUESTER_ID")
   private String requesterId;
 
-  @Column(
-      name = "REVIEWER_NM")
+  @Column(name = "REVIEWER_NM")
   private String reviewerNm;
 
-  @Column(
-      name = "REVIEWER_ID")
+  @Column(name = "REVIEWER_ID")
   private String reviewerId;
 
-  @Column(
-      name = "APPROVER_NM")
+  @Column(name = "APPROVER_NM")
   private String approverNm;
 
-  @Column(
-      name = "APPROVER_ID")
+  @Column(name = "APPROVER_ID")
   private String approverId;
 
-  @Column(
-      name = "PROCESSOR_NM")
+  @Column(name = "PROCESSOR_NM")
   private String processorNm;
 
-  @Column(
-      name = "PROCESSOR_ID")
+  @Column(name = "PROCESSOR_ID")
   private String processorId;
 
-  @Column(
-      name = "REQ_YR")
+  @Column(name = "REQ_YR")
   private String reqYr;
 
-  @Column(
-      name = "REQ_MONTH")
+  @Column(name = "REQ_MONTH")
   private String reqMonth;
 
-  @Column(
-      name = "REQ_DT")
+  @Column(name = "REQ_DT")
   private String reqDt;
 
-  @Column(
-      name = "CLOSE_YR")
+  @Column(name = "CLOSE_YR")
   private String closeYr;
 
-  @Column(
-      name = "CLOSE_MONTH")
+  @Column(name = "CLOSE_MONTH")
   private String closeMonth;
 
-  @Column(
-      name = "CLOSE_DT")
+  @Column(name = "CLOSE_DT")
   private String closeDt;
 
-  @Column(
-      name = "FINAL_STATUS")
+  @Column(name = "FINAL_STATUS")
   private String finalStatus;
 
-  @Column(
-      name = "REJECT_TOTAL")
+  @Column(name = "REJECT_TOTAL")
   private long rejectTotal;
 
-  @Column(
-      name = "LAST_REJ_REASON")
+  @Column(name = "LAST_REJ_REASON")
   private String lastRejReason;
 
-  @Column(
-      name = "DAY_PROCESS")
+  @Column(name = "DAY_PROCESS")
   private String dayProcess;
 
-  @Column(
-      name = "REQUEST_TAT")
+  @Column(name = "REQUEST_TAT")
   private long requestTat = -1;
 
-  @Column(
-      name = "PENDING_TAT")
+  @Column(name = "PENDING_TAT")
   private long pendingTat = -1;
 
-  @Column(
-      name = "REVIEW_TAT")
+  @Column(name = "REVIEW_TAT")
   private long reviewTat = -1;
 
-  @Column(
-      name = "APPROVAL_TAT")
+  @Column(name = "APPROVAL_TAT")
   private long approvalTat = -1;
 
-  @Column(
-      name = "APPROVAL2_TAT")
+  @Column(name = "APPROVAL2_TAT")
   private long approval2Tat = -1;
 
-  @Column(
-      name = "PROCESS_TAT")
+  @Column(name = "PROCESS_TAT")
   private long processTat = -1;
 
-  @Column(
-      name = "OVERALL_TAT")
+  @Column(name = "OVERALL_TAT")
   private long overallTat = -1;
 
-  @Column(
-      name = "SUBMIT_TO_COMPLETE_TAT")
+  @Column(name = "SUBMIT_TO_COMPLETE_TAT")
   private long submitToCompleteTat = -1;
 
-  @Column(
-      name = "CUST_TYPE")
+  @Column(name = "CUST_TYPE")
   private String custType;
 
-  @Column(
-      name = "SCENARIO_TYPE_DESC")
+  @Column(name = "SCENARIO_TYPE_DESC")
   private String scenarioType;
 
-  @Column(
-      name = "SCENARIO_SUBTYPE_DESC")
+  @Column(name = "SCENARIO_SUBTYPE_DESC")
   private String scenarioSubType;
 
-  @Column(
-      name = "REQUEST_DUE_DATE")
+  @Column(name = "REQUEST_DUE_DATE")
   private String requestDueDate;
 
-  @Column(
-      name = "COMPLETION_TS")
+  @Column(name = "COMPLETION_TS")
   private String completionTs;
 
   public String getCntryCd() {
@@ -509,5 +474,13 @@ public class RequestStatsModel {
 
   public void setCompletionTs(String completionTs) {
     this.completionTs = completionTs;
+  }
+
+  public String getSourceSystId() {
+    return sourceSystId;
+  }
+
+  public void setSourceSystId(String sourceSystId) {
+    this.sourceSystId = sourceSystId;
   }
 }

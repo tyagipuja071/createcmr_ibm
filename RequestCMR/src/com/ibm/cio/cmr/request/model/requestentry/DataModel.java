@@ -238,6 +238,8 @@ public class DataModel extends BaseModel {
   // Italy Legacy Fields
   private String hwSvcsRepTeamNo;
 
+  private String usSicmen;
+
   public String getCreditCd() {
     return creditCd;
   }
@@ -1142,6 +1144,14 @@ public class DataModel extends BaseModel {
 
   public void setNationalCusId(String nationalCusId) {
     this.nationalCusId = nationalCusId;
+  }
+
+  public String getUsSicmen() {
+    return usSicmen;
+  }
+
+  public void setUsSicmen(String usSicmen) {
+    this.usSicmen = usSicmen;
   }
 
 }
