@@ -401,7 +401,12 @@ public class SwitzerlandUtil extends AutomationUtil {
       break;
     default:
       if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier()))) {
-        muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+        if (SCENARIO_CROSS_BORDER.equals(scenario)) {
+          // verified all logic is based on 3000-9999 condition for crossborders
+          muboty = getMubotyFromMapping(data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
+        } else {
+          muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+        }
       }
     }
 
