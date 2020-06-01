@@ -1739,6 +1739,19 @@ function applyAddrChangesModal_onLoad() {
     		  continue;
     	  }
       } 
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
       if (type.ret3 == cntry) {
         useCntry = true;
       }
@@ -1854,6 +1867,10 @@ function applyAddrChangesModal_onLoad() {
           }
         }
       } else if (cntry == '848') {
+        var reqReason = FormManager.getActualValue('reqReason');
+        if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
+          continue;
+        }
         if (type.ret1 != 'ZS02') {
           var reqType = FormManager.getActualValue('reqType');
           if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {

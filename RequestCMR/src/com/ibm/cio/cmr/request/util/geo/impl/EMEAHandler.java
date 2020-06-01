@@ -2407,7 +2407,19 @@ public class EMEAHandler extends BaseSOFHandler {
         // Sync Sold to and Local lauguage address
         if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp())
             && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
-          updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
+          if ("ZS01".equals(addr.getId().getAddrType())) {
+            if (getAddressByType(entityManager, "ZP01", data.getId().getReqId()) == null) {
+              saveAddrCopyForTR(entityManager, addr, "ZP01");
+            } else {
+              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
+            }
+          } else if ("ZP01".equals(addr.getId().getAddrType())) {
+            if (getAddressByType(entityManager, "ZS01", data.getId().getReqId()) == null) {
+              saveAddrCopyForTR(entityManager, addr, "ZS01");
+            } else {
+              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
+            }
+          }
         }
         if (admin.getReqType().equals("C")) {
           Addr zs01addr = getCurrentInstallingAddress(entityManager, admin.getId().getReqId());
@@ -4102,12 +4114,12 @@ public class EMEAHandler extends BaseSOFHandler {
     }
   }
 
-  private void saveAddrCopyForGR(EntityManager entityManager, Addr addr, String addrType) {
+  private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType) {
     Addr addrCopy = (Addr) SerializationUtils.clone(addr);
     addrCopy.getId().setAddrType(addrType);
 
-    if (addrType.equals("ZP01")) {
-      addrCopy.setCustPhone(null);
+    if (addrType.equals("ZS01")) {
+      addrCopy.setTaxOffice(null);
     }
 
     entityManager.persist(addrCopy);
