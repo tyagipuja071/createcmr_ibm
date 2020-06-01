@@ -107,10 +107,10 @@ public class ImportExternalDataElement extends OverridingElement {
       } else {
         if (requestData.getAddress("ZS01") == null) {
           details.append("Main address(ZS01) not found on the request,so skipping MIDAS import.\n");
-          engineData.addRejectionComment("Main address(ZS01) not found on the request");
+          engineData.addRejectionComment("OTH", "Main address(ZS01) not found on the request.", "", "");
         } else if (StringUtils.isEmpty(scenarioSubType)) {
           details.append("Scenario can't be identified");
-          engineData.addRejectionComment("Scenario can't be identified");
+          engineData.addRejectionComment("OTH", "Scenario can't be identified.", "", "");
         }
         results.setResults("Skip MIDAS import");
         results.setDetails(details.toString());
@@ -169,7 +169,7 @@ public class ImportExternalDataElement extends OverridingElement {
         results.setResults("Execution Not Done.");
         results.setDetails(response.getMessage());
         log.debug("Error while connecting to MIDAS service " + response.getMessage());
-        engineData.addRejectionComment(response.getMessage());
+        engineData.addRejectionComment("OTH", response.getMessage(), "", "");
       }
 
     } else {

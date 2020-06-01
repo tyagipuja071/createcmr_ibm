@@ -361,4 +361,6 @@ public class MessageUtil {
   // Single Reactivate query Error
   public static final int SINGLE_REACT_ERROR_QUERY = 551;
 
+  public static final int OEM_IMPORT_US_CREATE = 9052;
+
 }

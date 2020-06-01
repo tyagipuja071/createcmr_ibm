@@ -126,6 +126,12 @@ public class CmrConstants {
   public static final String RESULT_NO_RESULT = "No Results";
   public static final String RESULT_CANCELLED = "Cancelled";
 
+  public static final String RDC_SOLD_TO = "ZS01";
+  public static final String RDC_BILL_TO = "ZP01";
+  public static final String RDC_INSTALL_AT = "ZI01";
+  public static final String RDC_SHIP_TO = "ZD01";
+  public static final String RDC_SECONDARY_SOLD_TO = "ZS02";
+
   // REQUEST ACTIONS
   public static final String All_Processing_Complete() {
     return UIMgr.getText("trans.All_Processing_Complete");

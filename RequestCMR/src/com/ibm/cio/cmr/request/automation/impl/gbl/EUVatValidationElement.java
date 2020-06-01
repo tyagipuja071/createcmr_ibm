@@ -87,11 +87,11 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             if (response.getRecord().isValid()) {
               validation.setSuccess(true);
               validation.setMessage("Execution done.");
-              LOG.debug("Vat and company information verified through VAT Layer.");
+              LOG.debug("VAT and company information verified through VIES.");
               engineData.addPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED);
 
-              details.append("Vat and company information verified through VAT Layer.");
-              details.append("\nCompany details from VAT Layer :");
+              details.append("VAT and company information verified through VIES.");
+              details.append("\nCompany details from VIES :");
               details.append(
                   "\nCompany Name = " + (StringUtils.isBlank(response.getRecord().getCompanyName()) ? "" : response.getRecord().getCompanyName()));
               details
@@ -102,17 +102,17 @@ public class EUVatValidationElement extends ValidatingElement implements Company
             } else {
               validation.setSuccess(false);
               validation.setMessage("Review needed.");
-              output.setDetails("Vat is invalid.Need review.");
+              output.setDetails("VAT is invalid. Need review.");
               output.setOnError(true);
-              engineData.addRejectionComment("Vat is invalid.");
-              LOG.debug("Vat is invalid.Need review.");
+              engineData.addRejectionComment("OTH", "VAT is invalid.", "", "");
+              LOG.debug("VAT is invalid.Need review.");
             }
           } else {
             validation.setSuccess(false);
             validation.setMessage("Execution failed.");
             output.setDetails(response.getMessage());
             output.setOnError(true);
-            engineData.addRejectionComment(response.getMessage());
+            engineData.addRejectionComment("OTH", response.getMessage(), null, null);
             LOG.debug(response.getMessage());
           }
         }
@@ -135,6 +135,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     if (landCntry == null && StringUtils.isBlank(defaultLandedCountry)) {
       return null;
     }
+
     if (!landCntry.equals(defaultLandedCountry)) {
       // handle cross-border and subregions
 

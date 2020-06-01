@@ -375,7 +375,10 @@ public class BluePagesHelper {
    * @throws CmrException
    */
   public static Person getPerson(String email) throws CmrException {
-    return getPerson(email, null);
+    if (StringUtils.isNotBlank(email)) {
+      return getPerson(email, null);
+    }
+    return null;
   }
 
   /**
@@ -455,4 +458,22 @@ public class BluePagesHelper {
       return null;
     }
   }
+
+  public static boolean isBluePagesHeirarchyManager(String employeeEmail, String managerEmail) {
+    if (StringUtils.isNotBlank(employeeEmail) && StringUtils.isNotBlank(managerEmail)) {
+      String email = employeeEmail;
+      while (StringUtils.isNotBlank(email)) {
+        String employeeId = getCNUMByIntranetAddr(email);
+        if (!"NOTFOUND".equals(employeeId) && !"MULTIPLE".equals(employeeId)) {
+          email = BluePagesHelper.getManagerEmail(employeeId);
+        }
+        if (email != null && email.equals(managerEmail)) {
+          return true;
+        }
+      }
+    }
+    return false;
+
+  }
+
 }
