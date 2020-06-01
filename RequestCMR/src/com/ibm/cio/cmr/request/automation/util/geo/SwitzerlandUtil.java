@@ -348,17 +348,24 @@ public class SwitzerlandUtil extends AutomationUtil {
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
-    String scenario = data.getCustSubGrp();
-    LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
-    String actualScenario = scenario.substring(2);
-    if (StringUtils.isNotBlank(actualScenario)
-        && (SCENARIO_BUSINESS_PARTNER.equals(actualScenario) || SCENARIO_IBM_EMPLOYEE.equals(actualScenario)
-            || SCENARIO_PRIVATE_CUSTOMER.equals(actualScenario) || SCENARIO_INTERNAL.equals(actualScenario))
-        && data.getSubIndustryCd() != null && data.getSubIndustryCd().startsWith("B")) {
-      details.append("Found IMS value 'B' on the request, setting ISU-CTC as 32-N").append("\n");
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
-      results.setResults("Computed");
+    Admin admin = requestData.getAdmin();
+    if ("C".equals(admin.getReqType())) {
+      String scenario = data.getCustSubGrp();
+      LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
+      String actualScenario = scenario.substring(2);
+      if (StringUtils.isNotBlank(actualScenario)
+          && !(SCENARIO_BUSINESS_PARTNER.equals(actualScenario) || SCENARIO_IBM_EMPLOYEE.equals(actualScenario)
+              || SCENARIO_PRIVATE_CUSTOMER.equals(actualScenario) || SCENARIO_INTERNAL.equals(actualScenario))
+          && data.getSubIndustryCd() != null && data.getSubIndustryCd().startsWith("B") && "32".equals(data.getIsuCd())
+          && "S".equals(data.getClientTier())) {
+        details.append("Found IMS value 'B' on the request, setting ISU-CTC as 32-N").append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
+        results.setResults("Computed");
+      } else {
+        details.append("No specific fields to compute.\n");
+        results.setResults("Skipped");
+      }
     } else {
       details.append("No specific fields to compute.\n");
       results.setResults("Skipped");
@@ -393,11 +400,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
-      if (data.getSubIndustryCd() != null && data.getSubIndustryCd().startsWith("B")) {
-        muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), "32", "N");
-      } else {
-        muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), "32", "S");
-      }
+      muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       break;
     default:
       if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier()))) {
@@ -465,7 +468,7 @@ public class SwitzerlandUtil extends AutomationUtil {
             && clientTier.equals(mapping.getCtc())) {
           if (StringUtils.isNotBlank(mapping.getPostalCdMin()) && StringUtils.isNotBlank(mapping.getPostalCdMax())) {
             int start = Integer.parseInt(mapping.getPostalCdMin());
-            int end = Integer.parseInt(mapping.getPostalCdMin());
+            int end = Integer.parseInt(mapping.getPostalCdMax());
             if (postalCd >= start && postalCd <= end) {
               return mapping;
             }
