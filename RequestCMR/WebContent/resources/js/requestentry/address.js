@@ -1722,6 +1722,19 @@ function applyAddrChangesModal_onLoad() {
       if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
         break;
       }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
       if (type.ret3 == cntry) {
         useCntry = true;
       }
