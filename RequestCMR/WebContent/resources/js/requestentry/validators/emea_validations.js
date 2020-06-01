@@ -3321,7 +3321,9 @@ function addTRAddressTypeValidator() {
           var zi01Cnt = 0;
           var zs01Copy;
           var zp01Copy;
-
+          var custType = FormManager.getActualValue('custGrp');
+          var compareFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'stateProv', 'postCd', 'dept', 'poBox', 'landCntry' ];
+          var compareFieldsLocal = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'stateProv', 'postCd', 'dept', 'poBox', 'landCntry', 'taxOffice' ];
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -3330,6 +3332,39 @@ function addTRAddressTypeValidator() {
             type = record.addrType;
             if (typeof (type) == 'object') {
               type = type[0];
+            }
+            // Valid english for all address types when
+            // 1: All address types except ZP01
+            // 2: For ZP01, create request => scenario is CROSS,
+            // update request=> land country is not TR
+            if(type != 'ZP01' || (type == 'ZP01' && (custType == 'CROSS' || (cmr.currentRequestType == 'U' && record['landCntry'][0] != 'TR')))){
+              for (var j = 0; j < compareFieldsLocal.length; j++) {
+                var value = record[compareFieldsLocal[j]];
+                if (typeof (value) == 'object') {
+                  value = value[0];
+                }
+                if(value != null && value != undefined && value != '' && typeof(value) == 'string'){
+                  if(value != value.match(/^[0-9A-Za-z\'\"\,\.\!\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)){
+                    return new ValidationResult(null, false, type + ' must be in English.');
+                  }
+                }
+              }
+            }
+            // Valid Turkish for ZP01 when
+            // 1:Sub scenario is local for create request
+            // 2:Land country is TR for update request
+            if(type == 'ZP01' && (custType == 'LOCAL' || (cmr.currentRequestType == 'U' && record['landCntry'][0] == 'TR'))){
+              for (var j = 0; j < compareFields.length; j++) {
+                var value = record[compareFields[j]];
+                if (typeof (value) == 'object') {
+                  value = value[0];
+                }
+                if(value != null && value != undefined && value != '' && typeof(value)=='string'){
+                  if(value != value.match(/^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)){
+                    return new ValidationResult(null, false, type + ' must be in Turkish.');
+                  }
+                }
+              }
             }
             if (type == 'ZS01') {
               zs01Cnt++;
@@ -3352,21 +3387,14 @@ function addTRAddressTypeValidator() {
             return new ValidationResult(null, false, 'Only one Local Language Translation of Sold-To is allowed.');
           }
 
-          var compareFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'stateProv', 'postCd', 'dept', 'poBox', 'landCntry' ];
           for (var i = 0; i < compareFields.length; i++) {
-            var custType = FormManager.getActualValue('custGrp');
-            if (custType == 'CROSS') {
+            if (custType == 'CROSS' || (cmr.currentRequestType == 'U' && zp01Copy['landCntry'][0] != 'TR')) {
               if (zs01Copy[compareFields[i]][0] != zp01Copy[compareFields[i]][0]) {
                 return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
               }
-            } else {
-              if ((zs01Copy[compareFields[i]] == '' || zs01Copy[compareFields[i]] == null || zs01Copy[compareFields[i]] == undefined)
-                  && (zp01Copy[compareFields[i]] != '' && zp01Copy[compareFields[i]] != null && zp01Copy[compareFields[i]] != undefined)) {
-                return new ValidationResult(null, false, 'There is a mismatch between Sold-To and Local Language Translation of Sold-To.');
-              }
-              if ((zp01Copy[compareFields[i]] == '' || zp01Copy[compareFields[i]] == null || zp01Copy[compareFields[i]] == undefined)
-                  && (zs01Copy[compareFields[i]] != '' && zs01Copy[compareFields[i]] != null && zs01Copy[compareFields[i]] != undefined)) {
-                return new ValidationResult(null, false, 'There is a mismatch between Sold-To and Local Language Translation of Sold-To.');
+            } else if (custType == 'LOCAL' || (cmr.currentRequestType == 'U' && zp01Copy['landCntry'][0] == 'TR')){
+              if (modifyCharForTurk(zs01Copy[compareFields[i]][0]) != zp01Copy[compareFields[i]][0]) {
+                return new ValidationResult(null, false, 'Local language not applicable for Cross-border, address must match sold to data.');
               }
             }
           }
@@ -4923,7 +4951,7 @@ function showCommercialFinanced() {
   }
 }
 function lockCmrOwner() {
-  // FormManager.setValue('cmrOwner', 'IBM');
+  FormManager.setValue('cmrOwner', 'IBM');
   FormManager.readOnly('cmrOwner');
 }
 function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
@@ -8233,6 +8261,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addIEClientTierISULogic, [ SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(addUKClientTierISULogic, [ SysLoc.UK ]);
   GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
+  GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(lockCmrOwner, [ SysLoc.TURKEY ]);  
   GEOHandler.addAfterConfig(addSBOSalesRepLogicIreland, [ SysLoc.IRELAND ]);
   // GEOHandler.addAfterConfig(addSBODependcyLogicUK, [ SysLoc.UK ]);
   // GEOHandler.addAfterConfig(addSalesRepDependcyLogicUK, [ SysLoc.UK ]);
@@ -8294,7 +8324,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setFieldsToReadOnlyGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(addrFunctionForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(disableAddrFieldsGRCYTR, [ SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.GREECE ]);
+  GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForTR, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
@@ -8450,7 +8480,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(resetSubIndustryCdGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(showCommercialFinanced, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(lockCmrOwner, [ SysLoc.TURKEY ]);
 
   // CYPRUS Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
