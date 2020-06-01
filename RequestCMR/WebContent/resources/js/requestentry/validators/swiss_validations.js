@@ -68,6 +68,7 @@ function addAfterConfigForSWISS() {
     FormManager.readOnly("inacCd");
     FormManager.setValue("custClass", "45");
     FormManager.readOnly("custClass");
+    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
   }
 
   if (reqType == 'C' && (custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI')) {
@@ -352,6 +353,7 @@ function addHandlersForSWISS() {
 
   if (_IMSHandler == null) {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+      setISUCTCOnIMSChange();
       setMubotyOnPostalCodeIMS();
       setMubotyOnPostalCodeIMS32N(value);
     });
@@ -397,6 +399,20 @@ function getImportedIndcForSwiss() {
   return _importedIndc;
 
 }
+function setISUCTCOnIMSChange() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (!(custSubGrp == 'CHINT' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')) {
+    if ('32' == isuCd && 'S' == clientTier && subIndustryCd.startsWith('B')) {
+      FormManager.setValue('clientTier', 'N');
+    } else if ('32' == isuCd && 'N' == clientTier && !subIndustryCd.startsWith('B')) {
+      FormManager.setValue('clientTier', 'S');
+    }
+  }
+}
+
 function addVatSuffixForCustLangCdScrtch() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
@@ -545,6 +561,11 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
   if (((custSubGrp != 'CHBUS') || (custSubGrp != 'XCHBP') || (custSubGrp != 'CHINT') || (custSubGrp != 'XCHIN')) && (postCd == '')) {
     postCd = result.ret1;
   }
+  // for cross use post cd 3000 values
+  if (custSubGrp == 'XCHCM') {
+    postCd = 3000;
+  }
+
   var isuCd = FormManager.getActualValue('isuCd');
   var ims = FormManager.getActualValue('subIndustryCd');
   var clientTier = FormManager.getActualValue('clientTier');
@@ -764,6 +785,10 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
   if (((custSubGrp != 'CHBUS') || (custSubGrp != 'XCHBP') || (custSubGrp != 'CHINT') || (custSubGrp != 'XCHIN')) && (postCd == '')) {
     postCd = result.ret1;
   }
+  if (custSubGrp == 'XCHCM') {
+    postCd = 3000;
+  }
+
   var isuCd = FormManager.getActualValue('isuCd');
   var ims = FormManager.getActualValue('subIndustryCd');
   var clientTier = FormManager.getActualValue('clientTier');
@@ -1782,4 +1807,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(name3LengthValidation, GEOHandler.SWISS, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.SWISS, null, true);
 
+  // new phase 2
+  GEOHandler.addAfterConfig(setISUCTCOnIMSChange, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, GEOHandler.SWISS);
 });
