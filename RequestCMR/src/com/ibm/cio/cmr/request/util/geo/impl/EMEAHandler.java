@@ -1935,6 +1935,8 @@ public class EMEAHandler extends BaseSOFHandler {
         String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
+
+      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
     }
   }
 
@@ -3111,6 +3113,16 @@ public class EMEAHandler extends BaseSOFHandler {
       abbrevNmValue = results.get(0);
     }
 
+    String abbrevNmSoldto = null;
+    String sql2 = ExternalizedQuery.getSql("QUERY.ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP");
+    PreparedQuery query2 = new PreparedQuery(entityManager, sql2);
+    query2.setParameter("REQ_ID", data.getId().getReqId());
+    query2.setParameter("ADDR_TYPE", "ZS01");
+    List<String> record = query2.getResults(String.class);
+    if (record != null && !record.isEmpty()) {
+      abbrevNmSoldto = record.get(0);
+    }
+
     if (abbrevNmValue != null && abbrevNmValue.length() > 22) {
       abbrevNmValue = abbrevNmValue.substring(0, 22);
     }
@@ -3146,6 +3158,18 @@ public class EMEAHandler extends BaseSOFHandler {
           }
         }
         data.setAbbrevNm(abbrevNmValue);
+      }
+    }
+
+    String processingType = PageManager.getProcessingType(SystemLocation.GREECE, "U");
+    if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+      if (SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        if ((admin.getProspLegalInd() != null && admin.getProspLegalInd().equals("Y")) || admin.getReqType().equalsIgnoreCase("C")) {
+          data.setAbbrevNm(abbrevNmSoldto);
+          if (abbrevNmSoldto != null && abbrevNmSoldto.length() > 22) {
+            data.setAbbrevNm(abbrevNmSoldto.substring(0, 22));
+          }
+        }
       }
     }
 
