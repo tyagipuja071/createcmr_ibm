@@ -785,6 +785,10 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
   if (((custSubGrp != 'CHBUS') || (custSubGrp != 'XCHBP') || (custSubGrp != 'CHINT') || (custSubGrp != 'XCHIN')) && (postCd == '')) {
     postCd = result.ret1;
   }
+  if (custSubGrp == 'XCHCM') {
+    postCd = 3000;
+  }
+
   var isuCd = FormManager.getActualValue('isuCd');
   var ims = FormManager.getActualValue('subIndustryCd');
   var clientTier = FormManager.getActualValue('clientTier');
