@@ -41,7 +41,7 @@ public class SingaporeUtil extends AutomationUtil {
 
     if (ifDefaultCluster) {
       details.append("Cluster should not be the default for the scenario.\n");
-      engineData.addRejectionComment("Cluster should not be the default for the scenario.");
+      engineData.addRejectionComment("OTH", "Cluster should not be the default for the scenario.", "", "");
       // eleResults.append("Default cluster found.\n");
       results.setOnError(true);
     } else {
@@ -53,7 +53,7 @@ public class SingaporeUtil extends AutomationUtil {
 
     if (validRes != null && validRes.equals("INVALID")) {
       details.append("The combination of Salesman No. and Cluster is not valid.\n");
-      engineData.addRejectionComment("The combination of Salesman No. and Cluster is not valid.");
+      engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
       // eleResults.append("Invalid Salesman No.\n");
       results.setOnError(true);
     } else if (validRes != null && validRes.equals("VALID")) {
@@ -112,7 +112,7 @@ public class SingaporeUtil extends AutomationUtil {
     if (isIsicInvalid) {
       details.append("Invalid ISIC code, please choose another one based on industry.\n");
       // eleResults.append("Invalid ISIC code.\n");
-      engineData.addRejectionComment("Invalid ISIC code, please choose another one based on industry.");
+      engineData.addRejectionComment("OTH", "Invalid ISIC code, please choose another one based on industry.", "", "");
       results.setOnError(true);
     } else {
       details.append("ISIC is valid" + "\n");

@@ -248,6 +248,9 @@ div.exc-new {
   border-right: 10px Solid rgb(255,128,128);
 }
 
+div.exc-new2 {
+  border-right: 3px Solid rgb(255,128,128) !important;
+}
 select.exc-deflt, select.exc-deflt option {
   color: #666;
 }
@@ -357,4 +360,58 @@ div.exc-note {
 
 table.meta-table input {
   font-family: IBM Plex Sans, Calibri;
+}
+
+a.view-mode {
+  font-size: 12px;
+  cursor: pointer;
+}
+
+div.com-cat {
+  font-size: 13px;
+  font-weight: bold;
+  width: 100%;
+  border-bottom: 1px Solid gray;
+  margin-top:20px;
+}
+
+div.com-exc {
+  border: 1px Solid #777;
+  border-radius: 10px;
+  font-size: 11px;
+  margin-top:10px;
+  width:250px;
+  display: inline-block;
+  margin-right: 10px;
+  box-shadow: 1px 1px #DDD;
+}
+
+
+div.com-exc table td, div.com-exc table th, div.com-exc input, div.com-exc select, div.com-exc option , div.com-exc table select, div.com-exc table select option {
+  font-size: 11px;
+}
+div.com-exc table select {
+  width: 100px;
+}
+div.com-exc table th {
+  padding-right: 3px;
+  font-weight: normal;
+  text-align: right;
+}
+div.com-exc table td {
+  padding-left: 2px;
+  text-align: left;
+}
+
+div.com-exc-header {
+  font-size: 12px;
+  font-weight: bold;
+  border-bottom: 1px Solid #777;
+  text-align:center;
+  border-radius: 10px 10px 0 0;
+  background: #deefff; /* Old browsers */
+  background: -moz-linear-gradient(top,  #deefff 0%, #98bede 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #deefff 0%,#98bede 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #deefff 0%,#98bede 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#deefff', endColorstr='#98bede',GradientType=0 ); /* IE6-9 */
 }

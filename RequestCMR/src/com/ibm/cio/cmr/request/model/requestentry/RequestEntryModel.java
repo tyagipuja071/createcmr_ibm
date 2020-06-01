@@ -111,6 +111,7 @@ public class RequestEntryModel extends BaseModel {
   private String ibmDeptCostCenter;
   private String privIndc;
   private String countryUse;
+  private String usSicmen;
 
   // scorecard fields
   private String dplChkResult;
@@ -2995,6 +2996,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setRejSupplInfo2(String rejSupplInfo2) {
     this.rejSupplInfo2 = rejSupplInfo2;
+  }
+
+  public String getUsSicmen() {
+    return usSicmen;
+  }
+
+  public void setUsSicmen(String usSicmen) {
+    this.usSicmen = usSicmen;
   }
 
 }
