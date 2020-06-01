@@ -605,6 +605,8 @@ public abstract class AutomationUtil {
         engineData.addRejectionComment("OTH", "CEID " + ceId + "  is not valid as checked against the PartnerWorld Profile System.", "", "");
         details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.").append("\n");
         return false;
+      } else {
+        details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.").append("\n");
       }
     } catch (Exception e) {
       LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
