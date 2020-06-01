@@ -196,9 +196,10 @@ public class PortugalTransformer extends MessageTransformer {
       messageHash.put("MarketingResponseCode", "5");
       messageHash.put("CEdivision", "2");
       messageHash.put("ARemark", "YES");
-    } else if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType)) {
+    } else if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType) || "CRGOV".equals(custType)) {
       messageHash.put("CustomerType", "G");
-    } else if (MQMsgConstants.CUSTSUBGRP_INTER.equals(custType) || MQMsgConstants.CUSTSUBGRP_INTSO.equals(custType)) {
+    } else if (MQMsgConstants.CUSTSUBGRP_INTER.equals(custType) || MQMsgConstants.CUSTSUBGRP_INTSO.equals(custType)
+      || "CRINT".equals(custType) || "CRISO".equals(custType)) {
       messageHash.put("CustomerType", "91");
     } else {
       messageHash.put("ARemark", "");
