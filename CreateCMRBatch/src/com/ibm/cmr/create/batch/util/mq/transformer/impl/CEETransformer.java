@@ -1042,6 +1042,8 @@ public class CEETransformer extends EMEATransformer {
 
     if (data.getRepTeamMemberNo() != null) {
       legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+    } else {
+      legacyCust.setSalesRepNo("");
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
