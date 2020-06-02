@@ -151,7 +151,7 @@ public class SwitzerlandUtil extends AutomationUtil {
 
   @Override
   protected List<String> getCountryLegalEndings() {
-    return Arrays.asList("GMBH", "KLG", " AG", "Sàrl", "SARL", " SA", "S.A.", "SAGL");
+    return Arrays.asList("GMBH", "KLG", "AG", "Sàrl", "SARL", "SA", "S.A.", "SAGL");
   }
 
   @SuppressWarnings("unchecked")
