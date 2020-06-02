@@ -158,6 +158,8 @@ public class USUtil extends AutomationUtil {
 
   public static final List<String> FEDERAL_SCENARIOS = Arrays.asList(SC_FED_CAMOUFLAGED, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
       SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_REGULAR, SC_FED_TRIBAL_BUS);
+  private static final List<String> CSP_IRRELEVANT_UPDATE_FIELDS = Arrays.asList("ISU Code", "GEO Location Code", "Coverage Type/ID", "BG LDE Rule",
+      "Buying Group ID", "Client Tier", "DUNS No.");
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
@@ -466,6 +468,9 @@ public class USUtil extends AutomationUtil {
           if (updatedDataModel != null) {
             LOG.debug("Checking updates for : " + new ObjectMapper().writeValueAsString(updatedDataModel));
             String field = updatedDataModel.getDataField();
+            if ("CSP".equals(admin.getReqReason()) && CSP_IRRELEVANT_UPDATE_FIELDS.contains(field)) {
+              continue;
+            }
             switch (field) {
             case "Tax Class / Code 1":
             case "Tax Class / Code 2":
@@ -609,7 +614,7 @@ public class USUtil extends AutomationUtil {
           }
         }
 
-        if ("CSP".equals(admin.getReqReason()) && !changes.isDataChanged("ISIC")) {
+        if ("CSP".equals(admin.getReqReason())) {
           String error = performCSPCheck(cedpManager, entityManager, data, admin);
           if (StringUtils.isNotBlank(error)) {
             LOG.debug(error);
