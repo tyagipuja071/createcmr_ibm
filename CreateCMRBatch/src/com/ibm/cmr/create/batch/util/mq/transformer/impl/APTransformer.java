@@ -126,9 +126,9 @@ public abstract class APTransformer extends MessageTransformer {
       } else {
         handler.messageHash.put("NotifierSrc2", "");
       }
-      handler.messageHash.put("NotifierSrc1", "");
+      // handler.messageHash.put("NotifierSrc1", "");
     } else {
-      handler.messageHash.put("NotifierSrc1", "");
+      // handler.messageHash.put("NotifierSrc1", "");
       handler.messageHash.put("NotifierSrc2", "");
     }
   }
