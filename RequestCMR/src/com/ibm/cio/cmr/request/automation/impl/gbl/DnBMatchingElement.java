@@ -351,19 +351,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         }
       }
       if (StringUtils.isNotBlank(address)) {
-        if (address.length() > 30) {
-          addrTxt1 = address.substring(0, 30);
-          addrTxt2 = ((address.length() - 30 > 30) ? address.substring(30, 60) : address.substring(30));
-        } else {
-          addrTxt1 = address;
-          addrTxt2 = "";
-        }
+        int streetLength = SystemLocation.UNITED_STATES.equals(country) ? 24 : 30;
+        String[] streetParts = handler.doSplitName(address, "", streetLength, streetLength);
+        addrTxt1 = streetParts[0];
+        addrTxt2 = streetParts[1];
         // street line1
         output.addMatch(getProcessCode(), addrType + "::ADDR_TXT", addrTxt1, "Derived", "Derived", "D&B", itemNo);
-        if (StringUtils.isNotBlank(addrTxt2)) {
-          output.addMatch(getProcessCode(), addrType + "::ADDR_TXT_2", StringUtils.isBlank(addrTxt2) ? "-BLANK-" : addrTxt2, "Derived", "Derived",
-              "D&B", itemNo);
-        }
+        output.addMatch(getProcessCode(), addrType + "::ADDR_TXT_2", StringUtils.isBlank(addrTxt2) ? "-BLANK-" : addrTxt2, "Derived", "Derived",
+            "D&B", itemNo);
       }
       if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
         output.addMatch(getProcessCode(), addrType + "::CITY1", dnbRecord.getDnbCity(), "Derived", "Derived", "D&B", itemNo);
