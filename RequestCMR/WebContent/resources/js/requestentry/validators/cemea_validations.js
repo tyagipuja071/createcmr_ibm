@@ -648,6 +648,28 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function setPreferredLang() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  FormManager.readOnly('custPrefLang');
+  if ('693' == cntry) {
+    FormManager.setValue('custPrefLang', 'Q');
+  } else if ('668' == cntry) {
+    FormManager.setValue('custPrefLang', 'C');
+  } else if ('820' == cntry) {
+    FormManager.setValue('custPrefLang', 'L');
+  } else if ('708' == cntry) {
+    FormManager.setValue('custPrefLang', '5');
+  } else if ('642' == cntry) {
+    FormManager.setValue('custPrefLang', 'F');
+  } else if ('832' == cntry) {
+    FormManager.setValue('custPrefLang', 'A');
+  } else if ('821' == cntry) {
+    FormManager.setValue('custPrefLang', 'R');
+  } else {
+    FormManager.setValue('custPrefLang', 'E');
+  }
+}
+
 function setClientTierValues(isuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -2545,6 +2567,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
+  GEOHandler.addAfterConfig(setPreferredLang, [ '668', '820', '708', '642', '832', '821', '693' ]);
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
   // CMR-2101 Austriathe func for Austria
   GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
@@ -2586,6 +2609,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(validateAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAddrFunction(addLatinCharValidator, GEOHandler.CEMEA);
+
+  GEOHandler.addAfterTemplateLoad(setPreferredLang, [ '668', '820', '708', '642', '832', '821', '693' ]);
 
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
 
