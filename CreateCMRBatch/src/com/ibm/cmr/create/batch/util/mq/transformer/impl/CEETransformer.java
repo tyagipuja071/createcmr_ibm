@@ -1107,6 +1107,11 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
+    // use svcArOffice to store custLang
+    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
+      cust.setLangCd(muData.getSvcArOffice());
+    }
+
     // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getRestrictTo())) {

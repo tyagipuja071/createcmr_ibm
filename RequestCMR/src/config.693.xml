@@ -126,6 +126,13 @@
 					<width>20</width>
 					<length>16</length>
 				</column>
+				<column>
+					<label>Preferred Language</label>
+					<dbColumn>SVC_AR_OFFICE</dbColumn>
+					<width>20</width>
+					<length>1</length>
+					<bdsId>CustLang</bdsId>
+				</column>				
 			</columns>
 		</tab>
 		<tab name="Sold To" type="Address" typeCode="ZS01">
@@ -183,13 +190,6 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Preferred Language</label>
-					<dbColumn>CUST_LANG_CD</dbColumn>
-					<width>20</width>
-					<length>1</length>
-					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
@@ -257,13 +257,6 @@
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
-					<label>Preferred Language</label>
-					<dbColumn>CUST_LANG_CD</dbColumn>
-					<width>20</width>
-					<length>1</length>
-					<bdsId>CustLang</bdsId>
-				</column>
-				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
@@ -327,13 +320,6 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Preferred Language</label>
-					<dbColumn>CUST_LANG_CD</dbColumn>
-					<width>20</width>
-					<length>1</length>
-					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
@@ -401,13 +387,6 @@
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
-					<label>Preferred Language</label>
-					<dbColumn>CUST_LANG_CD</dbColumn>
-					<width>20</width>
-					<length>1</length>
-					<bdsId>CustLang</bdsId>
-				</column>
-				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
@@ -471,13 +450,6 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Preferred Language</label>
-					<dbColumn>CUST_LANG_CD</dbColumn>
-					<width>20</width>
-					<length>1</length>
-					<bdsId>CustLang</bdsId>
 				</column>
 				<column>
 					<label>Hardware Master</label>
