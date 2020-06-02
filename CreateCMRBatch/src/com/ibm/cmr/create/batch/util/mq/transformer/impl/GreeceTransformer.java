@@ -592,6 +592,7 @@ public class GreeceTransformer extends EMEATransformer {
       CmrtCust legacyCust, CmrtAddr legacyAddr, CMRRequestContainer cmrObjects, Addr currAddr) {
     formatAddressLines(dummyHandler);
     boolean update = "U".equals(dummyHandler.adminData.getReqType());    
+    int newlyAddedAddrStartIndex = 5;
 
     legacyAddr.setAddrLineT("");
     legacyAddr.setAddrLineU("");
@@ -599,12 +600,16 @@ public class GreeceTransformer extends EMEATransformer {
     if (update) {
       legacyAddr.setForCreate(false);
 
-      if (!isAddressPresent(legacyAddr.getId().getAddrNo())) {
+      CmrtAddr legacyClone = (CmrtAddr) SerializationUtils.clone(legacyAddr);
+      if (!isAddressPresent(legacyClone.getId().getAddrNo())) {
         try {
-          LegacyDirectUtil.capsAndFillNulls(legacyAddr, true);
+          LegacyDirectUtil.capsAndFillNulls(legacyClone, true);
           // no need to update sequence 
-          legacyAddr.getId().setAddrNo(currAddr.getId().getAddrSeq());
-          addressToBeAdded.add(legacyAddr);
+          legacyClone.getId().setAddrNo(currAddr.getId().getAddrSeq());
+          int currentSeq = Integer.parseInt(currAddr.getId().getAddrSeq());
+          if(currentSeq > newlyAddedAddrStartIndex) {
+            addressToBeAdded.add(legacyClone);  
+          }
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -636,10 +641,14 @@ public class GreeceTransformer extends EMEATransformer {
         modifyAddrUseFields(getAddressUse(addr), legacyAddrList.get(i));
       }
     } else {
+      if(!isOldCmrRecords(legacyAddrList)) {
       // revert isForCreate back -- used for partialCompleteRecord later
         addUpdateAddresses(legacyObjects, addrList);
         updateMailingAddrWithBillingData(legacyObjects);
         legacyObjects.getCustomer().setLangCd("1");
+      } else {
+        handleOldCmrRecords(entityManager, reqId, legacyObjects, cmrObjects);
+      }
     }
   }
   
@@ -1116,6 +1125,173 @@ public class GreeceTransformer extends EMEATransformer {
         custExt.setiTaxCode(zp01Addr.getFloor());
       }
     }
+  }
+  
+  private void handleOldCmrRecords(EntityManager entityManager, long reqId, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
+    List<Addr> addrList = cmrObjects.getAddresses();
+    List<CmrtAddr> legacyAddressesSplit = new ArrayList<>();
+    List<String> legacyAddrNoList = new ArrayList<>();
+    int billingIndex = 0;
+    int installingIndex = 0;
+    
+    for(int i = 0; i < legacyObjects.getAddresses().size(); i++) {
+      CmrtAddr curAddr = legacyObjects.getAddresses().get(i);
+      String addrNo = curAddr.getId().getAddrNo();
+      legacyAddrNoList.add(addrNo);
+      
+      if("Y".equals(curAddr.getIsAddrUseBilling())) {
+        billingIndex = i;
+      } else if("Y".equals(curAddr.getIsAddrUseInstalling())) {
+        installingIndex = i;
+      }
+    }
+    
+    int zs01AddrSeq = -1;
+    CmrtAddr mailingAddr = new CmrtAddr();
+    
+    for(Addr addr : addrList) {
+      CmrtAddr legacyAddrUpdated;
+      if(addr.getId().getAddrType().equals("ZP01")) {
+        legacyAddrUpdated = (CmrtAddr) SerializationUtils.clone(legacyObjects.getAddresses().get(billingIndex));  
+      } else {
+        legacyAddrUpdated = (CmrtAddr) SerializationUtils.clone(legacyObjects.getAddresses().get(installingIndex));
+      }
+      String legacyAddrNo = changeSeqNo(Integer.parseInt(addr.getId().getAddrSeq()));
+      legacyAddrUpdated.getId().setAddrNo(legacyAddrNo);
+      formatAddressLinesForOldRecord(legacyAddrUpdated, addr);
+      modifyAddrUseFields(getAddressUse(addr), legacyAddrUpdated);
+      
+      if("ZS01".equals(addr.getId().getAddrType())) {
+        zs01AddrSeq = Integer.parseInt(addr.getId().getAddrSeq());
+      }
+      
+      if("ZP01".equals(addr.getId().getAddrType())) {
+        mailingAddr = (CmrtAddr)SerializationUtils.clone( legacyAddrUpdated);
+      }
+      
+      if(legacyAddrNoList.contains(legacyAddrNo)) {
+        legacyAddrUpdated.setForCreate(false);
+        legacyAddrUpdated.setForUpdate(true);
+        
+      } else {
+        legacyAddrUpdated.setForCreate(true);
+      }
+      legacyAddressesSplit.add(legacyAddrUpdated);
+    }
+    
+    if(zs01AddrSeq != 1) {
+      mailingAddr.getId().setAddrNo(changeSeqNo(1));
+    } else {
+      mailingAddr.getId().setAddrNo(changeSeqNo(legacyAddressesSplit.size()));
+    }
+    
+    if(legacyAddrNoList.contains(mailingAddr.getId().getAddrNo())) {
+      mailingAddr.setForCreate(false);
+      mailingAddr.setForUpdate(true);
+    } else {
+      mailingAddr.setForCreate(true);
+    }
+    
+    modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
+    legacyAddressesSplit.add(mailingAddr);
+    
+    legacyObjects.getAddresses().clear();
+    legacyObjects.getAddresses().addAll(legacyAddressesSplit);
+  }
+  
+ private void formatAddressLinesForOldRecord(CmrtAddr legacyAddr, Addr addr) {
+    
+    Addr addrData = addr;
+    boolean crossBorder = isCrossBorder(addrData);
+    String addrType = addrData.getId().getAddrType();
+    
+    LOG.debug("Handling old Greece records -- formatAddressLinesForOldRecord ");
+    LOG.debug("Handling  Data for " + addrData.getCustNm1());
+
+    // customer name
+    String line1 = addrData.getCustNm1();
+
+    // nickname, or occupation
+    String line2 = "";
+
+    if (!StringUtils.isBlank(addrData.getCustNm2())) {
+      line2 = addrData.getCustNm2();
+    }
+
+    String line3 = "";
+
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
+      line3 = "ATT " + addrData.getCustNm4();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line3 = addrData.getAddrTxt2();
+    } else if (!StringUtils.isBlank(addrData.getPoBox())
+        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+      line3 = "PO BOX " + addrData.getPoBox();
+    }
+    
+    // Street
+    String line4 = "";
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 = addrData.getAddrTxt();
+    } else if (!StringUtils.isBlank(addrData.getPoBox())
+        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+      line4 = "PO BOX " + addrData.getPoBox();
+    } 
+    
+    // postal code + city
+    String line5 = (!StringUtils.isEmpty(addrData.getPostCd()) ? addrData.getPostCd() : "") + " "
+        + (!StringUtils.isEmpty(addrData.getCity1()) ? addrData.getCity1() : "");
+    line5 = line5.trim();
+
+    // country
+    String line6 = "";
+
+    if(!crossBorder && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line6 =  "Ελλάδα";
+    } else {
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());  
+    }
+    
+    legacyAddr.setAddrLine1(line1);
+    legacyAddr.setAddrLine2(line2);
+    legacyAddr.setAddrLine3(line3);
+    legacyAddr.setAddrLine4(line4);
+    legacyAddr.setAddrLine5(line5);
+    legacyAddr.setAddrLine6(line6);
+    legacyAddr.setAddrLineI("");
+
+  }
+  
+  private boolean isOldCmrRecords(List<CmrtAddr> addresses) {
+    int yesFlagCount = 0;
+    for(CmrtAddr legacyAddr : addresses) {
+      
+      if("Y".equals(legacyAddr.getIsAddrUseMailing())) {
+        yesFlagCount++;
+      }
+      
+      if("Y".equals(legacyAddr.getIsAddrUseBilling())) {
+        yesFlagCount++;
+      }
+      
+      if("Y".equals(legacyAddr.getIsAddrUseInstalling())) {
+        yesFlagCount++;
+      }
+      
+      if("Y".equals(legacyAddr.getIsAddrUseShipping())) {
+        yesFlagCount++;
+      }
+      
+      if("Y".equals(legacyAddr.getIsAddrUseEPL())) {
+        yesFlagCount++;
+      }
+      
+      if(yesFlagCount > 1) {
+        return true;
+      }
+      yesFlagCount = 0;
+    }
+    return false;
   }
 
 }
