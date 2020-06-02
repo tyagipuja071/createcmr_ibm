@@ -5524,8 +5524,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "RESTRICT_TO":
         muModel.setRestrictTo(tempVal);
+        break;
       case "CUST_NM3":
         muModel.setCustNm3(tempVal);
+        break;
+      case "SUB_INDUSTRY_CD":
+        muModel.setSubIndustryCd(tempVal);
+        break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;
