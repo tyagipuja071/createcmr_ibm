@@ -580,8 +580,13 @@ public class CEETransformer extends EMEATransformer {
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
     if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(993110);
-      generateCMRNoObj.setMax(998899);
+      if ("DUMMY".equals(data.getAbbrevNm())) {
+        generateCMRNoObj.setMin(985001);
+        generateCMRNoObj.setMax(985999);
+      } else {
+        generateCMRNoObj.setMin(993110);
+        generateCMRNoObj.setMax(998899);
+      }
       LOG.debug("that is CEE INTER CMR");
     } else {
       generateCMRNoObj.setMin(369320);
