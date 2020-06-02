@@ -802,7 +802,7 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
     },
     'img' : 'B',
     'isuCtc' : '32N',
-    'muboty' : '0421234'
+    'muboty' : '0421336'
   }, {
     'postalCode1' : {
       'min' : 3000,
