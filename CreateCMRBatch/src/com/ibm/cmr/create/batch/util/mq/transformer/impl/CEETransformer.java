@@ -1090,7 +1090,11 @@ public class CEETransformer extends EMEATransformer {
     LOG.debug("Mapping default Data values..");
 
     if (!StringUtils.isBlank(muData.getAbbrevNm())) {
-      cust.setAbbrevNm(muData.getAbbrevNm());
+      if ("@".equals(muData.getAbbrevNm())) {
+        cust.setAbbrevNm("");
+      } else {
+        cust.setAbbrevNm(muData.getAbbrevNm());
+      }
     }
 
     // RBBXA :Bank Branch Number
@@ -1128,11 +1132,18 @@ public class CEETransformer extends EMEATransformer {
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
     if (isuClientTier != null && isuClientTier.length() == 3) {
       cust.setIsuCd(isuClientTier);
+    } else if (isuClientTier.contains("@")) {
+      cust.setIsuCd("");
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      cust.setSalesRepNo(muData.getRepTeamMemberNo());
-      cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+      if ("@".equals(muData.getRepTeamMemberNo())) {
+        cust.setSalesRepNo("");
+        cust.setSalesGroupRep("");
+      } else {
+        cust.setSalesRepNo(muData.getRepTeamMemberNo());
+        cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
@@ -1177,7 +1188,11 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getIsicCd())) {
-      cust.setIsicCd(muData.getIsicCd());
+      if ("@".equals(muData.getIsicCd())) {
+        cust.setIsicCd("");
+      } else {
+        cust.setIsicCd(muData.getIsicCd());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
@@ -1190,8 +1205,13 @@ public class CEETransformer extends EMEATransformer {
 
     // SBO
     if (!StringUtils.isBlank(muData.getCustNm1())) {
-      cust.setSbo(muData.getCustNm1());
-      cust.setIbo(muData.getCustNm1());
+      if ("@".equals(muData.getCustNm1())) {
+        cust.setSbo("");
+        cust.setIbo("");
+      } else {
+        cust.setSbo(muData.getCustNm1());
+        cust.setIbo(muData.getCustNm1());
+      }
     }
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@".equals(muData.getInacCd())) {
