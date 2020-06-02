@@ -650,6 +650,9 @@ function addAddressFieldValidators() {
 
 function setPreferredLang() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if ('618' == cntry) {
+    return;
+  }
   FormManager.readOnly('custPrefLang');
   if ('693' == cntry) {
     FormManager.setValue('custPrefLang', 'Q');
@@ -2567,7 +2570,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(phoneNoValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setPreferredLang, [ '668', '820', '708', '642', '832', '821', '693' ]);
+  GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
   // CMR-2101 Austriathe func for Austria
   GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
@@ -2610,7 +2613,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(validateAbbrevNmLocn, GEOHandler.CEMEA);
   GEOHandler.addAddrFunction(addLatinCharValidator, GEOHandler.CEMEA);
 
-  GEOHandler.addAfterTemplateLoad(setPreferredLang, [ '668', '820', '708', '642', '832', '821', '693' ]);
+  GEOHandler.addAfterTemplateLoad(setPreferredLang, GEOHandler.CEMEA);
 
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
 
