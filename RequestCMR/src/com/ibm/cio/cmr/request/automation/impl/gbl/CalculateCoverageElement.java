@@ -567,7 +567,7 @@ public class CalculateCoverageElement extends OverridingElement {
                           details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                         }
                         // special case, pls fix on monday
-                        if (("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) && !"BGNONE".equals(fieldValue)) {
+                        if (("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) && fieldValue != null && !"BGNONE".equals(fieldValue)) {
                           if ("GBG_ID".equals(dbField) && gbg != null && condition.getValues() != null
                               && condition.getValues().contains(gbg.getGbgId())) {
                             // noop
