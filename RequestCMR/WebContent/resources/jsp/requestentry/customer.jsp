@@ -46,6 +46,18 @@
       </cmr:column>
     </cmr:view>
 
+    <cmr:view forCountry="693,668,820,708,642,832,821">
+      <cmr:column span="2" containerForField="CustLang">
+        <p>
+          <cmr:label fieldId="custPrefLang">
+            <cmr:fieldLabel fieldId="CustLang" />:
+             <cmr:delta text="${rdcdata.custPrefLang}" oldValue="${reqentry.custPrefLang}" />
+          </cmr:label>
+          <cmr:field path="custPrefLang" id="custPrefLang" fieldId="CustLang" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    
     <cmr:view forCountry="618">
       <cmr:column span="2" containerForField="CustLang">
         <p>
