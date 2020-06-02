@@ -103,6 +103,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   public static final String SUB_TYPE_FEDERAL_REGULAR_GOVT = "FEDERAL";
   public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
   public static final String SUB_TYPE_BUSINESS_PARTNER_END_USER = "END USER";
+  private static final List<String> SPECIAL_TAX_STATES = Arrays.asList("AK", "DE", "MT", "NH", "OR");
 
   public static final String AFFILIATE_FEDERAL = "9200000";
   private boolean waiting;
@@ -948,7 +949,15 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     // do final checks on request data
     overrides.addOverride(getProcessCode(), "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     overrides.addOverride(getProcessCode(), "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
-    overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+
+    Addr installAt = requestData.getAddress("ZS01");
+    if (installAt != null && SPECIAL_TAX_STATES.contains(installAt.getStateProv())) {
+      details.append("Tax Code set to J000 based on state.\n");
+      overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J000");
+    } else {
+      details.append("Tax Code set to J666 based on state.\n");
+      overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+    }
     overrides.addOverride(getProcessCode(), "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
     overrides.addOverride(getProcessCode(), "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
@@ -1003,7 +1012,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     if (childRequest != null && "COM".equals(childRequest.getAdmin().getReqStatus())) {
       // match name + address from completed child
       Addr childInstallAt = childRequest.getAddress("ZS01");
-      Addr installAt = requestData.getAddress("ZS01");
       Admin childAdmin = childRequest.getAdmin();
       if (!StringUtils.equals(installAt.getDivn(), childAdmin.getMainCustNm1())) {
         String fullName = childAdmin.getMainCustNm1();
