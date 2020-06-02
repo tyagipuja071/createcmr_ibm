@@ -17,6 +17,7 @@ import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -3930,6 +3931,7 @@ public class EMEAHandler extends BaseSOFHandler {
           String addressCont = ""; // 5
           String poBox = ""; // 12
           String attPerson = ""; // 11
+          String poBox1 = ""; // 12
           
           if(row.getRowNum() == 2001){
             continue;
@@ -3956,6 +3958,10 @@ public class EMEAHandler extends BaseSOFHandler {
           attPerson = validateColValFromCell((XSSFCell) currCell);
           currCell = (XSSFCell) row.getCell(12);
           poBox = validateColValFromCell((XSSFCell) currCell);
+          if (currCell != null) {
+            DataFormatter df = new DataFormatter();
+            poBox1 = df.formatCellValue(row.getCell(12));
+          }
          
           TemplateValidation error = new TemplateValidation(name);          
           if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
@@ -3995,6 +4001,37 @@ public class EMEAHandler extends BaseSOFHandler {
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               validations.add(error);   
             }
+            
+            if (poBox1.contains("+")) {
+              LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
+              validations.add(error);
+            }
+          }
+          
+          if (localCity.contains("@") && localCity.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Local City", "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
+          }
+
+          if (crossCity.contains("@") && crossCity.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Cross Border City", "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
+          }
+
+          if (localPostal.contains("@") && localPostal.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Local Postal Code", "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
+          }
+
+          if (cbPostal.contains("@") && cbPostal.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Cross Border Postal Code",
+                "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
           }
         }
       }
