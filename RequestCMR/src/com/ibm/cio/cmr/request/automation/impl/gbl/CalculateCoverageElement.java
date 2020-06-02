@@ -549,7 +549,7 @@ public class CalculateCoverageElement extends OverridingElement {
                       } else {
                         fieldValue = getColumnValueFromData(requestData.getData(), dbField);
                       }
-                      if (condition.getValues() != null && condition.getValues().contains(fieldValue)) {
+                      if (containsValue(condition, fieldValue)) {
                         // no override using first value, the list already
                         // contains current value
                         details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + fieldValue + "\n");
@@ -567,12 +567,10 @@ public class CalculateCoverageElement extends OverridingElement {
                           details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
                         }
                         // special case, pls fix on monday
-                        if (("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) && !"BGNONE".equals(fieldValue)) {
-                          if ("GBG_ID".equals(dbField) && gbg != null && condition.getValues() != null
-                              && condition.getValues().contains(gbg.getGbgId())) {
+                        if (("GBG_ID".equals(dbField) || "BG_ID".equals(dbField)) && fieldValue != null && !"BGNONE".equals(fieldValue)) {
+                          if ("GBG_ID".equals(dbField) && gbg != null && containsValue(condition, gbg.getGbgId())) {
                             // noop
-                          } else if ("BG_ID".equals(dbField) && gbg != null && condition.getValues() != null
-                              && condition.getValues().contains(gbg.getBgId())) {
+                          } else if ("BG_ID".equals(dbField) && gbg != null && containsValue(condition, gbg.getBgId())) {
                             // noop
                           } else {
                             // don't let cov element compute gbg
@@ -649,6 +647,17 @@ public class CalculateCoverageElement extends OverridingElement {
       }
       coverageIds.add(currCovId);
     }
+  }
+
+  private boolean containsValue(Condition condition, String fieldValue) {
+    if (fieldValue != null && condition.getValues() != null && !condition.getValues().isEmpty()) {
+      for (String value : condition.getValues()) {
+        if (value != null && value.trim().equals(fieldValue.trim())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private String getColumnValueFromAddr(Addr addr, String dbField) {
