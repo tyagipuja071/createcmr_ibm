@@ -95,7 +95,7 @@ public abstract class AutomationUtil {
     }
   };
 
-  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", " CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
+  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", "CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
       "INCORPORATED");
 
   /**
@@ -786,20 +786,37 @@ public abstract class AutomationUtil {
       return false;
     }
 
+    String cleanName = " " + getCleanString(name) + " ";
     for (String gblEnding : GLOBAL_LEGAL_ENDINGS) {
-      if (name.toUpperCase().contains(gblEnding)) {
+
+      if (cleanName.contains(" " + getCleanString(gblEnding) + " ")) {
         return true;
       }
     }
     List<String> extendedEndings = getCountryLegalEndings();
     if (extendedEndings != null) {
       for (String cntryEnding : extendedEndings) {
-        if (name.toUpperCase().contains(cntryEnding)) {
+        if (cleanName.contains(" " + getCleanString(cntryEnding) + " ")) {
           return true;
         }
       }
     }
     return false;
+  }
+
+  /**
+   * Extracts the Alphanumeric string from the input String (replaces non
+   * accepted characters with spaces
+   * 
+   * @param str
+   * @return
+   */
+  public static String getCleanString(String str) {
+    if (StringUtils.isNotBlank(str)) {
+      str = str.trim().replaceAll("[^a-zA-Z0-9\\s\\-]", " ").toUpperCase();
+      return str;
+    }
+    return "";
   }
 
   /**
