@@ -1032,6 +1032,8 @@ public class CEETransformer extends EMEATransformer {
 
     if (data.getCustPrefLang() != null) {
       legacyCust.setLangCd(data.getCustPrefLang());
+    } else {
+      legacyCust.setLangCd("");
     }
 
     if (!StringUtils.isBlank(data.getSalesTeamCd())) {
