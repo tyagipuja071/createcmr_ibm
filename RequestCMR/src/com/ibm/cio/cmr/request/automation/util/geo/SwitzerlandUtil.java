@@ -417,6 +417,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       details.append("Setting MUBOTY to " + muboty.getMuboty() + " based on Postal Code rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
+      results.setResults("Calculated");
     } else {
       String sortl = data.getSearchTerm();
       if (!StringUtils.isBlank(sortl)) {
