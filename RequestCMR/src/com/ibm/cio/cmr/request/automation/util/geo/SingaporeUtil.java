@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -14,11 +15,14 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.ScenarioExceptions;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class SingaporeUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(SingaporeUtil.class);
+
+  private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -40,10 +44,17 @@ public class SingaporeUtil extends AutomationUtil {
     }
 
     if (ifDefaultCluster) {
-      details.append("Cluster should not be the default for the scenario.\n");
-      engineData.addRejectionComment("OTH", "Cluster should not be the default for the scenario.", "", "");
-      // eleResults.append("Default cluster found.\n");
-      results.setOnError(true);
+      if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+        LOG.debug("Default Cluster used but allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
+        results.setOnError(false);
+        // eleResults.append("Default Cluster used.\n");
+        details.append("Default Cluster used but allowed for the request (Private Person/BlueMix/Marketplace).\n");
+      } else {
+        details.append("Cluster should not be the default for the scenario.\n");
+        engineData.addRejectionComment("OTH", "Cluster should not be the default for the scenario.", "", "");
+        // eleResults.append("Default cluster found.\n");
+        results.setOnError(true);
+      }
     } else {
       details.append("Default cluster not used.\n");
     }
@@ -146,6 +157,29 @@ public class SingaporeUtil extends AutomationUtil {
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
+    processSkipCompanyChecks(engineData, requestData, details);
     return true;
+  }
+
+  /**
+   * CHecks if the record is a private customer / bluemix / marketplace
+   * 
+   * @param engineData
+   * @param requestData
+   * @param details
+   * @return
+   */
+  private void processSkipCompanyChecks(AutomationEngineData engineData, RequestData requestData, StringBuilder details) {
+    Data data = requestData.getData();
+
+    boolean skipCompanyChecks = "9500".equals(data.getIsicCd()) || (data.getCustSubGrp() != null && data.getCustSubGrp().contains("PRIV"));
+    if (skipCompanyChecks) {
+      details.append("Private Person request - company checks will be skipped.\n");
+      ScenarioExceptions exc = (ScenarioExceptions) engineData.get("SCENARIO_EXCEPTIONS");
+      if (exc != null) {
+        exc.setSkipVerificationIndc("Y");
+        engineData.put("SCENARIO_EXCEPTIONS", exc);
+      }
+    }
   }
 }
