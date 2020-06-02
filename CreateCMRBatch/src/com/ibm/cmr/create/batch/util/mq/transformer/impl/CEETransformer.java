@@ -888,7 +888,7 @@ public class CEETransformer extends EMEATransformer {
     formatDataLines(dummyHandler);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
+
       legacyCust.setAccAdminBo("Y60382");
       legacyCust.setCeDivision("2");
 
@@ -899,21 +899,21 @@ public class CEETransformer extends EMEATransformer {
       }
 
       // CMR-2279:ISR set based on SBO
-      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-
-        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-        PreparedQuery q = new PreparedQuery(entityManager, sql);
-        q.setParameter("SBO", data.getSalesBusOffCd());
-        q.setParameter("CNTRY", data.getCmrIssuingCntry());
-        String isr = q.getSingleResult(String.class);
-        if (!StringUtils.isBlank(isr)) {
-          legacyCust.setSalesRepNo(isr);
-          cmrObjects.getData().setRepTeamMemberNo(isr);
-        } else {
-          legacyCust.setSalesRepNo("");
-          cmrObjects.getData().setRepTeamMemberNo("");
-        }
-      }
+      // if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+      //
+      // String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+      // PreparedQuery q = new PreparedQuery(entityManager, sql);
+      // q.setParameter("SBO", data.getSalesBusOffCd());
+      // q.setParameter("CNTRY", data.getCmrIssuingCntry());
+      // String isr = q.getSingleResult(String.class);
+      // if (!StringUtils.isBlank(isr)) {
+      // legacyCust.setSalesRepNo(isr);
+      // cmrObjects.getData().setRepTeamMemberNo(isr);
+      // } else {
+      // legacyCust.setSalesRepNo("");
+      // cmrObjects.getData().setRepTeamMemberNo("");
+      // }
+      // }
 
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -1030,12 +1030,18 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
+    if (data.getCustPrefLang() != null) {
+      legacyCust.setLangCd(data.getCustPrefLang());
+    }
+
     if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-      // legacyCust.setSalesRepNo(data.getSalesTeamCd());
       legacyCust.setSalesGroupRep(data.getSalesTeamCd());
     } else {
-      // legacyCust.setSalesRepNo("");
       legacyCust.setSalesGroupRep("");
+    }
+
+    if (data.getRepTeamMemberNo() != null) {
+      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
