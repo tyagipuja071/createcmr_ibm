@@ -1006,8 +1006,13 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       Addr installAt = requestData.getAddress("ZS01");
       Admin childAdmin = childRequest.getAdmin();
       if (!StringUtils.equals(installAt.getDivn(), childAdmin.getMainCustNm1())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), childAdmin.getMainCustNm1());
-        overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), childAdmin.getMainCustNm2());
+        String fullName = childAdmin.getMainCustNm1();
+        if (!StringUtils.isBlank(childAdmin.getMainCustNm2())) {
+          fullName += " " + childAdmin.getMainCustNm2();
+        }
+        String nameParts[] = handler.doSplitName(fullName, "", 24, 24);
+        overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
+        overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
       }
       if (!StringUtils.equals(installAt.getAddrTxt(), childInstallAt.getAddrTxt())) {
         overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), childInstallAt.getAddrTxt());
