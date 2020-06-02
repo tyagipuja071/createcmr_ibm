@@ -522,7 +522,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
     } else {
       addr.setPostCd(cmr.getCmrPostalCode());
-      int addrLength = 30;
+      int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
       String street = cmr.getCmrStreet();
       if (street != null && street.length() > addrLength) {
         if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
