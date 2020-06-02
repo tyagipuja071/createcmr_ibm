@@ -115,6 +115,22 @@ public abstract class APTransformer extends MessageTransformer {
      * ("60".equalsIgnoreCase(restrictInd)) {
      * handler.messageHash.put("RestrictedInd", "60"); }
      */
+
+    // CMR-3163 - make sure NotifierSrc2 = "060" if private customer
+    // private customer is by scenario OR using ISIC 9500
+    if ("C".equals(handler.adminData.getReqType())) {
+      String isic = handler.cmrData.getIsicCd();
+      String scenario = handler.cmrData.getCustSubGrp();
+      if ("9500".equals(isic) || (scenario != null && scenario.contains("PRIV"))) {
+        handler.messageHash.put("NotifierSrc2", "060");
+      } else {
+        handler.messageHash.put("NotifierSrc2", "");
+      }
+      handler.messageHash.put("NotifierSrc1", "");
+    } else {
+      handler.messageHash.put("NotifierSrc1", "");
+      handler.messageHash.put("NotifierSrc2", "");
+    }
   }
 
   /**
