@@ -1,5 +1,7 @@
 package com.ibm.cio.cmr.request.automation.impl.us;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Attachment;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.Scorecard;
@@ -42,6 +45,7 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AttachmentService;
 import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.ui.template.Template;
 import com.ibm.cio.cmr.request.ui.template.TemplateManager;
@@ -122,42 +126,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     AutomationResult<OverrideOutput> output = buildResult(reqId);
     Addr addr = requestData.getAddress("ZS01");
 
-    // check the scenario
-    if ("U".equals(admin.getReqType())) {
-      output.setResults("Skipped");
-      output.setDetails("Update types not supported.");
-      return output;
-    }
-
-    String custGrp = data.getCustGrp();
-    String custSubGrp = data.getCustSubGrp();
-    if ("BYMODEL".equals(custSubGrp)) {
-      String type = admin.getCustType();
-      if (!USUtil.BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
-          || (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
-        output.setResults("Skipped");
-        output.setDetails("Non BP End User create by model scenario not supported.");
-        return output;
-      }
-      // CMR-3856 add check for ehosting
-      String deptAttn = addr.getDept() != null ? addr.getDept().toLowerCase() : "";
-      if (deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host")) {
-        output.setResults("Skipped");
-        output.setDetails("Non BP End User create by model scenario not supported.");
-        return output;
-      }
-    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
-      output.setResults("Skipped");
-      output.setDetails("Non BP End User scenario not supported.");
-      return output;
-    }
-
-    if (StringUtils.isBlank(data.getPpsceid())) {
-      String msg = "PPS CEID is required for Business Partner requests.";
-      engineData.addRejectionComment("OTH", msg, "", "");
-      output.setOnError(true);
-      output.setDetails(msg);
-      output.setResults("CEID Missing");
+    // validate first
+    if (doInitialValidations(admin, data, addr, output, engineData)) {
       return output;
     }
 
@@ -372,6 +342,60 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     output.setDetails(details.toString());
     output.setResults("Success");
     return output;
+  }
+
+  /**
+   * Perform initial validations on the request whether it fits the BP@EU
+   * scenario
+   * 
+   * @param admin
+   * @param data
+   * @param addr
+   * @param output
+   * @param engineData
+   * @return true if the processing needs to halt
+   */
+  private boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
+    // check the scenario
+    if ("U".equals(admin.getReqType())) {
+      output.setResults("Skipped");
+      output.setDetails("Update types not supported.");
+      return true;
+    }
+
+    String custGrp = data.getCustGrp();
+    String custSubGrp = data.getCustSubGrp();
+    if ("BYMODEL".equals(custSubGrp)) {
+      String type = admin.getCustType();
+      if (!USUtil.BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
+          || (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
+        output.setResults("Skipped");
+        output.setDetails("Non BP End User create by model scenario not supported.");
+        return true;
+      }
+      // CMR-3856 add check for ehosting
+      String deptAttn = addr.getDept() != null ? addr.getDept().toLowerCase() : "";
+      if (deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host")) {
+        output.setResults("Skipped");
+        output.setDetails("Non BP End User create by model scenario not supported.");
+        return true;
+      }
+    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
+      output.setResults("Skipped");
+      output.setDetails("Non BP End User scenario not supported.");
+      return true;
+    }
+
+    if (StringUtils.isBlank(data.getPpsceid())) {
+      String msg = "PPS CEID is required for Business Partner requests.";
+      engineData.addRejectionComment("OTH", msg, "", "");
+      output.setOnError(true);
+      output.setDetails(msg);
+      output.setResults("CEID Missing");
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -1183,6 +1207,38 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
           RequestUtils.createCommentLogFromBatch(entityManager, cmt.getCreateById(), requestData.getAdmin().getId().getReqId(), cmt.getCmt());
         }
       }
+
+      // copy attachments
+      LOG.debug("Copying attachments from Child Request " + childReqId);
+      try {
+        sql = ExternalizedQuery.getSql("AUTO.US.GET_ATTACHMENTS");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", childReqId);
+        query.setForReadOnly(true);
+        List<Attachment> attachments = query.getResults(Attachment.class);
+        if (attachments != null) {
+          AttachmentService attachService = new AttachmentService();
+          long parentReqId = requestData.getAdmin().getId().getReqId();
+          AppUser user = null;
+          for (Attachment attachment : attachments) {
+            File file = new File(attachment.getId().getDocLink());
+            if (file.exists()) {
+              try (FileInputStream fis = new FileInputStream(file)) {
+                user = new AppUser();
+                user.setIntranetId(attachment.getDocAttachById());
+                user.setBluePagesName(attachment.getDocAttachByNm());
+                LOG.debug("Attaching " + file.getName() + " to Request " + parentReqId);
+                attachService.addExternalAttachment(entityManager, user, parentReqId, attachment.getDocContent(), file.getName(), attachment.getCmt(),
+                    fis);
+              }
+            }
+          }
+        }
+      } catch (Exception e) {
+        LOG.warn("Attachments cannot be copied.");
+        details.append("Attachments cannot be copied to the request due to an error.\n");
+      }
+
     }
   }
 
