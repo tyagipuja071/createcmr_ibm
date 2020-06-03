@@ -108,7 +108,7 @@
         }
       }
       cmr.hideProgress();
-      doUpdateAddr(FormManager.getActualValue('reqId'),'ZS01', soldToSeq, cmr.MANDT);
+      doUpdateAddr(FormManager.getActualValue('reqId'),'ZS01', soldToSeq, cmr.MANDT, true);
     }
   }
   function enableSupportal(){
