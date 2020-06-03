@@ -510,10 +510,19 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
     } else {
       LOG.debug("Checking IBM direct CMR for " + addr.getDivn());
+
+      String customerName = addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "");
+      customerName = customerName.toUpperCase();
+      if (customerName.contains("C/O")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
+      } else if (customerName.contains("UCW")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
+      }
+
       DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
       request.setIssuingCountry(SystemLocation.UNITED_STATES);
       request.setLandedCountry(addr.getLandCntry());
-      request.setCustomerName(addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : ""));
+      request.setCustomerName(customerName);
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(addr.getAddrTxt2());
       request.setCity(addr.getCity1());
@@ -693,7 +702,15 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     Admin childAdmin = childReqData.getAdmin();
     childAdmin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     childAdmin.setSourceSystId("CreateCMR");
-    String[] names = handler.doSplitName(cleanName(bpAddr.getDivn()), cleanName(bpAddr.getDept()), 28, 22);
+    String customerName = bpAddr.getDivn() + (!StringUtils.isBlank(bpAddr.getDept()) ? " " + bpAddr.getDept() : "");
+    customerName = customerName.toUpperCase();
+    if (customerName.contains("C/O")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
+    } else if (customerName.contains("UCW")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
+    }
+
+    String[] names = handler.doSplitName(cleanName(customerName), "", 28, 22);
     childAdmin.setMainCustNm1(names[0]);
     childAdmin.setMainCustNm2(names[1]);
     childAdmin.setLockBy(null);
@@ -1071,11 +1088,25 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       // match name + address from completed child
       Addr childInstallAt = childRequest.getAddress("ZS01");
       Admin childAdmin = childRequest.getAdmin();
-      if (!StringUtils.equals(installAt.getDivn(), childAdmin.getMainCustNm1())) {
+      if (!StringUtils.equals(installAt.getDivn(), childAdmin.getMainCustNm1())
+          || !StringUtils.equals(installAt.getDept(), childAdmin.getMainCustNm2())) {
+
+        String customerName = installAt.getDivn() + (!StringUtils.isBlank(installAt.getDept()) ? " " + installAt.getDept() : "");
+        customerName = customerName.toUpperCase();
+        String customerNameSuffix = "";
+        if (customerName.contains("C/O")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("C/O")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
+        } else if (customerName.contains("UCW")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("UCW")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
+        }
+
         String fullName = childAdmin.getMainCustNm1();
         if (!StringUtils.isBlank(childAdmin.getMainCustNm2())) {
           fullName += " " + childAdmin.getMainCustNm2();
         }
+        fullName += customerNameSuffix;
         String nameParts[] = handler.doSplitName(fullName, "", 24, 24);
         overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
@@ -1283,12 +1314,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    * @param name
    * @return
    */
-  private String cleanName(String name) {
+  private static String cleanName(String name) {
     if (name == null) {
       return "";
     }
     name = name.replaceAll("'", "");
-    name = name.replaceAll("[^A-Za-z0-9&\\-]", " ");
+    name = name.replaceAll("[^A-Za-z0-9&\\-/]", " ");
     name = name.replaceAll("  ", " ").toUpperCase();
     return name;
   }
