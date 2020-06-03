@@ -186,13 +186,22 @@ public class EMEAHandler extends BaseSOFHandler {
 				record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
 			}
 
-			if (SystemLocation.GREECE.equals(record.getCmrIssuedBy())
-					|| SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
-				LOG.debug("GR/CY Nickname: " + record.getCmrName2Plain());
-				record.setCmrName2Plain(record.getCmrName2Plain());
-				record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
-				record.setCmrDept(null);
-			}
+      if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
+        LOG.debug("CY Nickname: " + record.getCmrName2Plain());
+        record.setCmrName2Plain(record.getCmrName2Plain());
+        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
+        record.setCmrDept(null);
+      }
+      
+       if (SystemLocation.GREECE.equals(record.getCmrIssuedBy())) {
+          LOG.debug("GR Nickname: " + record.getCmrName2Plain());
+          record.setCmrName2Plain(record.getCmrName2Plain());
+          record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
+          record.setCmrDept(null);
+          if (!StringUtils.isBlank(record.getCmrPOBox())) {
+            record.setCmrPOBox(record.getCmrPOBox());
+          }
+        }
 
 			if (SystemLocation.TURKEY.equals(record.getCmrIssuedBy())) {
 				record.setCmrName2Plain(record.getCmrName2Plain());
