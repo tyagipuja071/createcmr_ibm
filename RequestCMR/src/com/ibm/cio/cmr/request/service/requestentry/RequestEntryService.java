@@ -1027,7 +1027,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       if (admin != null) {
         mv.addObject("sourceSystem", admin.getSourceSystId());
       } else {
-        mv.addObject("sourceSystem", "");
+        mv.addObject("sourceSystem", null);
       }
 
       String autoEngineIndc = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
