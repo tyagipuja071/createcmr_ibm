@@ -145,20 +145,21 @@ function afterConfigForUS() {
     });
   }
 
-  if (FormManager.getActualValue('reqType') == 'C') {
-    if (_usSicmenHandler == null) {
-      _usSicmenHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
-        var sicmen = FormManager.getActualValue('usSicmen');
-        var _custType = FormManager.getActualValue('custSubGrp');
-        if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
-          FormManager.setValue('isicCd', '357X');
-        } else {
+  if (_usSicmenHandler == null) {
+    _usSicmenHandler = dojo.connect(FormManager.getField('usSicmen'), 'onChange', function(value) {
+      var sicmen = FormManager.getActualValue('usSicmen');
+      var _custType = FormManager.getActualValue('custSubGrp');
+      if (_custType == 'OEMHW' || _custType == 'OEM-SW' || _custType == 'TPD' || _custType == 'SSD' || _custType == 'DB4') {
+        FormManager.setValue('isicCd', '357X');
+      } else {
+        var currIsic = FormManager.getActualValue('isicCd');
+        if (currIsic != '357X') {
           FormManager.setValue('isicCd', sicmen);
         }
-      });
-    }
-    _usSicmenHandler[0].onChange();
+      }
+    });
   }
+  _usSicmenHandler[0].onChange();
 }
 
 function initUSTemplateHandler() {
