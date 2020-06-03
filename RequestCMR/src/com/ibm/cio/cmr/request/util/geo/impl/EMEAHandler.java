@@ -16,6 +16,8 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -340,146 +342,14 @@ public class EMEAHandler extends BaseSOFHandler {
             }
 
             if ("726".equals(cmrIssueCd)) {
-              seqNo = record.getCmrAddrSeq();
-              if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-                addrType = record.getCmrAddrTypeCode();
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  converted.add(addr);
+              if (isNewCmrRecordsGR) {
+                converted.add(handleNewCmrRecordsGR(record));
+                if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+                  converted.add(mapLocalLanguageTranslationOfSoldTo(entityManager, record, cmrIssueCd));
                 }
-              }
-
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
-                // Map local language translation of sold to value -- for greece
-                // recommit
-                CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager, record.getCmrNum(), cmrIssueCd);
-                CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
-                FindCMRRecordModel localTransAddr = new FindCMRRecordModel();
-                PropertyUtils.copyProperties(localTransAddr, record);
-                localTransAddr.setCmrAddrSeq(db2LocalTransAddr.getId().getAddrNo());
-                localTransAddr.setCmrAddrTypeCode("ZP01");
-
-                if (!StringUtils.isBlank(record.getCmrIntlName1())) {
-                  localTransAddr.setCmrName1Plain(record.getCmrIntlName1());
-                } else {
-                  localTransAddr.setCmrName1Plain(db2LocalTransAddr.getAddrLine1());
-                }
-                if (!StringUtils.isBlank(record.getCmrIntlName2())) {
-                  localTransAddr.setCmrName2Plain(record.getCmrIntlName2());
-                } else {
-                  localTransAddr.setCmrName2Plain(db2LocalTransAddr.getAddrLine2());
-                }
-
-                if (!StringUtils.isBlank(record.getCmrIntlName4())) {
-                  localTransAddr.setCmrName4(record.getCmrIntlName4());
-                } else if (!StringUtils.isBlank(record.getCmrName4())) {
-                  if (db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
-                    localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
-                  }
-                }
-
-                if (!StringUtils.isBlank(record.getCmrIntlAddress())) {
-                  localTransAddr.setCmrStreetAddress(record.getCmrIntlAddress());
-                } else if (!StringUtils.isBlank(record.getCmrStreetAddress())) {
-                  localTransAddr.setCmrStreetAddress(db2LocalTransAddr.getStreet());
-                }
-
-                if (!StringUtils.isBlank(record.getCmrOtherIntlAddress())) {
-                  localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
-                } else if (!StringUtils.isBlank(record.getCmrStreetAddressCont())) {
-                  if (!db2LocalTransAddr.getAddrLine3().startsWith("ATT") && !db2LocalTransAddr.getAddrLine3().startsWith("PO BOX")) {
-                    localTransAddr.setCmrStreetAddressCont(db2LocalTransAddr.getAddrLine3());
-                  }
-
-                }
-
-                if (!StringUtils.isBlank(record.getCmrIntlCity1())) {
-                  localTransAddr.setCmrCity(record.getCmrIntlCity1());
-                } else {
-                  localTransAddr.setCmrCity(db2LocalTransAddr.getCity());
-                }
-
-                if (!StringUtils.isBlank(record.getCmrState())) {
-                  localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());
-                }
-                if (!StringUtils.isBlank(record.getCmrPostalCode())) {
-                  localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());
-                }
-
-                String poBox = db2LocalTransAddr.getPoBox();
-                if (poBox.contains("PO BOX")) {
-                  poBox = poBox.substring(6).trim();
-                } else if (poBox.contains("APTO")) {
-                  poBox = poBox.substring(5).trim();
-                }
-                if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                  localTransAddr.setCmrPOBox(poBox);
-                }
-
-                // If not in sadr look in DB2
-                if (record.getCmrCountryLanded().equals("GR")) {
-                  if (!StringUtils.isBlank(record.getCmrIntlName1())) {
-                    localTransAddr.setCmrName1Plain(record.getCmrIntlName1());
-                  } else {
-                    localTransAddr.setCmrName1Plain(db2LocalTransAddr.getAddrLine1());
-                  }
-                  if (!StringUtils.isBlank(record.getCmrIntlName2())) {
-                    localTransAddr.setCmrName2Plain(record.getCmrIntlName2());
-                  } else {
-                    localTransAddr.setCmrName2Plain(db2LocalTransAddr.getAddrLine2());
-                  }
-
-                  if (!StringUtils.isBlank(record.getCmrIntlName4())) {
-                    localTransAddr.setCmrName4(record.getCmrIntlName4());
-                  } else if (!StringUtils.isBlank(record.getCmrName4())) {
-                    if (db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
-                      localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
-                    }
-                  }
-
-                  if (!StringUtils.isBlank(record.getCmrIntlAddress())) {
-                    localTransAddr.setCmrStreetAddress(record.getCmrIntlAddress());
-                  } else if (!StringUtils.isBlank(record.getCmrStreetAddress())) {
-                    localTransAddr.setCmrStreetAddress(db2LocalTransAddr.getStreet());
-                  }
-
-                  if (!StringUtils.isBlank(record.getCmrOtherIntlAddress())) {
-                    localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
-                  } else if (!StringUtils.isBlank(record.getCmrStreetAddressCont())) {
-                    if (!db2LocalTransAddr.getAddrLine3().startsWith("ATT") && !db2LocalTransAddr.getAddrLine3().startsWith("PO BOX")) {
-                      localTransAddr.setCmrStreetAddressCont(db2LocalTransAddr.getAddrLine3());
-                    }
-
-                  }
-
-                  if (!StringUtils.isBlank(record.getCmrIntlCity1())) {
-                    localTransAddr.setCmrCity(record.getCmrIntlCity1());
-                  } else {
-                    localTransAddr.setCmrCity(db2LocalTransAddr.getCity());
-                  }
-
-                  if (!StringUtils.isBlank(record.getCmrState())) {
-                    localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());
-                  }
-                  if (!StringUtils.isBlank(record.getCmrPostalCode())) {
-                    localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());
-                  }
-
-                  poBox = db2LocalTransAddr.getPoBox();
-                  if (poBox.contains("PO BOX")) {
-                    poBox = poBox.substring(6).trim();
-                  } else if (poBox.contains("APTO")) {
-                    poBox = poBox.substring(5).trim();
-                  }
-                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    localTransAddr.setCmrPOBox(poBox);
-                  }
-                }
-
-                if (custExt != null) {
-                  localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
-                }
-                converted.add(localTransAddr);
+              } else {
+                converted.addAll(handleOldCmrRecordsGR(entityManager, record, cmrIssueCd, converted.size()));
+                break;
               }
             }
 
@@ -790,6 +660,37 @@ public class EMEAHandler extends BaseSOFHandler {
             if (record != null) {
               converted.add(record);
             }
+            
+            if (poBox1.contains("+")) {
+              LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
+              validations.add(error);
+            }
+          }
+          
+          if (localCity.contains("@") && localCity.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Local City", "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
+          }
+
+          if (crossCity.contains("@") && crossCity.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Cross Border City", "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
+          }
+
+          if (localPostal.contains("@") && localPostal.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Local Postal Code", "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
+          }
+
+          if (cbPostal.contains("@") && cbPostal.length() > 0) {
+            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+            error.addError(row.getRowNum(), "Cross Border Postal Code",
+                "Field contains invalid character. Please fix and upload the template again.");
+            validations.add(error);
           }
 
         }
@@ -4176,5 +4077,189 @@ public class EMEAHandler extends BaseSOFHandler {
     }
     return null;
   }
+  
+  private boolean checkIfNewCmrRecords(List<FindCMRRecordModel> items) {
+    
+    int rdcRecordsCount = items.size();
+    int legacyRecordsCount = legacyObjects.getAddresses().size();
+    
+    // for new rdc records it is all db2 addr records except mailing and billing
+    // legacy has 5 records min for new cmr for greece
+    if(rdcRecordsCount < 3 || legacyRecordsCount < 5) {
+      return false;
+    }
+    return true;
+  }
+  
+  boolean isOldRecordsGR = false;
+  private List<FindCMRRecordModel> handleOldCmrRecordsGR(EntityManager entityManager, FindCMRRecordModel record, String cmrIssueCd, int recCount) throws Exception {
+    List<FindCMRRecordModel> records = new ArrayList<FindCMRRecordModel>();
+    isOldRecordsGR = true;
+    int currentSeq = recCount == 0 ? 2 : recCount;
+    int rdcRecSeq = Integer.parseInt(record.getCmrAddrSeq());
+    for(CmrtAddr cmrtAddr : legacyObjects.getAddresses()) {
+     List<String> addrUseList = this.legacyObjects.getUsesBySequenceNo(cmrtAddr.getId().getAddrNo());
+     
+     for(String addrUse : addrUseList) {
+       String addrType = getAddressTypeByUseGR(addrUse);
+       
+       if(!StringUtils.isEmpty(addrType)) {
+         FindCMRRecordModel newRecord = new FindCMRRecordModel();
+         newRecord = cloneAddress(record, addrType);
+         
+         if(currentSeq == rdcRecSeq) {
+           currentSeq++;
+         }
+         
+         if(!(record.getCmrAddrTypeCode().equals(addrType))) {
+           newRecord.setCmrAddrSeq(String.format("%05d", currentSeq++));
+           newRecord.setCmrSapNumber(null);
+         } 
+         
+         newRecord.setCmrName1Plain(cmrtAddr.getAddrLine1());
+         newRecord.setCmrName2Plain(cmrtAddr.getAddrLine2());
+         if (!cmrtAddr.getAddrLine3().startsWith("ATT") && !cmrtAddr.getAddrLine3().startsWith("PO BOX")) {
+           newRecord.setCmrStreetAddressCont(cmrtAddr.getAddrLine3());
+         } else if (cmrtAddr.getAddrLine3().startsWith("ATT") ) {
+           newRecord.setCmrName4(cmrtAddr.getAddrLine3());
+         } else if (cmrtAddr.getAddrLine3().startsWith("PO BOX")) {
+           newRecord.setCmrPOBox(cmrtAddr.getAddrLine3());
+         }
+         
+         if(cmrtAddr.getAddrLine4().startsWith("PO BOX")) {
+           newRecord.setCmrPOBox(cmrtAddr.getAddrLine4());
+         } else {
+           newRecord.setCmrStreetAddress(cmrtAddr.getAddrLine4());
+         }
+         
+         if(!StringUtils.isEmpty(cmrtAddr.getAddrLine5())) {
+           String[] line5 = cmrtAddr.getAddrLine5().split(" ");
+           String postalCode = "";
+           String city = "";
+           for (int i = 0; i < line5.length; i++) {
+             if (i < 2 && StringUtils.isNumeric(line5[i])) {
+               postalCode += line5[i];
+             } else {
+               city += " " + line5[i];
+             }
+           }
+           newRecord.setCmrCity(city.trim());
+           newRecord.setCmrPostalCode(postalCode);
+         }
+         
+         CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
+         if ("ZP01".equals(addrType) && custExt != null) {
+           newRecord.setCmrTaxOffice(custExt.getiTaxCode());
+         }  
+         records.add(newRecord);
+       }
+     }
+    }
+    return records;
+  }
 
+  private FindCMRRecordModel handleNewCmrRecordsGR(FindCMRRecordModel record) throws Exception {
+    FindCMRRecordModel addr = null;
+    String seqNo = record.getCmrAddrSeq();
+    if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+      String addrType = record.getCmrAddrTypeCode();
+      if (!StringUtils.isEmpty(addrType)) {
+        addr = cloneAddress(record, addrType);
+      }
+    }
+    return addr;
+  }
+  
+  private String getAddressTypeByUseGR(String addressUse) {
+    switch (addressUse) {
+    case "2":
+      return "ZP01";
+    case "3":
+      return "ZS01";
+    case "4":
+      return "ZD01";
+    case "5":
+      return "ZI01";
+    }
+    return null;
+  }
+  
+  private FindCMRRecordModel mapLocalLanguageTranslationOfSoldTo(EntityManager entityManager, FindCMRRecordModel record, String cmrIssueCd)
+      throws Exception {
+    //Map local language translation of sold to value -- for greece recommit
+    CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager,
+        record.getCmrNum(), cmrIssueCd);
+    CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
+    FindCMRRecordModel localTransAddr = new FindCMRRecordModel();
+    PropertyUtils.copyProperties(localTransAddr, record);
+    localTransAddr.setCmrAddrSeq(db2LocalTransAddr.getId().getAddrNo());
+    localTransAddr.setCmrAddrTypeCode("ZP01");
+    
+    // If not in sadr look in DB2
+    if (record.getCmrCountryLanded().equals("GR")) {
+      if (!StringUtils.isBlank(record.getCmrIntlName1())) {
+        localTransAddr.setCmrName1Plain(record.getCmrIntlName1());
+      } else {
+        localTransAddr.setCmrName1Plain(db2LocalTransAddr.getAddrLine1());
+      }
+      if (!StringUtils.isBlank(record.getCmrIntlName2())) {
+        localTransAddr.setCmrName2Plain(record.getCmrIntlName2());
+      } else {
+        localTransAddr.setCmrName2Plain(db2LocalTransAddr.getAddrLine2());
+      }
+
+      if (!StringUtils.isBlank(record.getCmrIntlName4())) {
+        localTransAddr.setCmrName4(record.getCmrIntlName4());
+      } else if (!StringUtils.isBlank(record.getCmrName4())) {
+        if (db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
+          localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
+        }
+      }
+
+      if (!StringUtils.isBlank(record.getCmrIntlAddress())) {
+        localTransAddr.setCmrStreetAddress(record.getCmrIntlAddress());
+      } else if (!StringUtils.isBlank(record.getCmrStreetAddress())) {
+        localTransAddr.setCmrStreetAddress(db2LocalTransAddr.getStreet());
+      }
+
+      if (!StringUtils.isBlank(record.getCmrOtherIntlAddress())) {
+        localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
+      } else if (!StringUtils.isBlank(record.getCmrStreetAddressCont())) {
+        if (!db2LocalTransAddr.getAddrLine3().startsWith("ATT") && !db2LocalTransAddr.getAddrLine3().startsWith("PO BOX")) {
+          localTransAddr.setCmrStreetAddressCont(db2LocalTransAddr.getAddrLine3());
+        }
+
+      }
+
+      if (!StringUtils.isBlank(record.getCmrIntlCity1())) {
+        localTransAddr.setCmrCity(record.getCmrIntlCity1());
+      } else {
+        localTransAddr.setCmrCity(db2LocalTransAddr.getCity());
+      }
+
+      if (!StringUtils.isBlank(record.getCmrState())) {
+        localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());
+      }
+      if (!StringUtils.isBlank(record.getCmrPostalCode())) {
+        localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());
+      }
+
+      String poBox = db2LocalTransAddr.getPoBox();
+      if (poBox.contains("PO BOX")) {
+        poBox = poBox.substring(6).trim();
+      } else if (poBox.contains("APTO")) {
+        poBox = poBox.substring(5).trim();
+      }
+      if (!StringUtils.isBlank(record.getCmrPOBox())) {
+        localTransAddr.setCmrPOBox(poBox);
+      }
+    }
+    
+    if (custExt != null) {
+      localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
+    }   
+    
+    return localTransAddr;
+  }
+  
 }
