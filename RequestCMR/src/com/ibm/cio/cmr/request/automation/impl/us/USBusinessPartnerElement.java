@@ -478,6 +478,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     ibmDirectCmr.setCmrLde(completedChildData.getBgRuleId());
     ibmDirectCmr.setCmrCoverage(completedChildData.getCovId());
     ibmDirectCmr.setCmrCoverageName(completedChildData.getCovDesc());
+    ibmDirectCmr.setCmrName(childRequest.getAdmin().getMainCustNm1());
 
     return ibmDirectCmr;
   }
@@ -952,8 +953,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
     Data data = requestData.getData();
     if (ibmDirectCmr != null) {
-      details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
-          + ibmDirectCmr.getCmrSapNumber() + "): \n");
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrSapNumber())) {
+        details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
+            + ibmDirectCmr.getCmrSapNumber() + "): \n");
+      } else {
+        details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + ": \n");
+      }
 
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
         details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + "\n");
@@ -975,8 +980,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
       }
 
-      details.append((StringUtils.isBlank(ibmDirectCmr.getCmrInac()) ? " - " + ibmDirectCmr.getCmrInac() : "") + "\n");
-
       // add here gbg and cov
       LOG.debug("Getting Buying Group/Coverage values");
       String bgId = ibmDirectCmr.getCmrBuyingGroup();
@@ -996,9 +999,23 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         calcGbg.setGbgName("None");
         calcGbg.setLdeRule("BG_DEFAULT");
       }
-      details.append(" - GBG: " + calcGbg.getGbgId() + "(" + calcGbg.getGbgName() + ")" + "\n");
-      details.append(" - BG: " + calcGbg.getBgId() + "(" + calcGbg.getBgName() + ")" + "\n");
-      details.append(" - LDE Rule: " + calcGbg.getLdeRule() + "\n");
+      if (!StringUtils.isBlank(calcGbg.getGbgId())) {
+        details.append(" - GBG: " + calcGbg.getGbgId() + "(" + (StringUtils.isBlank(calcGbg.getGbgName()) ? "not specified" : calcGbg.getGbgName())
+            + ")" + "\n");
+      } else {
+        details.append(" - GBG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(
+            " - BG: " + calcGbg.getBgId() + "(" + (StringUtils.isBlank(calcGbg.getBgName()) ? "not specified" : calcGbg.getBgName()) + ")" + "\n");
+      } else {
+        details.append(" - BG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(" - LDE Rule: " + calcGbg.getLdeRule() + "\n");
+      } else {
+        details.append(" - LDE Rule: none\n");
+      }
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
 
@@ -1106,7 +1123,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         if (!StringUtils.isBlank(childAdmin.getMainCustNm2())) {
           fullName += " " + childAdmin.getMainCustNm2();
         }
-        fullName += customerNameSuffix;
+        fullName += " " + customerNameSuffix;
         String nameParts[] = handler.doSplitName(fullName, "", 24, 24);
         overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
