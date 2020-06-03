@@ -79,7 +79,7 @@
           <width>20</width>
           <lovId>ModeOfPayment2</lovId>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Phone #</label>
           <dbColumn>RESTRICT_TO</dbColumn>
           <length>16</length>
@@ -136,13 +136,13 @@
           <width>40</width>
           <length>24</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>5</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
@@ -224,13 +224,13 @@
           <width>40</width>
           <length>24</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>5</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
@@ -306,13 +306,13 @@
           <width>40</width>
           <length>24</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>8</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
@@ -330,7 +330,7 @@
           <width>18</width>
           <length>26</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Phone #</label>
           <dbColumn>CUST_PHONE</dbColumn>
           <length>16</length>
@@ -387,13 +387,13 @@
           <width>40</width>
           <length>24</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>8</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
