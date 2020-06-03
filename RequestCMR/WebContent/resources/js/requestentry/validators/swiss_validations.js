@@ -1142,9 +1142,14 @@ function addVatSuffixForCustLangCd() {
   };
 
   var custLangCd = '';
-  var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
-  if (result.ret1 != null && result.ret1 != '') {
-    custLangCd = result.ret1;
+  if ("ZS01" == FormManager.getActualValue('addrType')) {
+    custangCd = FormManager.getActualValue('custLangCd');
+  }
+  if (custLangCd == null || custLangCd == '' || custLangCd == undefined) {
+    var result = cmr.query('ADDR.GET.CUST_LANG_CD.BY_REQID', qParams);
+    if (result.ret1 != null && result.ret1 != '') {
+      custLangCd = result.ret1;
+    }
   }
 
   if (!custSubGrpList.includes(custSubGrp)) {
