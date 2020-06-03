@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -1020,6 +1021,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
     try {
 
+      AdminPK adminPK = new AdminPK();
+      adminPK.setReqId(model.getReqId());
+      Admin admin = entityManager.find(Admin.class, adminPK);
+      if (admin != null) {
+        mv.addObject("sourceSystem", admin.getSourceSystId());
+      } else {
+        mv.addObject("sourceSystem", "");
+      }
+
       String autoEngineIndc = RequestUtils.getAutomationConfig(entityManager, model.getCmrIssuingCntry());
       mv.addObject("autoEngineIndc", autoEngineIndc);
       DataModel rdcData = getRdcDataModel(entityManager, model.getReqId());
@@ -1450,7 +1460,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
 
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
-          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic()) ? (kna1.getZzkvSic().trim().length()>4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+          cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
