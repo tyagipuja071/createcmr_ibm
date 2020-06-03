@@ -1388,9 +1388,7 @@ public class RequestUtils {
             }
           }
         }
-        String standardCity = getUSStandardCityName(cmrRecord.getCmrCountryLanded(), cmrRecord.getCmrCity(), cmrRecord.getCmrState(),
-            cmrRecord.getCmrCounty(), cmrRecord.getCmrPostalCode());
-        cmrRecord.setCmrCity(standardCity);
+        processUSStandardCityName(cmrRecord);
         LOG.debug("City/County Computed: City: " + cmrRecord.getCmrCity() + " " + cmrRecord.getCmrCountyCode() + " - " + cmrRecord.getCmrCounty());
       } catch (Exception e) {
         LOG.warn("County and City computation error.", e);
@@ -1407,23 +1405,30 @@ public class RequestUtils {
    * @return
    * @throws Exception
    */
-  public static String getUSStandardCityName(String landedCounty, String city, String state, String county, String postalCode) throws Exception {
+  public static void processUSStandardCityName(FindCMRRecordModel record) throws Exception {
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     StandardCityServiceClient stdCityClient = CmrServicesFactory.getInstance().createClient(baseUrl, StandardCityServiceClient.class);
     StandardCityRequest stdCityRequest = new StandardCityRequest();
-    stdCityRequest.setCountry(landedCounty);
-    stdCityRequest.setCity(city);
-    stdCityRequest.setState(state);
+    stdCityRequest.setCountry(record.getCmrCountryLanded());
+    stdCityRequest.setCity(record.getCmrCity());
+    stdCityRequest.setState(record.getCmrState());
     stdCityRequest.setSysLoc(SystemLocation.UNITED_STATES);
-    stdCityRequest.setCountyName(county);
-    stdCityRequest.setPostalCode(postalCode);
+    stdCityRequest.setCountyName(record.getCmrCounty());
+    stdCityRequest.setPostalCode(record.getCmrPostalCode());
+    stdCityRequest.setStreet1(record.getCmrStreetAddress());
+    stdCityRequest.setStreet2(record.getCmrStreetAddressCont());
     stdCityClient.setStandardCityRequest(stdCityRequest);
 
     StandardCityResponse resp = stdCityClient.executeAndWrap(StandardCityResponse.class);
     if (resp != null && resp.isSuccess()) {
-      return resp.getStandardCity();
+      if (resp.isCityMatched()) {
+        record.setCmrCity(resp.getStandardCity());
+      }
+      if (StringUtils.isBlank(record.getCmrCounty())) {
+        record.setCmrCountyCode(resp.getStandardCountyCd());
+        record.setCmrCounty(resp.getStandardCountyName());
+      }
     }
-    return city;
   }
 
   /**

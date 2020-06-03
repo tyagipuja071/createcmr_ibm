@@ -1471,7 +1471,7 @@ function doCopyAddr(reqId, addrType, addrSeq, mandt, name, type) {
  * 
  * @param AddrType
  */
-function doUpdateAddr(reqId, addrType, addrSeq, mandt, name, type) {
+function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
   var qParams = {
     REQ_ID : reqId,
     ADDR_TYPE : addrType,
@@ -1481,13 +1481,15 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, name, type) {
   var result = cmr.query('ADDRDETAIL', qParams);
   cmr.addrdetails = result;
   cmr.addressMode = 'updateAddress';
-  if (result && result.ret31 == 'D') {
-    cmr.showConfirm('continueEditDnbAddress()',
-        'This is an address imported from D&B. Modifying the address information can cause company checks to fail. The request can also be potentially <strong>rejected</strong>. Proceed?',
-        'D&B Address', null, {
-          OK : 'Proceed',
-          CANCEL : 'Don\'t Edit'
-        });
+  if (result && result.ret31 == 'D' && !skipDnb) {
+    cmr
+        .showConfirm(
+            'continueEditDnbAddress()',
+            'This is an address imported from D&B. Modifying the Name, Street, City, State, and/or Postal Code information can cause company checks to fail. The request can also be potentially <strong>rejected</strong>.<br>Updates to other fields will not affect the checks.<br><br>Proceed?',
+            'D&B Address', null, {
+              OK : 'Proceed',
+              CANCEL : 'Don\'t Edit'
+            });
   } else {
     cmr.showModal('addEditAddressModal');
   }
@@ -1609,6 +1611,10 @@ function doDplCheck() {
     }
   } catch (e) {
 
+  }
+  if (typeof (FilteringDropdown) != 'undefined' && FilteringDropdown.pending()) {
+    cmr.showAlert('Please wait a while for the page to completely load then run DPL Check again.');
+    return;
   }
   cmr.showConfirm('doRunDpl()', 'DPL Check will be performed on the addresses on the list. Proceed?');
 }
