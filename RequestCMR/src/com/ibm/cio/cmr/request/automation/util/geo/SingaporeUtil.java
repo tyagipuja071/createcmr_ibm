@@ -62,44 +62,23 @@ public class SingaporeUtil extends AutomationUtil {
     String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
     LOG.debug("IfClusterSalesmanIsValid" + validRes);
 
-    if (validRes != null && validRes.equals("INVALID")) {
-      details.append("The combination of Salesman No. and Cluster is not valid.\n");
-      engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
-      // eleResults.append("Invalid Salesman No.\n");
-      results.setOnError(true);
-    } else if (validRes != null && validRes.equals("VALID")) {
-      details.append("The combination of Salesman No. and Cluster is valid.\n");
-    } else if (validRes != null && validRes.equals("NO_RESULTS")) {
-      details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
-    }
+    if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+      LOG.debug("Salesman check skipped for private and allowed scenarios.");
+      details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
+    } else {
 
-    /*
-     * if (StringUtils.isNotEmpty(duns)) { GOEDeterminationElement
-     * goeDetermination = new
-     * GOEDeterminationElement(requestData.getAdmin().getReqType(), null, false,
-     * false); JSONArray matches = new JSONArray(); try { matches =
-     * goeDetermination.findGOE(duns, null, null, null); if (!matches.isEmpty())
-     * { for (Object dunsMatch : matches) { JSONObject match = (JSONObject)
-     * dunsMatch; String overallIndicator = (String)
-     * match.get("OVERALL_GOE_CD"); LOG.debug("overallIndicator" +
-     * overallIndicator); if (StringUtils.isNotEmpty(overallIndicator) &&
-     * (overallIndicator.equals("Y") || overallIndicator.equals("S"))) {
-     * details.append("Government= Y" + "\n");
-     * overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-     * "DATA", "GOVERNMENT", data.getGovType(), "Y"); } else {
-     * eleResults.append("NOT a GOE." + "\n"); results.setOnError(true);
-     * details.append("GOE Determination = NOT a GOE. \n"); } } } else {
-     * eleResults.append("Cannot determine GOE" + "\n");
-     * details.append("GOE status cannot be determined via DUNS No." + "\n");
-     * results.setOnError(true); } } catch (IOException e) {
-     * LOG.debug(e.getMessage()); e.printStackTrace();
-     * eleResults.append("Cannot determine GOE" + "\n");
-     * details.append("Error occured while determining GOE status." + "\n");
-     * results.setOnError(true); } } else { eleResults.append("Duns not found" +
-     * "\n"); details.append(
-     * "GOE status cannot be determined via DUNS No. as duns No doesn't exists on request."
-     * + "\n"); results.setOnError(true); }
-     */
+      if (validRes != null && validRes.equals("INVALID")) {
+        details.append("The combination of Salesman No. and Cluster is not valid.\n");
+        engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
+        // eleResults.append("Invalid Salesman No.\n");
+        results.setOnError(true);
+      } else if (validRes != null && validRes.equals("VALID")) {
+        details.append("The combination of Salesman No. and Cluster is valid.\n");
+      } else if (validRes != null && validRes.equals("NO_RESULTS")) {
+        details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+      }
+
+    }
 
     if (govType != null && govType.equals("Y")) {
       // eleResults.append("Government Organization" + "\n");
