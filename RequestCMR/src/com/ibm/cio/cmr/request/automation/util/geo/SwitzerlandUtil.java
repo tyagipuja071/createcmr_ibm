@@ -403,7 +403,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       break;
     default:
-      if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier()))) {
+      if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier())) && !isCoverageCalculated) {
         if (SCENARIO_CROSS_BORDER.equals(scenario)) {
           // verified all logic is based on 3000-9999 condition for crossborders
           muboty = getMubotyFromMapping(data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
@@ -418,7 +418,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       results.setResults("Calculated");
-    } else {
+    } else if (!isCoverageCalculated) {
       String sortl = data.getSearchTerm();
       if (!StringUtils.isBlank(sortl)) {
         String msg = "No valid MUBOTY mapping from request data. Using MUBOTY " + sortl + " from request.";
