@@ -15,11 +15,11 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.entity.ScenarioExceptions;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -212,9 +212,9 @@ public class AustraliaUtil extends AutomationUtil {
     boolean skipCompanyChecks = "9500".equals(data.getIsicCd()) || (data.getCustSubGrp() != null && data.getCustSubGrp().contains("PRIV"));
     if (skipCompanyChecks) {
       details.append("Private Person request - company checks will be skipped.\n");
-      ScenarioExceptions exc = (ScenarioExceptions) engineData.get("SCENARIO_EXCEPTIONS");
+      ScenarioExceptionsUtil exc = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
       if (exc != null) {
-        exc.setSkipVerificationIndc("Y");
+        exc.setSkipCompanyVerification(true);
         engineData.put("SCENARIO_EXCEPTIONS", exc);
       }
     }
