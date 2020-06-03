@@ -435,45 +435,36 @@ function setISUCTCOnIMSChange() {
 }
 
 function addVatSuffixForCustLangCdScrtch() {
-  var custSubGrpList = [ 'CHIBM', 'LIIBM', 'CHPRI', 'LIPRI', 'CHINT', 'LIINT' ];
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return;
-  }
   var reqId = FormManager.getActualValue('reqId');
   var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
     REQ_ID : reqId,
     ADDR_TYPE : 'ZS01'
   });
   var landCntry = result.ret1;
-  if (landCntry != 'CH' && landCntry != 'LI') {
+  if (landCntry != 'CH') {
     return;
   }
   // get custlangCd
-  if (!custSubGrpList.includes(custSubGrp)) {
-    var reqId = FormManager.getActualValue('reqId');
-    var qParams = {
-      REQ_ID : reqId
-    };
-    var result = cmr.query('GET.CUSTLANGCD.ZS01', qParams);
-    if (result != null) {
-      var custLang = result.ret1;
-      // set vat suffix
-      var vat = FormManager.getActualValue('vat');
-      if (vat != '' && vat != null && vat != undefined && vat.length >= 15) {
-        var vatOnly = vat.substring(0, 15);
-        if ((custLang == 'E' || custLang == 'D') && vat.substring(16, 20) != 'Mwst') {
-          FormManager.setValue('vat', vatOnly.concat(" Mwst"));
-        } else if ((custLang == 'I') && vat.substring(16, 19) != 'IVA') {
-          FormManager.setValue('vat', vatOnly.concat(" IVA"));
-        } else if (custLang == 'F' && vat.substring(16, 19) != 'TVA') {
-          FormManager.setValue('vat', vatOnly.concat(" TVA"));
-        }
+  var reqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : reqId
+  };
+  var result = cmr.query('GET.CUSTLANGCD.ZS01', qParams);
+  if (result != null) {
+    var custLang = result.ret1;
+    // set vat suffix
+    var vat = FormManager.getActualValue('vat');
+    if (vat != '' && vat != null && vat != undefined && vat.length >= 15) {
+      var vatOnly = vat.substring(0, 15);
+      if ((custLang == 'E' || custLang == 'D') && vat.substring(16, 20) != 'Mwst') {
+        FormManager.setValue('vat', vatOnly.concat(" Mwst"));
+      } else if ((custLang == 'I') && vat.substring(16, 19) != 'IVA') {
+        FormManager.setValue('vat', vatOnly.concat(" IVA"));
+      } else if (custLang == 'F' && vat.substring(16, 19) != 'TVA') {
+        FormManager.setValue('vat', vatOnly.concat(" TVA"));
       }
     }
-  } else {
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');
   }
 }
 
@@ -575,6 +566,7 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
     REQ_ID : zs01ReqId,
+    ADDR_TYPE : 'ZS01'
   };
 
   var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
@@ -799,6 +791,7 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
     REQ_ID : zs01ReqId,
+    ADDR_TYPE : 'ZS01'
   };
 
   var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
@@ -1141,7 +1134,7 @@ function addVatSuffixForCustLangCd() {
     ADDR_TYPE : 'ZS01'
   });
   var landCntry = result.ret1;
-  if (landCntry != 'CH' && landCntry != 'LI') {
+  if (landCntry != 'CH') {
     return;
   }
   var qParams = {
@@ -1564,19 +1557,29 @@ function setPreferredLangAddr() {
   // return;
   // }
   var zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : zs01ReqId,
-  };
+
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == null || addrType == '' || addrType == undefined) {
+    addrType = 'ZS01';
+  }
+
+  if (reqType == 'U' && addrType == 'ZS01') {
+    return;
+  }
 
   var landCntry = FormManager.getActualValue('landCntry');
   if (landCntry == null || landCntry == '' || landCntry == undefined) {
     var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
       REQ_ID : reqId,
-      ADDR_TYPE : 'ZS01'
+      ADDR_TYPE : addrType
     });
     landCntry = result.ret1;
   }
   if (landCntry == 'CH' || landCntry == 'LI') {
+    var qParams = {
+      REQ_ID : zs01ReqId,
+      ADDR_TYPE : addrType
+    };
     var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
     var postCd = FormManager.getActualValue('postCd');
     postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
