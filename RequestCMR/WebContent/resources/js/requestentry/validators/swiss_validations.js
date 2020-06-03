@@ -139,15 +139,17 @@ function addAfterConfigForSWISS() {
     // setPreferredLangAddr();
     addVatSuffixForCustLangCd();
   }
-  var vatLockedCustSubGrpList = [ 'CHIBM', 'LIIBM', 'CHPRI', 'LIPRI', 'CHINT', 'LIINT' ];
-  if (vatLockedCustSubGrpList.includes(custSubGrp)) {
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');
-  } else {
-    FormManager.enable('vat');
-    if (dijit.byId('vatExempt').get('checked')) {
-      dijit.byId('vatExempt').set('checked', false);
-      setVatValidatorSWISS();
+  if (reqType == 'C') {
+    var vatLockedCustSubGrpList = [ 'CHIBM', 'LIIBM', 'CHPRI', 'LIPRI', 'CHINT', 'LIINT' ];
+    if (vatLockedCustSubGrpList.includes(custSubGrp)) {
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');
+    } else {
+      FormManager.enable('vat');
+      if (dijit.byId('vatExempt').get('checked')) {
+        dijit.byId('vatExempt').set('checked', false);
+        setVatValidatorSWISS();
+      }
     }
   }
 }
@@ -1558,9 +1560,9 @@ function setPreferredLangAddr() {
   //
   // Cross Border it is E (English)
   var reqType = FormManager.getActualValue('reqType');
-//  if (reqType != 'C') {
-//    return;
-//  }
+  // if (reqType != 'C') {
+  // return;
+  // }
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
     REQ_ID : zs01ReqId,
