@@ -348,6 +348,11 @@ public class RequestUtils {
         }
       }
 
+      // CMR-3996 - if CreateCMR is the source, do not notify anyone
+      if ("CreateCMR".equals(admin.getSourceSystId())) {
+        return;
+      }
+
     }
 
     if (recipients.toString().trim().length() == 0 && !("PPN".equals(history.getReqStatus()))) {
