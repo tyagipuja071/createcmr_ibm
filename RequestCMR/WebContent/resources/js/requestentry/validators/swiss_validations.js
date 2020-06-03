@@ -35,6 +35,8 @@ function addAfterConfigForSWISS() {
 
   if (reqType == 'U') {
     FormManager.enable('clientTier');
+    FormManager.readOnly('custLangCd');
+
     // FormManager.enable('currencyCd');
   } else {
     // FormManager.readOnly('currencyCd');
@@ -136,6 +138,19 @@ function addAfterConfigForSWISS() {
   if (impIndc != 'N') {
     // setPreferredLangAddr();
     addVatSuffixForCustLangCd();
+  }
+  if (reqType == 'C') {
+    var vatLockedCustSubGrpList = [ 'CHIBM', 'LIIBM', 'CHPRI', 'LIPRI', 'CHINT', 'LIINT' ];
+    if (vatLockedCustSubGrpList.includes(custSubGrp)) {
+      FormManager.readOnly('vat');
+      FormManager.setValue('vat', '');
+    } else {
+      FormManager.enable('vat');
+      if (dijit.byId('vatExempt').get('checked')) {
+        dijit.byId('vatExempt').set('checked', false);
+        setVatValidatorSWISS();
+      }
+    }
   }
 }
 
@@ -421,16 +436,13 @@ function setISUCTCOnIMSChange() {
 
 function addVatSuffixForCustLangCdScrtch() {
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return;
-  }
   var reqId = FormManager.getActualValue('reqId');
   var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
     REQ_ID : reqId,
     ADDR_TYPE : 'ZS01'
   });
   var landCntry = result.ret1;
-  if (landCntry != 'CH' && landCntry != 'LI') {
+  if (landCntry != 'CH') {
     return;
   }
   // get custlangCd
@@ -554,6 +566,7 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
     REQ_ID : zs01ReqId,
+    ADDR_TYPE : 'ZS01'
   };
 
   var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
@@ -778,6 +791,7 @@ function setMubotyOnPostalCodeIMS32N(postCd, subIndustryCd, clientTier) {
   var zs01ReqId = FormManager.getActualValue('reqId');
   var qParams = {
     REQ_ID : zs01ReqId,
+    ADDR_TYPE : 'ZS01'
   };
 
   var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
@@ -1120,7 +1134,7 @@ function addVatSuffixForCustLangCd() {
     ADDR_TYPE : 'ZS01'
   });
   var landCntry = result.ret1;
-  if (landCntry != 'CH' && landCntry != 'LI') {
+  if (landCntry != 'CH') {
     return;
   }
   var qParams = {
@@ -1633,23 +1647,33 @@ function setPreferredLangAddr() {
   //
   // Cross Border it is E (English)
   var reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
+  // if (reqType != 'C') {
+  // return;
+  // }
+  var zs01ReqId = FormManager.getActualValue('reqId');
+
+  var addrType = FormManager.getActualValue('addrType');
+  if (addrType == null || addrType == '' || addrType == undefined) {
+    addrType = 'ZS01';
+  }
+
+  if (reqType == 'U' && addrType == 'ZS01') {
     return;
   }
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : zs01ReqId,
-  };
 
   var landCntry = FormManager.getActualValue('landCntry');
   if (landCntry == null || landCntry == '' || landCntry == undefined) {
     var result = cmr.query('ADDR.GET.LAND_CNTRY.BY_REQID', {
       REQ_ID : reqId,
-      ADDR_TYPE : 'ZS01'
+      ADDR_TYPE : addrType
     });
     landCntry = result.ret1;
   }
   if (landCntry == 'CH' || landCntry == 'LI') {
+    var qParams = {
+      REQ_ID : zs01ReqId,
+      ADDR_TYPE : addrType
+    };
     var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
     var postCd = FormManager.getActualValue('postCd');
     postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
