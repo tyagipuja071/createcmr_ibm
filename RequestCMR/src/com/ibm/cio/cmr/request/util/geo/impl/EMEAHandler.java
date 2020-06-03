@@ -171,11 +171,21 @@ public class EMEAHandler extends BaseSOFHandler {
         record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
       }
 
-      if (SystemLocation.GREECE.equals(record.getCmrIssuedBy()) || SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
-        LOG.debug("GR/CY Nickname: " + record.getCmrName2Plain());
+      if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
+        LOG.debug("CY Nickname: " + record.getCmrName2Plain());
         record.setCmrName2Plain(record.getCmrName2Plain());
         record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
         record.setCmrDept(null);
+      }
+
+      if (SystemLocation.GREECE.equals(record.getCmrIssuedBy())) {
+        LOG.debug("GR Nickname: " + record.getCmrName2Plain());
+        record.setCmrName2Plain(record.getCmrName2Plain());
+        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
+        record.setCmrDept(null);
+        if (!StringUtils.isBlank(record.getCmrPOBox())) {
+          record.setCmrPOBox(record.getCmrPOBox());
+        }
       }
 
       if (SystemLocation.TURKEY.equals(record.getCmrIssuedBy())) {
@@ -3989,7 +3999,6 @@ public class EMEAHandler extends BaseSOFHandler {
             attPerson = validateColValFromCell(currCell);
             currCell = (XSSFCell) row.getCell(12);
             poBox = validateColValFromCell(currCell);
-
             if (currCell != null) {
               DataFormatter df = new DataFormatter();
               poBox1 = df.formatCellValue(row.getCell(12));
