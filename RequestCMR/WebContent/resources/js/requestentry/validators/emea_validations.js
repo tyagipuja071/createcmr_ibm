@@ -3851,6 +3851,12 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
   }
 }
 
+function retainLandCntryValuesOnCopy() {  
+  if ((cmr.addressMode == 'copyAddress') && FormManager.getActualValue('landCntry') == '') {
+    FormManager.setValue('landCntry', cmr.oldlandcntry);
+  }
+}
+
 function disableAddrFieldsGRCYTR() {
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
 
@@ -7997,6 +8003,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCrossLandedCntryFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
+
   
   
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator, [
