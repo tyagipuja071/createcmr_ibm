@@ -211,6 +211,11 @@ public class EMEAHandler extends BaseSOFHandler {
           List<String> sofUses = null;
           FindCMRRecordModel addr = null;
 
+          boolean isNewCmrRecordsGR = false;
+          if ("726".equals(cmrIssueCd)) {
+            isNewCmrRecordsGR = checkIfNewCmrRecords(source.getItems());
+          }
+
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
@@ -660,37 +665,7 @@ public class EMEAHandler extends BaseSOFHandler {
             if (record != null) {
               converted.add(record);
             }
-            
-            if (poBox1.contains("+")) {
-              LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
-              validations.add(error);
-            }
-          }
-          
-          if (localCity.contains("@") && localCity.length() > 0) {
-            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-            error.addError(row.getRowNum(), "Local City", "Field contains invalid character. Please fix and upload the template again.");
-            validations.add(error);
-          }
 
-          if (crossCity.contains("@") && crossCity.length() > 0) {
-            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-            error.addError(row.getRowNum(), "Cross Border City", "Field contains invalid character. Please fix and upload the template again.");
-            validations.add(error);
-          }
-
-          if (localPostal.contains("@") && localPostal.length() > 0) {
-            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-            error.addError(row.getRowNum(), "Local Postal Code", "Field contains invalid character. Please fix and upload the template again.");
-            validations.add(error);
-          }
-
-          if (cbPostal.contains("@") && cbPostal.length() > 0) {
-            LOG.trace("Field contains invalid character. Please fix and upload the template again.");
-            error.addError(row.getRowNum(), "Cross Border Postal Code",
-                "Field contains invalid character. Please fix and upload the template again.");
-            validations.add(error);
           }
 
         }
@@ -1896,6 +1871,10 @@ public class EMEAHandler extends BaseSOFHandler {
         address.setCustNm4(currentRecord.getCmrName4());
       }
 
+      if (SystemLocation.GREECE.equals(country)) {
+        address.setCustNm4(currentRecord.getCmrName4());
+      }
+
       if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
         if (!StringUtils.isEmpty(currentRecord.getCmrName3())) {
           address.setDept(removeATT(currentRecord.getCmrName3()));
@@ -2899,6 +2878,12 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetAbbrevLocnAfterImport(entityManager, admin, data);
     }
 
+    if (SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
+      if (isOldRecordsGR) {
+        updateImportIndicatior(entityManager, data.getId().getReqId());
+      }
+    }
+
     if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
       data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
       entityManager.merge(data);
@@ -2912,6 +2897,12 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
     }
 
+  }
+
+  private void updateImportIndicatior(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.IMPORTIND.N"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 
   private void autoSetHwMasterInstallFlagAfterImport(EntityManager entityManager, Admin admin, Data data) {
@@ -3962,6 +3953,8 @@ public class EMEAHandler extends BaseSOFHandler {
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String cmrNo = ""; // 0
+            String seqNo = "";// 1
             String localCity = ""; // 7
             String crossCity = ""; // 8
             String localPostal = ""; // 9
@@ -3970,11 +3963,11 @@ public class EMEAHandler extends BaseSOFHandler {
             String addressCont = ""; // 5
             String poBox = ""; // 12
             String attPerson = ""; // 11
-            String cmrNo = ""; // 0
-            String seqNo = "";// 1
+
             if (row.getRowNum() == 2001) {
               continue;
             }
+
             // iterate all the rows and check each column value
             currCell = (XSSFCell) row.getCell(0);
             cmrNo = validateColValFromCell(currCell);
@@ -4025,13 +4018,13 @@ public class EMEAHandler extends BaseSOFHandler {
                     "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
                 validations.add(error);
               }
-            }
 
-            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
-              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              error.addError(row.getRowNum(), "Address Sequence No.",
-                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
+              if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Address Sequence No.",
+                    "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                validations.add(error);
+              }
             }
           }
         }
@@ -4077,83 +4070,85 @@ public class EMEAHandler extends BaseSOFHandler {
     }
     return null;
   }
-  
+
   private boolean checkIfNewCmrRecords(List<FindCMRRecordModel> items) {
-    
+
     int rdcRecordsCount = items.size();
     int legacyRecordsCount = legacyObjects.getAddresses().size();
-    
+
     // for new rdc records it is all db2 addr records except mailing and billing
     // legacy has 5 records min for new cmr for greece
-    if(rdcRecordsCount < 3 || legacyRecordsCount < 5) {
+    if (rdcRecordsCount < 3 || legacyRecordsCount < 5) {
       return false;
     }
     return true;
   }
-  
+
   boolean isOldRecordsGR = false;
-  private List<FindCMRRecordModel> handleOldCmrRecordsGR(EntityManager entityManager, FindCMRRecordModel record, String cmrIssueCd, int recCount) throws Exception {
+
+  private List<FindCMRRecordModel> handleOldCmrRecordsGR(EntityManager entityManager, FindCMRRecordModel record, String cmrIssueCd, int recCount)
+      throws Exception {
     List<FindCMRRecordModel> records = new ArrayList<FindCMRRecordModel>();
     isOldRecordsGR = true;
     int currentSeq = recCount == 0 ? 2 : recCount;
     int rdcRecSeq = Integer.parseInt(record.getCmrAddrSeq());
-    for(CmrtAddr cmrtAddr : legacyObjects.getAddresses()) {
-     List<String> addrUseList = this.legacyObjects.getUsesBySequenceNo(cmrtAddr.getId().getAddrNo());
-     
-     for(String addrUse : addrUseList) {
-       String addrType = getAddressTypeByUseGR(addrUse);
-       
-       if(!StringUtils.isEmpty(addrType)) {
-         FindCMRRecordModel newRecord = new FindCMRRecordModel();
-         newRecord = cloneAddress(record, addrType);
-         
-         if(currentSeq == rdcRecSeq) {
-           currentSeq++;
-         }
-         
-         if(!(record.getCmrAddrTypeCode().equals(addrType))) {
-           newRecord.setCmrAddrSeq(String.format("%05d", currentSeq++));
-           newRecord.setCmrSapNumber(null);
-         } 
-         
-         newRecord.setCmrName1Plain(cmrtAddr.getAddrLine1());
-         newRecord.setCmrName2Plain(cmrtAddr.getAddrLine2());
-         if (!cmrtAddr.getAddrLine3().startsWith("ATT") && !cmrtAddr.getAddrLine3().startsWith("PO BOX")) {
-           newRecord.setCmrStreetAddressCont(cmrtAddr.getAddrLine3());
-         } else if (cmrtAddr.getAddrLine3().startsWith("ATT") ) {
-           newRecord.setCmrName4(cmrtAddr.getAddrLine3());
-         } else if (cmrtAddr.getAddrLine3().startsWith("PO BOX")) {
-           newRecord.setCmrPOBox(cmrtAddr.getAddrLine3());
-         }
-         
-         if(cmrtAddr.getAddrLine4().startsWith("PO BOX")) {
-           newRecord.setCmrPOBox(cmrtAddr.getAddrLine4());
-         } else {
-           newRecord.setCmrStreetAddress(cmrtAddr.getAddrLine4());
-         }
-         
-         if(!StringUtils.isEmpty(cmrtAddr.getAddrLine5())) {
-           String[] line5 = cmrtAddr.getAddrLine5().split(" ");
-           String postalCode = "";
-           String city = "";
-           for (int i = 0; i < line5.length; i++) {
-             if (i < 2 && StringUtils.isNumeric(line5[i])) {
-               postalCode += line5[i];
-             } else {
-               city += " " + line5[i];
-             }
-           }
-           newRecord.setCmrCity(city.trim());
-           newRecord.setCmrPostalCode(postalCode);
-         }
-         
-         CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
-         if ("ZP01".equals(addrType) && custExt != null) {
-           newRecord.setCmrTaxOffice(custExt.getiTaxCode());
-         }  
-         records.add(newRecord);
-       }
-     }
+    for (CmrtAddr cmrtAddr : legacyObjects.getAddresses()) {
+      List<String> addrUseList = this.legacyObjects.getUsesBySequenceNo(cmrtAddr.getId().getAddrNo());
+
+      for (String addrUse : addrUseList) {
+        String addrType = getAddressTypeByUseGR(addrUse);
+
+        if (!StringUtils.isEmpty(addrType)) {
+          FindCMRRecordModel newRecord = new FindCMRRecordModel();
+          newRecord = cloneAddress(record, addrType);
+
+          if (currentSeq == rdcRecSeq) {
+            currentSeq++;
+          }
+
+          if (!(record.getCmrAddrTypeCode().equals(addrType))) {
+            newRecord.setCmrAddrSeq(String.format("%05d", currentSeq++));
+            newRecord.setCmrSapNumber(null);
+          }
+
+          newRecord.setCmrName1Plain(cmrtAddr.getAddrLine1());
+          newRecord.setCmrName2Plain(cmrtAddr.getAddrLine2());
+          if (!cmrtAddr.getAddrLine3().startsWith("ATT") && !cmrtAddr.getAddrLine3().startsWith("PO BOX")) {
+            newRecord.setCmrStreetAddressCont(cmrtAddr.getAddrLine3());
+          } else if (cmrtAddr.getAddrLine3().startsWith("ATT")) {
+            newRecord.setCmrName4(cmrtAddr.getAddrLine3());
+          } else if (cmrtAddr.getAddrLine3().startsWith("PO BOX")) {
+            newRecord.setCmrPOBox(cmrtAddr.getAddrLine3());
+          }
+
+          if (cmrtAddr.getAddrLine4().startsWith("PO BOX")) {
+            newRecord.setCmrPOBox(cmrtAddr.getAddrLine4());
+          } else {
+            newRecord.setCmrStreetAddress(cmrtAddr.getAddrLine4());
+          }
+
+          if (!StringUtils.isEmpty(cmrtAddr.getAddrLine5())) {
+            String[] line5 = cmrtAddr.getAddrLine5().split(" ");
+            String postalCode = "";
+            String city = "";
+            for (int i = 0; i < line5.length; i++) {
+              if (i < 2 && StringUtils.isNumeric(line5[i])) {
+                postalCode += line5[i];
+              } else {
+                city += " " + line5[i];
+              }
+            }
+            newRecord.setCmrCity(city.trim());
+            newRecord.setCmrPostalCode(postalCode);
+          }
+
+          CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
+          if ("ZP01".equals(addrType) && custExt != null) {
+            newRecord.setCmrTaxOffice(custExt.getiTaxCode());
+          }
+          records.add(newRecord);
+        }
+      }
     }
     return records;
   }
@@ -4169,7 +4164,7 @@ public class EMEAHandler extends BaseSOFHandler {
     }
     return addr;
   }
-  
+
   private String getAddressTypeByUseGR(String addressUse) {
     switch (addressUse) {
     case "2":
@@ -4183,18 +4178,17 @@ public class EMEAHandler extends BaseSOFHandler {
     }
     return null;
   }
-  
+
   private FindCMRRecordModel mapLocalLanguageTranslationOfSoldTo(EntityManager entityManager, FindCMRRecordModel record, String cmrIssueCd)
       throws Exception {
-    //Map local language translation of sold to value -- for greece recommit
-    CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager,
-        record.getCmrNum(), cmrIssueCd);
+    // Map local language translation of sold to value -- for greece recommit
+    CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager, record.getCmrNum(), cmrIssueCd);
     CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
     FindCMRRecordModel localTransAddr = new FindCMRRecordModel();
     PropertyUtils.copyProperties(localTransAddr, record);
     localTransAddr.setCmrAddrSeq(db2LocalTransAddr.getId().getAddrNo());
     localTransAddr.setCmrAddrTypeCode("ZP01");
-    
+
     // If not in sadr look in DB2
     if (record.getCmrCountryLanded().equals("GR")) {
       if (!StringUtils.isBlank(record.getCmrIntlName1())) {
@@ -4254,12 +4248,12 @@ public class EMEAHandler extends BaseSOFHandler {
         localTransAddr.setCmrPOBox(poBox);
       }
     }
-    
+
     if (custExt != null) {
       localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
-    }   
-    
+    }
+
     return localTransAddr;
   }
-  
+
 }
