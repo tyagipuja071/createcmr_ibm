@@ -304,8 +304,14 @@ public class USUtil extends AutomationUtil {
         if ("C".equals(admin.getReqType())
             && (data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
             && !FEDERAL_SCENARIOS.contains(scenarioSubType)) {
-          details.append("Federal ISIC found on the request for non-Federal scenario.\n");
-          engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
+          if (SC_BP_END_USER.equals(scenarioSubType)) {
+            details.append("Federal ISIC found on the request for BP@EU. Treating as validated.\n");
+            // engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC
+            // found on the request for non-Federal scenario.");
+          } else {
+            details.append("Federal ISIC found on the request for non-Federal scenario.\n");
+            engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
+          }
         }
       }
 
