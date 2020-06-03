@@ -631,12 +631,21 @@ public class TurkeyTransformer extends EMEATransformer {
       line2 = "";
     }
 
-    line3 = addrData.getAddrTxt();
+    // line3 = addrData.getAddrTxt();
+    //
+    // if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+    // line4 = addrData.getAddrTxt2();
+    // } else {
+    // line4 = "";
+    // }
 
+    // CMR-2924
     if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line3 = addrData.getAddrTxt();
       line4 = addrData.getAddrTxt2();
     } else {
-      line4 = "";
+      line3 = "";
+      line4 = addrData.getAddrTxt();
     }
 
     // Dept + Postal code + City
