@@ -1138,8 +1138,11 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         if (!StringUtils.isBlank(childAdmin.getMainCustNm2())) {
           fullName += " " + childAdmin.getMainCustNm2();
         }
-        fullName += " " + customerNameSuffix;
         String nameParts[] = handler.doSplitName(fullName, "", 24, 24);
+        // CMR-4002 always put suffix on dept line
+        nameParts[1] = (nameParts[1] != null ? nameParts[1] : "") + (StringUtils.isBlank(customerNameSuffix) ? "" : " " + customerNameSuffix);
+        nameParts[1] = nameParts[1].trim();
+
         overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
       }
