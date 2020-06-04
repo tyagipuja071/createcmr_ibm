@@ -253,7 +253,8 @@ public class SwitzerlandUtil extends AutomationUtil {
       validation.setMessage("Successful");
     }
 
-    String details = duplicateDetails.length() > 0 ? duplicateDetails.toString() : "";
+    String details = output.getDetails().length() > 0 ? output.getDetails() + "\n" : "";
+    details += duplicateDetails.length() > 0 ? duplicateDetails.toString() : "";
     details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
     output.setDetails(details);
     output.setProcessOutput(validation);
