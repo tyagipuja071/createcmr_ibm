@@ -1631,8 +1631,9 @@ function addCrossLandedCntryFormValidatorGR() {
 	  FormManager.addFormValidator((function() {
 	    return {
 	      validate : function() {
-	        
-	        if (FormManager.getActualValue('custGrp') == 'CROSS' && (FormManager.getActualValue('addrType') == 'ZP01' || FormManager.getActualValue('addrType') == 'ZS01') 
+	               
+	        var isCrossborder = cmr.oldlandcntry != 'GR' &&  FormManager.getActualValue('reqType') == 'U';
+	        if ((FormManager.getActualValue('custGrp') == 'CROSS' || isCrossborder) && (FormManager.getActualValue('addrType') == 'ZP01' || FormManager.getActualValue('addrType') == 'ZS01') 
 	        		&& FormManager.getActualValue('landCntry') == 'GR') {
 		          return new ValidationResult(null, false, 'Landed Country value should not be \'Greece - GR\' for Cross-border customers.');
 		    }
@@ -4063,13 +4064,27 @@ function disableAddrFieldsGR() {
   }
   
   var landCntry = FormManager.getActualValue('landCntry');
-  if(!(FormManager.getActualValue('custGrp') == 'CROSS') && landCntry == 'GR' && 
+  if(!(FormManager.getActualValue('custGrp') == 'CROSS' || isUpdateReqCrossborder()) && landCntry == 'GR' && 
 		  (FormManager.getActualValue('addrType') == 'ZP01'
 		|| FormManager.getActualValue('addrType') == 'ZS01') ) {
 	  FormManager.readOnly('landCntry');
   } else {
 	  FormManager.enable('landCntry');
   }
+}
+
+function isUpdateReqCrossborder() {
+  if(!(FormManager.getActualValue('custGrp') == 'LOCAL')) {
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+	    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+	    if (_allAddressData != null && _allAddressData[i] != null) {
+	      if(_allAddressData[i].addrType[0] == 'ZS01') {
+	        return _allAddressData[i].landCntry[0] != 'GR'; 
+		    }
+	    }
+    }  
+  }	
+  return false;
 }
 
 function hideMOPAFieldForGR() {
