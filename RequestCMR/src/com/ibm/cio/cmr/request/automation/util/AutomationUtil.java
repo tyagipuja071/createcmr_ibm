@@ -376,7 +376,13 @@ public abstract class AutomationUtil {
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (StringUtils.isNotBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
+      if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        request.setOrgId(data.getVat().split("\\s")[0]);
+      } else {
+        request.setOrgId(data.getVat());
+      }
+    } else if (StringUtils.isNotBlank(addr.getVat())) {
+      request.setOrgId(addr.getVat());
     }
 
     if (addr != null) {
