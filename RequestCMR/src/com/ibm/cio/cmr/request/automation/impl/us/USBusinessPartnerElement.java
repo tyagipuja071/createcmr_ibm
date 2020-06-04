@@ -1239,7 +1239,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       } else {
         Map<String, Object> record = response.getRecords().get(0);
         String affiliate = (String) record.get("I_MKT_AFFLTN");
-        if (affiliate != null) {
+        if (!StringUtils.isBlank(affiliate)) {
           return StringUtils.leftPad(affiliate, 7, '0');
         }
         return null;
