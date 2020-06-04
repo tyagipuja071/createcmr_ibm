@@ -297,7 +297,7 @@ public class ApprovalUtil {
       } else if (fieldName.equals("ADMIN.MAIN_CUST_NM2")) {
         sql = sql.append(fieldName + " <> ADMIN.OLD_CUST_NM2");
       } else {
-        sql = sql.append("curr." + fieldName + " <> old." + fieldName);
+        sql = sql.append("nvl(curr." + fieldName + ",'') <> nvl(old." + fieldName + ",'')");
       }
       break;
     }
