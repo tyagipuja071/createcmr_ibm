@@ -2294,10 +2294,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
         if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"TR".equals(addr.getLandCntry())) {
           updateLandCntry(entityManager, addr);
-        }
-        // Sync Sold to and Local lauguage address
-        if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp())
-            && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
+          // Sync Sold to and Local lauguage address
           if ("ZS01".equals(addr.getId().getAddrType())) {
             if (getAddressByType(entityManager, "ZP01", data.getId().getReqId()) == null) {
               saveAddrCopyForTR(entityManager, addr, "ZP01");
