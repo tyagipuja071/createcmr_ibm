@@ -46,10 +46,11 @@ public class GreeceTransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  /* Greece - MQ - Code
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01" };
+  /*
+   * Greece - MQ - Code private static final String[] ADDRESS_ORDER = { "ZP01",
+   * "ZS01", "ZD01" };
    */
-  
+
   // Comment this out when reverting to MQ
   private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZD01", "ZI01" };
 
@@ -77,8 +78,8 @@ public class GreeceTransformer extends EMEATransformer {
   private static final String ADDRESS_USE_COUNTRY_G = "G";
   private static final String ADDRESS_USE_COUNTRY_H = "H";
 
-  private List<CmrtAddr> addressToBeAdded = new ArrayList<>(); 
-  
+  private List<CmrtAddr> addressToBeAdded = new ArrayList<>();
+
   public GreeceTransformer() {
     super(SystemLocation.GREECE);
 
@@ -108,7 +109,6 @@ public class GreeceTransformer extends EMEATransformer {
     messageHash.put("ARemark", "");
     messageHash.put("EnterpriseNo", cmrData.getEnterprise());
     messageHash.put("CustomerLanguage", "1");
-
 
     messageHash.put("CollectionCode", "");
 
@@ -145,8 +145,8 @@ public class GreeceTransformer extends EMEATransformer {
         messageHash.put("CustomerType", "");
       }
     } else {
-      if(update) {
-        messageHash.put("CustomerType", !StringUtils.isBlank(cmrData.getCrosSubTyp()) ? cmrData.getCrosSubTyp() : "");  
+      if (update) {
+        messageHash.put("CustomerType", !StringUtils.isBlank(cmrData.getCrosSubTyp()) ? cmrData.getCrosSubTyp() : "");
       } else {
         messageHash.put("CustomerType", "");
       }
@@ -166,7 +166,7 @@ public class GreeceTransformer extends EMEATransformer {
     Data cmrData = handler.cmrData;
     boolean crossBorder = isCrossBorder(addrData);
     String addrType = addrData.getId().getAddrType();
-    
+
     String addrKey = getAddressKey(addrData.getId().getAddrType());
     LOG.debug("Handling " + (update ? "update" : "create") + " request.");
     Map<String, String> messageHash = handler.messageHash;
@@ -199,7 +199,7 @@ public class GreeceTransformer extends EMEATransformer {
         && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
       line3 = "PO BOX " + addrData.getPoBox();
     }
-    
+
     // Street
     String line4 = "";
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
@@ -207,8 +207,8 @@ public class GreeceTransformer extends EMEATransformer {
     } else if (!StringUtils.isBlank(addrData.getPoBox())
         && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
       line4 = "PO BOX " + addrData.getPoBox();
-    } 
-    
+    }
+
     // postal code + city
     String line5 = (!StringUtils.isEmpty(addrData.getPostCd()) ? addrData.getPostCd() : "") + " "
         + (!StringUtils.isEmpty(addrData.getCity1()) ? addrData.getCity1() : "");
@@ -217,10 +217,10 @@ public class GreeceTransformer extends EMEATransformer {
     // country
     String line6 = "";
 
-    if(!crossBorder && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
-      line6 =  "Ελλάδα";
+    if (!crossBorder && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line6 = "Ελλάδα";
     } else {
-      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());  
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
     }
 
     int lineNo = 1;
@@ -238,8 +238,8 @@ public class GreeceTransformer extends EMEATransformer {
 
     // vat
     if (!MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType())) {
-      messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU", !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat()
-          : "");
+      messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU",
+          !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat() : "");
     } else {
       messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressU", "");
     }
@@ -274,23 +274,14 @@ public class GreeceTransformer extends EMEATransformer {
     return ADDRESS_ORDER;
   }
 
-  
-  /* Greece - MQ Code
-  @Override
-  public String getAddressKey(String addrType) {
-    switch (addrType) {
-    case "ZP01":
-      return "Mail";
-    case "ZS01":
-      return "Install";
-    case "ZD01":
-      return "Ship";
-    default:
-      return "";
-    }
-  }
-  */
-  
+  /*
+   * Greece - MQ Code
+   * 
+   * @Override public String getAddressKey(String addrType) { switch (addrType)
+   * { case "ZP01": return "Mail"; case "ZS01": return "Install"; case "ZD01":
+   * return "Ship"; default: return ""; } }
+   */
+
   // Comment this method out when reverting to MQ code
   @Override
   public String getAddressKey(String addrType) {
@@ -308,22 +299,14 @@ public class GreeceTransformer extends EMEATransformer {
     }
   }
 
-  /* Greece - MQ Code
-  @Override
-  public String getTargetAddressType(String addrType) {
-    switch (addrType) {
-    case "ZP01":
-      return "Mailing";
-    case "ZS01":
-      return "Installing";
-    case "ZD01":
-      return "Shipping";
-    default:
-      return "";
-    }
-  }
-  */
-  
+  /*
+   * Greece - MQ Code
+   * 
+   * @Override public String getTargetAddressType(String addrType) { switch
+   * (addrType) { case "ZP01": return "Mailing"; case "ZS01": return
+   * "Installing"; case "ZD01": return "Shipping"; default: return ""; } }
+   */
+
   // Comment this method out when reverting to MQ
   @Override
   public String getTargetAddressType(String addrType) {
@@ -360,23 +343,21 @@ public class GreeceTransformer extends EMEATransformer {
   protected boolean isCrossBorder(Addr addr) {
     return !"GR".equals(addr.getLandCntry());
   }
-  
-  /* Greece - MQ Code
-  @Override
-  public String getAddressUse(Addr addr) {
-    switch (addr.getId().getAddrType()) {
-    case MQMsgConstants.ADDR_ZP01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING + MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-    case MQMsgConstants.ADDR_ZS01:
-      return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING + MQMsgConstants.SOF_ADDRESS_USE_SHIPPING + MQMsgConstants.SOF_ADDRESS_USE_EPL;
-    case MQMsgConstants.ADDR_ZD01:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    default:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
-    }
-  }
-  */
-  
+
+  /*
+   * Greece - MQ Code
+   * 
+   * @Override public String getAddressUse(Addr addr) { switch
+   * (addr.getId().getAddrType()) { case MQMsgConstants.ADDR_ZP01: return
+   * MQMsgConstants.SOF_ADDRESS_USE_MAILING +
+   * MQMsgConstants.SOF_ADDRESS_USE_BILLING; case MQMsgConstants.ADDR_ZS01:
+   * return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING +
+   * MQMsgConstants.SOF_ADDRESS_USE_SHIPPING +
+   * MQMsgConstants.SOF_ADDRESS_USE_EPL; case MQMsgConstants.ADDR_ZD01: return
+   * MQMsgConstants.SOF_ADDRESS_USE_SHIPPING; default: return
+   * MQMsgConstants.SOF_ADDRESS_USE_SHIPPING; } }
+   */
+
   // Comment this method out when reverting to MQ
   @Override
   public String getAddressUse(Addr addr) {
@@ -463,7 +444,7 @@ public class GreeceTransformer extends EMEATransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
-      
+
       if (!StringUtils.isBlank(data.getAbbrevNm())) {
         legacyCust.setAbbrevNm(data.getAbbrevNm());
       } else {
@@ -477,23 +458,23 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         legacyCust.setIsuCd("");
       }
-      
+
       if (!StringUtils.isBlank(data.getIsicCd())) {
         legacyCust.setIsicCd(data.getIsicCd());
       } else {
         legacyCust.setIsicCd("");
       }
-      
+
       if (!StringUtils.isBlank(data.getSubIndustryCd())) {
         legacyCust.setImsCd(data.getSubIndustryCd());
       } else {
         legacyCust.setImsCd("");
       }
-      
-      //SBO,IBO,REMXA,REMXD   
-    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+
+      // SBO,IBO,REMXA,REMXD
+      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
         legacyCust.setIbo(data.getSalesBusOffCd());
-         legacyCust.setSbo(data.getSalesBusOffCd());
+        legacyCust.setSbo(data.getSalesBusOffCd());
       } else {
         legacyCust.setIbo("");
         legacyCust.setSbo("");
@@ -503,25 +484,25 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         legacyCust.setSalesRepNo("");
       }
-      
+
       if (!StringUtils.isBlank(data.getSalesTeamCd())) {
         legacyCust.setSalesGroupRep(data.getSalesTeamCd());
       } else {
         legacyCust.setSalesGroupRep("");
       }
-      
+
       if (!StringUtils.isBlank(data.getCollectionCd())) {
         legacyCust.setCollectionCd(data.getCollectionCd());
       } else {
         legacyCust.setCollectionCd("");
       }
-      
+
     } // common data for C/U
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
       legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
     }
-    
+
     if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
       if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
@@ -533,33 +514,38 @@ public class GreeceTransformer extends EMEATransformer {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       }
     }
-    
+
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("ModeOfPayment"))) {
       legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
     }
-    
+
     legacyCust.setCustType(dummyHandler.messageHash.get("CustomerType"));
-    
+
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     } // other fields to be transformed is pending
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
     legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesTeamCd()) ? data.getSalesTeamCd() : ""); //REMXD
-      legacyCust.setDcRepeatAgreement("0"); //CAGXB
-      legacyCust.setLeasingInd("0");        //CIEDC 
-      legacyCust.setAuthRemarketerInd("0"); //CIEXJ
-      if(data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("XBP")) {
+      legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesTeamCd()) ? data.getSalesTeamCd() : ""); // REMXD
+      legacyCust.setDcRepeatAgreement("0"); // CAGXB
+      legacyCust.setLeasingInd("0"); // CIEDC
+      legacyCust.setAuthRemarketerInd("0"); // CIEXJ
+      if (data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("XBP")) {
         legacyCust.setAuthRemarketerInd("1");
-      }      
+      }
       String formatSBO = data.getSalesBusOffCd() + "0000";
       legacyCust.setIbo(formatSBO);
       legacyCust.setSbo(formatSBO);
+
+      String custSubType = data.getCustSubGrp();
+      if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custSubType)) {
+        legacyCust.setCustType("G");
+      }
     }
     legacyCust.setCeBo("");
   }
-  
+
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
     data.setOrdBlk("");
     entityManager.merge(data);
@@ -571,32 +557,32 @@ public class GreeceTransformer extends EMEATransformer {
     entityManager.merge(data);
     entityManager.flush();
   }
-  
+
   @Override
   public boolean hasCmrtCustExt() {
     return true;
   }
-  
+
   @Override
-  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler,
-      CmrtCustExt legacyCustExt, CMRRequestContainer cmrObjects) {
-    for(Addr addr : cmrObjects.getAddresses()) {
-      if(addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
+  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+      CMRRequestContainer cmrObjects) {
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
         legacyCustExt.setiTaxCode((addr.getTaxOffice()));
       }
     }
   }
-  
+
   @Override
-  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler,
-      CmrtCust legacyCust, CmrtAddr legacyAddr, CMRRequestContainer cmrObjects, Addr currAddr) {
+  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
+      CMRRequestContainer cmrObjects, Addr currAddr) {
     formatAddressLines(dummyHandler);
-    boolean update = "U".equals(dummyHandler.adminData.getReqType());    
+    boolean update = "U".equals(dummyHandler.adminData.getReqType());
     int newlyAddedAddrStartIndex = 5;
 
     legacyAddr.setAddrLineT("");
     legacyAddr.setAddrLineU("");
-    
+
     if (update) {
       legacyAddr.setForCreate(false);
 
@@ -604,11 +590,11 @@ public class GreeceTransformer extends EMEATransformer {
       if (!isAddressPresent(legacyClone.getId().getAddrNo())) {
         try {
           LegacyDirectUtil.capsAndFillNulls(legacyClone, true);
-          // no need to update sequence 
+          // no need to update sequence
           legacyClone.getId().setAddrNo(currAddr.getId().getAddrSeq());
           int currentSeq = Integer.parseInt(currAddr.getId().getAddrSeq());
-          if(currentSeq > newlyAddedAddrStartIndex) {
-            addressToBeAdded.add(legacyClone);  
+          if (currentSeq > newlyAddedAddrStartIndex) {
+            addressToBeAdded.add(legacyClone);
           }
         } catch (Exception e) {
           e.printStackTrace();
@@ -616,7 +602,7 @@ public class GreeceTransformer extends EMEATransformer {
       }
     }
   }
-  
+
   @Override
   public void transformOtherData(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
     long reqId = cmrObjects.getAdmin().getId().getReqId();
@@ -641,8 +627,8 @@ public class GreeceTransformer extends EMEATransformer {
         modifyAddrUseFields(getAddressUse(addr), legacyAddrList.get(i));
       }
     } else {
-      if(!isOldCmrRecords(legacyAddrList)) {
-      // revert isForCreate back -- used for partialCompleteRecord later
+      if (!isOldCmrRecords(legacyAddrList)) {
+        // revert isForCreate back -- used for partialCompleteRecord later
         addUpdateAddresses(legacyObjects, addrList);
         updateMailingAddrWithBillingData(legacyObjects);
         legacyObjects.getCustomer().setLangCd("1");
@@ -651,14 +637,14 @@ public class GreeceTransformer extends EMEATransformer {
       }
     }
   }
-  
+
   private void updateMailingAddrWithBillingData(LegacyDirectObjectContainer legacyObjects) {
     CmrtAddr billingAddr = null;
     int mailingAddrIndex = -1;
-    for(int i = 0; i < legacyObjects.getAddresses().size(); i++) {
-      if("Y".equals(legacyObjects.getAddresses().get(i).getIsAddrUseMailing())) {
+    for (int i = 0; i < legacyObjects.getAddresses().size(); i++) {
+      if ("Y".equals(legacyObjects.getAddresses().get(i).getIsAddrUseMailing())) {
         mailingAddrIndex = i;
-      } else if("Y".equals(legacyObjects.getAddresses().get(i).getIsAddrUseBilling())) {
+      } else if ("Y".equals(legacyObjects.getAddresses().get(i).getIsAddrUseBilling())) {
         billingAddr = legacyObjects.getAddresses().get(i);
       }
     }
@@ -676,31 +662,31 @@ public class GreeceTransformer extends EMEATransformer {
   }
 
   private void addUpdateAddresses(LegacyDirectObjectContainer legacyObjects, List<Addr> addrList) {
-    for(CmrtAddr cmrAddr: addressToBeAdded) {
+    for (CmrtAddr cmrAddr : addressToBeAdded) {
       modifyAddedAddresses(cmrAddr, cmrAddr.getId().getAddrNo(), addrList);
       cmrAddr.setForCreate(true);
-      legacyObjects.addAddress(cmrAddr);  
+      legacyObjects.addAddress(cmrAddr);
     }
   }
-  
+
   private void modifyAddedAddresses(CmrtAddr cmrAddr, String addrSeq, List<Addr> addrList) {
-    for(Addr addr: addrList) {
-      if("N".equals(addr.getImportInd())) {
-        if(addrSeq.equals(addr.getId().getAddrSeq())) {
+    for (Addr addr : addrList) {
+      if ("N".equals(addr.getImportInd())) {
+        if (addrSeq.equals(addr.getId().getAddrSeq())) {
           LOG.info("GREECE modified address use for seq: " + addrSeq);
           modifyAddrUseFields(getAddressUse(addr), cmrAddr);
         }
       }
     }
   }
-  
+
   private boolean isAddressPresent(String seqNo) {
-    if(addressToBeAdded.size() == 0) {
+    if (addressToBeAdded.size() == 0) {
       return false;
     }
-    
-    for(CmrtAddr cmrAddr : addressToBeAdded) {
-      if(seqNo.equalsIgnoreCase(cmrAddr.getId().getAddrNo())) {
+
+    for (CmrtAddr cmrAddr : addressToBeAdded) {
+      if (seqNo.equalsIgnoreCase(cmrAddr.getId().getAddrNo())) {
         return true;
       }
     }
@@ -712,18 +698,18 @@ public class GreeceTransformer extends EMEATransformer {
     updateAddrSeq(entityManager, reqId, addrType, oldSeq, newSeq, null);
     legacyObjects.getAddresses().get(index).getId().setAddrNo(newSeq);
   }
-  
+
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
     CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
     mailingAddr.getId().setAddrNo(String.format("%05d", 1)); // should be 00001
     modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(mailingAddr);
   }
-  
+
   private String changeSeqNo(int newSeq) {
     return String.format("%05d", newSeq);
   }
-  
+
   private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
@@ -735,7 +721,7 @@ public class GreeceTransformer extends EMEATransformer {
     LOG.debug("GREECE - Assigning address sequence " + newSeq + " to " + addrType + " address.");
     q.executeSql();
   }
-  
+
   private void modifyAddrUseFields(String addrUse, CmrtAddr legacyAddr) {
     setAddrUseFieldsToN(legacyAddr);
     for (String use : addrUse.split("")) {
@@ -802,7 +788,7 @@ public class GreeceTransformer extends EMEATransformer {
     legacyAddr.setIsAddressUseG(ADDRESS_USE_NOT_EXISTS);
     legacyAddr.setIsAddressUseH(ADDRESS_USE_NOT_EXISTS);
   }
-  
+
   @Override
   public void generateCMRNoByLegacy(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, CMRRequestContainer cmrObjects) {
     Data data = cmrObjects.getData();
@@ -813,7 +799,7 @@ public class GreeceTransformer extends EMEATransformer {
       generateCMRNoObj.setMax(999999);
     }
   }
-  
+
   protected boolean zs01CrossBorder(MQMessageHandler handler) {
     EntityManager entityManager = handler.getEntityManager();
     if (entityManager == null) {
@@ -838,10 +824,10 @@ public class GreeceTransformer extends EMEATransformer {
     }
     return false;
   }
-  
+
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
-    LOG.debug("Mapping default Data values from transformLegacyCustomerDataMassUpdate.");    
+    LOG.debug("Mapping default Data values from transformLegacyCustomerDataMassUpdate.");
     if (!StringUtils.isBlank(muData.getAbbrevNm())) {
       cust.setAbbrevNm(muData.getAbbrevNm());
     }
@@ -849,13 +835,13 @@ public class GreeceTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
-    
+
     String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
         + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
     if (isuClientTier != null && isuClientTier.length() == 3) {
       cust.setIsuCd(isuClientTier);
     }
-    
+
     if (!StringUtils.isBlank(muData.getEnterprise())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getEnterprise())) {
         cust.setEnterpriseNo("");
@@ -871,11 +857,11 @@ public class GreeceTransformer extends EMEATransformer {
         cust.setCollectionCd(muData.getCollectionCd());
       }
     }
-    
+
     if (!StringUtils.isBlank(muData.getIsicCd())) {
       cust.setIsicCd(muData.getIsicCd());
     }
-    
+
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@@@@".equals(muData.getInacCd().trim())) {
         cust.setInacCd("");
@@ -883,12 +869,12 @@ public class GreeceTransformer extends EMEATransformer {
         cust.setInacCd(muData.getInacCd());
       }
     }
-    
+
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
       cust.setImsCd(subInd);
     }
-    
+
     if (!StringUtils.isBlank(muData.getModeOfPayment())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getModeOfPayment().trim())) {
         cust.setModeOfPayment("");
@@ -896,7 +882,7 @@ public class GreeceTransformer extends EMEATransformer {
         cust.setModeOfPayment(muData.getModeOfPayment());
       }
     }
-    
+
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd())) {
         cust.setEmbargoCd("");
@@ -904,7 +890,7 @@ public class GreeceTransformer extends EMEATransformer {
         cust.setEmbargoCd(muData.getMiscBillCd());
       }
     }
-    
+
     if (!StringUtils.isBlank(muData.getRestrictTo())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getRestrictTo())) {
         cust.setTelNoOrVat("");
@@ -912,7 +898,7 @@ public class GreeceTransformer extends EMEATransformer {
         cust.setTelNoOrVat(muData.getRestrictTo());
       }
     }
-    
+
     if (!StringUtils.isBlank(muData.getVat())) {
       // String newVat = handleVatMassUpdateChanges(muData.getVat(),
       // cust.getVat());
@@ -921,11 +907,11 @@ public class GreeceTransformer extends EMEATransformer {
       } else {
         cust.setVat(muData.getVat());
       }
-    }    
+    }
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
-  
+
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
@@ -961,7 +947,7 @@ public class GreeceTransformer extends EMEATransformer {
     if (!StringUtils.isBlank(addr.getCity1())) {
       legacyAddr.setCity(addr.getCity1());
     }
-    
+
     if (!StringUtils.isBlank(addr.getCustPhone())) {
       if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
         legacyAddr.setAddrPhone("");
@@ -969,11 +955,11 @@ public class GreeceTransformer extends EMEATransformer {
         legacyAddr.setAddrPhone(addr.getCustPhone());
       }
     }
-    
+
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
     }
-    
+
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
       if (DEFAULT_CLEAR_CHAR.equals(poBox)) {
@@ -984,8 +970,8 @@ public class GreeceTransformer extends EMEATransformer {
     }
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
-    
-    if("Y".equals(legacyAddr.getIsAddrUseBilling())) {
+
+    if ("Y".equals(legacyAddr.getIsAddrUseBilling())) {
       CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(legacyAddr);
       newMailingAddr.getId().setAddrNo(String.format("%05d", 1));
       modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
@@ -994,20 +980,20 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
   }
-  
+
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
     LOG.debug("*** START GR formatMassUpdateAddressLines >>>");
     boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
     Map<String, String> messageHash = new LinkedHashMap<String, String>();
-    
+
     messageHash.put("SourceCode", "EF0");
     messageHash.remove(addrKey + "Name");
     messageHash.remove(addrKey + "ZipCode");
     messageHash.remove(addrKey + "City");
-    messageHash.remove(addrKey + "POBox");    
-    
+    messageHash.remove(addrKey + "POBox");
+
     String line1 = legacyAddr.getAddrLine1();
     String line2 = legacyAddr.getAddrLine2();
     String line3 = legacyAddr.getAddrLine3();
@@ -1015,9 +1001,9 @@ public class GreeceTransformer extends EMEATransformer {
     String line5 = legacyAddr.getAddrLine5();
     String line6 = legacyAddr.getAddrLine6();
 
-    //customer name
+    // customer name
     line1 = legacyAddr.getAddrLine1();
-    
+
     if (!StringUtils.isBlank(massUpdtAddr.getCustNm2())) {
       if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm2())) {
         line2 = "";
@@ -1025,7 +1011,7 @@ public class GreeceTransformer extends EMEATransformer {
         line2 = massUpdtAddr.getCustNm2();
       }
     }
-    
+
     // Att Person or Address Con't/Occupation
     if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
       if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt2())) {
@@ -1043,7 +1029,7 @@ public class GreeceTransformer extends EMEATransformer {
         line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
       }
     }
-    
+
     // Street OR PO BOX
     if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt())) {
       if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt())) {
@@ -1060,24 +1046,24 @@ public class GreeceTransformer extends EMEATransformer {
         legacyAddr.setPoBox(massUpdtAddr.getPoBox());
       }
     }
-     
+
     if (!StringUtils.isEmpty(massUpdtAddr.getPostCd()) || !StringUtils.isEmpty(massUpdtAddr.getCity1())) {
       line5 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() + " " : "")
           + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
     }
-        
+
     if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
       line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
     }
-    
+
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
         (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : ""), (line6 != null ? line6.trim() : "") };
-    
+
     int lineNo = 1;
     LOG.debug("Lines: " + (line1 != null ? line1.trim() : "") + " | " + (line2 != null ? line2.trim() : "") + " | "
-        + (line3 != null ? line3.trim() : "") + " | " + (line4 != null ? line4.trim() : "") + " | " + (line5 != null ? line5.trim() : "") 
-        + " | " + (line6 != null ? line6.trim() : ""));
-    
+        + (line3 != null ? line3.trim() : "") + " | " + (line4 != null ? line4.trim() : "") + " | " + (line5 != null ? line5.trim() : "") + " | "
+        + (line6 != null ? line6.trim() : ""));
+
     for (String line : lines) {
       messageHash.put(getAddressKey((massUpdtAddr.getId().getAddrType()) + "Address" + lineNo).toString(), line);
       lineNo++;
@@ -1089,7 +1075,7 @@ public class GreeceTransformer extends EMEATransformer {
     legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
     legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
   }
-  
+
   @Override
   public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
       MassUpdtData muData, String cmr) throws Exception {
@@ -1126,33 +1112,34 @@ public class GreeceTransformer extends EMEATransformer {
       }
     }
   }
-  
-  private void handleOldCmrRecords(EntityManager entityManager, long reqId, LegacyDirectObjectContainer legacyObjects, CMRRequestContainer cmrObjects) {
+
+  private void handleOldCmrRecords(EntityManager entityManager, long reqId, LegacyDirectObjectContainer legacyObjects,
+      CMRRequestContainer cmrObjects) {
     List<Addr> addrList = cmrObjects.getAddresses();
     List<CmrtAddr> legacyAddressesSplit = new ArrayList<>();
     List<String> legacyAddrNoList = new ArrayList<>();
     int billingIndex = 0;
     int installingIndex = 0;
-    
-    for(int i = 0; i < legacyObjects.getAddresses().size(); i++) {
+
+    for (int i = 0; i < legacyObjects.getAddresses().size(); i++) {
       CmrtAddr curAddr = legacyObjects.getAddresses().get(i);
       String addrNo = curAddr.getId().getAddrNo();
       legacyAddrNoList.add(addrNo);
-      
-      if("Y".equals(curAddr.getIsAddrUseBilling())) {
+
+      if ("Y".equals(curAddr.getIsAddrUseBilling())) {
         billingIndex = i;
-      } else if("Y".equals(curAddr.getIsAddrUseInstalling())) {
+      } else if ("Y".equals(curAddr.getIsAddrUseInstalling())) {
         installingIndex = i;
       }
     }
-    
+
     int zs01AddrSeq = -1;
     CmrtAddr mailingAddr = new CmrtAddr();
-    
-    for(Addr addr : addrList) {
+
+    for (Addr addr : addrList) {
       CmrtAddr legacyAddrUpdated;
-      if(addr.getId().getAddrType().equals("ZP01")) {
-        legacyAddrUpdated = (CmrtAddr) SerializationUtils.clone(legacyObjects.getAddresses().get(billingIndex));  
+      if (addr.getId().getAddrType().equals("ZP01")) {
+        legacyAddrUpdated = (CmrtAddr) SerializationUtils.clone(legacyObjects.getAddresses().get(billingIndex));
       } else {
         legacyAddrUpdated = (CmrtAddr) SerializationUtils.clone(legacyObjects.getAddresses().get(installingIndex));
       }
@@ -1160,51 +1147,51 @@ public class GreeceTransformer extends EMEATransformer {
       legacyAddrUpdated.getId().setAddrNo(legacyAddrNo);
       formatAddressLinesForOldRecord(legacyAddrUpdated, addr);
       modifyAddrUseFields(getAddressUse(addr), legacyAddrUpdated);
-      
-      if("ZS01".equals(addr.getId().getAddrType())) {
+
+      if ("ZS01".equals(addr.getId().getAddrType())) {
         zs01AddrSeq = Integer.parseInt(addr.getId().getAddrSeq());
       }
-      
-      if("ZP01".equals(addr.getId().getAddrType())) {
-        mailingAddr = (CmrtAddr)SerializationUtils.clone( legacyAddrUpdated);
+
+      if ("ZP01".equals(addr.getId().getAddrType())) {
+        mailingAddr = (CmrtAddr) SerializationUtils.clone(legacyAddrUpdated);
       }
-      
-      if(legacyAddrNoList.contains(legacyAddrNo)) {
+
+      if (legacyAddrNoList.contains(legacyAddrNo)) {
         legacyAddrUpdated.setForCreate(false);
         legacyAddrUpdated.setForUpdate(true);
-        
+
       } else {
         legacyAddrUpdated.setForCreate(true);
       }
       legacyAddressesSplit.add(legacyAddrUpdated);
     }
-    
-    if(zs01AddrSeq != 1) {
+
+    if (zs01AddrSeq != 1) {
       mailingAddr.getId().setAddrNo(changeSeqNo(1));
     } else {
       mailingAddr.getId().setAddrNo(changeSeqNo(legacyAddressesSplit.size()));
     }
-    
-    if(legacyAddrNoList.contains(mailingAddr.getId().getAddrNo())) {
+
+    if (legacyAddrNoList.contains(mailingAddr.getId().getAddrNo())) {
       mailingAddr.setForCreate(false);
       mailingAddr.setForUpdate(true);
     } else {
       mailingAddr.setForCreate(true);
     }
-    
+
     modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyAddressesSplit.add(mailingAddr);
-    
+
     legacyObjects.getAddresses().clear();
     legacyObjects.getAddresses().addAll(legacyAddressesSplit);
   }
-  
- private void formatAddressLinesForOldRecord(CmrtAddr legacyAddr, Addr addr) {
-    
+
+  private void formatAddressLinesForOldRecord(CmrtAddr legacyAddr, Addr addr) {
+
     Addr addrData = addr;
     boolean crossBorder = isCrossBorder(addrData);
     String addrType = addrData.getId().getAddrType();
-    
+
     LOG.debug("Handling old Greece records -- formatAddressLinesForOldRecord ");
     LOG.debug("Handling  Data for " + addrData.getCustNm1());
 
@@ -1228,7 +1215,7 @@ public class GreeceTransformer extends EMEATransformer {
         && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
       line3 = "PO BOX " + addrData.getPoBox();
     }
-    
+
     // Street
     String line4 = "";
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
@@ -1236,8 +1223,8 @@ public class GreeceTransformer extends EMEATransformer {
     } else if (!StringUtils.isBlank(addrData.getPoBox())
         && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
       line4 = "PO BOX " + addrData.getPoBox();
-    } 
-    
+    }
+
     // postal code + city
     String line5 = (!StringUtils.isEmpty(addrData.getPostCd()) ? addrData.getPostCd() : "") + " "
         + (!StringUtils.isEmpty(addrData.getCity1()) ? addrData.getCity1() : "");
@@ -1246,12 +1233,12 @@ public class GreeceTransformer extends EMEATransformer {
     // country
     String line6 = "";
 
-    if(!crossBorder && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
-      line6 =  "Ελλάδα";
+    if (!crossBorder && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line6 = "Ελλάδα";
     } else {
-      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());  
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
     }
-    
+
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
@@ -1261,32 +1248,32 @@ public class GreeceTransformer extends EMEATransformer {
     legacyAddr.setAddrLineI("");
 
   }
-  
+
   private boolean isOldCmrRecords(List<CmrtAddr> addresses) {
     int yesFlagCount = 0;
-    for(CmrtAddr legacyAddr : addresses) {
-      
-      if("Y".equals(legacyAddr.getIsAddrUseMailing())) {
+    for (CmrtAddr legacyAddr : addresses) {
+
+      if ("Y".equals(legacyAddr.getIsAddrUseMailing())) {
         yesFlagCount++;
       }
-      
-      if("Y".equals(legacyAddr.getIsAddrUseBilling())) {
+
+      if ("Y".equals(legacyAddr.getIsAddrUseBilling())) {
         yesFlagCount++;
       }
-      
-      if("Y".equals(legacyAddr.getIsAddrUseInstalling())) {
+
+      if ("Y".equals(legacyAddr.getIsAddrUseInstalling())) {
         yesFlagCount++;
       }
-      
-      if("Y".equals(legacyAddr.getIsAddrUseShipping())) {
+
+      if ("Y".equals(legacyAddr.getIsAddrUseShipping())) {
         yesFlagCount++;
       }
-      
-      if("Y".equals(legacyAddr.getIsAddrUseEPL())) {
+
+      if ("Y".equals(legacyAddr.getIsAddrUseEPL())) {
         yesFlagCount++;
       }
-      
-      if(yesFlagCount > 1) {
+
+      if (yesFlagCount > 1) {
         return true;
       }
       yesFlagCount = 0;
