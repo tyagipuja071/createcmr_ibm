@@ -459,9 +459,18 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     if (StringUtils.isBlank(affiliate)) {
       affiliate = getUSCMRAffiliate(completedChildData.getCmrNo());
     }
-    if (!StringUtils.isBlank(affiliate)) {
-      ibmDirectCmr.setCmrAffiliate(affiliate);
+    ibmDirectCmr.setCmrAffiliate(affiliate);
+
+    String childIsic = completedChildData.getIsicCd();
+    boolean federalPoa = childIsic != null && (childIsic.startsWith("90") || childIsic.startsWith("91") || childIsic.startsWith("92"));
+    if (federalPoa) {
+      String enterprise = completedChildData.getEnterprise();
+      if (StringUtils.isBlank(enterprise)) {
+        enterprise = getUSCMREnterprise(completedChildData.getCmrNo());
+      }
+      ibmDirectCmr.setCmrEnterpriseNumber(enterprise);
     }
+
     ibmDirectCmr.setCmrIsu(completedChildData.getIsuCd());
     ibmDirectCmr.setCmrTier(completedChildData.getClientTier());
     ibmDirectCmr.setCmrInac(completedChildData.getInacCd());
@@ -960,9 +969,15 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + ": \n");
       }
 
+      String affiliate = ibmDirectCmr.getCmrAffiliate();
+      String isic = ibmDirectCmr.getCmrIsic();
+      boolean federalPoa = isic != null && (isic.startsWith("90") || isic.startsWith("91") || isic.startsWith("92"));
+      if (federalPoa) {
+        affiliate = ibmDirectCmr.getCmrEnterpriseNumber();
+      }
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
-        details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), ibmDirectCmr.getCmrAffiliate());
+        details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+        overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
       }
 
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrIsu())) {
@@ -1195,7 +1210,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   }
 
   /**
-   * Checks if the cmrNo has a blank restriction code in US CMR DB
+   * Gets the Affiliate from US CMR
    * 
    * @param cmrNo
    * @return
@@ -1223,7 +1238,53 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         return null;
       } else {
         Map<String, Object> record = response.getRecords().get(0);
-        return (String) record.get("I_MKT_AFFLTN");
+        String affiliate = (String) record.get("I_MKT_AFFLTN");
+        if (!StringUtils.isBlank(affiliate)) {
+          return StringUtils.leftPad(affiliate, 7, '0');
+        }
+        return null;
+      }
+    } catch (Exception e) {
+      LOG.warn("Error in executing US CMR query", e);
+      return null;
+    }
+
+  }
+
+  /**
+   * Gets the Enterprise from US CMR
+   * 
+   * @param cmrNo
+   * @return
+   */
+  private String getUSCMREnterprise(String cmrNo) {
+    String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+    String sql = ExternalizedQuery.getSql("AUTO.US.USCMR.ENTERPRISE", usSchema);
+    sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.setRows(1);
+    query.addField("I_ENT");
+    query.addField("I_CUST_ENTITY");
+
+    try {
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+      QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
+
+      if (!response.isSuccess()) {
+        LOG.warn("Not successful executiong of US CMR query");
+        return null;
+      } else if (response.getRecords() == null || response.getRecords().size() == 0) {
+        LOG.warn("No records in US CMR DB");
+        return null;
+      } else {
+        Map<String, Object> record = response.getRecords().get(0);
+        String enterprise = (String) record.get("I_ENT");
+        if (!StringUtils.isBlank(enterprise)) {
+          return StringUtils.leftPad(enterprise, 7, '0');
+        }
+        return null;
       }
     } catch (Exception e) {
       LOG.warn("Error in executing US CMR query", e);
