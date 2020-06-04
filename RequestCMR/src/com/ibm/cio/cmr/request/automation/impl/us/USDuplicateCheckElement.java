@@ -277,9 +277,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         LOG.error("Unable to determine CMR details for create by model scenario", e);
         return true;
       }
-    } else if ("CreateCMR".equals(requestData.getAdmin().getSourceSystId())) {
-      return true;
-    } else if (negativeCheckScenarioList.contains(custSubGrp)) {
+    } else if (negativeCheckScenarioList.contains(custSubGrp) || "CreateCMR".equals(requestData.getAdmin().getSourceSystId())) {
       return true;
     }
     return false;
