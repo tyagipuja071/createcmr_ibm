@@ -623,6 +623,12 @@ public class MCOPtEsHandler extends MCOHandler {
         addr.setCustPhone("");
       }
     }
+    
+    if (!StringUtils.isEmpty(addr.getPoBox())) {
+      if (!"ZS01".equals(addr.getId().getAddrType()) && !"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setPoBox("");
+      }
+    }
   }
 
   private void addEditFiscalAddress(EntityManager entityManager, Addr addr) throws Exception {

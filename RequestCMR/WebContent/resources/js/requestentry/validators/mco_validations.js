@@ -651,6 +651,13 @@ function disableAddrFieldsPTES() {
     FormManager.enable('custPhone');
   }
   
+  if(addrType != 'ZS01' && addrType != 'ZP01'){
+    FormManager.readOnly('poBox');
+    FormManager.setValue('poBox', '');
+  }else{
+    FormManager.enable('poBox');
+  }
+  
   FormManager.setValue('dept', '');
   FormManager.readOnly('dept');
   
@@ -1863,5 +1870,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+
   
 });
