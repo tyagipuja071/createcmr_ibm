@@ -889,7 +889,7 @@ public class CEETransformer extends EMEATransformer {
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
-      legacyCust.setAccAdminBo("Y60382");
+      legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("2");
 
       if (!StringUtils.isBlank(data.getCrosSubTyp())) {
@@ -924,6 +924,22 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
+      if (!StringUtils.isBlank(data.getCompany())) {
+        legacyCust.setBankAcctNo(data.getCompany());
+      } else {
+        legacyCust.setBankAcctNo("");
+      }
+
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+        if (data.getTaxCd1().length() > 8) {
+          legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
+        } else {
+        legacyCust.setBankBranchNo(data.getTaxCd1());
+        }
+      } else {
+        legacyCust.setBankBranchNo("");
+      }
+
       if ("693".equals(data.getCmrIssuingCntry())) {
         if (!StringUtils.isBlank(data.getCompany())) {
           legacyCust.setBankAcctNo(data.getCompany());
@@ -931,12 +947,15 @@ public class CEETransformer extends EMEATransformer {
           legacyCust.setBankAcctNo("");
         }
         if (!StringUtils.isBlank(data.getTaxCd1())) {
+          if (data.getTaxCd1().length() > 8) {
+            legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
+          } else {
           legacyCust.setBankBranchNo(data.getTaxCd1());
+          }
         } else {
           legacyCust.setBankBranchNo("");
         }
       }
-
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -1030,7 +1049,8 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
-    if (data.getCustPrefLang() != null) {
+    // if (data.getCustPrefLang() != null) {
+    if (!StringUtils.isBlank(data.getCustPrefLang())) {
       legacyCust.setLangCd(data.getCustPrefLang());
     } else {
       legacyCust.setLangCd("");
@@ -1042,7 +1062,8 @@ public class CEETransformer extends EMEATransformer {
       legacyCust.setSalesGroupRep("");
     }
 
-    if (data.getRepTeamMemberNo() != null) {
+    // if (data.getRepTeamMemberNo() != null) {
+    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
       legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
     } else {
       legacyCust.setSalesRepNo("");
