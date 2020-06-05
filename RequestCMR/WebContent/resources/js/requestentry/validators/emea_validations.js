@@ -3397,7 +3397,7 @@ function addTRAddressTypeValidator() {
                   value = value[0];
                 }
                 if(value != null && value != undefined && value != '' && typeof(value) == 'string'){
-                  if(value != value.match(/^[0-9A-Za-z\'\"\,\.\!\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)){
+                  if(value != value.match(/^[0-9A-Za-z\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)){
                     // return new ValidationResult(null, false, addrTypeText + '
                     // must be in English.');
                     enErrMsg += addrTypeText + ', ';
@@ -3416,7 +3416,7 @@ function addTRAddressTypeValidator() {
                   value = value[0];
                 }
                 if(value != null && value != undefined && value != '' && typeof(value)=='string'){
-                  if(value != value.match(/^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)){
+                  if(value != value.match(/^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)){
                     // return new ValidationResult(null, false, addrTypeText + '
                     // must be in Turkish.');
                     turkishErrMsg += addrTypeText + ', ';
@@ -8395,7 +8395,7 @@ function turkish(input) {
   if (!value || value == '' || value.length == 0) {
     return true;
   }
-  var reg = /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
+  var reg = /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
   if (value != value.match(reg)) {
     return new ValidationResult(input, false, '{1} is not a valid value for {0}. Please enter turkish characters only.');
   } else {
