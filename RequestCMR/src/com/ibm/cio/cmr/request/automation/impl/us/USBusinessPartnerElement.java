@@ -1175,6 +1175,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         nameParts[1] = (nameParts[1] != null ? nameParts[1] : "") + (StringUtils.isBlank(customerNameSuffix) ? "" : " " + customerNameSuffix);
         nameParts[1] = nameParts[1].trim();
 
+        if (nameParts[1].length() > 24) {
+          details.append("Value for Department Line exceeds 24 characters. Final value needs to be reviewed.\n");
+          engineData.addNegativeCheckStatus("_deptLengthExceeded",
+              "Value for Department Line exceeds 24 characters. Final value needs to be reviewed.");
+        }
+
         overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
       }
