@@ -227,7 +227,7 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var postCd = FormManager.getActualValue('postCd');
-        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$")) {
+        if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
           return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
         }
         return new ValidationResult(null, true);
