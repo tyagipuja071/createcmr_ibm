@@ -4003,6 +4003,8 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private void validateTemplateDupFillsGreece(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     XSSFCell currCell = null;
+    XSSFSheet soldto = book.getSheet("Sold To Address");
+    XSSFSheet localLang = book.getSheet("Local Lang translation Sold-to");
     for (String name : GR_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
@@ -4121,6 +4123,8 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+   compareTwoSheets(localLang, soldto, book, validations);
+    
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType) {
@@ -4136,9 +4140,6 @@ public class EMEAHandler extends BaseSOFHandler {
 
     entityManager.persist(addrCopy);
     entityManager.flush();
-  }
-
-    compareTwoSheets(localLang, soldto, book, validations);
   }
 
   private boolean compareTwoSheets(XSSFSheet sheet1, XSSFSheet sheet2, XSSFWorkbook book, List<TemplateValidation> validations) {
