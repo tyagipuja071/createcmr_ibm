@@ -163,7 +163,31 @@ function afterConfigForPT() {
   } else {
     FormManager.enable('crosSubTyp');
   }
+  
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
+  }
 
+}
+
+function cmrNoValidatorPT(){
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cmrNoRegEx = /^[0-9]*$/;
+        if ((cntry == '822') && cmrNo != '' && cmrNoRegEx.test(cmrNo)) {
+          return new ValidationResult(null, true);
+        } else if (cmrNo != undefined && cmrNo != '') {
+          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function addAddressTypeValidator() {
@@ -1870,6 +1894,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.registerValidator(cmrNoValidatorPT, [ SysLoc.PORTUGAL ], null, true);
 
-  
 });
