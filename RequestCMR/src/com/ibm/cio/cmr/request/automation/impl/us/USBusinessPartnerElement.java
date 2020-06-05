@@ -1115,13 +1115,45 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
     }
 
-    // do some name + address changes
+    boolean createAddressOverrides = false;
+    String mainCustNm1 = "";
+    String mainCustNm2 = "";
+    String streetAddress1 = "";
+    String streetAddress2 = "";
+    String city1 = "";
+    String postalCd = "";
+    String stateProv = "";
+    String county = "";
+
     if (childRequest != null && "COM".equals(childRequest.getAdmin().getReqStatus())) {
-      // match name + address from completed child
       Addr childInstallAt = childRequest.getAddress("ZS01");
       Admin childAdmin = childRequest.getAdmin();
-      if (!StringUtils.equals(installAt.getDivn(), childAdmin.getMainCustNm1())
-          || !StringUtils.equals(installAt.getDept(), childAdmin.getMainCustNm2())) {
+      mainCustNm1 = childAdmin.getMainCustNm1();
+      mainCustNm2 = childAdmin.getMainCustNm2();
+      streetAddress1 = childInstallAt.getAddrTxt();
+      streetAddress2 = childInstallAt.getAddrTxt2();
+      city1 = childInstallAt.getCity1();
+      postalCd = childInstallAt.getPostCd();
+      stateProv = childInstallAt.getStateProv();
+      county = childInstallAt.getCounty();
+      createAddressOverrides = true;
+    } else if (ibmDirectCmr != null) {
+      String parts[] = handler.doSplitName(ibmDirectCmr.getCmrName(), "", 24, 24);
+      mainCustNm1 = parts[0];
+      mainCustNm2 = parts[1];
+      parts = handler.doSplitAddress(ibmDirectCmr.getCmrStreetAddress(), ibmDirectCmr.getCmrName4(), 24, 24);
+      streetAddress1 = parts[0];
+      streetAddress2 = parts[1];
+      city1 = ibmDirectCmr.getCmrCity();
+      postalCd = ibmDirectCmr.getCmrPostalCode();
+      stateProv = ibmDirectCmr.getCmrState();
+      county = ibmDirectCmr.getCmrCountry();
+      createAddressOverrides = true;
+    }
+
+    if (createAddressOverrides) {
+
+      if (!StringUtils.equals(installAt.getDivn(), mainCustNm1) || !StringUtils.equals(installAt.getDept(), mainCustNm2)) {
 
         String customerName = installAt.getDivn() + (!StringUtils.isBlank(installAt.getDept()) ? " " + installAt.getDept() : "");
         customerName = customerName.toUpperCase();
@@ -1134,9 +1166,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
           customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
         }
 
-        String fullName = childAdmin.getMainCustNm1();
-        if (!StringUtils.isBlank(childAdmin.getMainCustNm2())) {
-          fullName += " " + childAdmin.getMainCustNm2();
+        String fullName = mainCustNm1;
+        if (!StringUtils.isBlank(mainCustNm2)) {
+          fullName += " " + mainCustNm2;
         }
         String nameParts[] = handler.doSplitName(fullName, "", 24, 24);
         // CMR-4002 always put suffix on dept line
@@ -1146,26 +1178,28 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
       }
-      if (!StringUtils.equals(installAt.getAddrTxt(), childInstallAt.getAddrTxt())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), childInstallAt.getAddrTxt());
+
+      if (!StringUtils.equals(installAt.getAddrTxt(), streetAddress1)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), streetAddress1);
       }
-      if (!StringUtils.equals(installAt.getAddrTxt2(), childInstallAt.getAddrTxt2())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT2", installAt.getAddrTxt2(), childInstallAt.getAddrTxt2());
+      if (!StringUtils.equals(installAt.getAddrTxt2(), streetAddress2)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT2", installAt.getAddrTxt2(), streetAddress2);
       }
-      if (!StringUtils.equals(installAt.getCity1(), childInstallAt.getCity1())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "CITY1", installAt.getCity1(), childInstallAt.getCity1());
+      if (!StringUtils.equals(installAt.getCity1(), city1)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "CITY1", installAt.getCity1(), city1);
       }
-      if (!StringUtils.equals(installAt.getPostCd(), childInstallAt.getPostCd())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "POST_CD", installAt.getPostCd(), childInstallAt.getPostCd());
+      if (!StringUtils.equals(installAt.getPostCd(), postalCd)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "POST_CD", installAt.getPostCd(), postalCd);
       }
-      if (!StringUtils.equals(installAt.getStateProv(), childInstallAt.getStateProv())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "STATE_PROV", installAt.getStateProv(), childInstallAt.getStateProv());
+      if (!StringUtils.equals(installAt.getStateProv(), stateProv)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "STATE_PROV", installAt.getStateProv(), stateProv);
       }
-      if (!StringUtils.equals(installAt.getCounty(), childInstallAt.getCounty())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), childInstallAt.getCounty());
-        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NM", installAt.getCountyName(), childInstallAt.getCountyName());
+      if (!StringUtils.equals(installAt.getCounty(), county)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), county);
+        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NM", installAt.getCountyName(), county);
       }
     }
+
     if (!hasFieldError) {
       details.append("Branch Office codes computed successfully.");
       engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
