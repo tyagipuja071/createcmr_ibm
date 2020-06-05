@@ -1891,6 +1891,19 @@ function setEconomicCode() {
   }
 }
 
+var _subindustryChanged = false;
+function setEnterpriseBasedOnSubIndustry() {
+  if (_isicCdHandler == null && FormManager.getField('isicCd')) {
+    _isicCdHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    if(cmr.currentTab == "CUST_REQ_TAB") {
+      _subindustryChanged = true;
+      var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
+      setEnterprise(repTeamMemberNo);  
+    }      
+  });
+  }
+}
+
 function addPostalCodeValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -3463,6 +3476,12 @@ function setISRValuesGROnUpdate() {
 		setISRValuesGR();
 	}
 }
+
+var _isScenarioChanged = false;
+function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
+  _isScenarioChanged = scenarioChanged;
+}
+
 function setFieldsBehaviourGR() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -3598,23 +3617,53 @@ function setISRValues() {
   }
 }
 
+var _oldEnterpriseValue = '';
 function setEnterprise(value) {
   var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
-  if (cmrCntry == SysLoc.GREECE && value == 'R21180' && isu == '32' && ctc == 'M') {
-    FormManager.setValue('enterprise', '822835');
-  } else if (cmrCntry == SysLoc.GREECE && value == '000000' && isu == '34' && ctc == '6') {
-    FormManager.setValue('enterprise', '822836');
-  } else if (cmrCntry == SysLoc.GREECE && value == '000000' && isu == '32' && ctc == '6') {
-    FormManager.setValue('enterprise', '822835');
-  } else if (cmrCntry == SysLoc.GREECE && value == '000000' && isu == '32' && ctc == 'S') {
-	FormManager.setValue('enterprise', '822806');
-  } else if (cmrCntry == SysLoc.CYPRUS && value == 'E33290' && isu == '32' && ctc == 'M') {
-    FormManager.setValue('enterprise', '822835');
-  } else {
-    FormManager.setValue('enterprise', '');
+  var repTeam = FormManager.getActualValue('repTeamMemberNo');
+  var valueChanged = false;
+  var shouldSetEnterprise = false;
+
+  if(cmr.currentTab == 'IBM_REQ_TAB') {
+    valueChanged = _oldEnterpriseValue != value;  
   }
+
+  if(_subindustryChanged || valueChanged || _isScenarioChanged) {
+    shouldSetEnterprise = true;
+  }
+    
+  if(cmrCntry == SysLoc.GREECE) {
+    if(shouldSetEnterprise) {
+      
+      var subindustry = FormManager.getActualValue('subIndustryCd');
+      var isicBasedChange = /^A|B|C|E|G|J|M|P|T|X/.test(subindustry);
+            
+      if (repTeam == '049050' && isu == '32' && ctc == 'S' && isicBasedChange) {
+        FormManager.setValue('enterprise', '822806');
+      } else if (repTeam == '041008' && isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange) {
+        FormManager.setValue('enterprise', '822830');
+      } else if (value == '048257' && isu == '34' && ctc == '6') {
+        FormManager.setValue('enterprise', '822836');
+      } else if (value == '048257' && isu == '34' && ctc == '6') {
+        FormManager.setValue('enterprise', '822835');
+      } else {
+        FormManager.setValue('enterprise', '');
+      }
+      _subindustryChanged = false;
+      FormManager.readOnly('subIndustryCd');
+    }
+    _oldEnterpriseValue = value;
+  }
+
+  if (cmrCntry == SysLoc.CYPRUS) {
+    if (value == 'E33290' && isu == '32' && ctc == 'M') {
+      FormManager.setValue('enterprise', '822835');
+    } else {
+      FormManager.setValue('enterprise', '');
+    }
+  } 
 }
 
 function hideCollectionCd() {
@@ -8019,7 +8068,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
-
+  GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.GREECE ]);
   
   
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator, [
