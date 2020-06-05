@@ -703,7 +703,6 @@ public class EMEAHandler extends BaseSOFHandler {
             if (record != null) {
               converted.add(record);
             }
-
           }
 
         }
@@ -1925,7 +1924,6 @@ public class EMEAHandler extends BaseSOFHandler {
 
       String processingType = PageManager.getProcessingType(country, "U");
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-
         if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
             && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
           String seq = address.getId().getAddrSeq();
@@ -4005,6 +4003,8 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private void validateTemplateDupFillsGreece(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     XSSFCell currCell = null;
+    XSSFSheet soldto = book.getSheet("Sold To Address");
+    XSSFSheet localLang = book.getSheet("Local Lang translation Sold-to");
     for (String name : GR_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
@@ -4123,6 +4123,8 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
+   compareTwoSheets(localLang, soldto, book, validations);
+    
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType) {
@@ -4138,6 +4140,70 @@ public class EMEAHandler extends BaseSOFHandler {
 
     entityManager.persist(addrCopy);
     entityManager.flush();
+  }
+
+  private boolean compareTwoSheets(XSSFSheet sheet1, XSSFSheet sheet2, XSSFWorkbook book, List<TemplateValidation> validations) {
+    int firstRow1 = sheet1.getFirstRowNum();
+    int lastRow1 = sheet1.getLastRowNum();
+    boolean equalSheets = true;
+    for (int i = firstRow1 + 1; i <= lastRow1; i++) {
+      XSSFRow row1 = sheet1.getRow(i);
+      XSSFRow row2 = sheet2.getRow(i);
+      if (!compareTwoRows(row1, row2, validations)) {
+        equalSheets = false;
+        int rowNos = row1.getRowNum() + 1;
+        TemplateValidation errors = new TemplateValidation("Local Lang-Sold To");
+        LOG.trace("Invalid rows found. Please check your file to proceed.");
+        errors.addError(row1.getRowNum(), "", "Row" + ": " + rowNos + " Invalid rows found. Please check your file to proceed..");
+        validations.add(errors);
+      }
+    }
+    return equalSheets;
+  }
+
+  private boolean compareTwoRows(XSSFRow row1, XSSFRow row2, List<TemplateValidation> validations) {
+    if ((row1 == null) && (row2 == null)) {
+      return true;
+    } else if ((row1 == null) || (row2 == null)) {
+      return false;
+    }
+
+    int firstCell1 = row1.getFirstCellNum();
+    int lastCell1 = row1.getLastCellNum();
+    boolean equalRows = true;
+
+    // Compare all cells in a row
+    for (int i = firstCell1 + 2; i <= lastCell1; i++) {
+      XSSFCell currCell1 = null;
+      String locallang = "";
+      String soldto = "";
+      currCell1 = row1.getCell(i);
+      locallang = validateColValFromCell(currCell1);
+      currCell1 = row2.getCell(i);
+      soldto = validateColValFromCell(currCell1);
+
+      if (row1.getRowNum() == 2001) {
+        continue;
+      }
+      if (i == 13) {
+        continue; // skip tax office
+      }
+
+      TemplateValidation error = new TemplateValidation("Local Lang/Sold To");
+      String msg = "Same fields needs to be filled for both Local Language and Sold to address. Please fix and upload the template again.";
+      int rowNo = row1.getRowNum() + 1;
+      if (!StringUtils.isEmpty(soldto) && StringUtils.isEmpty(locallang)) {
+        LOG.trace(msg);
+        error.addError(row1.getRowNum(), "", "Row" + rowNo + ": " + msg);
+        validations.add(error);
+      }
+      if (StringUtils.isEmpty(soldto) && !StringUtils.isEmpty(locallang)) {
+        LOG.trace(msg);
+        error.addError(row1.getRowNum(), "", "Row" + rowNo + ": " + msg);
+        validations.add(error);
+      }
+    }
+    return equalRows;
   }
 
   // START -- missing code greece code
