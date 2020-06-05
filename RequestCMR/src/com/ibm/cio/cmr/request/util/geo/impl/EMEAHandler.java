@@ -219,6 +219,8 @@ public class EMEAHandler extends BaseSOFHandler {
           String seqNo = null;
           List<String> sofUses = null;
           FindCMRRecordModel addr = null;
+          int zi01count = 0;
+          int zd01count = 0;
 
           boolean isNewCmrRecordsGR = false;
           if ("726".equals(cmrIssueCd)) {
@@ -278,6 +280,12 @@ public class EMEAHandler extends BaseSOFHandler {
                   addr = cloneAddress(record, addrType);
                   addr.setCmrDept(record.getCmrCity2());
                   converted.add(addr);
+                }
+                if ("ZI01".equals(addrType)) {
+                  zi01count++;
+                }
+                if ("ZD01".equals(addrType)) {
+                  zd01count++;
                 }
                 if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
                   String kunnr = addr.getCmrSapNumber();
@@ -367,6 +375,27 @@ public class EMEAHandler extends BaseSOFHandler {
               }
             }
 
+          }
+          
+          if("862".equals(cmrIssueCd) && zi01count == 0){
+            FindCMRRecordModel newzi01 = new FindCMRRecordModel();
+            PropertyUtils.copyProperties(newzi01, mainRecord);
+            newzi01.setCmrAddrTypeCode("ZI01");
+            newzi01.setCmrAddrSeq("00005");
+            newzi01.setParentCMRNo("");
+            newzi01.setCmrSapNumber("");
+
+            converted.add(newzi01);
+          }
+          if ("862".equals(cmrIssueCd) && zd01count == 0) {
+            FindCMRRecordModel newzd01 = new FindCMRRecordModel();
+            PropertyUtils.copyProperties(newzd01, mainRecord);
+            newzd01.setCmrAddrTypeCode("ZD01");
+            newzd01.setCmrAddrSeq("00004");
+            newzd01.setParentCMRNo("");
+            newzd01.setCmrSapNumber("");
+
+            converted.add(newzd01);
           }
 
           if (SystemLocation.UNITED_KINGDOM.equals(mainRecord.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(mainRecord.getCmrIssuedBy())) {
@@ -2891,6 +2920,10 @@ public class EMEAHandler extends BaseSOFHandler {
       }
     }
 
+    if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
+      updateImportIndForTRCopyAddr(entityManager, data.getId().getReqId());
+    }
+
     if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
       data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
       entityManager.merge(data);
@@ -2908,6 +2941,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private void updateImportIndicatior(EntityManager entityManager, long reqId) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.IMPORTIND.N"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateImportIndForTRCopyAddr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }
