@@ -4080,6 +4080,9 @@ public class EMEAHandler extends BaseSOFHandler {
 
     if (addrType.equals("ZS01")) {
       addrCopy.setTaxOffice(null);
+      addrCopy.getId().setAddrSeq("00003");
+    } else if (addrType.equals("ZP01")) {
+      addrCopy.getId().setAddrSeq("00002");
     }
 
     entityManager.persist(addrCopy);
