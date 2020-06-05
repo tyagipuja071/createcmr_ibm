@@ -2163,6 +2163,18 @@ public class EMEAHandler extends BaseSOFHandler {
     } else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
       data.setInstallBranchOff(data.getSalesBusOffCd());
       data.setEngineeringBo(data.getSalesBusOffCd());
+      if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
+        String custSubGrp = data.getCustSubGrp();
+        if ("BUSPR".equals(custSubGrp) || "XBP".equals(custSubGrp)) {
+          data.setCrosSubTyp("BP");
+        } else if ("XGOV".equals(custSubGrp) || "GOVRN".equals(custSubGrp)) {
+          data.setCrosSubTyp("G");
+        } else if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
+          data.setCrosSubTyp("91");
+        } else {
+          data.setCrosSubTyp(null);
+        }
+      }
     }
   }
 
