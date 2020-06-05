@@ -898,23 +898,6 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setCustType("");
       }
 
-      // CMR-2279:ISR set based on SBO
-      // if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      //
-      // String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-      // PreparedQuery q = new PreparedQuery(entityManager, sql);
-      // q.setParameter("SBO", data.getSalesBusOffCd());
-      // q.setParameter("CNTRY", data.getCmrIssuingCntry());
-      // String isr = q.getSingleResult(String.class);
-      // if (!StringUtils.isBlank(isr)) {
-      // legacyCust.setSalesRepNo(isr);
-      // cmrObjects.getData().setRepTeamMemberNo(isr);
-      // } else {
-      // legacyCust.setSalesRepNo("");
-      // cmrObjects.getData().setRepTeamMemberNo("");
-      // }
-      // }
-
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
@@ -968,6 +951,22 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
+      if (!StringUtils.isBlank(data.getCompany())) {
+        legacyCust.setBankAcctNo(data.getCompany());
+      } else {
+        legacyCust.setBankAcctNo("");
+      }
+
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+        if (data.getTaxCd1().length() > 8) {
+          legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
+        } else {
+          legacyCust.setBankBranchNo(data.getTaxCd1());
+        }
+      } else {
+        legacyCust.setBankBranchNo("");
+      }
+
       if ("693".equals(data.getCmrIssuingCntry())) {
         if (!StringUtils.isBlank(data.getCompany())) {
           legacyCust.setBankAcctNo(data.getCompany());
@@ -975,7 +974,11 @@ public class CEETransformer extends EMEATransformer {
           legacyCust.setBankAcctNo("");
         }
         if (!StringUtils.isBlank(data.getTaxCd1())) {
+          if (data.getTaxCd1().length() > 8) {
+            legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
+          } else {
           legacyCust.setBankBranchNo(data.getTaxCd1());
+          }
         } else {
           legacyCust.setBankBranchNo("");
         }
