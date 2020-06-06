@@ -176,7 +176,7 @@ public class CalculateCoverageElement extends OverridingElement {
         covFrom = BG_ODM;
       }
       if (bgId != null) {
-        if ("BGNONE".equals(bgId.trim()) && BG_ODM.equals(covFrom)) {
+        if ("BGNONE".equals(bgId.trim())) {
           details.append("Projected Buying Group on the request is 'BGNONE'. Skipping Coverage Calculation from Buying Group.\n");
           covFrom = BG_NONE;
         } else {
