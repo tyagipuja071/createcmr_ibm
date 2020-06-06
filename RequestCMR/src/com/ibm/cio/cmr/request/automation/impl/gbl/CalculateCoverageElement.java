@@ -434,11 +434,8 @@ public class CalculateCoverageElement extends OverridingElement {
   public void logCoverage(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData, List<String> coverageIds,
       StringBuilder details, OverrideOutput output, CoverageContainer coverageContainer, String currCovLevel, GBGResponse gbg, String covFrom,
       boolean logNegativeCheck) {
-    if (coverageIds == null) {
-      // check for null
-      coverageIds = new ArrayList<>();
-    }
-
+    coverageIds = coverageIds != null ? coverageIds : new ArrayList<String>();
+    covFrom = covFrom != null ? covFrom : "";
     Data data = requestData.getData();
     String cmrIssuingCntry = data.getCmrIssuingCntry();
     String currCovId = "";
