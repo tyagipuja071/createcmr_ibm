@@ -614,7 +614,7 @@ public class CalculateCoverageElement extends OverridingElement {
               && !data.getGbgId().equals(gbgResult.getNewValue())) {
             // calculated global buying group is different from coverage global
             // buying group.
-            details.append("\nGlobal Buying Group ID under coverage overrides is different from the one on request.\n");
+            details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
             engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
             output.getData().remove(gbgKey);
           }
