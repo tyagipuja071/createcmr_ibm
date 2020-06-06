@@ -429,7 +429,6 @@ public class CalculateCoverageElement extends OverridingElement {
    * @param coverageContainer
    * @param currCovLevel
    * @param covFrom
-   * @param covFrom2
    * @param logNegativeCheck
    */
   public void logCoverage(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData, List<String> coverageIds,
