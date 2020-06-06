@@ -175,40 +175,35 @@ public class CalculateCoverageElement extends OverridingElement {
         gbgId = data.getGbgId();
         covFrom = BG_ODM;
       }
-      if (bgId != null) {
-        if ("BGNONE".equals(bgId.trim())) {
-          details.append("Projected Buying Group on the request is 'BGNONE'. Skipping Coverage Calculation from Buying Group.\n");
-          covFrom = BG_NONE;
-        } else {
-          coverages = computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_BG", bgId, data.getCmrIssuingCntry(), false);
-          if (coverages != null && !coverages.isEmpty()) {
-            CoverageContainer preferredCoverage = coverages.get(0);
-            if (preferredCoverage.getFinalCoverageRules() == null) {
-              details.append("The preferred coverage '" + preferredCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
-                  + "' was not found in coverage rules.").append("\n");
-              details.append("Proceeding with other calculated coverages - ").append("\n");
-              engineData.addNegativeCheckStatus("PREFERRED_COVERAGE_ERROR", "The preferred coverage '" + preferredCoverage.getFinalCoverage()
-                  + "' determined using Buying Group '" + bgId + "' was not found in coverage rules.");
-              coverages = getValidCoverages(coverages);
-            }
+      if (bgId != null && !"BGNONE".equals(bgId.trim())) {
+        coverages = computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_BG", bgId, data.getCmrIssuingCntry(), false);
+        if (coverages != null && !coverages.isEmpty()) {
+          CoverageContainer preferredCoverage = coverages.get(0);
+          if (preferredCoverage.getFinalCoverageRules() == null) {
+            details.append("The preferred coverage '" + preferredCoverage.getFinalCoverage() + "' determined using Buying Group '" + bgId
+                + "' was not found in coverage rules.").append("\n");
+            details.append("Proceeding with other calculated coverages - ").append("\n");
+            engineData.addNegativeCheckStatus("PREFERRED_COVERAGE_ERROR", "The preferred coverage '" + preferredCoverage.getFinalCoverage()
+                + "' determined using Buying Group '" + bgId + "' was not found in coverage rules.");
+            coverages = getValidCoverages(coverages);
           }
+        }
 
-          if (coverages == null || coverages.isEmpty()) {
-            CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), gbgId, bgId);
-            List<Coverage> currCoverage = coverageRules.findCoverage(inputBG);
-            if (currCoverage != null && !currCoverage.isEmpty()) {
-              CoverageContainer cont = new CoverageContainer();
-              cont.setFinalCoverage(currCoverage.get(0).getType() + currCoverage.get(0).getId());
-              cont.setFinalCoverageRules(coverageRules.findRule(currCoverage.get(0).getType() + currCoverage.get(0).getId()));
-              if (currCoverage.size() > 1) {
-                cont.setBaseCoverage(currCoverage.get(1).getType() + currCoverage.get(1).getId());
-                cont.setBaseCoverageRules(coverageRules.findRule(currCoverage.get(1).getType() + currCoverage.get(1).getId()));
-              }
-              coverages.add(cont);
+        if (coverages == null || coverages.isEmpty()) {
+          CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), gbgId, bgId);
+          List<Coverage> currCoverage = coverageRules.findCoverage(inputBG);
+          if (currCoverage != null && !currCoverage.isEmpty()) {
+            CoverageContainer cont = new CoverageContainer();
+            cont.setFinalCoverage(currCoverage.get(0).getType() + currCoverage.get(0).getId());
+            cont.setFinalCoverageRules(coverageRules.findRule(currCoverage.get(0).getType() + currCoverage.get(0).getId()));
+            if (currCoverage.size() > 1) {
+              cont.setBaseCoverage(currCoverage.get(1).getType() + currCoverage.get(1).getId());
+              cont.setBaseCoverageRules(coverageRules.findRule(currCoverage.get(1).getType() + currCoverage.get(1).getId()));
             }
-          } else {
-            withCmrData = true;
+            coverages.add(cont);
           }
+        } else {
+          withCmrData = true;
         }
       } else if (StringUtils.isNotEmpty(data.getVat())) {
         coverages = computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_VAT", data.getVat(), data.getCmrIssuingCntry());
@@ -237,6 +232,9 @@ public class CalculateCoverageElement extends OverridingElement {
           coverageNotFound = true;
         }
         covFrom = COV_ODM;
+      } else if (bgId != null && "BGNONE".equals(bgId.trim())) {
+        details.append("Projected Buying Group on the request is 'BGNONE'. Skipping Coverage Calculation from Buying Group.\n");
+        covFrom = BG_NONE;
       }
       // get default coverage
       String defaultCoverage = getDefaultCoverage(data.getCmrIssuingCntry());
