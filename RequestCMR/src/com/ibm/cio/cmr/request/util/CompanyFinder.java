@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 import com.ibm.json.java.JSONObject;
 
 /**
@@ -81,6 +84,8 @@ public class CompanyFinder {
             }
           }
         }
+        matches.addAll(findRequests(searchModel));
+
         if (matches.isEmpty() || searchDnb) {
           matches.addAll(searchDnB(searchModel));
         }
@@ -323,6 +328,77 @@ public class CompanyFinder {
       }
     }
     return cmrMatches;
+  }
+
+  /**
+   * Checks any existing requests similar to the search criteria
+   * 
+   * @param searchModel
+   * @return
+   * @throws InvocationTargetException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   * @throws SecurityException
+   * @throws NoSuchMethodException
+   */
+  private static List<CompanyRecordModel> findRequests(CompanyRecordModel searchModel) throws Exception {
+    List<CompanyRecordModel> reqMatches = new ArrayList<CompanyRecordModel>();
+
+    // connect to the service
+    MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+
+    ReqCheckRequest request = new ReqCheckRequest();
+    request.setReqId(0);
+    request.setAddrType("ZS01");
+    request.setCity(searchModel.getCity());
+    request.setCustomerName(searchModel.getName());
+    request.setIssuingCountry(searchModel.getIssuingCntry());
+    request.setLandedCountry(searchModel.getCountryCd());
+    request.setPostalCode(searchModel.getPostCd());
+    request.setStateProv(searchModel.getStateProv());
+    request.setStreetLine1(searchModel.getStreetAddress1());
+    request.setStreetLine2(searchModel.getStreetAddress2());
+    request.setVat(searchModel.getVat());
+
+    LOG.debug("Executing Duplicate Request Check for quick search..");
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.REQ_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<MatchingResponse<ReqCheckResponse>> ref = new TypeReference<MatchingResponse<ReqCheckResponse>>() {
+    };
+    MatchingResponse<ReqCheckResponse> res = mapper.readValue(json, ref);
+    if (res != null && res.getMatched()) {
+      LOG.debug("Found " + res.getMatches().size() + " requests");
+      CompanyRecordModel match = null;
+      for (ReqCheckResponse duplicateReq : res.getMatches()) {
+        if (reqMatches.size() < 5) {
+          match = new CompanyRecordModel();
+          match.setCmrNo(duplicateReq.getReqId() + "");
+          match.setCity(duplicateReq.getCity());
+          match.setCountryCd(duplicateReq.getLandedCountry());
+          match.setIssuingCntry(duplicateReq.getIssuingCntry());
+          match.setMatchGrade(duplicateReq.getMatchGrade() + "");
+          match.setName(duplicateReq.getCustomerName());
+          match.setPostCd(duplicateReq.getPostalCode());
+          match.setRecType(CompanyRecordModel.REC_TYPE_REQUEST);
+          match.setStateProv(duplicateReq.getStateProv());
+          match.setStreetAddress1(duplicateReq.getStreetLine1());
+          match.setStreetAddress2(duplicateReq.getStreetLine2());
+          match.setRestrictTo(duplicateReq.getUsRestrictTo());
+          match.setVat(duplicateReq.getVat());
+          match.setTaxCd1(duplicateReq.getTaxCd1());
+
+          reqMatches.add(match);
+        } else {
+          break;
+        }
+      }
+    }
+    return reqMatches;
   }
 
   /**

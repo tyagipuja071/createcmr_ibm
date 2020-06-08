@@ -1,5 +1,7 @@
 package com.ibm.cio.cmr.request.automation.impl.us;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Attachment;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.Scorecard;
@@ -42,6 +45,7 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.requestentry.AttachmentService;
 import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.ui.template.Template;
 import com.ibm.cio.cmr.request.ui.template.TemplateManager;
@@ -103,6 +107,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   public static final String SUB_TYPE_FEDERAL_REGULAR_GOVT = "FEDERAL";
   public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
   public static final String SUB_TYPE_BUSINESS_PARTNER_END_USER = "END USER";
+  private static final List<String> SPECIAL_TAX_STATES = Arrays.asList("AK", "DE", "MT", "NH", "OR");
 
   public static final String AFFILIATE_FEDERAL = "9200000";
   private boolean waiting;
@@ -121,42 +126,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     AutomationResult<OverrideOutput> output = buildResult(reqId);
     Addr addr = requestData.getAddress("ZS01");
 
-    // check the scenario
-    if ("U".equals(admin.getReqType())) {
-      output.setResults("Skipped");
-      output.setDetails("Update types not supported.");
-      return output;
-    }
-
-    String custGrp = data.getCustGrp();
-    String custSubGrp = data.getCustSubGrp();
-    if ("BYMODEL".equals(custSubGrp)) {
-      String type = admin.getCustType();
-      if (!USUtil.BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
-          || (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
-        output.setResults("Skipped");
-        output.setDetails("Non BP End User create by model scenario not supported.");
-        return output;
-      }
-      // CMR-3856 add check for ehosting
-      String deptAttn = addr.getDept() != null ? addr.getDept().toLowerCase() : "";
-      if (deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host")) {
-        output.setResults("Skipped");
-        output.setDetails("Non BP End User create by model scenario not supported.");
-        return output;
-      }
-    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
-      output.setResults("Skipped");
-      output.setDetails("Non BP End User scenario not supported.");
-      return output;
-    }
-
-    if (StringUtils.isBlank(data.getPpsceid())) {
-      String msg = "PPS CEID is required for Business Partner requests.";
-      engineData.addRejectionComment("OTH", msg, "", "");
-      output.setOnError(true);
-      output.setDetails(msg);
-      output.setResults("CEID Missing");
+    // validate first
+    if (doInitialValidations(admin, data, addr, output, engineData)) {
       return output;
     }
 
@@ -168,7 +139,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     long childReqId = admin.getChildReqId();
     String childCmrNo = null;
     RequestData childRequest = null;
-    Data completedChildData = null;
+    boolean childCompleted = false;
     if (childReqId > 0) {
       // check child reqId processing first
       LOG.debug("Getting child request data for Request " + childReqId);
@@ -247,18 +218,26 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         LOG.debug("Child request " + childReqId + " completed.");
         details.append("Child Request " + childReqId + " completed. Proceeding with automated checks.\n");
         childCmrNo = childRequest.getData().getCmrNo();
-        completedChildData = childRequest.getData();
+        childCompleted = true;
       }
     }
 
-    // check IBM Direct CMR
-    if (ibmDirectCmr == null) {
-      // if a rejected child caused the retrieval of a child cmr
-      ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
+    // prioritize child request here
+    if (childCompleted) {
+      details.append("Copying CMR values direct CMR " + childCmrNo + " from Child Request " + childReqId + ".\n");
+      ibmDirectCmr = createDirectCMRFromChild(childRequest);
+    } else {
+      // check IBM Direct CMR
+      if (ibmDirectCmr == null) {
+        // if a rejected child caused the retrieval of a child cmr
+        ibmDirectCmr = findIBMDirectCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
+      }
+      if (ibmDirectCmr != null) {
+        details.append("Copying CMR values CMR " + ibmDirectCmr.getCmrNum() + " from FindCMR.\n");
+        LOG.debug("IBM Direct CMR Found: " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName());
+      }
     }
-    if (ibmDirectCmr != null) {
-      LOG.debug("IBM Direct CMR Found: " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName());
-    }
+
     // match against D&B
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmDirectCmr != null);
 
@@ -277,59 +256,48 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       childReqId = createChildRequest(entityManager, requestData, engineData);
       details.append("No IBM Direct CMR for the end user.\n");
 
-      String childErrorMsg = "- IBM Direct CMR request creation cannot be done, errors were encountered -";
-      if (childReqId <= 0) {
-        details.append(childErrorMsg + "\n");
-        // engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
-        engineData.addRejectionComment("OTH", childErrorMsg, "", "");
+      if (childCompleted) {
+        String childError = "Child Request " + childReqId + " was completed but Direct CMR cannot be determined. Manula validation needed.";
+        details.append(childError + "\n");
+        engineData.addNegativeCheckStatus("_usChildError", childError);
         output.setDetails(details.toString());
-        output.setOnError(true);
         output.setResults("Issues Encountered");
         return output;
       } else {
-        String childDetails = completeChildRequestDataAndAddress(entityManager, requestData, engineData, childReqId, dnbMatch);
-        if (childDetails == null) {
+        String childErrorMsg = "- IBM Direct CMR request creation cannot be done, errors were encountered -";
+        if (childReqId <= 0) {
           details.append(childErrorMsg + "\n");
           // engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
           engineData.addRejectionComment("OTH", childErrorMsg, "", "");
+          output.setDetails(details.toString());
           output.setOnError(true);
           output.setResults("Issues Encountered");
-          output.setDetails(details.toString());
           return output;
         } else {
-          details.append("Child Request " + childReqId + " created for the IBM Direct CMR record of " + addr.getDivn()
-              + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
-              + ".\nThe system will wait for completion of the child record bfore processing the request.\n");
-          details.append(childDetails + "\n");
-          this.waiting = true;
-          output.setDetails(details.toString());
-          output.setResults("Waiting on Child Request");
-          output.setOnError(false);
-          return output;
+          String childDetails = completeChildRequestDataAndAddress(entityManager, requestData, engineData, childReqId, dnbMatch);
+          if (childDetails == null) {
+            details.append(childErrorMsg + "\n");
+            // engineData.addNegativeCheckStatus("_usBpRejected",
+            // childErrorMsg);
+            engineData.addRejectionComment("OTH", childErrorMsg, "", "");
+            output.setOnError(true);
+            output.setResults("Issues Encountered");
+            output.setDetails(details.toString());
+            return output;
+          } else {
+            details.append("Child Request " + childReqId + " created for the IBM Direct CMR record of " + addr.getDivn()
+                + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
+                + ".\nThe system will wait for completion of the child record bfore processing the request.\n");
+            details.append(childDetails + "\n");
+            this.waiting = true;
+            output.setDetails(details.toString());
+            output.setResults("Waiting on Child Request");
+            output.setOnError(false);
+            return output;
+          }
+
         }
-
       }
-    }
-
-    if (completedChildData != null && ibmDirectCmr != null) {
-      // make sure we switch the codes to use directly from child
-      ibmDirectCmr.setCmrNum(completedChildData.getCmrNo());
-      String affiliate = completedChildData.getAffiliate();
-      if (StringUtils.isBlank(affiliate)) {
-        affiliate = getUSCMRAffiliate(completedChildData.getCmrNo());
-      }
-      if (!StringUtils.isBlank(affiliate)) {
-        ibmDirectCmr.setCmrAffiliate(affiliate);
-      }
-      ibmDirectCmr.setCmrIsu(completedChildData.getIsuCd());
-      ibmDirectCmr.setCmrTier(completedChildData.getClientTier());
-      ibmDirectCmr.setCmrInac(completedChildData.getInacCd());
-      ibmDirectCmr.setCmrInacType(completedChildData.getInacType());
-      ibmDirectCmr.setCmrSubIndustry(completedChildData.getSubIndustryCd());
-      ibmDirectCmr.setCmrIsic(completedChildData.getUsSicmen());
-      Addr childInstallAt = childRequest.getAddress("ZS01");
-      ibmDirectCmr.setCmrCountyCode(childInstallAt.getCounty());
-      ibmDirectCmr.setCmrCounty(childInstallAt.getCountyName());
     }
 
     // copy from IBM Direct if found, and fill the rest of BO codes
@@ -371,6 +339,60 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     output.setDetails(details.toString());
     output.setResults("Success");
     return output;
+  }
+
+  /**
+   * Perform initial validations on the request whether it fits the BP@EU
+   * scenario
+   * 
+   * @param admin
+   * @param data
+   * @param addr
+   * @param output
+   * @param engineData
+   * @return true if the processing needs to halt
+   */
+  private boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
+    // check the scenario
+    if ("U".equals(admin.getReqType())) {
+      output.setResults("Skipped");
+      output.setDetails("Update types not supported.");
+      return true;
+    }
+
+    String custGrp = data.getCustGrp();
+    String custSubGrp = data.getCustSubGrp();
+    if ("BYMODEL".equals(custSubGrp)) {
+      String type = admin.getCustType();
+      if (!USUtil.BUSINESS_PARTNER.equals(type) || !"E".equals(data.getBpAcctTyp())
+          || (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
+        output.setResults("Skipped");
+        output.setDetails("Non BP End User create by model scenario not supported.");
+        return true;
+      }
+      // CMR-3856 add check for ehosting
+      String deptAttn = addr.getDept() != null ? addr.getDept().toLowerCase() : "";
+      if (deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host")) {
+        output.setResults("Skipped");
+        output.setDetails("Non BP End User create by model scenario not supported.");
+        return true;
+      }
+    } else if (!TYPE_BUSINESS_PARTNER.equals(custGrp) || !SUB_TYPE_BUSINESS_PARTNER_END_USER.equals(custSubGrp)) {
+      output.setResults("Skipped");
+      output.setDetails("Non BP End User scenario not supported.");
+      return true;
+    }
+
+    if (StringUtils.isBlank(data.getPpsceid())) {
+      String msg = "PPS CEID is required for Business Partner requests.";
+      engineData.addRejectionComment("OTH", msg, "", "");
+      output.setOnError(true);
+      output.setDetails(msg);
+      output.setResults("CEID Missing");
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -420,6 +442,57 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   }
 
   /**
+   * Creates a {@link FindCMRRecordModel} copy from the Child Request
+   * 
+   * @param childRequest
+   * @return
+   */
+  private FindCMRRecordModel createDirectCMRFromChild(RequestData childRequest) {
+    if (childRequest == null || !"COM".equals(childRequest.getAdmin().getReqStatus())) {
+      return null;
+    }
+    FindCMRRecordModel ibmDirectCmr = new FindCMRRecordModel();
+    Data completedChildData = childRequest.getData();
+    // make sure we switch the codes to use directly from child
+    ibmDirectCmr.setCmrNum(completedChildData.getCmrNo());
+    String affiliate = completedChildData.getAffiliate();
+    if (StringUtils.isBlank(affiliate)) {
+      affiliate = getUSCMRAffiliate(completedChildData.getCmrNo());
+    }
+    ibmDirectCmr.setCmrAffiliate(affiliate);
+
+    String childIsic = completedChildData.getIsicCd();
+    boolean federalPoa = childIsic != null && (childIsic.startsWith("90") || childIsic.startsWith("91") || childIsic.startsWith("92"));
+    if (federalPoa) {
+      String enterprise = completedChildData.getEnterprise();
+      if (StringUtils.isBlank(enterprise)) {
+        enterprise = getUSCMREnterprise(completedChildData.getCmrNo());
+      }
+      ibmDirectCmr.setCmrEnterpriseNumber(enterprise);
+    }
+
+    ibmDirectCmr.setCmrIsu(completedChildData.getIsuCd());
+    ibmDirectCmr.setCmrTier(completedChildData.getClientTier());
+    ibmDirectCmr.setCmrInac(completedChildData.getInacCd());
+    ibmDirectCmr.setCmrInacType(completedChildData.getInacType());
+    ibmDirectCmr.setCmrSubIndustry(completedChildData.getSubIndustryCd());
+    ibmDirectCmr.setCmrIsic(completedChildData.getUsSicmen());
+    Addr childInstallAt = childRequest.getAddress("ZS01");
+    ibmDirectCmr.setCmrCountyCode(childInstallAt.getCounty());
+    ibmDirectCmr.setCmrCounty(childInstallAt.getCountyName());
+    ibmDirectCmr.setCmrBuyingGroup(completedChildData.getBgId());
+    ibmDirectCmr.setCmrBuyingGroupDesc(completedChildData.getBgDesc());
+    ibmDirectCmr.setCmrGlobalBuyingGroup(completedChildData.getGbgId());
+    ibmDirectCmr.setCmrGlobalBuyingGroupDesc(completedChildData.getGbgDesc());
+    ibmDirectCmr.setCmrLde(completedChildData.getBgRuleId());
+    ibmDirectCmr.setCmrCoverage(completedChildData.getCovId());
+    ibmDirectCmr.setCmrCoverageName(completedChildData.getCovDesc());
+    ibmDirectCmr.setCmrName(childRequest.getAdmin().getMainCustNm1());
+
+    return ibmDirectCmr;
+  }
+
+  /**
    * Finds an IBM direct CMR for the end user
    * 
    * @param handler
@@ -447,10 +520,19 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
     } else {
       LOG.debug("Checking IBM direct CMR for " + addr.getDivn());
+
+      String customerName = addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "");
+      customerName = customerName.toUpperCase();
+      if (customerName.contains("C/O")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
+      } else if (customerName.contains("UCW")) {
+        customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
+      }
+
       DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
       request.setIssuingCountry(SystemLocation.UNITED_STATES);
       request.setLandedCountry(addr.getLandCntry());
-      request.setCustomerName(addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : ""));
+      request.setCustomerName(customerName);
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(addr.getAddrTxt2());
       request.setCity(addr.getCity1());
@@ -630,7 +712,15 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     Admin childAdmin = childReqData.getAdmin();
     childAdmin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     childAdmin.setSourceSystId("CreateCMR");
-    String[] names = handler.doSplitName(cleanName(bpAddr.getDivn()), cleanName(bpAddr.getDept()), 28, 22);
+    String customerName = bpAddr.getDivn() + (!StringUtils.isBlank(bpAddr.getDept()) ? " " + bpAddr.getDept() : "");
+    customerName = customerName.toUpperCase();
+    if (customerName.contains("C/O")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
+    } else if (customerName.contains("UCW")) {
+      customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
+    }
+
+    String[] names = handler.doSplitName(cleanName(customerName), "", 28, 22);
     childAdmin.setMainCustNm1(names[0]);
     childAdmin.setMainCustNm2(names[1]);
     childAdmin.setLockBy(null);
@@ -872,16 +962,22 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
     Data data = requestData.getData();
     if (ibmDirectCmr != null) {
-      details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
-          + ibmDirectCmr.getCmrSapNumber() + "): \n");
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrSapNumber())) {
+        details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
+            + ibmDirectCmr.getCmrSapNumber() + "): \n");
+      } else {
+        details.append("\nCopying IBM Codes from IBM Direct CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + ": \n");
+      }
 
-      if (StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
-        // try to get affiliate from US CMR
-
+      String affiliate = ibmDirectCmr.getCmrAffiliate();
+      String isic = ibmDirectCmr.getCmrIsic();
+      boolean federalPoa = isic != null && (isic.startsWith("90") || isic.startsWith("91") || isic.startsWith("92"));
+      if (federalPoa) {
+        affiliate = ibmDirectCmr.getCmrEnterpriseNumber();
       }
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
-        details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + "\n");
-        overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), ibmDirectCmr.getCmrAffiliate());
+        details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+        overrides.addOverride(getProcessCode(), "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
       }
 
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrIsu())) {
@@ -898,11 +994,6 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "DATA", "INAC_TYPE", data.getInacType(), ibmDirectCmr.getCmrInacType());
         overrides.addOverride(getProcessCode(), "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
       }
-
-      details.append((StringUtils.isBlank(ibmDirectCmr.getCmrInac()) ? " - " + ibmDirectCmr.getCmrInac() : "") + "\n");
-      details.append(" - SICMEN: " + ibmDirectCmr.getCmrIsic() + "\n");
-      details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
-      details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
 
       // add here gbg and cov
       LOG.debug("Getting Buying Group/Coverage values");
@@ -923,9 +1014,23 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         calcGbg.setGbgName("None");
         calcGbg.setLdeRule("BG_DEFAULT");
       }
-      details.append(" - GBG: " + calcGbg.getGbgId() + "(" + calcGbg.getGbgName() + ")" + "\n");
-      details.append(" - BG: " + calcGbg.getBgId() + "(" + calcGbg.getBgName() + ")" + "\n");
-      details.append(" - LDE Rule: " + calcGbg.getLdeRule() + "\n");
+      if (!StringUtils.isBlank(calcGbg.getGbgId())) {
+        details.append(" - GBG: " + calcGbg.getGbgId() + "(" + (StringUtils.isBlank(calcGbg.getGbgName()) ? "not specified" : calcGbg.getGbgName())
+            + ")" + "\n");
+      } else {
+        details.append(" - GBG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(
+            " - BG: " + calcGbg.getBgId() + "(" + (StringUtils.isBlank(calcGbg.getBgName()) ? "not specified" : calcGbg.getBgName()) + ")" + "\n");
+      } else {
+        details.append(" - BG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(" - LDE Rule: " + calcGbg.getLdeRule() + "\n");
+      } else {
+        details.append(" - LDE Rule: none\n");
+      }
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
 
@@ -940,6 +1045,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       engineData.put(AutomationEngineData.COVERAGE_CALCULATED, calcCovId);
 
+      details.append(" - SICMEN: " + ibmDirectCmr.getCmrIsic() + "\n");
+      details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
+      details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
       overrides.addOverride(getProcessCode(), "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
       overrides.addOverride(getProcessCode(), "DATA", "US_SICMEN", data.getUsSicmen(), ibmDirectCmr.getCmrIsic());
       overrides.addOverride(getProcessCode(), "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmDirectCmr.getCmrSubIndustry());
@@ -948,7 +1056,15 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     // do final checks on request data
     overrides.addOverride(getProcessCode(), "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     overrides.addOverride(getProcessCode(), "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
-    overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+
+    Addr installAt = requestData.getAddress("ZS01");
+    if (installAt != null && SPECIAL_TAX_STATES.contains(installAt.getStateProv())) {
+      details.append("Tax Code set to J000 based on state.\n");
+      overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J000");
+    } else {
+      details.append("Tax Code set to J666 based on state.\n");
+      overrides.addOverride(getProcessCode(), "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+    }
     overrides.addOverride(getProcessCode(), "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
     overrides.addOverride(getProcessCode(), "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
@@ -999,36 +1115,101 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
     }
 
-    // do some name + address changes
+    boolean createAddressOverrides = false;
+    String mainCustNm1 = "";
+    String mainCustNm2 = "";
+    String streetAddress1 = "";
+    String streetAddress2 = "";
+    String city1 = "";
+    String postalCd = "";
+    String stateProv = "";
+    String county = "";
+
     if (childRequest != null && "COM".equals(childRequest.getAdmin().getReqStatus())) {
-      // match name + address from completed child
       Addr childInstallAt = childRequest.getAddress("ZS01");
-      Addr installAt = requestData.getAddress("ZS01");
       Admin childAdmin = childRequest.getAdmin();
-      if (!StringUtils.equals(installAt.getDivn(), childAdmin.getMainCustNm1())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), childAdmin.getMainCustNm1());
-        overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), childAdmin.getMainCustNm2());
+      mainCustNm1 = childAdmin.getMainCustNm1();
+      mainCustNm2 = childAdmin.getMainCustNm2();
+      streetAddress1 = childInstallAt.getAddrTxt();
+      streetAddress2 = childInstallAt.getAddrTxt2();
+      city1 = childInstallAt.getCity1();
+      postalCd = childInstallAt.getPostCd();
+      stateProv = childInstallAt.getStateProv();
+      county = childInstallAt.getCounty();
+      createAddressOverrides = true;
+    }
+    // COMMENTED AS PER DISCUSSIONS OVER CMR-4033
+    // else if (ibmDirectCmr != null) {
+    // String parts[] = handler.doSplitName(ibmDirectCmr.getCmrName(), "", 24,
+    // 24);
+    // mainCustNm1 = parts[0];
+    // mainCustNm2 = parts[1];
+    // parts = handler.doSplitAddress(ibmDirectCmr.getCmrStreetAddress(),
+    // ibmDirectCmr.getCmrName4(), 24, 24);
+    // streetAddress1 = parts[0];
+    // streetAddress2 = parts[1];
+    // city1 = ibmDirectCmr.getCmrCity();
+    // postalCd = ibmDirectCmr.getCmrPostalCode();
+    // stateProv = ibmDirectCmr.getCmrState();
+    // county = ibmDirectCmr.getCmrCountry();
+    // createAddressOverrides = true;
+    // }
+
+    if (createAddressOverrides) {
+
+      if (!StringUtils.equals(installAt.getDivn(), mainCustNm1) || !StringUtils.equals(installAt.getDept(), mainCustNm2)) {
+
+        String customerName = installAt.getDivn() + (!StringUtils.isBlank(installAt.getDept()) ? " " + installAt.getDept() : "");
+        customerName = customerName.toUpperCase();
+        String customerNameSuffix = "";
+        if (customerName.contains("C/O")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("C/O")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
+        } else if (customerName.contains("UCW")) {
+          customerNameSuffix = customerName.substring(customerName.lastIndexOf("UCW")).trim();
+          customerName = customerName.substring(0, customerName.lastIndexOf("UCW")).trim();
+        }
+
+        String fullName = mainCustNm1;
+        if (!StringUtils.isBlank(mainCustNm2)) {
+          fullName += " " + mainCustNm2;
+        }
+        String nameParts[] = handler.doSplitName(fullName, "", 24, 24);
+        // CMR-4002 always put suffix on dept line
+        nameParts[1] = (nameParts[1] != null ? nameParts[1] : "") + (StringUtils.isBlank(customerNameSuffix) ? "" : " " + customerNameSuffix);
+        nameParts[1] = nameParts[1].trim();
+
+        if (nameParts[1].length() > 24) {
+          details.append("Value for Department Line exceeds 24 characters. Final value needs to be reviewed.\n");
+          engineData.addNegativeCheckStatus("_deptLengthExceeded",
+              "Value for Department Line exceeds 24 characters. Final value needs to be reviewed.");
+        }
+
+        overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
+        overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
       }
-      if (!StringUtils.equals(installAt.getAddrTxt(), childInstallAt.getAddrTxt())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), childInstallAt.getAddrTxt());
+
+      if (!StringUtils.equals(installAt.getAddrTxt(), streetAddress1)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), streetAddress1);
       }
-      if (!StringUtils.equals(installAt.getAddrTxt2(), childInstallAt.getAddrTxt2())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT2", installAt.getAddrTxt2(), childInstallAt.getAddrTxt2());
+      if (!StringUtils.equals(installAt.getAddrTxt2(), streetAddress2)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT2", installAt.getAddrTxt2(), streetAddress2);
       }
-      if (!StringUtils.equals(installAt.getCity1(), childInstallAt.getCity1())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "CITY1", installAt.getCity1(), childInstallAt.getCity1());
+      if (!StringUtils.equals(installAt.getCity1(), city1)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "CITY1", installAt.getCity1(), city1);
       }
-      if (!StringUtils.equals(installAt.getPostCd(), childInstallAt.getPostCd())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "POST_CD", installAt.getPostCd(), childInstallAt.getPostCd());
+      if (!StringUtils.equals(installAt.getPostCd(), postalCd)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "POST_CD", installAt.getPostCd(), postalCd);
       }
-      if (!StringUtils.equals(installAt.getStateProv(), childInstallAt.getStateProv())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "STATE_PROV", installAt.getStateProv(), childInstallAt.getStateProv());
+      if (!StringUtils.equals(installAt.getStateProv(), stateProv)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "STATE_PROV", installAt.getStateProv(), stateProv);
       }
-      if (!StringUtils.equals(installAt.getCounty(), childInstallAt.getCounty())) {
-        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), childInstallAt.getCounty());
-        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NM", installAt.getCountyName(), childInstallAt.getCountyName());
+      if (!StringUtils.equals(installAt.getCounty(), county)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), county);
+        overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NM", installAt.getCountyName(), county);
       }
     }
+
     if (!hasFieldError) {
       details.append("Branch Office codes computed successfully.");
       engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
@@ -1076,7 +1257,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   }
 
   /**
-   * Checks if the cmrNo has a blank restriction code in US CMR DB
+   * Gets the Affiliate from US CMR
    * 
    * @param cmrNo
    * @return
@@ -1104,7 +1285,53 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         return null;
       } else {
         Map<String, Object> record = response.getRecords().get(0);
-        return (String) record.get("I_MKT_AFFLTN");
+        String affiliate = (String) record.get("I_MKT_AFFLTN");
+        if (!StringUtils.isBlank(affiliate)) {
+          return StringUtils.leftPad(affiliate, 7, '0');
+        }
+        return null;
+      }
+    } catch (Exception e) {
+      LOG.warn("Error in executing US CMR query", e);
+      return null;
+    }
+
+  }
+
+  /**
+   * Gets the Enterprise from US CMR
+   * 
+   * @param cmrNo
+   * @return
+   */
+  private String getUSCMREnterprise(String cmrNo) {
+    String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+    String sql = ExternalizedQuery.getSql("AUTO.US.USCMR.ENTERPRISE", usSchema);
+    sql = StringUtils.replace(sql, ":CMR_NO", cmrNo);
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.setRows(1);
+    query.addField("I_ENT");
+    query.addField("I_CUST_ENTITY");
+
+    try {
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+      QueryResponse response = client.executeAndWrap(QueryClient.USCMR_APP_ID, query, QueryResponse.class);
+
+      if (!response.isSuccess()) {
+        LOG.warn("Not successful executiong of US CMR query");
+        return null;
+      } else if (response.getRecords() == null || response.getRecords().size() == 0) {
+        LOG.warn("No records in US CMR DB");
+        return null;
+      } else {
+        Map<String, Object> record = response.getRecords().get(0);
+        String enterprise = (String) record.get("I_ENT");
+        if (!StringUtils.isBlank(enterprise)) {
+          return StringUtils.leftPad(enterprise, 7, '0');
+        }
+        return null;
       }
     } catch (Exception e) {
       LOG.warn("Error in executing US CMR query", e);
@@ -1170,6 +1397,38 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
           RequestUtils.createCommentLogFromBatch(entityManager, cmt.getCreateById(), requestData.getAdmin().getId().getReqId(), cmt.getCmt());
         }
       }
+
+      // copy attachments
+      LOG.debug("Copying attachments from Child Request " + childReqId);
+      try {
+        sql = ExternalizedQuery.getSql("AUTO.US.GET_ATTACHMENTS");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", childReqId);
+        query.setForReadOnly(true);
+        List<Attachment> attachments = query.getResults(Attachment.class);
+        if (attachments != null) {
+          AttachmentService attachService = new AttachmentService();
+          long parentReqId = requestData.getAdmin().getId().getReqId();
+          AppUser user = null;
+          for (Attachment attachment : attachments) {
+            File file = new File(attachment.getId().getDocLink());
+            if (file.exists()) {
+              try (FileInputStream fis = new FileInputStream(file)) {
+                user = new AppUser();
+                user.setIntranetId(attachment.getDocAttachById());
+                user.setBluePagesName(attachment.getDocAttachByNm());
+                LOG.debug("Attaching " + file.getName() + " to Request " + parentReqId);
+                attachService.addExternalAttachment(entityManager, user, parentReqId, attachment.getDocContent(), file.getName(), attachment.getCmt(),
+                    fis);
+              }
+            }
+          }
+        }
+      } catch (Exception e) {
+        LOG.warn("Attachments cannot be copied.");
+        details.append("Attachments cannot be copied to the request due to an error.\n");
+      }
+
     }
   }
 
@@ -1180,12 +1439,12 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
    * @param name
    * @return
    */
-  private String cleanName(String name) {
+  private static String cleanName(String name) {
     if (name == null) {
       return "";
     }
     name = name.replaceAll("'", "");
-    name = name.replaceAll("[^A-Za-z0-9&\\-]", " ");
+    name = name.replaceAll("[^A-Za-z0-9&\\-/]", " ");
     name = name.replaceAll("  ", " ").toUpperCase();
     return name;
   }

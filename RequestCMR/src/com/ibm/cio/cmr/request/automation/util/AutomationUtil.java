@@ -95,7 +95,7 @@ public abstract class AutomationUtil {
     }
   };
 
-  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", " CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
+  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", "CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
       "INCORPORATED");
 
   /**
@@ -376,7 +376,13 @@ public abstract class AutomationUtil {
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (StringUtils.isNotBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
+      if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        request.setOrgId(data.getVat().split("\\s")[0]);
+      } else {
+        request.setOrgId(data.getVat());
+      }
+    } else if (StringUtils.isNotBlank(addr.getVat())) {
+      request.setOrgId(addr.getVat());
     }
 
     if (addr != null) {
@@ -516,7 +522,10 @@ public abstract class AutomationUtil {
     LOG.debug("Validating Private Person record for " + name);
     try {
       DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
-      String cmrNo = checkResponse.getCmrNo();
+      String cmrNo = "";
+      if (checkResponse != null) {
+        cmrNo = checkResponse.getCmrNo();
+      }
       // TODO find kunnr String kunnr = checkResponse.get
       if (!StringUtils.isBlank(cmrNo)) {
         LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
@@ -605,6 +614,8 @@ public abstract class AutomationUtil {
         engineData.addRejectionComment("OTH", "CEID " + ceId + "  is not valid as checked against the PartnerWorld Profile System.", "", "");
         details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.").append("\n");
         return false;
+      } else {
+        details.append("CEID " + ceId + " is validated against the PartnerWorld Profile System.").append("\n");
       }
     } catch (Exception e) {
       LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
@@ -781,20 +792,37 @@ public abstract class AutomationUtil {
       return false;
     }
 
+    String cleanName = " " + getCleanString(name) + " ";
     for (String gblEnding : GLOBAL_LEGAL_ENDINGS) {
-      if (name.toUpperCase().contains(gblEnding)) {
+
+      if (cleanName.contains(" " + getCleanString(gblEnding) + " ")) {
         return true;
       }
     }
     List<String> extendedEndings = getCountryLegalEndings();
     if (extendedEndings != null) {
       for (String cntryEnding : extendedEndings) {
-        if (name.toUpperCase().contains(cntryEnding)) {
+        if (cleanName.contains(" " + getCleanString(cntryEnding) + " ")) {
           return true;
         }
       }
     }
     return false;
+  }
+
+  /**
+   * Extracts the Alphanumeric string from the input String (replaces non
+   * accepted characters with spaces
+   * 
+   * @param str
+   * @return
+   */
+  public static String getCleanString(String str) {
+    if (StringUtils.isNotBlank(str)) {
+      str = str.trim().replaceAll("[^a-zA-Z0-9\\s\\-]", " ").toUpperCase();
+      return str;
+    }
+    return "";
   }
 
   /**
