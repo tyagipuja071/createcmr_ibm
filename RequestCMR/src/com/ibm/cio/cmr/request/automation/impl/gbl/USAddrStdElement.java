@@ -106,14 +106,25 @@ public class USAddrStdElement extends OverridingElement {
       requestadd.setStreet(street);
 
       LOG.debug("Connecting to the AddressStd Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-      AddressStdResponse response = tgmeClient.executeAndWrap(TgmeClient.ADDRESS_STD_APP_ID, requestadd, AddressStdResponse.class);
-      LOG.debug("Response status is " + response.getStatus());
-      if (response.getStatus() != TgmeClient.STATUS_SUCCESSFUL) {
-        throw new Exception("TGME Error");
+      AddressStdData tgmeData = null;
+      boolean tgmeError = false;
+      try {
+        AddressStdResponse response = tgmeClient.executeAndWrap(TgmeClient.ADDRESS_STD_APP_ID, requestadd, AddressStdResponse.class);
+        LOG.debug("Response status is " + response.getStatus());
+        if (response.getStatus() != TgmeClient.STATUS_SUCCESSFUL) {
+          tgmeError = true;
+        } else {
+          tgmeData = response.getData();
+        }
+      } catch (Exception e) {
+        LOG.warn("Error in connecting to address standardization.", e);
+        tgmeError = true;
       }
-      // data1 holds response data from service
-      AddressStdData tgmeData = response.getData();
-
+      if (tgmeError) {
+        details.append("Cannot connect to address standardization service at the moment.");
+        tgmeData = new AddressStdData();
+        tgmeData.setTgmeResponseCode("U");
+      }
       LOG.debug("Tgme Resonse code is : " + tgmeData.getTgmeResponseCode());
       if (StringUtils.isBlank(tgmeData.getTgmeResponseCode())) {
         throw new Exception("TGME Code is null, service may be down.");
