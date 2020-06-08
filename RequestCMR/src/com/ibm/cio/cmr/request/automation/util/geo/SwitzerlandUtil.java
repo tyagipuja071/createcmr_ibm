@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
@@ -59,7 +60,7 @@ public class SwitzerlandUtil extends AutomationUtil {
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
 
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Phone #", "FAX", "Customer Name 4");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "FAX", "Customer Name 4");
 
   private static List<ChMubotyMapping> mubotyMappings = new ArrayList<ChMubotyMapping>();
 
@@ -150,7 +151,7 @@ public class SwitzerlandUtil extends AutomationUtil {
 
   @Override
   protected List<String> getCountryLegalEndings() {
-    return Arrays.asList("GMBH", "KLG", " AG", "Sàrl", "SARL", " SA", "S.A.", "SAGL");
+    return Arrays.asList("GMBH", "KLG", "AG", "Sàrl", "SARL", "SA", "S.A.", "SAGL");
   }
 
   @SuppressWarnings("unchecked")
@@ -252,7 +253,8 @@ public class SwitzerlandUtil extends AutomationUtil {
       validation.setMessage("Successful");
     }
 
-    String details = duplicateDetails.length() > 0 ? duplicateDetails.toString() : "";
+    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
+    details += duplicateDetails.length() > 0 ? duplicateDetails.toString() : "";
     details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
     output.setDetails(details);
     output.setProcessOutput(validation);
@@ -276,7 +278,7 @@ public class SwitzerlandUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "VAT #":
-        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+        if (!StringUtils.isBlank(change.getNewData())) {
           Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
           boolean matchesDnb = false;
@@ -346,9 +348,31 @@ public class SwitzerlandUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    details.append("No specific fields to compute.\n");
-    results.setResults("Skipped");
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    if ("C".equals(admin.getReqType())) {
+      String scenario = data.getCustSubGrp();
+      LOG.info("Starting Field Computations for Request ID " + data.getId().getReqId());
+      String actualScenario = scenario.substring(2);
+      if (StringUtils.isNotBlank(actualScenario)
+          && !(SCENARIO_BUSINESS_PARTNER.equals(actualScenario) || SCENARIO_IBM_EMPLOYEE.equals(actualScenario)
+              || SCENARIO_PRIVATE_CUSTOMER.equals(actualScenario) || SCENARIO_INTERNAL.equals(actualScenario))
+          && data.getSubIndustryCd() != null && data.getSubIndustryCd().startsWith("B") && "32".equals(data.getIsuCd())
+          && "S".equals(data.getClientTier())) {
+        details.append("Found IMS value 'B' on the request, setting ISU-CTC as 32-N").append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
+        results.setResults("Computed");
+      } else {
+        details.append("No specific fields to compute.\n");
+        results.setResults("Skipped");
+      }
+    } else {
+      details.append("No specific fields to compute.\n");
+      results.setResults("Skipped");
+    }
     results.setDetails(details.toString());
+
     return results;
   }
 
@@ -377,15 +401,25 @@ public class SwitzerlandUtil extends AutomationUtil {
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
-      muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), "32", "S");
+      muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       break;
+    default:
+      if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier())) && !isCoverageCalculated) {
+        if (SCENARIO_CROSS_BORDER.equals(scenario)) {
+          // verified all logic is based on 3000-9999 condition for crossborders
+          muboty = getMubotyFromMapping(data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
+        } else {
+          muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+        }
+      }
     }
 
     if (muboty != null) {
       details.append("Setting MUBOTY to " + muboty.getMuboty() + " based on Postal Code rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
-    } else {
+      results.setResults("Calculated");
+    } else if (!isCoverageCalculated) {
       String sortl = data.getSearchTerm();
       if (!StringUtils.isBlank(sortl)) {
         String msg = "No valid MUBOTY mapping from request data. Using MUBOTY " + sortl + " from request.";
@@ -436,7 +470,7 @@ public class SwitzerlandUtil extends AutomationUtil {
             && clientTier.equals(mapping.getCtc())) {
           if (StringUtils.isNotBlank(mapping.getPostalCdMin()) && StringUtils.isNotBlank(mapping.getPostalCdMax())) {
             int start = Integer.parseInt(mapping.getPostalCdMin());
-            int end = Integer.parseInt(mapping.getPostalCdMin());
+            int end = Integer.parseInt(mapping.getPostalCdMax());
             if (postalCd >= start && postalCd <= end) {
               return mapping;
             }
