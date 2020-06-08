@@ -802,7 +802,8 @@ public class USHandler extends GEOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
-    if ("ISIC".equals(field)) {
+    List<String> skipOnSummaryUpdateFields = Arrays.asList("ISIC", "CAP", "SitePartyID");
+    if (skipOnSummaryUpdateFields.contains(field)) {
       return true;
     }
     return false;
