@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -13,12 +14,15 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class SingaporeUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(SingaporeUtil.class);
+
+  private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -40,10 +44,17 @@ public class SingaporeUtil extends AutomationUtil {
     }
 
     if (ifDefaultCluster) {
-      details.append("Cluster should not be the default for the scenario.\n");
-      engineData.addRejectionComment("Cluster should not be the default for the scenario.");
-      // eleResults.append("Default cluster found.\n");
-      results.setOnError(true);
+      if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+        LOG.debug("Default Cluster used but allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
+        results.setOnError(false);
+        // eleResults.append("Default Cluster used.\n");
+        details.append("Default Cluster used but allowed for the request (Private Person/BlueMix/Marketplace).\n");
+      } else {
+        details.append("Cluster should not be the default for the scenario.\n");
+        engineData.addRejectionComment("OTH", "Cluster should not be the default for the scenario.", "", "");
+        // eleResults.append("Default cluster found.\n");
+        results.setOnError(true);
+      }
     } else {
       details.append("Default cluster not used.\n");
     }
@@ -51,44 +62,23 @@ public class SingaporeUtil extends AutomationUtil {
     String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
     LOG.debug("IfClusterSalesmanIsValid" + validRes);
 
-    if (validRes != null && validRes.equals("INVALID")) {
-      details.append("The combination of Salesman No. and Cluster is not valid.\n");
-      engineData.addRejectionComment("The combination of Salesman No. and Cluster is not valid.");
-      // eleResults.append("Invalid Salesman No.\n");
-      results.setOnError(true);
-    } else if (validRes != null && validRes.equals("VALID")) {
-      details.append("The combination of Salesman No. and Cluster is valid.\n");
-    } else if (validRes != null && validRes.equals("NO_RESULTS")) {
-      details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
-    }
+    if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+      LOG.debug("Salesman check skipped for private and allowed scenarios.");
+      details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
+    } else {
 
-    /*
-     * if (StringUtils.isNotEmpty(duns)) { GOEDeterminationElement
-     * goeDetermination = new
-     * GOEDeterminationElement(requestData.getAdmin().getReqType(), null, false,
-     * false); JSONArray matches = new JSONArray(); try { matches =
-     * goeDetermination.findGOE(duns, null, null, null); if (!matches.isEmpty())
-     * { for (Object dunsMatch : matches) { JSONObject match = (JSONObject)
-     * dunsMatch; String overallIndicator = (String)
-     * match.get("OVERALL_GOE_CD"); LOG.debug("overallIndicator" +
-     * overallIndicator); if (StringUtils.isNotEmpty(overallIndicator) &&
-     * (overallIndicator.equals("Y") || overallIndicator.equals("S"))) {
-     * details.append("Government= Y" + "\n");
-     * overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-     * "DATA", "GOVERNMENT", data.getGovType(), "Y"); } else {
-     * eleResults.append("NOT a GOE." + "\n"); results.setOnError(true);
-     * details.append("GOE Determination = NOT a GOE. \n"); } } } else {
-     * eleResults.append("Cannot determine GOE" + "\n");
-     * details.append("GOE status cannot be determined via DUNS No." + "\n");
-     * results.setOnError(true); } } catch (IOException e) {
-     * LOG.debug(e.getMessage()); e.printStackTrace();
-     * eleResults.append("Cannot determine GOE" + "\n");
-     * details.append("Error occured while determining GOE status." + "\n");
-     * results.setOnError(true); } } else { eleResults.append("Duns not found" +
-     * "\n"); details.append(
-     * "GOE status cannot be determined via DUNS No. as duns No doesn't exists on request."
-     * + "\n"); results.setOnError(true); }
-     */
+      if (validRes != null && validRes.equals("INVALID")) {
+        details.append("The combination of Salesman No. and Cluster is not valid.\n");
+        engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
+        // eleResults.append("Invalid Salesman No.\n");
+        results.setOnError(true);
+      } else if (validRes != null && validRes.equals("VALID")) {
+        details.append("The combination of Salesman No. and Cluster is valid.\n");
+      } else if (validRes != null && validRes.equals("NO_RESULTS")) {
+        details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+      }
+
+    }
 
     if (govType != null && govType.equals("Y")) {
       // eleResults.append("Government Organization" + "\n");
@@ -112,7 +102,7 @@ public class SingaporeUtil extends AutomationUtil {
     if (isIsicInvalid) {
       details.append("Invalid ISIC code, please choose another one based on industry.\n");
       // eleResults.append("Invalid ISIC code.\n");
-      engineData.addRejectionComment("Invalid ISIC code, please choose another one based on industry.");
+      engineData.addRejectionComment("OTH", "Invalid ISIC code, please choose another one based on industry.", "", "");
       results.setOnError(true);
     } else {
       details.append("ISIC is valid" + "\n");
@@ -146,6 +136,29 @@ public class SingaporeUtil extends AutomationUtil {
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
+    processSkipCompanyChecks(engineData, requestData, details);
     return true;
+  }
+
+  /**
+   * CHecks if the record is a private customer / bluemix / marketplace
+   * 
+   * @param engineData
+   * @param requestData
+   * @param details
+   * @return
+   */
+  private void processSkipCompanyChecks(AutomationEngineData engineData, RequestData requestData, StringBuilder details) {
+    Data data = requestData.getData();
+
+    boolean skipCompanyChecks = "9500".equals(data.getIsicCd()) || (data.getCustSubGrp() != null && data.getCustSubGrp().contains("PRIV"));
+    if (skipCompanyChecks) {
+      details.append("Private Person request - company checks will be skipped.\n");
+      ScenarioExceptionsUtil exc = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      if (exc != null) {
+        exc.setSkipCompanyVerification(true);
+        engineData.put("SCENARIO_EXCEPTIONS", exc);
+      }
+    }
   }
 }

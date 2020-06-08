@@ -216,81 +216,104 @@ public class MassChangeTemplate {
           LOG.debug("validating name 3 for sheet " + name);
           for (Row row : sheet) {
             if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-              String dept = "";
-              String building = "";
-              String floor = "";
-              Cell cmrCell1 = row.getCell(7);
+              Cell cmrCell1 = row.getCell(4);
               if (cmrCell1 != null) {
+                String name3 = "";
                 switch (cmrCell1.getCellTypeEnum()) {
                 case STRING:
-                  dept = cmrCell1.getStringCellValue();
+                  name3 = cmrCell1.getStringCellValue();
                   break;
                 case NUMERIC:
                   double nvalue = cmrCell1.getNumericCellValue();
                   if (nvalue > 0) {
-                    dept = "" + nvalue;
+                    name3 = "" + nvalue;
+                    break;
                   }
-                  break;
                 default:
                   continue;
                 }
-              }
-              Cell cmrCell2 = row.getCell(8);
-              if (cmrCell2 != null) {
-                switch (cmrCell2.getCellTypeEnum()) {
-                case STRING:
-                  floor = cmrCell2.getStringCellValue();
-                  break;
-                case NUMERIC:
-                  double nvalue = cmrCell2.getNumericCellValue();
-                  if (nvalue > 0) {
-                    floor = nvalue + "";
-                  }
-                  break;
-                default:
-                  continue;
+                if (name3.length() > 30) {
+                  LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
+                  TemplateValidation error = new TemplateValidation(name);
+                  error.addError(row.getRowNum(), "building", "Total computed length of customer name3 should not exeed 30");
+                  validations.add(error);
                 }
               }
-              Cell cmrCell3 = row.getCell(9);
-              if (cmrCell3 != null) {
-                switch (cmrCell3.getCellTypeEnum()) {
-                case STRING:
-                  building = cmrCell3.getStringCellValue();
-                  break;
-                case NUMERIC:
-                  double nvalue = cmrCell3.getNumericCellValue();
-                  if (nvalue > 0) {
-                    building = nvalue + "";
-                  }
-                  break;
-                default:
-                  continue;
-                }
-              }
-              String name3 = "";
-              if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept, "@")) {
-                name3 += dept;
-                if (StringUtils.isNotBlank(building) && !StringUtils.equals(building, "@")) {
-                  name3 += ", ";
-                } else if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
-                  name3 += ", ";
-                }
-              }
-              if (StringUtils.isNotBlank(building) && !StringUtils.equals(building, "@")) {
-                name3 += building;
-                if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
-                  name3 += ", ";
-                }
-              }
-              if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor, "@")) {
-                name3 += floor;
-              }
-              if (name3.length() > 30) {
-                LOG.debug("Total computed length of building, department and floor should not exeed 30. Sheet: " + name + " Row: " + row.getRowNum());
-                TemplateValidation error = new TemplateValidation(name);
-                error.addError(row.getRowNum(), "building", "Total computed length of building, department and floor should not exeed 30");
-                validations.add(error);
-              }
+              // String dept = "";
+              // String building = "";
+              // String floor = "";
+              // Cell cmrCell1 = row.getCell(7);
+              // if (cmrCell1 != null) {
+              // switch (cmrCell1.getCellTypeEnum()) {
+              // case STRING:
+              // dept = cmrCell1.getStringCellValue();
+              // break;
+              // case NUMERIC:
+              // double nvalue = cmrCell1.getNumericCellValue();
+              // if (nvalue > 0) {
+              // dept = "" + nvalue;
+              // }
+              // break;
+              // default:
+              // continue;
+              // }
+              // }
+              // Cell cmrCell2 = row.getCell(8);
+              // if (cmrCell2 != null) {
+              // switch (cmrCell2.getCellTypeEnum()) {
+              // case STRING:
+              // floor = cmrCell2.getStringCellValue();
+              // break;
+              // case NUMERIC:
+              // double nvalue = cmrCell2.getNumericCellValue();
+              // if (nvalue > 0) {
+              // floor = nvalue + "";
+              // }
+              // break;
+              // default:
+              // continue;
+              // }
+              // }
+              // Cell cmrCell3 = row.getCell(9);
+              // if (cmrCell3 != null) {
+              // switch (cmrCell3.getCellTypeEnum()) {
+              // case STRING:
+              // building = cmrCell3.getStringCellValue();
+              // break;
+              // case NUMERIC:
+              // double nvalue = cmrCell3.getNumericCellValue();
+              // if (nvalue > 0) {
+              // building = nvalue + "";
+              // }
+              // break;
+              // default:
+              // continue;
+              // }
+              // }
+              //
+              // if (StringUtils.isNotBlank(dept) && !StringUtils.equals(dept,
+              // "@")) {
+              // name3 += dept;
+              // if (StringUtils.isNotBlank(building) &&
+              // !StringUtils.equals(building, "@")) {
+              // name3 += ", ";
+              // } else if (StringUtils.isNotBlank(floor) &&
+              // !StringUtils.equals(floor, "@")) {
+              // name3 += ", ";
+              // }
+              // }
+              // if (StringUtils.isNotBlank(building) &&
+              // !StringUtils.equals(building, "@")) {
+              // name3 += building;
+              // if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor,
+              // "@")) {
+              // name3 += ", ";
+              // }
+              // }
+              // if (StringUtils.isNotBlank(floor) && !StringUtils.equals(floor,
+              // "@")) {
+              // name3 += floor;
+              // }
             }
           }
         }

@@ -32,12 +32,11 @@ import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
-import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
-import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.dnb.DnbOrganizationId;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
@@ -70,11 +69,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(handler, requestData, engineData, "ZS01");
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        engineData.put(AutomationEngineData.DNB_ALL_MATCHES, dnbMatches);
         if (!hasValidMatches) {
           // if no valid matches - do not process records
           result.setOnError(shouldThrowError);
@@ -139,7 +139,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
                   perfectMatch);
               if (eligibleAddresses.size() > 0) {
-                processAddressFields(perfectMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
+                processAddressFields(data.getCmrIssuingCntry(), perfectMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
               }
             }
             engineData.put("dnbMatching", perfectMatch);
@@ -156,13 +156,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               List<String> eligibleAddresses = getAddrSatisfyingLevenshteinDistance(data.getCmrIssuingCntry(), admin, requestData.getAddresses(),
                   highestCloseMatch);
               if (eligibleAddresses.size() > 0) {
-                processAddressFields(highestCloseMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
+                processAddressFields(data.getCmrIssuingCntry(), highestCloseMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
               }
             }
             engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL", "VAT value did not match with the highest confidence D&B match.");
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else {
 
+            LOG.debug("No D&B record matched the request data.");
             // by now this is sure to be on error with no data match
             details.append("Matches against D&B were found but no record matched the request data.\n");
             details.append("Showing D&B matches:\n");
@@ -171,40 +172,42 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
               processDnBFields(entityManager, data, dnbRecord, output, details, itemNo);
               itemNo++;
             }
-            engineData.addRejectionComment(
-                "Matches against D&B were found but no record matched the request data. Please correct name/address information.");
+            engineData.addRejectionComment("OTH", "Matches against D&B were found but no record matched the request data.", "", "");
             result.setResults("Name/Address not matched");
             result.setOnError(true);
             engineData.put("dnbMatching", dnbMatches.get(0));
           }
 
           // save the highest matched record
+          DnBMatchingResponse attachRecord = null;
           if (perfectMatch != null || highestCloseMatch != null) {
-            ImportDnBService dnbService = new ImportDnBService();
-            DnBMatchingResponse highestMatch = perfectMatch != null ? perfectMatch : highestCloseMatch;
-            AppUser user = (AppUser) engineData.get("appUser");
-            LOG.debug("Saving DnB Highest match attachment for DUNS " + highestMatch.getDunsNo() + "..");
-            try {
-              dnbService.saveDnBAttachment(entityManager, user, admin.getId().getReqId(), highestMatch.getDunsNo(), "DnBHighestMatch",
-                  highestMatch.getConfidenceCode());
-            } catch (Exception e) {
-              // ignore attachment issues
-              LOG.warn("Error in saving D&B attachment", e);
-            }
+            attachRecord = perfectMatch != null ? perfectMatch : highestCloseMatch;
+          } else {
+            attachRecord = dnbMatches.get(0);
+          }
+          ImportDnBService dnbService = new ImportDnBService();
+          AppUser user = (AppUser) engineData.get("appUser");
+          LOG.debug("Saving DnB Highest match attachment for DUNS " + attachRecord.getDunsNo() + "..");
+          try {
+            dnbService.saveDnBAttachment(entityManager, user, admin.getId().getReqId(), attachRecord.getDunsNo(), "DnBHighestMatch",
+                attachRecord.getConfidenceCode());
+          } catch (Exception e) {
+            // ignore attachment issues
+            LOG.warn("Error in saving D&B attachment", e);
           }
           result.setDetails(details.toString().trim());
           result.setProcessOutput(output);
         }
       } else {
         result.setDetails("No D&B record was found using advanced matching.");
-        engineData.addRejectionComment("No matches with D&B records. Please import from D&B search.");
+        engineData.addRejectionComment("OTH", "No matches with D&B records. Please import from D&B search.", "", "");
         result.setResults("No Matches");
         result.setOnError(true);
       }
 
     } else {
       result.setDetails("Missing main address on the request.");
-      engineData.addRejectionComment("Missing main address on the request");
+      engineData.addRejectionComment("OTH", "Missing main address on the request.", "", "");
       result.setResults("No Matches");
       result.setOnError(true);
     }
@@ -292,7 +295,7 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     }
 
     LOG.debug("Connecting to D&B details service..");
-    DnBCompany dnbData = getDnBDetails(dnbRecord.getDunsNo());
+    DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
     if (dnbData != null) {
 
       if (!StringUtils.isBlank(dnbData.getPrimaryCounty())) {
@@ -320,8 +323,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
    * @param scenarioExceptions
    * @param handler
    */
-  private void processAddressFields(DnBMatchingResponse dnbRecord, MatchingOutput output, int itemNo, ScenarioExceptionsUtil scenarioExceptions,
-      GEOHandler handler, List<String> eligibleAddressTypes) {
+  private void processAddressFields(String country, DnBMatchingResponse dnbRecord, MatchingOutput output, int itemNo,
+      ScenarioExceptionsUtil scenarioExceptions, GEOHandler handler, List<String> eligibleAddressTypes) {
     boolean mainCustNameAdded = false;
     for (String addrType : eligibleAddressTypes) {
 
@@ -331,19 +334,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
       String name1, name2, addrTxt1, addrTxt2;
 
       // customer name 1 and name 2
+
       if (!StringUtils.isEmpty(companyNm)) {
-        if (companyNm.trim().length() > 30) {
-          name1 = companyNm.substring(0, 30);
-          name2 = ((companyNm.length() - 30 > 30) ? companyNm.substring(30, 60) : companyNm.substring(30));
-        } else {
-          name1 = companyNm;
-          name2 = "";
-        }
+        String[] nameParts = handler.doSplitName(companyNm, "", handler.getName1Length(), handler.getName2Length());
+        name1 = nameParts[0];
+        name2 = nameParts[1];
         if (!handler.customerNamesOnAddress() && !mainCustNameAdded) {
           output.addMatch(getProcessCode(), "MAIN_CUST_NM1", name1, "Derived", "Derived", "D&B", itemNo);
-          if (name2 != null) {
-            output.addMatch(getProcessCode(), "MAIN_CUST_NM2", name2, "Derived", "Derived", "D&B", itemNo);
-          }
+          output.addMatch(getProcessCode(), "MAIN_CUST_NM2", StringUtils.isBlank(name2) ? "-BLANK-" : name2, "Derived", "Derived", "D&B", itemNo);
           mainCustNameAdded = true;
         } else {
           output.addMatch(getProcessCode(), addrType + "::CUST_NM1", name1, "Derived", "Derived", "D&B", itemNo);
@@ -353,18 +351,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         }
       }
       if (StringUtils.isNotBlank(address)) {
-        if (address.length() > 30) {
-          addrTxt1 = address.substring(0, 30);
-          addrTxt2 = ((address.length() - 30 > 30) ? address.substring(30, 60) : address.substring(30));
-        } else {
-          addrTxt1 = address;
-          addrTxt2 = "";
-        }
+        int streetLength = SystemLocation.UNITED_STATES.equals(country) ? 24 : 30;
+        String[] streetParts = handler.doSplitName(address, "", streetLength, streetLength);
+        addrTxt1 = streetParts[0];
+        addrTxt2 = streetParts[1];
         // street line1
         output.addMatch(getProcessCode(), addrType + "::ADDR_TXT", addrTxt1, "Derived", "Derived", "D&B", itemNo);
-        if (StringUtils.isNotBlank(addrTxt2)) {
-          output.addMatch(getProcessCode(), addrType + "::ADDR_TXT_2", addrTxt2, "Derived", "Derived", "D&B", itemNo);
-        }
+        output.addMatch(getProcessCode(), addrType + "::ADDR_TXT_2", StringUtils.isBlank(addrTxt2) ? "-BLANK-" : addrTxt2, "Derived", "Derived",
+            "D&B", itemNo);
       }
       if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
         output.addMatch(getProcessCode(), addrType + "::CITY1", dnbRecord.getDnbCity(), "Derived", "Derived", "D&B", itemNo);
@@ -373,28 +367,22 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         output.addMatch(getProcessCode(), addrType + "::STATE_PROV", dnbRecord.getDnbStateProv(), "Derived", "Derived", "D&B", itemNo);
       }
       if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
-        output.addMatch(getProcessCode(), addrType + "::POST_CD", dnbRecord.getDnbPostalCode(), "Derived", "Derived", "D&B", itemNo);
+        if (SystemLocation.UNITED_STATES.equals(country)) {
+          // putting it here as US is the only country with a different format
+          // from D&B
+          String postCd = dnbRecord.getDnbPostalCode();
+          if (postCd != null && postCd.length() == 9) {
+            postCd = postCd.substring(0, 5) + "-" + postCd.substring(5);
+          }
+          output.addMatch(getProcessCode(), addrType + "::POST_CD", postCd, "Derived", "Derived", "D&B", itemNo);
+        } else {
+          output.addMatch(getProcessCode(), addrType + "::POST_CD", dnbRecord.getDnbPostalCode(), "Derived", "Derived", "D&B", itemNo);
+        }
       }
       if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
         output.addMatch(getProcessCode(), addrType + "::LAND_CNTRY", dnbRecord.getDnbCountry(), "Derived", "Derived", "D&B", itemNo);
       }
     }
-  }
-
-  /**
-   * Connects to the details service and gets the details of the DUNS NO from
-   * D&B
-   *
-   * @param dunsNo
-   * @return
-   * @throws Exception
-   */
-  private DnBCompany getDnBDetails(String dunsNo) throws Exception {
-    DnbData data = CompanyFinder.getDnBDetails(dunsNo);
-    if (data != null && data.getResults() != null && !data.getResults().isEmpty()) {
-      return data.getResults().get(0);
-    }
-    return null;
   }
 
   @Override
@@ -410,11 +398,19 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
         Addr addr = requestData.getAddress(addressInfoField[0]);
         if (Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "STATE_PROV", "LAND_CNTRY", "POST_CD")
             .contains(addressInfoField[1])) {
-          setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue());
+          if ("-BLANK-".equals(match.getId().getMatchKeyValue())) {
+            setEntityValue(addr, addressInfoField[1], null);
+          } else {
+            setEntityValue(addr, addressInfoField[1], match.getId().getMatchKeyValue());
+          }
         }
       }
     } else if (Arrays.asList("MAIN_CUST_NM1", "MAIN_CUST_NM2").contains(field)) {
-      setEntityValue(admin, field, match.getId().getMatchKeyValue());
+      if ("-BLANK-".equals(match.getId().getMatchKeyValue())) {
+        setEntityValue(admin, field, null);
+      } else {
+        setEntityValue(admin, field, match.getId().getMatchKeyValue());
+      }
     }
     return true;
   }

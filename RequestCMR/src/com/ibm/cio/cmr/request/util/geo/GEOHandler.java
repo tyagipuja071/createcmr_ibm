@@ -286,6 +286,14 @@ public abstract class GEOHandler {
    * @param length2
    */
   protected void splitAddress(Addr addr, String addr1, String addr2, int length1, int length2) {
+    String[] addrSplit = doSplitAddress(addr1, addr2, length1, length2);
+
+    addr.setAddrTxt(addrSplit[0]);
+    addr.setAddrTxt2(addrSplit[1]);
+
+  }
+
+  public String[] doSplitAddress(String addr1, String addr2, int length1, int length2) {
     String address = addr1 + " " + (addr2 != null ? addr2 : "");
     String[] parts = address.split("[ ]");
 
@@ -314,9 +322,7 @@ public abstract class GEOHandler {
       adPart2 = adPart2.substring(0, length1);
     }
 
-    addr.setAddrTxt(adPart1);
-    addr.setAddrTxt2(adPart2);
-
+    return new String[] { adPart1, adPart2 };
   }
 
   /**
@@ -801,6 +807,10 @@ public abstract class GEOHandler {
 
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     // NO OP
+  }
+
+  public void convertDnBImportValues(EntityManager entityManager, Admin admin, Data data) {
+    // noop
   }
 
   protected static String validateColValFromCell(XSSFCell cell) {

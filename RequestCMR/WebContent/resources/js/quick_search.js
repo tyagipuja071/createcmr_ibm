@@ -144,6 +144,8 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
         WindowMgr.open('COMPDET', 'CMR' + record.cmrNo, 'company_details?issuingCountry=' + issuingCntry + '&cmrNo=' + record.cmrNo, null, 550);
       } else if (record.recType == 'DNB') {
         WindowMgr.open('COMPDET', 'DNB' + record.dunsNo, 'company_details?issuingCountry=' + issuingCntry + '&dunsNo=' + record.dunsNo, null, 550);
+      } else if (record.recType == 'REQ') {
+        WindowMgr.open('SUMMARY', record.cmrNo, 'summary?reqId=' + record.cmrNo + '&reqType=C', null, null);
       } else {
         cmr.showAlert('Cannot open details of the record.');
       }
@@ -414,6 +416,16 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     return list;
   };
 
+  $scope.exportToPdf = function(rec) {
+    cmr.showProgress('Exporting request details. Please wait...');
+    var reqId = rec.cmrNo;
+    var token = new Date().getTime();
+    FormManager.setValue('pdfReqId', reqId);
+    FormManager.setValue('pdfTokenId', token);
+    document.forms['frmPDF'].submit();
+    window.setTimeout('checkToken("' + token + '")', 1000);
+  };
+
   _inscp = $scope;
 
 } ]);
@@ -576,6 +588,7 @@ function buildSearchCriteria() {
     cmrNo : FormManager.getActualValue('cmrNo'),
     vat : FormManager.getActualValue('vat'),
     taxCd1 : FormManager.getActualValue('taxCd1'),
+    restrictTo : FormManager.getActualValue('restrictTo'),
   };
   var issuingCntry = FormManager.getActualValue('issuingCntry');
   if (issuingCntry.length > 3) {

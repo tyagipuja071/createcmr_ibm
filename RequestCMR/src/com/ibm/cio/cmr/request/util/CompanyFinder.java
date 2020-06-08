@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckRequest;
+import com.ibm.cmr.services.client.matching.request.ReqCheckResponse;
 import com.ibm.json.java.JSONObject;
 
 /**
@@ -81,6 +84,8 @@ public class CompanyFinder {
             }
           }
         }
+        matches.addAll(findRequests(searchModel));
+
         if (matches.isEmpty() || searchDnb) {
           matches.addAll(searchDnB(searchModel));
         }
@@ -148,6 +153,7 @@ public class CompanyFinder {
         request.setVat(searchModel.getTaxCd1());
       }
       request.setAddrType(addrType);
+      request.setUsRestrictTo(searchModel.getRestrictTo());
 
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
       // connect to the duplicate CMR check service
@@ -182,6 +188,7 @@ public class CompanyFinder {
           match.setAltCity(record.getAltCity());
           match.setAltStreet(record.getAltStreet());
 
+          match.setRestrictTo(record.getUsRestrictTo());
           match.setRevenue(record.getRevenue());
           if (!StringUtils.isBlank(searchModel.getVat()) || !StringUtils.isBlank(searchModel.getTaxCd1())) {
             match.setOrgIdMatch(searchModel.getVat().equals(match.getVat()) || searchModel.getTaxCd1().equals(match.getTaxCd1()));
@@ -241,6 +248,7 @@ public class CompanyFinder {
         cmr.setAltName(record.getCmrIntlName1() + (record.getCmrIntlName2() != null ? record.getCmrIntlName2() : ""));
         cmr.setAltStreet(record.getCmrIntlAddress() + (record.getCmrIntlName3() != null ? record.getCmrIntlName3() : ""));
         cmr.setAltCity(record.getCmrIntlCity1());
+        cmr.setRestrictTo(record.getUsCmrRestrictTo());
         cmrRecords.add(cmr);
         if (dunsList == null) {
           // only import 1 record for non duns matching
@@ -320,6 +328,77 @@ public class CompanyFinder {
       }
     }
     return cmrMatches;
+  }
+
+  /**
+   * Checks any existing requests similar to the search criteria
+   * 
+   * @param searchModel
+   * @return
+   * @throws InvocationTargetException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   * @throws SecurityException
+   * @throws NoSuchMethodException
+   */
+  private static List<CompanyRecordModel> findRequests(CompanyRecordModel searchModel) throws Exception {
+    List<CompanyRecordModel> reqMatches = new ArrayList<CompanyRecordModel>();
+
+    // connect to the service
+    MatchingResponse<ReqCheckResponse> response = new MatchingResponse<ReqCheckResponse>();
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    client.setReadTimeout(1000 * 60 * 5);
+
+    ReqCheckRequest request = new ReqCheckRequest();
+    request.setReqId(0);
+    request.setAddrType("ZS01");
+    request.setCity(searchModel.getCity());
+    request.setCustomerName(searchModel.getName());
+    request.setIssuingCountry(searchModel.getIssuingCntry());
+    request.setLandedCountry(searchModel.getCountryCd());
+    request.setPostalCode(searchModel.getPostCd());
+    request.setStateProv(searchModel.getStateProv());
+    request.setStreetLine1(searchModel.getStreetAddress1());
+    request.setStreetLine2(searchModel.getStreetAddress2());
+    request.setVat(searchModel.getVat());
+
+    LOG.debug("Executing Duplicate Request Check for quick search..");
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.REQ_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+    TypeReference<MatchingResponse<ReqCheckResponse>> ref = new TypeReference<MatchingResponse<ReqCheckResponse>>() {
+    };
+    MatchingResponse<ReqCheckResponse> res = mapper.readValue(json, ref);
+    if (res != null && res.getMatched()) {
+      LOG.debug("Found " + res.getMatches().size() + " requests");
+      CompanyRecordModel match = null;
+      for (ReqCheckResponse duplicateReq : res.getMatches()) {
+        if (reqMatches.size() < 5) {
+          match = new CompanyRecordModel();
+          match.setCmrNo(duplicateReq.getReqId() + "");
+          match.setCity(duplicateReq.getCity());
+          match.setCountryCd(duplicateReq.getLandedCountry());
+          match.setIssuingCntry(duplicateReq.getIssuingCntry());
+          match.setMatchGrade(duplicateReq.getMatchGrade() + "");
+          match.setName(duplicateReq.getCustomerName());
+          match.setPostCd(duplicateReq.getPostalCode());
+          match.setRecType(CompanyRecordModel.REC_TYPE_REQUEST);
+          match.setStateProv(duplicateReq.getStateProv());
+          match.setStreetAddress1(duplicateReq.getStreetLine1());
+          match.setStreetAddress2(duplicateReq.getStreetLine2());
+          match.setRestrictTo(duplicateReq.getUsRestrictTo());
+          match.setVat(duplicateReq.getVat());
+          match.setTaxCd1(duplicateReq.getTaxCd1());
+
+          reqMatches.add(match);
+        } else {
+          break;
+        }
+      }
+    }
+    return reqMatches;
   }
 
   /**
@@ -404,8 +483,12 @@ public class CompanyFinder {
     if (sbDuns.length() > 0) {
       // try to do a secondary matching against FindCMR using DUNS Information
       LOG.debug("Trying to find CMRs with DUNS: " + sbDuns.toString());
-      List<CompanyRecordModel> cmrs = findCMRsViaService(searchModel.getIssuingCntry(), null, 3, "showCmrType=R,P&addressType="
-          + ("897".equals(searchModel.getIssuingCntry()) ? "ZS01,ZI01" : "ZS01") + "&dunsNumberList=" + sbDuns.toString());
+      String params = "showCmrType=R,P&addressType=" + ("897".equals(searchModel.getIssuingCntry()) ? "ZS01,ZI01" : "ZS01") + "&dunsNumberList="
+          + sbDuns.toString();
+      if (!StringUtils.isBlank(searchModel.getRestrictTo())) {
+        params += "&usRestrictTo=" + searchModel.getRestrictTo();
+      }
+      List<CompanyRecordModel> cmrs = findCMRsViaService(searchModel.getIssuingCntry(), null, 3, params);
       if (cmrs != null) {
         for (CompanyRecordModel cmr : cmrs) {
           cmr.setMatchGrade("DUNS");

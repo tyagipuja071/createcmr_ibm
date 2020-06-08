@@ -213,7 +213,7 @@
           <length>6</length>
         </column>
         
-        <column exactLength="true">
+        <column>
           <label>Address Seq. No.</label>
           <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
           <width>20</width>
@@ -438,7 +438,7 @@
           <length>6</length>
         </column>
         
-        <column exactLength="true">
+        <column>
           <label>Address Seq. No.</label>
           <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
           <width>20</width>

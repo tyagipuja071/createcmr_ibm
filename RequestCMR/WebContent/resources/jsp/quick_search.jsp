@@ -44,6 +44,23 @@ form.ibm-column-form .dijitTextBox INPUT {
     FilteringDropdown.loadItems('countryCd', 'countryCd_spinner', 'bds', 'fieldId=LandedCountry');
     FilteringDropdown.loadOnChange('stateProv', 'stateProv_spinner', 'bds', 'fieldId=StateProv&cmrIssuingCntry=_issuingCntry&landCntry=_countryCd', 'countryCd');
     
+    var ids2 = cmr.query('QUICK_SEARCH.RESTRICT_TO', {_qall  : 'Y'});
+    var model2 = { 
+        identifier : "id", 
+        label : "name",
+        items : []
+    };
+    model2.items.push({id : '', name : ''});
+    for (var i =0; i < ids2.length; i++){
+      model2.items.push({id : ids2[i].ret1, name : ids2[i].ret2});
+    }
+    var dropdown2 = {
+        listItems : model2
+    };
+    
+    FilteringDropdown.loadFixedItems('restrictTo', null, dropdown2);
+    //FilteringDropdown.loadItems('restrictTo', null, 'lov', 'fieldId=RestrictTo&CMRIssuingCountry=897');
+    
     
     // onchange handlers
     var _cntryHandler = dojo.connect(FormManager.getField('issuingCntry'), 'onChange', function(value) {
@@ -58,14 +75,19 @@ form.ibm-column-form .dijitTextBox INPUT {
           FormManager.setValue('countryCd', value.substring(3));
         }
         var cntry = value.length == 3 ? value : value.substring(0,3);
-        if (cntry == '706'){
+        cmr.hideNode('siret-cont');
+        cmr.hideNode('restrict-cont');
+        FormManager.setValue('taxCd1','');
+        FormManager.readOnly('taxCd1');
+        FormManager.setValue('restrictTo','');
+        FormManager.readOnly('restrictTo');
+        if (cntry == '897'){
+          cmr.showNode('restrict-cont');
+          FormManager.enable('restrictTo');
+        } else if (cntry == '706'){
           cmr.showNode('siret-cont');
           FormManager.enable('taxCd1');
-        } else {
-          FormManager.setValue('');
-          FormManager.readOnly('taxCd1');
-          cmr.hideNode('siret-cont');
-        }
+        } 
       }
     });
     var _landCntryHandler = dojo.connect(FormManager.getField('countryCd'), 'onChange', function(value) {
@@ -156,7 +178,7 @@ form.ibm-column-form .dijitTextBox INPUT {
         <cmr:column span="6">
           <div class="embargo1">
             <img src="${resourcesPath}/images/info-bubble-icon.png" class="cmr-error-icon">
-            <cmr:note text="You can quickly search for existing CMRs and D&B records based on company details. Requests can directly be created from the results. 
+            <cmr:note text="You can quickly search for existing CMRs and D&B records based on company details. The list also shows current requests with similar details. Requests can directly be created from the results. 
             If a CMR No. is not specified, you will have to provide Name, Country, Street, and City values." />
           </div>
         </cmr:column>
@@ -288,19 +310,35 @@ form.ibm-column-form .dijitTextBox INPUT {
             <form:input path="vat" placeHolder="VAT# / Business Reg #" dojoType="dijit.form.TextBox" maxlength="16"/>
           </p>
         </cmr:column>
-        <div id="siret-cont">
-        <cmr:column span="1" width="150">
-          <p>
-            <cmr:label fieldId="vat">SIRET: 
-            <cmr:info text="For France companies only."></cmr:info>
-            </cmr:label>
-          </p>
-        </cmr:column>
-        <cmr:column span="2" width="250">
-          <p> 
-            <form:input path="taxCd1" placeHolder="SIRET" dojoType="dijit.form.TextBox" maxlength="14"/>
-          </p>
-        </cmr:column>
+        <div id="siret-cont" style="display:none">
+          <cmr:column span="1" width="150">
+            <p>
+              <cmr:label fieldId="vat">SIRET: 
+              <cmr:info text="For France companies only."></cmr:info>
+              </cmr:label>
+            </p>
+          </cmr:column>
+          <cmr:column span="2" width="250">
+            <p> 
+              <form:input path="taxCd1" placeHolder="SIRET" dojoType="dijit.form.TextBox" maxlength="14"/>
+            </p>
+          </cmr:column>
+        </div>
+        <div id="restrict-cont" style="display:none">
+          <cmr:column span="1" width="150">
+            <p>
+              <cmr:label fieldId="vat">Restricted To: 
+              <cmr:info text="Restriction Code, for US records only."></cmr:info>
+              </cmr:label>
+            </p>
+          </cmr:column>
+          <cmr:column span="2" width="250">
+            <p> 
+              <form:select dojoType="dijit.form.FilteringSelect" id="restrictTo" searchAttr="name" style="display: block;" maxHeight="200"
+                required="false" path="restrictTo" placeHolder="Select Restriction">
+              </form:select>
+            </p>
+          </cmr:column>
         </div>
       </cmr:row>
 
@@ -344,9 +382,9 @@ form.ibm-column-form .dijitTextBox INPUT {
                      <td colspan="7">No records found for the given criteria.</td>
                    </tr>
                    <tr ng-repeat="rec in records | recFilter:recordsFilter">
-                     <td><span ng-class="{'type-cmr' : rec.recType == 'CMR', 'type-dnb' : rec.recType == 'DNB'}">{{rec.recType == 'DNB' ? 'D&B' : rec.recType}}</span></td>
+                     <td><span ng-class="{'type-cmr' : rec.recType == 'CMR', 'type-dnb' : rec.recType == 'DNB', 'type-req' : rec.recType == 'REQ'}">{{rec.recType == 'DNB' ? 'D&B' : (rec.recType == 'REQ' ? 'Request' : rec.recType)}}</span></td>
                      <td>
-                       <a ng-click="openDetails(rec)" title="Open details of the record">{{rec.recType == 'CMR' ? rec.cmrNo : rec.dunsNo}}</a>
+                       <a ng-click="openDetails(rec)" title="Open details of the record">{{rec.recType == 'DNB' ? rec.dunsNo : rec.cmrNo}}</a>
                        <span ng-show="rec.revenue > 0 && !rec.highestRevenue" title="With revenue" style="cursor:help">
                          <br>
                          <img src="${resourcesPath}/images/money.png" class="money">
@@ -366,12 +404,18 @@ form.ibm-column-form .dijitTextBox INPUT {
                        <div ng-show="rec.recType == 'DNB'">
                          <span title="D&B Match Confidence (0 - lowest, 10 - highest)" class="match-dnb" ng-class="{'match-e' : rec.matchGrade == '10' || rec.matchGrade == '09', 'match-f' : rec.matchGrade == '08', 'match-r' : rec.matchGrade == '07'}">{{rec.matchGrade}}</span>
                        </div>
+                       <div ng-show="rec.recType == 'REQ'">
+                         <span title="Match Quality (0 - lowest, 100 - highest)" class="match-dnb">{{rec.matchGrade}}</span>
+                       </div>
                      </td>
                      <td>
                        {{rec.name}} 
                        <span ng-if="rec.altName" style="color:rgb(217,108,0)" title="Local Language Data">
                          <br>
                          {{rec.altName}}
+                       </span>
+                       <span ng-if="rec.restrictTo" class="restrict" title="Restriction Code">
+                         {{rec.restrictTo}}
                        </span>
                      </td>
                      <td>
@@ -407,6 +451,9 @@ form.ibm-column-form .dijitTextBox INPUT {
                          <input ng-show="rec.cmrNo.indexOf('P') == 0" type="button" class="cmr-grid-btn" value="Convert to Legal CMR" title="Request for conversion of this Prospect to Legal CMR" ng-click="confirmImport(rec, false)">
                          <input ng-show="rec.cmrNo.indexOf('P') != 0" type="button" class="cmr-grid-btn" value="Update CMR" title="Request for an Update of this CMR" ng-click="confirmImport(rec, true)">
                        </div>
+                       <div ng-show="rec.recType == 'REQ'">
+                         <img class="pdf" title="Export Request Details to PDF" ng-click="exportToPdf(rec)" src="${resourcesPath}/images/pdf-icon.png">
+                       </div>
                      </td> 
                    </tr>
                    <tr>
@@ -430,6 +477,12 @@ form.ibm-column-form .dijitTextBox INPUT {
   <cmr:model model="search" />
 </cmr:section>
 </cmr:boxContent>
+<form name="frmPDF" id="frmPDF" action="${contextPath}/request/pdf" method="POST" target="attachDlFrame">
+  <input type="hidden" id="pdfReqId" name="reqId">
+  <input type="hidden" id="pdfTokenId" name="tokenId">
+</form>
+<iframe id="attachDlFrame" style="display:none" name="attachDlFrame"></iframe>
+
 <script src="${resourcesPath}/js/quick_search.js?${cmrv}"></script>
 <jsp:include page="quick_search_modal.jsp" />
   

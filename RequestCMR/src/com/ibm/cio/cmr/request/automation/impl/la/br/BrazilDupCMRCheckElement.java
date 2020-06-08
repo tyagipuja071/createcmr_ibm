@@ -167,7 +167,8 @@ public class BrazilDupCMRCheckElement extends DuplicateCheckElement {
     // get request admin and data
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-
+    Addr zs01 = requestData.getAddress("ZS01");
+    String zs01Kunnr = zs01.getSapNo() != null ? zs01.getSapNo().substring(1) : null;
     // build result
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
@@ -219,8 +220,7 @@ public class BrazilDupCMRCheckElement extends DuplicateCheckElement {
 
             // add support to override duplicate CMR checks later
             requestData.getAdmin().setMatchIndc("C");
-
-            engineData.addRejectionComment("Duplicate CMR matches found.");
+            engineData.addRejectionComment("DUPC", "Duplicate CMR matches found.", StringUtils.join(cmrList, ", "), zs01Kunnr);
             result.setOnError(true);
           }
           result.setDetails(details.toString().trim());

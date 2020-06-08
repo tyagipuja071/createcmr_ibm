@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -14,6 +15,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -29,6 +31,8 @@ public class AustraliaUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(AustraliaUtil.class);
 
+  private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
+
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
@@ -43,131 +47,59 @@ public class AustraliaUtil extends AutomationUtil {
     LOG.debug("Australia : Performing field computations for req_id : " + reqId);
     String defaultClusterCd = getDefaultCluster(entityManager, requestData, engineData);
     String validCode = checkIfClusterSalesmanIsValid(entityManager, requestData);
+
     // a. check cluster
     if (defaultClusterCd.equalsIgnoreCase(data.getApCustClusterId())) {
-      LOG.debug("Default Cluster used.");
-      engineData.addRejectionComment("Cluster should not be the default cluster for the scenario.");
-      results.setOnError(true);
-      // eleResults.append("Default Cluster used.\n");
-      details.append("Cluster should not be the default cluster for the scenario.\n");
+
+      if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+        LOG.debug("Default Cluster used but allowed: ISIC=" + data.getIsicCd() + " Scenario=" + data.getCustSubGrp());
+        results.setOnError(false);
+        // eleResults.append("Default Cluster used.\n");
+        details.append("Default Cluster used but allowed for the request (Private Person/BlueMix/Marketplace).\n");
+      } else {
+        LOG.debug("Default Cluster used.");
+        engineData.addRejectionComment("OTH", "Cluster should not be the default cluster for the scenario.", "", "");
+        results.setOnError(true);
+        // eleResults.append("Default Cluster used.\n");
+        details.append("Cluster should not be the default cluster for the scenario.\n");
+      }
     } else {
       LOG.debug("Default Cluster NOT used.");
       // eleResults.append("Default Cluster not used.\n");
       details.append("Cluster used is not default.\n");
     }
-    // b. check cluster and salesman no. combination
-    if ("VALID".equalsIgnoreCase(validCode)) {
-      LOG.debug("The combination of Salesman No. and Cluster is valid.");
-      // eleResults.append("\nValid cluster and Salesman No. used.\n");
-      details.append("\nThe combination of Salesman No. and Cluster is valid.\n");
-    } else if ("INVALID".equalsIgnoreCase(validCode)) {
-      LOG.debug("The combination of Salesman No. and Cluster is INVALID.");
-      engineData.addRejectionComment("The combination of Salesman No. and Cluster is invalid.");
-      results.setOnError(true);
-      // eleResults.append("Invalid Cluster and Salesman No. combination.\n");
-      details.append("\nThe combination of Salesman No. and Cluster is invalid.\n");
-    } else {
-      LOG.debug("Salesman No.-Cluster combination not present.");
-      engineData.addRejectionComment("No combination of Salesman No. and Cluster is present.");
-      results.setOnError(true);
-      // eleResults.append("No combination of Salesman No. and Cluster
-      // present.\n");
-      details.append("\nNo combination of Salesman No. and Cluster is present.\n");
-    }
-    // defect CMR-1972 fix
-    // try {
-    // // c. check entity type
-    // AutomationResponse<BNValidationResponse> response = getBNInfo(admin,
-    // data);
-    // if (response != null && response.isSuccess()) {
-    // LOG.debug("Response received from ABN Service.");
-    // if (response.getRecord().isValid()) {
-    // LOG.debug("Business No. verified succesfully from ABN Service.");
-    // if ((StringUtils.isNotBlank(response.getRecord().getEntityTypeCode())
-    // &&
-    // StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeCode(),
-    // "GOV"))
-    // || (StringUtils.isNotBlank(response.getRecord().getEntityTypeDesc())
-    // &&
-    // StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeDesc(),
-    // "GOV"))) {
-    // LOG.debug("Entity Type is GOV.");
-    // details.append("\nSetting Fields based on ABN Service:\n");
-    // details.append("Government Indicator = " + "Yes\n");
-    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-    // "DATA", "GOVERNMENT", data.getGovType(), "Y");
-    // // code for calculating gov type to be placed here
-    //
-    // if ((StringUtils.isNotBlank(response.getRecord().getEntityTypeCode())
-    // &&
-    // (StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeCode(),
-    // "Federal")
-    // ||
-    // StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeCode(),
-    // "Commonwealth")))
-    // || (StringUtils.isNotBlank(response.getRecord().getEntityTypeDesc())
-    // &&
-    // (StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeDesc(),
-    // "Federal")
-    // ||
-    // StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeDesc(),
-    // "Commonwealth")))) {
-    // details.append("Government Customer Type = " + "012\n");
-    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-    // "DATA", "TAX_CD2", data.getTaxCd2(), "012");
-    // } else if
-    // ((StringUtils.isNotBlank(response.getRecord().getEntityTypeCode())
-    // &&
-    // StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeCode(),
-    // "State"))
-    // || (StringUtils.isNotBlank(response.getRecord().getEntityTypeDesc())
-    // &&
-    // StringUtils.containsIgnoreCase(response.getRecord().getEntityTypeDesc(),
-    // "State"))) {
-    // details.append("Government Customer Type = " + "013\n");
-    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-    // "DATA", "TAX_CD2", data.getTaxCd2(), "013");
-    // } else {
-    // details.append("Government Customer Type = " + "014\n");
-    // overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE,
-    // "DATA", "TAX_CD2", data.getTaxCd2(), "014");
-    // }
-    //
-    // // code end
-    // // engineData.addRejectionComment("The entity is a Government entity
-    // // but type cannot be determined.");
-    // // results.setOnError(true);
-    // // eleResults.append("\nGov Typ undefined.\n");
-    // // details.append("\nThe entity is a Government entity but type
-    // // cannot be determined.\n");
-    // } else {
-    // LOG.debug("The entity is not a Government entity.");
-    // // eleResults.append("\nEntity is non-government.\n");
-    // details.append("\nThe entity is not a Government entity.\n");
-    // }
-    // } else {
-    // LOG.debug("Buisness Number is not Valid.");
-    // engineData.addRejectionComment("Buisness Number is not Valid.");
-    // results.setOnError(true);
-    // // eleResults.append("\nBuisness no. invalid.\n");
-    // details.append("\nThe information on the request does not match the
-    // information from the ABN service.\n");
-    // }
-    // } else {
-    // LOG.debug("No Response from ABN Service.");
-    // engineData.addRejectionComment(response.getMessage());
-    // results.setOnError(true);
-    // // eleResults.append("\nNo Response from ABN Service.\n");
-    // details.append("\n" + response.getMessage() + "\n");
-    // }
-    // } finally {
-    // }
 
+    if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+      LOG.debug("Salesman check skipped for private and allowed scenarios.");
+      // eleResults.append("\nValid cluster and Salesman No. used.\n");
+      details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
+    } else {
+
+      // b. check cluster and salesman no. combination
+      if ("VALID".equalsIgnoreCase(validCode)) {
+        LOG.debug("The combination of Salesman No. and Cluster is valid.");
+        // eleResults.append("\nValid cluster and Salesman No. used.\n");
+        details.append("\nThe combination of Salesman No. and Cluster is valid.\n");
+      } else if ("INVALID".equalsIgnoreCase(validCode)) {
+        LOG.debug("The combination of Salesman No. and Cluster is INVALID.");
+        engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is invalid.", "", "");
+        results.setOnError(true);
+        // eleResults.append("Invalid Cluster and Salesman No. combination.\n");
+        details.append("\nThe combination of Salesman No. and Cluster is invalid.\n");
+      } else {
+        LOG.debug("Salesman No.-Cluster combination not present.");
+        engineData.addRejectionComment("OTH", "No combination of Salesman No. and Cluster is present.", "", "");
+        results.setOnError(true);
+        // eleResults.append("No combination of Salesman No. and Cluster
+        // present.\n");
+        details.append("\nNo combination of Salesman No. and Cluster is present.\n");
+      }
+    }
     isIsicInvalid = isISICValidForScenario(requestData, Arrays.asList(isicScenarioList));
 
     if (isIsicInvalid) {
       details.append("Invalid ISIC code, please choose another one based on industry.\n");
-      engineData.addRejectionComment("Invalid ISIC code, please choose another one based on industry.");
+      engineData.addRejectionComment("OTH", "Invalid ISIC code, please choose another one based on industry.", "", "");
       results.setOnError(true);
     } else {
       details.append("ISIC is valid" + "\n");
@@ -185,6 +117,28 @@ public class AustraliaUtil extends AutomationUtil {
     return results;
   }
 
+  /**
+   * CHecks if the record is a private customer / bluemix / marketplace
+   * 
+   * @param engineData
+   * @param requestData
+   * @param details
+   * @return
+   */
+  private void processSkipCompanyChecks(AutomationEngineData engineData, RequestData requestData, StringBuilder details) {
+    Data data = requestData.getData();
+
+    boolean skipCompanyChecks = "9500".equals(data.getIsicCd()) || (data.getCustSubGrp() != null && data.getCustSubGrp().contains("PRIV"));
+    if (skipCompanyChecks) {
+      details.append("Private Person request - company checks will be skipped.\n");
+      ScenarioExceptionsUtil exc = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      if (exc != null) {
+        exc.setSkipCompanyVerification(true);
+        engineData.put("SCENARIO_EXCEPTIONS", exc);
+      }
+    }
+  }
+
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
@@ -195,6 +149,7 @@ public class AustraliaUtil extends AutomationUtil {
     // scenario check for normal and ESOSW
     String scenarioList[] = { "NRML", "ESOSW" };
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scenarioList));
+    processSkipCompanyChecks(engineData, requestData, details);
     return true;
   }
 

@@ -2,7 +2,9 @@ package com.ibm.cio.cmr.request.automation.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,20 +26,34 @@ import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
+import com.ibm.cmr.services.client.PPSServiceClient;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
+import com.ibm.cmr.services.client.pps.PPSRequest;
+import com.ibm.cmr.services.client.pps.PPSResponse;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  *
@@ -73,8 +89,25 @@ public abstract class AutomationUtil {
       put(SystemLocation.COMOROS, FranceUtil.class);
       put(SystemLocation.SAINT_PIERRE_MIQUELON, FranceUtil.class);
 
+      put(SystemLocation.SWITZERLAND, SwitzerlandUtil.class);
+      put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
+
     }
   };
+
+  private static final List<String> GLOBAL_LEGAL_ENDINGS = Arrays.asList("COMPANY", "CO", "CORP", "CORPORATION", "LTD", "LIMITED", "LLC", "INC",
+      "INCORPORATED");
+
+  /**
+   * Holds the possible return values of
+   * {@link SwitzerlandUtil#checkPrivatePersonRecord(Addr, boolean)}
+   * 
+   * @author JeffZAMORA
+   *
+   */
+  protected static enum PrivatePersonCheckStatus {
+    Passed, PassedBoth, DuplicateCMR, NoIBMRecord, DuplicateCheckError, BluepagesError;
+  }
 
   private static final List<String> VAT_CHECK_COUNTRIES = Arrays.asList(SystemLocation.BRAZIL);
 
@@ -343,7 +376,13 @@ public abstract class AutomationUtil {
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (StringUtils.isNotBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
+      if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        request.setOrgId(data.getVat().split("\\s")[0]);
+      } else {
+        request.setOrgId(data.getVat());
+      }
+    } else if (StringUtils.isNotBlank(addr.getVat())) {
+      request.setOrgId(addr.getVat());
     }
 
     if (addr != null) {
@@ -418,6 +457,480 @@ public abstract class AutomationUtil {
     }
 
     return result;
+  }
+
+  /**
+   * Does the private person and IBM employee checks
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param result
+   * @param details
+   * @param output
+   * @return
+   */
+  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
+      boolean checkBluepages) {
+
+    if (hasLegalEndings(name)) {
+      engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
+      details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
+      return false;
+    }
+
+    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
+    PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+
+    switch (checkStatus) {
+    case BluepagesError:
+      engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
+      break;
+    case DuplicateCMR:
+      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
+      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
+          checkResult.getCmrNo(), "");
+      return false;
+    case DuplicateCheckError:
+      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      break;
+    case NoIBMRecord:
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+      details.append("Employee details not found in IBM BluePages.").append("\n");
+      break;
+    case Passed:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      break;
+    case PassedBoth:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      details.append("Name validated against IBM BluePages successfully.").append("\n");
+      break;
+    }
+    return true;
+  }
+
+  /**
+   * Checks the private person record against current CMR records and optionally
+   * against BluePages
+   * 
+   * @param soldTo
+   * @param checkBluePages
+   * @return
+   */
+  protected PrivatePersonCheckResult checkPrivatePersonRecord(String country, String landCntry, String name, boolean checkBluePages) {
+    LOG.debug("Validating Private Person record for " + name);
+    try {
+      DuplicateCMRCheckResponse checkResponse = checkDuplicatePrivatePersonRecord(name, country, landCntry);
+      String cmrNo = "";
+      if (checkResponse != null) {
+        cmrNo = checkResponse.getCmrNo();
+      }
+      // TODO find kunnr String kunnr = checkResponse.get
+      if (!StringUtils.isBlank(cmrNo)) {
+        LOG.debug("Duplicate CMR No. found: " + checkResponse.getCmrNo());
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCMR, cmrNo, null);
+      }
+    } catch (Exception e) {
+      LOG.warn("Duplicate CMR check error.", e);
+      return new PrivatePersonCheckResult(PrivatePersonCheckStatus.DuplicateCheckError);
+    }
+    if (checkBluePages) {
+      LOG.debug("Checking against BluePages..");
+      Person person = null;
+      try {
+        person = BluePagesHelper.getPersonByName(name);
+        if (person == null) {
+          LOG.debug("NO BluePages record found");
+          return new PrivatePersonCheckResult(PrivatePersonCheckStatus.NoIBMRecord);
+        } else {
+          LOG.debug("BluePages record found: " + person.getName() + "/" + person.getEmail());
+          return new PrivatePersonCheckResult(PrivatePersonCheckStatus.PassedBoth);
+        }
+      } catch (Exception e) {
+        LOG.warn("BluePages check error.", e);
+        return new PrivatePersonCheckResult(PrivatePersonCheckStatus.BluepagesError);
+      }
+    } else {
+      LOG.debug("No duplicate CMR found.");
+      return new PrivatePersonCheckResult(PrivatePersonCheckStatus.Passed);
+    }
+
+  }
+
+  /**
+   * Generic matching logic to check NAME against private person records
+   * 
+   * @param name
+   * @param issuingCountry
+   * @param landedCountry
+   * @return CMR No. of the duplicate record
+   */
+  protected DuplicateCMRCheckResponse checkDuplicatePrivatePersonRecord(String name, String issuingCountry, String landedCountry) throws Exception {
+    MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        MatchingServiceClient.class);
+    DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
+    request.setCustomerName(name);
+    request.setIssuingCountry(issuingCountry);
+    request.setLandedCountry(landedCountry);
+    request.setIsicCd(AutomationConst.ISIC_PRIVATE_PERSON);
+    request.setNameMatch("Y");
+    client.setReadTimeout(1000 * 60 * 5);
+    LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
+    MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
+    ObjectMapper mapper = new ObjectMapper();
+    String json = mapper.writeValueAsString(rawResponse);
+
+    TypeReference<MatchingResponse<DuplicateCMRCheckResponse>> ref = new TypeReference<MatchingResponse<DuplicateCMRCheckResponse>>() {
+    };
+
+    MatchingResponse<DuplicateCMRCheckResponse> response = mapper.readValue(json, ref);
+
+    if (response.getSuccess()) {
+      if (response.getMatched() && response.getMatches().size() > 0) {
+        return response.getMatches().get(0);
+      }
+    }
+    return null;
+
+  }
+
+  /**
+   * Connects to PPS and checks the validity of the supplied CE ID
+   * 
+   * @param engineData
+   * @param ceId
+   * @param details
+   * @return
+   */
+  protected boolean doBusinessPartnerChecks(AutomationEngineData engineData, String ceId, StringBuilder details) {
+    if (StringUtils.isBlank(ceId)) {
+      engineData.addRejectionComment("OTH", "PPS CEID is required for Business Partner scenarios.", "", "");
+      details.append("PPS CEID is required for Business Partner scenarios.").append("\n");
+      return false;
+    }
+    try {
+      if (!checkPPSCEID(ceId)) {
+        engineData.addRejectionComment("OTH", "CEID " + ceId + "  is not valid as checked against the PartnerWorld Profile System.", "", "");
+        details.append("CEID " + ceId + " is not valid as checked against the PartnerWorld Profile System.").append("\n");
+        return false;
+      } else {
+        details.append("CEID " + ceId + " is validated against the PartnerWorld Profile System.").append("\n");
+      }
+    } catch (Exception e) {
+      LOG.error("Not able to validate PPS CE ID using PPS Service.", e);
+      details.append("Not able to validate PPS CEID " + ceId + " against PPS. An issue occurred during the validation.").append("\n");
+      engineData.addNegativeCheckStatus("PPSCEID",
+          "Not able to validate PPS CEID " + ceId + " against PPS. An issue occurred during the validation.");
+    }
+    return true;
+  }
+
+  /**
+   * Connects to the PPS Service and checks whether the PPS CEID is valid
+   * 
+   * @param ppsCeId
+   * @return
+   * @throws Exception
+   */
+  protected boolean checkPPSCEID(String ppsCeId) throws Exception {
+    if (StringUtils.isBlank(ppsCeId)) {
+      return false;
+    }
+    PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+        PPSServiceClient.class);
+    client.setRequestMethod(Method.Get);
+    client.setReadTimeout(1000 * 60 * 5);
+    PPSRequest request = new PPSRequest();
+    request.setCeid(ppsCeId);
+    PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
+    if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Generic method for ignoring Private Customer record updates
+   * 
+   * @param entityManager
+   * @param admin
+   * @param output
+   * @param validation
+   * @param engineData
+   * @return
+   */
+  protected boolean handlePrivatePersonRecord(EntityManager entityManager, Admin admin, AutomationResult<ValidationOutput> output,
+      ValidationOutput validation, AutomationEngineData engineData) {
+    DataRdc rdc = getDataRdc(entityManager, admin);
+    if ("9500".equals(rdc.getIsicCd())) {
+      LOG.debug("Private customer record. Skipping validations.");
+      validation.setSuccess(true);
+      validation.setMessage("Skipped");
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_VAT_CHECKS);
+      output.setDetails("Update checks skipped for Private Customer record.");
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Checks if the address already exists on the Request
+   *
+   * @param addrToCheck
+   * @param reqId
+   * @return
+   */
+  protected boolean addressExists(EntityManager entityManager, Addr addrToCheck) {
+
+    String sql = ExternalizedQuery.getSql("AUTO.CHECK_IF_ADDRESS_EXIST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addrToCheck.getId().getReqId());
+    query.setParameter("ADDR_SEQ", addrToCheck.getId().getAddrSeq());
+    query.setParameter("NAME1", addrToCheck.getCustNm1());
+    query.setParameter("LAND_CNTRY", addrToCheck.getLandCntry());
+    query.setParameter("CITY", addrToCheck.getCity1());
+    if (addrToCheck.getAddrTxt() != null) {
+      query.append(" and ADDR_TXT = :ADDR_TXT");
+      query.setParameter("ADDR_TXT", addrToCheck.getAddrTxt());
+    }
+    if (addrToCheck.getCustNm2() != null) {
+      query.append(" and CUST_NM2 = :NAME2");
+      query.setParameter("NAME2", addrToCheck.getCustNm2());
+    }
+    if (addrToCheck.getDept() != null) {
+      query.append(" and DEPT = :DEPT");
+      query.setParameter("DEPT", addrToCheck.getDept());
+    }
+    if (addrToCheck.getFloor() != null) {
+      query.append(" and FLOOR= :FLOOR");
+      query.setParameter("FLOOR", addrToCheck.getFloor());
+    }
+    if (addrToCheck.getBldg() != null) {
+      query.append(" and BLDG= :BLDG");
+      query.setParameter("BLDG", addrToCheck.getBldg());
+    }
+    if (addrToCheck.getOffice() != null) {
+      query.append(" and OFFICE =:OFFICE");
+      query.setParameter("OFFICE", addrToCheck.getOffice());
+    }
+    if (addrToCheck.getStateProv() != null) {
+      query.append(" and STATE_PROV = :STATE");
+      query.setParameter("STATE", addrToCheck.getStateProv());
+    }
+    if (addrToCheck.getPoBox() != null) {
+      query.append(" and PO_BOX = :PO_BOX");
+      query.setParameter("PO_BOX", addrToCheck.getPoBox());
+    }
+    if (addrToCheck.getPostCd() != null) {
+      query.append(" and POST_CD= :POST_CD");
+      query.setParameter("POST_CD", addrToCheck.getPostCd());
+    }
+    if (addrToCheck.getCustPhone() != null) {
+      query.append(" and CUST_PHONE = :PHONE");
+      query.setParameter("PHONE", addrToCheck.getCustPhone());
+    }
+    if (addrToCheck.getCounty() != null) {
+      query.append(" and COUNTY= :COUNTY");
+      query.setParameter("COUNTY", addrToCheck.getCounty());
+    }
+
+    return query.exists();
+  }
+
+  /**
+   * Removes duplicate addresses on the request based on the Sold-to address
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param details
+   */
+  protected boolean removeDuplicateAddresses(EntityManager entityManager, RequestData requestData, StringBuilder details) {
+    Addr zs01 = requestData.getAddress("ZS01");
+    String custNm1 = StringUtils.isNotBlank(zs01.getCustNm1()) ? zs01.getCustNm1().trim() : "";
+    String custNm2 = StringUtils.isNotBlank(zs01.getCustNm2()) ? zs01.getCustNm2().trim() : "";
+    String mainCustNm = (custNm1 + (StringUtils.isNotBlank(custNm2) ? " " + custNm2 : "")).toUpperCase();
+    String mainStreetAddress1 = (StringUtils.isNotBlank(zs01.getAddrTxt()) ? zs01.getAddrTxt() : "").trim().toUpperCase();
+    String mainCity = (StringUtils.isNotBlank(zs01.getCity1()) ? zs01.getCity1() : "").trim().toUpperCase();
+    String mainPostalCd = (StringUtils.isNotBlank(zs01.getPostCd()) ? zs01.getPostCd() : "").trim();
+    Iterator<Addr> it = requestData.getAddresses().iterator();
+    boolean removed = false;
+    details.append("Checking for duplicate address records - ").append("\n");
+    while (it.hasNext()) {
+      Addr addr = it.next();
+      if (!"ZS01".equals(addr.getId().getAddrType())) {
+        String custNm = (addr.getCustNm1().trim() + (StringUtils.isNotBlank(addr.getCustNm2()) ? " " + addr.getCustNm2().trim() : "")).toUpperCase();
+        if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
+            && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
+          details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
+          entityManager.remove(addr);
+          it.remove();
+          removed = true;
+        }
+      }
+    }
+
+    if (!removed) {
+      details.append("No duplicate address records found on the request.").append("\n");
+    }
+    return removed;
+
+  }
+
+  /**
+   * Checks if the given name has legal endings. This checks the globally
+   * defined legal identifiers and has support for country-specific legal
+   * endings
+   * 
+   * @param name
+   * @return
+   */
+  protected boolean hasLegalEndings(String name) {
+    if (name == null) {
+      return false;
+    }
+
+    String cleanName = " " + getCleanString(name) + " ";
+    for (String gblEnding : GLOBAL_LEGAL_ENDINGS) {
+
+      if (cleanName.contains(" " + getCleanString(gblEnding) + " ")) {
+        return true;
+      }
+    }
+    List<String> extendedEndings = getCountryLegalEndings();
+    if (extendedEndings != null) {
+      for (String cntryEnding : extendedEndings) {
+        if (cleanName.contains(" " + getCleanString(cntryEnding) + " ")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Extracts the Alphanumeric string from the input String (replaces non
+   * accepted characters with spaces
+   * 
+   * @param str
+   * @return
+   */
+  public static String getCleanString(String str) {
+    if (StringUtils.isNotBlank(str)) {
+      str = str.trim().replaceAll("[^a-zA-Z0-9\\s\\-]", " ").toUpperCase();
+      return str;
+    }
+    return "";
+  }
+
+  /**
+   * 
+   * Extended legal endings apart from the global values. Override in
+   * country-specific utilities to extend the {@link #hasLegalEndings(String)}
+   * method
+   * 
+   * @return
+   */
+  protected List<String> getCountryLegalEndings() {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Gets the {@link DataRdc} record for the given request
+   * 
+   * @param entityManager
+   * @param admin
+   * @return
+   */
+  protected DataRdc getDataRdc(EntityManager entityManager, Admin admin) {
+    DataPK rdcPk = new DataPK();
+    rdcPk.setReqId(admin.getId().getReqId());
+    DataRdc rdc = entityManager.find(DataRdc.class, rdcPk);
+    return rdc;
+  }
+
+  /**
+   * Container class, extended to hold extra info for the matched CMR No.
+   * 
+   * @author JeffZAMORA
+   *
+   */
+  protected class PrivatePersonCheckResult {
+    private PrivatePersonCheckStatus status;
+    private String cmrNo;
+    private String kunnr;
+
+    public PrivatePersonCheckResult(PrivatePersonCheckStatus status) {
+      this(status, null, null);
+    }
+
+    public PrivatePersonCheckResult(PrivatePersonCheckStatus status, String cmrNo, String kunnr) {
+      this.status = status;
+      this.cmrNo = cmrNo;
+    }
+
+    public PrivatePersonCheckStatus getStatus() {
+      return status;
+    }
+
+    public void setStatus(PrivatePersonCheckStatus status) {
+      this.status = status;
+    }
+
+    public String getCmrNo() {
+      return cmrNo;
+    }
+
+    public void setCmrNo(String cmrNo) {
+      this.cmrNo = cmrNo;
+    }
+
+    public String getKunnr() {
+      return kunnr;
+    }
+
+    public void setKunnr(String kunnr) {
+      this.kunnr = kunnr;
+    }
+  }
+
+  protected String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+    }
+    return kunnr;
+  }
+
+  public void skipAllChecks(AutomationEngineData engineData) {
+    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
+      ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      scenarioExceptions.setSkipDuplicateChecks(true);
+      scenarioExceptions.setSkipChecks(true);
+      scenarioExceptions.setSkipCompanyVerification(true);
+    }
   }
 
 }

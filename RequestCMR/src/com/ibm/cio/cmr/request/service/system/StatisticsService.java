@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.system.MetricsModel;
 import com.ibm.cio.cmr.request.model.system.RequestStatsModel;
@@ -62,6 +64,17 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     RequestStatsContainer container = new RequestStatsContainer();
     MetricsModel model = (MetricsModel) params.getParam("model");
 
+    Date from = null;
+    Date to = null;
+    from = FORMATTER.parse(model.getDateFrom());
+    to = FORMATTER.parse(model.getDateTo());
+
+    long diff = to.getTime() - from.getTime();
+    double diffDays = Math.floor((diff / 1000) / 60 / 60 / 24);
+    if (diffDays > 180 || diffDays < 0) {
+      throw new CmrException(new Exception("Date range is either invalid or greater than 180 days."));
+    }
+
     LOG.info("Extracting data from " + model.getDateFrom() + " to " + model.getDateTo());
     String sql = ExternalizedQuery.getSql("METRICS.REQUEST_STAT");
     String geo = model.getGroupByGeo();
@@ -82,12 +95,25 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     query.setForReadOnly(true);
 
     List<RequestStatsModel> stats = query.getResults(RequestStatsModel.class);
+    long smallestReqId = Long.MAX_VALUE;
+    long largestReqId = 0;
+    for (RequestStatsModel stat : stats) {
+      if (stat.getId().getReqId() > largestReqId) {
+        largestReqId = stat.getId().getReqId();
+      }
+      if (stat.getId().getReqId() < smallestReqId) {
+        smallestReqId = stat.getId().getReqId();
+      }
+    }
     container.setRecords(stats);
-    LOG.debug("Records retrieved.");
+    LOG.debug("Records retrieved. Request ID range: " + smallestReqId + " to " + largestReqId);
 
     Map<Long, List<String>> rejections = new HashMap<Long, List<String>>();
     sql = ExternalizedQuery.getSql("METRICS.REJECTIONS");
     query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SMALLEST", smallestReqId);
+    query.setParameter("LARGEST", largestReqId);
+    query.setForReadOnly(true);
     List<Object[]> results = query.getResults();
 
     Long reqId = null;
@@ -119,8 +145,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  public void exportToExcel(RequestStatsContainer container, MetricsModel model, HttpServletResponse response) throws IOException, ParseException,
-      IllegalArgumentException, IllegalAccessException {
+  public void exportToExcel(RequestStatsContainer container, MetricsModel model, HttpServletResponse response)
+      throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     if (config == null) {
       initConfig();
@@ -130,84 +156,87 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     Map<Long, List<String>> rejectionReasons = container.getRejectionReasons();
     LOG.info("Exporting records to excel..");
     XSSFWorkbook report = new XSSFWorkbook();
-    XSSFSheet sheet = report.createSheet("Statistics");
+    try {
+      XSSFSheet sheet = report.createSheet("Statistics");
 
-    Drawing drawing = sheet.createDrawingPatriarch();
-    CreationHelper helper = report.getCreationHelper();
+      Drawing drawing = sheet.createDrawingPatriarch();
+      CreationHelper helper = report.getCreationHelper();
 
-    XSSFFont bold = report.createFont();
-    bold.setBold(true);
-    bold.setFontHeight(10);
-    XSSFCellStyle boldStyle = report.createCellStyle();
-    boldStyle.setFont(bold);
+      XSSFFont bold = report.createFont();
+      bold.setBold(true);
+      bold.setFontHeight(10);
+      XSSFCellStyle boldStyle = report.createCellStyle();
+      boldStyle.setFont(bold);
 
-    XSSFFont regular = report.createFont();
-    regular.setFontHeight(10);
-    XSSFCellStyle regularStyle = report.createCellStyle();
-    regularStyle.setFont(regular);
-    regularStyle.setWrapText(true);
-    regularStyle.setVerticalAlignment(VerticalAlignment.TOP);
+      XSSFFont regular = report.createFont();
+      regular.setFontHeight(10);
+      XSSFCellStyle regularStyle = report.createCellStyle();
+      regularStyle.setFont(regular);
+      regularStyle.setWrapText(true);
+      regularStyle.setVerticalAlignment(VerticalAlignment.TOP);
 
-    StatXLSConfig sc = null;
-    for (int i = 0; i < config.size(); i++) {
-      sc = config.get(i);
-      sheet.setColumnWidth(i, sc.getWidth() * 256);
-    }
-    // create title
-    XSSFRow titleRow = sheet.createRow(0);
-    XSSFCell cell = titleRow.createCell(0);
-    cell.setCellStyle(boldStyle);
-    String title = "Request Statistics";
-    if (model != null) {
-      title = "Request Statistics from " + model.getDateFrom() + " to " + model.getDateTo();
-      if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
-        title += " for " + model.getGroupByProcCenter();
+      StatXLSConfig sc = null;
+      for (int i = 0; i < config.size(); i++) {
+        sc = config.get(i);
+        sheet.setColumnWidth(i, sc.getWidth() * 256);
       }
-      if (!StringUtils.isEmpty(model.getGroupByGeo())) {
-        title += " (" + model.getGroupByGeo() + ")";
+      // create title
+      XSSFRow titleRow = sheet.createRow(0);
+      XSSFCell cell = titleRow.createCell(0);
+      cell.setCellStyle(boldStyle);
+      String title = "Request Statistics";
+      if (model != null) {
+        title = "Request Statistics from " + model.getDateFrom() + " to " + model.getDateTo();
+        if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
+          title += " for " + model.getGroupByProcCenter();
+        }
+        if (!StringUtils.isEmpty(model.getGroupByGeo())) {
+          title += " (" + model.getGroupByGeo() + ")";
+        }
       }
-    }
-    cell.setCellValue(title);
+      cell.setCellValue(title);
 
-    // create headers
-    XSSFRow header = sheet.createRow(1);
-    createHeaders(header, boldStyle, drawing, config, helper);
+      // create headers
+      XSSFRow header = sheet.createRow(1);
+      createHeaders(header, boldStyle, drawing, config, helper);
 
-    // add the data
-    XSSFRow row = null;
-    int current = 2;
-    for (RequestStatsModel request : stats) {
-      row = sheet.createRow(current);
-      createDataLine(row, request, rejectionReasons != null ? rejectionReasons.get(request.getId().getReqId()) : null, regularStyle, config);
-      current++;
-    }
-    String type = "application/octet-stream";
-    String fileName = "RequestStats_";
-    if (model != null) {
-      fileName += StringUtils.replace(model.getDateFrom(), "-", "");
-      fileName += "-";
-      fileName += StringUtils.replace(model.getDateTo(), "-", "");
-      if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
-        fileName += "_" + model.getGroupByProcCenter();
+      // add the data
+      XSSFRow row = null;
+      int current = 2;
+      for (RequestStatsModel request : stats) {
+        row = sheet.createRow(current);
+        createDataLine(row, request, rejectionReasons != null ? rejectionReasons.get(request.getId().getReqId()) : null, regularStyle, config);
+        current++;
       }
-      if (!StringUtils.isBlank(model.getGroupByGeo())) {
-        fileName += "_" + model.getGroupByGeo();
+      String type = "application/octet-stream";
+      String fileName = "RequestStats_";
+      if (model != null) {
+        fileName += StringUtils.replace(model.getDateFrom(), "-", "");
+        fileName += "-";
+        fileName += StringUtils.replace(model.getDateTo(), "-", "");
+        if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
+          fileName += "_" + model.getGroupByProcCenter();
+        }
+        if (!StringUtils.isBlank(model.getGroupByGeo())) {
+          fileName += "_" + model.getGroupByGeo();
+        }
       }
-    }
-    if (response != null) {
-      response.setContentType(type);
-      response.addHeader("Content-Type", type);
-      response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xlsx\"");
-      report.write(response.getOutputStream());
-    } else {
-      FileOutputStream fos = new FileOutputStream("C:/" + fileName + ".xlsx");
-      try {
-        report.write(fos);
-      } finally {
-        fos.close();
+      if (response != null) {
+        response.setContentType(type);
+        response.addHeader("Content-Type", type);
+        response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xlsx\"");
+        report.write(response.getOutputStream());
+      } else {
+        FileOutputStream fos = new FileOutputStream("C:/" + fileName + ".xlsx");
+        try {
+          report.write(fos);
+        } finally {
+          fos.close();
+        }
       }
+    } finally {
+      report.close();
     }
-
   }
 
   /**
@@ -284,8 +313,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
           Long lVal = (Long) value;
           if (lVal != null && lVal.longValue() >= 0) {
             long millis = lVal.longValue() * 1000;
-            String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis), TimeUnit.MILLISECONDS.toMinutes(millis)
-                - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+            String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
                 TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
             cell.setCellValue(hms);
           }
@@ -346,6 +375,7 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("Scenario Type", "SCENARIO_TYPE_DESC", 20, null));
     config.add(new StatXLSConfig("Scenario Subtype", "SCENARIO_SUBTYPE_DESC", 20, null));
     config.add(new StatXLSConfig("Record Type", "CUST_TYPE", 10, null));
+    config.add(new StatXLSConfig("Source System", "SOURCE_SYST_ID", 20, null));
     config.add(new StatXLSConfig("Requester", "REQUESTER_NM", 20, null));
     config.add(new StatXLSConfig("Requester ID", "REQUESTER_ID", 25, null));
     config.add(new StatXLSConfig("Reviewer", "REVIEWER_NM", 20, null));
@@ -364,8 +394,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("Due Date", "REQUEST_DUE_DATE", 16, null));
     config.add(new StatXLSConfig("Final Status", "FINAL_STATUS", 24, null));
     config.add(new StatXLSConfig("# of Rejections", "REJECT_TOTAL", 14, null));
-    config.add(new StatXLSConfig("Last Reject Reason", "LAST_REJ_REASON", 25,
-        "If at anytime the request was rejected, the reason for the last rejection"));
+    config.add(
+        new StatXLSConfig("Last Reject Reason", "LAST_REJ_REASON", 25, "If at anytime the request was rejected, the reason for the last rejection"));
     config.add(new StatXLSConfig("Other Rejection Reasons", "REJECTIONS", 25, null));
     config.add(new StatXLSConfig("Processed within 24 Hrs", "DAY_PROCESS", 23, null));
     config.add(new StatXLSConfig("Request TAT", "REQUEST_TAT", 12,
@@ -378,6 +408,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
         "Total time (hh:mm:ss) it took for external approvals on this request to be responded to"));
     config.add(new StatXLSConfig("CMR Processing TAT", "PROCESS_TAT", 17,
         "Total time (hh:mm:ss) it took for creation of the CMR either by automatic processing or manual through legacy systems"));
+    config.add(new StatXLSConfig("Automation TAT", "AUTO_TAT", 12,
+        "Total time (hh:mm:ss) it took for all automation to complete, including retries and waiting for automatically generated approvals."));
     config.add(new StatXLSConfig("Overall TAT", "OVERALL_TAT", 12, "Total time (hh:mm:ss) it took from request creation to completion."));
     config.add(new StatXLSConfig("Submit-to-Complete TAT", "SUBMIT_TO_COMPLETE_TAT", 20,
         "Total time (hh:mm:ss) it took from last request submission that got completed to request closing."));
@@ -395,8 +427,8 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    */
-  public void exportToSquadReport(RequestStatsContainer container, MetricsModel model, HttpServletResponse response) throws IOException,
-      ParseException, IllegalArgumentException, IllegalAccessException {
+  public void exportToSquadReport(RequestStatsContainer container, MetricsModel model, HttpServletResponse response)
+      throws IOException, ParseException, IllegalArgumentException, IllegalAccessException {
 
     List<StatXLSConfig> config = new ArrayList<StatXLSConfig>();
     config.add(new StatXLSConfig("Squad", "SQUAD", 22, null));
@@ -411,82 +443,86 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     List<SquadStatisticsModel> stats = container.getSquadRecords();
     LOG.info("Exporting records to excel..");
     XSSFWorkbook report = new XSSFWorkbook();
-    XSSFSheet sheet = report.createSheet("Statistics");
+    try {
+      XSSFSheet sheet = report.createSheet("Statistics");
 
-    Drawing drawing = sheet.createDrawingPatriarch();
-    CreationHelper helper = report.getCreationHelper();
+      Drawing drawing = sheet.createDrawingPatriarch();
+      CreationHelper helper = report.getCreationHelper();
 
-    XSSFFont bold = report.createFont();
-    bold.setBold(true);
-    bold.setFontHeight(10);
-    XSSFCellStyle boldStyle = report.createCellStyle();
-    boldStyle.setFont(bold);
+      XSSFFont bold = report.createFont();
+      bold.setBold(true);
+      bold.setFontHeight(10);
+      XSSFCellStyle boldStyle = report.createCellStyle();
+      boldStyle.setFont(bold);
 
-    XSSFFont regular = report.createFont();
-    regular.setFontHeight(10);
-    XSSFCellStyle regularStyle = report.createCellStyle();
-    regularStyle.setFont(regular);
-    regularStyle.setWrapText(true);
-    regularStyle.setVerticalAlignment(VerticalAlignment.TOP);
+      XSSFFont regular = report.createFont();
+      regular.setFontHeight(10);
+      XSSFCellStyle regularStyle = report.createCellStyle();
+      regularStyle.setFont(regular);
+      regularStyle.setWrapText(true);
+      regularStyle.setVerticalAlignment(VerticalAlignment.TOP);
 
-    StatXLSConfig sc = null;
-    for (int i = 0; i < config.size(); i++) {
-      sc = config.get(i);
-      sheet.setColumnWidth(i, sc.getWidth() * 256);
-    }
-    // create title
-    XSSFRow titleRow = sheet.createRow(0);
-    XSSFCell cell = titleRow.createCell(0);
-    cell.setCellStyle(boldStyle);
-    String title = "Squad Report ";
-    if (model != null) {
-      title = "Squad Report from " + model.getDateFrom() + " to " + model.getDateTo();
-      if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
-        title += " for " + model.getGroupByProcCenter();
+      StatXLSConfig sc = null;
+      for (int i = 0; i < config.size(); i++) {
+        sc = config.get(i);
+        sheet.setColumnWidth(i, sc.getWidth() * 256);
       }
-      if (!StringUtils.isEmpty(model.getGroupByGeo())) {
-        title += " (" + model.getGroupByGeo() + ")";
+      // create title
+      XSSFRow titleRow = sheet.createRow(0);
+      XSSFCell cell = titleRow.createCell(0);
+      cell.setCellStyle(boldStyle);
+      String title = "Squad Report ";
+      if (model != null) {
+        title = "Squad Report from " + model.getDateFrom() + " to " + model.getDateTo();
+        if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
+          title += " for " + model.getGroupByProcCenter();
+        }
+        if (!StringUtils.isEmpty(model.getGroupByGeo())) {
+          title += " (" + model.getGroupByGeo() + ")";
+        }
       }
-    }
-    cell.setCellValue(title);
+      cell.setCellValue(title);
 
-    // create headers
-    XSSFRow header = sheet.createRow(1);
-    createHeaders(header, boldStyle, drawing, config, helper);
+      // create headers
+      XSSFRow header = sheet.createRow(1);
+      createHeaders(header, boldStyle, drawing, config, helper);
 
-    // add the data
-    XSSFRow row = null;
-    int current = 2;
-    for (SquadStatisticsModel request : stats) {
-      row = sheet.createRow(current);
-      createDataLine(row, request, null, regularStyle, config);
-      current++;
-    }
-    String type = "application/octet-stream";
-    String fileName = "SquadSummary_";
-    if (model != null) {
-      fileName += StringUtils.replace(model.getDateFrom(), "-", "");
-      fileName += "-";
-      fileName += StringUtils.replace(model.getDateTo(), "-", "");
-      if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
-        fileName += "_" + model.getGroupByProcCenter();
+      // add the data
+      XSSFRow row = null;
+      int current = 2;
+      for (SquadStatisticsModel request : stats) {
+        row = sheet.createRow(current);
+        createDataLine(row, request, null, regularStyle, config);
+        current++;
       }
-      if (!StringUtils.isBlank(model.getGroupByGeo())) {
-        fileName += "_" + model.getGroupByGeo();
+      String type = "application/octet-stream";
+      String fileName = "SquadSummary_";
+      if (model != null) {
+        fileName += StringUtils.replace(model.getDateFrom(), "-", "");
+        fileName += "-";
+        fileName += StringUtils.replace(model.getDateTo(), "-", "");
+        if (!StringUtils.isEmpty(model.getGroupByProcCenter())) {
+          fileName += "_" + model.getGroupByProcCenter();
+        }
+        if (!StringUtils.isBlank(model.getGroupByGeo())) {
+          fileName += "_" + model.getGroupByGeo();
+        }
       }
-    }
-    if (response != null) {
-      response.setContentType(type);
-      response.addHeader("Content-Type", type);
-      response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xlsx\"");
-      report.write(response.getOutputStream());
-    } else {
-      FileOutputStream fos = new FileOutputStream("C:/" + fileName + ".xlsx");
-      try {
-        report.write(fos);
-      } finally {
-        fos.close();
+      if (response != null) {
+        response.setContentType(type);
+        response.addHeader("Content-Type", type);
+        response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xlsx\"");
+        report.write(response.getOutputStream());
+      } else {
+        FileOutputStream fos = new FileOutputStream("C:/" + fileName + ".xlsx");
+        try {
+          report.write(fos);
+        } finally {
+          fos.close();
+        }
       }
+    } finally {
+      report.close();
     }
 
   }

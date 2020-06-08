@@ -13,6 +13,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public static final String REC_TYPE_CMR = "CMR";
   public static final String REC_TYPE_DNB = "DNB";
+  public static final String REC_TYPE_REQUEST = "REQ";
   public static final String GOE_STATUS_UNKNOWN = "U";
   public static final String GOE_STATUS_NO = "N";
   public static final String GOE_STATUS_YES = "Y";
@@ -44,6 +45,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
   private String altName;
   private String altStreet;
   private String altCity;
+  private String restrictTo;
 
   private Double revenue;
 
@@ -61,6 +63,13 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
       return -1;
     }
     if (!"CMR".equals(this.recType) && "CMR".equals(o.getRecType())) {
+      return 1;
+    }
+
+    if ("REQ".equals(this.recType) && !"REQ".equals(o.getRecType())) {
+      return -1;
+    }
+    if (!"REQ".equals(this.recType) && "REQ".equals(o.getRecType())) {
       return 1;
     }
 
@@ -316,5 +325,13 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setOperStatusCode(String operStatusCode) {
     this.operStatusCode = operStatusCode;
+  }
+
+  public String getRestrictTo() {
+    return restrictTo;
+  }
+
+  public void setRestrictTo(String restrictTo) {
+    this.restrictTo = restrictTo;
   }
 }
