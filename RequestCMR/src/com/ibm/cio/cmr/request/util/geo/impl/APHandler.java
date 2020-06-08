@@ -375,6 +375,15 @@ public abstract class APHandler extends GEOHandler {
         }
       }
     }
+
+    String sql = ExternalizedQuery.getSql("DNB.GET_CURR_SOLD_TO");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", data.getId().getReqId());
+    query.setForReadOnly(true);
+    Addr soldTo = query.getSingleResult(Addr.class);
+    if (soldTo != null) {
+      setAbbrevLocNMBeforeAddrSave(entityManager, soldTo, data.getCmrIssuingCntry());
+    }
   }
 
   @Override
