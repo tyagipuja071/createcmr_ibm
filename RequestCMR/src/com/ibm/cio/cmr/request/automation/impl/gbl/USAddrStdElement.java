@@ -126,9 +126,6 @@ public class USAddrStdElement extends OverridingElement {
         tgmeData.setTgmeResponseCode("U");
       }
       LOG.debug("Tgme Resonse code is : " + tgmeData.getTgmeResponseCode());
-      if (StringUtils.isBlank(tgmeData.getTgmeResponseCode())) {
-        throw new Exception("TGME Code is null, service may be down.");
-      }
 
       TgmeCodes codeDesc = getTgmeCode(entityManager, tgmeData.getTgmeResponseCode());
       if (codeDesc != null) {
