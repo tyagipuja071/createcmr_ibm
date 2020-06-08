@@ -387,8 +387,13 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     String sql = ExternalizedQuery.getSql("APPROVAL.CHECKIFALLAPPROVED");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
+    boolean approvalsReceived = !query.exists();
+    sql = ExternalizedQuery.getSql("APPROVAL.CHECKIFCONDAPPROVED");
+    query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    boolean conditionallyApproved = query.exists();
 
-    if (!query.exists() && PENDING_STATUSES_TO_MOVE.contains(admin.getReqStatus())) {
+    if (approvalsReceived && PENDING_STATUSES_TO_MOVE.contains(admin.getReqStatus())) {
       // move only if it is one of the middle statuses
       this.log.debug("All approvals complete. Moving to next step");
       String procCenter = null;
@@ -396,7 +401,8 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
         admin.setReqStatus(CmrConstants.REQUEST_STATUS.SVA.toString());
       } else {
         if (CmrConstants.REQUEST_STATUS.REP.toString().equals(admin.getReqStatus()) && "N".equalsIgnoreCase(admin.getReviewReqIndc())) {
-          boolean processOnCompletion = isProcessOnCompletionChk(entityManager, admin.getId().getReqId(), admin.getReqType());
+          boolean processOnCompletion = isProcessOnCompletionChk(entityManager, admin.getId().getReqId(), admin.getReqType())
+              && !conditionallyApproved;
           if (processOnCompletion) {
             admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
           } else {
@@ -419,6 +425,9 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       String comment = "All approval requests have been approved.";
       if ("Y".equalsIgnoreCase(admin.getReviewReqIndc())) {
         comment += "\nThe request requires a processor review before proceeding.";
+      }
+      if (conditionallyApproved) {
+        comment = "Approval requests have been approved conditionally.\nThe request requires a processor review before proceeding.";
       }
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
