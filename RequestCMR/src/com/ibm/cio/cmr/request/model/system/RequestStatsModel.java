@@ -122,6 +122,9 @@ public class RequestStatsModel {
   @Column(name = "OVERALL_TAT")
   private long overallTat = -1;
 
+  @Column(name = "AUTO_TAT")
+  private long autoTat = -1;
+
   @Column(name = "SUBMIT_TO_COMPLETE_TAT")
   private long submitToCompleteTat = -1;
 
@@ -482,5 +485,13 @@ public class RequestStatsModel {
 
   public void setSourceSystId(String sourceSystId) {
     this.sourceSystId = sourceSystId;
+  }
+
+  public long getAutoTat() {
+    return autoTat;
+  }
+
+  public void setAutoTat(long autoTat) {
+    this.autoTat = autoTat;
   }
 }

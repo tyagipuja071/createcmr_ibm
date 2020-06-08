@@ -28,6 +28,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AutomationMatching;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -147,6 +148,9 @@ public class GBGMatchingElement extends MatchingElement {
         List<GBGResponse> gbgMatches = response.getMatches();
         Collections.sort(gbgMatches, new GBGComparator(request.getLandedCountry()));
 
+        // get default landed country
+        String defaultLandCntry = PageManager.getDefaultLandedCountry(data.getCmrIssuingCntry());
+
         result.setResults("Matches Found");
         details.append(gbgMatches.size() + " record(s) found.");
         if (gbgMatches.size() > 5) {
@@ -159,6 +163,13 @@ public class GBGMatchingElement extends MatchingElement {
             LOG.debug("Non-Local gbg found as highest match..");
             details.append("\n")
                 .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
+            break;
+          } else if (defaultLandCntry != null && !defaultLandCntry.equals(gbg.getCountry())) {
+            LOG.debug("Non-Local gbg found as highest match..");
+            details.append("\n")
+                .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
+            engineData.addNegativeCheckStatus("_nonLocalGBGFound",
+                "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
             break;
           } else {
             details.append("\n");
