@@ -258,7 +258,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       if (addr != null) {
         for (String rdcAddrType : rdcAddrTypes) {
 
-          DuplicateCMRCheckRequest request = getRequest(entityManager, data, admin, addr, rdcAddrType, vatMatchRequired);
+          DuplicateCMRCheckRequest request = getRequest(entityManager, data, admin, addr, engineData, rdcAddrType, vatMatchRequired);
           log.debug("Executing Duplicate CMR Check " + (admin.getId().getReqId() > 0 ? " for Request ID: " + admin.getId().getReqId() : " through UI")
               + " for AddrType: " + cmrAddrType + "-" + rdcAddrType);
           MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
@@ -294,8 +294,8 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     return response;
   }
 
-  private DuplicateCMRCheckRequest getRequest(EntityManager entityManager, Data data, Admin admin, Addr addr, String rdcAddrType,
-      boolean vatMatchRequired) {
+  private DuplicateCMRCheckRequest getRequest(EntityManager entityManager, Data data, Admin admin, Addr addr, AutomationEngineData engineData,
+      String rdcAddrType, boolean vatMatchRequired) {
     DuplicateCMRCheckRequest request = new DuplicateCMRCheckRequest();
     if (addr != null) {
       request.setIssuingCountry(data.getCmrIssuingCntry());
@@ -322,7 +322,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       }
       request.setAddrType(rdcAddrType);
 
-      DuplicateChecksUtil.setCountrySpecificsForCMRChecks(entityManager, admin, data, addr, request);
+      DuplicateChecksUtil.setCountrySpecificsForCMRChecks(entityManager, admin, data, addr, request, engineData);
     }
     return request;
   }
