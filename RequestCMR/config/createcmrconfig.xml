@@ -176,6 +176,7 @@
     <required>true</required>
     <editType>text</editType>
     <value>https://dgadaldecmr01.sl.bluecloud.ibm.com:9444/DNBSearchWeb</value>
+    <value>https://ibmcmrr0.portsmouth.uk.ibm.com/DNBSearchWeb</value>
   </item>
   <item>
     <id>MAIL_SUBJECT</id>
@@ -264,6 +265,7 @@
     <required>true</required>
     <editType>text</editType>
     <value>https://dgadaldecmr01.sl.bluecloud.ibm.com:9443/CMRServicesV2</value>
+    <value>https://ibmcmrr0.portsmouth.uk.ibm.com/CMRServicesV2</value>
   </item>
   <item>
     <id>ADDRESS_VERIFICATION_RULES_LINK</id>
@@ -297,6 +299,7 @@
     <required>true</required>
     <editType>text</editType>
     <value>https://dgadaldecmr01.sl.bluecloud.ibm.com:9443/CMRServicesV2</value>
+    <value>https://ibmcmrr0.portsmouth.uk.ibm.com/CMRServicesV2</value>
   </item>
   <item>
     <id>MASS_UPDATE_MAX_ROWS</id>
