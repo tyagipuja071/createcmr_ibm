@@ -27,7 +27,6 @@ import com.ibm.cmr.services.client.tgme.AddressStdData;
 import com.ibm.cmr.services.client.tgme.AddressStdRequest;
 import com.ibm.cmr.services.client.tgme.AddressStdResponse;
 import com.ibm.cmr.services.client.tgme.RawAddressStdResponse;
-import com.ibm.websphere.wssecurity.wssapi.WSSException;
 
 /**
  * @author Jeffrey Zamora
@@ -39,7 +38,7 @@ public class TgmeAddrStdService extends BaseSimpleService<TgmeAddrStdModel> {
   private static final Logger LOG = Logger.getLogger(TgmeAddrStdService.class);
 
   @Override
-  protected TgmeAddrStdModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws WSSException {
+  protected TgmeAddrStdModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) {
 
     TgmeAddrStdModel result = new TgmeAddrStdModel();
 

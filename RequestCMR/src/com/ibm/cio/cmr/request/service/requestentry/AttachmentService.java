@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -24,8 +25,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-
-import sun.misc.BASE64Decoder;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -188,8 +187,7 @@ public class AttachmentService extends BaseService<AttachmentModel, Attachment> 
 
           BufferedImage image = null;
           byte[] imageByte = null;
-          BASE64Decoder decoder = new BASE64Decoder();
-          imageByte = decoder.decodeBuffer(imgContent);
+          imageByte = Base64.getDecoder().decode(imgContent);
           ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
           try {
             image = ImageIO.read(bis);
