@@ -604,6 +604,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     // reverify
     if (response.getMatches().size() == 0) {
+      response.setSuccess(true);
       response.setMatched(false);
       response.setMessage("No matches found for the given search criteria.");
     }
