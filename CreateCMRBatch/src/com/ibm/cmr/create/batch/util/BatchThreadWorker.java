@@ -13,6 +13,7 @@ import javax.persistence.Persistence;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cmr.create.batch.entry.BatchEntryPoint;
 import com.ibm.cmr.create.batch.service.MultiThreadedBatchService;
 
 /**
@@ -46,7 +47,7 @@ public class BatchThreadWorker implements Runnable {
       }
       LOG.info("Starting processing of " + this.requestIds.size() + " requests");
 
-      EntityManagerFactory emf = Persistence.createEntityManagerFactory("RDC");
+      EntityManagerFactory emf = Persistence.createEntityManagerFactory(BatchEntryPoint.DEFAULT_BATCH_PERSISTENCE_UNIT);
       try {
         EntityManager entityManager = emf.createEntityManager();
         EntityTransaction transaction = null;

@@ -21,6 +21,7 @@ import javax.persistence.SqlResultSetMappings;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.persistence.config.QueryHints;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
@@ -98,6 +99,7 @@ public class PreparedQuery {
     }
 
     Query query = this.entityManager.createNativeQuery(preparedSql, annotatedSqlName);
+    query.setHint(QueryHints.MAINTAIN_CACHE, false);
 
     if (maxRows > 0) {
       query.setMaxResults(maxRows);
@@ -222,6 +224,7 @@ public class PreparedQuery {
     if (this.flushOnCommit) {
       query.setFlushMode(FlushModeType.COMMIT);
     }
+    query.setHint(QueryHints.MAINTAIN_CACHE, false);
 
     if (returnClass != null && returnClass.getAnnotation(Entity.class) != null && this.forReadOnly) {
       List<M> result = query.getResultList();

@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.openjpa.persistence.OpenJPAEntityTransaction;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
@@ -330,10 +329,11 @@ public abstract class BaseService<M extends BaseModel, E extends BaseEntity<?>> 
    * @param entityManager
    */
   public void partialCommit(EntityManager entityManager) {
-    OpenJPAEntityTransaction transaction = (OpenJPAEntityTransaction) entityManager.getTransaction();
+    EntityTransaction transaction = entityManager.getTransaction();
     if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
+      transaction.commit();
       this.log.debug("Transaction partially committed");
-      transaction.commitAndResume();
+      transaction.begin();
     }
   }
 
@@ -344,9 +344,11 @@ public abstract class BaseService<M extends BaseModel, E extends BaseEntity<?>> 
    * @param entityManager
    */
   public void partialRollback(EntityManager entityManager) {
-    OpenJPAEntityTransaction transaction = (OpenJPAEntityTransaction) entityManager.getTransaction();
+    EntityTransaction transaction = entityManager.getTransaction();
     if (transaction != null && transaction.isActive()) {
-      transaction.rollbackAndResume();
+      transaction.rollback();
+      this.log.debug("Transaction partially rolled back");
+      transaction.begin();
     }
   }
 
