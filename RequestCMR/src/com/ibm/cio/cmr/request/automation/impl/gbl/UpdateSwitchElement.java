@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.impl.gbl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 
 /**
@@ -35,6 +37,7 @@ import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 public class UpdateSwitchElement extends ValidatingElement {
 
   private static final Logger log = Logger.getLogger(UpdateSwitchElement.class);
+  private static final List<String> NCHECK_NO_UPD_COUNTRIES = Arrays.asList(SystemLocation.UNITED_STATES);
 
   public UpdateSwitchElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -144,6 +147,14 @@ public class UpdateSwitchElement extends ValidatingElement {
 
         }
 
+      } else if (NCHECK_NO_UPD_COUNTRIES.contains(data.getCmrIssuingCntry()) && !changes.hasDataChanges() && !changes.hasAddressChanges()) {
+        // Set negative check if country is part of the list and there are no
+        // updates/changes at all on the request
+        validation.setSuccess(true);
+        validation.setMessage("Review Required");
+        output.setDetails("No data/address changes made on request.");
+        engineData.addNegativeCheckStatus("NO_UPD", "No data/address changes made on request.");
+        log.debug("No data/address changes made on request.");
       } else if (validation.isSuccess()) {
         validation.setSuccess(true);
         validation.setMessage("Execution done.");

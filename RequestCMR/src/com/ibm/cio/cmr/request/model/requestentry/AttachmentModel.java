@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.model.requestentry;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.ui.ModelMap;
@@ -26,7 +27,7 @@ public class AttachmentModel extends BaseModel {
   private String docContent;
   private String docAttachById;
   private String docAttachByNm;
-  private Timestamp attachTs;
+  private Date attachTs;
   private String attachTsStr;
   private String cmt;
 
@@ -93,10 +94,6 @@ public class AttachmentModel extends BaseModel {
     this.docAttachByNm = docAttachByNm;
   }
 
-  public Timestamp getAttachTs() {
-    return attachTs;
-  }
-
   public void setAttachTs(Timestamp attachTs) {
     this.attachTs = attachTs;
   }
@@ -131,6 +128,14 @@ public class AttachmentModel extends BaseModel {
 
   public void setAttachMode(String attachMode) {
     this.attachMode = attachMode;
+  }
+
+  public Date getAttachTs() {
+    return attachTs;
+  }
+
+  public void setAttachTs(Date attachTs) {
+    this.attachTs = attachTs;
   }
 
 }

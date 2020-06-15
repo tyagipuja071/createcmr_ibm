@@ -9,6 +9,8 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.util.ConfigUtil;
+
 /**
  * Utility class to get the sql from an external source.
  * 
@@ -55,7 +57,7 @@ public class ExternalizedQuery {
    * @param sqlKey
    */
   private static void load() throws Exception {
-    InputStream is = ExternalizedQuery.class.getClassLoader().getResourceAsStream("cmr-queries.properties");
+    InputStream is = ConfigUtil.getResourceStream("cmr-queries.properties");
     try {
       queryBundle.clear();
       queryBundle.load(is);

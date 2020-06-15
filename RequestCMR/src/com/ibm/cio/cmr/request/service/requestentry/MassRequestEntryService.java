@@ -85,6 +85,7 @@ import com.ibm.cio.cmr.request.service.BaseService;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -3155,7 +3156,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     List<MassUpdateModel> errorList = getErrorList(reqId, iterationId);
 
     try {
-      InputStream is = MassRequestEntryService.class.getClassLoader().getResourceAsStream(template);
+      InputStream is = ConfigUtil.getResourceStream(template);
       Workbook efWb;
       try {
         efWb = new XSSFWorkbook(is);
@@ -3301,7 +3302,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     List<MassUpdateModel> errorList = getErrorList(reqId, iterationId);
 
     try {
-      InputStream is = MassRequestEntryService.class.getClassLoader().getResourceAsStream(template);
+      InputStream is = ConfigUtil.getResourceStream(template);
       Workbook efWb;
       try {
         efWb = new XSSFWorkbook(is);
@@ -3430,7 +3431,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     List<MassUpdateModel> errorList = getErrorList(reqId, iterationId);
 
     try {
-      InputStream is = MassRequestEntryService.class.getClassLoader().getResourceAsStream(template);
+      InputStream is = ConfigUtil.getResourceStream(template);
       Workbook efWb;
       try {
         efWb = new XSSFWorkbook(is);

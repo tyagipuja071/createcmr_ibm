@@ -25,7 +25,6 @@ import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.entity.WfHistPK;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.ui.UIMgr;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 
@@ -150,12 +149,13 @@ public class IERPRequestUtils extends RequestUtils {
       String rejRes = "<tr><th style=\"text-align:left;width:200px\">Reject Reason:</th><td>{10}</td></tr>";
       temp.insert(insertstart, rejRes);
       email = temp.toString();
-      email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status, history.getCreateByNm() + " ("
-          + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent, directUrlLink, rejectReason,
-          feedbackLink);
+      email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status,
+          history.getCreateByNm() + " (" + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent,
+          directUrlLink, rejectReason, feedbackLink);
     } else {
-      email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status, history.getCreateByNm() + " ("
-          + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent, directUrlLink, "", feedbackLink);
+      email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status,
+          history.getCreateByNm() + " (" + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent,
+          directUrlLink, "", feedbackLink);
     }
     String host = SystemConfiguration.getValue("MAIL_HOST");
 
@@ -243,9 +243,9 @@ public class IERPRequestUtils extends RequestUtils {
     try {
       InputStream is = null;
       if (batchemailTemplate != null) {
-        is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email_batch.html");
+        is = ConfigUtil.getResourceStream("cmr-email_batch.html");
       } else {
-        is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email.html");
+        is = ConfigUtil.getResourceStream("cmr-email.html");
       }
 
       try {
@@ -274,7 +274,7 @@ public class IERPRequestUtils extends RequestUtils {
 
   private static String getExternalEmailTemplate(String sourceSystId) {
     try {
-      InputStream is = UIMgr.class.getClassLoader().getResourceAsStream((sourceSystId.toLowerCase()) + ".html");
+      InputStream is = ConfigUtil.getResourceStream((sourceSystId.toLowerCase()) + ".html");
 
       try {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");

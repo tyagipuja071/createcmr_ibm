@@ -523,7 +523,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
     } else {
       addr.setPostCd(cmr.getCmrPostalCode());
-      int addrLength = 30;
+      int addrLength = SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) ? 24 : 30;
       String street = cmr.getCmrStreet();
       if (street != null && street.length() > addrLength) {
         if (!StringUtils.isBlank(cmr.getCmrStreetAddressCont())) {
@@ -577,6 +577,13 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
 
     if ("U".equals(reqModel.getReqType())) {
       addr.setAddrStdResult("X");
+    } else {
+      // CMR-3994 - county
+      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && !StringUtils.isBlank(addr.getCounty())) {
+        addr.setAddrStdResult("C");
+        addr.setAddrStdAcceptInd("Y");
+        addr.setAddrStdTs(SystemUtil.getCurrentTimestamp());
+      }
     }
 
     cmr.setCmrIssuedBy(reqModel.getCmrIssuingCntry());

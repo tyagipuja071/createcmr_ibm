@@ -207,7 +207,7 @@ public class PreparedQuery {
       LOG.debug("Params: [" + sb.toString() + "]");
     }
     Query query = null;
-    if (returnClass != null) {
+    if (returnClass != null && returnClass.getAnnotation(Entity.class) != null) {
       query = this.entityManager.createNativeQuery(preparedSql, returnClass);
     } else {
       query = this.entityManager.createNativeQuery(preparedSql);
