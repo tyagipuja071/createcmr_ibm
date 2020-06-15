@@ -150,9 +150,29 @@ function afterConfigForCEMEA() {
       FormManager.enable('custClass');
     }
   }
-
+  setAustriaUIFields();
   setExpediteReason();
   setTypeOfCustomerRequiredProcessor();
+}
+
+function setAustriaUIFields() {
+  if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
+    return;
+  }
+  if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+    FormManager.readOnly('isicCd');
+    FormManager.setValue('isicCd', '9500');
+    FormManager.readOnly('subIndustryCd');
+    FormManager.setValue('subIndustryCd', 'WQ');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.setValue('salesBusOffCd', '099');
+    FormManager.readOnly('inacCd');
+    FormManager.setValue('inacCd', '');
+    FormManager.readOnly('enterprise');
+    FormManager.setValue('enterprise', '');
+  }
 }
 
 /**
