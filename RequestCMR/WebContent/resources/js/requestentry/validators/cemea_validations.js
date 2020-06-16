@@ -173,6 +173,31 @@ function setAustriaUIFields() {
     FormManager.readOnly('enterprise');
     FormManager.setValue('enterprise', '');
   }
+
+  var custType = FormManager.getActualValue('custGrp');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  // for Private customer
+  if (custSubType != null && custSubType != '' && custSubType == 'PRICU') {
+    FormManager.setValue("vat", "");
+    FormManager.readOnly("vat");
+    FormManager.setValue("inacCd", "");
+    FormManager.readOnly("inacCd");
+    FormManager.setValue("enterprise", "");
+    FormManager.readOnly("enterprise");
+    FormManager.readOnly("salesBusOffCd");
+  }
+  
+// for cross border - Business partner
+  if (custType == 'CROSS' && custSubType != null && custSubType != '' && custSubType == 'XBP') {
+    FormManager.setValue("inacCd", "");
+    FormManager.readOnly("inacCd");
+    FormManager.setValue("enterprise", "");
+    FormManager.readOnly("enterprise");
+    FormManager.setValue("salesBusOffCd", "080");
+    FormManager.readOnly("salesBusOffCd");
+
+  }
+
 }
 
 /**

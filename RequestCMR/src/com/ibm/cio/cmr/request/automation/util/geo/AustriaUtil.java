@@ -39,6 +39,7 @@ public class AustriaUtil extends AutomationUtil {
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
   private static final String SCENARIO_IBM_EMPLOYEE = "IBMEM";
   private static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
+  private static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
   private static final String SCENARIO_CROSS_COMMERICAL = "XCOM";
   private static final String SCENARIO_CROSS_GOVERNMENT = "XGOV";
   private static final String SCENARIO_CROSS_BUSINESS_PARTNER = "XBUS";
@@ -77,6 +78,7 @@ public class AustriaUtil extends AutomationUtil {
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario));
     case SCENARIO_BUSINESS_PARTNER:
+    case SCENARIO_BUSINESS_PARTNER_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     }
 
