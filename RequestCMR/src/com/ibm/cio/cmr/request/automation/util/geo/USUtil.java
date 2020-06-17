@@ -867,7 +867,8 @@ public class USUtil extends AutomationUtil {
       // skip checks if requester is from USCMDE team
       validation.setSuccess(true);
     } else {
-      StringBuilder details = new StringBuilder(output.getDetails());
+      String dataDetails = output.getDetails() != null ? output.getDetails() : "";
+      StringBuilder details = new StringBuilder(dataDetails);
       details.append("\n");
       USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
       String custTypCd = detailsCont.getCustTypCd();
