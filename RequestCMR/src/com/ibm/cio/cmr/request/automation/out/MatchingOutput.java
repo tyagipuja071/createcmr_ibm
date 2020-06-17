@@ -161,6 +161,7 @@ public class MatchingOutput implements AutomationOutput {
 
           LOG.debug("Creating match record for " + record.getMatchKeyName() + " = " + record.getMatchKeyValue());
           entityManager.merge(match);
+          entityManager.flush();
 
           this.recordedMatches.add(match);
         }
