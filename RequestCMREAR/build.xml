@@ -14,7 +14,7 @@
 <project name="Build" default="build" basedir=".">
 
     <target name="build"> 
-        <getProjectData basedir="${basedir}"  projectname="CreateCMR"/>
+        <getProjectData basedir="${basedir}"  projectname="CreateCMREAR"/>
         <echo message="${ant.project.name} build: project=${projectName} nature=${natureName} ... "  />
         <ant antfile="${projectBuildFile}" target="buildPROJECT" >  
             <property name="projectName" value="${projectName}"/>  
