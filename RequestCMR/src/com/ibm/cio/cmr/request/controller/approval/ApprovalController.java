@@ -3,17 +3,16 @@
  */
 package com.ibm.cio.cmr.request.controller.approval;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
@@ -41,7 +40,6 @@ import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cmr.services.client.auth.Authorization;
-import com.ibm.misc.BASE64Decoder;
 
 /**
  * Approvals pages controller
@@ -66,14 +64,12 @@ public class ApprovalController extends BaseController {
     A, C, R
   }
 
-  @RequestMapping(
-      value = "/approval")
+  @RequestMapping(value = "/approval")
   public ModelAndView showErrorPage(HttpServletRequest request, HttpServletResponse response, ModelMap model) throws Exception {
     return null;
   }
 
-  @RequestMapping(
-      value = "/approval/{approvalCode}")
+  @RequestMapping(value = "/approval/{approvalCode}")
   public ModelAndView showApprovalPage(@PathVariable("approvalCode") String approvalCode, HttpServletRequest request, HttpServletResponse response,
       ApprovalResponseModel modelFromRequest) throws Exception {
     boolean processing = CmrConstants.YES_NO.Y.toString().equals(request.getParameter("processing"));
@@ -190,11 +186,7 @@ public class ApprovalController extends BaseController {
     String authInfo = authParts[1];
     // Decode the data back to original string
     byte[] bytes = null;
-    try {
-      bytes = new BASE64Decoder().decodeBuffer(authInfo);
-    } catch (IOException e) {
-      return false;
-    }
+    bytes = Base64.getDecoder().decode(authInfo);
     String decodedAuth = new String(bytes);
     String[] credentials = decodedAuth.split(":");
     if (credentials.length != 2) {
@@ -225,11 +217,7 @@ public class ApprovalController extends BaseController {
     String authInfo = authParts[1];
     // Decode the data back to original string
     byte[] bytes = null;
-    try {
-      bytes = new BASE64Decoder().decodeBuffer(authInfo);
-    } catch (IOException e) {
-      return "";
-    }
+    bytes = Base64.getDecoder().decode(authInfo);
     String decodedAuth = new String(bytes);
     String[] credentials = decodedAuth.split(":");
     if (credentials.length != 2) {
@@ -273,12 +261,12 @@ public class ApprovalController extends BaseController {
     }
 
     try {
-      String l1 = Base64.encodeBase64String(param.getBytes());
+      String l1 = Base64.getEncoder().encodeToString(param.getBytes());
       SecureRandom random = new SecureRandom();
       String salt = new BigInteger(130, random).toString(32);
       // salt the base 64 level 1
       l1 += salt.substring(0, 8);
-      String l2 = Base64.encodeBase64String(l1.getBytes());
+      String l2 = Base64.getEncoder().encodeToString(l1.getBytes());
       // salt the base 64 level 2 for it not to be decoded
       l2 = salt.substring(16, 19).toUpperCase() + l2 + salt.substring(10, 15).toUpperCase();
       return l2;
@@ -302,9 +290,9 @@ public class ApprovalController extends BaseController {
     try {
       // first extract l2
       String l2 = param.substring(3, param.length() - 5);
-      String l1 = new String(Base64.decodeBase64(l2.getBytes()));
+      String l1 = new String(Base64.getDecoder().decode(l2.getBytes()));
       l1 = l1.substring(0, l1.length() - 8);
-      String decoded = new String(Base64.decodeBase64(l1.getBytes()));
+      String decoded = new String(Base64.getDecoder().decode(l1.getBytes()));
       String[] params = decoded.split("&");
       String[] valuePair = null;
       ApprovalResponseModel model = new ApprovalResponseModel();
@@ -326,9 +314,7 @@ public class ApprovalController extends BaseController {
     }
   }
 
-  @RequestMapping(
-      value = "/approval/list",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/list", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getApprovalList(HttpServletRequest request, HttpServletResponse response, ApprovalResponseModel model) throws CmrException {
 
     if (StringUtils.isNotEmpty(request.getParameter("reqId"))) {
@@ -345,9 +331,7 @@ public class ApprovalController extends BaseController {
     return wrapAsSearchResult(results);
   }
 
-  @RequestMapping(
-      value = "/approval/process",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/process", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processApprovals(HttpServletRequest request, HttpServletResponse response, ApprovalResponseModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -377,9 +361,7 @@ public class ApprovalController extends BaseController {
    * @return
    * @throws CmrException
    */
-  @RequestMapping(
-      value = "/approval/comments",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/comments", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getApprovalComments(HttpServletRequest request, HttpServletResponse response) throws CmrException {
 
     ApprovalResponseModel model = new ApprovalResponseModel();
@@ -408,9 +390,7 @@ public class ApprovalController extends BaseController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/approval/action",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/action", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processActions(HttpServletRequest request, HttpServletResponse response, ApprovalResponseModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -428,9 +408,7 @@ public class ApprovalController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/approval/status",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/approval/status", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap getApprovalStatus(HttpServletRequest request, HttpServletResponse response) throws CmrException {
     ModelMap map = new ModelMap();
     String reqIdStr = request.getParameter("reqId");

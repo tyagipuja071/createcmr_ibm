@@ -9,6 +9,8 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.ibm.cio.cmr.request.util.ConfigUtil;
+
 /**
  * Hanldes UI related stuff, from FieldConfig, FieldInfo to screen labels
  * 
@@ -20,7 +22,7 @@ public class UIMgr {
   private static Properties BUNDLE = new Properties();
 
   private static void load() throws Exception {
-    InputStream is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-ui.properties");
+    InputStream is = ConfigUtil.getResourceStream("cmr-ui.properties");
     try {
       BUNDLE.clear();
       BUNDLE.load(is);

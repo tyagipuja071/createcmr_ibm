@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -193,7 +194,7 @@ public class RequestEntryController extends BaseController {
       LOG.debug("DPL Check is not required for this record, will not reset status.");
       return false;
     }
-    Timestamp ts = model.getDplChkTs();
+    Date ts = model.getDplChkTs();
     if (ts == null) {
       return false;
     }

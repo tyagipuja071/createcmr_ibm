@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.openjpa.persistence.OpenJPAEntityTransaction;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -118,7 +117,7 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
 
   @Override
   public Boolean process(HttpServletRequest request, ParamContainer params) throws CmrException {
-    EntityManager entityManager = JpaManager.getEntityManager(getPersistenceUnitName());
+    EntityManager entityManager = JpaManager.getEntityManager();
     EntityTransaction transaction = null;
     try {
 
@@ -186,17 +185,6 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
   @Override
   protected Boolean doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     return executeBatch(entityManager);
-  }
-
-  /**
-   * Gets the persistence unit name to use from persistence.xml. Default is
-   * "RDC". If a service will use a different persistence manager, override this
-   * method
-   * 
-   * @return
-   */
-  protected String getPersistenceUnitName() {
-    return "RDC";
   }
 
   @Override
@@ -276,7 +264,10 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
    * @param entityManager
    */
   public synchronized void deleteEntity(BaseEntity<?> entity, EntityManager entityManager) {
-    entityManager.remove(entity);
+    BaseEntity<?> merged = entityManager.merge(entity);
+    if (merged != null) {
+      entityManager.remove(merged);
+    }
     entityManager.flush();
   }
 
@@ -286,13 +277,15 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
    * @param entityManager
    */
   public synchronized void partialCommit(EntityManager entityManager) {
-    OpenJPAEntityTransaction transaction = (OpenJPAEntityTransaction) entityManager.getTransaction();
+    EntityTransaction transaction = entityManager.getTransaction();
     if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
       LOG.debug("Transaction partially committed");
-      transaction.commitAndResume();
+      transaction.commit();
+      transaction.begin();
     } else if (transaction != null && transaction.isActive() && transaction.getRollbackOnly()) {
       LOG.debug("Transaction partially rolled back and resumed.");
-      transaction.rollbackAndResume();
+      transaction.rollback();
+      transaction.begin();
     }
 
     if (this.terminator != null) {
@@ -308,10 +301,11 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
    * @param entityManager
    */
   public synchronized void partialRollback(EntityManager entityManager) {
-    OpenJPAEntityTransaction transaction = (OpenJPAEntityTransaction) entityManager.getTransaction();
+    EntityTransaction transaction = entityManager.getTransaction();
     if (transaction != null && transaction.isActive()) {
       LOG.debug("Transaction partially rolled back");
-      transaction.rollbackAndResume();
+      transaction.rollback();
+      transaction.begin();
     }
     if (this.terminator != null) {
       this.terminator.keepAlive();
