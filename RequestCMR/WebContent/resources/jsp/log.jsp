@@ -53,6 +53,28 @@ ul {
       <th width="*">Changes</th>
     </tr>
     <tr>
+      <td>R5.0 b-R5156</td>
+      <td>June 06, 2020</td>
+      <td>
+        <ul>
+          <li>CreateCMR 2.0 - Switzerland & Liechtenstein</li>
+          <li>CreateCMR 2.0 - US - Critical Fixes & Enhancements</li>
+          <li>Global Automation Framework Enhancements</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>R5.0 b-R5152</td>
+      <td>June 04, 2020</td>
+      <td>
+        <ul>
+          <li>CreateCMR 2.0 - US - Urgent Fixes</li>
+          <li>CreateCMR 2.0 - AU/SG - Automation Enhancements</li>
+          <li>Other Internal Defect Fixes</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
       <td>R5.0 b-R5146</td>
       <td>May 30, 2020</td>
       <td>

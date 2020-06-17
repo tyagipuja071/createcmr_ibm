@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 
 /**
  * Class for handling system configuration
@@ -53,8 +53,7 @@ public class SystemConfiguration {
     configurations.clear();
     ConfigItemDigester digester = new ConfigItemDigester();
 
-    ClassLoader loader = SystemConfiguration.class.getClassLoader();
-    InputStream is = loader.getResourceAsStream(CONFIG.getString("CONFIG_FILE"));
+    InputStream is = ConfigUtil.getResourceStream(CONFIG.getString("CONFIG_FILE"));
 
     try {
       @SuppressWarnings("unchecked")
@@ -63,11 +62,11 @@ public class SystemConfiguration {
         configurations.put(item.getId(), item);
       }
 
-      URL url = loader.getResource(CONFIG.getString("CONFIG_FILE"));
+      // URL url = new URL(ConfigUtil.getConfigDir());
 
-      File configFile = new File(url.getPath());
-      File parentDir = configFile.getParentFile();
-      dirLocation = parentDir;
+      File configFile = new File(ConfigUtil.getConfigDir());
+      // File parentDir = configFile.getParentFile();
+      dirLocation = configFile;
       // System.out.println("Config Location = " + dirLocation);
     } finally {
       is.close();

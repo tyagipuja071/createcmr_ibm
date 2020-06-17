@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.util.ConfigUtil;
+
 /**
  * Maps the BP portal handled enterprises with their CE IDs
  * 
@@ -40,8 +42,7 @@ public class USCeIdMapping {
       LOG.debug("Initializing CE ID mappings..");
       Map<String, USCeIdMapping> mappings = new HashMap<String, USCeIdMapping>();
       try {
-        ClassLoader loader = USCeIdMapping.class.getClassLoader();
-        try (InputStream is = loader.getResourceAsStream("us-ceid-mapping.properties")) {
+        try (InputStream is = ConfigUtil.getResourceStream("us-ceid-mapping.properties")) {
           try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             String line;
             while ((line = br.readLine()) != null) {

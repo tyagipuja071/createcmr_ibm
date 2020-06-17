@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -139,7 +140,8 @@ public class MassRequestEntryController extends BaseController {
             setYourActionsAttributes(request, reqModel, false);
 
             // If normal request record, redirect to Normal Request page...
-            if (!StringUtils.isEmpty(reqModel.getReqType()) && ("C".equals(reqModel.getReqType().trim()) || "U".equals(reqModel.getReqType().trim()))) {
+            if (!StringUtils.isEmpty(reqModel.getReqType())
+                && ("C".equals(reqModel.getReqType().trim()) || "U".equals(reqModel.getReqType().trim()))) {
               mv = new ModelAndView("redirect:/request/" + reqId, "reqentry", reqModel);
               return mv;
             }
@@ -180,7 +182,7 @@ public class MassRequestEntryController extends BaseController {
       LOG.debug("DPL Check is not required for this record, will not reset status.");
       return false;
     }
-    Timestamp ts = model.getDplChkTs();
+    Date ts = model.getDplChkTs();
     if (ts == null) {
       return false;
     }
@@ -326,7 +328,8 @@ public class MassRequestEntryController extends BaseController {
             reqModel.setUserRole(CmrConstants.Role_Requester);
           } else if (CmrConstants.REQUEST_STATUS.PCO.toString().equals(requestStatus)
               || CmrConstants.REQUEST_STATUS.PVA.toString().equals(requestStatus) || CmrConstants.REQUEST_STATUS.PCR.toString().equals(requestStatus)
-              || CmrConstants.REQUEST_STATUS.ACU.toString().equals(requestStatus) || CmrConstants.REQUEST_STATUS.SV2.toString().equals(requestStatus)) {
+              || CmrConstants.REQUEST_STATUS.ACU.toString().equals(requestStatus)
+              || CmrConstants.REQUEST_STATUS.SV2.toString().equals(requestStatus)) {
             reqModel.setUserRole(CmrConstants.Role_Processor);
           } else if (CmrConstants.REQUEST_STATUS.IIP.toString().equals(requestStatus)) {
             reqModel.setUserRole(CmrConstants.Role_Info_Provider);
@@ -410,8 +413,8 @@ public class MassRequestEntryController extends BaseController {
       sqlId = "YOUR_ACTIONS_NEW";
     }
 
-    if (("X".equals(lockInd) || ("P".equals(claimRole) || "R".equals(claimRole) || "D".equals(claimRole)) || (("L".equals(claimRole) || "O"
-        .equals(claimRole)) && !sameOriginator)) && !newRequest) {
+    if (("X".equals(lockInd) || ("P".equals(claimRole) || "R".equals(claimRole) || "D".equals(claimRole))
+        || (("L".equals(claimRole) || "O".equals(claimRole)) && !sameOriginator)) && !newRequest) {
       request.setAttribute("yourActionsViewOnly", true);
     }
 

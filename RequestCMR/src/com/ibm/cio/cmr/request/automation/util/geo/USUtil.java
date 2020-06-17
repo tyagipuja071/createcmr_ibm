@@ -39,6 +39,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -158,6 +159,8 @@ public class USUtil extends AutomationUtil {
 
   public static final List<String> FEDERAL_SCENARIOS = Arrays.asList(SC_FED_CAMOUFLAGED, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE,
       SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_REGULAR, SC_FED_TRIBAL_BUS);
+  private static final List<String> CSP_IRRELEVANT_UPDATE_FIELDS = Arrays.asList("ISU Code", "GEO Location Code", "Coverage Type/ID", "BG LDE Rule",
+      "Buying Group ID", "Client Tier", "DUNS No.");
 
   private static final List<String> HEALTH_CARE_EDUCATION_ISIC = Arrays.asList("8030", "8010", "8511");
 
@@ -185,10 +188,7 @@ public class USUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/pccArDept", "pccArDept");
       digester.addSetNext("mappings/mapping", "add");
       try {
-        ClassLoader loader = USUtil.class.getClassLoader();
-        // FileInputStream in = new
-        // FileInputStream("C:\\Users\\RangoliSaxena\\git\\createcmr\\RequestCMR\\config\\us-branchoff-mapping.xml");
-        InputStream is = loader.getResourceAsStream("us-branchoff-mapping.xml");
+        InputStream is = ConfigUtil.getResourceStream("us-branchoff-mapping.xml");
         USUtil.boMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
@@ -208,10 +208,7 @@ public class USUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/svcOfficeAR", "svcOfficeAR");
       digester.addSetNext("mappings/mapping", "add");
       try {
-        ClassLoader loader = USUtil.class.getClassLoader();
-        // FileInputStream in = new
-        // FileInputStream("C:\\Users\\RangoliSaxena\\git\\createcmr\\RequestCMR\\config\\us-mktgsvc-mapping.xml");
-        InputStream is = loader.getResourceAsStream("us-mktgsvc-mapping.xml");
+        InputStream is = ConfigUtil.getResourceStream("us-mktgsvc-mapping.xml");
         USUtil.svcARBOMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
@@ -302,8 +299,14 @@ public class USUtil extends AutomationUtil {
         if ("C".equals(admin.getReqType())
             && (data.getIsicCd().startsWith("90") || data.getIsicCd().startsWith("91") || data.getIsicCd().startsWith("92"))
             && !FEDERAL_SCENARIOS.contains(scenarioSubType)) {
-          details.append("Federal ISIC found on the request for non-Federal scenario.\n");
-          engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
+          if (SC_BP_END_USER.equals(scenarioSubType)) {
+            details.append("Federal ISIC found on the request for BP@EU. Treating as validated.\n");
+            // engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC
+            // found on the request for non-Federal scenario.");
+          } else {
+            details.append("Federal ISIC found on the request for non-Federal scenario.\n");
+            engineData.addNegativeCheckStatus("FEDERAL_ISIC", "Federal ISIC found on the request for non-Federal scenario.");
+          }
         }
       }
 
@@ -466,6 +469,9 @@ public class USUtil extends AutomationUtil {
           if (updatedDataModel != null) {
             LOG.debug("Checking updates for : " + new ObjectMapper().writeValueAsString(updatedDataModel));
             String field = updatedDataModel.getDataField();
+            if ("CSP".equals(admin.getReqReason()) && CSP_IRRELEVANT_UPDATE_FIELDS.contains(field)) {
+              continue;
+            }
             switch (field) {
             case "Tax Class / Code 1":
             case "Tax Class / Code 2":
@@ -609,7 +615,7 @@ public class USUtil extends AutomationUtil {
           }
         }
 
-        if ("CSP".equals(admin.getReqReason()) && !changes.isDataChanged("ISIC")) {
+        if ("CSP".equals(admin.getReqReason())) {
           String error = performCSPCheck(cedpManager, entityManager, data, admin);
           if (StringUtils.isNotBlank(error)) {
             LOG.debug(error);

@@ -1,6 +1,5 @@
 package com.ibm.cio.cmr.request.model.requestentry;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -117,23 +116,23 @@ public class RequestEntryModel extends BaseModel {
   private String dplChkResult;
   private String dplChkUsrId;
   private String dplChkUsrNm;
-  private Timestamp dplChkTs;
+  private Date dplChkTs;
   private String findCmrResult;
   private String findCmrUsrId;
   private String findCmrUsrNm;
   private String findCmrRejReason;
   private String findCmrRejCmt;
-  private Timestamp findCmrTs;
+  private Date findCmrTs;
   private String findDnbResult;
   private String findDnbUsrId;
   private String findDnbUsrNm;
   private String findDnbRejReason;
   private String findDnbRejCmt;
-  private Timestamp findDnbTs;
+  private Date findDnbTs;
   private String addrStdResult;
   private String addrStdRejReason;
   private String addrStdRejCmt;
-  private Timestamp addrStdTs;
+  private Date addrStdTs;
   private String approvalResult;
   private String approvalDateStr;
   private String approvalMaxTs;
@@ -999,14 +998,6 @@ public class RequestEntryModel extends BaseModel {
     this.dplChkUsrNm = dplChkUsrNm;
   }
 
-  public Timestamp getDplChkTs() {
-    return dplChkTs;
-  }
-
-  public void setDplChkTs(Timestamp dplChkTs) {
-    this.dplChkTs = dplChkTs;
-  }
-
   public String getFindCmrResult() {
     return findCmrResult;
   }
@@ -1045,14 +1036,6 @@ public class RequestEntryModel extends BaseModel {
 
   public void setFindCmrRejCmt(String findCmrRejCmt) {
     this.findCmrRejCmt = findCmrRejCmt;
-  }
-
-  public Timestamp getFindCmrTs() {
-    return findCmrTs;
-  }
-
-  public void setFindCmrTs(Timestamp findCmrTs) {
-    this.findCmrTs = findCmrTs;
   }
 
   public String getFindDnbResult() {
@@ -1095,14 +1078,6 @@ public class RequestEntryModel extends BaseModel {
     this.findDnbRejCmt = findDnbRejCmt;
   }
 
-  public Timestamp getFindDnbTs() {
-    return findDnbTs;
-  }
-
-  public void setFindDnbTs(Timestamp findDnbTs) {
-    this.findDnbTs = findDnbTs;
-  }
-
   public String getAddrStdResult() {
     return addrStdResult;
   }
@@ -1125,14 +1100,6 @@ public class RequestEntryModel extends BaseModel {
 
   public void setAddrStdRejCmt(String addrStdRejCmt) {
     this.addrStdRejCmt = addrStdRejCmt;
-  }
-
-  public Timestamp getAddrStdTs() {
-    return addrStdTs;
-  }
-
-  public void setAddrStdTs(Timestamp addrStdTs) {
-    this.addrStdTs = addrStdTs;
   }
 
   public String getYourAction() {
@@ -3004,6 +2971,38 @@ public class RequestEntryModel extends BaseModel {
 
   public void setUsSicmen(String usSicmen) {
     this.usSicmen = usSicmen;
+  }
+
+  public Date getDplChkTs() {
+    return dplChkTs;
+  }
+
+  public void setDplChkTs(Date dplChkTs) {
+    this.dplChkTs = dplChkTs;
+  }
+
+  public Date getFindCmrTs() {
+    return findCmrTs;
+  }
+
+  public void setFindCmrTs(Date findCmrTs) {
+    this.findCmrTs = findCmrTs;
+  }
+
+  public Date getFindDnbTs() {
+    return findDnbTs;
+  }
+
+  public void setFindDnbTs(Date findDnbTs) {
+    this.findDnbTs = findDnbTs;
+  }
+
+  public Date getAddrStdTs() {
+    return addrStdTs;
+  }
+
+  public void setAddrStdTs(Date addrStdTs) {
+    this.addrStdTs = addrStdTs;
   }
 
 }
