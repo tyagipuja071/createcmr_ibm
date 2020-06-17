@@ -48,7 +48,7 @@ public class JpaManager {
     getSessionFactory("CEDP");
   }
 
-  public static void setDefaultUnitName(String unitName) {
+  public static synchronized void setDefaultUnitName(String unitName) {
     UNIT = unitName;
   }
 }

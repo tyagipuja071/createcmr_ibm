@@ -18,7 +18,7 @@ public class DebugUtil {
     try {
       ObjectMapper mapper = new ObjectMapper();
       String jsonString = mapper.writeValueAsString(object);
-      logger.debug(mapper.defaultPrettyPrintingWriter().writeValueAsString(JSONObject.parse(jsonString)));
+      logger.debug(mapper.writeValueAsString(JSONObject.parse(jsonString)));
     } catch (Exception e) {
       logger.warn("Cannot print object as json.");
     }

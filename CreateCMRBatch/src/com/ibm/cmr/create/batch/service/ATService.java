@@ -171,19 +171,21 @@ public class ATService extends TransConnService {
           break;
         }
 
-        if (!(CmrConstants.REQ_TYPE_DELETE.equalsIgnoreCase(admin.getReqType()) && CmrConstants.REQ_TYPE_REACTIVATE.equalsIgnoreCase(admin
-            .getReqType()))) {
+        if (!(CmrConstants.REQ_TYPE_DELETE.equalsIgnoreCase(admin.getReqType())
+            && CmrConstants.REQ_TYPE_REACTIVATE.equalsIgnoreCase(admin.getReqType()))) {
           if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(admin.getRdcProcessingStatus())
               || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
             admin.setReqStatus("PPN");
             admin.setProcessedFlag("E"); // set request status to error.
-            WfHist hist = createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin
-                .getId().getReqId());
-          } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS
-              .equalsIgnoreCase(admin.getRdcProcessingStatus())) && !"TREC".equalsIgnoreCase(admin.getReqReason())) {
+            WfHist hist = createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing",
+                admin.getId().getReqId());
+          } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+              || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+              && !"TREC".equalsIgnoreCase(admin.getReqReason())) {
             admin.setReqStatus("COM");
             admin.setProcessedFlag("Y"); // set request status to processed
-            WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
+            WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing",
+                admin.getId().getReqId());
           }
         }
         partialCommit(entityManager);
@@ -247,19 +249,19 @@ public class ATService extends TransConnService {
             || CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
-          WfHist hist = createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin
-              .getId().getReqId());
-        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS
-            .equalsIgnoreCase(admin.getRdcProcessingStatus())) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+          WfHist hist = createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing",
+              admin.getId().getReqId());
+        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           admin.setReqStatus("COM");
           admin.setProcessedFlag("Y"); // set request status to processed
           WfHist hist = createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
         }
         partialCommit(entityManager);
       } catch (Exception e) {
-        LOG.error(
-            "Error in processing Aborted Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " [" + e.getMessage()
-                + "]", e);
+        LOG.error("Error in processing Aborted Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " ["
+            + e.getMessage() + "]", e);
       }
     }
 
@@ -297,8 +299,9 @@ public class ATService extends TransConnService {
           admin.setReqStatus("PPN");
           admin.setProcessedFlag("E"); // set request status to error.
           createHistory(entityManager, "Sending back to processor due to error on RDC processing", "PPN", "RDC Processing", admin.getId().getReqId());
-        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus()) || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS
-            .equalsIgnoreCase(admin.getRdcProcessingStatus())) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        } else if ((CmrConstants.RDC_STATUS_COMPLETED.equalsIgnoreCase(admin.getRdcProcessingStatus())
+            || CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equalsIgnoreCase(admin.getRdcProcessingStatus()))
+            && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
           admin.setReqStatus("COM");
           admin.setProcessedFlag("Y"); // set request status to processed
           createHistory(entityManager, "Request processing Completed Successfully", "COM", "RDC Processing", admin.getId().getReqId());
@@ -426,8 +429,8 @@ public class ATService extends TransConnService {
     admin.setLastUpdtBy(BATCH_USER_ID);
     updateEntity(admin, entityManager);
 
-    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error", admin.getId()
-        .getReqId());
+    WfHist hist = createHistory(entityManager, "An error occurred during processing: " + errorMsg, "PPN", "Processing Error",
+        admin.getId().getReqId());
     createComment(entityManager, "An error occurred during processing:\n" + errorMsg, admin.getId().getReqId());
 
     RequestUtils.sendEmailNotifications(entityManager, admin, hist);
@@ -504,8 +507,8 @@ public class ATService extends TransConnService {
 
     if (CmrConstants.RDC_STATUS_COMPLETED.equals(response.getStatus())) {
       overallStatus = CmrConstants.RDC_STATUS_COMPLETED;
-      statusMessage.append("Record with request ID " + admin.getId().getReqId() + " and CMR Number " + response.getCmrNo()
-          + " created SUCCESSFULLY. ");
+      statusMessage
+          .append("Record with request ID " + admin.getId().getReqId() + " and CMR Number " + response.getCmrNo() + " created SUCCESSFULLY. ");
       statusMessage.append("CMR No. " + response.getCmrNo() + " generated for this request. ");
       if (prospectConversion) {
         statusMessage.append(" RDc processing converted prospect " + cmrServiceInput + " to KUNNR(s): ");
@@ -553,8 +556,8 @@ public class ATService extends TransConnService {
     // update admin status
     admin.setDisableAutoProc(disableAutoProc);
     LOG.debug("*** Setting DISABLE_AUTO_PROC >> " + admin.getDisableAutoProc());
-    admin.setProcessedFlag(CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N
-        .toString());
+    admin.setProcessedFlag(
+        CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N.toString());
     LOG.debug("*** Setting PROCESSED_FLAG >> " + admin.getProcessedFlag());
 
     // edited to return the request back to processor if an error
@@ -886,8 +889,8 @@ public class ATService extends TransConnService {
             admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
             admin.setProcessedFlag("N");
           } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
-            admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-                : CmrConstants.RDC_STATUS_ABORTED);
+            admin.setRdcProcessingStatus(
+                processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
             admin.setProcessedFlag("E");
           } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
             admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
@@ -925,13 +928,13 @@ public class ATService extends TransConnService {
                 "CPR".equals(admin.getReqStatus()));
           } else {
             RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
-                "RDc  Processing has been completed(First batch run). Please check request's comment log for details.", ACTION_RDC_UPDATE, null,
-                null, "CPR".equals(admin.getReqStatus()));
+                "RDc  Processing has been completed(First batch run). Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
+                "CPR".equals(admin.getReqStatus()));
           }
 
           partialCommit(entityManager);
-          LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-              + admin.getRdcProcessingMsg());
+          LOG.debug(
+              "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
 
         } catch (Exception e) {
           LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -1074,9 +1077,9 @@ public class ATService extends TransConnService {
                   comment = comment.append("\nRDc update processing for KUNNR "
                       + (request.getSapNo() != null ? request.getSapNo() : "(not generated)") + " failed. Error: " + response.getMessage());
                 } else if (CmrConstants.RDC_STATUS_ABORTED.equalsIgnoreCase(resultCode)) {
-                  comment = comment.append("\nRDc update processing for KUNNR "
-                      + (request.getSapNo() != null ? request.getSapNo() : "(not generated)") + " failed. Error: " + response.getMessage()
-                      + " System will retry processing once.");
+                  comment = comment
+                      .append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
+                          + " failed. Error: " + response.getMessage() + " System will retry processing once.");
                 } else if (CmrConstants.RDC_STATUS_NOT_COMPLETED.equalsIgnoreCase(resultCode)) {
                   comment = comment.append("\nRDc update processing for KUNNR "
                       + (request.getSapNo() != null ? request.getSapNo() : "(not generated)") + " failed. Error: " + response.getMessage());
@@ -1101,8 +1104,8 @@ public class ATService extends TransConnService {
               admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
               admin.setProcessedFlag("N");
             } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
-              admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-                  : CmrConstants.RDC_STATUS_ABORTED);
+              admin.setRdcProcessingStatus(
+                  processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
               admin.setProcessedFlag("N");
             } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
               admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
@@ -1140,8 +1143,8 @@ public class ATService extends TransConnService {
             }
 
             partialCommit(entityManager);
-            LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-                + admin.getRdcProcessingMsg());
+            LOG.debug(
+                "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
 
           } catch (Exception e) {
             LOG.error("Error in processing Update Request " + admin.getId().getReqId(), e);
@@ -1296,8 +1299,8 @@ public class ATService extends TransConnService {
           // update admin status
           admin.setDisableAutoProc(disableAutoProc);
           LOG.debug("*** Setting DISABLE_AUTO_PROC >> " + admin.getDisableAutoProc());
-          admin.setProcessedFlag(CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N
-              .toString());
+          admin.setProcessedFlag(
+              CmrConstants.RDC_STATUS_COMPLETED.equals(overallStatus) ? CmrConstants.YES_NO.Y.toString() : CmrConstants.YES_NO.N.toString());
           LOG.debug("*** Setting PROCESSED_FLAG >> " + admin.getProcessedFlag());
 
           /*
@@ -1941,8 +1944,8 @@ public class ATService extends TransConnService {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
-          admin.setRdcProcessingStatus(processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED
-              : CmrConstants.RDC_STATUS_ABORTED);
+          admin.setRdcProcessingStatus(
+              processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS);
         } else {
@@ -1976,8 +1979,8 @@ public class ATService extends TransConnService {
         }
 
         partialCommit(entityManager);
-        LOG.debug("Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: "
-            + admin.getRdcProcessingMsg());
+        LOG.debug(
+            "Request ID " + admin.getId().getReqId() + " Status: " + admin.getRdcProcessingStatus() + " Message: " + admin.getRdcProcessingMsg());
         // *** END OF FIX
       } else {
         LOG.error("*****There are no mass update requests for RDC processing.*****");
@@ -2182,10 +2185,12 @@ public class ATService extends TransConnService {
     }
     if (isTempReactivate) {
       LOG.info("Response received from Process Service for TREC [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " KUNNR: "
-          + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-") + "]");
+          + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
+          + "]");
     } else {
       LOG.info("Response received from AustriaProcessService [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " KUNNR: "
-          + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-") + "]");
+          + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
+          + "]");
     }
     if (response != null && response.getRecords() != null && response.getRecords().size() > 0) {
       RDcRecord record = response.getRecords().get(0);
