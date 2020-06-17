@@ -1526,34 +1526,35 @@ function setCTCIsuByCluster() {
     return;
   }
   var _clusterHandler = dojo.connect(FormManager.getField('apCustClusterId'), 'onChange', function(value) {	
-    if (!value) {
-	  return;
-	}
-	var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-	var _cluster = FormManager.getActualValue('apCustClusterId');
-	
-	var apClientTierValue = [];
-	var isuCdValue = [];
-	if (_cluster != '' && _cluster != '') {
-	  var qParams = {
-	    _qall : 'Y',
-	    ISSUING_CNTRY : _cmrIssuingCntry,
-	    CLUSTER : _cluster,
-	   };
-	   var results = cmr.query('GET.CTC_ISU_BY_CLUSTER_CNTRY', qParams);
-	   if (results != null) {
-	     for (var i = 0; i < results.length; i++) {
-	    	 apClientTierValue.push(results[i].ret1);
-	    	 isuCdValue.push(results[i].ret2);
-	     }
-	     FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
-	     FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
-	     if (apClientTierValue.length == 1) {
-	       FormManager.setValue('clientTier', apClientTierValue[0]);
-	       FormManager.setValue('isuCd', isuCdValue[0]);
-	     }
-	   }
-	}
+    var clusterVal = FormManager.getActualValue('apCustClusterId');
+    if (!clusterVal) {
+	    return;
+	  }
+ 	  var _cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  	var _cluster = FormManager.getActualValue('apCustClusterId');
+  	
+  	var apClientTierValue = [];
+  	var isuCdValue = [];
+  	if (_cluster != '' && _cluster != '') {
+  	  var qParams = {
+  	    _qall : 'Y',
+  	    ISSUING_CNTRY : _cmrIssuingCntry,
+  	    CLUSTER : _cluster,
+  	   };
+  	   var results = cmr.query('GET.CTC_ISU_BY_CLUSTER_CNTRY', qParams);
+  	   if (results != null) {
+  	     for (var i = 0; i < results.length; i++) {
+  	    	 apClientTierValue.push(results[i].ret1);
+  	    	 isuCdValue.push(results[i].ret2);
+  	     }
+  	     FormManager.limitDropdownValues(FormManager.getField('clientTier'), apClientTierValue);
+  	     FormManager.limitDropdownValues(FormManager.getField('isuCd'), isuCdValue);
+  	     if (apClientTierValue.length == 1) {
+  	       FormManager.setValue('clientTier', apClientTierValue[0]);
+  	       FormManager.setValue('isuCd', isuCdValue[0]);
+  	     }
+  	   }
+  	}
   });
   if (_clusterHandler && _clusterHandler[0]) {
 	  _clusterHandler[0].onChange();

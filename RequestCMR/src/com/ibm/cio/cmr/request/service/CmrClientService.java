@@ -204,6 +204,8 @@ public class CmrClientService extends BaseSimpleService<Object> {
     stdCityRequest.setCity(address.getCity1());
     stdCityRequest.setState(address.getStateProv());
     stdCityRequest.setSysLoc(cmrIssuingCntry);
+    stdCityRequest.setStreet1(address.getAddrTxt());
+    stdCityRequest.setStreet2(address.getAddrTxt2());
     if ("US".equals(address.getLandCntry())) {
       stdCityRequest.setCountyName(address.getCountyName());
       stdCityRequest.setPostalCode(address.getPostCd());
@@ -237,8 +239,8 @@ public class CmrClientService extends BaseSimpleService<Object> {
       coverage.setGbQuadSectorTier(data.getClientTier());
       coverage.setINAC(data.getInacCd());
       coverage.setIndustryClass(data.getSubIndustryCd());
-      coverage.setIndustryCode(data.getSubIndustryCd() != null && data.getSubIndustryCd().length() > 0 ? data.getSubIndustryCd().substring(0, 1)
-          : null);
+      coverage
+          .setIndustryCode(data.getSubIndustryCd() != null && data.getSubIndustryCd().length() > 0 ? data.getSubIndustryCd().substring(0, 1) : null);
       coverage.setIndustrySolutionUnit(data.getIsuCd());
       coverage.setNationalTaxID(data.getTaxCd1());
       coverage.setSORTL(data.getSearchTerm());

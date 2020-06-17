@@ -63,6 +63,7 @@ public class CalculateCoverageElement extends OverridingElement {
   private boolean noInit = false;
   public static final String BG_CALC = "BG_CALC";
   public static final String BG_ODM = "BG_ODM";
+  public static final String BG_NONE = "BG_NONE";
   public static final String COV_REQ = "COV_REQ";
   public static final String COV_VAT = "COV_VAT";
   public static final String COV_ODM = "COV_ODM";
@@ -174,7 +175,7 @@ public class CalculateCoverageElement extends OverridingElement {
         gbgId = data.getGbgId();
         covFrom = BG_ODM;
       }
-      if (bgId != null) {
+      if (bgId != null && !"BGNONE".equals(bgId.trim())) {
         coverages = computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_BG", bgId, data.getCmrIssuingCntry(), false);
         if (coverages != null && !coverages.isEmpty()) {
           CoverageContainer preferredCoverage = coverages.get(0);
@@ -231,6 +232,9 @@ public class CalculateCoverageElement extends OverridingElement {
           coverageNotFound = true;
         }
         covFrom = COV_ODM;
+      } else if (bgId != null && "BGNONE".equals(bgId.trim())) {
+        details.append("Projected Buying Group on the request is 'BGNONE'. Skipping Coverage Calculation from Buying Group.\n");
+        covFrom = BG_NONE;
       }
       // get default coverage
       String defaultCoverage = getDefaultCoverage(data.getCmrIssuingCntry());
@@ -285,7 +289,7 @@ public class CalculateCoverageElement extends OverridingElement {
         boolean logNegativeCheck = true;
         for (CoverageContainer container : coverages) {
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
-          logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, FINAL, computedGbg, logNegativeCheck);
+          logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, FINAL, computedGbg, covFrom, logNegativeCheck);
           logNegativeCheck = false;
 
           boolean logBaseCoverage = false;
@@ -294,7 +298,7 @@ public class CalculateCoverageElement extends OverridingElement {
             // don't log base for now
             if (container.getBaseCoverage() != null) {
               LOG.debug("Logging Base Coverage ID: " + container.getBaseCoverage());
-              logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, BASE, computedGbg, false);
+              logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, BASE, computedGbg, covFrom, false);
             }
           }
 
@@ -323,6 +327,8 @@ public class CalculateCoverageElement extends OverridingElement {
 
           }
         }
+      } else if (BG_NONE.equals(covFrom)) {
+        LOG.debug("No Calculated BG Found. Projected BG='BGNONE'. Skipping Regular Coverage Calculation.");
       } else if (!currCoverage.isEmpty()) {
         if (calculatedCoverageContainer.getFinalCoverage().equals(defaultCoverage)) {
           result.setResults("Default Coverage");
@@ -334,6 +340,8 @@ public class CalculateCoverageElement extends OverridingElement {
           isCoverageCalculated = true;
           covFrom = COV_REQ;
         }
+      } else if (BG_NONE.equals(covFrom)) {
+        result.setResults("Skipped");
       } else {
         result.setResults("Cannot Calculate");
         covFrom = NONE;
@@ -366,7 +374,7 @@ public class CalculateCoverageElement extends OverridingElement {
             // calculated or projected Buying Group, and ODM determined
             // Coverage");
           }
-        } else if (!isCoverageCalculated) {
+        } else if (!isCoverageCalculated && !BG_NONE.equals(covFrom)) {
           details.setLength(0);
           details.append("Coverage could not be calculated.");
         } else if (isCoverageCalculated) {
@@ -420,16 +428,14 @@ public class CalculateCoverageElement extends OverridingElement {
    * @param output
    * @param coverageContainer
    * @param currCovLevel
+   * @param covFrom
    * @param logNegativeCheck
    */
   public void logCoverage(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData, List<String> coverageIds,
-      StringBuilder details, OverrideOutput output, CoverageContainer coverageContainer, String currCovLevel, GBGResponse gbg,
+      StringBuilder details, OverrideOutput output, CoverageContainer coverageContainer, String currCovLevel, GBGResponse gbg, String covFrom,
       boolean logNegativeCheck) {
-    if (coverageIds == null) {
-      // check for null
-      coverageIds = new ArrayList<>();
-    }
-
+    coverageIds = coverageIds != null ? coverageIds : new ArrayList<String>();
+    covFrom = covFrom != null ? covFrom : "";
     Data data = requestData.getData();
     String cmrIssuingCntry = data.getCmrIssuingCntry();
     String currCovId = "";
@@ -445,7 +451,7 @@ public class CalculateCoverageElement extends OverridingElement {
     if (!coverageIds.contains(currCovId)) {
       // GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
       // create overrides for first logged/manually logged coverage only
-      boolean createOverrides = coverageIds.isEmpty();
+      boolean createOverrides = coverageIds.isEmpty() && !COV_ODM.equals(covFrom);
       if (currCovRules != null && !currCovRules.isEmpty()) {
         details.append("\nCoverage ID = " + currCovId).append(" (" + currCovLevel + ")").append("\n");
         details.append("Coverage Name = " + getCoverageDescription(entityManager, currCovId)).append("\n");
@@ -591,23 +597,28 @@ public class CalculateCoverageElement extends OverridingElement {
         if (gbg != null && createOverrides && output.getData() != null && !output.getData().isEmpty()) {
           FieldResultKey bgKey = new FieldResultKey("DATA", "BG_ID");
           FieldResult bgResult = output.getData().get(bgKey);
-          if (bgResult != null && StringUtils.isNotBlank(data.getBgId()) && !"BGNONE".equals(data.getBgId())
+          if (bgResult != null && StringUtils.isNotBlank(data.getBgId()) && !"BGNONE".equals(data.getBgId().trim())
               && !data.getBgId().equals(bgResult.getNewValue())) {
             // calculated buying group is different from coverage buying group.
-            details.append("\nBuying Group ID under coverage overrides is different from the one on request.\n");
+            details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
             engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
             output.getData().remove(bgKey);
           }
           FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
           FieldResult gbgResult = output.getData().get(gbgKey);
-          if (gbgResult != null && StringUtils.isNotBlank(data.getGbgId()) && !"BGNONE".equals(data.getGbgId())
+          if (gbgResult != null && StringUtils.isNotBlank(data.getGbgId()) && !"BGNONE".equals(data.getGbgId().trim())
               && !data.getGbgId().equals(gbgResult.getNewValue())) {
             // calculated global buying group is different from coverage global
             // buying group.
-            details.append("\nGlobal Buying Group ID under coverage overrides is different from the one on request.\n");
+            details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
             engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
             output.getData().remove(gbgKey);
           }
+        }
+
+        if (COV_ODM.equals(covFrom)) {
+          // no overrides if COV_ODM
+          details.append("Current request data already fall into the projected ODM coverage.\n");
         }
 
         // Add to list if rules found.

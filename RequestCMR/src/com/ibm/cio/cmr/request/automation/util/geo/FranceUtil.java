@@ -38,6 +38,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -77,8 +78,7 @@ public class FranceUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/sbo", "sbo");
       digester.addSetNext("mappings/mapping", "add");
       try {
-        ClassLoader loader = FranceUtil.class.getClassLoader();
-        InputStream is = loader.getResourceAsStream("fr-sbo-mapping.xml");
+        InputStream is = ConfigUtil.getResourceStream("fr-sbo-mapping.xml");
         FranceUtil.sortlMappings = (ArrayList<FrSboMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
@@ -436,7 +436,7 @@ public class FranceUtil extends AutomationUtil {
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
           covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, container, CalculateCoverageElement.FINAL, null,
-              true);
+              null, true);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {

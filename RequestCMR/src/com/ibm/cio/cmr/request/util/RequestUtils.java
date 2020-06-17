@@ -49,7 +49,6 @@ import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
-import com.ibm.cio.cmr.request.ui.UIMgr;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.external.CreateCMRBPHandler;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -348,6 +347,11 @@ public class RequestUtils {
         }
       }
 
+      // CMR-3996 - if CreateCMR is the source, do not notify anyone
+      if ("CreateCMR".equals(admin.getSourceSystId())) {
+        return;
+      }
+
     }
 
     if (recipients.toString().trim().length() == 0 && !("PPN".equals(history.getReqStatus()))) {
@@ -622,9 +626,9 @@ public class RequestUtils {
     try {
       InputStream is = null;
       if (batchemailTemplate != null) {
-        is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email_batch.html");
+        is = ConfigUtil.getResourceStream("cmr-email_batch.html");
       } else {
-        is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email.html");
+        is = ConfigUtil.getResourceStream("cmr-email.html");
       }
 
       try {
@@ -653,7 +657,7 @@ public class RequestUtils {
 
   private static String getExternalEmailTemplate(String sourceSystId) {
     try {
-      InputStream is = UIMgr.class.getClassLoader().getResourceAsStream((sourceSystId.toLowerCase()) + ".html");
+      InputStream is = ConfigUtil.getResourceStream((sourceSystId.toLowerCase()) + ".html");
 
       try {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
@@ -684,7 +688,7 @@ public class RequestUtils {
   private static String getCMREmailTemplate() {
     StringBuilder sb = new StringBuilder();
     try {
-      InputStream is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email_mc.html");
+      InputStream is = ConfigUtil.getResourceStream("cmr-email_mc.html");
       try {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         try {
@@ -1388,9 +1392,7 @@ public class RequestUtils {
             }
           }
         }
-        String standardCity = getUSStandardCityName(cmrRecord.getCmrCountryLanded(), cmrRecord.getCmrCity(), cmrRecord.getCmrState(),
-            cmrRecord.getCmrCounty(), cmrRecord.getCmrPostalCode());
-        cmrRecord.setCmrCity(standardCity);
+        processUSStandardCityName(cmrRecord);
         LOG.debug("City/County Computed: City: " + cmrRecord.getCmrCity() + " " + cmrRecord.getCmrCountyCode() + " - " + cmrRecord.getCmrCounty());
       } catch (Exception e) {
         LOG.warn("County and City computation error.", e);
@@ -1407,23 +1409,30 @@ public class RequestUtils {
    * @return
    * @throws Exception
    */
-  public static String getUSStandardCityName(String landedCounty, String city, String state, String county, String postalCode) throws Exception {
+  public static void processUSStandardCityName(FindCMRRecordModel record) throws Exception {
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
     StandardCityServiceClient stdCityClient = CmrServicesFactory.getInstance().createClient(baseUrl, StandardCityServiceClient.class);
     StandardCityRequest stdCityRequest = new StandardCityRequest();
-    stdCityRequest.setCountry(landedCounty);
-    stdCityRequest.setCity(city);
-    stdCityRequest.setState(state);
+    stdCityRequest.setCountry(record.getCmrCountryLanded());
+    stdCityRequest.setCity(record.getCmrCity());
+    stdCityRequest.setState(record.getCmrState());
     stdCityRequest.setSysLoc(SystemLocation.UNITED_STATES);
-    stdCityRequest.setCountyName(county);
-    stdCityRequest.setPostalCode(postalCode);
+    stdCityRequest.setCountyName(record.getCmrCounty());
+    stdCityRequest.setPostalCode(record.getCmrPostalCode());
+    stdCityRequest.setStreet1(record.getCmrStreetAddress());
+    stdCityRequest.setStreet2(record.getCmrStreetAddressCont());
     stdCityClient.setStandardCityRequest(stdCityRequest);
 
     StandardCityResponse resp = stdCityClient.executeAndWrap(StandardCityResponse.class);
     if (resp != null && resp.isSuccess()) {
-      return resp.getStandardCity();
+      if (resp.isCityMatched()) {
+        record.setCmrCity(resp.getStandardCity());
+      }
+      if (StringUtils.isBlank(record.getCmrCounty())) {
+        record.setCmrCountyCode(resp.getStandardCountyCd());
+        record.setCmrCounty(resp.getStandardCountyName());
+      }
     }
-    return city;
   }
 
   /**
