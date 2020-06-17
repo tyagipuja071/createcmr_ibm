@@ -73,9 +73,9 @@ public class CNHandler extends GEOHandler {
 
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
-        "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO"));
+    fields.addAll(
+        Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD", "SUB_INDUSTRY_CD",
+            "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD", "DUNS_NO"));
     return fields;
   }
 
@@ -321,13 +321,19 @@ public class CNHandler extends GEOHandler {
 
     if (intlAddrList != null && intlAddrList.size() > 0) {
       for (IntlAddr intlAddr : intlAddrList) {
-        entityManager.remove(intlAddr);
+        IntlAddr merged = entityManager.merge(intlAddr);
+        if (merged != null) {
+          entityManager.remove(merged);
+        }
       }
 
       // remove INTL_ADDR_RDC too
       if (intlAddrRdcList != null && intlAddrRdcList.size() > 0) {
         for (IntlAddrRdc intlAddrRdc : intlAddrRdcList) {
-          entityManager.remove(intlAddrRdc);
+          IntlAddrRdc merged = entityManager.merge(intlAddrRdc);
+          if (merged != null) {
+            entityManager.remove(merged);
+          }
         }
       }
 
@@ -419,7 +425,8 @@ public class CNHandler extends GEOHandler {
         entityManager.merge(data);
         entityManager.flush();
 
-        String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), cmr, addr.getId().getAddrType(), addr.getPairedAddrSeq());
+        String adrnr = getAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), cmr, addr.getId().getAddrType(),
+            addr.getPairedAddrSeq());
         Sadr sadr = getChinaAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
 
         if (sadr != null) {
@@ -680,7 +687,7 @@ public class CNHandler extends GEOHandler {
 
       for (int i = idxStart; i < tmpAr.length; i++) {
         namePart3 = namePart3 + " " + tmpAr[i];
-      }// namePart3 = temp2;
+      } // namePart3 = temp2;
 
       namePart3 = namePart3.trim();
 
@@ -1352,92 +1359,91 @@ public class CNHandler extends GEOHandler {
 
   }
 
-  
-@Override
-public Map<String, String> getUIFieldIdMap(){ 
-Map<String, String> map = new HashMap<String, String>();
-map.put("##OriginatorName", "originatorNm");
-map.put("##SensitiveFlag", "sensitiveFlag");
-map.put("##INACType", "inacType");
-map.put("##ISU", "isuCd");
-map.put("##Building", "bldg");
-map.put("##CMROwner", "cmrOwner");
-map.put("##DropDownCityChina", "cnCity");
-map.put("##PPSCEID", "ppsceid");
-map.put("##CustLang", "custPrefLang");
-map.put("##ExportCodesCountry", "custAcctType");
-map.put("##GlobalBuyingGroupID", "gbgId");
-map.put("##ExportCodesTDOIndicator", "icmsInd");
-map.put("##CoverageID", "covId");
-map.put("##OriginatorID", "originatorId");
-map.put("##BPRelationType", "bpRelType");
-map.put("##ChinaCustomerCntName", "cnCustContNm");
-map.put("##CAP", "capInd");
-map.put("##RequestReason", "reqReason");
-map.put("##POBox", "poBox");
-map.put("##ParentCompanyNo", "dealerNo");
-map.put("##SocialCreditCd", "busnType");
-map.put("##LandedCountry", "landCntry");
-map.put("##CMRIssuingCountry", "cmrIssuingCntry");
-map.put("##INACCode", "inacCd");
-map.put("##CustPhone", "custPhone");
-map.put("##CustomerScenarioType", "custGrp");
-map.put("##ChinaCity2", "cnDistrict");
-map.put("##ClassCode", "custClass");
-map.put("##City1", "city1");
-map.put("##City2", "city2");
-map.put("##RequestingLOB", "requestingLob");
-map.put("##AddrStdRejectReason", "addrStdRejReason");
-map.put("##ExpediteReason", "expediteReason");
-map.put("##VAT", "vat");
-map.put("##CMRNumber", "cmrNo");
-map.put("##Office", "office");
-map.put("##Subindustry", "subIndustryCd");
-map.put("##EnterCMR", "enterCMRNo");
-map.put("##StateProvChina", "stateProv");
-map.put("##DisableAutoProcessing", "disableAutoProc");
-map.put("##ChinaStreetAddress1", "cnAddrTxt");
-map.put("##Expedite", "expediteInd");
-map.put("##BGLDERule", "bgRuleId");
-map.put("##ProspectToLegalCMR", "prospLegalInd");
-map.put("##ChinaStreetAddress2", "cnAddrTxt2");
-map.put("##RdcComment", "rdcComment");
-map.put("##ChinaSearchTerm", "searchTerm");
-map.put("##ExportCodesTDOdate", "bioChemMissleMfg");
-map.put("##ClientTier", "clientTier");
-map.put("##CustomerCntPhone2", "cnCustContPhone2");
-map.put("##IERPSitePrtyId", "ierpSitePrtyId");
-map.put("##DropDownCity", "city1DrpDown");
-map.put("##SAPNumber", "sapNo");
-map.put("##Department", "dept");
-map.put("##StreetAddress2", "addrTxt2");
-map.put("##Company", "company");
-map.put("##StreetAddress1", "addrTxt");
-map.put("##CustomerName1", "custNm1");
-map.put("##CustomerName2", "custNm2");
-map.put("##ISIC", "isicCd");
-map.put("##CustomerName3", "custNm3");
-map.put("##CustomerCntJobTitle", "cnCustContJobTitle");
-map.put("##Enterprise", "enterprise");
-map.put("##IbmDeptCostCenter", "ibmDeptCostCenter");
-map.put("##PostalCode", "postCd");
-map.put("##InterAddrKey", "cnInterAddrKey");
-map.put("##TransportZone", "transportZone");
-map.put("##DUNS", "dunsNo");
-map.put("##BuyingGroupID", "bgId");
-map.put("##ChinaCustomerName1", "cnCustName1");
-map.put("##RequesterID", "requesterId");
-map.put("##ChinaCustomerName2", "cnCustName2");
-map.put("##GeoLocationCode", "geoLocationCd");
-map.put("##ChinaCustomerName3", "cnCustName3");
-map.put("##MembLevel", "memLvl");
-map.put("##GovIndicator", "govType");
-map.put("##PrivacyIndc", "privIndc");
-map.put("##RequestType", "reqType");
-map.put("##CustomerScenarioSubType", "custSubGrp");
-return map;
-}
-  
+  @Override
+  public Map<String, String> getUIFieldIdMap() {
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("##OriginatorName", "originatorNm");
+    map.put("##SensitiveFlag", "sensitiveFlag");
+    map.put("##INACType", "inacType");
+    map.put("##ISU", "isuCd");
+    map.put("##Building", "bldg");
+    map.put("##CMROwner", "cmrOwner");
+    map.put("##DropDownCityChina", "cnCity");
+    map.put("##PPSCEID", "ppsceid");
+    map.put("##CustLang", "custPrefLang");
+    map.put("##ExportCodesCountry", "custAcctType");
+    map.put("##GlobalBuyingGroupID", "gbgId");
+    map.put("##ExportCodesTDOIndicator", "icmsInd");
+    map.put("##CoverageID", "covId");
+    map.put("##OriginatorID", "originatorId");
+    map.put("##BPRelationType", "bpRelType");
+    map.put("##ChinaCustomerCntName", "cnCustContNm");
+    map.put("##CAP", "capInd");
+    map.put("##RequestReason", "reqReason");
+    map.put("##POBox", "poBox");
+    map.put("##ParentCompanyNo", "dealerNo");
+    map.put("##SocialCreditCd", "busnType");
+    map.put("##LandedCountry", "landCntry");
+    map.put("##CMRIssuingCountry", "cmrIssuingCntry");
+    map.put("##INACCode", "inacCd");
+    map.put("##CustPhone", "custPhone");
+    map.put("##CustomerScenarioType", "custGrp");
+    map.put("##ChinaCity2", "cnDistrict");
+    map.put("##ClassCode", "custClass");
+    map.put("##City1", "city1");
+    map.put("##City2", "city2");
+    map.put("##RequestingLOB", "requestingLob");
+    map.put("##AddrStdRejectReason", "addrStdRejReason");
+    map.put("##ExpediteReason", "expediteReason");
+    map.put("##VAT", "vat");
+    map.put("##CMRNumber", "cmrNo");
+    map.put("##Office", "office");
+    map.put("##Subindustry", "subIndustryCd");
+    map.put("##EnterCMR", "enterCMRNo");
+    map.put("##StateProvChina", "stateProv");
+    map.put("##DisableAutoProcessing", "disableAutoProc");
+    map.put("##ChinaStreetAddress1", "cnAddrTxt");
+    map.put("##Expedite", "expediteInd");
+    map.put("##BGLDERule", "bgRuleId");
+    map.put("##ProspectToLegalCMR", "prospLegalInd");
+    map.put("##ChinaStreetAddress2", "cnAddrTxt2");
+    map.put("##RdcComment", "rdcComment");
+    map.put("##ChinaSearchTerm", "searchTerm");
+    map.put("##ExportCodesTDOdate", "bioChemMissleMfg");
+    map.put("##ClientTier", "clientTier");
+    map.put("##CustomerCntPhone2", "cnCustContPhone2");
+    map.put("##IERPSitePrtyId", "ierpSitePrtyId");
+    map.put("##DropDownCity", "city1DrpDown");
+    map.put("##SAPNumber", "sapNo");
+    map.put("##Department", "dept");
+    map.put("##StreetAddress2", "addrTxt2");
+    map.put("##Company", "company");
+    map.put("##StreetAddress1", "addrTxt");
+    map.put("##CustomerName1", "custNm1");
+    map.put("##CustomerName2", "custNm2");
+    map.put("##ISIC", "isicCd");
+    map.put("##CustomerName3", "custNm3");
+    map.put("##CustomerCntJobTitle", "cnCustContJobTitle");
+    map.put("##Enterprise", "enterprise");
+    map.put("##IbmDeptCostCenter", "ibmDeptCostCenter");
+    map.put("##PostalCode", "postCd");
+    map.put("##InterAddrKey", "cnInterAddrKey");
+    map.put("##TransportZone", "transportZone");
+    map.put("##DUNS", "dunsNo");
+    map.put("##BuyingGroupID", "bgId");
+    map.put("##ChinaCustomerName1", "cnCustName1");
+    map.put("##RequesterID", "requesterId");
+    map.put("##ChinaCustomerName2", "cnCustName2");
+    map.put("##GeoLocationCode", "geoLocationCd");
+    map.put("##ChinaCustomerName3", "cnCustName3");
+    map.put("##MembLevel", "memLvl");
+    map.put("##GovIndicator", "govType");
+    map.put("##PrivacyIndc", "privIndc");
+    map.put("##RequestType", "reqType");
+    map.put("##CustomerScenarioSubType", "custSubGrp");
+    return map;
+  }
+
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     return false;
