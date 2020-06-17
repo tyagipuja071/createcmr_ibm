@@ -24,7 +24,7 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
     if (FormManager.getActualValue('addrType') == 'ZP02') {
       GEOHandler.disableCopyAddress();
     } else {
-      GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy, [ 'ZD01' ]);
+      GEOHandler.enableCopyAddress(GEOHandler.CEMEA_COPY, validateCEMEACopy, [ 'ZD01' ]);
     }
   }
 }
@@ -73,6 +73,9 @@ function lockEmbargo() {
  * lock OrdBlk field
  */
 function lockOrdBlk() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -80,6 +83,10 @@ function lockOrdBlk() {
   if (role == 'REQUESTER') {
     FormManager.readOnly('ordBlk');
   } else {
+    FormManager.enable('ordBlk');
+  }
+  // CMR - 3389
+  if (cntry == SysLoc.AUSTRIA && reqType == 'U') {
     FormManager.enable('ordBlk');
   }
 }
@@ -159,6 +166,9 @@ function setAustriaUIFields() {
   if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
     return;
   }
+  FormManager.hide('CreditCd', 'creditCd');
+  FormManager.hide('CurrencyCode', 'legacyCurrencyCd');
+
   if (FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
@@ -173,7 +183,7 @@ function setAustriaUIFields() {
     FormManager.readOnly('enterprise');
     FormManager.setValue('enterprise', '');
   }
-
+  
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   // for Private customer
@@ -195,9 +205,9 @@ function setAustriaUIFields() {
     FormManager.readOnly("enterprise");
     FormManager.setValue("salesBusOffCd", "080");
     FormManager.readOnly("salesBusOffCd");
-
+ 
   }
-
+  
 }
 
 /**
@@ -440,8 +450,9 @@ function addAddressTypeValidator() {
             // own
             if (reqLob == 'IGF' && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0)) {
               return new ValidationResult(null, false, 'All address types are mandatory.');
-            } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
-              return new ValidationResult(null, false, 'All address types are mandatory.');
+            } else if (zs01Cnt == 0) {
+              // CMR-3389
+              return new ValidationResult(null, false, 'Sold-to address is mandatory for CMR creation.');
             }
           } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory except G Address.');
@@ -1402,7 +1413,7 @@ function phoneNoValidationOnChange() {
 }
 
 function setEnterpriseValues(clientTier) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
@@ -2553,7 +2564,36 @@ function setTypeOfCustomerRequiredProcessor() {
   }
 }
 
+function setScenarioTo3PA(cntry, addressMode, saving, finalSave, force) {
+  if ((finalSave || force) && cmr.addressMode) {
+    var addrType = FormManager.getActualValue('addrType');
+    var copyTypes = document.getElementsByName('copyTypes');
+    var copyingToA = false;
+    if (copyTypes != null && copyTypes.length > 0) {
+      copyTypes.forEach(function(input, i) {
+        if (input.value == 'ZS01' && input.checked) {
+          copyingToA = true;
+        }
+      });
+    }
+    if ((addrType == 'ZS01' || copyingToA)) {
+      var custNm1 = FormManager.getActualValue('custNm1');
+      var custNm2 = FormManager.getActualValue('custNm2');
+      if (custNm1.concat(custNm2).includes("c/o")) {
+        FormManager.setValue('custGrp', 'LOCAL');
+        FormManager.setValue('custSubGrp', '3PA');
+      }
+
+    }
+  }
+}
+
+function canCopyAddress(value, rowIndex, grid) {
+  return false;
+}
 dojo.addOnLoad(function() {
+  GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
+      '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
   GEOHandler.CEMEA = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762',
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
   GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '603', '607', '620', '626', '651', '675', '677', '680', '694', '695', '699', '705', '707', '713', '741', '752', '762', '767', '768', '772',
@@ -2581,6 +2621,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAddrFunction(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
 
   GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(reqReasonOnChange, [ SysLoc.AUSTRIA ]);
