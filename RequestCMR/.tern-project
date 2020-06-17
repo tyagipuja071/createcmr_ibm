@@ -19,10 +19,5 @@
   "libs": [
     "browser",
     "jquery"
-  ],
-  "ide": {
-    "scriptPaths": [
-      
-    ]
-  }
+  ]
 }
