@@ -3,7 +3,7 @@
  */
 package com.ibm.cio.cmr.request.model.pref;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.ui.ModelMap;
@@ -28,7 +28,7 @@ public class DelegateModel extends BaseModel {
 
   private String delegateNm;
 
-  private Timestamp createTs;
+  private Date createTs;
 
   public String getUserId() {
     return userId;
@@ -54,14 +54,6 @@ public class DelegateModel extends BaseModel {
     this.delegateNm = delegateNm;
   }
 
-  public Timestamp getCreateTs() {
-    return createTs;
-  }
-
-  public void setCreateTs(Timestamp createTs) {
-    this.createTs = createTs;
-  }
-
   @Override
   public boolean allKeysAssigned() {
     return !StringUtils.isEmpty(this.delegateId) && !StringUtils.isEmpty(this.userId);
@@ -83,6 +75,14 @@ public class DelegateModel extends BaseModel {
     map.addAttribute("userId", this.userId);
     map.addAttribute("delegateId", this.delegateId);
 
+  }
+
+  public Date getCreateTs() {
+    return createTs;
+  }
+
+  public void setCreateTs(Date createTs) {
+    this.createTs = createTs;
   }
 
 }

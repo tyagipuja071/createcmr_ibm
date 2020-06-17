@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,10 +35,9 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AutomationUtil} for Switzwerland/LI country specific validations
@@ -81,8 +81,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/muboty", "muboty");
       digester.addSetNext("mappings/mapping", "add");
       try {
-        ClassLoader loader = GermanyUtil.class.getClassLoader();
-        InputStream is = loader.getResourceAsStream("ch-muboty-mapping.xml");
+        InputStream is = ConfigUtil.getResourceStream("ch-muboty-mapping.xml");
         SwitzerlandUtil.mubotyMappings = (ArrayList<ChMubotyMapping>) digester.parse(is);
         // test
         ChMubotyMapping mapping = getMubotyFromMapping("C", "1000", "32", "S");
