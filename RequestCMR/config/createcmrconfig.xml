@@ -68,39 +68,6 @@
     <value></value>
   </item>
   <item>
-    <id>BLUEGROUP_PROCESSOR</id>
-    <order>8</order>
-    <name>Processing BlueGroup</name>
-    <description>Comma-separated list of the BlueGroups the user has to be a member of to have the processor role.</description>
-    <type>bluegroup</type>
-    <editable>true</editable>
-    <required>false</required>
-    <editType>text</editType>
-    <value>RequestCMRProcessorTestGroup,WW RequestCMR Processor</value>
-  </item>
-  <item>
-    <id>BLUEGROUP_ACCESS</id>
-    <order>8</order>
-    <name>BlueGroups Access</name>
-    <description>Comma-separated list of the BlueGroups the user has to be a member of to gain access to the site.</description>
-    <type>bluegroup</type>
-    <editable>true</editable>
-    <required>false</required>
-    <editType>text</editType>
-    <value>FindCMRTestGroup,WW Find &amp; Request CMR Admin,WW Find &amp; Request CMR,WW RequestCMR Processor</value>
-  </item>
-  <item>
-    <id>BLUEGROUP_ADMIN</id>
-    <order>9</order>
-    <name>Admin BlueGroups</name>
-    <description>The BlueGroup that application administrators belong to</description>
-    <type>bluegroup</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>WW Find &amp; Request CMR Admin,FindCMRTestGroup</value>
-  </item>
-  <item>
     <id>MANDT</id>
     <order>10</order>
     <name>Client (MANDT)</name>
@@ -120,7 +87,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>smtp.icds.ibm.com</value>
+    <value>oop.uk.relay.ibm.com</value>
   </item>
   <item>
     <id>DATE_FORMAT</id>
@@ -164,7 +131,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>CreateCMR System&lt;createcmr@us.ibm.com&gt;</value>
+    <value>CreateCMR DEV&lt;createcmr@us.ibm.com&gt;</value>
   </item>
   <item>
     <id>FIND_CMR_URL</id>
@@ -175,8 +142,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://dgadaldecmr01.sl.bluecloud.ibm.com:9444/DNBSearchWeb</value>
-    <value>https://ibmcmrr0.portsmouth.uk.ibm.com/DNBSearchWeb</value>
+    <value>https://localhost:9444/FindCMR</value>
   </item>
   <item>
     <id>MAIL_SUBJECT</id>
@@ -188,17 +154,6 @@
     <required>true</required>
     <editType>text</editType>
     <value>Request {0} - Status Changed to {1}</value>
-  </item>
-  <item>
-    <id>TGME_URL</id>
-    <order>16</order>
-    <name>TGME Address Standardization Endpoint</name>
-    <description>The URL of the TGME Web Service</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://ibmccmpo.portsmouth.uk.ibm.com:9443/wisd/transformcustinfotgmev15/TgmeStanService</value>
   </item>
   <item>
     <id>ATTACHMENT_DIR</id>
@@ -221,17 +176,6 @@
     <required>true</required>
     <editType>text</editType>
     <value>2</value>
-  </item>
-  <item>
-    <id>EVS_URL</id>
-    <order>19</order>
-    <name>EVS Service Endpoint</name>
-    <description>The URL of the EVS Web Service for DPL Check functions</description>
-    <type>string</type>
-    <editable>true</editable>
-    <required>true</required>
-    <editType>text</editType>
-    <value>https://dhebpwasc01.boulder.ibm.com/webapp/comexp/exportWS/services/ComExp</value>
   </item>
   <item>
     <id>DPL_CHECK_VALIDITY</id>
@@ -264,8 +208,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://dgadaldecmr01.sl.bluecloud.ibm.com:9443/CMRServicesV2</value>
-    <value>https://ibmcmrr0.portsmouth.uk.ibm.com/CMRServicesV2</value>
+    <value>https://localhost:9444/CMRServices</value>
   </item>
   <item>
     <id>ADDRESS_VERIFICATION_RULES_LINK</id>
@@ -298,8 +241,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://dgadaldecmr01.sl.bluecloud.ibm.com:9443/CMRServicesV2</value>
-    <value>https://ibmcmrr0.portsmouth.uk.ibm.com/CMRServicesV2</value>
+    <value>https://localhost:9444/CMRServices</value>
   </item>
   <item>
     <id>MASS_UPDATE_MAX_ROWS</id>
@@ -387,7 +329,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://dgadaldecmr01.sl.bluecloud.ibm.com:9445/CreateCMR</value>
+    <value>https://localhost:9444/CreateCMR</value>
   </item>
   <item>
     <id>SERVER_ALIAS</id>
@@ -398,7 +340,7 @@
     <editable>false</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>BZ29</value>
+    <value>DEV</value>
   </item>
   <item>
     <id>CMR_HOME</id>
@@ -420,7 +362,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://ibmccmr3.portsmouth.uk.ibm.com:9445/CISearchServices</value>
+    <value>https://localhost:9444/CISearchServices</value>
   </item>
   <item>
     <id>CREATECMR_BP_URL</id>

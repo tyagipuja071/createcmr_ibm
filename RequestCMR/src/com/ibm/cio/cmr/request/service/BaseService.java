@@ -319,7 +319,10 @@ public abstract class BaseService<M extends BaseModel, E extends BaseEntity<?>> 
    * @param entityManager
    */
   public void deleteEntity(BaseEntity<?> entity, EntityManager entityManager) {
-    entityManager.remove(entity);
+    BaseEntity<?> merged = entityManager.merge(entity);
+    if (merged != null) {
+      entityManager.remove(merged);
+    }
     entityManager.flush();
   }
 

@@ -264,7 +264,10 @@ public abstract class BaseBatchService extends BaseSimpleService<Boolean> {
    * @param entityManager
    */
   public synchronized void deleteEntity(BaseEntity<?> entity, EntityManager entityManager) {
-    entityManager.remove(entity);
+    BaseEntity<?> merged = entityManager.merge(entity);
+    if (merged != null) {
+      entityManager.remove(merged);
+    }
     entityManager.flush();
   }
 
