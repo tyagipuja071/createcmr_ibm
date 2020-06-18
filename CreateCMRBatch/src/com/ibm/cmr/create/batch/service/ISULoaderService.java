@@ -162,12 +162,6 @@ public class ISULoaderService extends BaseBatchService {
     return false;
   }
 
-  @Override
-  protected String getPersistenceUnitName() {
-    // RDC is for CIWEB, use the other persistence unit RDC_MAIN for main RDc
-    return "RDC_MAIN";
-  }
-
   /**
    * Get all ISU codes from DB in a Batch CMR Num
    * 

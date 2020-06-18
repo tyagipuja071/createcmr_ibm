@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -24,13 +25,9 @@ import com.ibm.cio.cmr.request.entity.listeners.NoLog;
  * @author Rama mohan
  */
 @Entity
-@Table(
-    name = "SCORECARD",
-    schema = "CREQCMR")
+@Table(name = "SCORECARD", schema = "CREQCMR")
 @EntityListeners({ ChangeLogListener.class })
-@ChangeLogDetails(
-    childTable = true,
-    reqId = "id.reqId")
+@ChangeLogDetails(childTable = true, reqId = "id.reqId")
 public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -47,74 +44,58 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
     this.id = id;
   }
 
-  @Column(
-      name = "DPL_CHK_RESULT")
+  @Column(name = "DPL_CHK_RESULT")
   private String dplChkResult;
 
-  @Column(
-      name = "DPL_CHK_USR_ID")
+  @Column(name = "DPL_CHK_USR_ID")
   private String dplChkUsrId;
 
-  @Column(
-      name = "DPL_CHK_USR_NM")
+  @Column(name = "DPL_CHK_USR_NM")
   private String dplChkUsrNm;
 
-  @Column(
-      name = "DPL_CHK_TS")
+  @Column(name = "DPL_CHK_TS")
   @Temporal(TemporalType.TIMESTAMP)
-  private Timestamp dplChkTs;
+  private Date dplChkTs;
 
-  @Column(
-      name = "FIND_CMR_RESULT")
+  @Column(name = "FIND_CMR_RESULT")
   private String findCmrResult;
 
-  @Column(
-      name = "FIND_CMR_USR_ID")
+  @Column(name = "FIND_CMR_USR_ID")
   private String findCmrUsrId;
 
-  @Column(
-      name = "FIND_CMR_USR_NM")
+  @Column(name = "FIND_CMR_USR_NM")
   private String findCmrUsrNm;
 
-  @Column(
-      name = "FIND_CMR_REJ_REASON")
+  @Column(name = "FIND_CMR_REJ_REASON")
   private String findCmrRejReason;
 
-  @Column(
-      name = "FIND_CMR_REJ_CMT")
+  @Column(name = "FIND_CMR_REJ_CMT")
   private String findCmrRejCmt;
 
-  @Column(
-      name = "FIND_CMR_TS")
+  @Column(name = "FIND_CMR_TS")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
-  private Timestamp findCmrTs;
+  private Date findCmrTs;
 
-  @Column(
-      name = "FIND_DNB_RESULT")
+  @Column(name = "FIND_DNB_RESULT")
   private String findDnbResult;
 
-  @Column(
-      name = "FIND_DNB_USR_ID")
+  @Column(name = "FIND_DNB_USR_ID")
   private String findDnbUsrId;
 
-  @Column(
-      name = "FIND_DNB_USR_NM")
+  @Column(name = "FIND_DNB_USR_NM")
   private String findDnbUsrNm;
 
-  @Column(
-      name = "FIND_DNB_REJ_REASON")
+  @Column(name = "FIND_DNB_REJ_REASON")
   private String findDnbRejReason;
 
-  @Column(
-      name = "FIND_DNB_REJ_CMT")
+  @Column(name = "FIND_DNB_REJ_CMT")
   private String findDnbRejCmt;
 
-  @Column(
-      name = "FIND_DNB_TS")
+  @Column(name = "FIND_DNB_TS")
   @Temporal(TemporalType.TIMESTAMP)
   @NoLog
-  private Timestamp findDnbTs;
+  private Date findDnbTs;
 
   public String getDplChkResult() {
     return this.dplChkResult;
@@ -138,10 +119,6 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
 
   public void setDplChkUsrNm(String dplChkUsrNm) {
     this.dplChkUsrNm = dplChkUsrNm;
-  }
-
-  public Timestamp getDplChkTs() {
-    return this.dplChkTs;
   }
 
   public void setDplChkTs(Timestamp dplChkTs) {
@@ -188,14 +165,6 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
     this.findCmrRejCmt = findCmrRejCmt;
   }
 
-  public Timestamp getFindCmrTs() {
-    return this.findCmrTs;
-  }
-
-  public void setFindCmrTs(Timestamp findCmrTs) {
-    this.findCmrTs = findCmrTs;
-  }
-
   public String getFindDnbResult() {
     return this.findDnbResult;
   }
@@ -236,11 +205,27 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
     this.findDnbRejCmt = findDnbRejCmt;
   }
 
-  public Timestamp getFindDnbTs() {
-    return this.findDnbTs;
+  public Date getDplChkTs() {
+    return dplChkTs;
   }
 
-  public void setFindDnbTs(Timestamp findDnbTs) {
+  public void setDplChkTs(Date dplChkTs) {
+    this.dplChkTs = dplChkTs;
+  }
+
+  public Date getFindCmrTs() {
+    return findCmrTs;
+  }
+
+  public void setFindCmrTs(Date findCmrTs) {
+    this.findCmrTs = findCmrTs;
+  }
+
+  public Date getFindDnbTs() {
+    return findDnbTs;
+  }
+
+  public void setFindDnbTs(Date findDnbTs) {
     this.findDnbTs = findDnbTs;
   }
 
