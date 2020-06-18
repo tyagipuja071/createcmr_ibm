@@ -31,7 +31,7 @@ import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 
 /**
  * @author Neil Sherwin Espolong
- * */
+ */
 @Component
 public class GeoContactInfoService extends BaseService<GeoContactInfoModel, GeoContactInfo> {
 
@@ -476,7 +476,10 @@ public class GeoContactInfoService extends BaseService<GeoContactInfoModel, GeoC
     if (geoContactInfo != null && geoContactInfo.size() > 0) {
       for (int i = 0; i < geoContactInfo.size(); i++) {
         GeoContactInfo contactInfo = geoContactInfo.get(i);
-        entityManager.remove(contactInfo);
+        GeoContactInfo merged = entityManager.merge(contactInfo);
+        if (merged != null) {
+          entityManager.remove(merged);
+        }
       }
     }
   }

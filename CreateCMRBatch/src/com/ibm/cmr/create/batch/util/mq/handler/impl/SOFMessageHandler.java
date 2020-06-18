@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.openjpa.persistence.OpenJPAEntityTransaction;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -645,8 +645,8 @@ public class SOFMessageHandler extends MQMessageHandler {
       }
       Addr nextAddr = this.addrData;
 
-      Addr lastAddr = lastSequence > 0 && this.currentAddresses != null && this.currentAddresses.size() >= lastSequence ? this.currentAddresses
-          .get(lastSequence - 1) : null;
+      Addr lastAddr = lastSequence > 0 && this.currentAddresses != null && this.currentAddresses.size() >= lastSequence
+          ? this.currentAddresses.get(lastSequence - 1) : null;
       if ("U".contains(this.mqIntfReqQueue.getReqType()) && lastAddr != null && !"Y".equals(lastAddr.getImportInd())) {
         LOG.debug("Last address processed: " + lastAddr.getId().getAddrType() + " (" + lastAddr.getId().getAddrSeq() + ")");
         String addrNum = rdcLegacyMQMessage.getAddressNo();
@@ -679,10 +679,11 @@ public class SOFMessageHandler extends MQMessageHandler {
               q.executeSql();
               createPartialComment("Address Number " + addrNum + " assigned to " + type + " address.", cmrNo);
 
-              OpenJPAEntityTransaction transaction = (OpenJPAEntityTransaction) entityManager.getTransaction();
+              EntityTransaction transaction = entityManager.getTransaction();
               if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
                 LOG.debug("Transaction partially committed");
-                transaction.commitAndResume();
+                transaction.commit();
+                transaction.begin();
               }
 
             } catch (Exception e) {
@@ -780,8 +781,8 @@ public class SOFMessageHandler extends MQMessageHandler {
 
         }
         entityManager.merge(cmrData);
-        createPartialComment("CMR No. " + cmrNo + " has been assigned to the request (System Location " + this.mqIntfReqQueue.getCmrIssuingCntry()
-            + ").", cmrNo);
+        createPartialComment(
+            "CMR No. " + cmrNo + " has been assigned to the request (System Location " + this.mqIntfReqQueue.getCmrIssuingCntry() + ").", cmrNo);
       }
 
     } else if (MQMsgConstants.SOF_STATUS_ANA.equals(replyStatus)) {

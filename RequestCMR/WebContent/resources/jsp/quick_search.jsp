@@ -415,6 +415,7 @@ form.ibm-column-form .dijitTextBox INPUT {
                          {{rec.altName}}
                        </span>
                        <span ng-if="rec.restrictTo" class="restrict" title="Restriction Code">
+                         <br>
                          {{rec.restrictTo}}
                        </span>
                      </td>

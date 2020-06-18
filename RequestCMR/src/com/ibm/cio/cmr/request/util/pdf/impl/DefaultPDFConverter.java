@@ -125,6 +125,9 @@ public class DefaultPDFConverter implements PDFConverter {
         writer.close();
       }
       return true;
+    } catch (IOException io) {
+      LOG.warn("IO Error in Generating PDF for Request ID " + admin.getId().getReqId() + ":" + io.getMessage());
+      return true;
     } catch (Exception e) {
       LOG.error("Error in Generating PDF for Request ID " + admin.getId().getReqId(), e);
       return false;
@@ -138,7 +141,7 @@ public class DefaultPDFConverter implements PDFConverter {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setForReadOnly(true);
     query.setParameter("REQ_ID", admin.getId().getReqId());
-    
+
     List<Object[]> records = query.getResults();
     for (Object[] record : records) {
       Table cmrTable = createDetailsTable();
@@ -320,8 +323,8 @@ public class DefaultPDFConverter implements PDFConverter {
     Table customer = createDetailsTable();
     customer.addCell(createLabelCell("Abbreviated Name:"));
     customer.addCell(createValueCell(data.getAbbrevNm()));
-   // customer.addCell(createLabelCell("Preferred Language:"));
-    //customer.addCell(createValueCell(data.getCustPrefLang()));
+    // customer.addCell(createLabelCell("Preferred Language:"));
+    // customer.addCell(createValueCell(data.getCustPrefLang()));
 
     customer.addCell(createLabelCell("Subindustry:"));
     customer.addCell(createValueCell(data.getSubIndustryCd()));
