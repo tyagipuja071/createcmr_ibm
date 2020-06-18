@@ -60,7 +60,7 @@ public class MQProcessUtil {
   }
 
   private static void load() throws Exception {
-    InputStream is = MQProcessUtil.class.getClassLoader().getResourceAsStream("cmr-mq.properties");
+    InputStream is = ConfigUtil.getResourceStream("cmr-mq.properties");
     try {
       BUNDLE.clear();
       BUNDLE.load(is);

@@ -36,8 +36,8 @@ public class TaxInfoService extends BaseService<GeoTaxInfoModel, GeoTaxInfo> {
   }
 
   @Override
-  protected void performTransaction(GeoTaxInfoModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException,
-      IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+  protected void performTransaction(GeoTaxInfoModel model, EntityManager entityManager, HttpServletRequest request)
+      throws CmrException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 
     int newGeoTaxInfoID;
     String action = model.getAction();
@@ -187,7 +187,10 @@ public class TaxInfoService extends BaseService<GeoTaxInfoModel, GeoTaxInfo> {
     if (taxInfoList != null && taxInfoList.size() > 0) {
       for (int i = 0; i < taxInfoList.size(); i++) {
         GeoTaxInfo taxInfo = taxInfoList.get(i);
-        entityManager.remove(taxInfo);
+        GeoTaxInfo merged = entityManager.merge(taxInfo);
+        if (merged != null) {
+          entityManager.remove(merged);
+        }
       }
     }
   }
