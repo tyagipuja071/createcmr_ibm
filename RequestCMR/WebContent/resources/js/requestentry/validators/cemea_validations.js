@@ -186,8 +186,8 @@ function setAustriaUIFields() {
     FormManager.readOnly("enterprise");
     FormManager.readOnly("salesBusOffCd");
   }
-  
-// for cross border - Business partner
+
+  // for cross border - Business partner
   if (custType == 'CROSS' && custSubType != null && custSubType != '' && custSubType == 'XBP') {
     FormManager.setValue("inacCd", "");
     FormManager.readOnly("inacCd");
@@ -196,6 +196,17 @@ function setAustriaUIFields() {
     FormManager.setValue("salesBusOffCd", "080");
     FormManager.readOnly("salesBusOffCd");
 
+  }
+  // FOR LOCAL CUSTOMER - Internal
+  if (custType == 'LOCAL' && custSubType != null && custSubType != '' && custSubType == 'INTER') {
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.setValue('salesBusOffCd', '000');
+    FormManager.readOnly('inacCd');
+    FormManager.setValue('inacCd', '');
+    FormManager.readOnly('enterprise');
+    FormManager.setValue('enterprise', '');
   }
 
 }
