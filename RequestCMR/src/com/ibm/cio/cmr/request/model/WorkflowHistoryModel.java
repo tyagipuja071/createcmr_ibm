@@ -1,7 +1,7 @@
 package com.ibm.cio.cmr.request.model;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
@@ -31,13 +31,13 @@ public class WorkflowHistoryModel extends BaseModel {
 
   private String createByNm;
 
-  private Timestamp createTs;
+  private Date createTs;
 
   private String createTsString;
 
   private long createTsMillis;
 
-  private Timestamp completeTs;
+  private Date completeTs;
 
   private String sentToId;
 
@@ -113,21 +113,17 @@ public class WorkflowHistoryModel extends BaseModel {
     this.createByNm = createByNm;
   }
 
-  public Timestamp getCreateTs() {
-    return createTs;
-  }
-
-  public void setCreateTs(Timestamp createTs) {
+  public void setCreateTs(Date createTs) {
     this.createTs = createTs;
     this.createTsString = formatter.format(createTs);
     this.createTsMillis = createTs.getTime();
   }
 
-  public Timestamp getCompleteTs() {
+  public Date getCompleteTs() {
     return completeTs;
   }
 
-  public void setCompleteTs(Timestamp completeTs) {
+  public void setCompleteTs(Date completeTs) {
     this.completeTs = completeTs;
   }
 
@@ -163,10 +159,12 @@ public class WorkflowHistoryModel extends BaseModel {
     this.rejReason = rejReason;
   }
 
+  @Override
   public String getRecordDescription() {
     return UIMgr.getText("record.wfhistory");
   }
 
+  @Override
   public void addKeyParameters(ModelAndView mv) {
     mv.addObject("wfId", this.wfId);
   }
@@ -237,6 +235,10 @@ public class WorkflowHistoryModel extends BaseModel {
 
   public void setReqStatusAct(String reqStatusAct) {
     this.reqStatusAct = reqStatusAct;
+  }
+
+  public Date getCreateTs() {
+    return createTs;
   }
 
 }

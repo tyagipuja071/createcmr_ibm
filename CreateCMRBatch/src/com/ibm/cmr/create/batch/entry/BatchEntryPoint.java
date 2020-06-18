@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.listener.CmrContextListener;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.ui.UIMgr;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.MessageUtil;
@@ -30,6 +31,8 @@ import com.ibm.cio.cmr.request.util.SystemUtil;
 public abstract class BatchEntryPoint {
 
   private static Logger logger = null;
+
+  public static final String DEFAULT_BATCH_PERSISTENCE_UNIT = "BATCH";
 
   protected static void initContext(String batchAppName) {
     initContext(batchAppName, false);
@@ -48,6 +51,7 @@ public abstract class BatchEntryPoint {
   }
 
   private static void startBatchContext(String log4jFile, boolean initUI) {
+    ConfigUtil.init();
     System.err.println("CMR Home Dir: " + System.getProperty("cmr.home"));
     System.err.println("Initializing Log4J for Request CMR...");
     PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
@@ -58,7 +62,7 @@ public abstract class BatchEntryPoint {
     logger.debug("Initializing JPA Manager...");
     JpaManager.init();
     logger.debug("JPA Manager Inititialized.");
-
+    JpaManager.setDefaultUnitName(DEFAULT_BATCH_PERSISTENCE_UNIT);
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
 

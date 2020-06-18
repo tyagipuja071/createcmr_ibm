@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="RDC" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <non-jta-data-source>jdbc/rdc</non-jta-data-source>
 
-  <persistence-unit name="RDC">
-    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-    <jta-data-source>jdbc/rdc</jta-data-source>
     <class>com.ibm.cio.cmr.request.entity.ApCustClusterTierMap</class>
     <class>com.ibm.cio.cmr.request.entity.ApCustClusterTierMapPK</class>
     <class>com.ibm.cio.cmr.request.entity.SystParameters</class>
@@ -137,19 +138,18 @@
 
     <class>com.ibm.cio.cmr.request.entity.CollectorNameNo</class>
     <class>com.ibm.cio.cmr.request.entity.CollectorNameNoPK</class>
-    
+
     <class>com.ibm.cio.cmr.request.entity.GeoCities</class>
     <class>com.ibm.cio.cmr.request.entity.GeoCitiesPK</class>
 
     <class>com.ibm.cio.cmr.request.entity.MqIntfReqData</class>
     <class>com.ibm.cio.cmr.request.entity.MqIntfReqDataPK</class>
-    
-    <class>com.ibm.cio.cmr.request.entity.MqIntfReqData</class>
-    <class>com.ibm.cio.cmr.request.entity.MqIntfReqDataPK</class>
-    
+
+
+
     <class>com.ibm.cio.cmr.request.entity.MachinesToInstall</class>
     <class>com.ibm.cio.cmr.request.entity.MachinesToInstallPK</class>
-    
+
     <class>com.ibm.cio.cmr.request.entity.KunnrExt</class>
     <class>com.ibm.cio.cmr.request.entity.KunnrExtPK</class>
     
@@ -198,7 +198,6 @@
     <class>com.ibm.cio.cmr.request.entity.ReftUnsicWPK</class>
     <class>com.ibm.cio.cmr.request.entity.RepTeam</class>
     <class>com.ibm.cio.cmr.request.entity.RepTeamPK</class>
-    
     <properties>
     <!-- ORIGINAL -->
       <property name="openjpa.ConnectionFactoryMode" value="managed" />
@@ -238,4 +237,5 @@
       <!-- END TEMP -->
     </properties>
   </persistence-unit>
+
 </persistence>

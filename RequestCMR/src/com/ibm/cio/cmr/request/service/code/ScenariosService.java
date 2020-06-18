@@ -148,7 +148,10 @@ public class ScenariosService extends BaseSimpleService<ProcessResultModel> {
     CustSubType subtype = entityManager.find(CustSubType.class, subtypePk);
     if (subtype != null) {
       LOG.debug("Removing subtype " + model.getCustSubTypeVal() + " from CUST_SUB_TYPE under " + model.getIssuingCntry());
-      entityManager.remove(subtype);
+      CustSubType merged = entityManager.merge(subtype);
+      if (merged != null) {
+        entityManager.remove(merged);
+      }
       entityManager.flush();
     }
 
@@ -250,8 +253,8 @@ public class ScenariosService extends BaseSimpleService<ProcessResultModel> {
       LOG.debug("Creating CUST_SUB_TYPE " + model.getCode() + " - " + model.getDesc());
       entityManager.persist(subtype);
       entityManager.flush();
-      SystemUtil
-          .logSystemAdminAction(entityManager, user, "CUST_SUB_TYPE", "I", model.getCustTypeVal(), model.getIssuingCntry(), "", model.getCode());
+      SystemUtil.logSystemAdminAction(entityManager, user, "CUST_SUB_TYPE", "I", model.getCustTypeVal(), model.getIssuingCntry(), "",
+          model.getCode());
       break;
     }
   }

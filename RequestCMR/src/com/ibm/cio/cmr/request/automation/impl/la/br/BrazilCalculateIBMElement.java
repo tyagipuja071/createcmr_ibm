@@ -929,7 +929,10 @@ public class BrazilCalculateIBMElement extends OverridingElement {
     if (taxInfo != null) {
       if (StringUtils.isBlank(taxInfo.getTaxSeparationIndc())) {
         LOG.debug("Deleting Tax Info for Request " + admin.getId().getReqId() + " for tax seperation indc null.");
-        entityManager.remove(taxInfo);
+        GeoTaxInfo merged = entityManager.merge(taxInfo);
+        if (merged != null) {
+          entityManager.remove(merged);
+        }
         entityManager.flush();
       }
     }
