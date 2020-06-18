@@ -33,7 +33,7 @@ public class MessageUtil {
    * @param sqlKey
    */
   private static void load() throws Exception {
-    InputStream is = MessageUtil.class.getClassLoader().getResourceAsStream("cmr-messages.properties");
+    InputStream is = ConfigUtil.getResourceStream("cmr-messages.properties");
     try {
       BUNDLE.clear();
       BUNDLE.load(is);

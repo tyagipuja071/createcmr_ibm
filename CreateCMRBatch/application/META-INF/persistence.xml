@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
-  <persistence-unit name="RDC">
-    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+  <persistence-unit name="BATCH" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>com.ibm.cio.cmr.request.entity.UserPref</class>
     <class>com.ibm.cio.cmr.request.entity.UserPrefPK</class>
     <class>com.ibm.cio.cmr.request.entity.Delegate</class>
@@ -73,9 +74,9 @@
     <class>com.ibm.cio.cmr.request.entity.RequestChangeLog</class>
     <class>com.ibm.cio.cmr.request.entity.RequestChangeLogPK</class>
     <class>com.ibm.cio.cmr.request.entity.SystParameters</class>
-    <class>com.ibm.cio.cmr.request.entity.SystParametersPK</class>     
+    <class>com.ibm.cio.cmr.request.entity.SystParametersPK</class>
     <class>com.ibm.cio.cmr.request.entity.MqIntfReqQueue</class>
-    <class>com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK</class> 
+    <class>com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK</class>
     <class>com.ibm.cio.cmr.request.entity.SuppCntry</class>
     <class>com.ibm.cio.cmr.request.entity.SuppCntryPK</class>
     <class>com.ibm.cio.cmr.request.entity.CustScenarios</class>
@@ -93,7 +94,7 @@
     <class>com.ibm.cio.cmr.request.entity.MqIntfReqData</class>
     <class>com.ibm.cio.cmr.request.entity.MqIntfReqDataPK</class>
     <class>com.ibm.cio.cmr.request.entity.Sadr</class>
-    <class>com.ibm.cio.cmr.request.entity.SadrPK</class> 
+    <class>com.ibm.cio.cmr.request.entity.SadrPK</class>
     <class>com.ibm.cio.cmr.request.entity.MachinesToInstall</class>
     <class>com.ibm.cio.cmr.request.entity.MachinesToInstallPK</class>
     <class>com.ibm.cio.cmr.request.entity.CmrtCust</class>
@@ -128,93 +129,39 @@
     <class>com.ibm.cio.cmr.request.entity.GeoTaxInfoPK</class>
     <class>com.ibm.cio.cmr.request.entity.ScenarioExceptions</class>
     <class>com.ibm.cio.cmr.request.entity.ScenarioExceptionsPK</class>
+    <class>com.ibm.cio.cmr.request.entity.TgmeCodes</class>
+    <class>com.ibm.cio.cmr.request.entity.TgmeCodesPK</class>
 
     <properties>
-      <property name="openjpa.ConnectionFactoryMode" value="local" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
 
-      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
-      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
-
-      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
-      <property name="openjpa.DataCache" value="false" />
-      <property name="openjpa.QueryCache" value="false" />
-      <property name="openjpa.Log" value="log4j" />
-      <property name="openjpa.ReadLockLevel" value="none"/>
-      <property name="openjpa.LockTimeout" value="120000"/>
-
-      <property name="openjpa.ConnectionDriverName" value="com.ibm.db2.jcc.DB2Driver" />
-      <property name="openjpa.ConnectionURL" value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=C:\\Progs\\squirrel-sql-4.0.0\\ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
-      <!-- <property name="openjpa.ConnectionURL" value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=C:\\Security\\RDC_PP.jks;sslTrustStorePassword=rdcppcer;" />     -->
-
-      <property name="openjpa.ConnectionUserName" value="rdcfvt" />
-      <property name="openjpa.ConnectionPassword" value="fvt16rdc" />
-      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
-      <!-- 
-      <property name="openjpa.ConnectionURL" value="jdbc:db2://b06acirdb005.portsmouth.uk.ibm.com:3203/eushdb2a:sslConnection=true;sslTrustStoreLocation=C:\\Security\\RDC_PP.jks;sslTrustStorePassword=rdcppcer;" />
-      <property name="openjpa.ConnectionUserName" value="rdhadm" />
-      <property name="openjpa.ConnectionPassword" value="soaked34" />
-      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
+      <property name="javax.persistence.jdbc.driver" value="com.ibm.db2.jcc.DB2Driver" />
+      <property name="javax.persistence.jdbc.url"
+        value="jdbc:db2://n000a273.cloud.icds.ibm.com:50602/FVTCLDDB:sslConnection=true;sslTrustStoreLocation=ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
+      <property name="javax.persistence.jdbc.user" value="rdcfvt" />
+      <property name="javax.persistence.jdbc.password" value="fvt16rdc" />
+      
+      <!-- Preprod 
+      <property name="javax.persistence.jdbc.driver" value="com.ibm.db2.jcc.DB2Driver" />
+      <property name="javax.persistence.jdbc.url"
+        value="jdbc:db2://b06acirdb005.portsmouth.uk.ibm.com:3203/eushdb2a:sslConnection=true;sslTrustStoreLocation=ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
+      <property name="javax.persistence.jdbc.user" value="rdhadm" />
+      <property name="javax.persistence.jdbc.password" value="soaked34" />
       -->
     </properties>
   </persistence-unit>
-  
-  <persistence-unit name="CEDP">
-    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-    
+
+  <persistence-unit name="CEDP" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+
     <properties>
-      <property name="openjpa.ConnectionFactoryMode" value="local" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
 
-      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
-      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
+      <property name="javax.persistence.jdbc.driver" value="com.ibm.db2.jcc.DB2Driver" />
+      <property name="javax.persistence.jdbc.url"
+        value="jdbc:db2://warehouse.data.zc2.ibm.com:50001/BLUDB:sslConnection=true;sslTrustStoreLocation=ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
+      <property name="javax.persistence.jdbc.user" value="C_MM9J897_nomail_relay_ibm_com" />
+      <property name="javax.persistence.jdbc.password" value="findcmr4us" />
 
-      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
-      <property name="openjpa.DataCache" value="false" />
-      <property name="openjpa.QueryCache" value="false" />
-      <property name="openjpa.Log" value="log4j" />
-      <property name="openjpa.ReadLockLevel" value="none"/>
-      <property name="openjpa.LockTimeout" value="120000"/>
-
-      <property name="openjpa.ConnectionDriverName" value="com.ibm.db2.jcc.DB2Driver" />
-      <property name="openjpa.ConnectionURL" value="jdbc:db2://warehouse.data.zc2.ibm.com:50001/BLUDB:sslConnection=true;sslTrustStoreLocation=C:\\Progs\\squirrel-sql-4.0.0\\ibm-truststore.jks;sslTrustStorePassword=zaq12wsx" />
-
-      <property name="openjpa.ConnectionUserName" value="C_MM9J897_nomail_relay_ibm_com" />
-      <property name="openjpa.ConnectionPassword" value="findcmr4us" />
-      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
     </properties>
   </persistence-unit>
 
-<!--  
-  <persistence-unit name="RDC_MAIN">
-    <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-
-    <properties>
-      <property name="openjpa.ConnectionFactoryMode" value="managed" />
-      <property name="openjpa.ConnectionRetainMode" value="on-demand" />
-      <property name="openjpa.ConnectionFactoryProperties"
-        value="ExceptionAction=destroy, TestOnReturn=true, TestWhileIdle=true, TestOnBorrow=true, TimeBetweenEvictionRunsMillis=300000, ValidationTimeout=240000, MaxActive=10, MaxIdle=3, MaxTotal=15, ValidationSQL='SELECT current date FROM sysibm.sysdummy1'" />
-
-      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
-      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
-
-      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
-      <property name="openjpa.DataCache" value="false" />
-      <property name="openjpa.QueryCache" value="false" />
-      <property name="openjpa.Log" value="log4j" />
-
-      <property name="openjpa.ConnectionDriverName" value="com.ibm.db2.jcc.DB2Driver" />
-      <property name="openjpa.ConnectionURL" value="jdbc:db2://b06acirdb005.portsmouth.uk.ibm.com:3333/EUSHDB2A" />
-      <property name="openjpa.ConnectionUserName" value="rdhadm" />
-      <property name="openjpa.ConnectionPassword" value="soaked34" />
-      <property name="openjpa.RemoteCommitProvider" value="sjvm" />
-      <property name="openjpa.ConnectionRetainMode" value="always" />
-
-
-    </properties>
-  </persistence-unit>
--->
 </persistence>

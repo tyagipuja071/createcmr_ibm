@@ -582,8 +582,8 @@ public class NORDXHandler extends BaseSOFHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM4", "ADDR_TXT", "CITY1", "STATE_PROV", "POST_CD", "LAND_CNTRY", "PO_BOX",
-        "CUST_PHONE"));
+    fields.addAll(
+        Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM4", "ADDR_TXT", "CITY1", "STATE_PROV", "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE"));
     return fields;
   }
 
@@ -680,8 +680,8 @@ public class NORDXHandler extends BaseSOFHandler {
 
   private void createMachines(EntityManager entityManager, Admin admin, Data data, MachineModel model) {
 
-    LOG.trace("Creating Machines To Install for  Addr record:  " + " [Request ID: " + admin.getId().getReqId() + " ,Addr Type: "
-        + model.getAddrType() + " ,Addr Seq: " + model.getAddrSeq() + "]");
+    LOG.trace("Creating Machines To Install for  Addr record:  " + " [Request ID: " + admin.getId().getReqId() + " ,Addr Type: " + model.getAddrType()
+        + " ,Addr Seq: " + model.getAddrSeq() + "]");
 
     // AppUser user = AppUser.getUser(request);
 
@@ -725,7 +725,10 @@ public class NORDXHandler extends BaseSOFHandler {
     List<MachinesToInstall> machines = query.getResults(MachinesToInstall.class);
 
     for (MachinesToInstall machine : machines) {
-      entityManager.remove(machine);
+      MachinesToInstall merged = entityManager.merge(machine);
+      if (merged != null) {
+        entityManager.remove(merged);
+      }
       entityManager.flush();
     }
   }
