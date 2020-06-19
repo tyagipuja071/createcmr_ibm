@@ -2602,8 +2602,8 @@ function setScenarioTo3PA() {
       REQ_ID : FormManager.getActualValue('reqId')
     };
     var results = cmr.query('AT.GET.ADDR.ZS01', qParams);
-    var custNm1 = result.ret1;
-    var custNm2 = result.ret2;
+    var custNm1 = results.ret1;
+    var custNm2 = results.ret2;
     if (custNm1.concat(custNm2).includes("c/o")) {
       FormManager.setValue('custGrp', 'LOCAL');
       FormManager.setValue('custSubGrp', '3PA');
