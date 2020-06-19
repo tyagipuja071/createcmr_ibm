@@ -183,7 +183,7 @@ function setAustriaUIFields() {
     FormManager.readOnly('enterprise');
     FormManager.setValue('enterprise', '');
   }
-  
+
   var custType = FormManager.getActualValue('custGrp');
   var custSubType = FormManager.getActualValue('custSubGrp');
   // for Private customer
@@ -196,8 +196,8 @@ function setAustriaUIFields() {
     FormManager.readOnly("enterprise");
     FormManager.readOnly("salesBusOffCd");
   }
-  
-// for cross border - Business partner
+
+  // for cross border - Business partner
   if (custType == 'CROSS' && custSubType != null && custSubType != '' && custSubType == 'XBP') {
     FormManager.setValue("inacCd", "");
     FormManager.readOnly("inacCd");
@@ -205,9 +205,9 @@ function setAustriaUIFields() {
     FormManager.readOnly("enterprise");
     FormManager.setValue("salesBusOffCd", "080");
     FormManager.readOnly("salesBusOffCd");
- 
+
   }
-  
+
 }
 
 /**
@@ -2564,7 +2564,7 @@ function setTypeOfCustomerRequiredProcessor() {
   }
 }
 
-function setScenarioTo3PA(cntry, addressMode, saving, finalSave, force) {
+function setScenarioTo3PAOnAddrSave(cntry, addressMode, saving, finalSave, force) {
   if ((finalSave || force) && cmr.addressMode) {
     var addrType = FormManager.getActualValue('addrType');
     var copyTypes = document.getElementsByName('copyTypes');
@@ -2591,6 +2591,111 @@ function setScenarioTo3PA(cntry, addressMode, saving, finalSave, force) {
 function canCopyAddress(value, rowIndex, grid) {
   return false;
 }
+
+function setScenarioTo3PA() {
+  // on importing an address , this check should happen
+  var impIndc = getImportedIndcForSwiss();
+  if (impIndc != 'N') {
+    // get zs01 address from ADDR table
+    var qParams = {
+      _qall : 'Y',
+      REQ_ID : FormManager.getActualValue('reqId')
+    };
+    var results = cmr.query('AT.GET.ADDR.ZS01', qParams);
+    var custNm1 = result.ret1;
+    var custNm2 = result.ret2;
+    if (custNm1.concat(custNm2).includes("c/o")) {
+      FormManager.setValue('custGrp', 'LOCAL');
+      FormManager.setValue('custSubGrp', '3PA');
+    }
+  }
+}
+
+var _importedIndc = null;
+function getImportedIndcForSwiss() {
+  if (_importedIndc) {
+    console.log('Returning imported indc = ' + _importedIndc);
+    return _importedIndc;
+  }
+  var results = cmr.query('IMPORTED_ADDR_ZS01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  console.log('saving imported ind as ' + _importedIndc);
+  return _importedIndc;
+
+}
+
+function similarAddrCheckValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var req_id = FormManager.getActualValue('reqId');
+        var req_type = FormManager.getActualValue('reqType');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var addrDupExists = [];
+          var custNm1 = '';
+          var custNm2 = '';
+          var addrTxt = '';
+          var city1 = '';
+          var addrTxt2 = '';
+          var stateProv = '';
+          var landCntry = '';
+          var importIndc = '';
+          var dept = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            custNm1 = record.custNm1[0];
+            custNm2 = record.custNm2[0] != null ? record.custNm2[0] : '';
+            addrTxt = record.addrTxt[0];
+            city1 = record.city1[0] != null ? record.city1[0] : '';
+            stateProv = record.stateProv[0] != null ? record.stateProv[0] : '';
+            addrTxt2 = record.addrTxt2[0] != null ? record.addrTxt2[0] : '';
+            ;
+            landCntry = record.landCntry[0];
+            dept = record.dept[0] != null ? record.dept[0] : '';
+            importIndc = record.importInd[0] != null ? record.importInd[0] : '';
+
+            if (req_type == 'U' && importIndc == 'Y') {
+              continue; // skip the unique check for addresses in case of
+              // import for Update requests.
+            }
+            var qParams = {
+              REQ_ID : req_id,
+              CUST_NM1 : custNm1,
+              CUST_NM2 : custNm2,
+              ADDR_TXT : addrTxt,
+              CITY1 : city1,
+              STATE_PROV : stateProv,
+              POST_CD : postCd,
+              LAND_CNTRY : landCntry
+            };
+            var results = cmr.query('GET.SME_ADDR_RECORDS_AT', qParams);
+            if (results.ret1 > 1) {
+              addrDupExists.push(record.addrTypeText);
+            }
+          }
+          if (addrDupExists.length > 0) {
+            return new ValidationResult(null, false, 'Duplicate address details exist for Addresses ' + addrDupExists + '. Delete other addresses except Contract address.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
       '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
@@ -2618,10 +2723,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockOrdBlk, SysLoc.AUSTRIA);
 
   GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidation, [ SysLoc.AUSTRIA ]);
-
+  GEOHandler.addAfterConfig(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAddrFunction(lockAbbrvLocnForScenrio, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAddrFunction(setScenarioTo3PA, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAddrFunction(setScenarioTo3PAOnAddrSave, [ SysLoc.AUSTRIA ]);
 
   GEOHandler.addAfterConfig(custNmAttnPersonPhoneValidationOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(reqReasonOnChange, [ SysLoc.AUSTRIA ]);
