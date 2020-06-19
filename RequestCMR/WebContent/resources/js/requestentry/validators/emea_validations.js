@@ -2968,6 +2968,52 @@ function addGRAddressTypeValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+
+function addGRAddressGridValidatorStreetPOBox() {
+  console.log("addGRAddressGridValidatorStreetPOBox..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.GREECE) {
+          return new ValidationResult(null, true);
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          var missingPOBoxStreetAddrs = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            
+            var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '') || (record.addrTxt[0] != null && record.addrTxt[0] != '') ;
+            if(!isPOBoxOrStreetFilled) {
+              if(missingPOBoxStreetAddrs != '') {
+                missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0];
+              } else {
+                missingPOBoxStreetAddrs += record.addrTypeText[0];
+              }
+            }
+          }
+          
+          if(missingPOBoxStreetAddrs != '') {
+            return new ValidationResult(null, false, 'Please fill-out either Street Address or PO Box for the following address: ' + missingPOBoxStreetAddrs);
+          }
+          
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
 	
   if(zs01Data.custNm1[0]  == zp01Data.custNm1[0] 
@@ -2987,6 +3033,10 @@ function isTranslationAddrFieldsMatchForGR(zs01Data, zp01Data) {
 function getMismatchFields(zs01Data, zp01Data, isCrossborder) {
 
 	var mismatchFields = '';
+	
+	if(zs01Data == null || zp01Data == null) {
+	  return mismatchFields;
+	}
 	  if(!hasMatchingFieldsFilled(zs01Data.addrTxt[0], zp01Data.addrTxt[0], isCrossborder)) {
 		mismatchFields += 'Street Address';
   	  }
@@ -3088,7 +3138,7 @@ function populateTranslationAddrWithSoldToData() {
 	}
   }
 }
-//Add individual function to prevent different requirement in future
+// Add individual function to prevent different requirement in future
 function populateTranslationAddrWithSoldToDataTR() {
   if (FormManager.getActualValue('custGrp') == 'CROSS' && CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('addrType') == 'ZP01') {
     var record = null;
@@ -4884,13 +4934,14 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
     postCode = currPostCd.substring(0, 2);
   }
 
-//set collection code based on postalcode logic
+// set collection code based on postalcode logic
   var checkImportIndc = getImportedIndcForItaly();
   if (checkImportIndc != 'Y') {
     if (postCodeOrg != '' && isuCode != '' && isuCode == '32' && ctc == 'S') {
-      /*if ((postCodeOrg == '55100')) {
-        FormManager.setValue('collectionCd', 'CIT03');
-      } else*/ if (postCode >= 00 && postCode <= 04) {
+      /*
+       * if ((postCodeOrg == '55100')) { FormManager.setValue('collectionCd',
+       * 'CIT03'); } else
+       */ if (postCode >= 00 && postCode <= 04) {
         FormManager.setValue('collectionCd', 'CIT14');
       } else if (postCode == 10 || postCode == 11 || postCode == 28) {
         FormManager.setValue('collectionCd', 'CIT04');
@@ -4931,10 +4982,10 @@ function autoSetSBOSROnPostalCode(clientTier, currPostCd) {
         && ctc == 'S'
         && (custSubType == 'COMME' || custSubType == '3PAIT' || custSubType == 'NGOIT' || custSubType == 'GOVST' || custSubType == 'LOCEN' || custSubType == 'PRICU' || custSubType == 'UNIVE'
             || custSubType == 'CROCM' || custSubType == 'CRO3P' || custSubType == 'CROLC' || custSubType == 'CROUN' || custSubType == 'CROGO' || custSubType == 'CROPR')) {
-      /*if ((postCodeOrg == '55100')) {
-        FormManager.setValue('repTeamMemberNo', '09NAMM');
-        FormManager.setValue('salesBusOffCd', 'NA');
-      } else*/ if (postCode >= 00 && postCode <= 04) {
+      /*
+       * if ((postCodeOrg == '55100')) { FormManager.setValue('repTeamMemberNo',
+       * '09NAMM'); FormManager.setValue('salesBusOffCd', 'NA'); } else
+       */ if (postCode >= 00 && postCode <= 04) {
         FormManager.setValue('repTeamMemberNo', '09NCMM');
         FormManager.setValue('salesBusOffCd', 'NC');
       } else if (postCode == 10 || postCode == 11 || postCode == 28) {
@@ -8061,6 +8112,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(updateAbbrevNmLocnGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addGRAddressTypeValidator, [ SysLoc.GREECE ], null, true);
+  GEOHandler.registerValidator(addGRAddressGridValidatorStreetPOBox, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addOccupationPOBoxValidator, [  SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addOccupationPOBoxAttnPersonValidatorForGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addStreetAddressFormValidatorGR, [ SysLoc.GREECE ], null, true);
