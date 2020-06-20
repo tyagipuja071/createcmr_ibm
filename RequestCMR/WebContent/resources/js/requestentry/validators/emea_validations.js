@@ -64,6 +64,22 @@ function getImportedIndcForItaly() {
   return _importedIndc;
 
 }
+
+function getImportedIndcForGreece() {
+  if (_importedIndc) {
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED_GR', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  return _importedIndc;
+}
+
 function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -3532,6 +3548,42 @@ function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
   _isScenarioChanged = scenarioChanged;
 }
 
+function retainImportValues(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndcForGreece();
+  var reqId = FormManager.getActualValue('reqId');
+  
+  if(FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' 
+   && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVRN')) {
+      
+   var origISU;
+   var origClientTier;
+   var origRepTeam;
+   var origSbo;
+   var origInac;
+   var origEnterprise;
+   
+   var result = cmr.query("GET.CMRINFO.IMPORTED_GR", {
+     REQ_ID : reqId
+   });
+      
+   if(result != null && result != '') {
+     origISU = result.ret1;
+     origClientTier = result.ret2;
+     origRepTeam = result.ret3;
+     origSbo = result.ret4;
+     origInac = result.ret5;
+     origEnterprise = result.ret6;
+     
+     FormManager.setValue('isuCd', origISU);
+     FormManager.setValue('clientTier', origClientTier);
+     FormManager.setValue('repTeamMemberNo', origRepTeam);
+     FormManager.setValue('salesBusOffCd', origSbo);
+     FormManager.setValue('inacCd', origInac);
+     FormManager.setValue('enterprise', origEnterprise);
+   }
+ }
+}
+
 function setFieldsBehaviourGR() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
@@ -3698,6 +3750,9 @@ function setEnterprise(value) {
         FormManager.setValue('enterprise', '822836');
       } else if (value == '048257' && isu == '34' && ctc == '6') {
         FormManager.setValue('enterprise', '822835');
+      } else if (getImportedIndcForGreece() == 'Y' && FormManager.getActualValue('reqType') == 'C'
+        && (FormManager.getActualValue('custSubGrp') == 'COMME'|| FormManager.getActualValue('custSubGrp') == 'GOVRN')){
+        // DO NOTHING -- Don't overwrite imported value
       } else {
         FormManager.setValue('enterprise', '');
       }
@@ -3727,6 +3782,11 @@ function hideCollectionCd() {
 
 function setSalesBoSboIbo() {
   var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
+  
+  if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE && repTeamMemberNo.length > 6) {
+    repTeamMemberNo = repTeamMemberNo.substring(0,6);
+  }
+  
   if (repTeamMemberNo != '') {
     var qParams = {
       ISSUING_CNTRY : FormManager.getActualValue('cmrIssuingCntry'),
@@ -8122,6 +8182,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterTemplateLoad(retainImportValues, [ SysLoc.GREECE ]);
   
   
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator, [
