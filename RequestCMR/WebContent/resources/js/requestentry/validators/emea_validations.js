@@ -2965,7 +2965,7 @@ function addGRAddressTypeValidator() {
         		  mismatchFields = getMismatchFields(zs01Data, zp01Data, true);
         	  }
         	  if(mismatchFields != '') {
-        		  return new ValidationResult(null, false, 'Sold-to mismatch, please update Local Language translation of Sold-to: ' +  mismatchFields);	  
+        		  return new ValidationResult(null, false, 'Sold-to and Local Translation, mismatched fields: ' +  mismatchFields);	  
         	  }
           } 
 
