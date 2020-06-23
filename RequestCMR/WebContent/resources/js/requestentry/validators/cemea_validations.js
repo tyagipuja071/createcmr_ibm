@@ -2821,7 +2821,8 @@ dojo.addOnLoad(function() {
    * 1496135: Importing G address from SOF for Update Requests jz: add local
    * country name text box
    */
-  GEOHandler.registerValidator(similarAddrCheckValidator, [ SysLoc.AUSTRIA ], null, true);
+  // GEOHandler.registerValidator(similarAddrCheckValidator, [ SysLoc.AUSTRIA ],
+  // null, true);
   GEOHandler.addToggleAddrTypeFunction(toggleLocalCountryName, GEOHandler.CEMEA);
   GEOHandler.addAddrFunction(toggleLocalCountryNameOnOpen, GEOHandler.CEMEA);
   // CMR-2101 SBO is required for processor
