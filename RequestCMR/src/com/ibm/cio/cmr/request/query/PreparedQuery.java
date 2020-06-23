@@ -262,8 +262,12 @@ public class PreparedQuery {
       return null;
     }
     if (peek instanceof Object[]) {
-      for (Object[] result : results) {
-        list.add((T) result[0]);
+      if (returnClass instanceof Object[]) {
+        return (List<T>) results;
+      } else {
+        for (Object[] result : results) {
+          list.add((T) result[0]);
+        }
       }
     } else {
       for (Object result : results) {
@@ -369,6 +373,19 @@ public class PreparedQuery {
 
   public <M> M getSingleResult(Class<M> returnClass) {
     List<M> results = getResults(1, returnClass);
+    if (results != null && results.size() > 0) {
+      return results.get(0);
+    }
+    return null;
+  }
+
+  /**
+   * Gets the result defaulting to the Object[] result set
+   * 
+   * @return
+   */
+  public Object[] getSingleResult() {
+    List<Object[]> results = getResults(1);
     if (results != null && results.size() > 0) {
       return results.get(0);
     }
