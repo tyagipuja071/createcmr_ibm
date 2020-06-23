@@ -2934,6 +2934,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
     if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       updateImportIndForTRCopyAddr(entityManager, data.getId().getReqId());
+      updateDPLCheckForTRCopyAddr(entityManager, data.getId().getReqId());
     }
 
     if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
@@ -2959,6 +2960,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private void updateImportIndForTRCopyAddr(EntityManager entityManager, long reqId) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateDPLCheckForTRCopyAddr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.DPLCHECK"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }
