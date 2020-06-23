@@ -1261,7 +1261,7 @@ public class TurkeyTransformer extends EMEATransformer {
       legacyCust.setMrcCd("3");
     }
 
-    if (!StringUtils.isBlank(data.getVat())) {
+    if (!StringUtils.isEmpty(data.getVat())) {
       legacyCust.setVat(data.getVat());
     } else {
       legacyCust.setVat("");
