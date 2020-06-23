@@ -207,8 +207,8 @@ function setAustriaUIFields() {
     FormManager.readOnly("salesBusOffCd");
 
   }
-  // FOR LOCAL CUSTOMER - Internal
-  if (custType == 'LOCAL' && custSubType != null && custSubType != '' && custSubType == 'INTER') {
+  // FOR LOCAL CUSTOMER - Internal , Internal SO
+  if (custType == 'LOCAL' && custSubType != null && custSubType != '' && (custSubType == 'INTER' || custSubType == 'INTSO')) {
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
     FormManager.readOnly('salesBusOffCd');
