@@ -39,12 +39,9 @@ public class AustriaUtil extends AutomationUtil {
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
   private static final String SCENARIO_IBM_EMPLOYEE = "IBMEM";
   private static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
-  private static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
+  private static final String SCENARIO_THIRD_PARTY_DC = "3PA";
   private static final String SCENARIO_CROSS_COMMERICAL = "XCOM";
-  private static final String SCENARIO_CROSS_GOVERNMENT = "XGOV";
-  private static final String SCENARIO_CROSS_BUSINESS_PARTNER = "XBUS";
-  private static final String SCENARIO_CROSS_INTERNAL = "XINT";
-  private static final String SCENARIO_CROSS_INTERNAL_SO = "XISO";
+  private static final String SCENARIO_CROSS_BUSINESS_PARTNER = "XBP";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
@@ -64,9 +61,21 @@ public class AustriaUtil extends AutomationUtil {
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     String customerName = soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
 
-    if (StringUtils.isBlank(scenario) || scenario.length() != 5) {
+    if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
+      return true;
+    }
+
+    if ("C".equals(requestData.getAdmin().getReqType())) {
+      // remove duplicates
+      removeDuplicateAddresses(entityManager, requestData, details);
+    }
+
+    if (!SCENARIO_THIRD_PARTY_DC.equals(scenario) && (customerName.toUpperCase().contains("C/O") || customerName.toUpperCase().contains("CAREOF")
+        || customerName.toUpperCase().contains("CARE OF"))) {
+      details.append("Scenario should be Third Party/Data Center based on custmer name.").append("\n");
+      engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario should be for 3rd Party / Data Center.");
       return true;
     }
 
@@ -78,8 +87,12 @@ public class AustriaUtil extends AutomationUtil {
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
           SCENARIO_IBM_EMPLOYEE.equals(scenario));
     case SCENARIO_BUSINESS_PARTNER:
-    case SCENARIO_BUSINESS_PARTNER_CROSS:
+    case SCENARIO_CROSS_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+    case SCENARIO_THIRD_PARTY_DC:
+      engineData.addNegativeCheckStatus("_chThirdParty", "Third Party/Data Center request needs further validation.");
+      details.append("Third Party/Data Center request needs further validation.").append("\n");
+      break;
     }
 
     return true;
