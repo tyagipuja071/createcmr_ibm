@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.geo.AustraliaUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.AustriaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
@@ -91,6 +92,7 @@ public abstract class AutomationUtil {
 
       put(SystemLocation.SWITZERLAND, SwitzerlandUtil.class);
       put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
+      put(SystemLocation.AUSTRIA, AustriaUtil.class);
 
     }
   };
