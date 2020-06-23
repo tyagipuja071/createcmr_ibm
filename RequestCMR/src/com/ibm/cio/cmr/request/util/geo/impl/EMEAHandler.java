@@ -3936,6 +3936,18 @@ public class EMEAHandler extends BaseSOFHandler {
         results.add(update);
       }
     }
+
+    if (SystemLocation.TURKEY.equals(cmrCountry)) {
+      if (!equals(addr.getDept(), addr.getDeptOld())) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "District", "District"));
+        update.setNewData(addr.getDept());
+        update.setOldData(addr.getDeptOld());
+        results.add(update);
+      }
+    }
   }
 
   public String getaddAddressAdrnr(EntityManager entityManager, String mandt, String kunnr, String ktokd, String seq) {
