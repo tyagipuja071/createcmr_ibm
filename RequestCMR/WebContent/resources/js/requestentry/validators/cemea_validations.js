@@ -198,7 +198,9 @@ function setAustriaUIFields() {
   }
 
   // for cross border - Business partner
-  if (custType == 'CROSS' && custSubType != null && custSubType != '' && custSubType == 'XBP') {
+  if (custSubType != null && custSubType != '' && (custSubType == 'BUSPR' || (custType != null && custType != '' && custType == 'CROSS' && custSubType == 'XBP'))) {
+    FormManager.resetValidations('inacCd');
+    FormManager.resetValidations('enterprise');
     FormManager.setValue("inacCd", "");
     FormManager.readOnly("inacCd");
     FormManager.setValue("enterprise", "");
@@ -331,10 +333,25 @@ function addHandlersForCEMEA() {
     _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
       // CMR-2101 Austria remove ISR
       // setSalesRepValues();
+      setISUCTCOnIMSChange();
       setSBOValuesForIsuCtc();// CMR-2101
     });
   }
 
+}
+
+function setISUCTCOnIMSChange() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+  if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'IBMEM' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
+    if ('32' == isuCd && 'S' == clientTier && subIndustryCd.startsWith('B')) {
+      FormManager.setValue('clientTier', 'N');
+    } else if ('32' == isuCd && 'N' == clientTier && !subIndustryCd.startsWith('B')) {
+      FormManager.setValue('clientTier', 'S');
+    }
+  }
 }
 
 var _vatExemptHandler = null;
@@ -1001,19 +1018,29 @@ function setSBOValuesForIsuCtc() {
     }
     console.log("there are " + results.length + " SBO returned.");
 
+    var readOnly = false;
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     if (custSubGrp == 'IBMEM' && results.length > 0) {
       FormManager.setValue('salesBusOffCd', "099");
+      readOnly = true;
     } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBP') {
       FormManager.setValue('salesBusOffCd', "080");
+      readOnly = true;
     } else if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'XINT' || custSubGrp == 'XISO') {
       FormManager.setValue('salesBusOffCd', "000");
+      readOnly = true;
     } else if (results.length > 1) {
       FormManager.setValue('salesBusOffCd', "");
     } else if (results.length == 1) {
       FormManager.setValue('salesBusOffCd', results[0].ret1);
+      readOnly = true;
     } else {
       FormManager.setValue('salesBusOffCd', "");
+    }
+
+    if (readOnly) {
+      // experimental might need to remove later
+      FormManager.readOnly('salesBusOffCd');
     }
   }
 }
@@ -2027,15 +2054,29 @@ function cemeaCustomVATValidator(cntry, tabName, formName, aType) {
           }
 
           var zs01Cntry = landCntry;
+          var addrExist = false;
+          if (addrType != null && addrType != '') {
+            var addrResult = cmr.query('GET.ADDR_BY_REQID_TYPE', {
+              REQ_ID : FormManager.getActualValue('reqId'),
+              ADDR_TYPE : addrType
+            });
+            if (addrResult && addrResult.ret1 && addrResult.ret1 != '') {
+              addrExist = true;
+            }
+          }
+
+          if (!addrExist) {
+            addrType = 'ZS01';
+          }
 
           var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
             REQID : FormManager.getActualValue('reqId'),
-            TYPE : addrType ? addrType : 'ZS01'
+            TYPE : addrType
           });
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
           }
-          console.log('ZP01 VAT Country: ' + zs01Cntry);
+          console.log(addrType + ' VAT Country: ' + zs01Cntry);
 
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
@@ -2840,4 +2881,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSBO, [ SysLoc.AUSTRIA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(validateSBO, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(validateSBO, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
 });
