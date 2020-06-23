@@ -232,9 +232,45 @@ public class PreparedQuery {
         this.entityManager.detach(entity);
       }
       return result;
+    } else if (returnClass != null && returnClass.getAnnotation(Entity.class) == null) {
+      return (List<M>) convertList((List<Object[]>) query.getResultList(), returnClass);
     } else {
       return query.getResultList();
     }
+  }
+
+  /**
+   * Converts the raw result list to the target class
+   * 
+   * @param results
+   * @param returnClass
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  private <T> List<T> convertList(List<Object[]> results, T returnClass) {
+    List<T> list = new ArrayList<T>();
+    // do a dirty one by one here
+
+    Object peek = results != null && !results.isEmpty() ? results.get(0) : null;
+    for (Object result : results) {
+      if (result != null) {
+        peek = result;
+        break;
+      }
+    }
+    if (peek == null) {
+      return null;
+    }
+    if (peek instanceof Object[]) {
+      for (Object[] result : results) {
+        list.add((T) result[0]);
+      }
+    } else {
+      for (Object result : results) {
+        list.add((T) result);
+      }
+    }
+    return list;
   }
 
   /**
