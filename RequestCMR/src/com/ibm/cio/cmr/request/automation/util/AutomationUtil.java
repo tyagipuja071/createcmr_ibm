@@ -938,4 +938,19 @@ public abstract class AutomationUtil {
     }
   }
 
+  /**
+   * Filter Duplicate CMR Matches on the basis of some country specific
+   * criteria. Note: Update the matches in response with the filtered list.
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param response
+   */
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    LOG.debug("No Country Specific Filter for Duplicate CMR Checks Defined.");
+    // NOOP
+  }
+
 }
