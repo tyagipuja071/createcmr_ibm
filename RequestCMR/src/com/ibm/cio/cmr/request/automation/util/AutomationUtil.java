@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.geo.AustraliaUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.AustriaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
@@ -91,6 +92,7 @@ public abstract class AutomationUtil {
 
       put(SystemLocation.SWITZERLAND, SwitzerlandUtil.class);
       put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
+      put(SystemLocation.AUSTRIA, AustriaUtil.class);
 
     }
   };
@@ -934,6 +936,21 @@ public abstract class AutomationUtil {
       scenarioExceptions.setSkipChecks(true);
       scenarioExceptions.setSkipCompanyVerification(true);
     }
+  }
+
+  /**
+   * Filter Duplicate CMR Matches on the basis of some country specific
+   * criteria. Note: Update the matches in response with the filtered list.
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param response
+   */
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    LOG.debug("No Country Specific Filter for Duplicate CMR Checks Defined.");
+    // NOOP
   }
 
 }
