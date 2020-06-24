@@ -408,7 +408,7 @@ function getImportedIndcForSwiss() {
     console.log('Returning imported indc = ' + _importedIndc);
     return _importedIndc;
   }
-  var results = cmr.query('IMPORTED_ADDR_SWISS', {
+  var results = cmr.query('IMPORTED_ADDR_ZS01', {
     REQID : FormManager.getActualValue('reqId')
   });
   if (results != null && results.ret1) {
