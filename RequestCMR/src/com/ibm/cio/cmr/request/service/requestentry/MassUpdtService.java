@@ -77,13 +77,13 @@ public class MassUpdtService extends BaseService<MassUpdateModel, MassUpdt> {
       List<String> uniquecmrActualList = new ArrayList<>();
       // check for fresh duplicate values
       for (int i = 0; i < cmractualList.size(); i++) {
-        if (!uniquecmrGUIList.contains(cmractualList.get(i)))
+        if (uniquecmrGUIList.isEmpty() || (!uniquecmrGUIList.isEmpty() && !uniquecmrGUIList.contains(cmractualList.get(i))))
           uniquecmrGUIList.add(cmractualList.get(i));
       }
 
       // check for duplicate values from DB
       for (int i = 0; i < uniquecmrGUIList.size(); i++) {
-        if (!rs.contains(uniquecmrGUIList.get(i))) {
+        if ((rs == null || rs.isEmpty()) || (!rs.isEmpty() && !rs.contains(uniquecmrGUIList.get(i)))) {
           uniquecmrActualList.add(uniquecmrGUIList.get(i));
           // cmractualList.remove(uniquecmrList.get(i));
         }
@@ -215,8 +215,12 @@ public class MassUpdtService extends BaseService<MassUpdateModel, MassUpdt> {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", parReqId);
     List<Integer> rs = query.getResults(Integer.class);
-    for (Integer maxSNo : rs) {
-      maxSeqNo = (maxSNo != null) ? maxSNo : 0;
+    if (rs != null) {
+      for (Integer maxSNo : rs) {
+        maxSeqNo = (maxSNo != null) ? maxSNo : 0;
+      }
+    } else {
+      maxSeqNo = 0;
     }
 
     massUpdtpk.setParReqId(parReqId);
