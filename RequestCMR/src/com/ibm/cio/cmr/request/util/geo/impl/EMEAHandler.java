@@ -4151,6 +4151,8 @@ public class EMEAHandler extends BaseSOFHandler {
       XSSFRow row2 = sheet2.getRow(i);
       if (!compareTwoRows(row1, row2, validations)) {
         equalSheets = false;
+        if ((row1 == null) || (row2 == null))
+          continue;
         int rowNos = row1.getRowNum() + 1;
         TemplateValidation errors = new TemplateValidation("Local Lang-Sold To");
         LOG.trace("Invalid rows found. Please check your file to proceed.");
