@@ -1822,6 +1822,9 @@ public class EMEAHandler extends BaseSOFHandler {
 
       if (SystemLocation.GREECE.equals(country)) {
         address.setCustNm4(currentRecord.getCmrName4());
+        if (isOldRecordsGR) {
+          address.setImportInd("N");
+        }
       }
 
       if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
@@ -2740,12 +2743,6 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetAbbrevLocnAfterImport(entityManager, admin, data);
     }
 
-    if (SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
-      if (isOldRecordsGR) {
-        updateImportIndicatior(entityManager, data.getId().getReqId());
-      }
-    }
-
     if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
       data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
       entityManager.merge(data);
@@ -2759,12 +2756,6 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
     }
 
-  }
-
-  private void updateImportIndicatior(EntityManager entityManager, long reqId) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.IMPORTIND.N"));
-    query.setParameter("REQ_ID", reqId);
-    query.executeSql();
   }
 
   private void autoSetHwMasterInstallFlagAfterImport(EntityManager entityManager, Admin admin, Data data) {
