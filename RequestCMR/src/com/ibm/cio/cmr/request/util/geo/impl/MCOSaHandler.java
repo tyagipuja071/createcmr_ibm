@@ -3,6 +3,9 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -132,5 +135,15 @@ public class MCOSaHandler extends MCOHandler {
     LOG.trace("State: " + address.getCmrState());
     LOG.trace("Country: " + address.getCmrCountryLanded());
 
+  }
+
+  @Override
+  public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01", "ZS02");
+  }
+
+  @Override
+  public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("ZD01", "ZI01");
   }
 }
