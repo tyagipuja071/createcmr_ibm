@@ -1910,6 +1910,9 @@ public class EMEAHandler extends BaseSOFHandler {
 
       if (SystemLocation.GREECE.equals(country)) {
         address.setCustNm4(currentRecord.getCmrName4());
+        if (isOldRecordsGR) {
+          address.setImportInd("N");
+        }
       }
 
       if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
@@ -3458,6 +3461,10 @@ public class EMEAHandler extends BaseSOFHandler {
     map.put("##CommercialFinanced", "commercialFinanced");
     map.put("##CustClass", "custClass");
     map.put("##TypeOfCustomer", "crosSubTyp");
+    map.put("##ISR", "repTeamMemberNo");
+    // *abner revert begin
+    // map.put("##CommercialFinanced", "commercialFinanced");
+    // *abner revert end
     return map;
   }
 
