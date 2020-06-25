@@ -23,6 +23,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.ui.UIMgr;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.MessageUtil;
@@ -54,9 +55,12 @@ public class CmrContextListener implements ServletContextListener, HttpSessionLi
   }
 
   public static void startCMRContext(String log4jFile, boolean initUI) {
+
+    ConfigUtil.init();
+
     System.err.println("CMR Home Dir: " + System.getProperty("cmr.home"));
     System.err.println("Initializing Log4J for Request CMR...");
-    PropertyConfigurator.configure(CmrContextListener.class.getClassLoader().getResource(log4jFile));
+    PropertyConfigurator.configure(ConfigUtil.getResourceStream(log4jFile));
 
     logger = Logger.getLogger(CmrContextListener.class);
     logger.debug("Log4j Inititialized.");
@@ -148,8 +152,8 @@ public class CmrContextListener implements ServletContextListener, HttpSessionLi
       }
       AppUser user = (AppUser) session.getAttribute(CmrConstants.SESSION_APPUSER_KEY);
       if (user != null) {
-        logger.debug("Session ID: " + session.getId() + " = Removing session attribute for " + user.getBluePagesName() + " (" + user.getIntranetId()
-            + ")");
+        logger.debug(
+            "Session ID: " + session.getId() + " = Removing session attribute for " + user.getBluePagesName() + " (" + user.getIntranetId() + ")");
         session.removeAttribute(CmrConstants.SESSION_APPUSER_KEY);
       }
     }

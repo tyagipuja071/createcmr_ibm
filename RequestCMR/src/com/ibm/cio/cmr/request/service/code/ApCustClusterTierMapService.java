@@ -57,7 +57,10 @@ public class ApCustClusterTierMapService extends BaseService<ApCustClusterTierMa
           apClPK.setIsuCode(StringUtils.isNotBlank(isuCode) ? isuCode : "");
           selectedCluster = entityManager.find(ApCustClusterTierMap.class, apClPK);
           if (selectedCluster != null) {
-            entityManager.remove(selectedCluster);
+            ApCustClusterTierMap merged = entityManager.merge(selectedCluster);
+            if (merged != null) {
+              entityManager.remove(merged);
+            }
           }
         }
 

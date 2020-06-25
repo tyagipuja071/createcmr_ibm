@@ -21,6 +21,7 @@ import javax.persistence.SqlResultSetMappings;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.persistence.config.QueryHints;
 
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
@@ -98,6 +99,7 @@ public class PreparedQuery {
     }
 
     Query query = this.entityManager.createNativeQuery(preparedSql, annotatedSqlName);
+    query.setHint(QueryHints.MAINTAIN_CACHE, false);
 
     if (maxRows > 0) {
       query.setMaxResults(maxRows);
@@ -207,7 +209,7 @@ public class PreparedQuery {
       LOG.debug("Params: [" + sb.toString() + "]");
     }
     Query query = null;
-    if (returnClass != null) {
+    if (returnClass != null && returnClass.getAnnotation(Entity.class) != null) {
       query = this.entityManager.createNativeQuery(preparedSql, returnClass);
     } else {
       query = this.entityManager.createNativeQuery(preparedSql);
@@ -222,6 +224,7 @@ public class PreparedQuery {
     if (this.flushOnCommit) {
       query.setFlushMode(FlushModeType.COMMIT);
     }
+    query.setHint(QueryHints.MAINTAIN_CACHE, false);
 
     if (returnClass != null && returnClass.getAnnotation(Entity.class) != null && this.forReadOnly) {
       List<M> result = query.getResultList();
@@ -229,9 +232,49 @@ public class PreparedQuery {
         this.entityManager.detach(entity);
       }
       return result;
+    } else if (returnClass != null && returnClass.getAnnotation(Entity.class) == null) {
+      return (List<M>) convertList((List<Object[]>) query.getResultList(), returnClass);
     } else {
       return query.getResultList();
     }
+  }
+
+  /**
+   * Converts the raw result list to the target class
+   * 
+   * @param results
+   * @param returnClass
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  private <T> List<T> convertList(List<Object[]> results, T returnClass) {
+    List<T> list = new ArrayList<T>();
+    // do a dirty one by one here
+
+    Object peek = results != null && !results.isEmpty() ? results.get(0) : null;
+    for (Object result : results) {
+      if (result != null) {
+        peek = result;
+        break;
+      }
+    }
+    if (peek == null) {
+      return null;
+    }
+    if (peek instanceof Object[]) {
+      if (Object[].class.equals(returnClass)) {
+        return (List<T>) results;
+      } else {
+        for (Object[] result : results) {
+          list.add((T) result[0]);
+        }
+      }
+    } else {
+      for (Object result : results) {
+        list.add((T) result);
+      }
+    }
+    return list;
   }
 
   /**
@@ -330,6 +373,19 @@ public class PreparedQuery {
 
   public <M> M getSingleResult(Class<M> returnClass) {
     List<M> results = getResults(1, returnClass);
+    if (results != null && results.size() > 0) {
+      return results.get(0);
+    }
+    return null;
+  }
+
+  /**
+   * Gets the result defaulting to the Object[] result set
+   * 
+   * @return
+   */
+  public Object[] getSingleResult() {
+    List<Object[]> results = getResults(1);
     if (results != null && results.size() > 0) {
       return results.get(0);
     }

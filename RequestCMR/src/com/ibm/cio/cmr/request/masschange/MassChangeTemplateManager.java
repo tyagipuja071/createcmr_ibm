@@ -16,6 +16,7 @@ import com.ibm.cio.cmr.request.masschange.config.MassChangeTemplateDigester;
 import com.ibm.cio.cmr.request.masschange.obj.MassChangeTemplate;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateColumn;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateTab;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 
 /**
  * Initializes and manages the templates from the XML configurations
@@ -74,7 +75,7 @@ public class MassChangeTemplateManager {
    * @throws SAXException
    */
   private static void init(String configName) throws IOException, SAXException {
-    try (InputStream is = MassChangeTemplate.class.getClassLoader().getResourceAsStream(configName)) {
+    try (InputStream is = ConfigUtil.getResourceStream(configName)) {
       MassChangeTemplateDigester digester = new MassChangeTemplateDigester();
       MassChangeTemplate template = (MassChangeTemplate) digester.parse(is);
       if (template != null) {
@@ -167,7 +168,7 @@ public class MassChangeTemplateManager {
    * @throws IOException
    */
   private static synchronized MassChangeTemplate initTemplate(String configName) throws IOException, SAXException {
-    try (InputStream is = MassChangeTemplate.class.getClassLoader().getResourceAsStream(configName)) {
+    try (InputStream is = ConfigUtil.getResourceStream(configName)) {
       MassChangeTemplateDigester digester = new MassChangeTemplateDigester();
       MassChangeTemplate template = (MassChangeTemplate) digester.parse(is);
       if (template != null) {

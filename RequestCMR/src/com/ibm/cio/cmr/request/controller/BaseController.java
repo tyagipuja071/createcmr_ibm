@@ -4,10 +4,10 @@
 package com.ibm.cio.cmr.request.controller;
 
 import java.beans.PropertyEditorSupport;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +24,6 @@ import org.springframework.web.servlet.mvc.Controller;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.ProcessResultModel;
-import com.ibm.misc.BASE64Decoder;
 
 /**
  * Base Controller class where all {@link Controller} classes should extend
@@ -192,19 +191,15 @@ public class BaseController {
       String authInfo = authParts[1];
       // Decode the data back to original string
       byte[] bytes = null;
-      try {
-        bytes = new BASE64Decoder().decodeBuffer(authInfo);
+      bytes = Base64.getDecoder().decode(authInfo);
 
-        String decodedAuth = new String(bytes);
-        String[] credentials = decodedAuth.split(":");
-        if (credentials.length != 2) {
-          auth = false;
-        }
+      String decodedAuth = new String(bytes);
+      String[] credentials = decodedAuth.split(":");
+      if (credentials.length != 2) {
+        auth = false;
+      }
 
-        if (!(user.equals(credentials[0]) && password.equals(credentials[1]))) {
-          auth = false;
-        }
-      } catch (IOException e) {
+      if (!(user.equals(credentials[0]) && password.equals(credentials[1]))) {
         auth = false;
       }
     }
