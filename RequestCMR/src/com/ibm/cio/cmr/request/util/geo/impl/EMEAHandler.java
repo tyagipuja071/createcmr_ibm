@@ -3213,6 +3213,7 @@ public class EMEAHandler extends BaseSOFHandler {
     map.put("##CustomerScenarioSubType", "custSubGrp");
     map.put("##EngineeringBo", "engineeringBo");
     map.put("##CodFlag", "creditCd");
+    map.put("##ISR", "repTeamMemberNo");
     // *abner revert begin
     // map.put("##CommercialFinanced", "commercialFinanced");
     // *abner revert end
