@@ -3786,18 +3786,16 @@ function setISRValuesGR() {
     FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('abbrevLocn', 'SAAS');
     FormManager.readOnly('repTeamMemberNo');
-  } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBP') {
-    FormManager.setValue('repTeamMemberNo', '200005');
-    FormManager.readOnly('repTeamMemberNo');
-  } else if (custSubGrp == 'INTER' || custSubGrp == 'XINTR') {
+  } else if (custSubGrp == 'INTER'  || custSubGrp == 'XINTR') {
     FormManager.setValue('repTeamMemberNo', '000000');
   }
   var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   setEnterprise(repTeamMemberNo);
   FormManager.readOnly('subIndustryCd');
-  if (custSubGrp == 'COMME' || custSubGrp == 'CROSS' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN' || custSubGrp == '') {
-    setISRValues();
-  }
+  if (custSubGrp == 'COMME' || custSubGrp == 'CROSS' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN' || custSubGrp == ''
+    || custSubGrp == 'BUSPR' || custSubGrp == 'XBP') {
+	  setISRValues();
+  }  
   if (repTeamMemberNo == '') {
     FormManager.setValue('salesSR', '');
     FormManager.setValue('salesTeamCd', '');
