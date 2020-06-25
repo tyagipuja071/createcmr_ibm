@@ -23,7 +23,7 @@
             <property name="source" value="" />
         </ant>
     	
-      	<!--<antcall target="createjar" />-->
+      	<antcall target="createjar" />
     </target>
 	
 	  <target name="createjar">
