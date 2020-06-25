@@ -210,15 +210,17 @@ function setAustriaUIFields() {
 
   }
   // FOR LOCAL CUSTOMER - Internal , Internal SO
-  if (custType == 'LOCAL' && custSubType != null && custSubType != '' && (custSubType == 'INTER' || custSubType == 'INTSO')) {
-    FormManager.readOnly('vat');
-    FormManager.setValue('vat', '');
-    FormManager.readOnly('salesBusOffCd');
-    FormManager.setValue('salesBusOffCd', '000');
-    FormManager.readOnly('inacCd');
-    FormManager.setValue('inacCd', '');
-    FormManager.readOnly('enterprise');
-    FormManager.setValue('enterprise', '');
+  if (custType != null && custType != '' && custType == 'LOCAL' && custSubType != null && custSubType != '' && (custSubType == 'INTER' || custSubType == 'INTSO')) {
+	FormManager.resetValidations('inacCd');
+	FormManager.resetValidations('enterprise');
+	FormManager.setValue("vat", "");
+    FormManager.readOnly("vat");
+    FormManager.setValue("salesBusOffCd", "000");
+    FormManager.readOnly("salesBusOffCd");
+    FormManager.setValue("inacCd", "");
+    FormManager.readOnly("inacCd");
+    FormManager.setValue("enterprise", "");
+    FormManager.readOnly("enterprise");
   }
 
 }
