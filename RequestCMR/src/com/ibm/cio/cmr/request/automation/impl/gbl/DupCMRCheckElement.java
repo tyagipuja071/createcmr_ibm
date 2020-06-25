@@ -171,7 +171,7 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
     return result;
   }
 
-  public void logDuplicateCMR(StringBuilder details, DuplicateCMRCheckResponse cmrCheckRecord) {
+  public static void logDuplicateCMR(StringBuilder details, DuplicateCMRCheckResponse cmrCheckRecord) {
     if (!StringUtils.isBlank(cmrCheckRecord.getCmrNo())) {
       details.append("CMR Number = " + cmrCheckRecord.getCmrNo()).append("\n");
     }

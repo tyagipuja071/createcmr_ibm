@@ -21,6 +21,8 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DupCMRCheckElement;
+import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -40,6 +42,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -48,6 +51,7 @@ import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -235,6 +239,45 @@ public class USUtil extends AutomationUtil {
       if (SC_BYMODEL.equals(scenarioSubType)) {
         scenarioSubType = determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
       }
+      if (SC_BP_END_USER.equals(scenarioSubType)) {
+        // check duplicate cmr again for BP@EU
+        details.append("Performing Duplicate CMR checks for BP@EU Request after determining Direct CMR").append("\n");
+        USDuplicateCheckElement dupCheckElement = new USDuplicateCheckElement(null, null, false, false);
+        MatchingResponse<DuplicateCMRCheckResponse> response = dupCheckElement.getCMRMatches(entityManager, requestData, engineData);
+        if (response.getSuccess() && !response.getMatches().isEmpty()) {
+          List<DuplicateCMRCheckResponse> cmrCheckMatches = response.getMatches();
+          details.append(cmrCheckMatches.size() + " record(s) found.");
+          if (cmrCheckMatches.size() > 3) {
+            cmrCheckMatches = cmrCheckMatches.subList(0, 5);
+            details.append("Showing top 3 matches only.");
+          }
+          List<String> duplicateList = new ArrayList<String>();
+          List<String> soldToKunnrsList = new ArrayList<String>();
+          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+            details.append("\n");
+            LOG.debug("Duplicate CMRs Found..");
+            duplicateList.add(cmrCheckRecord.getCmrNo());
+            soldToKunnrsList.add(dupCheckElement.getZS01Kunnr(cmrCheckRecord.getCmrNo(), SystemLocation.UNITED_STATES));
+            DupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
+            if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
+              details.append("US Restrict To =  " + cmrCheckRecord.getUsRestrictTo()).append("\n");
+            } else {
+              details.append("US Restrict To = -blank- ").append("\n");
+            }
+          }
+          engineData.addRejectionComment("DUPC", "There were possible duplicate CMRs found with the same data.",
+              StringUtils.join(dupCheckElement.removeDupEntriesFrmList(duplicateList), ", "),
+              StringUtils.join(dupCheckElement.removeDupEntriesFrmList(soldToKunnrsList), ", "));
+          admin.setMatchIndc("C");
+          results.setResults("Duplicate BP CMR(s) Found");
+          results.setDetails(details.toString());
+          results.setOnError(true);
+          return results;
+        } else {
+          details.append("No Duplicate CMRs found").append("\n");
+        }
+      }
+
       LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
       // computation start
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
@@ -339,7 +382,9 @@ public class USUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
       }
 
-    } else if ("U".equals(admin.getReqType())) {
+    } else if ("U".equals(admin.getReqType()))
+
+    {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");
     }
