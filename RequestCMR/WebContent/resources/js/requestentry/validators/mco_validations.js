@@ -1081,6 +1081,12 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
+    fieldsToDisable.push('repTeamMemberNo');
+    FormManager.readOnly('vat');
+    fieldsToDisable.push('vat');
+    FormManager.readOnly('inacCd');
+    fieldsToDisable.push('inacCd');
+
 
   } else if (custSubGroup == 'XCRO') {
     // fieldsToDisable.push(('locationNumber'));
