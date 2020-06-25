@@ -2874,6 +2874,14 @@ public class EMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())
+        && SystemLocation.TURKEY.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Type of Customer", "Type of Customer"));
+      update.setNewData(service.getCodeAndDescription(newData.getCrosSubTyp(), "Type of Customer", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCrosSubTyp(), "Type of Customer", cmrCountry));
+      results.add(update);
+    }
   }
 
   @Override
@@ -2897,6 +2905,9 @@ public class EMEAHandler extends BaseSOFHandler {
 
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
+
+    String ziType = "ZI01";
+    String zdType = "ZD01";
     if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
       LOG.debug("Switching mailing address locations..");
       String sql = null;
@@ -2930,7 +2941,18 @@ public class EMEAHandler extends BaseSOFHandler {
     }
 
     if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
-      updateImportIndForTRCopyAddr(entityManager, data.getId().getReqId());
+      int zi01countrdc = getaddZI01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(),
+          ziType);
+      int zd01countrdc = getaddZD01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(),
+          zdType);
+      if (zi01countrdc == 0) {
+        updateImportIndForTRCopyzi01Addr(entityManager, data.getId().getReqId());
+        updateDPLCheckForTRCopyzi01Addr(entityManager, data.getId().getReqId());
+      }
+      if (zd01countrdc == 0) {
+        updateImportIndForTRCopyzd01Addr(entityManager, data.getId().getReqId());
+        updateDPLCheckForTRCopyzd01Addr(entityManager, data.getId().getReqId());
+      }
     }
 
     if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()) && data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
@@ -2954,8 +2976,26 @@ public class EMEAHandler extends BaseSOFHandler {
     query.executeSql();
   }
 
-  private void updateImportIndForTRCopyAddr(EntityManager entityManager, long reqId) {
+  private void updateImportIndForTRCopyzi01Addr(EntityManager entityManager, long reqId) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateDPLCheckForTRCopyzi01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.DPLCHECK"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateImportIndForTRCopyzd01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.IMPORTIND_ZD"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateDPLCheckForTRCopyzd01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.DPLCHECK_ZD"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }
@@ -3926,6 +3966,18 @@ public class EMEAHandler extends BaseSOFHandler {
         results.add(update);
       }
     }
+
+    if (SystemLocation.TURKEY.equals(cmrCountry)) {
+      if (!equals(addr.getDept(), addr.getDeptOld())) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "District", "District"));
+        update.setNewData(addr.getDept());
+        update.setOldData(addr.getDeptOld());
+        results.add(update);
+      }
+    }
   }
 
   public String getaddAddressAdrnr(EntityManager entityManager, String mandt, String kunnr, String ktokd, String seq) {
@@ -4418,6 +4470,48 @@ public class EMEAHandler extends BaseSOFHandler {
     }
 
     return localTransAddr;
+  }
+
+  public int getaddZI01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+    int zi01count = 0;
+    String count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR_NO", cmr_no);
+    query.setParameter("ADDR_TYPE", ktokd);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      count = sResult[0].toString();
+      zi01count = Integer.parseInt(count);
+    }
+    System.out.println("zi01count = " + zi01count);
+
+    return zi01count;
+  }
+
+  public int getaddZD01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+    int zd01count = 0;
+    String count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR_NO", cmr_no);
+    query.setParameter("ADDR_TYPE", ktokd);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      count = sResult[0].toString();
+      zd01count = Integer.parseInt(count);
+    }
+    System.out.println("zd01count = " + zd01count);
+
+    return zd01count;
   }
 
 }
