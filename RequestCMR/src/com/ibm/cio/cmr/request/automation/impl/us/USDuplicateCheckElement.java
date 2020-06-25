@@ -177,7 +177,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
                 duplicateList.add(cmrCheckRecord.getCmrNo());
                 soldToKunnrsList.add(getZS01Kunnr(cmrCheckRecord.getCmrNo(), SystemLocation.UNITED_STATES));
 
-                dupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
+                DupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
                 if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
                   details.append("US Restrict To =  " + cmrCheckRecord.getUsRestrictTo()).append("\n");
                 } else {
@@ -658,7 +658,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
    * @return
    * @throws Exception
    */
-  private MatchingResponse<DuplicateCMRCheckResponse> getCMRMatches(EntityManager entityManager, RequestData requestData,
+  public MatchingResponse<DuplicateCMRCheckResponse> getCMRMatches(EntityManager entityManager, RequestData requestData,
       AutomationEngineData engineData) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -776,7 +776,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return true;
   }
 
-  private String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
+  public String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
     String kunnr = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
@@ -831,7 +831,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
   }
 
-  private List<String> removeDupEntriesFrmList(List<String> duplList) {
+  public List<String> removeDupEntriesFrmList(List<String> duplList) {
     Set<String> s = new LinkedHashSet<String>();
     s.addAll(duplList);
     duplList.clear();
