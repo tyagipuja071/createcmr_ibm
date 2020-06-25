@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -368,7 +369,7 @@ public class SystemUtil {
 
     String sql = "select current timezone from SYSIBM.SYSDUMMY1";
     PreparedQuery query = new PreparedQuery(em, sql);
-    Float dbTimezone = query.getSingleResult(Float.class);
+    BigDecimal dbTimezone = query.getSingleResult(BigDecimal.class);
     DecimalFormat DF = new DecimalFormat("#");
     String tzString = DF.format(dbTimezone);
     // System.out.println("DB Raw Timezone: " + tzString);

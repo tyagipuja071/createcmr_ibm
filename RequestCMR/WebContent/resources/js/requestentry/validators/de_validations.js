@@ -574,6 +574,15 @@ function checkOrderBlk() {
   }
 }
 
+function unlockCustGrpSubGrp() {
+  var reqStatus = FormManager.getActualValue('overallStatus');
+  var viewMode = FormManager.getActualValue('viewOnlyPage');
+
+  if (reqStatus != 'Processing Create/Upd Pending' && viewMode != true) {
+    FormManager.enable('custGrp');
+    FormManager.enable('custSubGrp');
+  }
+}
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -587,6 +596,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addDPLCheckValidator, GEOHandler.DE,
   // GEOHandler.ROLE_PROCESSOR, false, false);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(unlockCustGrpSubGrp, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(autoSetIBMDeptCostCenter, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(disableVatExemptForScenarios, GEOHandler.DE);
   GEOHandler.addAfterTemplateLoad(setPrivacyIndcReqdForProc, GEOHandler.DE);

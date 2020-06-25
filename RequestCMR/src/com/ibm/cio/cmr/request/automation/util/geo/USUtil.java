@@ -41,6 +41,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -191,10 +192,7 @@ public class USUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/pccArDept", "pccArDept");
       digester.addSetNext("mappings/mapping", "add");
       try {
-        ClassLoader loader = USUtil.class.getClassLoader();
-        // FileInputStream in = new
-        // FileInputStream("C:\\Users\\RangoliSaxena\\git\\createcmr\\RequestCMR\\config\\us-branchoff-mapping.xml");
-        InputStream is = loader.getResourceAsStream("us-branchoff-mapping.xml");
+        InputStream is = ConfigUtil.getResourceStream("us-branchoff-mapping.xml");
         USUtil.boMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
@@ -214,10 +212,7 @@ public class USUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/svcOfficeAR", "svcOfficeAR");
       digester.addSetNext("mappings/mapping", "add");
       try {
-        ClassLoader loader = USUtil.class.getClassLoader();
-        // FileInputStream in = new
-        // FileInputStream("C:\\Users\\RangoliSaxena\\git\\createcmr\\RequestCMR\\config\\us-mktgsvc-mapping.xml");
-        InputStream is = loader.getResourceAsStream("us-mktgsvc-mapping.xml");
+        InputStream is = ConfigUtil.getResourceStream("us-mktgsvc-mapping.xml");
         USUtil.svcARBOMappings = (ArrayList<USBranchOffcMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
@@ -912,7 +907,8 @@ public class USUtil extends AutomationUtil {
       // skip checks if requester is from USCMDE team
       validation.setSuccess(true);
     } else {
-      StringBuilder details = new StringBuilder(output.getDetails());
+      String dataDetails = output.getDetails() != null ? output.getDetails() : "";
+      StringBuilder details = new StringBuilder(dataDetails);
       details.append("\n");
       USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
       String custTypCd = detailsCont.getCustTypCd();

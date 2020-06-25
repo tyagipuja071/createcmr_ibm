@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -78,8 +79,7 @@ public class GermanyUtil extends AutomationUtil {
       digester.addBeanPropertySetter("mappings/mapping/sortl", "sortl");
       digester.addSetNext("mappings/mapping", "add");
       try {
-        ClassLoader loader = GermanyUtil.class.getClassLoader();
-        InputStream is = loader.getResourceAsStream("de-sortl-mapping.xml");
+        InputStream is = ConfigUtil.getResourceStream("de-sortl-mapping.xml");
         GermanyUtil.sortlMappings = (ArrayList<DeSortlMapping>) digester.parse(is);
       } catch (Exception e) {
         LOG.error("Error occured while digesting xml.", e);
@@ -325,7 +325,10 @@ public class GermanyUtil extends AutomationUtil {
         if (custNm.equals(mainCustNm) && addr.getAddrTxt().trim().toUpperCase().equals(mainStreetAddress1)
             && addr.getCity1().trim().toUpperCase().equals(mainCity) && addr.getPostCd().trim().equals(mainPostalCd)) {
           details.append("Removing duplicate address record: " + addr.getId().getAddrType() + " from the request.").append("\n");
-          entityManager.remove(addr);
+          Addr merged = entityManager.merge(addr);
+          if (merged != null) {
+            entityManager.remove(merged);
+          }
           it.remove();
         }
       }
@@ -437,9 +440,8 @@ public class GermanyUtil extends AutomationUtil {
 
   private String insertGermanCharacters(String input) {
     if (StringUtils.isNotBlank(input)) {
-      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö")
-          .replace("OE", "Ö").replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß")
-          .replace("Ss", "ß");
+      String str = input.replaceAll("Ae", "Ä").replaceAll("ae", "ä").replace("AE", "Ä").replaceAll("Oe", "Ö").replaceAll("oe", "ö").replace("OE", "Ö")
+          .replaceAll("Ue", "Ü").replace("ue", "ü").replace("UE", "Ü").replaceAll("ss", "ß").replaceAll("SS", "ß").replace("Ss", "ß");
       return str;
     }
     return null;
