@@ -1516,10 +1516,10 @@ function addDistrictPostCodeCityValidator() {
 
         var val = city;
         if (dept != '') {
-          val += (val.length > 0 ? ', ' : '') + dept;
+        	val += (val.length > 0 ? ' ' : '') + dept;
         }
         if (post != '') {
-          val += (val.length > 0 ? ', ' : '') + post;
+        	val += (val.length > 0 ? ' ' : '') + post;
         }
         if (val.length > 30) {
           return new ValidationResult(null, false, 'Total computed length of District, Postal Code, and City should be less than 30 characters.');
