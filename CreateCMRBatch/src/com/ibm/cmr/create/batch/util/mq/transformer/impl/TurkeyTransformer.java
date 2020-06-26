@@ -1388,7 +1388,7 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      if ("@".equals(muData.getCollectionCd())) {
+      if ("@".equals(muData.getVat())) {
         cust.setVat("");
       } else {
         cust.setVat(muData.getVat());
