@@ -1069,6 +1069,8 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
+    fieldsToDisable.push('inacCd');
+//    fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'INTSO') {
     fieldsToDisable.push('isicCd');
@@ -1076,17 +1078,18 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
+    fieldsToDisable.push('inacCd');
+//    fieldsToDisable.push('custClass');
+
 
   } else if (custSubGroup == 'PRICU') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
     fieldsToDisable.push('repTeamMemberNo');
-    FormManager.readOnly('vat');
     fieldsToDisable.push('vat');
-    FormManager.readOnly('inacCd');
     fieldsToDisable.push('inacCd');
-
+    fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'XCRO') {
     // fieldsToDisable.push(('locationNumber'));
@@ -1707,8 +1710,32 @@ function addMailingConditionValidator() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-
 /* End 1430539 */
+
+function setFieldsCharForScenarios(){
+	 if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+		    return;
+		  }
+		  if (FormManager.getActualValue('reqType') != 'C') {
+		    return;
+		  }
+		  var custSubGroup = FormManager.getActualValue('custSubGrp');
+		  var role = FormManager.getActualValue('userRole').toUpperCase();
+        if(custSubGroup == 'PRICU'){
+        FormManager.setValue('inacCd','');	
+        FormManager.setValue('vat','');	
+//        FormManager.setValue('custClass','60')
+        }
+        if(custSubGroup == 'INTER'){
+            FormManager.setValue('inacCd','');	
+//            FormManager.setValue('custClass','81')
+            }
+        if(custSubGroup == 'INTSO'){
+            FormManager.setValue('inacCd','');	
+//            FormManager.setValue('custClass','85')
+            }
+        
+}
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -1756,6 +1783,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockRequireFieldsSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setFieldMandatoryForProcessorSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessorSpain, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setFieldsCharForScenarios, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(setFieldsCharForScenarios, [ SysLoc.SPAIN ]);
 
   GEOHandler.addAfterTemplateLoad(setFieldMandatoryForProcessorPT, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
