@@ -8165,7 +8165,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addNonLatinCharValidator, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addPOBoxValidatorGR, [ SysLoc.GREECE ]);
-  GEOHandler.addAddrFunction(updateAddrTypeList, [ SysLoc.CYPRUS, SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(updateAddrTypeList, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(convertToUpperCaseGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(preFillTranslationAddrWithSoldToForGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(updateAbbrevNmLocnGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
