@@ -7962,6 +7962,22 @@ function addCustNm4ValidatorForTR() {
       validate : function() {
         var custNm4 = FormManager.getActualValue('custNm4');
         var streetCont = FormManager.getActualValue('addrTxt2');
+        var reqId = FormManager.getActualValue('reqId');
+        var addressType = FormManager.getActualValue('addrType');
+        var addrSeq = FormManager.getActualValue('addrSeq');
+        var reqType = FormManager.getActualValue('reqType');
+        var qParams = {
+            ADDR_TYPE : addressType,
+            ADDR_SEQ : addrSeq,
+            REQ_ID : reqId
+          };
+          var results = cmr.query('GET.NAME4STR.TR', qParams);
+          if('U' == reqType){
+            if (results.ret2 != null && results.ret1 != null && results.ret2 == streetCont && results.ret1 == custNm4) {
+              return new ValidationResult(null, true);
+            }            
+          }
+          
         if ((custNm4.length != undefined && custNm4.length > 0) && (streetCont.length != undefined && streetCont.length > 0)) {
           return new ValidationResult(null, false, 'Only \'Street Cont\' or \'Name 4\' can be filled.');
         }
