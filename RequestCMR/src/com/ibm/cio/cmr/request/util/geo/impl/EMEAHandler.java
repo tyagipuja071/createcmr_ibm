@@ -1906,6 +1906,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
       if (SystemLocation.TURKEY.equals(country)) {
         address.setDept(currentRecord.getCmrDept());
+        address.setAddrTxt2(currentRecord.getCmrName3());
         address.setCustNm4(currentRecord.getCmrName4());
       }
 
