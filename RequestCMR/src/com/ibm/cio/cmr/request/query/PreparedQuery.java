@@ -259,7 +259,7 @@ public class PreparedQuery {
       }
     }
     if (peek == null) {
-      return null;
+      return list;
     }
     if (peek instanceof Object[]) {
       if (Object[].class.equals(returnClass)) {
