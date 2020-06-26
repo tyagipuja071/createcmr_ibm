@@ -2886,6 +2886,16 @@ public class EMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCrosSubTyp(), "Type of Customer", cmrCountry));
       results.add(update);
     }
+    
+    if (SystemLocation.TURKEY.equals(oldData.getCmrIssuingCntry())) {
+        if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEconomicCd(), newData.getEconomicCd())) {
+          update = new UpdatedDataModel();
+          update.setDataField(PageManager.getLabel(cmrCountry, "EconomicCd2", "-"));
+          update.setNewData(service.getCodeAndDescription(newData.getEconomicCd(), "EconomicCode", cmrCountry));
+          update.setOldData(service.getCodeAndDescription(oldData.getEconomicCd(), "EconomicCode", cmrCountry));
+          results.add(update);
+        }
+      }
   }
 
   @Override
