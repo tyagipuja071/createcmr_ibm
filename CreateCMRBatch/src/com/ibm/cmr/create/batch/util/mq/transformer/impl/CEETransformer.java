@@ -1185,13 +1185,23 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if ("@".equals(muData.getEnterprise())) {
+    if (!cust.getId().getCustomerNo().startsWith("99") && !StringUtils.isBlank(muData.getCompany())) {
+        if ("@".equals(muData.getCompany())) {
+          cust.setEnterpriseNo("");
+        } else {
+          cust.setEnterpriseNo(muData.getCompany());
+        }
+      } else if (cust.getId().getCustomerNo().startsWith("99")) {
         cust.setEnterpriseNo("");
-      } else {
-        cust.setEnterpriseNo(muData.getEnterprise());
       }
-    }
+  	
+  	// if (!StringUtils.isBlank(muData.getEnterprise())) {
+      // if ("@".equals(muData.getEnterprise())) {
+      // cust.setEnterpriseNo("");
+      // } else {
+      // cust.setEnterpriseNo(muData.getEnterprise());
+      // }
+      // }
 
     // Email1 used to store phone
     if (!StringUtils.isBlank(muData.getEmail1())) {
