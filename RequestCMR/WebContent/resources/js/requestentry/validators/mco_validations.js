@@ -1062,6 +1062,14 @@ function forceLockScenariosSpain() {
   } else if (custSubGroup == 'BUSPR') {
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
+    FormManager.readOnly('custClassCode');
+    fieldsToDisable.push('custClassCode');
+    FormManager.readOnly('vat');
+    fieldsToDisable.push('vat');
+    FormManager.readOnly('inacCd');
+    fieldsToDisable.push('inacCd');
+    FormManager.readOnly('repTeamMemberNo');
+    fieldsToDisable.push('repTeamMemberNo');
 
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
@@ -1098,6 +1106,14 @@ function forceLockScenariosSpain() {
     // fieldsToDisable.push(('locationNumber'));
     fieldsToDisable.push(('isuCd'));
     fieldsToDisable.push('clientTier');
+    FormManager.readOnly('custClassCode');
+    fieldsToDisable.push('custClassCode');
+    FormManager.readOnly('vat');
+    fieldsToDisable.push('vat');
+    FormManager.readOnly('inacCd');
+    fieldsToDisable.push('inacCd');
+    FormManager.readOnly('repTeamMemberNo');
+    fieldsToDisable.push('repTeamMemberNo');
 
   } else if (custSubGroup == 'XINSO') {
     fieldsToDisable.push('isicCd');
