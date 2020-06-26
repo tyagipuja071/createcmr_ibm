@@ -2,7 +2,7 @@
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
-				<column exactLength="true" number="true">
+				<column exactLength="true">
 					<label>CMR. No</label>
 					<dbColumn>CMR_NO</dbColumn>
 					<width>20</width>
