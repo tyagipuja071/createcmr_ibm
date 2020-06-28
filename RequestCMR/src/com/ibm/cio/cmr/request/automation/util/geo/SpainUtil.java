@@ -3,6 +3,9 @@
  */
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
@@ -48,4 +51,8 @@ public class SpainUtil extends AutomationUtil {
 	return null;
   }
 
+  @Override
+  protected List<String> getCountryLegalEndings() {
+    return Arrays.asList("SL","S.L.","S.A.","SLL","SA","LTD","SOCIEDAD LIMITADA","SLP","S.C.C.L.","SLU","SAU","S.A.U","C.B.","S.E.E.");
+  }
 }
