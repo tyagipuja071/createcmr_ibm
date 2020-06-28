@@ -663,7 +663,7 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
     if (reqType == 'C' && addrType == 'ZS01' || copyingToA) {
       // generate Abbreviated Name/Location
       var role = FormManager.getActualValue('userRole').toUpperCase();
-      var abbrevNm = "IBM/".concat(FormManager.getActualValue('custNm1'));
+      var abbrevNm = FormManager.getActualValue('custNm1');
       var abbrevLocn = FormManager.getActualValue('city1');
 
       if (role == 'REQUESTER') {
@@ -1392,7 +1392,7 @@ function setAbbrvPortugalSpain() {
   var reqType = FormManager.getActualValue('reqType');
   var reqId = FormManager.getActualValue('reqId');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (reqType == 'C' && role == 'REQUESTER') {
     if (reqId != null) {
       reqParam = {
@@ -1404,6 +1404,9 @@ function setAbbrvPortugalSpain() {
     var abbrvNm = custNm.ret1;
     var abbrevLocn = city.ret1;
 
+    if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN && ['INTER','INTSO'].includes(custSubGrp)){
+    	abbrvNm = "IBM/".concat(abbrvNm);
+    }
     if (abbrvNm && abbrvNm.length > 22) {
       abbrvNm = abbrvNm.substring(0, 22);
     }
@@ -1755,8 +1758,9 @@ function setFieldsCharForScenarios(){
 function addBilingMailingValidatorSpain() {
 	  FormManager.addFormValidator((function() {
 	    return {
-	      validate : function() {
-	        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+	      validate : function() {    	  
+	      var custSubGrp = FormManager.getActualValue('custSubGrp') ;
+	        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && ['INETR','INTSO'].includes(custSubGrp)){
 	          var recordList = null;
 	          var reqType = FormManager.getActualValue('reqType')
 	          var role = FormManager.getActualValue('userRole').toUpperCase();
