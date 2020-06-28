@@ -663,7 +663,7 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
     if (reqType == 'C' && addrType == 'ZS01' || copyingToA) {
       // generate Abbreviated Name/Location
       var role = FormManager.getActualValue('userRole').toUpperCase();
-      var abbrevNm = FormManager.getActualValue('custNm1');
+      var abbrevNm = "IBM/".concat(FormManager.getActualValue('custNm1'));
       var abbrevLocn = FormManager.getActualValue('city1');
 
       if (role == 'REQUESTER') {
@@ -1752,6 +1752,53 @@ function setFieldsCharForScenarios(){
             }
         
 }
+
+function addBilingMailingValidatorSpain() {
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+	          var recordList = null;
+	          var reqType = FormManager.getActualValue('reqType')
+	          var role = FormManager.getActualValue('userRole').toUpperCase();
+              var inValidCnt = 0;
+	          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+	            recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+	            if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
+	              recordList = _allAddressData[i];
+	            }
+	           var custNm1 = recordList.custNm1;
+	           var custNm2 = recordList.custNm2;
+	           var addrType = recordList.addrType;
+	            if (typeof (type) == 'object') {
+	              type = type[0];
+	            }
+	            if (typeof (custNm1) == 'object') {
+	            	custNm1 = custNm1[0];
+	            }
+	            if (typeof (custNm2) == 'object') {
+	            	custNm2 = custNm2[0];
+	            }
+	            if (typeof (addrType) == 'object') {
+	            	addrType = addrType[0];
+	            }
+	            
+	            if(!custNm1.concat(custNm2).includes("IBM") && (addrType == 'ZP01' || addrType == 'ZS01')){
+	            	inValidCnt++;
+	            }
+	          }
+
+	          if (inValidCnt > 0) {
+	            return new ValidationResult(null, false, 'Mailing and Billing addresses should have "IBM" in them.');
+	          }
+	          return new ValidationResult(null, true);
+	        }
+	        return new ValidationResult(null, true);
+	      }
+	    };
+	  })(), 'MAIN_NAME_TAB', 'frmCMR');
+	}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -1830,7 +1877,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
-  
+  GEOHandler.registerValidator(addBilingMailingValidatorSpain, [ SysLoc.SPAIN], null, true);
+
   // PT Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
