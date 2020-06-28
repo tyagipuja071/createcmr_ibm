@@ -881,7 +881,7 @@ function forceLockScenariosPortugal() {
 
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
+  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   var fieldsToDisable = new Array();
   FormManager.enable('isicCd');
   FormManager.enable('isuCd');
@@ -900,14 +900,12 @@ function forceLockScenariosPortugal() {
   } else if (custSubGroup == 'INTSO') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
 
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
 
@@ -915,8 +913,9 @@ function forceLockScenariosPortugal() {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('repTeamMemberNo');
-
+    if(repTeamMemberNo != null && repTeamMemberNo != undefined && repTeamMemberNo != ''){
+        fieldsToDisable.push('repTeamMemberNo');	
+    }
   } else if (custSubGroup == 'IBMEM') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('isuCd');
