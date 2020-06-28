@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -16,7 +17,9 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * {@link AutomationUtil} for Spain specific validations
@@ -28,18 +31,29 @@ public class SpainUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(SpainUtil.class);
   private static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
   private static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
+  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
+
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    Addr soldTo = requestData.getAddress("ZS01");
+    String customerName = soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
+
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     
-    if((SCENARIO_BUSINESS_PARTNER.equals(scenario) || SCENARIO_BUSINESS_PARTNER_CROSS.equals(scenario))) {
-      return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-    }
+      LOG.debug("Scenario to check: " + scenario);
 
+      switch (scenario) {
+      case SCENARIO_PRIVATE_CUSTOMER:
+        return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details,
+            true);
+      case SCENARIO_BUSINESS_PARTNER:
+      case SCENARIO_BUSINESS_PARTNER_CROSS:
+        return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+      }
     return true;
   }
 
