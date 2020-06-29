@@ -888,7 +888,7 @@ function forceLockScenariosPortugal() {
 
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
+  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   var fieldsToDisable = new Array();
   FormManager.enable('isicCd');
   FormManager.enable('isuCd');
@@ -907,14 +907,12 @@ function forceLockScenariosPortugal() {
   } else if (custSubGroup == 'INTSO') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
 
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
 
@@ -922,8 +920,9 @@ function forceLockScenariosPortugal() {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('repTeamMemberNo');
-
+    if(repTeamMemberNo != null && repTeamMemberNo != undefined && repTeamMemberNo != ''){
+        fieldsToDisable.push('repTeamMemberNo');	
+    }
   } else if (custSubGroup == 'IBMEM') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('isuCd');
@@ -1400,18 +1399,24 @@ function setAbbrvPortugalSpain() {
   var reqType = FormManager.getActualValue('reqType');
   var reqId = FormManager.getActualValue('reqId');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (reqType == 'C' && role == 'REQUESTER') {
+	  var addrType = FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN ? 'ZI01' : 'ZS01' ;
     if (reqId != null) {
       reqParam = {
         REQ_ID : reqId,
+        ADDR_TYPE : addrType
       };
     }
-    var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
+    var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', reqParam);
     var city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
     var abbrvNm = custNm.ret1;
     var abbrevLocn = city.ret1;
 
+    if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN && ['INTER','INTSO'].includes(custSubGrp)){
+    	if(!abbrvNm.includes('IBM/'))
+    	abbrvNm = "IBM/".concat(abbrvNm);
+    }
     if (abbrvNm && abbrvNm.length > 22) {
       abbrvNm = abbrvNm.substring(0, 22);
     }
@@ -1773,6 +1778,52 @@ function setISUCTCOnISIC() {
 	      FormManager.setValue('clientTier', 'S');
 	    }
 	  }
+}
+function addBilingMailingValidatorSpain() {
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {    	  
+	      var custSubGrp = FormManager.getActualValue('custSubGrp') ;
+	        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && ['INETR','INTSO'].includes(custSubGrp)){
+	          var recordList = null;
+	          var reqType = FormManager.getActualValue('reqType')
+	          var role = FormManager.getActualValue('userRole').toUpperCase();
+              var inValidCnt = 0;
+	          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+	            recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+	            if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
+	              recordList = _allAddressData[i];
+	            }
+	           var custNm1 = recordList.custNm1;
+	           var custNm2 = recordList.custNm2;
+	           var addrType = recordList.addrType;
+	            if (typeof (type) == 'object') {
+	              type = type[0];
+	            }
+	            if (typeof (custNm1) == 'object') {
+	            	custNm1 = custNm1[0];
+	            }
+	            if (typeof (custNm2) == 'object') {
+	            	custNm2 = custNm2[0];
+	            }
+	            if (typeof (addrType) == 'object') {
+	            	addrType = addrType[0];
+	            }
+	            
+	            if(!custNm1.concat(custNm2).includes("IBM") && (addrType == 'ZP01' || addrType == 'ZS01')){
+	            	inValidCnt++;
+	            }
+	          }
+
+	          if (inValidCnt > 0) {
+	            return new ValidationResult(null, false, 'Mailing and Billing addresses should have "IBM" in them.');
+	          }
+	          return new ValidationResult(null, true);
+	        }
+	        return new ValidationResult(null, true);
+	      }
+	    };
+	  })(), 'MAIN_NAME_TAB', 'frmCMR');
 	}
 
 dojo.addOnLoad(function() {
@@ -1853,7 +1904,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
-  
+  GEOHandler.registerValidator(addBilingMailingValidatorSpain, [ SysLoc.SPAIN], null, true);
+
   // PT Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
