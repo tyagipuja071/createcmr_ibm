@@ -649,29 +649,30 @@ function addAddressFieldValidators() {
 }
 
 function setPreferredLang() {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if ('618' == cntry) {
-    return;
-  }
-  FormManager.readOnly('custPrefLang');
-  if ('693' == cntry) {
-    FormManager.setValue('custPrefLang', 'Q');
-  } else if ('668' == cntry) {
-    FormManager.setValue('custPrefLang', 'C');
-  } else if ('820' == cntry) {
-    FormManager.setValue('custPrefLang', 'L');
-  } else if ('708' == cntry) {
-    FormManager.setValue('custPrefLang', '5');
-  } else if ('642' == cntry) {
-    FormManager.setValue('custPrefLang', 'F');
-  } else if ('832' == cntry) {
-    FormManager.setValue('custPrefLang', 'A');
-  } else if ('821' == cntry) {
-    FormManager.setValue('custPrefLang', 'R');
-  } else {
-    FormManager.setValue('custPrefLang', 'E');
-  }
-}
+	  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	  if ('618' == cntry) {
+	    return;
+	  }
+	  FormManager.readOnly('custPrefLang');
+	  if ('693' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+	    FormManager.setValue('custPrefLang', 'Q');
+	  } else if ('668' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+	    FormManager.setValue('custPrefLang', 'C');
+	  } else if ('820' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+	    FormManager.setValue('custPrefLang', 'L');
+	  } else if ('708' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+	    FormManager.setValue('custPrefLang', '5');
+	  } else if ('642' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+	    FormManager.setValue('custPrefLang', 'F');
+	  } else if ('832' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+	    FormManager.setValue('custPrefLang', 'A');
+	  } else if ('821' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+	    FormManager.setValue('custPrefLang', 'R');
+	  } else {
+	    FormManager.setValue('custPrefLang', 'E');
+	    FormManager.enable('custPrefLang');
+	  }
+	}
 
 function setClientTierValues(isuCd) {
 	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
