@@ -85,6 +85,7 @@ function afterConfigForZA() {
 
   setCreditCdField();
   enterpriseValidation();
+  clearPoBoxPhoneAddrGridItems();
 }
 
 function setCreditCdField() {
@@ -127,8 +128,8 @@ function disableAddrFieldsZA() {
     FormManager.enable('landCntry');
   }
 
-  // Phone - for shipping and EPL addresses
-  if (addrType == 'ZD01' || addrType == 'ZS02') {
+  // Phone - for mailing and shipping addresses
+  if (addrType == 'ZS01' || addrType == 'ZD01') {
     FormManager.enable('custPhone');
   } else {
     FormManager.setValue('custPhone', '');
@@ -761,6 +762,27 @@ function disablePOBox() {
   } else {
     FormManager.setValue('poBox', '');
     FormManager.disable('poBox');
+  }
+}
+
+function clearPoBoxPhoneAddrGridItems() {
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    if (_allAddressData != null && _allAddressData[i] != null) {
+      if (!(_allAddressData[i].addrType[0] == 'ZS01' || _allAddressData[i].addrType[0] == 'ZD01')) {
+        _allAddressData[i].custPhone[0] = '';
+      }
+
+      if (!(_allAddressData[i].addrType[0] == 'ZS01' || _allAddressData[i].addrType[0] == 'ZP01')) {
+        var clearPoBox = true;
+        if (_allAddressData[i].addrType[0] == 'ZI01' && _fstCntryCds.includes(_allAddressData[i].landCntry[0])) {
+          clearPoBox = false;
+        }
+        if (clearPoBox) {
+          _allAddressData[i].poBox[0] = '';
+        }
+      }
+    }
   }
 }
 
