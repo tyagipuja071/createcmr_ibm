@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
+import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -104,6 +105,17 @@ public class DuplicateChecksUtil {
       }
       request.setUsRestrictTo(data.getRestrictTo());
       break;
+    case SystemLocation.SPAIN:
+    	if(SpainUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())){
+    		if ("ZI01".equals(addr.getId().getAddrType())) {
+    	          request.setCustClass("81");
+    	        } 	
+    	}
+    	if(SpainUtil.SCENARIO_INTERNAL_SO.equals(data.getCustSubGrp())){
+    		if ("ZI01".equals(addr.getId().getAddrType())) {
+    	          request.setCustClass("85");
+    	        } 	
+    	}
     }
 
   }
