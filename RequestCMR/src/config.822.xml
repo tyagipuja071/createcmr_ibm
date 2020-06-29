@@ -1,0 +1,93 @@
+<template id="822" for="UPDATE">
+  <tabs>
+    <tab name="Data" type="Data" >
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column>
+          <label>Abbreviated Name</label>
+          <dbColumn>ABBREV_NM</dbColumn>
+          <width>40</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Abbreviated Location</label>
+          <dbColumn>ABBREV_LOCN</dbColumn>
+          <width>20</width>
+          <length>12</length>
+        </column>
+        <column>
+          <label>ISIC</label>
+          <dbColumn>ISIC_CD</dbColumn>
+          <width>20</width>
+          <bdsId>ISIC</bdsId>
+        </column>
+        <column>
+          <label>Collection Code</label>
+          <dbColumn>COLLECTION_CD</dbColumn>
+          <width>30</width>
+          <lovId>CollectionCd</lovId>
+        </column>
+        <column>
+          <label>Tax Code</label>
+          <dbColumn>SPECIAL_TAX_CD</dbColumn>
+          <width>30</width>
+          <lovId>SpecialTaxCd</lovId>
+        </column>
+        <column>
+          <label>Enterprise Number</label>
+          <dbColumn>ENTERPRISE</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column>
+          <label>Enterprise Number</label>
+          <dbColumn>ENTERPRISE</dbColumn>
+          <width>30</width>
+          <lovId>Enterprise</lovId>
+        </column>
+        <column>
+          <label>INAC/NAC</label>
+          <dbColumn>INAC_CD</dbColumn>
+          <length>4</length>
+          <width>20</width>
+        </column>
+        <column>
+          <label>Industry Solution Unit (ISU)</label>
+          <dbColumn>ISU_CD</dbColumn>
+          <width>25</width>
+          <lovId>ISU</lovId>
+        </column>
+        <column>
+          <label>Client Tier</label>
+          <dbColumn>CLIENT_TIER</dbColumn>
+          <width>25</width>
+          <lovId>ClientTier</lovId>
+        </column>
+        <column>
+          <label>Embargo Code</label>
+          <dbColumn>EMBARGO_CD</dbColumn>
+          <width>10</width>
+          <length>1</length>
+        </column>
+        <column>
+          <label>Mode of Payment</label>
+          <dbColumn>MODE_OF_PAYMENT</dbColumn>
+          <width>20</width>
+          <lovId>ModeOfPayment</lovId>
+        </column>
+        <column number="false">
+          <label>VAT</label>
+          <dbColumn>VAT</dbColumn>
+          <width>5</width>
+          <length>1</length>
+        </column>
+      </columns>
+    </tab>
+
+  </tabs>
+</template>
