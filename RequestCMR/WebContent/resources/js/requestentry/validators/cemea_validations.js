@@ -674,33 +674,45 @@ function setPreferredLang() {
 }
 
 function setClientTierValues(isuCd) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
 
-  isuCd = FormManager.getActualValue('isuCd');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var clientTiers = [];
-  if (isuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%'
-    };
-    var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        clientTiers.push(results[i].ret1);
-      }
-      if (clientTiers != null) {
-        FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
-        if (clientTiers.length == 1) {
-          FormManager.setValue('clientTier', clientTiers[0]);
-        }
-      }
-    }
-  }
-}
+	  isuCd = FormManager.getActualValue('isuCd');
+	  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	  var clientTiers = [];
+	  if (isuCd != '') {
+	    if (SysLoc.SLOVAKIA == cntry
+	        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
+	            .getActualValue('custSubGrp') == 'XCOM')) {
+	      if (isuCd == '34') {
+	        clientTiers = [ 'V' ];
+	      } else if (isuCd == '32') {
+	        clientTiers = [ 'N', 'S', 'M' ];
+	      } else if (isuCd == '5B') {
+	        clientTiers = [ '7' ];
+	      }
+	    } else {
+	      var qParams = {
+	        _qall : 'Y',
+	        ISSUING_CNTRY : cntry,
+	        ISU : '%' + isuCd + '%'
+	      };
+	      var results = cmr.query('GET.CTCLIST.BYISU', qParams);
+	      if (results != null) {
+	        for (var i = 0; i < results.length; i++) {
+	          clientTiers.push(results[i].ret1);
+	        }
+	      }
+	    }
+	    if (clientTiers != null) {
+	      FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
+	      if (clientTiers.length == 1) {
+	        FormManager.setValue('clientTier', clientTiers[0]);
+	      }
+	    }
+	  }
+	}
 
 function setClientTier2Values(dupIsuCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -1383,6 +1395,7 @@ function phoneNoValidationOnChange() {
   });
 }
 
+
 function setEnterpriseValues(clientTier) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1398,21 +1411,32 @@ function setEnterpriseValues(clientTier) {
 
   var enterprises = [];
   if (isuCd != '' && clientTier != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + clientTier + '%'
-    };
-    var results = cmr.query('GET.ENTLIST.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        enterprises.push(results[i].ret1);
+    if (SysLoc.SLOVAKIA == cntry
+        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
+            .getActualValue('custSubGrp') == 'XCOM')) {
+      if (isuCd == '32' && clientTier == 'M') {
+        enterprises = [ '985069', '985070' ];
+      } else if (isuCd == '34' && clientTier == 'V') {
+        enterprises = [ '985013', '985014' ];
       }
-      if (enterprises != null) {
-        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterprises);
-        if (enterprises.length == 1) {
-          FormManager.setValue('enterprise', enterprises[0]);
+    } else {
+      var qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry,
+        ISU : '%' + isuCd + clientTier + '%'
+      };
+      var results = cmr.query('GET.ENTLIST.BYISU', qParams);
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          enterprises.push(results[i].ret1);
         }
+      }
+    }
+
+    if (enterprises != null) {
+      FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterprises);
+      if (enterprises.length == 1) {
+        FormManager.setValue('enterprise', enterprises[0]);
       }
     }
   }
