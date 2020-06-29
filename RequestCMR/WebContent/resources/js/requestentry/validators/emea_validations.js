@@ -4987,64 +4987,136 @@ function autoSetAbbrevLocnOnChangeIT() {
 }
 // CMR-2205
 function autoSetAbbrevNmOnChanageTR() {
-  console.log("--->>> autoSetAbbrevNmOnChanageTR >> running");
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (role != 'REQUESTER') {
-    return;
-  }
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : zs01ReqId,
-    ADDR_TYPE : "ZS01",
-  };
-  var _abbrevNmValue = null;
-  var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', qParams);
-  _abbrevNmValue = result.ret1;
-
-  if (_abbrevNmValue != null && _abbrevNmValue.length > 22) {
-    _abbrevNmValue = _abbrevNmValue.substr(0, 22);
-  }
-  if (_abbrevNmValue == undefined) {
-    FormManager.setValue('abbrevNm', '');
-  } else {
-    FormManager.setValue('abbrevNm', _abbrevNmValue);
-  }
-  console.log("AbbrevNM>>" + FormManager.getActualValue('abbrevNm'));
-}
+	  console.log("--->>> autoSetAbbrevNmOnChanageTR >> running");
+	  var reqType = FormManager.getActualValue('reqType');
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+	  if (role != 'REQUESTER') {
+	    return;
+	  }
+	  var abbrName=FormManager.getActualValue("abbrevNm");
+	  if (abbrName != null && abbrName.length > 22) {
+	    abbrName = abbrName.substr(0, 22);
+	  }
+	  if (abbrName == undefined) {
+	    FormManager.setValue('abbrevNm', '');
+	  } else {
+	    FormManager.setValue('abbrevNm', abbrName);
+	  }
+	  console.log("AbbrevNM>>" + FormManager.getActualValue('abbrevNm'));  
+	}
 
 function autoSetAbbrevLocnOnChangeTR() {
-  console.log(">>> autoSetAbbrevLocnOnChangeTR >> running");
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (role != 'REQUESTER') {
-    return;
-  }
-  var _abbrevLocn = null;
-  var _zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : _zs01ReqId,
-    ADDR_TYPE : "ZS01",
-  };
-  var _result = cmr.query('ADDR.GET.CITY1.BY_REQID_ADDRTYP', qParams);
-  _abbrevLocn = _result.ret1;
+	  console.log(">>> autoSetAbbrevLocnOnChangeTR >> running");
+	  var reqType = FormManager.getActualValue('reqType');
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+	  if (role != 'REQUESTER') {
+	    return;
+	  }
 
-  if (_abbrevLocn != null && _abbrevLocn.length > 12) {
-    _abbrevLocn = _abbrevLocn.substr(0, 12);
-  }
-  if (_abbrevLocn == undefined) {
-    FormManager.setValue('abbrevLocn', '');
-  } else {
-    FormManager.setValue('abbrevLocn', _abbrevLocn);
-  }
-  console.log("abbrevLocn>>" + FormManager.getActualValue('abbrevLocn'));
-}
+	  var _abbrevLocn=FormManager.getActualValue('abbrevLocn');
+	  if (_abbrevLocn != null && _abbrevLocn.length > 12) {
+	    _abbrevLocn = _abbrevLocn.substr(0, 12);
+	  }
+	  if (_abbrevLocn == undefined) {
+	    FormManager.setValue('abbrevLocn', '');
+	  } else {
+	    FormManager.setValue('abbrevLocn', _abbrevLocn);
+	  }
+	  console.log("abbrevLocn>>" + FormManager.getActualValue('abbrevLocn'));
+	}
+
+function updateAbbrLocWithZS01TR(){
+	  var _abbrevLocn = null;
+	  var addrType = FormManager.getActualValue('addrType');
+	  if("ZS01" != addrType){
+	    return;
+	  } 
+	  var _zs01ReqId = FormManager.getActualValue('reqId');
+	  var newAddrCity= FormManager.getActualValue("city1");
+	  var newAddrLand=FormManager.getActualValue("landCntry") ;
+	  var isCross=true;
+	  if("TR" == FormManager.getActualValue("landCntry") ){
+	    isCross=false;
+	  }
+	  
+	  var qParams = {
+	    REQ_ID : _zs01ReqId,
+	    ADDR_TYPE : "ZS01",
+	  };
+	  var _result = cmr.query('ADDR.GET.CITY1.BY_REQID_ADDRTYP', qParams);
+	  var oldAddrCity = _result.ret1;
+	  
+	    if(isCross){
+	      _abbrevLocn = document.getElementById('landCntry').value;
+	      FormManager.setValue('abbrevLocn', _abbrevLocn);
+	    }else{
+	      if(newAddrCity !=oldAddrCity){
+	      if (newAddrCity != null && newAddrCity.length > 12) {
+	        newAddrCity = newAddrCity.substr(0, 12);
+	      }
+	      if (newAddrCity == undefined) {
+	        FormManager.setValue('abbrevLocn', '');
+	      } else {
+	        FormManager.setValue('abbrevLocn', newAddrCity);
+	      }      
+	    }
+	  }
+	}
+
+function updateAbbrNameWithZS01TR(){
+	  var reqType = FormManager.getActualValue('reqType');
+	  var addrType = FormManager.getActualValue('addrType');
+	  var abbrName=FormManager.getActualValue("abbrevNm");
+	  var newAddrName1= FormManager.getActualValue("custNm1");
+	  if("ZS01" != addrType){
+	    return;
+	  }
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+	  
+	  if('PROCESSOR'==role){
+	    var zs01ReqId = FormManager.getActualValue('reqId');
+	    var qParams = {
+	      REQ_ID : zs01ReqId,
+	    };
+	    var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
+	    var oldAbbrName = result.ret1;
+	    
+	    if(abbrName!=oldAbbrName){
+	      return;      
+	    }
+	  }
+	  
+	  var zs01ReqId = FormManager.getActualValue('reqId');
+	  var qParams = {
+	    REQ_ID : zs01ReqId,
+	    ADDR_TYPE : "ZS01",
+	  };
+	  var oldAddrName = null;
+	  var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', qParams);
+	  oldAddrName = result.ret1;
+
+	  if(oldAddrName != newAddrName1){
+	    if (newAddrName1 != null && newAddrName1.length > 22) {
+	      newAddrName1 = newAddrName1.substr(0, 22);
+	    }
+	    if (newAddrName1 == undefined) {
+	      FormManager.setValue('abbrevNm', '');
+	    } else {
+	      FormManager.setValue('abbrevNm', newAddrName1);
+	    }
+	  }
+	  
+	}
+
 
 /**
  * CMR-2093:Turkey - show CoF field for Update request only
@@ -8506,6 +8578,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addDPLCheckValidatorTR, [ SysLoc.TURKEY ], null, true);
+  
+  GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
 
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
