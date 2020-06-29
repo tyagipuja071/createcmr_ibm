@@ -1442,6 +1442,55 @@ function setEnterpriseValues(clientTier) {
   }
 }
 
+function addCmrNoValidatorForCEE() {
+	  FormManager.addFormValidator((function() {
+	    return {
+	      validate : function() {
+	        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+	        var custSubType = FormManager.getActualValue('custSubGrp');
+	        var cmrNo = FormManager.getField('cmrNo').value;
+	         
+	        if (cmrNo != '' && cmrNo.length != 6) {
+	          return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+	        } else if (isNaN(cmrNo)) {
+	          return new ValidationResult(null, false, 'CMR Number should be only numbers.');
+	        } else if (cmrNo == "000000") {
+	          return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+	        } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
+	          return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
+	        } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
+	          return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
+	        } else if (cmrNo != '' && custSubType != '' && cmrNo.startsWith('99')) {
+	          return new ValidationResult(null, false, 'CMR Number should be in 99XXXX for scenarios');
+	        } else {
+	          var qParams = {
+	            CMRNO : cmrNo,
+	            CNTRY : cntry,
+	            MANDT : cmr.MANDT
+	          };
+	          var results = cmr.query('GET.CMR.CEE', qParams);
+	          if (results.ret1 != null) {
+	            return new ValidationResult(null, false, 'The CMR Number already exists.');
+	          }
+	        }
+	        return new ValidationResult(null, true);
+	      }
+	    };
+	  })(), 'MAIN_IBM_TAB', 'frmCMR');
+	}
+
+	function cmrNoEnableForCEE(){
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  var reqType = FormManager.getActualValue('reqType');
+	  var cmrNo = FormManager.getActualValue('cmrNo');
+	  
+	  if (role!="PROCESSOR" || FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    FormManager.readOnly('cmrNo');
+	  }else{
+	    FormManager.enable('cmrNo');
+	  }
+	}
+	
 function setEnterprise2Values(dupClientTierCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -2614,7 +2663,14 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA);
+  
+  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, [ SysLoc.SLOVAKIA ]);
+  
+  GEOHandler.addAfterConfig(cmrNoEnableForCEE, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.registerValidator(addCmrNoValidatorForCEE,[ SysLoc.SLOVAKIA ]);
+  
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
@@ -2647,7 +2703,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
   GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
-  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ SysLoc.SLOVAKIA ]);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
   // GEOHandler.registerValidator(customCrossPostCdValidator, GEOHandler.CEMEA,
   // null, true);
