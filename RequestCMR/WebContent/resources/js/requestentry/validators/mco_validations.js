@@ -10,11 +10,20 @@ var _oldReqReason = null;
 var _oldOrdBlk = null;
 var _importedIndc = null;
 var _postalCodeHandler = null;
+var _ISICHandler = null;
 
-if (_postalCodeHandler == null) {
-  _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
-    setTaxCodeOnPostalCodePT();
-  });
+function addHandlersForPT() {
+  if (_postalCodeHandler == null) {
+    _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+      setTaxCodeOnPostalCodePT();
+    });
+  }
+  
+  if (_ISICHandler == null) {
+    _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      isuAndCtcBasedOnISIC();
+    });
+  }
 }
 
 function getImportedIndcForPT() {
@@ -239,11 +248,11 @@ function addAddressTypeValidator() {
             return new ValidationResult(null, false, 'Only one Billing address is allowed.');
           } else if (zp01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-          } else if (zi01Cnt > 1 && cntry != SysLoc.SPAIN) {
+          } /*else if (zi01Cnt > 1 && cntry != SysLoc.SPAIN) {
             return new ValidationResult(null, false, 'Only one Installing address is allowed.');
           } else if (zd01Cnt > 1 && cntry != SysLoc.SPAIN && FormManager.getActualValue('reqType') == 'C') {
             return new ValidationResult(null, false, 'Only one Shipping address is allowed for create requests.');
-          } else if (zs02Cnt > 1) {
+          }*/ else if (zs02Cnt > 1) {
             return new ValidationResult(null, false, 'Only one EPL address is allowed.');
           }
           return new ValidationResult(null, true);
@@ -1816,10 +1825,19 @@ function tempReactEmbargoCDOnChange() {
     _embargoCdHandler[0].onChange();
   }
 }
+
 function getOldFieldValues() {
   _oldEmbargoCd = FormManager.getActualValue('embargoCd');
   _oldReqReason = FormManager.getActualValue('reqReason');
   _oldOrdBlk = FormManager.getActualValue('ordBlk');
+}
+
+function isuAndCtcBasedOnISIC(){
+  var isicCd = FormManager.getActualValue('isicCd');
+  if (isicCd =='7230' || isicCd =='7240' || isicCd =='7290' || isicCd =='7210' || isicCd =='7221' || isicCd =='7229') {
+    FormManager.setValue('isuCd', '32');
+    FormManager.setValue('clientTier', 'N');
+  }
 }
 
 function addMailingConditionValidator() {
@@ -1876,6 +1894,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(afterConfigForMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(addHandlersForPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
@@ -1926,8 +1945,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SPAIN, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.SPAIN ], null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
-  // GEOHandler.registerValidator(addVatValidator, [ SysLoc.PORTUGAL ], null,
-  // true);
+  // GEOHandler.registerValidator(addVatValidator, [ SysLoc.PORTUGAL ], null, true);
   GEOHandler.registerValidator(addMailingConditionValidator, [ SysLoc.SPAIN ], null, true);
 
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.MCO);
@@ -1942,6 +1960,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
   
   // PT Legacy 
+  GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
