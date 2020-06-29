@@ -109,6 +109,9 @@ public class EMEAHandler extends BaseSOFHandler {
       "Ship-To Address" };
   protected static final String[] GR_MASS_UPDATE_SHEET_NAMES = { "Local Lang translation Sold-to", "Sold To Address", "Ship To Address",
       "Install At Address" };
+  
+  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
+  "Install At" };
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
@@ -3815,6 +3818,13 @@ public class EMEAHandler extends BaseSOFHandler {
       LOG.trace("validateTemplateDupFills for Greece");
       return;
     }
+    
+    if(country.equals(SystemLocation.SLOVAKIA)){
+      validateTemplateDupFillsCEE(validations, book, maxRows, country);
+      LOG.trace("validateTemplateDupFills for CEE countries");
+      return;
+    }
+    
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
@@ -4065,6 +4075,10 @@ public class EMEAHandler extends BaseSOFHandler {
     query.setParameter("COUNTRY", cmrCntry);
     query.setParameter("CMR_NO", cmrNo);
     return query.getSingleResult(CmrtCustExt.class);
+  }
+  
+  private void  validateTemplateDupFillsCEE(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+	  
   }
 
   private void validateTemplateDupFillsGreece(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
