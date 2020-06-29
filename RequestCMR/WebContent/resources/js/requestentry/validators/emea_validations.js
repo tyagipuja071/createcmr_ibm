@@ -3888,7 +3888,9 @@ function addShippingAddrTypeValidator() {
 }
 
 function convertToUpperCaseGR(cntry, addressMode, saving) {
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
+    return;
+  }
     var custType = FormManager.getActualValue('custGrp');
 
     // for cross border
@@ -3910,7 +3912,6 @@ function convertToUpperCaseGR(cntry, addressMode, saving) {
         dojo.byId(addrFields[i]).style.textTransform = 'none';
       }
     }
-  }
 }
 
 function updateAddrTypeList(cntry, addressMode, saving) {
