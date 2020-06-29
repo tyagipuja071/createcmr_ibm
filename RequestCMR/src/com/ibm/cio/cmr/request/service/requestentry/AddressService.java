@@ -152,13 +152,15 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
         int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
         int zi01cout = Integer.valueOf(getTrZI01Count(entityManager, model.getReqId()));
-
+        String existAddTypeText = "";
         if (model.getAddrType().equals("ZS01")) {
           newAddrSeq = "00003";
+          existAddTypeText = "Sold-To";
         }
         // update
         if (model.getAddrType().equals("ZP01")) {
           newAddrSeq = "00002";
+          existAddTypeText = "Local Language Translation of Sold-To";
         }
         if (model.getAddrType().equals("ZD01")) {
           if (zd01cout == 0) {
@@ -168,6 +170,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           } else {
             newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
           }
+          existAddTypeText = "Ship-To";
         }
         if (model.getAddrType().equals("ZI01")) {
           if (zi01cout == 0) {
@@ -175,8 +178,12 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           } else {
             newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
           }
+          existAddTypeText = "Install-At";
         }
-
+        // If address type already exist, the err msg is address type text xxxx
+        // for turkey
+        uniqAddr.delete(0, uniqAddr.length());
+        uniqAddr.append(existAddTypeText);
       }
 
       // if ("864".equals(model.getCmrIssuingCntry())) {
