@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.approval;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -22,7 +23,6 @@ import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.runtime.parser.ParseException;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -96,8 +96,24 @@ public class EmailEngine {
     LOG.debug("Initializing Velocity Engine...");
     // init engine
     this.engine = new VelocityEngine();
-    this.engine.addProperty(Velocity.RESOURCE_LOADER, "classpath");
-    this.engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+    String batchDir = null;
+    String cmrHome = System.getProperty("cmr.home");
+    if (!StringUtils.isBlank(cmrHome) && new File(cmrHome + File.separator + "batch").exists()) {
+      batchDir = cmrHome + File.separator + "batch";
+    } else {
+      String batchHome = System.getProperty("BATCH_HOME");
+      if (!StringUtils.isBlank(cmrHome) && new File(batchHome).exists()) {
+        batchDir = batchHome;
+      }
+    }
+    if (StringUtils.isBlank(batchDir)) {
+      batchDir = "";
+    }
+
+    // this.engine.addProperty(Velocity.RESOURCE_LOADER, "classpath");
+    engine.addProperty(Velocity.FILE_RESOURCE_LOADER_PATH, batchDir);
+    // this.engine.setProperty("classpath.resource.loader.class",
+    // ClasspathResourceLoader.class.getName());
     this.engine.init();
 
     LOG.debug("Initializing Request Data...");
