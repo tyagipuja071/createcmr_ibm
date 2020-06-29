@@ -1394,17 +1394,20 @@ function setAbbrvPortugalSpain() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (reqType == 'C' && role == 'REQUESTER') {
+	  var addrType = FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN ? 'ZI01' : 'ZS01' ;
     if (reqId != null) {
       reqParam = {
         REQ_ID : reqId,
+        ADDR_TYPE : addrType
       };
     }
-    var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
+    var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', reqParam);
     var city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
     var abbrvNm = custNm.ret1;
     var abbrevLocn = city.ret1;
 
     if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN && ['INTER','INTSO'].includes(custSubGrp)){
+    	if(!abbrvNm.includes('IBM/'))
     	abbrvNm = "IBM/".concat(abbrvNm);
     }
     if (abbrvNm && abbrvNm.length > 22) {
