@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.system.ForcedStatusChangeModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
@@ -137,13 +138,18 @@ public class ForcedStatusChangeService extends BaseService<ForcedStatusChangeMod
 
   @Override
   protected Admin getCurrentRecord(ForcedStatusChangeModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException {
+    AdminPK pk = new AdminPK();
+    pk.setReqId(model.getReqId());
+    Admin admin = entityManager.find(Admin.class, pk);
     String sql = ExternalizedQuery.getSql("SYSTEM.GETREQUEST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", model.getReqId());
-
     List<Admin> records = query.getResults(1, Admin.class);
     if (records != null && records.size() > 0) {
-      return records.get(0);
+      admin.setReqStatus(records.get(0).getReqStatus());
+      admin.setLockInd(records.get(0).getLockInd());
+      admin.setProcessedFlag(records.get(0).getProcessedFlag());
+      return admin;
     }
     return null;
   }
