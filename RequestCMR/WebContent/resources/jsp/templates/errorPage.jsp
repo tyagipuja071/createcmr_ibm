@@ -23,11 +23,7 @@
 					Click <a class="back" onclick="history.go(-1);">here</a> to go back to last known stable state. <br/>
 				</strong>
 			</p>
-			
-			<p>
-				${exception.message}
-			</p>	
-			
+					
 		</div>
 		<div id="push">
 		</div>
