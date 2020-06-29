@@ -4063,13 +4063,6 @@ function disableAddrFieldsGR() {
     FormManager.disable('custPhone');
   }
 
-  if (FormManager.getActualValue('addrType') != 'ZP01') {
-    FormManager.setValue('taxOffice', '');
-    FormManager.disable('taxOffice');
-  } else {
-    FormManager.enable('taxOffice');
-  }
-
   if (FormManager.getActualValue('addrType') == 'ZP01'
       || FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.enable('poBox');
