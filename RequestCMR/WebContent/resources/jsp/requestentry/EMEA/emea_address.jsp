@@ -304,7 +304,7 @@
 </cmr:view>--%>
 <cmr:view exceptForCountry="758">
 <cmr:row>
-  <cmr:column span="2" containerForField="POBox" exceptForCountry="755">
+  <cmr:column span="2" containerForField="POBox" exceptForCountry="755,862">
     <p>
       <cmr:label fieldId="poBox">
         <cmr:fieldLabel fieldId="POBox" />:
