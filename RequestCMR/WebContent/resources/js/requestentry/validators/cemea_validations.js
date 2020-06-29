@@ -2,7 +2,7 @@
 
 // Exclusive countries for GBM/SBM 
 var CEMEA_EXCL = new Set([ '620', '767', '805', '823', '677', '680', '832' ]);
-
+var CEE_INCL = new Set([ '693' ]);
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -990,6 +990,15 @@ function setSBO(repTeamMemberNo) {
    * CMR-2046 AT for update can also get SBO when change ISR
    */
   if (FormManager.getActualValue('reqType') != 'C' && cntry != SysLoc.AUSTRIA) {
+    return;
+  }
+  
+  // CEE cunrrently just for SK, if create req, set SBO as 000000, rep as
+  // 0999998
+  if (CEE_INCL.has(cntry) && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
+    FormManager.setValue('salesBusOffCd', '0000000');
+    FormManager.setValue('repTeamMemberNo', '099998');
     return;
   }
 
@@ -2572,7 +2581,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
-  // CMR-2101 Austriathe func for Austria
+//CMR-2101 Austria the func for Austria, setSBO also used by CEE countries
   GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
