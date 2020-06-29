@@ -11,11 +11,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
+import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 
@@ -105,7 +107,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
         lineNo++;
       }
     }
-
   }
 
   private boolean hasAttnPrefix(String attnPerson) {
@@ -123,9 +124,26 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   @Override
+  public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
+      CMRRequestContainer cmrObjects, Addr currAddr) {
+    LOG.debug("transformLegacyAddressData South Africa transformer...");
+
+    if ("ZD01".equals(currAddr.getId().getAddrType())) {
+      legacyAddr.setAddrPhone(currAddr.getCustPhone());
+    }
+  }
+
+  @Override
   public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
       CMRRequestContainer cmrObjects) {
+    LOG.debug("transformLegacyCustomerData South Africa transformer...");
     cmrObjects.getData().setUser("");
+
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+        legacyCust.setTelNoOrVat(addr.getCustPhone());
+      }
+    }
   }
 
   @Override
