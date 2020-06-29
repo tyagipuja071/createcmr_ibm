@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -579,20 +580,25 @@ public class CEETransformer extends EMEATransformer {
 
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
-    if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
-      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
-        generateCMRNoObj.setMin(985001);
-        generateCMRNoObj.setMax(985999);
-      } else {
-        generateCMRNoObj.setMin(993110);
-        generateCMRNoObj.setMax(998899);
-      }
-      LOG.debug("that is CEE INTER CMR");
-    } else {
-      generateCMRNoObj.setMin(369320);
-      generateCMRNoObj.setMax(999999);
-      LOG.debug("that is CEE No INTER CMR");
-    }
+	if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
+		if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
+			generateCMRNoObj.setMin(985001);
+			generateCMRNoObj.setMax(985999);
+		} else {
+			generateCMRNoObj.setMin(993110);
+			generateCMRNoObj.setMax(998899);
+		}
+		LOG.debug("that is CEE INTER CMR");
+	} else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp)) {
+		if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
+			generateCMRNoObj.setMin(1000);
+			generateCMRNoObj.setMax(9999);
+		}
+	} else {
+		generateCMRNoObj.setMin(369320);
+		generateCMRNoObj.setMax(999999);
+		LOG.debug("that is CEE No INTER CMR");
+	}
   }
 
   @Override
