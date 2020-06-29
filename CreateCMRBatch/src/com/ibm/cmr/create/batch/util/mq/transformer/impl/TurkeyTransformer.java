@@ -1388,7 +1388,7 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      if ("@".equals(muData.getCollectionCd())) {
+      if ("@".equals(muData.getVat())) {
         cust.setVat("");
       } else {
         cust.setVat(muData.getVat());
@@ -1424,12 +1424,12 @@ public class TurkeyTransformer extends EMEATransformer {
       String subInd = muData.getSubIndustryCd();
       cust.setImsCd(subInd);
       // Defect 1776715: Fix for Economic code
-      String firstChar = String.valueOf(subInd.charAt(0));
-      StringBuilder builder = new StringBuilder();
-      builder.append(firstChar);
-      builder.append(subInd);
-      LOG.debug("***Auto setting Economic code as > " + builder.toString());
-      cust.setEconomicCd(builder.toString());
+//      String firstChar = String.valueOf(subInd.charAt(0));
+//      StringBuilder builder = new StringBuilder();
+//      builder.append(firstChar);
+//      builder.append(subInd);
+//      LOG.debug("***Auto setting Economic code as > " + builder.toString());
+//      cust.setEconomicCd(builder.toString());
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());

@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -579,20 +580,25 @@ public class CEETransformer extends EMEATransformer {
 
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
-    if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
-      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
-        generateCMRNoObj.setMin(985001);
-        generateCMRNoObj.setMax(985999);
-      } else {
-        generateCMRNoObj.setMin(993110);
-        generateCMRNoObj.setMax(998899);
-      }
-      LOG.debug("that is CEE INTER CMR");
-    } else {
-      generateCMRNoObj.setMin(369320);
-      generateCMRNoObj.setMax(999999);
-      LOG.debug("that is CEE No INTER CMR");
-    }
+	if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp)) {
+		if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
+			generateCMRNoObj.setMin(985001);
+			generateCMRNoObj.setMax(985999);
+		} else {
+			generateCMRNoObj.setMin(993110);
+			generateCMRNoObj.setMax(998899);
+		}
+		LOG.debug("that is CEE INTER CMR");
+	} else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp)) {
+		if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
+			generateCMRNoObj.setMin(1000);
+			generateCMRNoObj.setMax(9999);
+		}
+	} else {
+		generateCMRNoObj.setMin(369320);
+		generateCMRNoObj.setMax(999999);
+		LOG.debug("that is CEE No INTER CMR");
+	}
   }
 
   @Override
@@ -991,18 +997,18 @@ public class CEETransformer extends EMEATransformer {
       }
 
       // CMR-2279:ISR set based on SBO
-      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-
-        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-        PreparedQuery q = new PreparedQuery(entityManager, sql);
-        q.setParameter("SBO", data.getSalesBusOffCd());
-        q.setParameter("CNTRY", data.getCmrIssuingCntry());
-        String isr = q.getSingleResult(String.class);
-        if (!StringUtils.isBlank(isr)) {
-          legacyCust.setSalesRepNo(isr);
-          cmrObjects.getData().setRepTeamMemberNo(isr);
-        }
-      }
+//      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+//
+//        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+//        PreparedQuery q = new PreparedQuery(entityManager, sql);
+//        q.setParameter("SBO", data.getSalesBusOffCd());
+//        q.setParameter("CNTRY", data.getCmrIssuingCntry());
+//        String isr = q.getSingleResult(String.class);
+//        if (!StringUtils.isBlank(isr)) {
+//          legacyCust.setSalesRepNo(isr);
+//          cmrObjects.getData().setRepTeamMemberNo(isr);
+//        }
+//      }
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
@@ -1157,6 +1163,14 @@ public class CEETransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
+    
+    if (!StringUtils.isBlank(muData.getOrdBlk())) {
+        if ("@".equals(muData.getOrdBlk())) {
+          cust.setEmbargoCd("");
+        }else{
+          cust.setEmbargoCd(muData.getOrdBlk());        
+        }
+      }
 
     // we use RestrictTo to store CoF in muData
     if (!StringUtils.isBlank(muData.getRestrictTo())) {
@@ -1176,22 +1190,32 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      if ("@".equals(muData.getRepTeamMemberNo())) {
-        cust.setSalesRepNo("");
-        cust.setSalesGroupRep("");
-      } else {
-        cust.setSalesRepNo(muData.getRepTeamMemberNo());
-        cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+        if ("@".equals(muData.getRepTeamMemberNo())) {
+          cust.setSalesRepNo("");
+          cust.setSalesGroupRep("");
+        } else {
+          cust.setSalesRepNo(muData.getRepTeamMemberNo());
+          cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+        }
       }
-    }
 
-    if (!StringUtils.isBlank(muData.getEnterprise())) {
-      if ("@".equals(muData.getEnterprise())) {
+    if (!cust.getId().getCustomerNo().startsWith("99") && !StringUtils.isBlank(muData.getCompany())) {
+        if ("@".equals(muData.getCompany())) {
+          cust.setEnterpriseNo("");
+        } else {
+          cust.setEnterpriseNo(muData.getCompany());
+        }
+      } else if (cust.getId().getCustomerNo().startsWith("99")) {
         cust.setEnterpriseNo("");
-      } else {
-        cust.setEnterpriseNo(muData.getEnterprise());
       }
-    }
+  	
+  	// if (!StringUtils.isBlank(muData.getEnterprise())) {
+      // if ("@".equals(muData.getEnterprise())) {
+      // cust.setEnterpriseNo("");
+      // } else {
+      // cust.setEnterpriseNo(muData.getEnterprise());
+      // }
+      // }
 
     // Email1 used to store phone
     if (!StringUtils.isBlank(muData.getEmail1())) {

@@ -2,7 +2,7 @@
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
-				<column exactLength="true" number="true">
+				<column exactLength="true">
 					<label>CMR. No</label>
 					<dbColumn>CMR_NO</dbColumn>
 					<width>20</width>
@@ -78,19 +78,19 @@
 					<length>2</length>
 					<lovId>ISU</lovId>
 				</column>
-
 				<column>
 					<label>Client Tier</label>
 					<dbColumn>CLIENT_TIER</dbColumn>
 					<width>25</width>
 					<length>1</length>
-					<bdsId>ClientTier</bdsId>
+					<lovId>ClientTier</lovId>
 				</column>
 				<column exactLength="true">
 					<label>SBO</label>
 					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>20</width>
 					<length>3</length>
+					<lovId>SalesBusOff</lovId>   
 				</column>
 				<column>
 					<label>CoF</label>

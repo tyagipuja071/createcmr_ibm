@@ -298,7 +298,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
         
         <!-- PO Box for ES/PT/IL/GR/CY/TU/UKI -->
-        <cmr:view forCountry="838,755,822,726,666,862,866,754">
+        <cmr:view forCountry="838,755,822,726,666,866,754">
           <cmr:gridCol width="90px" field="poBox" header="PO Box" />
         </cmr:view>
         

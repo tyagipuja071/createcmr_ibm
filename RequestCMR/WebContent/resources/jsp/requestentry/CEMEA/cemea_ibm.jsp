@@ -18,7 +18,7 @@
 
 <cmr:view forGEO="CEMEA">
   <cmr:row topPad="10">
-   <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("618")){%>
+   <% if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("693")){ %>
       <form:hidden path="repTeamMemberNo" id="repTeamMemberNo"/>
     <%} else { %>
     <cmr:column span="2" containerForField="SalRepNameNo">
@@ -41,8 +41,9 @@
       </p>
     </cmr:column>
 
-    <!-- CEEME - show SBO for processors only -->
-    <%if (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") && !"Processor".equalsIgnoreCase(reqentry.getUserRole())){%>
+<!-- CEEME - show SBO for processors only -->
+    <%if (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("693") 
+    	&& (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") && !"Processor".equalsIgnoreCase(reqentry.getUserRole()))){%>
       <form:hidden path="salesBusOffCd" id="salesBusOffCd"/>
     <%} else { %>
       <cmr:column span="2" containerForField="SalesBusOff">

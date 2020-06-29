@@ -1532,10 +1532,10 @@ function addDistrictPostCodeCityValidator() {
 
         var val = city;
         if (dept != '') {
-          val += (val.length > 0 ? ', ' : '') + dept;
+        	val += (val.length > 0 ? ' ' : '') + dept;
         }
         if (post != '') {
-          val += (val.length > 0 ? ', ' : '') + post;
+        	val += (val.length > 0 ? ' ' : '') + post;
         }
         if (val.length > 30) {
           return new ValidationResult(null, false, 'Total computed length of District, Postal Code, and City should be less than 30 characters.');
@@ -5141,64 +5141,136 @@ function autoSetAbbrevLocnOnChangeIT() {
 }
 // CMR-2205
 function autoSetAbbrevNmOnChanageTR() {
-  console.log("--->>> autoSetAbbrevNmOnChanageTR >> running");
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (role != 'REQUESTER') {
-    return;
-  }
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : zs01ReqId,
-    ADDR_TYPE : "ZS01",
-  };
-  var _abbrevNmValue = null;
-  var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', qParams);
-  _abbrevNmValue = result.ret1;
-
-  if (_abbrevNmValue != null && _abbrevNmValue.length > 22) {
-    _abbrevNmValue = _abbrevNmValue.substr(0, 22);
-  }
-  if (_abbrevNmValue == undefined) {
-    FormManager.setValue('abbrevNm', '');
-  } else {
-    FormManager.setValue('abbrevNm', _abbrevNmValue);
-  }
-  console.log("AbbrevNM>>" + FormManager.getActualValue('abbrevNm'));
-}
+	  console.log("--->>> autoSetAbbrevNmOnChanageTR >> running");
+	  var reqType = FormManager.getActualValue('reqType');
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+	  if (role != 'REQUESTER') {
+	    return;
+	  }
+	  var abbrName=FormManager.getActualValue("abbrevNm");
+	  if (abbrName != null && abbrName.length > 22) {
+	    abbrName = abbrName.substr(0, 22);
+	  }
+	  if (abbrName == undefined) {
+	    FormManager.setValue('abbrevNm', '');
+	  } else {
+	    FormManager.setValue('abbrevNm', abbrName);
+	  }
+	  console.log("AbbrevNM>>" + FormManager.getActualValue('abbrevNm'));  
+	}
 
 function autoSetAbbrevLocnOnChangeTR() {
-  console.log(">>> autoSetAbbrevLocnOnChangeTR >> running");
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (role != 'REQUESTER') {
-    return;
-  }
-  var _abbrevLocn = null;
-  var _zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : _zs01ReqId,
-    ADDR_TYPE : "ZS01",
-  };
-  var _result = cmr.query('ADDR.GET.CITY1.BY_REQID_ADDRTYP', qParams);
-  _abbrevLocn = _result.ret1;
+	  console.log(">>> autoSetAbbrevLocnOnChangeTR >> running");
+	  var reqType = FormManager.getActualValue('reqType');
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+	  if (role != 'REQUESTER') {
+	    return;
+	  }
 
-  if (_abbrevLocn != null && _abbrevLocn.length > 12) {
-    _abbrevLocn = _abbrevLocn.substr(0, 12);
-  }
-  if (_abbrevLocn == undefined) {
-    FormManager.setValue('abbrevLocn', '');
-  } else {
-    FormManager.setValue('abbrevLocn', _abbrevLocn);
-  }
-  console.log("abbrevLocn>>" + FormManager.getActualValue('abbrevLocn'));
-}
+	  var _abbrevLocn=FormManager.getActualValue('abbrevLocn');
+	  if (_abbrevLocn != null && _abbrevLocn.length > 12) {
+	    _abbrevLocn = _abbrevLocn.substr(0, 12);
+	  }
+	  if (_abbrevLocn == undefined) {
+	    FormManager.setValue('abbrevLocn', '');
+	  } else {
+	    FormManager.setValue('abbrevLocn', _abbrevLocn);
+	  }
+	  console.log("abbrevLocn>>" + FormManager.getActualValue('abbrevLocn'));
+	}
+
+function updateAbbrLocWithZS01TR(){
+	  var _abbrevLocn = null;
+	  var addrType = FormManager.getActualValue('addrType');
+	  if("ZS01" != addrType){
+	    return;
+	  } 
+	  var _zs01ReqId = FormManager.getActualValue('reqId');
+	  var newAddrCity= FormManager.getActualValue("city1");
+	  var newAddrLand=FormManager.getActualValue("landCntry") ;
+	  var isCross=true;
+	  if("TR" == FormManager.getActualValue("landCntry") ){
+	    isCross=false;
+	  }
+	  
+	  var qParams = {
+	    REQ_ID : _zs01ReqId,
+	    ADDR_TYPE : "ZS01",
+	  };
+	  var _result = cmr.query('ADDR.GET.CITY1.BY_REQID_ADDRTYP', qParams);
+	  var oldAddrCity = _result.ret1;
+	  
+	    if(isCross){
+	      _abbrevLocn = document.getElementById('landCntry').value;
+	      FormManager.setValue('abbrevLocn', _abbrevLocn);
+	    }else{
+	      if(newAddrCity !=oldAddrCity){
+	      if (newAddrCity != null && newAddrCity.length > 12) {
+	        newAddrCity = newAddrCity.substr(0, 12);
+	      }
+	      if (newAddrCity == undefined) {
+	        FormManager.setValue('abbrevLocn', '');
+	      } else {
+	        FormManager.setValue('abbrevLocn', newAddrCity);
+	      }      
+	    }
+	  }
+	}
+
+function updateAbbrNameWithZS01TR(){
+	  var reqType = FormManager.getActualValue('reqType');
+	  var addrType = FormManager.getActualValue('addrType');
+	  var abbrName=FormManager.getActualValue("abbrevNm");
+	  var newAddrName1= FormManager.getActualValue("custNm1");
+	  if("ZS01" != addrType){
+	    return;
+	  }
+	  var role = FormManager.getActualValue('userRole').toUpperCase();
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	    return;
+	  }
+	  
+	  if('PROCESSOR'==role){
+	    var zs01ReqId = FormManager.getActualValue('reqId');
+	    var qParams = {
+	      REQ_ID : zs01ReqId,
+	    };
+	    var result = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
+	    var oldAbbrName = result.ret1;
+	    
+	    if(abbrName!=oldAbbrName){
+	      return;      
+	    }
+	  }
+	  
+	  var zs01ReqId = FormManager.getActualValue('reqId');
+	  var qParams = {
+	    REQ_ID : zs01ReqId,
+	    ADDR_TYPE : "ZS01",
+	  };
+	  var oldAddrName = null;
+	  var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', qParams);
+	  oldAddrName = result.ret1;
+
+	  if(oldAddrName != newAddrName1){
+	    if (newAddrName1 != null && newAddrName1.length > 22) {
+	      newAddrName1 = newAddrName1.substr(0, 22);
+	    }
+	    if (newAddrName1 == undefined) {
+	      FormManager.setValue('abbrevNm', '');
+	    } else {
+	      FormManager.setValue('abbrevNm', newAddrName1);
+	    }
+	  }
+	  
+	}
+
 
 /**
  * CMR-2093:Turkey - show CoF field for Update request only
@@ -8116,6 +8188,22 @@ function addCustNm4ValidatorForTR() {
       validate : function() {
         var custNm4 = FormManager.getActualValue('custNm4');
         var streetCont = FormManager.getActualValue('addrTxt2');
+        var reqId = FormManager.getActualValue('reqId');
+        var addressType = FormManager.getActualValue('addrType');
+        var addrSeq = FormManager.getActualValue('addrSeq');
+        var reqType = FormManager.getActualValue('reqType');
+        var qParams = {
+            ADDR_TYPE : addressType,
+            ADDR_SEQ : addrSeq,
+            REQ_ID : reqId
+          };
+          var results = cmr.query('GET.NAME4STR.TR', qParams);
+          if('U' == reqType){
+            if (results.ret2 != null && results.ret1 != null && results.ret2 == streetCont && results.ret1 == custNm4) {
+              return new ValidationResult(null, true);
+            }            
+          }
+          
         if ((custNm4.length != undefined && custNm4.length > 0) && (streetCont.length != undefined && streetCont.length > 0)) {
           return new ValidationResult(null, false, 'Only \'Street Cont\' or \'Name 4\' can be filled.');
         }
@@ -8543,12 +8631,26 @@ function turkish(input) {
   if (!value || value == '' || value.length == 0) {
     return true;
   }
-  var reg = /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
-  if (value != value.match(reg)) {
+  //var reg = /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
+  var reg = /[a-zA-Z0-9ğüşöçİĞÜŞÖÇ]+/;
+  if (!value.match(reg)) {
     return new ValidationResult(input, false, '{1} is not a valid value for {0}. Please enter turkish characters only.');
   } else {
     return new ValidationResult(input, true);
   }
+}
+
+function filterCmrnoForTR(){
+  var cmrNo = FormManager.getActualValue('cmrNo');
+  if(cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P'){
+      FormManager.setValue('cmrNo', '');
+  }
+  
+  dojo.connect(FormManager.getField('cmrNo'), 'onChange', function(value) {
+      if(value.length > 0 && value.substr(0, 1).toUpperCase() == 'P'){
+          FormManager.setValue('cmrNo', '');
+      }
+     });
 }
 
 dojo.addOnLoad(function() {
@@ -8643,6 +8745,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addDPLCheckValidatorTR, [ SysLoc.TURKEY ], null, true);
+  
+  GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
 
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
@@ -8655,6 +8760,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(toggleBPRelMemTypeForTurkey, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(toggleTypeOfCustomerForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(filterCmrnoForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(filterCmrnoForTR, [ SysLoc.TURKEY ]);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
