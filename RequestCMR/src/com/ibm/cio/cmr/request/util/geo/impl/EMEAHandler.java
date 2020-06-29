@@ -2197,6 +2197,10 @@ public class EMEAHandler extends BaseSOFHandler {
         if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"CY".equals(addr.getLandCntry())) {
           updateLandCntry(entityManager, addr);
         }
+        
+        if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
+          addr.setCustPhone("");
+        }
       }
 
       break;

@@ -3354,7 +3354,7 @@ function addCYAddressTypeValidator() {
 var _gtcISUHandler = null;
 var _CTCHandler = null;
 var _gtcISRHandler = null;
-var _gtcAddrTypes = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01' ];
+var _gtcAddrTypes = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01', 'ZS02' ];
 var _gtcAddrTypeHandler = [];
 var _gtcVatExemptHandler = null;
 function addHandlersForGRCYTR() {
@@ -3888,25 +3888,27 @@ function addShippingAddrTypeValidator() {
 }
 
 function convertToUpperCaseGR(cntry, addressMode, saving) {
-  var custType = FormManager.getActualValue('custGrp');
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+    var custType = FormManager.getActualValue('custGrp');
 
-  // for cross border
-  if (custType == 'CROSS') {
-    return;
-  }
-
-  // Greek address - block lowercase
-  var addrFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'postCd', 'custPhone', 'sapNo', 'taxOffice', 'custNm4' ];
-  if (FormManager.getActualValue('addrType') == 'ZP01') {
-    for (var i = 0; i < addrFields.length; i++) {
-      dojo.byId(addrFields[i]).style.textTransform = 'uppercase';
-      if (saving) {
-        dojo.byId(addrFields[i]).value = dojo.byId(addrFields[i]).value.toUpperCase();
-      }
+    // for cross border
+    if (custType == 'CROSS') {
+      return;
     }
-  } else {
-    for (var i = 0; i < addrFields.length; i++) {
-      dojo.byId(addrFields[i]).style.textTransform = 'none';
+
+    // Greek address - block lowercase
+    var addrFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'postCd', 'custPhone', 'sapNo', 'taxOffice', 'custNm4' ];
+    if (FormManager.getActualValue('addrType') == 'ZP01') {
+      for (var i = 0; i < addrFields.length; i++) {
+        dojo.byId(addrFields[i]).style.textTransform = 'uppercase';
+        if (saving) {
+          dojo.byId(addrFields[i]).value = dojo.byId(addrFields[i]).value.toUpperCase();
+        }
+      }
+    } else {
+      for (var i = 0; i < addrFields.length; i++) {
+        dojo.byId(addrFields[i]).style.textTransform = 'none';
+      }
     }
   }
 }
