@@ -314,6 +314,7 @@ var _CTCHandler = null;
 var _SalesRepHandler = null;
 var _LocNumHandler = null;
 var _vatExemptHandler = null;
+var _isicHandler = null;
 var _noISRLogicPT = new Set([ 'INTER', 'INTSO', 'ININV', 'IBMEM' ]);
 var _noISRLogicES = new Set([ 'INTER', 'INTSO', 'XINTR', 'XINSO' ]);
 function addHandlersForPTES() {
@@ -370,6 +371,12 @@ function addHandlersForPTES() {
       setVatValidatorPTES();
     });
   }
+  
+  if (_isicHandler == null) {
+	    _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+	      setISUCTCOnISIC();
+	    });
+	  }
 
 }
 
@@ -1752,6 +1759,22 @@ function setFieldsCharForScenarios(){
             }
         
 }
+
+function setISUCTCOnISIC() {
+	  var custSubGrp = FormManager.getActualValue('custSubGrp');
+	  var isuCd = FormManager.getActualValue('isuCd');
+	  var clientTier = FormManager.getActualValue('clientTier');
+	  var isic= FormManager.getActualValue('isicCd');
+	  var isicList= new Set([ '7230','7240','7290','7210', '7221', '7229' ]);
+	  if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XINTR' || custSubGrp == 'XINSO' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
+	    if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
+	      FormManager.setValue('clientTier', 'N');
+	    } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
+	      FormManager.setValue('clientTier', 'S');
+	    }
+	  }
+	}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -1835,5 +1858,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   
 });
