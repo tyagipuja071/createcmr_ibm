@@ -991,18 +991,18 @@ public class CEETransformer extends EMEATransformer {
       }
 
       // CMR-2279:ISR set based on SBO
-      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-
-        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-        PreparedQuery q = new PreparedQuery(entityManager, sql);
-        q.setParameter("SBO", data.getSalesBusOffCd());
-        q.setParameter("CNTRY", data.getCmrIssuingCntry());
-        String isr = q.getSingleResult(String.class);
-        if (!StringUtils.isBlank(isr)) {
-          legacyCust.setSalesRepNo(isr);
-          cmrObjects.getData().setRepTeamMemberNo(isr);
-        }
-      }
+//      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+//
+//        String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
+//        PreparedQuery q = new PreparedQuery(entityManager, sql);
+//        q.setParameter("SBO", data.getSalesBusOffCd());
+//        q.setParameter("CNTRY", data.getCmrIssuingCntry());
+//        String isr = q.getSingleResult(String.class);
+//        if (!StringUtils.isBlank(isr)) {
+//          legacyCust.setSalesRepNo(isr);
+//          cmrObjects.getData().setRepTeamMemberNo(isr);
+//        }
+//      }
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
@@ -1176,14 +1176,14 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      if ("@".equals(muData.getRepTeamMemberNo())) {
-        cust.setSalesRepNo("");
-        cust.setSalesGroupRep("");
-      } else {
-        cust.setSalesRepNo(muData.getRepTeamMemberNo());
-        cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+        if ("@".equals(muData.getRepTeamMemberNo())) {
+          cust.setSalesRepNo("");
+          cust.setSalesGroupRep("");
+        } else {
+          cust.setSalesRepNo(muData.getRepTeamMemberNo());
+          cust.setSalesGroupRep(muData.getRepTeamMemberNo());
+        }
       }
-    }
 
     if (!cust.getId().getCustomerNo().startsWith("99") && !StringUtils.isBlank(muData.getCompany())) {
         if ("@".equals(muData.getCompany())) {
