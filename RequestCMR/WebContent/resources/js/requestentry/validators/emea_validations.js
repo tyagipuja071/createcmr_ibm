@@ -4150,7 +4150,10 @@ function addShippingAddrTypeValidator() {
 }
 
 function convertToUpperCaseGR(cntry, addressMode, saving) {
-  var custType = FormManager.getActualValue('custGrp');
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
+    return;
+  }
+    var custType = FormManager.getActualValue('custGrp');
 
   // for cross border
   if (custType == 'CROSS') {
@@ -4329,14 +4332,8 @@ function disableAddrFieldsGR() {
     FormManager.disable('custPhone');
   }
 
-  if (FormManager.getActualValue('addrType') != 'ZP01') {
-    FormManager.setValue('taxOffice', '');
-    FormManager.disable('taxOffice');
-  } else {
-    FormManager.enable('taxOffice');
-  }
-
-  if (FormManager.getActualValue('addrType') == 'ZP01' || FormManager.getActualValue('addrType') == 'ZS01') {
+  if (FormManager.getActualValue('addrType') == 'ZP01'
+      || FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.enable('poBox');
   } else {
     FormManager.setValue('poBox', '');
