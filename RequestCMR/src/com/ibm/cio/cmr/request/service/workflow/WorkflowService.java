@@ -24,7 +24,6 @@ import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.StatusTrans;
-import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.model.workflow.WorkflowRequestsModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -48,8 +47,8 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
   }
 
   @Override
-  protected void performTransaction(WorkflowRequestsModel model, EntityManager entityManager, HttpServletRequest request) throws CmrException,
-      SQLException {
+  protected void performTransaction(WorkflowRequestsModel model, EntityManager entityManager, HttpServletRequest request)
+      throws CmrException, SQLException {
     String action = model.getAction();
 
     if ("CLAIM".equals(action) || "REPROCESS".equals(action)) {
@@ -208,7 +207,7 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
       WorkflowRequestsModel workflowRequestsModel = null;
 
       Admin a = null;
-      WfHist hist = null;
+      // WfHist hist = null;
       Data data = null;
       String status = null;
       String reqType = null;
@@ -219,12 +218,12 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
       String canClaim = null;
       String canClaimAll = null;
       String typeDesc = null;
-      // String rejectReason=null;
+      String rejectReason = null;
       String pendingAppr = null;
       if (rs != null) {
         for (CompoundEntity entity : rs) {
           a = entity.getEntity(Admin.class);
-          hist = entity.getEntity(WfHist.class);
+          // hist = entity.getEntity(WfHist.class);
           data = entity.getEntity(Data.class);
           status = (String) entity.getValue("OVERALL_STATUS");
           reqType = (String) entity.getValue("REQ_TYPE_TEXT");
@@ -236,16 +235,14 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
           canClaimAll = (String) entity.getValue("CAN_CLAIM_ALL");
           typeDesc = (String) entity.getValue("TYPE_DESCRIPTION");
           pendingAppr = (String) entity.getValue("PENDING_APPROVALS");
-          // rejectReason=(String)entity.getValue("REJ_REASON");
+          rejectReason = (String) entity.getValue("REJ_REASON");
           workflowRequestsModel = new WorkflowRequestsModel();
           if (a != null) {
             copyValuesFromEntity(a, workflowRequestsModel);
             workflowRequestsModel.setCustName(concat(a.getMainCustNm1(), a.getMainCustNm2()));
           }
 
-          if (hist != null) {
-            workflowRequestsModel.setRejectReason(hist.getRejReason());
-          }
+          workflowRequestsModel.setRejectReason(rejectReason);
 
           if (data != null) {
             workflowRequestsModel.setCmrNo(data.getCmrNo());
