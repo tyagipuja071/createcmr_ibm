@@ -1186,14 +1186,10 @@ function forceLockScenariosSpain() {
   } else if (custSubGroup == 'BUSPR') {
     fieldsToDisable.push('isuCd');
     fieldsToDisable.push('clientTier');
-    FormManager.readOnly('custClassCode');
-    fieldsToDisable.push('custClassCode');
-    FormManager.readOnly('vat');
-    fieldsToDisable.push('vat');
-    FormManager.readOnly('inacCd');
+    fieldsToDisable.push('enterprise');
     fieldsToDisable.push('inacCd');
-    FormManager.readOnly('repTeamMemberNo');
     fieldsToDisable.push('repTeamMemberNo');
+    //fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
@@ -1233,14 +1229,10 @@ function forceLockScenariosSpain() {
     // fieldsToDisable.push(('locationNumber'));
     fieldsToDisable.push(('isuCd'));
     fieldsToDisable.push('clientTier');
-    FormManager.readOnly('custClassCode');
-    fieldsToDisable.push('custClassCode');
-    FormManager.readOnly('vat');
-    fieldsToDisable.push('vat');
-    FormManager.readOnly('inacCd');
+    fieldsToDisable.push('enterprise');
     fieldsToDisable.push('inacCd');
-    FormManager.readOnly('repTeamMemberNo');
     fieldsToDisable.push('repTeamMemberNo');
+    //fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'XINSO') {
     fieldsToDisable.push('isicCd');
@@ -1888,6 +1880,21 @@ function setFieldsCharForScenarios(){
         if(custSubGroup == 'INTSO'){
             FormManager.setValue('inacCd','');	
 //            FormManager.setValue('custClass','85')
+            }
+        if(custSubGroup == 'COMME'){
+        	//FormManager.setValue('custClass','11');
+            }
+        if(custSubGroup == 'BUSPR'){
+        	//FormManager.setValue('custClass','45');
+        	FormManager.setValue('inacCd','');
+        	FormManager.setValue('repTeamMemberNo','1Ficti');
+        	FormManager.setValue('enterprise','');
+            }
+        if(custSubGroup == 'XBP'){
+            //FormManager.setValue('custClass','45');
+        	FormManager.setValue('inacCd','');
+        	FormManager.setValue('repTeamMemberNo','1Ficti');
+        	FormManager.setValue('enterprise','');
             }
         
 }
