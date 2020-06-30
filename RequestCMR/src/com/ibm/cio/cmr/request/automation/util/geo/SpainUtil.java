@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +21,8 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
 /**
  * {@link AutomationUtil} for Spain specific validations
@@ -29,9 +32,11 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 public class SpainUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(SpainUtil.class);
-  private static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
-  private static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
-  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
+  public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
+  public static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
+  public static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
+  public static final String SCENARIO_INTERNAL = "INTER";
+  public static final String SCENARIO_INTERNAL_SO = "INTSO";
 
 
   @Override
@@ -69,4 +74,30 @@ public class SpainUtil extends AutomationUtil {
   protected List<String> getCountryLegalEndings() {
     return Arrays.asList("SL","S.L.","S.A.","SLL","SA","LTD","SOCIEDAD LIMITADA","SLP","S.C.C.L.","SLU","SAU","S.A.U","C.B.","S.E.E.");
   }
+  
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+	      MatchingResponse<DuplicateCMRCheckResponse> response) {
+	 String[] scenariosToBeChecked = {"THDIG","GOVIG","XIGS","IGSGS"};
+	  String scenario = requestData.getData().getCustSubGrp();
+	  String[] sboValuesToCheck = {"109", "209","309"};
+	  if(Arrays.asList(scenariosToBeChecked).contains(scenario)){
+		  List<DuplicateCMRCheckResponse> matches = response.getMatches();
+		  List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();		  
+		  for(DuplicateCMRCheckResponse match : matches){
+			  if(StringUtils.isNotBlank(match.getSortl())){
+				  String sortl = match.getSortl().length() > 3 ? match.getSortl().substring(0, 3) : match.getSortl();
+				  if(!Arrays.asList(sboValuesToCheck).contains(sortl)){
+					  filteredMatches.add(match);
+				  }
+			  }
+			 
+		  }  		  
+		 // set filtered matches in response
+		  if(!filteredMatches.isEmpty()){
+		  response.setMatches(filteredMatches);
+		  }
+	  }
+	  
+	  }
 }
