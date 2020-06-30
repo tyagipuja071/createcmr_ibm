@@ -8499,6 +8499,19 @@ function filterCmrnoForTR(){
      });
 }
 
+function disableSitePartyIdTR(){
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    FormManager.setValue('sitePartyId', '');
+  }
+  FormManager.resetValidations('sitePartyId');
+  FormManager.readOnly('sitePartyId');
+}
+
+function afterConfigForTR(){
+  disableSitePartyIdTR();
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8608,6 +8621,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(controlFieldsBySubScenarioTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(filterCmrnoForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(filterCmrnoForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
