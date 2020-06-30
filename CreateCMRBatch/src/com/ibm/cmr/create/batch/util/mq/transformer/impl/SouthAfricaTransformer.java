@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -10,9 +11,12 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -41,6 +45,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
     Map<String, String> messageHash = handler.messageHash;
     messageHash.put("MarketingResponseCode", "2");
     messageHash.put("CEdivision", "2");
+    messageHash.put("CurrencyCode", "SA");
+
   }
 
   @Override
@@ -137,21 +143,63 @@ public class SouthAfricaTransformer extends MCOTransformer {
   public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
       CMRRequestContainer cmrObjects) {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
-    cmrObjects.getData().setUser("");
+    Data data = cmrObjects.getData();
+    Admin admin = cmrObjects.getAdmin();
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      String custSubGrp = data.getCustSubGrp();
+      String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
+
+      boolean isBusPr = Arrays.asList(busPrSubGrp).contains(custSubGrp);
+
+      if (isBusPr) {
+        legacyCust.setAuthRemarketerInd("Y");
+      } else {
+        legacyCust.setAuthRemarketerInd("N");
+      }
+
+      legacyCust.setCeDivision(dummyHandler.messageHash.get("CEdivision"));
+      legacyCust.setCurrencyCd(dummyHandler.messageHash.get("CurrencyCode"));
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+
+    }
 
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
         legacyCust.setTelNoOrVat(addr.getCustPhone());
       }
     }
+
+    legacyCust.setAbbrevNm(data.getAbbrevNm());
+    legacyCust.setLangCd("1");
+    legacyCust.setMrcCd("2");
+    cmrObjects.getData().setUser("");
+  }
+
+  @Override
+  public boolean hasCmrtCustExt() {
+    return true;
+  }
+
+  @Override
+  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+      CMRRequestContainer cmrObjects) {
+    Admin admin = cmrObjects.getAdmin();
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      legacyCustExt.setTeleCovRep("3100");
+    }
   }
 
   @Override
   public void generateCMRNoByLegacy(EntityManager entityManager, GenerateCMRNoRequest generateCMRNoObj, CMRRequestContainer cmrObjects) {
+    LOG.debug("Set max and min range For ZA...");
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
-    LOG.debug("Set max and min range For ZA...");
-    if (custSubGrp != null && "INTER".equals(custSubGrp) || custSubGrp != null && "ZAXIN".equals(custSubGrp)) {
+    String[] interalSubGrp = { "ZAXIN", "NAXIN", "LSXIN", "SZXIN", "ZAINT", "NAINT", "LSINT", "SZINT" };
+    boolean isInternal = Arrays.asList(interalSubGrp).contains(custSubGrp);
+
+    if (isInternal) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
