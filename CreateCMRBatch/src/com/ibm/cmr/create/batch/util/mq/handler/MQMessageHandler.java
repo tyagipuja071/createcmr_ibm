@@ -470,6 +470,7 @@ public abstract class MQMessageHandler {
       data.setCreateTs(SystemUtil.getCurrentTimestamp());
       this.entityManager.persist(data);
       this.entityManager.flush();
+      LOG.debug("XML content saved to database..");
     } catch (Exception e) {
       LOG.debug("Cannot save XML to DB.", e);
     }
