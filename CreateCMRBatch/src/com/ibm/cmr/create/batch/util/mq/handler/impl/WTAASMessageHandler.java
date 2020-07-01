@@ -184,7 +184,8 @@ public class WTAASMessageHandler extends MQMessageHandler {
      * && "Y".equals(this.adminData.getProspLegalInd())) {
      * this.messageHash.put("CustNo", ""); } else
      */
-    if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0 && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
+    if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
+        && !StringUtils.isEmpty(this.cmrData.getCmrNo())) {
       LOG.debug("Setting CMR No to user supplied value: " + this.cmrData.getCmrNo());
       this.messageHash.put("CustNo", this.cmrData.getCmrNo());
     } else if (MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()) && lastSequence == 0
@@ -270,20 +271,18 @@ public class WTAASMessageHandler extends MQMessageHandler {
     AttributesPerLineOutputter xmlOutputter = new AttributesPerLineOutputter(1);
     xmlOutputter.omitDeclaration(true);
 
-    if (LOG.isTraceEnabled()) {
-      StringWriter sw = new StringWriter();
-      try {
-        xmlOutputter.output(document, sw);
+    StringWriter sw = new StringWriter();
+    try {
+      xmlOutputter.output(document, sw);
 
-        String xmlTemp = sw.toString();
+      String xmlTemp = sw.toString();
 
-        xmlTemp = StringEscapeUtils.unescapeXml(xmlTemp);
-        saveXmlContentToDB(sw.toString(), fileName, this.mqIntfReqQueue.getId().getQueryReqId());
+      xmlTemp = StringEscapeUtils.unescapeXml(xmlTemp);
+      saveXmlContentToDB(sw.toString(), fileName, this.mqIntfReqQueue.getId().getQueryReqId());
 
-        LOG.trace(xmlTemp);
-      } finally {
-        sw.close();
-      }
+      LOG.trace(xmlTemp);
+    } finally {
+      sw.close();
     }
 
     try {
@@ -375,16 +374,14 @@ public class WTAASMessageHandler extends MQMessageHandler {
           }
         }
 
-        if (LOG.isTraceEnabled()) {
-          StringWriter sw = new StringWriter();
-          try {
-            LOG.trace("Reply XML: ");
-            xmlOutputter.output(document, sw);
-            saveXmlContentToDB(sw.toString(), outXml.getName(), this.mqIntfReqQueue.getId().getQueryReqId());
-            LOG.trace(sw.toString());
-          } finally {
-            sw.close();
-          }
+        StringWriter sw = new StringWriter();
+        try {
+          LOG.trace("Reply XML: ");
+          xmlOutputter.output(document, sw);
+          saveXmlContentToDB(sw.toString(), outXml.getName(), this.mqIntfReqQueue.getId().getQueryReqId());
+          LOG.trace(sw.toString());
+        } finally {
+          sw.close();
         }
         processReply(reply);
       } else {
@@ -449,9 +446,8 @@ public class WTAASMessageHandler extends MQMessageHandler {
             this.mqIntfReqQueue.setRefnSourceCd(reply.getSourceCode());
           }
 
-          if ((lastSequence == 1 && MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()))
-              || (!StringUtils.isEmpty(cmrNo) && StringUtils.isEmpty(this.mqIntfReqQueue.getCmrNo()) && MQMsgConstants.REQ_TYPE_CREATE
-                  .equals(this.mqIntfReqQueue.getReqType()))) {
+          if ((lastSequence == 1 && MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType())) || (!StringUtils.isEmpty(cmrNo)
+              && StringUtils.isEmpty(this.mqIntfReqQueue.getCmrNo()) && MQMsgConstants.REQ_TYPE_CREATE.equals(this.mqIntfReqQueue.getReqType()))) {
             // this is the first message after create, update CMR No and create
             // comment
             LOG.debug("Processing CMR No. from reply :  " + cmrNo);
