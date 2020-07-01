@@ -89,10 +89,10 @@ public class TrimListener {
       return value;
     }
     try {
-      String cleaned = StringUtils.replace(value, "�", "'");
-      cleaned = StringUtils.replace(cleaned, "�", "'");
-      cleaned = StringUtils.replace(cleaned, "�", "\"");
-      cleaned = StringUtils.replace(cleaned, "�", "\"");
+      String cleaned = StringUtils.replace(value, "“", "'");
+      cleaned = StringUtils.replace(cleaned, "”", "'");
+      cleaned = StringUtils.replace(cleaned, "‘", "\"");
+      cleaned = StringUtils.replace(cleaned, "’", "\"");
       return cleaned;
     } catch (Exception e) {
       return value;
