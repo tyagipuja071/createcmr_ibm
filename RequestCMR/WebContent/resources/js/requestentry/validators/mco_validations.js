@@ -181,24 +181,6 @@ function afterConfigForPT() {
 
 }
 
-function cmrNoValidatorPT(){
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var cmrNo = FormManager.getActualValue('cmrNo');
-        var cmrNoRegEx = /^[0-9]*$/;
-        if ((cntry == '822') && cmrNo != '' && cmrNoRegEx.test(cmrNo)) {
-          return new ValidationResult(null, true);
-        } else if (cmrNo != undefined && cmrNo != '') {
-          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
 function addAddressTypeValidator() {
   console.log("addAddressTypeValidator for 822, 838..........");
   FormManager.addFormValidator((function() {
@@ -1815,6 +1797,27 @@ function isuAndCtcBasedOnISIC(){
   }
 }
 
+function cmrNoValidatorForInternalSO() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo').substring(0, 3);
+        var requestType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (requestType != 'C') {
+          return;
+        }
+        if ((cmrNo == '997') && (custSubGrp == 'INTSO' || custSubGrp == 'CRISO')) {
+          return new ValidationResult(null, true);
+        } else if (cmrNo != undefined && cmrNo != '997' && (custSubGrp == 'INTSO' || custSubGrp == 'CRISO')) {
+          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 997.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function addMailingConditionValidator() {
   FormManager.addFormValidator((function() {
     return {
@@ -1913,6 +1916,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.registerValidator(cmrNoValidatorPT, [ SysLoc.PORTUGAL ], null, true);
+  GEOHandler.registerValidator(cmrNoValidatorForInternalSO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
 
 });
