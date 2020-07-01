@@ -3449,25 +3449,6 @@ function addTRAddressTypeValidator() {
                 }
               }
             }
-            // Valid Turkish for ZP01 when
-            // 1:Sub scenario is local for create request
-            // 2:Land country is TR for update request
-            if (type == 'ZP01' && (custType == 'LOCAL' || (cmr.currentRequestType == 'U' && record['landCntry'][0] == 'TR'))) {
-              for (var j = 0; j < compareFieldsLocal.length; j++) {
-                var value = record[compareFieldsLocal[j]];
-                if (typeof (value) == 'object') {
-                  value = value[0];
-                }
-                if (value != null && value != undefined && value != '' && typeof (value) == 'string') {
-                  if (value != value.match(/^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)) {
-                    // return new ValidationResult(null, false, addrTypeText + '
-                    // must be in Turkish.');
-                    turkishErrMsg += addrTypeText + ', ';
-                    break;
-                  }
-                }
-              }
-            }
             if (type == 'ZS01') {
               zs01Cnt++;
               zs01Copy = record;
@@ -3487,12 +3468,6 @@ function addTRAddressTypeValidator() {
             return new ValidationResult(null, false, enErrMsg);
           }
 
-          if (turkishErrMsg != '') {
-            turkishErrMsg = turkishErrMsg.substring(0, turkishErrMsg.lastIndexOf(','));
-            turkishErrMsg += ' must be in Turkish.';
-            return new ValidationResult(null, false, turkishErrMsg);
-          }
-
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
             return new ValidationResult(null, false, 'Sold-To/Ship-To/Install-At/Local Language Translation of Sold-To are mandatory.');
           } else if (zs01Cnt > 1) {
@@ -3506,25 +3481,28 @@ function addTRAddressTypeValidator() {
             if (custType == 'CROSS' || (cmr.currentRequestType == 'U' && zp01Copy['landCntry'][0] != 'TR')) {
               if (zs01Copy[compareFields[i]][0] != zp01Copy[compareFields[i]][0]) {
                 mismatchErrMsg += mappingAddressField(compareFields[i]) + ', ';
-                // return new ValidationResult(null, false, 'Sold-to mismatch,
-                // please update
-                // Language translation of Sold-to: ' +
-                // mappingAddressField(compareFields[i]));
               }
             } else if (custType == 'LOCAL' || (cmr.currentRequestType == 'U' && zp01Copy['landCntry'][0] == 'TR')) {
-              if (modifyCharForTurk(zp01Copy[compareFields[i]][0]) != zs01Copy[compareFields[i]][0]) {
+              if((zs01Copy[compareFields[i]] == '' || zs01Copy[compareFields[i]] == null || zs01Copy[compareFields[i]] == undefined)
+                && (zp01Copy[compareFields[i]] != '' && zp01Copy[compareFields[i]] != null && zp01Copy[compareFields[i]] != undefined)){
                 mismatchErrMsg += mappingAddressField(compareFields[i]) + ', ';
-                // return new ValidationResult(null, false, 'Sold-to mismatch,
-                // please update
-                // Language translation of Sold-to: ' +
-                // mappingAddressField(compareFields[i]));
               }
+              if((zp01Copy[compareFields[i]] == '' || zp01Copy[compareFields[i]] == null || zp01Copy[compareFields[i]] == undefined)
+                && (zs01Copy[compareFields[i]] != '' && zs01Copy[compareFields[i]] != null && zs01Copy[compareFields[i]] != undefined)){
+                mismatchErrMsg += mappingAddressField(compareFields[i]) + ', ';
+              } 
             }
           }
 
           if (mismatchErrMsg != '') {
             mismatchErrMsg = mismatchErrMsg.substring(0, mismatchErrMsg.lastIndexOf(','));
             return new ValidationResult(null, false, 'Sold-to mismatch, please update Language translation of Sold-to: ' + mismatchErrMsg);
+          }
+          
+          if(cmr.currentRequestType == 'U' && zs01Copy.importInd[0] == 'Y' && zp01Copy.importInd[0] == 'Y'){
+            if(zs01Copy.updateInd[0] != zp01Copy.updateInd[0]){
+              return new ValidationResult(null, false, 'If Sold-To is updated, Local Language Translation of Sold-To must be updated and vice versa');
+            }
           }
 
           return new ValidationResult(null, true);
@@ -8661,7 +8639,8 @@ function turkish(input) {
   if (!value || value == '' || value.length == 0) {
     return true;
   }
-  //var reg = /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
+  // var reg =
+  // /^[0-9ABDEFHJ-NPQRTV-Zabdefhj-npqrtv-zÇçĞğİıÖöŞşÜü\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/;
   var reg = /[a-zA-Z0-9ğüşöçİĞÜŞÖÇ]+/;
   if (!value.match(reg)) {
     return new ValidationResult(input, false, '{1} is not a valid value for {0}. Please enter turkish characters only.');
