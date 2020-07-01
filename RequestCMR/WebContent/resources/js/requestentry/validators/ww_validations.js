@@ -643,6 +643,47 @@ function addINACValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function cmrNoValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cmrNoRegEx = /^[0-9]*$/;
+        if (cmrNo == '000000') {
+          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed Except -> 000000');
+        } else if (cmrNo != '' && cmrNoRegEx.test(cmrNo)) {
+          return new ValidationResult(null, true);
+        } else if (cmrNo != undefined && cmrNo != '') {
+          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function cmrNoValidatorForInternalScenario() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo').substring(0, 2);
+        var requestType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (requestType != 'C') {
+          return;
+        }
+        if ((cmrNo == '99') && (custSubGrp == 'INTER' || custSubGrp == 'CRINT')) {
+          return new ValidationResult(null, true);
+        } else if (cmrNo != undefined && cmrNo != '99' && (custSubGrp == 'INTER' || custSubGrp == 'CRINT')) {
+          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 99.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -693,6 +734,10 @@ dojo.addOnLoad(function() {
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
+  
+  //For Legacy PT,CY,GR 
+  GEOHandler.registerValidator(cmrNoValidator, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(cmrNoValidatorForInternalScenario, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic

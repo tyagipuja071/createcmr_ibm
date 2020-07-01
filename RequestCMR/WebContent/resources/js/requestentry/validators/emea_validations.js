@@ -3819,6 +3819,8 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
      FormManager.setValue('inacCd', origInac);
      FormManager.setValue('enterprise', origEnterprise);
    }
+ } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' ) {
+   FormManager.setValue('inacCd', '');
  }
 }
 
