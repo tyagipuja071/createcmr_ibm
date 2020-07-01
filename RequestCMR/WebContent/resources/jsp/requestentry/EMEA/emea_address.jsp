@@ -84,7 +84,7 @@
       <a class="translate" href="javascript: cmr.openTranslateWindow('iw','en', ['custNm1', 'addrTxt', 'poBox', 'city1', 'dept'])" >to English</a>
     </p>
   </cmr:column>
-  <cmr:column span="2" forCountry="726">
+  <cmr:column span="2" forCountry="726,666">
     <p>
     <cmr:label fieldId="custNm4">
       <cmr:fieldLabel fieldId="CustomerName4" />: 
