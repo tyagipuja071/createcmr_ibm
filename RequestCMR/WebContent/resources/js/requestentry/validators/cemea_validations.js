@@ -1088,28 +1088,36 @@ function setSBO2(dupSalesRepNo) {
 }
 
 /**
- * CEEME - show CoF field for BP and COM scenarios only
+ * CEEME - show CoF field for Update req and LOB=IGF and reason=COPT
  */
 function setCommercialFinanced() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
-    return;
+	  return;
   }
-
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp != null && (custSubGrp.includes('COM') || custSubGrp.includes('BP') || custSubGrp.includes('BUSPR'))) {
-    FormManager.show('CommercialFinanced', 'commercialFinanced');
-  } else {
-    FormManager.clearValue('commercialFinanced');
-    FormManager.hide('CommercialFinanced', 'commercialFinanced');
-  }
+  processCoF();
+  dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+	  processCoF();
+  });
+  dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
+	  processCoF(); 
+  });
 }
 
+function processCoF(){
+	  var reqType = FormManager.getActualValue('reqType');
+	  var lob= FormManager.getActualValue('requestingLob');
+	  var reason = FormManager.getActualValue('reqReason');
+	  if(reqType == 'U'){
+		  FormManager.show('CommercialFinanced', 'commercialFinanced');
+		  if(lob =='IGF' && reason=='COPT'){
+			  FormManager.enable('commercialFinanced');
+		  }else{
+			  FormManager.readOnly('commercialFinanced');
+		  }
+	  }else {
+		  FormManager.hide('CommercialFinanced', 'commercialFinanced');
+	  }
+}
 /**
  * CEEME - show TeleCoverageRep for GBM and SBM scenarios
  */
