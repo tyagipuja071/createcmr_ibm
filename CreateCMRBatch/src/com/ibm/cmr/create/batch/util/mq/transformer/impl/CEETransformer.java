@@ -424,7 +424,66 @@ public class CEETransformer extends EMEATransformer {
     if ("695".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "KG";
     }
-
+    if ("707".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "CS";
+      }
+    if ("358".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "AZ";
+        }
+    if ("359".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "TM";
+        }
+    if ("363".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "TJ";
+        }
+    if ("603".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "AL";
+        }
+    if ("607".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "AM";
+        }
+    if ("626".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "BY";
+        }
+    if ("644".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "BG";
+        }
+    if ("651".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "GE";
+        }
+    if ("694".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "KZ";
+        }
+    if ("699".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "BA";
+        }
+    if ("705".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "MK";
+        }
+    if ("708".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "SI";
+        }
+    if ("740".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "HU";
+        }
+    if ("741".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "UZ";
+        }
+    if ("787".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "MD";
+        }
+    if ("820".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "PL";
+        }
+    if ("821".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "RU";
+        }
+    if ("826".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "RO";
+        }
+    if ("889".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "UA";
+        }
   }
 
   /**
@@ -1136,7 +1195,7 @@ public class CEETransformer extends EMEATransformer {
         cust.setAbbrevNm(muData.getAbbrevNm());
       }
     }
-
+    
     // use svcArOffice to store custLang
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
       cust.setLangCd(muData.getSvcArOffice());
@@ -1198,7 +1257,15 @@ public class CEETransformer extends EMEATransformer {
           cust.setSalesGroupRep(muData.getRepTeamMemberNo());
         }
       }
-
+    
+    if (!StringUtils.isBlank(muData.getCustNm2())) {
+        if ("@".equals(muData.getCustNm2())) {
+          cust.setCeBo("");
+        } else {
+          cust.setCeBo(muData.getCustNm2());
+        }
+    }
+    
     if (!cust.getId().getCustomerNo().startsWith("99") && !StringUtils.isBlank(muData.getCompany())) {
         if ("@".equals(muData.getCompany())) {
           cust.setEnterpriseNo("");

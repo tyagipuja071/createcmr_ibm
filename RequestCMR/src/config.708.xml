@@ -1,4 +1,4 @@
-<template id="693" for="UPDATE">
+<template id="708" for="UPDATE">
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
@@ -75,7 +75,7 @@
 					<dbColumn>ENTERPRISE</dbColumn>
 					<width>15</width>
 					<length>6</length>
-				</column>				
+				</column>	
 				<column>
 					<label>Order block code</label>
 					<dbColumn>ORD_BLK</dbColumn>
@@ -93,18 +93,6 @@
 					<dbColumn>VAT</dbColumn>
 					<width>5</width>
 					<length>20</length>
-				</column>
-				<column>
-					<label>IČO</label>
-					<dbColumn>NEW_ENTP_NAME1</dbColumn>
-					<width>10</width>
-					<length>8</length>
-				</column>
-				<column>
-					<label>DIČ</label>
-					<dbColumn>EMAIL2</dbColumn>
-					<width>10</width>
-					<length>12</length>
 				</column>
 				<column>
 					<label>Collection Code</label>
@@ -512,10 +500,17 @@
 					<length>24</length>
 				</column>
 				<column>
-					<label>Country Name in local language</label>
+					<label>Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column>
+					<label>Hardware Master</label>
+					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
+					<width>10</width>
+					<length>1</length>
+					<lovId>HwInstlMasterFlag</lovId>
 				</column>
 			</columns>
 		</tab>
