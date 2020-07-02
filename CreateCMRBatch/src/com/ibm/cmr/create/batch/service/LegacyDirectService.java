@@ -699,6 +699,7 @@ public class LegacyDirectService extends TransConnService {
           LOG.debug("Customer record doesn't exists on legacy DB so cannot be reactivated." + massUpdt.getCmrNo());
           addError(" Mass Reactivation Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
         }
+        updateEntity(massUpdt, entityManager);
       }
     } else {
       LOG.debug("No record found for processing with READY status");
@@ -766,6 +767,7 @@ public class LegacyDirectService extends TransConnService {
           LOG.debug("Customer record doesn't exists on legacy DB so cannot be inactivated." + massUpdt.getCmrNo());
           addError(" Mass Inactivation Request " + admin.getId().getReqId() + " Error: " + e.getMessage());
         }
+        updateEntity(massUpdt, entityManager);
       }
     } else {
       LOG.debug("No record found for processing with READY status");
@@ -3206,6 +3208,7 @@ public class LegacyDirectService extends TransConnService {
           LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
               + massUpdt.getId().getSeqNo() + "]");
           updateEntity(massUpdt, entityManager);
+          updateEntity(cust, entityManager);
         }
       }
       String resultCode = response.getStatus();
