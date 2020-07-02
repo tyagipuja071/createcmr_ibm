@@ -200,6 +200,7 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   private String func;
 
+  @Column(name="\"USER\"")
   private String user;
 
   private String loc;
