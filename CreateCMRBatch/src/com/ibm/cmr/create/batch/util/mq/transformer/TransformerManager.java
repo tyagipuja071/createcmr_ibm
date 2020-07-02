@@ -200,6 +200,7 @@ public class TransformerManager {
     // CEE - LD
     addTransformer(new CEETransformer(SystemLocation.SLOVAKIA));
     addTransformer(new CEETransformer(SystemLocation.KYRGYZSTAN));
+    addTransformer(new CEETransformer(SystemLocation.SERBIA));
   }
 
   /**
