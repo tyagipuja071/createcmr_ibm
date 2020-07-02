@@ -517,7 +517,7 @@
         <div id="custNm4_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view forCountry="726" >
+    <cmr:view forCountry="726,666" >
       <cmr:column span="1">
         <cmr:label fieldId="custNm4_view">
           <span class="lbl-CustomerName4">${ui.custName4}</span>
