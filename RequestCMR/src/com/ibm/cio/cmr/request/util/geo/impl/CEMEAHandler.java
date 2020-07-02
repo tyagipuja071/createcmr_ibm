@@ -185,7 +185,6 @@ public class CEMEAHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
 
-            seqNo = record.getCmrAddrSeq();
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
@@ -270,8 +269,13 @@ public class CEMEAHandler extends BaseSOFHandler {
               }
             }
 
-          }
+            int parvmCount = getKnvpParvmCount(record.getCmrSapNumber());
+            System.out.println("parvmCount = " + parvmCount);
 
+            if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && (parvmCount > 1)) {
+              record.setCmrAddrTypeCode("ZS02");
+            }
+          }
         }
       } else {
 
