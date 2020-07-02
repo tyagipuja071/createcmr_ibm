@@ -85,16 +85,16 @@ public class SouthAfricaTransformer extends MCOTransformer {
     line4 = addrData.getAddrTxt();
 
     String streetContPoBox = addrData.getAddrTxt2();
-    if (StringUtils.isNotBlank(streetContPoBox)) {
+    if (StringUtils.isNotBlank(streetContPoBox) && StringUtils.isNotBlank(addrData.getPoBox())) {
       streetContPoBox += ",PO BOX " + addrData.getPoBox();
-    } else {
+    } else if (StringUtils.isBlank(streetContPoBox) && StringUtils.isNotBlank(addrData.getPoBox())) {
       streetContPoBox = "PO BOX " + addrData.getPoBox();
     }
 
     line5 = streetContPoBox;
 
     String cityPostalCode = addrData.getCity1();
-    if (StringUtils.isNotBlank(cityPostalCode)) {
+    if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(addrData.getPostCd())) {
       cityPostalCode += ", " + addrData.getPostCd();
     }
 
