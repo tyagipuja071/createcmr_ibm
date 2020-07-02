@@ -115,7 +115,13 @@ public class CEMEAHandler extends BaseSOFHandler {
   public static final List<String> CEMEA_CHECKLIST = Arrays.asList("358", "359", "363", "603", "607", "620", "626", "651", "675", "677", "680", "694",
       "695", "699", "705", "707", "713", "741", "752", "762", "767", "768", "772", "787", "805", "808", "821", "823", "832", "849", "850", "865",
       "889");
-  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA);
+	private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA,
+			SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA, SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN,
+			SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA, SystemLocation.BELARUS,
+			SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN,
+			SystemLocation.BOSNIA_AND_HERZEGOVINA, SystemLocation.MACEDONIA, SystemLocation.SLOVENIA,
+			SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA, SystemLocation.POLAND,
+			SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE);
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
