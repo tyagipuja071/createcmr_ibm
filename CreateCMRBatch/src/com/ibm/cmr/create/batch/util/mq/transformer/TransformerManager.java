@@ -175,7 +175,7 @@ public class TransformerManager {
     addTransformer(new CEMEATransformer(SystemLocation.ROMANIA));
     addTransformer(new CEMEATransformer(SystemLocation.RUSSIAN_FEDERATION));
     addTransformer(new CEMEATransformer(SystemLocation.SAUDI_ARABIA));
-    addTransformer(new CEMEATransformer(SystemLocation.SERBIA));
+//    addTransformer(new CEMEATransformer(SystemLocation.SERBIA));
     // addTransformer(new CEMEATransformer(SystemLocation.SLOVAKIA));
     addTransformer(new CEMEATransformer(SystemLocation.SLOVENIA));
     addTransformer(new CEMEATransformer(SystemLocation.SYRIAN_ARAB_REPUBLIC));
