@@ -424,7 +424,9 @@ public class CEETransformer extends EMEATransformer {
     if ("695".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "KG";
     }
-
+    if ("707".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "CS";
+      }
   }
 
   /**
@@ -1136,7 +1138,7 @@ public class CEETransformer extends EMEATransformer {
         cust.setAbbrevNm(muData.getAbbrevNm());
       }
     }
-
+    
     // use svcArOffice to store custLang
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
       cust.setLangCd(muData.getSvcArOffice());
@@ -1198,7 +1200,15 @@ public class CEETransformer extends EMEATransformer {
           cust.setSalesGroupRep(muData.getRepTeamMemberNo());
         }
       }
-
+    
+    if (!StringUtils.isBlank(muData.getCustNm2())) {
+        if ("@".equals(muData.getCustNm2())) {
+          cust.setCeBo("");
+        } else {
+          cust.setCeBo(muData.getCustNm2());
+        }
+    }
+    
     if (!cust.getId().getCustomerNo().startsWith("99") && !StringUtils.isBlank(muData.getCompany())) {
         if ("@".equals(muData.getCompany())) {
           cust.setEnterpriseNo("");
