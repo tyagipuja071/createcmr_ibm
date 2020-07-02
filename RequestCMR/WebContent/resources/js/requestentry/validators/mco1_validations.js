@@ -181,11 +181,9 @@ function addAddressTypeValidator() {
           if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
           } else if (zs01Cnt > 1) {
-            return new ValidationResult(null, false, 'Only one Billing address is allowed.');
-          } else if (zp01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-          } else if (zi01Cnt > 1) {
-            return new ValidationResult(null, false, 'Only one Installing address is allowed.');
+          } else if (zp01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Billing address is allowed.');
           } else if (zs02Cnt > 1) {
             return new ValidationResult(null, false, 'Only one EPL address is allowed.');
           }
@@ -629,22 +627,12 @@ function enterpriseValidation() {
 }
 
 function showDeptNoForInternalsOnly() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var subCustGrp = FormManager.getActualValue('custSubGrp');
-  var str = null;
-  if (subCustGrp != null && subCustGrp.length > 0) {
-    str = subCustGrp.toUpperCase();
-    str = str.substring(2, str.length);
-  }
-  if (str == 'INT' || str == 'XIN') {
-    checkAndAddValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ]);
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+  if (scenario != null && internalScenarios.includes(scenario)) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
     FormManager.clearValue('ibmDeptCostCenter');
-    FormManager.resetValidations('ibmDeptCostCenter');
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
 }
@@ -708,7 +696,25 @@ function addCityPostalCodeLengthValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
 
+function addCrossLandedCntryFormValidator() {
+  console.log("addCrossLandedCntryFormValidator..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (isCrossborderScenario && FormManager.getActualValue('addrType') == 'ZS01' && FormManager.getActualValue('landCntry') == 'ZA') {
+          return new ValidationResult(null, false, 'Landed Country value should not be \'South Africa - ZA\' for Cross-border customers.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function isCrossborderScenario() {
+  var custGroup = FormManager.getActualValue('custGrp').toUpperCase();
+  return crossScenarios.includes(custGroup);
 }
 
 function streetValidatorCustom() {
@@ -809,7 +815,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(showCOForIGFonly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(showCOForIGFonly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onChangeSubCustGroup, GEOHandler.MCO1);
-  GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO1);
 
@@ -832,5 +837,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addStreetContPoBoxLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCityPostalCodeLengthValidator, GEOHandler.MCO1, null, true);
-
+  GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
 });
