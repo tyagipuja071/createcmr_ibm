@@ -1101,11 +1101,13 @@ function setSBO(repTeamMemberNo) {
   if (FormManager.getActualValue('reqType') != 'C' && cntry != SysLoc.AUSTRIA) {
     return;
   }
-  
+
   // CEE cunrrently just for SK, if create req, set SBO as 000000, rep as
   // 0999998
   if (CEE_INCL.has(cntry) && FormManager.getActualValue('reqType') == 'C') {
-    FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
+    if (FormManager.getField('templatevalue-repTeamMemberNo') != undefined) {
+      FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
+    }
     FormManager.setValue('salesBusOffCd', '0000000');
     FormManager.setValue('repTeamMemberNo', '099998');
     return;
@@ -1509,7 +1511,6 @@ function phoneNoValidationOnChange() {
   });
 }
 
-
 function setEnterpriseValues(clientTier) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
@@ -1559,54 +1560,54 @@ function setEnterpriseValues(clientTier) {
 }
 
 function addCmrNoValidatorForCEE() {
-	  FormManager.addFormValidator((function() {
-	    return {
-	      validate : function() {
-	        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-	        var custSubType = FormManager.getActualValue('custSubGrp');
-	        var cmrNo = FormManager.getField('cmrNo').value;
-	         
-	        if (cmrNo != '' && cmrNo.length != 6) {
-	          return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
-	        } else if (isNaN(cmrNo)) {
-	          return new ValidationResult(null, false, 'CMR Number should be only numbers.');
-	        } else if (cmrNo == "000000") {
-	          return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-	        } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
-	          return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
-	        } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
-	          return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
-	        } else if (cmrNo != '' && custSubType != '' && cmrNo.startsWith('99')) {
-	          return new ValidationResult(null, false, 'CMR Number should be in 99XXXX for scenarios');
-	        } else {
-	          var qParams = {
-	            CMRNO : cmrNo,
-	            CNTRY : cntry,
-	            MANDT : cmr.MANDT
-	          };
-	          var results = cmr.query('GET.CMR.CEE', qParams);
-	          if (results.ret1 != null) {
-	            return new ValidationResult(null, false, 'The CMR Number already exists.');
-	          }
-	        }
-	        return new ValidationResult(null, true);
-	      }
-	    };
-	  })(), 'MAIN_IBM_TAB', 'frmCMR');
-	}
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var cmrNo = FormManager.getField('cmrNo').value;
 
-	function cmrNoEnableForCEE(){
-	  var role = FormManager.getActualValue('userRole').toUpperCase();
-	  var reqType = FormManager.getActualValue('reqType');
-	  var cmrNo = FormManager.getActualValue('cmrNo');
-	  
-	  if (role!="PROCESSOR" || FormManager.getActualValue('viewOnlyPage') == 'true') {
-	    FormManager.readOnly('cmrNo');
-	  }else{
-	    FormManager.enable('cmrNo');
-	  }
-	}
-	
+        if (cmrNo != '' && cmrNo.length != 6) {
+          return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+        } else if (isNaN(cmrNo)) {
+          return new ValidationResult(null, false, 'CMR Number should be only numbers.');
+        } else if (cmrNo == "000000") {
+          return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+        } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
+          return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
+        } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
+          return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
+        } else if (cmrNo != '' && custSubType != '' && cmrNo.startsWith('99')) {
+          return new ValidationResult(null, false, 'CMR Number should be in 99XXXX for scenarios');
+        } else {
+          var qParams = {
+            CMRNO : cmrNo,
+            CNTRY : cntry,
+            MANDT : cmr.MANDT
+          };
+          var results = cmr.query('GET.CMR.CEE', qParams);
+          if (results.ret1 != null) {
+            return new ValidationResult(null, false, 'The CMR Number already exists.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function cmrNoEnableForCEE() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrNo = FormManager.getActualValue('cmrNo');
+
+  if (role != "PROCESSOR" || FormManager.getActualValue('viewOnlyPage') == 'true') {
+    FormManager.readOnly('cmrNo');
+  } else {
+    FormManager.enable('cmrNo');
+  }
+}
+
 function setEnterprise2Values(dupClientTierCd) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -2869,6 +2870,22 @@ function similarAddrCheckValidator() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
+function filterCmrnoForCEE() {
+  var cmrNo = FormManager.getActualValue('cmrNo');
+  if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {
+    FormManager.setValue('cmrNo', '');
+  }
+
+  dojo.connect(FormManager.getField('cmrNo'), 'onChange', function(value) {
+    if (value.length > 0 && value.substr(0, 1).toUpperCase() == 'P') {
+      FormManager.setValue('cmrNo', '');
+    }
+  });
+}
+
+function afterConfigForCEE() {
+  filterCmrnoForCEE();
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
@@ -2877,6 +2894,7 @@ dojo.addOnLoad(function() {
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
   GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '603', '607', '620', '626', '651', '675', '677', '680', '694', '695', '699', '705', '707', '713', '741', '752', '762', '767', '768', '772',
       '787', '805', '808', '821', '823', '832', '849', '850', '865', '889' ];
+  GEOHandler.CEE = [ '693' ];
   console.log('adding CEMEA functions...');
   GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
   // GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy);
@@ -2910,7 +2928,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatRequired, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setPreferredLang, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatRequired, GEOHandler.CEMEA);
-//CMR-2101 Austria the func for Austria, setSBO also used by CEE countries
+  // CMR-2101 Austria the func for Austria, setSBO also used by CEE countries
   GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
@@ -2928,14 +2946,14 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA);
-  
+
   GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, [ SysLoc.SLOVAKIA ]);
-  
+
   GEOHandler.addAfterConfig(cmrNoEnableForCEE, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, [ SysLoc.SLOVAKIA ]);
-  GEOHandler.registerValidator(addCmrNoValidatorForCEE,[ SysLoc.SLOVAKIA ]);
-  
+  GEOHandler.registerValidator(addCmrNoValidatorForCEE, [ SysLoc.SLOVAKIA ]);
+
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
@@ -3015,4 +3033,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(validateSBO, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
+  // CEE
+  GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
 });

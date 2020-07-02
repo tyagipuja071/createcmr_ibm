@@ -110,9 +110,6 @@ public class EMEAHandler extends BaseSOFHandler {
   protected static final String[] GR_MASS_UPDATE_SHEET_NAMES = { "Local Lang translation Sold-to", "Sold To Address", "Ship To Address",
       "Install At Address" };
 
-  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
-      "Install At" };
-
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
     LANDED_CNTRY_MAP.put(SystemLocation.IRELAND, "IE");
@@ -3814,13 +3811,7 @@ public class EMEAHandler extends BaseSOFHandler {
       LOG.trace("validateTemplateDupFills for Greece");
       return;
     }
-
-    if (country.equals(SystemLocation.SLOVAKIA)) {
-      validateTemplateDupFillsCEE(validations, book, maxRows, country);
-      LOG.trace("validateTemplateDupFills for CEE countries");
-      return;
-    }
-
+        
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {

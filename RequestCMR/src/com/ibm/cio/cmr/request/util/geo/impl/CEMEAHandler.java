@@ -115,6 +115,13 @@ public class CEMEAHandler extends BaseSOFHandler {
   public static final List<String> CEMEA_CHECKLIST = Arrays.asList("358", "359", "363", "603", "607", "620", "626", "651", "675", "677", "680", "694",
       "695", "699", "705", "707", "713", "741", "752", "762", "767", "768", "772", "787", "805", "808", "821", "823", "832", "849", "850", "865",
       "889");
+	private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA,
+			SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA, SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN,
+			SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA, SystemLocation.BELARUS,
+			SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN,
+			SystemLocation.BOSNIA_AND_HERZEGOVINA, SystemLocation.MACEDONIA, SystemLocation.SLOVENIA,
+			SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA, SystemLocation.POLAND,
+			SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE);
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
@@ -128,6 +135,9 @@ public class CEMEAHandler extends BaseSOFHandler {
       "821", "363", "359", "741", "699", "704", "707", "707", "889", "668", "693", "787", "820", "358");
 
   private static final String[] CIS_DUPLICATE_COUNTRIES = { "607", "358", "626", "651", "694", "695", "787", "363", "359", "889", "741" };
+  
+  protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
+  "Install At" };
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
@@ -181,7 +191,6 @@ public class CEMEAHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
 
-            seqNo = record.getCmrAddrSeq();
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               addrType = record.getCmrAddrTypeCode();
@@ -266,8 +275,13 @@ public class CEMEAHandler extends BaseSOFHandler {
               }
             }
 
-          }
+            int parvmCount = getKnvpParvmCount(record.getCmrSapNumber());
+            System.out.println("parvmCount = " + parvmCount);
 
+            if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && (parvmCount > 1)) {
+              record.setCmrAddrTypeCode("ZS02");
+            }
+          }
         }
       } else {
 
@@ -1311,12 +1325,15 @@ public class CEMEAHandler extends BaseSOFHandler {
     /**
      * Austria support new template to mass update
      */
-    if ("618".equals(issuingCountry) || "693".equals(issuingCountry)) {
+    if ("618".equals(issuingCountry)) {
       return true;
-    }
+    } else if (CEE_COUNTRY_LIST.contains(issuingCountry)){
+      return true;
+    } 
     return false;
   }
 
+  
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
