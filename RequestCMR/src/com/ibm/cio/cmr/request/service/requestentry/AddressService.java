@@ -159,7 +159,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
         // update
         if (model.getAddrType().equals("ZP01")) {
-          newAddrSeq = "00002";
+          if ("C".equals(admin.getReqType())) {
+            newAddrSeq = "00001";
+          } else {
+            newAddrSeq = "00002";
+          }
           existAddTypeText = "Local Language Translation of Sold-To";
         }
         if (model.getAddrType().equals("ZD01")) {
@@ -173,7 +177,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
           existAddTypeText = "Ship-To";
         }
         if (model.getAddrType().equals("ZI01")) {
-          if (zi01cout == 0) {
+          boolean seq5Exist = seq5Exists(entityManager, model.getReqId());
+          if (!seq5Exist) {
             newAddrSeq = "00005";
           } else {
             newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
@@ -2039,6 +2044,18 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       address.setCity1(model.getCity1DrpDown());
       updateEntity(address, entityManager);
     }
+  }
+
+  private boolean seq5Exists(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_5");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      return true;
+    }
+    return false;
   }
 
   public String generateAddrSeqLD(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry, GEOHandler geoHandler) {
