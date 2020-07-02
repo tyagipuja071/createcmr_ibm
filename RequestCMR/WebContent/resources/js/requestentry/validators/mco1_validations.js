@@ -181,11 +181,9 @@ function addAddressTypeValidator() {
           if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
           } else if (zs01Cnt > 1) {
-            return new ValidationResult(null, false, 'Only one Billing address is allowed.');
-          } else if (zp01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-          } else if (zi01Cnt > 1) {
-            return new ValidationResult(null, false, 'Only one Installing address is allowed.');
+          } else if (zp01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Billing address is allowed.');
           } else if (zs02Cnt > 1) {
             return new ValidationResult(null, false, 'Only one EPL address is allowed.');
           }
@@ -708,7 +706,25 @@ function addCityPostalCodeLengthValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
 
+function addCrossLandedCntryFormValidator() {
+  console.log("addCrossLandedCntryFormValidator..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (isCrossborderScenario && FormManager.getActualValue('addrType') == 'ZS01' && FormManager.getActualValue('landCntry') == 'ZA') {
+          return new ValidationResult(null, false, 'Landed Country value should not be \'South Africa - ZA\' for Cross-border customers.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function isCrossborderScenario() {
+  var custGroup = FormManager.getActualValue('custGrp').toUpperCase();
+  return crossScenarios.includes(custGroup);
 }
 
 function streetValidatorCustom() {
@@ -832,5 +848,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addStreetContPoBoxLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCityPostalCodeLengthValidator, GEOHandler.MCO1, null, true);
-
+  GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
 });
