@@ -627,22 +627,12 @@ function enterpriseValidation() {
 }
 
 function showDeptNoForInternalsOnly() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var subCustGrp = FormManager.getActualValue('custSubGrp');
-  var str = null;
-  if (subCustGrp != null && subCustGrp.length > 0) {
-    str = subCustGrp.toUpperCase();
-    str = str.substring(2, str.length);
-  }
-  if (str == 'INT' || str == 'XIN') {
-    checkAndAddValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ]);
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+  if (scenario != null && internalScenarios.includes(scenario)) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
     FormManager.clearValue('ibmDeptCostCenter');
-    FormManager.resetValidations('ibmDeptCostCenter');
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
 }
@@ -825,7 +815,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(showCOForIGFonly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(showCOForIGFonly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onChangeSubCustGroup, GEOHandler.MCO1);
-  GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO1);
 
