@@ -105,7 +105,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
     long reqIdToUse = reqId;
     boolean newRequest = false;
 
-    updateDnbValues(entityManager, mainRecord);
+    // updateDnbValues(entityManager, mainRecord);
 
     GEOHandler converter = RequestUtils.getGEOHandler(reqModel.getCmrIssuingCntry());
 
