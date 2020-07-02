@@ -427,6 +427,63 @@ public class CEETransformer extends EMEATransformer {
     if ("707".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "CS";
       }
+    if ("358".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "AZ";
+        }
+    if ("359".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "TM";
+        }
+    if ("363".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "TJ";
+        }
+    if ("603".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "AL";
+        }
+    if ("607".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "AM";
+        }
+    if ("626".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "BY";
+        }
+    if ("644".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "BG";
+        }
+    if ("651".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "GE";
+        }
+    if ("694".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "KZ";
+        }
+    if ("699".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "BA";
+        }
+    if ("705".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "MK";
+        }
+    if ("708".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "SI";
+        }
+    if ("740".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "HU";
+        }
+    if ("741".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "UZ";
+        }
+    if ("787".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "MD";
+        }
+    if ("820".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "PL";
+        }
+    if ("821".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "RU";
+        }
+    if ("826".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "RO";
+        }
+    if ("889".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "UA";
+        }
   }
 
   /**
