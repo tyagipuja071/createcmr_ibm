@@ -211,9 +211,9 @@ function setAustriaUIFields() {
   }
   // FOR LOCAL CUSTOMER - Internal , Internal SO
   if (custType != null && custType != '' && custType == 'LOCAL' && custSubType != null && custSubType != '' && (custSubType == 'INTER' || custSubType == 'INTSO')) {
-	FormManager.resetValidations('inacCd');
-	FormManager.resetValidations('enterprise');
-	FormManager.setValue("vat", "");
+    FormManager.resetValidations('inacCd');
+    FormManager.resetValidations('enterprise');
+    FormManager.setValue("vat", "");
     FormManager.readOnly("vat");
     FormManager.setValue("salesBusOffCd", "000");
     FormManager.readOnly("salesBusOffCd");
@@ -1453,7 +1453,9 @@ function phoneNoValidationOnChange() {
 }
 
 function setEnterpriseValues(clientTier) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || FormManager.getActualValue('custSubGrp') == 'IBMEM') {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
+      || custSubGrp == 'INTSO') {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
