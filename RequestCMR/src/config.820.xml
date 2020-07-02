@@ -1,4 +1,4 @@
-<template id="695" for="UPDATE">
+<template id="820" for="UPDATE">
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
@@ -76,14 +76,6 @@
 					<width>15</width>
 					<length>6</length>
 				</column>	
-				
-				<column>
-					<label>Engineering BO</label>
-					<dbColumn>ENGINEERING_BO</dbColumn>
-					<width>15</width>
-					<length>6</length>					
-				</column>
-				
 				<column>
 					<label>Order block code</label>
 					<dbColumn>ORD_BLK</dbColumn>

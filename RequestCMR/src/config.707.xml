@@ -196,7 +196,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="Mail to" type="Address" typeCode="ZI01">
+		<tab name="Mail to" type="Address" typeCode="ZD01">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
@@ -391,7 +391,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="Install At" data="false" type="Address" typeCode="ZS02">
+		<tab name="Install At" data="false" type="Address" typeCode="ZI01">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
