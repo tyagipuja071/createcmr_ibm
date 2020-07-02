@@ -376,8 +376,8 @@ public class EMEAHandler extends BaseSOFHandler {
             }
 
           }
-          
-          if("862".equals(cmrIssueCd) && zi01count == 0){
+
+          if ("862".equals(cmrIssueCd) && zi01count == 0) {
             FindCMRRecordModel newzi01 = new FindCMRRecordModel();
             PropertyUtils.copyProperties(newzi01, mainRecord);
             newzi01.setCmrAddrTypeCode("ZI01");
@@ -2305,7 +2305,7 @@ public class EMEAHandler extends BaseSOFHandler {
         if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"CY".equals(addr.getLandCntry())) {
           updateLandCntry(entityManager, addr);
         }
-        
+
         if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
           addr.setCustPhone("");
         }
@@ -2890,16 +2890,16 @@ public class EMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCrosSubTyp(), "Type of Customer", cmrCountry));
       results.add(update);
     }
-    
+
     if (SystemLocation.TURKEY.equals(oldData.getCmrIssuingCntry())) {
-        if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEconomicCd(), newData.getEconomicCd())) {
-          update = new UpdatedDataModel();
-          update.setDataField(PageManager.getLabel(cmrCountry, "EconomicCd2", "-"));
-          update.setNewData(service.getCodeAndDescription(newData.getEconomicCd(), "EconomicCode", cmrCountry));
-          update.setOldData(service.getCodeAndDescription(oldData.getEconomicCd(), "EconomicCode", cmrCountry));
-          results.add(update);
-        }
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEconomicCd(), newData.getEconomicCd())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "EconomicCd2", "-"));
+        update.setNewData(service.getCodeAndDescription(newData.getEconomicCd(), "EconomicCode", cmrCountry));
+        update.setOldData(service.getCodeAndDescription(oldData.getEconomicCd(), "EconomicCode", cmrCountry));
+        results.add(update);
       }
+    }
   }
 
   @Override
@@ -2952,12 +2952,6 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetAbbrevLocnAfterImport(entityManager, admin, data);
     }
 
-    if (SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
-      if (isOldRecordsGR) {
-        updateImportIndicatior(entityManager, data.getId().getReqId());
-      }
-    }
-
     if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       int zi01countrdc = getaddZI01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(),
           ziType);
@@ -2986,12 +2980,6 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
     }
 
-  }
-
-  private void updateImportIndicatior(EntityManager entityManager, long reqId) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.IMPORTIND.N"));
-    query.setParameter("REQ_ID", reqId);
-    query.executeSql();
   }
 
   private void updateImportIndForTRCopyzi01Addr(EntityManager entityManager, long reqId) {
@@ -3805,7 +3793,7 @@ public class EMEAHandler extends BaseSOFHandler {
       return false;
     }
   }
-  
+
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     XSSFRow row = null;
@@ -3823,7 +3811,7 @@ public class EMEAHandler extends BaseSOFHandler {
       LOG.trace("validateTemplateDupFills for Greece");
       return;
     }
-    
+        
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
@@ -3966,7 +3954,7 @@ public class EMEAHandler extends BaseSOFHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
-	  if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry) || SystemLocation.TURKEY.equals(cmrCountry)) {
+    if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry) || SystemLocation.TURKEY.equals(cmrCountry)) {
       if (!equals(addr.getTaxOffice(), addr.getTaxOfficeOld())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrType(addrTypeDesc);
@@ -3991,16 +3979,16 @@ public class EMEAHandler extends BaseSOFHandler {
     }
 
     if (SystemLocation.TURKEY.equals(cmrCountry)) {
-        if (!equals(addr.getDept(), addr.getDeptOld())) {
-          UpdatedNameAddrModel update = new UpdatedNameAddrModel();
-          update.setAddrType(addrTypeDesc);
-          update.setSapNumber(sapNumber);
-          update.setDataField(PageManager.getLabel(cmrCountry, "", "District Code"));
-          update.setNewData(addr.getDept());
-          update.setOldData(addr.getDeptOld());
-          results.add(update);
-        }
+      if (!equals(addr.getDept(), addr.getDeptOld())) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "", "District Code"));
+        update.setNewData(addr.getDept());
+        update.setOldData(addr.getDeptOld());
+        results.add(update);
       }
+    }
   }
 
   public String getaddAddressAdrnr(EntityManager entityManager, String mandt, String kunnr, String ktokd, String seq) {
@@ -4075,9 +4063,9 @@ public class EMEAHandler extends BaseSOFHandler {
     query.setParameter("CMR_NO", cmrNo);
     return query.getSingleResult(CmrtCustExt.class);
   }
-  
-  private void  validateTemplateDupFillsCEE(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-	  
+
+  private void validateTemplateDupFillsCEE(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+
   }
 
   private void validateTemplateDupFillsGreece(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
@@ -4202,8 +4190,8 @@ public class EMEAHandler extends BaseSOFHandler {
         }
       }
     }
-   compareTwoSheets(localLang, soldto, book, validations);
-    
+    compareTwoSheets(localLang, soldto, book, validations);
+
   }
 
   private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType) {
