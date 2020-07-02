@@ -435,6 +435,17 @@ public class PortugalTransformer extends MessageTransformer {
 
     // common data for C/U
     
+    // VAT
+    if (!StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+        legacyCust.setVat(dummyHandler.cmrData.getVat().substring(2));
+      } else {
+        legacyCust.setVat(dummyHandler.cmrData.getVat());
+      }
+    } else {
+      legacyCust.setVat("");
+    }
+    
     // CeDivision
     legacyCust.setCeDivision("3");
     
@@ -483,6 +494,13 @@ public class PortugalTransformer extends MessageTransformer {
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
+    formatAddressLines(dummyHandler);
+
+    if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
+      if (!(StringUtils.isBlank(currAddr.getCustPhone())) || !(StringUtils.isEmpty(currAddr.getCustPhone()))) {
+        legacyAddr.setAddrPhone("TF"+currAddr.getCustPhone());
+      }
+    }
     if ("N".equals(currAddr.getImportInd()) && MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
       legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
     }
