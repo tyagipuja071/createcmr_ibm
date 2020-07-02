@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.entity.listeners;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,10 +61,18 @@ public class TrimListener {
           nullValue = nvAnnot.value();
         }
         final String value = removeInvalid((String) field.get(entity));
-        if (value != null) {
-          field.set(entity, value.trim().length() == 0 ? nullValue : value.trim());
-        } else if (nullValue != null) {
-          field.set(entity, nullValue);
+        try {
+          Method set = entity.getClass().getDeclaredMethod("set" + (field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1)),
+              value != null ? value.getClass() : String.class);
+          if (set != null) {
+            if (value != null) {
+              set.invoke(entity, value.trim().length() == 0 ? null : value.trim());
+            } else if (nullValue != null) {
+              set.invoke(entity, nullValue);
+            }
+          }
+        } catch (Exception e) {
+          System.err.println("Error in set method: " + field.getName());
         }
       }
     }
@@ -80,10 +89,10 @@ public class TrimListener {
       return value;
     }
     try {
-      String cleaned = StringUtils.replace(value, "ë", "'");
-      cleaned = StringUtils.replace(cleaned, "í", "'");
-      cleaned = StringUtils.replace(cleaned, "î", "\"");
-      cleaned = StringUtils.replace(cleaned, "ì", "\"");
+      String cleaned = StringUtils.replace(value, "‚Äú", "'");
+      cleaned = StringUtils.replace(cleaned, "‚Äù", "'");
+      cleaned = StringUtils.replace(cleaned, "‚Äò", "\"");
+      cleaned = StringUtils.replace(cleaned, "‚Äô", "\"");
       return cleaned;
     } catch (Exception e) {
       return value;

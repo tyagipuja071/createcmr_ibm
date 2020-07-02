@@ -457,19 +457,18 @@ public class SOFMessageHandler extends MQMessageHandler {
     }
 
     try {
-      if (LOG.isTraceEnabled()) {
-        LOG.trace("XML output:");
-        StringWriter sw = new StringWriter();
-        try {
-          xmlOutputter.output(document, sw);
-          saveXmlContentToDB(sw.toString(), fileName, this.mqIntfReqQueue.getId().getQueryReqId());
-          LOG.trace(sw.toString());
-        } finally {
-          sw.close();
-        }
+      LOG.trace("XML output:");
+      StringWriter sw = new StringWriter();
+      try {
+        xmlOutputter.output(document, sw);
+        saveXmlContentToDB(sw.toString(), fileName, this.mqIntfReqQueue.getId().getQueryReqId());
+        LOG.trace(sw.toString());
+      } finally {
+        sw.close();
       }
       xmlOutputter.output(document, new FileOutputStream(outPath + fileName));
     } catch (Exception e) {
+      LOG.debug("Cannot save XML to DB", e);
     }
     return xmlOutputter.outputString(document);
   }
@@ -610,16 +609,14 @@ public class SOFMessageHandler extends MQMessageHandler {
       LOG.warn("Warning, physical file not saved.");
     }
 
-    if (LOG.isTraceEnabled()) {
-      StringWriter sw = new StringWriter();
-      try {
-        LOG.trace("Reply XML: ");
-        xmlOutputter.output(doc, sw);
-        saveXmlContentToDB(sw.toString(), fileName, this.mqIntfReqQueue.getId().getQueryReqId());
-        LOG.trace(sw.toString());
-      } finally {
-        sw.close();
-      }
+    StringWriter sw = new StringWriter();
+    try {
+      LOG.trace("Reply XML: ");
+      xmlOutputter.output(doc, sw);
+      saveXmlContentToDB(sw.toString(), fileName, this.mqIntfReqQueue.getId().getQueryReqId());
+      LOG.trace(sw.toString());
+    } finally {
+      sw.close();
     }
 
     saveMsgToDB();

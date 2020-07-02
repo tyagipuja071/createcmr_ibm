@@ -173,8 +173,13 @@ public class ChangeLogListener {
         ownTransaction = false;
         LOG.debug("Using thread local entity manager..");
       } else {
+        LOG.debug("Opening own changelog entity manager..");
         entityManager = JpaManager.getEntityManager();
       }
+
+      // for now, use own transaction all the time
+      entityManager = JpaManager.getEntityManager();
+      ownTransaction = true;
       try {
         EntityTransaction txn = entityManager.getTransaction();
         try {
@@ -219,8 +224,8 @@ public class ChangeLogListener {
               for (String columnName : columnNames) {
                 String column = getColumnName(entityClass, entity, columnName);
                 Object value = getFieldValue(entityClass, columnName, entity);
-                createChangeLog(parent, logDetails, ts, entityClass, entityManager, ACTION_INSERT, column, null, value != null ? value.toString()
-                    : null, entity, ownTransaction);
+                createChangeLog(parent, logDetails, ts, entityClass, entityManager, ACTION_INSERT, column, null,
+                    value != null ? value.toString() : null, entity, ownTransaction);
               }
             }
             loadValues(entity);
@@ -428,7 +433,7 @@ public class ChangeLogListener {
         + " / " + userId);
 
     if (ownTransaction) {
-      entityManager.flush();
+      // entityManager.flush();
     }
   }
 
