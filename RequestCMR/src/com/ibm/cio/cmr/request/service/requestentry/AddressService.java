@@ -159,7 +159,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
         // update
         if (model.getAddrType().equals("ZP01")) {
-          newAddrSeq = "00002";
+          if ("C".equals(admin.getReqType())) {
+            newAddrSeq = "00001";
+          } else {
+            newAddrSeq = "00002";
+          }
           existAddTypeText = "Local Language Translation of Sold-To";
         }
         if (model.getAddrType().equals("ZD01")) {
