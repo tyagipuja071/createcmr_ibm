@@ -66,8 +66,10 @@ public class AustriaUtil extends AutomationUtil {
     Addr soldTo = requestData.getAddress("ZS01");
     String scenario = data.getCustSubGrp();
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
-    String customerName = soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
-
+    String custNm1 = soldTo.getCustNm1();
+    String custNm2 =  !StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
+    String custNm3 =  !StringUtils.isBlank(soldTo.getCustNm3()) ? " " + soldTo.getCustNm3() : "";
+    String customerName = custNm1 + custNm2 + custNm3 ;
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
