@@ -67,7 +67,7 @@ public class GBGMatchingElement extends MatchingElement {
     String address = "";
     AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
     if (countryUtil != null) {
-      address = countryUtil.getAddressTypeByScenario(entityManager, requestData, engineData);
+      address = countryUtil.getAddressTypeForGbgCovCalcs(entityManager, requestData, engineData);
     } else {
       address = "ZS01";
     }

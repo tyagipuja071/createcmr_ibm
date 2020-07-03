@@ -184,7 +184,7 @@ public abstract class AutomationUtil {
    * @throws Exception
    */
 
-  public String getAddressTypeByScenario(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
     return "ZS01";
   }
 

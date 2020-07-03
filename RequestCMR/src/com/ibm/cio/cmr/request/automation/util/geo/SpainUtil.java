@@ -286,7 +286,7 @@ public class SpainUtil extends AutomationUtil {
   }
 
   @Override
-  public String getAddressTypeByScenario(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     String address = "";
