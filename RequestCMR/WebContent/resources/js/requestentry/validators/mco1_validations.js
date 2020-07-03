@@ -703,6 +703,9 @@ function addCrossLandedCntryFormValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var custGroup = FormManager.getActualValue('custGrp').toUpperCase();
+        var isCrossborderScenario = crossScenarios.includes(custGroup);
+
         if (isCrossborderScenario && FormManager.getActualValue('addrType') == 'ZS01' && FormManager.getActualValue('landCntry') == 'ZA') {
           return new ValidationResult(null, false, 'Landed Country value should not be \'South Africa - ZA\' for Cross-border customers.');
         }
@@ -710,11 +713,6 @@ function addCrossLandedCntryFormValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
-}
-
-function isCrossborderScenario() {
-  var custGroup = FormManager.getActualValue('custGrp').toUpperCase();
-  return crossScenarios.includes(custGroup);
 }
 
 function streetValidatorCustom() {
