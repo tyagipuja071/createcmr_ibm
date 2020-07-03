@@ -1827,15 +1827,19 @@ function addLatinCharValidator() {
   // latin addresses
   var addrToChkForIL = new Set([ 'ZI01', 'ZS02', 'CTYA', 'CTYB', 'CTYC' ]);
   var addrToChkForGR = new Set([ 'ZS01', 'ZD01', 'ZI01' ]);
+  var addrToChkForTR = new Set([ 'ZS01', 'ZD01', 'ZI01' ]);
 
   // for cross border
   if (custType == 'CROSS') {
     addrToChkForGR = new Set([ 'ZP01', 'ZS01', 'ZD01', 'ZI01' ]);
+    addrToChkForTR = new Set([ 'ZP01', 'ZS01', 'ZD01', 'ZI01' ]);
   }
 
   if (cntry == SysLoc.ISRAEL && addrToChkForIL.has(addrType)) {
     validateNonLatin = true;
   } else if (cntry == SysLoc.GREECE && addrToChkForGR.has(addrType)) {
+    validateNonLatin = true;
+  } else if (cntry == SysLoc.TURKEY && addrToChkForTR.has(addrType)) {
     validateNonLatin = true;
   }
 
@@ -1847,6 +1851,10 @@ function addLatinCharValidator() {
     } else if (cntry == SysLoc.GREECE) {
       checkAndAddValidator('custNm2', Validators.LATIN, [ 'Customer Name Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.LATIN, [ ' Address Con\'t/Occupation' ]);
+      checkAndAddValidator('dept', Validators.LATIN, [ 'District' ]);
+    } else if (cntry == SysLoc.TURKEY) {
+      checkAndAddValidator('custNm2', Validators.LATIN, [ 'Customer Name Con\'t' ]);
+      checkAndAddValidator('addrTxt2', Validators.LATIN, [ ' Address Con\'t' ]);
       checkAndAddValidator('dept', Validators.LATIN, [ 'District' ]);
     }
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
@@ -8612,6 +8620,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(filterCmrnoForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(afterConfigForTR, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.TURKEY ]);
 
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
