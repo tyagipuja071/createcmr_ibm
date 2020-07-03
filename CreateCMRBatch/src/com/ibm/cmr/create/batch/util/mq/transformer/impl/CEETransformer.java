@@ -1212,6 +1212,16 @@ public class CEETransformer extends EMEATransformer {
         cust.setBankBranchNo(muData.getNewEntpName1());
       }
     }
+    
+    if(SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())){
+    	if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
+    		if ("@".equals(muData.getSpecialTaxCd())) {
+    			cust.setTaxCd("");
+    		} else {
+    			cust.setTaxCd(muData.getSpecialTaxCd());
+    		}
+    	}    	
+    }
 
     // RABXA :Bank Account Number
     if (!StringUtils.isBlank(muData.getEmail2())) {
@@ -1329,7 +1339,7 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      if ("@".equals(muData.getCollectionCd())) {
+      if ("@".equals(muData.getVat())) {
         cust.setVat("");
       } else {
         cust.setVat(muData.getVat());
