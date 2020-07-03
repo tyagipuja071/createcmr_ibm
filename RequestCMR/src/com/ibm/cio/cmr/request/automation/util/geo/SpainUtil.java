@@ -239,7 +239,8 @@ public class SpainUtil extends AutomationUtil {
             if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZD01 and ZD02(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
-            } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getDataChange("Customer Name")) {
+            } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Customer Name")
+                && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else {
@@ -249,8 +250,10 @@ public class SpainUtil extends AutomationUtil {
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
-            if ((CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getDataChange("Customer Name"))
-                || CmrConstants.RDC_BILL_TO.equals(addrType) && null == changes.getDataChange("Customer Name")) {
+            if ((CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Customer Name")
+                && null == changes.getAddressChange(addrType, "Customer Name Con't"))
+                || (CmrConstants.RDC_BILL_TO.equals(addrType) && null == changes.getAddressChange(addrType, "Customer Name")
+                    && null == changes.getAddressChange(addrType, "Customer Name Con't"))) {
               // just proceed for installAT and Mailing updates
               LOG.debug("Update to InstallAt and Mailing " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to InstallAt and Mailing (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
