@@ -455,8 +455,7 @@ public class GermanyUtil extends AutomationUtil {
     Addr zs01 = requestData.getAddress("ZS01");
     String coverageId = container.getFinalCoverage();
     details.append("\n");
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null
-        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(engineData.get(covFrom)))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && covFrom != null && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SEARCH_TERM", data.getSearchTerm(), coverageId);
       details.append("Computed SORTL = " + coverageId).append("\n");
       results.setResults("Coverage Calculated");
