@@ -97,6 +97,8 @@ public class EmailEngine {
     // init engine
     this.engine = new VelocityEngine();
     this.engine.addProperty(Velocity.RESOURCE_LOADER, "classpath");
+    // engine.addProperty(Velocity.FILE_RESOURCE_LOADER_PATH,
+    // ConfigUtil.getConfigDir());
     this.engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
     this.engine.init();
 

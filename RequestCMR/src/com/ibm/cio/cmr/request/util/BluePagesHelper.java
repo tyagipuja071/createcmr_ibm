@@ -51,7 +51,7 @@ public class BluePagesHelper {
       } else if (bpresults.rows() > 1) {
         name = "MULTIPLE";
       } else if (bpresults.hasColumn("NAME")) {
-        name = (String) bpresults.getRow(0).get("NAME");
+        name = bpresults.getRow(0).get("NAME");
       }
     }
     return name;
@@ -67,7 +67,7 @@ public class BluePagesHelper {
   public static String getEmailByCNUM(String userCNUM) {
     BPResults bluePagesUserSearchedByCnum = BluePages.getPersonByCnum(userCNUM);
     if (bluePagesUserSearchedByCnum.rows() > 0) {
-      return (String) bluePagesUserSearchedByCnum.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID);
+      return bluePagesUserSearchedByCnum.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID);
     }
     return "No Email found";
   }
@@ -89,8 +89,8 @@ public class BluePagesHelper {
         notesID = "NOT FOUND";
       } else if (bpresults.rows() > 1) {
         notesID = "MULTIPLE";
-      } else if (bpresults.hasColumn("NOTESID") && ((String) bpresults.getRow(0).get("NOTESID")).length() > 0) {
-        notesID = (String) bpresults.getRow(0).get("NOTESID");
+      } else if (bpresults.hasColumn("NOTESID") && bpresults.getRow(0).get("NOTESID").length() > 0) {
+        notesID = bpresults.getRow(0).get("NOTESID");
         notesID = notesID.replace("/OU=", "/");
         notesID = notesID.replace("/O=", "/");
         notesID = notesID.replace("CN=", "");
@@ -117,7 +117,7 @@ public class BluePagesHelper {
     } else if (bpresults.rows() > 1) {
       cnum = "MULTIPLE";
     } else if (bpresults.hasColumn(BLUEPAGES_KEY_EMP_CNUM)) {
-      cnum = (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM);
+      cnum = bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM);
     }
     return cnum;
   }
@@ -136,19 +136,25 @@ public class BluePagesHelper {
 
     Map<String, String> returnMap = new HashMap<String, String>();
 
+    LOG.debug("Status: " + bpresults.getStatusCode() + " = " + bpresults.getStatusMsg());
     if (bpresults.succeeded()) {
       if (bpresults.rows() == 1) {
-        returnMap.put(BLUEPAGES_KEY_EMP_NAME, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
-        returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
-        returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
-        returnMap.put(BLUEPAGES_KEY_EMP_CNUM, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM));
-        returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
-        returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_NOTES_MAIL));
+        returnMap.put(BLUEPAGES_KEY_EMP_NAME, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
+        returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_CNUM, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM));
+        returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
+        returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, bpresults.getRow(0).get(BLUEPAGES_KEY_NOTES_MAIL));
 
       }
     } else {
       LOG.error("Error while doing Blue Pages look up ");
-      return null;
+      returnMap.put(BLUEPAGES_KEY_EMP_NAME, intranetAddr);
+      returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_CNUM, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, intranetAddr);
+      returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, intranetAddr);
     }
     return returnMap;
   }
@@ -166,19 +172,26 @@ public class BluePagesHelper {
 
     Map<String, String> returnMap = new HashMap<String, String>();
 
+    LOG.debug("Status: " + bpresults.getStatusCode() + " = " + bpresults.getStatusMsg());
+
     if (bpresults.succeeded()) {
       if (bpresults.rows() == 1) {
-        returnMap.put(BLUEPAGES_KEY_EMP_NAME, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
-        returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
-        returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
-        returnMap.put(BLUEPAGES_KEY_EMP_CNUM, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM));
-        returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
-        returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_NOTES_MAIL));
+        returnMap.put(BLUEPAGES_KEY_EMP_NAME, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
+        returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_CNUM, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM));
+        returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
+        returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, bpresults.getRow(0).get(BLUEPAGES_KEY_NOTES_MAIL));
 
       }
     } else {
       LOG.error("Error while doing Blue Pages look up ");
-      return null;
+      returnMap.put(BLUEPAGES_KEY_EMP_NAME, name);
+      returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_CNUM, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, name);
+      returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, name);
     }
     return returnMap;
   }
@@ -196,19 +209,25 @@ public class BluePagesHelper {
 
     Map<String, String> returnMap = new HashMap<String, String>();
 
+    LOG.debug("Status: " + bpresults.getStatusCode() + " = " + bpresults.getStatusMsg());
     if (bpresults.succeeded()) {
       if (bpresults.rows() == 1) {
-        returnMap.put(BLUEPAGES_KEY_EMP_NAME, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
-        returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
-        returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
-        returnMap.put(BLUEPAGES_KEY_EMP_CNUM, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM));
-        returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
-        returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, (String) bpresults.getRow(0).get(BLUEPAGES_KEY_NOTES_MAIL));
+        returnMap.put(BLUEPAGES_KEY_EMP_NAME, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_NAME));
+        returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COUNTRY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_COMPANY_CODE));
+        returnMap.put(BLUEPAGES_KEY_EMP_CNUM, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_CNUM));
+        returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, bpresults.getRow(0).get(BLUEPAGES_KEY_EMP_INTERNET_ID));
+        returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, bpresults.getRow(0).get(BLUEPAGES_KEY_NOTES_MAIL));
 
       }
     } else {
       LOG.error("Error while doing Blue Pages look up ");
-      return null;
+      returnMap.put(BLUEPAGES_KEY_EMP_NAME, notesId);
+      returnMap.put(BLUEPAGES_KEY_EMP_COUNTRY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_COMPANY_CODE, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_CNUM, "");
+      returnMap.put(BLUEPAGES_KEY_EMP_INTERNET_ID, notesId);
+      returnMap.put(BLUEPAGES_KEY_NOTES_MAIL, notesId);
     }
     return returnMap;
   }
@@ -361,7 +380,7 @@ public class BluePagesHelper {
   public static String getManagerEmail(String employeeId) {
     BPResults results = BluePages.getMgrChainOf(employeeId);
     if (results.rows() > 0) {
-      String mgrEmail = (String) results.getRow(0).get("INTERNET");
+      String mgrEmail = results.getRow(0).get("INTERNET");
       return mgrEmail;
     }
     return null;
