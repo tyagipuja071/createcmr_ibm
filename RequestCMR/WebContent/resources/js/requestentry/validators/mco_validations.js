@@ -451,7 +451,7 @@ function setSalesRepValues(clientTier) {
 }
 
 function setEnterpriseValues(clientTier) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN && (custSubGrp == 'BUSPR' || custSubGrp == 'XBP'))) {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
@@ -1094,7 +1094,7 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('enterprise');
     fieldsToDisable.push('inacCd');
     fieldsToDisable.push('repTeamMemberNo');
-    // fieldsToDisable.push('custClass');
+    fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
@@ -1136,7 +1136,7 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('enterprise');
     fieldsToDisable.push('inacCd');
     fieldsToDisable.push('repTeamMemberNo');
-    // fieldsToDisable.push('custClass');
+    fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'XINSO') {
     fieldsToDisable.push('isicCd');
