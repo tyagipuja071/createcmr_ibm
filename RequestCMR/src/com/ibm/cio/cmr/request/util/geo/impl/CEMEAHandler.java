@@ -949,7 +949,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     FindCMRRecordModel dupRecord = new FindCMRRecordModel();
     dupRecord.setCmrIssuedBy(dupCntry);
     dupRecord.setCmrNum(dupCmrNo);
-    retrieveSOFValues(dupRecord);
+    // retrieveSOFValues(dupRecord);
 
     if (this.currentImportValues != null && !this.currentImportValues.isEmpty()) {
       String abbrevNm = this.currentImportValues.get("CompanyName");
