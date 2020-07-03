@@ -2202,6 +2202,10 @@ public class EMEAHandler extends BaseSOFHandler {
         if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
           addr.setCustPhone("");
         }
+        
+        if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
+          addr.setTaxOffice("");
+        }
       }
 
       break;

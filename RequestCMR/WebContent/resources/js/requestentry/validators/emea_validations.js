@@ -3422,6 +3422,10 @@ var custType = FormManager.getActualValue('custGrp');
           preFillTranslationAddrWithSoldToForGR();    
        	}
        	
+       	if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS){
+          disableAddrFieldsCY();
+       	}
+       	
       });
     }
   }
@@ -3430,6 +3434,24 @@ var custType = FormManager.getActualValue('custGrp');
     _gtcVatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorGRCYTR();
     });
+  }
+}
+
+function disableAddrFieldsCY(){
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS && FormManager.getActualValue('addrType') != 'ZS01') {
+    FormManager.setValue('taxOffice', '');
+    FormManager.disable('taxOffice');
+  } else {
+    FormManager.enable('taxOffice');
+  }
+  
+  if ((FormManager.getActualValue('addrType') == 'ZS01' || FormManager
+      .getActualValue('addrType') == 'ZD01')) {
+    FormManager.enable('custPhone');
+  } else {
+    FormManager.setValue('custPhone', '');
+    FormManager.disable('custPhone');
   }
 }
 
@@ -8302,5 +8324,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAddrFunction(disableAddrFieldsCY, [ SysLoc.CYPRUS ]);
 
 });
