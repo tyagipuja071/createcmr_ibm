@@ -442,16 +442,20 @@ function add32PostCdCntrySBOlogicOnISUChange() {
 
 function addIBOlogic() {
   var reqType = FormManager.getActualValue('reqType');
-  var role = null;
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
-  }
-
-  if (role == 'Processor') {
+  // var role = null;
+  // if (typeof (_pagemodel) != 'undefined') {
+  // role = _pagemodel.userRole;
+  // }
+  //
+  // if (role == 'Processor') {
+  // FormManager.enable('installBranchOffCd');
+  // return;
+  // }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
 
-  if (reqType == 'C' && role == 'Requester') {
+  if (reqType == 'C') {
     addSboIboLogic();
   }
 }
