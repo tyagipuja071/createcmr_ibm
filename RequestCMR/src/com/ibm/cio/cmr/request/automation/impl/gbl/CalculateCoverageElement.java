@@ -131,7 +131,7 @@ public class CalculateCoverageElement extends OverridingElement {
       Data data = requestData.getData();
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (countryUtil != null) {
-        addrToUse = "ZS01"; // TODO change it to gbg address type method
+        addrToUse = countryUtil.getAddressTypeForGbgCovCalcs(entityManager, requestData, engineData);
       } else {
         addrToUse = "ZS01";
       }
