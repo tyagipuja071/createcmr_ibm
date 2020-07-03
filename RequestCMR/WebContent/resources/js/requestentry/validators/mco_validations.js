@@ -88,6 +88,7 @@ function afterConfigForMCO() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.readOnly('cmrOwner');
+
 }
 
 function addAddressTypeValidator() {
@@ -1120,7 +1121,7 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('vat');
     fieldsToDisable.push('inacCd');
-    fieldsToDisable.push('custClass');
+    // fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'XCRO') {
     // fieldsToDisable.push(('locationNumber'));
@@ -1654,6 +1655,14 @@ function lockRequireFieldsSpain() {
   var vat = FormManager.getActualValue('vat');
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
+  if (reqType == 'C' && (role == 'PROCESSOR' || role == 'REQUESTER')) {
+    FormManager.readOnly('custClass');
+  }
+
+  if (reqType == 'U' && role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  }
+
   if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93') {
     FormManager.readOnly('reqReason');
 
@@ -1765,30 +1774,34 @@ function setFieldsCharForScenarios() {
   if (custSubGroup == 'PRICU') {
     FormManager.setValue('inacCd', '');
     FormManager.setValue('vat', '');
-    // FormManager.setValue('custClass','60')
+    FormManager.setValue('custClass', '60')
   }
   if (custSubGroup == 'INTER') {
     FormManager.setValue('inacCd', '');
-    // FormManager.setValue('custClass','81')
+    FormManager.setValue('custClass', '81')
   }
   if (custSubGroup == 'INTSO') {
     FormManager.setValue('inacCd', '');
-    // FormManager.setValue('custClass','85')
-  }
-  if (custSubGroup == 'COMME') {
-    // FormManager.setValue('custClass','11');
+    FormManager.setValue('custClass', '85')
   }
   if (custSubGroup == 'BUSPR') {
-    // FormManager.setValue('custClass','45');
+    FormManager.setValue('custClass', '45');
     FormManager.setValue('inacCd', '');
     FormManager.setValue('repTeamMemberNo', '1Ficti');
     FormManager.setValue('enterprise', '');
   }
   if (custSubGroup == 'XBP') {
-    // FormManager.setValue('custClass','45');
+    FormManager.setValue('custClass', '45');
     FormManager.setValue('inacCd', '');
     FormManager.setValue('repTeamMemberNo', '1Ficti');
     FormManager.setValue('enterprise', '');
+  }
+
+  if (custSubGroup == 'COMME' || custSubGroup == 'IGSGS' || custSubGroup == 'THDPT' || custSubGroup == 'THDIG' || custSubGroup == 'XCRO' || custSubGroup == 'XIGS') {
+    FormManager.setValue('custClass', '11');
+  }
+  if (custSubGroup == 'GOVRN' || custSubGroup == 'GOVIG') {
+    FormManager.setValue('custClass', '12');
   }
 
 }
