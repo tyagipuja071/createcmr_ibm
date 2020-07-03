@@ -1911,6 +1911,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
       if (SystemLocation.GREECE.equals(country)) {
         address.setCustNm4(currentRecord.getCmrName4());
+        // GR - old record
         if (isOldRecordsGR) {
           address.setImportInd("N");
         }
