@@ -3413,11 +3413,15 @@ var custType = FormManager.getActualValue('custGrp');
     _gtcAddrTypeHandler[i] = null;
     if (_gtcAddrTypeHandler[i] == null) {
       _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value) {
-        convertToUpperCaseGR();
         disableAddrFieldsGRCYTR();
-        disableAddrFieldsGR();
-       	preFillTranslationAddrWithSoldToForGR();	  
        	preFillTranslationAddrWithSoldToForTR();
+       	
+       	if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+          convertToUpperCaseGR();
+          disableAddrFieldsGR();
+          preFillTranslationAddrWithSoldToForGR();    
+       	}
+       	
       });
     }
   }
