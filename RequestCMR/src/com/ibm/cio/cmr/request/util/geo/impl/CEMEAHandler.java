@@ -121,7 +121,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 			SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN,
 			SystemLocation.BOSNIA_AND_HERZEGOVINA, SystemLocation.MACEDONIA, SystemLocation.SLOVENIA,
 			SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA, SystemLocation.POLAND,
-			SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE);
+			SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
@@ -949,7 +949,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     FindCMRRecordModel dupRecord = new FindCMRRecordModel();
     dupRecord.setCmrIssuedBy(dupCntry);
     dupRecord.setCmrNum(dupCmrNo);
-    retrieveSOFValues(dupRecord);
+    // retrieveSOFValues(dupRecord);
 
     if (this.currentImportValues != null && !this.currentImportValues.isEmpty()) {
       String abbrevNm = this.currentImportValues.get("CompanyName");

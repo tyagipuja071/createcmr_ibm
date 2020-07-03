@@ -328,14 +328,14 @@ public abstract class BaseSOFHandler extends GEOHandler {
               LOG.trace("Economic Code: " + data.getEconomicCd());
             }
       }else{
-    	  if (this.currentImportValues.get("EconomicCode") != null) {
-    		  data.setEconomicCd(this.currentImportValues.get("EconomicCode"));
-    		  LOG.trace("Economic Code: " + data.getEconomicCd());
-    	  } else {
-    		  // temporary solution to handle the wrong tag
-    		  data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
-    		  LOG.trace("Economic Code: " + data.getEconomicCd());
-    	  }    	  
+        if (this.currentImportValues.get("EconomicCode") != null) {
+          data.setEconomicCd(this.currentImportValues.get("EconomicCode"));
+          LOG.trace("Economic Code: " + data.getEconomicCd());
+        } else {
+          // temporary solution to handle the wrong tag
+          data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
+          LOG.trace("Economic Code: " + data.getEconomicCd());
+        }       
       }
       
       

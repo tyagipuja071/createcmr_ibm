@@ -4464,6 +4464,16 @@ function addHandlerForCustSubTypeBpGRTRCY() {
   }
 }
 
+function showClassificationForTRUpd(){
+	if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+		if(FormManager.getActualValue('reqType') == 'U'){
+			FormManager.show('CustClass', 'custClass');
+			FormManager.enable('CustClass');
+			FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+		}		
+	}
+}
+
 function setCustSubTypeBpGRTRCY() {
   var custType = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
@@ -4491,10 +4501,10 @@ function setCustSubTypeBpGRTRCY() {
     }
     // Control Classification Code
     if (custType == 'BUSPR' || custType == 'XBP') {
-      FormManager.show('CustClass', 'custClass');
+      FormManager.show('custClass', 'custClass');
       FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
     } else {
-      FormManager.hide('CustClass', 'custClass');
+      FormManager.hide('custClass', 'custClass');
       FormManager.setValue('custClass', '');
       FormManager.resetValidations('custClass');
     }
@@ -5294,7 +5304,7 @@ function showCommercialFinanced() {
     FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER') {
-      FormManager.readOnly('custClass');
+//      FormManager.readOnly('custClass');
     } else {
       FormManager.enable('custClass');
     }
@@ -8826,6 +8836,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.GREECE, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addHandlerForCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(showClassificationForTRUpd,[ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setISRValuesGROnUpdate, [ SysLoc.GREECE ]);
 
   // Cyprus
