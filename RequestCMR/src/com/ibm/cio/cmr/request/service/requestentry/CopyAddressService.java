@@ -190,12 +190,19 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
         if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
           int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
           int zi01cout = Integer.valueOf(getTrZI01Count(entityManager, model.getReqId()));
+          AdminPK pk = new AdminPK();
+          pk.setReqId(model.getReqId());
+          Admin admin = entityManager.find(Admin.class, pk);
 
           if (toCopy.equals("ZS01")) {
             newAddrSeq = "00003";
           }
           if (toCopy.equals("ZP01")) {
-            newAddrSeq = "00002";
+            if ("C".equals(admin.getReqType())) {
+              newAddrSeq = "00001";
+            } else {
+              newAddrSeq = "00002";
+            }
           }
           if (toCopy.equals("ZD01")) {
             if (zd01cout == 0) {
