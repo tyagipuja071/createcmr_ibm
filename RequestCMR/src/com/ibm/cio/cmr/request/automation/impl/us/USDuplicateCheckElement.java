@@ -277,7 +277,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         LOG.error("Unable to determine CMR details for create by model scenario", e);
         return true;
       }
-    } else if (negativeCheckScenarioList.contains(custSubGrp) || "CreateCMR".equals(requestData.getAdmin().getSourceSystId())) {
+    } else if (negativeCheckScenarioList.contains(custSubGrp)
+        || (requestData.getAdmin().getSourceSystId() != null && requestData.getAdmin().getSourceSystId().contains("CreateCMR"))) {
       return true;
     }
     return false;
@@ -603,6 +604,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     // reverify
     if (response.getMatches().size() == 0) {
+      response.setSuccess(true);
       response.setMatched(false);
       response.setMessage("No matches found for the given search criteria.");
     }
@@ -664,8 +666,22 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Addr zi01 = requestData.getAddress("ZI01");
     MatchingResponse<DuplicateCMRCheckResponse> response = new MatchingResponse<DuplicateCMRCheckResponse>();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
-    // check if End user and has divn value
-    if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
+    String subScenario = data.getCustSubGrp();
+    if (USUtil.SC_BYMODEL.equals(subScenario)) {
+      subScenario = USUtil.determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
+    }
+
+    // check if End user
+    if (USUtil.SC_BP_END_USER.equals(subScenario) && "C".equals(admin.getReqType())) {
+
+      ScenarioExceptionsUtil bpScenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
+          USUtil.CG_THIRD_P_BUSINESS_PARTNER, USUtil.SC_BP_END_USER);
+      engineData.addPositiveCheckStatus("BP_EU_REQ");
+      if (bpScenarioExceptions != null) {
+        // set cmr check mappings to bp
+        scenarioExceptions.setAddressTypesForDuplicateCMRCheck(bpScenarioExceptions.getAddressTypesForDuplicateCMRCheck());
+      }
+
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
         response.setMatched(false);
@@ -732,6 +748,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     // reverify
     if (response.getMatches().size() == 0) {
+      response.setSuccess(true);
       response.setMatched(false);
       response.setMessage("No matches found for the given search criteria.");
     }
