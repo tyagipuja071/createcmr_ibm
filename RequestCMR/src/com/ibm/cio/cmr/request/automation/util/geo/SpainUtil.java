@@ -190,7 +190,7 @@ public class SpainUtil extends AutomationUtil {
         break;
       }
     }
-    if (resultCodes.add("D")) {
+    if (resultCodes.contains("D")) {
       output.setOnError(true);
       engineData.addRejectionComment("_atVATUpd", "VAT # on the request has characters updated other than the first character", "", "");
       validation.setSuccess(false);
@@ -239,7 +239,7 @@ public class SpainUtil extends AutomationUtil {
             if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZD01 and ZD02(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
-            } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, addr.getCustNm1())) {
+            } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getDataChange("Customer Name")) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Addition of new ZI01 (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else {
@@ -249,12 +249,12 @@ public class SpainUtil extends AutomationUtil {
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
-            if ((CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, addr.getCustNm1()))
-                || CmrConstants.RDC_BILL_TO.equals(addrType) && null == changes.getAddressChange(addrType, addr.getCustNm1())) {
+            if ((CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getDataChange("Customer Name"))
+                || CmrConstants.RDC_BILL_TO.equals(addrType) && null == changes.getDataChange("Customer Name")) {
               // just proceed for installAT and Mailing updates
               LOG.debug("Update to InstallAt and Mailing " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to InstallAt and Mailing (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
-            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && null == changes.getAddressChange(addrType, addr.getVat())) {
+            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && null == changes.getDataChange("VAT #")) {
               checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks").append("\n");
             } else {
               checkDetails.append("Updates to Updated Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
