@@ -4101,13 +4101,6 @@ function disableAddrFieldsGR() {
 
   }
   
-  if (cntryCd == SysLoc.CYPRUS && FormManager.getActualValue('addrType') != 'ZS01') {
-    FormManager.setValue('taxOffice', '');
-    FormManager.disable('taxOffice');
-  } else {
-    FormManager.enable('taxOffice');
-  }
-  
   var landCntry = FormManager.getActualValue('landCntry');
   if(!(FormManager.getActualValue('custGrp') == 'CROSS' || isUpdateReqCrossborder()) && landCntry == 'GR' && 
 		  (FormManager.getActualValue('addrType') == 'ZP01'
