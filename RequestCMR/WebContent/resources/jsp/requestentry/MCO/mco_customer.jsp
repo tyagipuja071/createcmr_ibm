@@ -155,7 +155,16 @@
           </cmr:label>
           <cmr:field path="legacyCurrencyCd" id="legacyCurrencyCd" fieldId="CurrencyCd" tabId="MAIN_CUST_TAB" />
         </p>
-      </cmr:column>
+      </cmr:column>   
+      <cmr:column span="2" containerForField="CustClass" >
+      <p>
+        <label for="custClass"> 
+        <cmr:fieldLabel fieldId="CustClass" />: 
+        <cmr:delta text="${rdcdata.custClass}" oldValue="${reqentry.custClass}" id="delta-custClass" />
+        </label>
+        <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>  
     </cmr:row>
   </cmr:view>
   
