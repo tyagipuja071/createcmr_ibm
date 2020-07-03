@@ -43,6 +43,8 @@ public class SpainUtil extends AutomationUtil {
   public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
   public static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
+  public static final String SCENARIO_THIRD_PARTY = "THDPT";
+  public static final String SCENARIO_THIRD_PARTY_IG = "THDIG";
   public static final String SCENARIO_INTERNAL = "INTER";
   public static final String SCENARIO_INTERNAL_SO = "INTSO";
 
@@ -281,6 +283,19 @@ public class SpainUtil extends AutomationUtil {
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
+  }
+
+  @Override
+  public String getAddressTypeByScenario(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    String address = "";
+
+    LOG.debug("Address for the scenario to check: " + scenario);
+    if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
+      address = "ZI01";
+    }
+    return address;
   }
 
 }

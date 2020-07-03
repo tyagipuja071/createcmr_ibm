@@ -62,9 +62,16 @@ public class GBGMatchingElement extends MatchingElement {
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
 
-    Addr currentAddress = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String address = "";
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    if (countryUtil != null) {
+      address = countryUtil.getAddressTypeByScenario(entityManager, requestData, engineData);
+    } else {
+      address = "ZS01";
+    }
+    Addr currentAddress = requestData.getAddress(address);
     GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
 

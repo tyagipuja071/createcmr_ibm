@@ -183,6 +183,21 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
+
+  public String getAddressTypeByScenario(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    return "ZS01";
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong>
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   */
+
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
