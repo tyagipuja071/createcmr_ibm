@@ -131,7 +131,7 @@ public class CalculateCoverageElement extends OverridingElement {
       Data data = requestData.getData();
       AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (countryUtil != null) {
-        addrToUse = "ZS01"; // change it to gbg method
+        addrToUse = "ZS01"; // TODO change it to gbg address type method
       } else {
         addrToUse = "ZS01";
       }
@@ -143,7 +143,6 @@ public class CalculateCoverageElement extends OverridingElement {
       CoverageContainer calculatedCoverageContainer = new CoverageContainer();
       boolean coverageNotFound = false;
       boolean isCoverageCalculated = false;
-      // String negativeCheck = "";
       List<CoverageContainer> coverages = null;
       boolean withCmrData = false;
       StringBuilder details = new StringBuilder();
@@ -321,7 +320,6 @@ public class CalculateCoverageElement extends OverridingElement {
 
       result.setDetails(details.toString());
       result.setProcessOutput(output);
-      // Map<FieldResultKey, FieldResult> keys = output.getData();
       return result;
     } catch (
 
@@ -436,6 +434,7 @@ public class CalculateCoverageElement extends OverridingElement {
                   details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + fieldValue + "\n");
                   break;
                 } else {
+                  // TODO review this logic
                   if (condition.getValues() != null) {
                     details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + condition.getValues() + " [" + fieldValue + "]\n");
                   } else {
@@ -454,7 +453,7 @@ public class CalculateCoverageElement extends OverridingElement {
             } else if (val != null && val.startsWith("!")) {
               String value = val.substring(1);
               if (StringUtils.isNotBlank(fieldValue) && !fieldValue.startsWith(value)) {
-                details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
+                details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + val + "\n");
               } else {
                 notDeterminedFields.put(field, val);
               }
@@ -473,51 +472,49 @@ public class CalculateCoverageElement extends OverridingElement {
             engineData.addNegativeCheckStatus(key, "The override value could not be determined for '" + key + "' during coverage calculation.");
           }
         }
-
-        if (StringUtils.isNotBlank(coverageContainer.getIsuCd())) {
-          details.append("\nOverrides based on CMR data:").append("\n");
-          details.append(" - ISU Code = " + coverageContainer.getIsuCd()).append("\n");
-          details.append(" - Client Tier = " + coverageContainer.getClientTierCd()).append("\n");
-          if (createOverrides) {
-            output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
-            output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
-                StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
-          }
-        }
-
-        // Check if BG ID calculated
-        if (createOverrides && output.getData() != null && !output.getData().isEmpty()) {
-          FieldResultKey bgKey = new FieldResultKey("DATA", "BG_ID");
-          FieldResult bgResult = output.getData().get(bgKey);
-          if (bgResult != null && StringUtils.isNotBlank(data.getBgId()) && !"BGNONE".equals(data.getBgId().trim())
-              && !data.getBgId().equals(bgResult.getNewValue())) {
-            // calculated buying group is different from coverage buying group.
-            details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
-            engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
-            output.getData().remove(bgKey);
-          }
-          FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
-          FieldResult gbgResult = output.getData().get(gbgKey);
-          if (gbgResult != null && StringUtils.isNotBlank(data.getGbgId()) && !"BGNONE".equals(data.getGbgId().trim())
-              && !data.getGbgId().equals(gbgResult.getNewValue())) {
-            // calculated global buying group is different from coverage global
-            // buying group.
-            details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
-            engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
-            output.getData().remove(gbgKey);
-          }
-        }
-
-        if (COV_ODM.equals(covFrom)) {
-          // no overrides if COV_ODM
-          details.append("Current request data already fall into the projected ODM coverage.\n");
-        }
-
-        // Add to list if rules found.
-        coverageIds.add(currCovId);
       }
-    }
+      if (StringUtils.isNotBlank(coverageContainer.getIsuCd())) {
+        details.append("\nOverrides based on CMR data:").append("\n");
+        details.append(" - ISU Code = " + coverageContainer.getIsuCd()).append("\n");
+        details.append(" - Client Tier = " + coverageContainer.getClientTierCd()).append("\n");
+        if (createOverrides) {
+          output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
+          output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
+              StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
+        }
+      }
 
+      // Check if BG ID calculated
+      if (createOverrides && output.getData() != null && !output.getData().isEmpty()) {
+        FieldResultKey bgKey = new FieldResultKey("DATA", "BG_ID");
+        FieldResult bgResult = output.getData().get(bgKey);
+        if (bgResult != null && StringUtils.isNotBlank(data.getBgId()) && !"BGNONE".equals(data.getBgId().trim())
+            && !data.getBgId().equals(bgResult.getNewValue())) {
+          // calculated buying group is different from coverage buying group.
+          details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
+          engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          output.getData().remove(bgKey);
+        }
+        FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
+        FieldResult gbgResult = output.getData().get(gbgKey);
+        if (gbgResult != null && StringUtils.isNotBlank(data.getGbgId()) && !"BGNONE".equals(data.getGbgId().trim())
+            && !data.getGbgId().equals(gbgResult.getNewValue())) {
+          // calculated global buying group is different from coverage global
+          // buying group.
+          details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
+          engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          output.getData().remove(gbgKey);
+        }
+      }
+
+      if (COV_ODM.equals(covFrom)) {
+        // no overrides if COV_ODM
+        details.append("Current request data already fall into the projected ODM coverage.\n");
+      }
+
+      // Add to list if rules found.
+      coverageIds.add(currCovId);
+    }
   }
 
   /**
