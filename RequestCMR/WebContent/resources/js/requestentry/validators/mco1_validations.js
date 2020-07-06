@@ -628,8 +628,9 @@ function enterpriseValidation() {
 
 function showDeptNoForInternalsOnly() {
   var scenario = FormManager.getActualValue('custSubGrp');
-  var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
-  if (scenario != null && internalScenarios.includes(scenario)) {
+  var subGrp = getCommonSubgrpVal(scenario);
+  var isInternal = (subGrp == 'INT' || subGrp == 'XIN');
+  if (scenario != null && isInternal) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
     FormManager.clearValue('ibmDeptCostCenter');
@@ -790,6 +791,73 @@ function clearPoBoxPhoneAddrGridItems() {
   }
 }
 
+function retainImportedValues(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndc();
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged) {
+    var reqId = FormManager.getActualValue('reqId');
+    var subGrp = getCommonSubgrpVal(scenario);
+
+    var isCommercial = (subGrp == 'XCO' || subGrp == 'COM');
+    var isGovern = (subGrp == 'XGO' || subGrp == 'GOV');
+    var isThirdParty = (subGrp == 'XTP' || subGrp == 'TP');
+
+    if (isCommercial || isGovern || isThirdParty) {
+      var origISU;
+      var origClientTier;
+      var origRepTeam;
+      var origSbo;
+      var origInac;
+
+      var result = cmr.query("GET.CMRINFO.IMPORTED", {
+        REQ_ID : reqId
+      });
+
+      if (result != null && result != '') {
+        origISU = result.ret1;
+        origClientTier = result.ret2;
+        origRepTeam = result.ret3;
+        origSbo = result.ret4;
+        origInac = result.ret5;
+
+        FormManager.setValue('isuCd', origISU);
+        FormManager.setValue('clientTier', origClientTier);
+        FormManager.setValue('repTeamMemberNo', origRepTeam);
+        FormManager.setValue('salesBusOffCd', origSbo);
+        FormManager.setValue('inacCd', origInac);
+      }
+    } else {
+      FormManager.setValue('inacCd', '');
+    }
+  }
+}
+
+var _importedIndc = null;
+function getImportedIndc() {
+  if (_importedIndc) {
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED_ZS01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  return _importedIndc;
+}
+
+// common subgroup value of SA and sub-regions
+function getCommonSubgrpVal(custSubGrp) {
+  var val = null;
+  if (custSubGrp != null && custSubGrp.length > 0) {
+    val = custSubGrp.toUpperCase();
+    val = val.substring(2, val.length);
+  }
+  return val;
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -820,7 +888,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForZA, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.MCO1, null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SOUTH_AFRICA, 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), [ SysLoc.SOUTH_AFRICA ], null, true);
+  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SOUTH_AFRICA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO1, null, true);
 
@@ -836,4 +904,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetContPoBoxLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCityPostalCodeLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
+
+  GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
+
 });
