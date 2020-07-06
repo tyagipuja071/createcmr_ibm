@@ -451,7 +451,7 @@ function setSalesRepValues(clientTier) {
 }
 
 function setEnterpriseValues(clientTier) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN && (custSubGrp == 'BUSPR' || custSubGrp == 'XBP'))) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
@@ -460,8 +460,11 @@ function setEnterpriseValues(clientTier) {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGroup = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
-  FormManager.enable('enterprise');
+  if ((cntry == SysLoc.PORTUGAL) || (cntry == SysLoc.SPAIN && custSubGrp != 'XBP' && custSubGrp != 'BUSPR')) {
+    FormManager.enable('enterprise');
+  }
   clientTier = FormManager.getActualValue('clientTier');
 
   // For Spain, domestic with 32B, 32S, 32T & 217 ISUs, set enterprise based on
