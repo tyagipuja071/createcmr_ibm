@@ -32,27 +32,20 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
 /**
  * imports data values from findCMR using enterprise as cmrNo
  */
-function importByEnterprise() {
-  var cmrNo = FormManager.getActualValue('enterprise');
-  if (cmrNo == '') {
-    cmr.showAlert('Please input enterprise number as CMR Number to search for.');
-    return;
-  }
-
-  var hasAccepted = dojo.byId('findCMRResult_txt').innerHTML.trim() == 'Accepted';
-  cmr.skipAddress = true;
-  if (hasAccepted) {
-    cmr.importcmr = cmrNo;
-    cmr.showConfirm('doImportCmrs()',
-        'Results from a previous CMR Search have already been accepted for this request. Importing will overwrite existing data records. Continue importing the CMR records?', null, null, {
-          OK : 'Yes',
-          CANCEL : 'Cancel'
-        });
-  } else {
-    importCMRs(cmrNo);
-  }
-
-}
+/*
+ * function importByEnterprise() { var cmrNo =
+ * FormManager.getActualValue('enterprise'); if (cmrNo == '') {
+ * cmr.showAlert('Please input enterprise number as CMR Number to search for.');
+ * return; }
+ * 
+ * var hasAccepted = dojo.byId('findCMRResult_txt').innerHTML.trim() ==
+ * 'Accepted'; cmr.skipAddress = true; if (hasAccepted) { cmr.importcmr = cmrNo;
+ * cmr.showConfirm('doImportCmrs()', 'Results from a previous CMR Search have
+ * already been accepted for this request. Importing will overwrite existing
+ * data records. Continue importing the CMR records?', null, null, { OK : 'Yes',
+ * CANCEL : 'Cancel' }); } else { importCMRs(cmrNo); }
+ *  }
+ */
 
 /**
  * lock Embargo Code field
