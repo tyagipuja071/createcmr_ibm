@@ -119,7 +119,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 			"City2", "Department" };
 
 	private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company",
-			"CAP", "CMROwner", "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity",
+			"CAP", "CMROwner", "CustClassCode","CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity",
 			"POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County", "City2",
 			"Department" };
 
