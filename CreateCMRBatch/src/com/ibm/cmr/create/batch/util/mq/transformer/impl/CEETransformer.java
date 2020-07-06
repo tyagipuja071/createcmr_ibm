@@ -484,6 +484,9 @@ public class CEETransformer extends EMEATransformer {
     if ("889".equals(data.getCmrIssuingCntry())) {
         DEFAULT_LANDED_COUNTRY = "UA";
         }
+    if ("704".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "HR";
+        }
   }
 
   /**
@@ -1123,7 +1126,19 @@ public class CEETransformer extends EMEATransformer {
     } else {
       legacyCust.setLangCd("");
     }
-
+    
+    String cebo = data.getEngineeringBo();
+    if(!StringUtils.isBlank(cebo)){
+    	if(SystemLocation.SERBIA.equals(data.getCmrIssuingCntry())){
+    		if(cebo.length() < 7){
+    			cebo=StringUtils.rightPad(cebo, 7, '0');
+    		}
+    	}
+    	legacyCust.setCeBo(cebo);
+    }else{
+    	legacyCust.setCeBo("");
+    }
+    
     if (!StringUtils.isBlank(data.getSalesTeamCd())) {
       legacyCust.setSalesGroupRep(data.getSalesTeamCd());
     } else {
@@ -1208,6 +1223,16 @@ public class CEETransformer extends EMEATransformer {
       } else {
         cust.setBankBranchNo(muData.getNewEntpName1());
       }
+    }
+    
+    if(SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())){
+    	if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
+    		if ("@".equals(muData.getSpecialTaxCd())) {
+    			cust.setTaxCd("");
+    		} else {
+    			cust.setTaxCd(muData.getSpecialTaxCd());
+    		}
+    	}    	
     }
 
     // RABXA :Bank Account Number
@@ -1326,7 +1351,7 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      if ("@".equals(muData.getCollectionCd())) {
+      if ("@".equals(muData.getVat())) {
         cust.setVat("");
       } else {
         cust.setVat(muData.getVat());

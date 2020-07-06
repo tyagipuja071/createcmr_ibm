@@ -67,9 +67,9 @@ public class AustriaUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     String custNm1 = soldTo.getCustNm1();
-    String custNm2 =  !StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
-    String custNm3 =  !StringUtils.isBlank(soldTo.getCustNm3()) ? " " + soldTo.getCustNm3() : "";
-    String customerName = custNm1 + custNm2 + custNm3 ;
+    String custNm2 = !StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
+    String custNm3 = !StringUtils.isBlank(soldTo.getCustNm3()) ? " " + soldTo.getCustNm3() : "";
+    String customerName = custNm1 + custNm2 + custNm3;
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -379,7 +379,7 @@ public class AustriaUtil extends AutomationUtil {
       break;
     }
 
-    if (sbo != null) {
+    if (StringUtils.isNotBlank(sbo)) {
       details.append("Setting SBO to " + sbo + " based on IMS mapping rules.");
       overrides.addOverride(covElement.getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sbo);
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);

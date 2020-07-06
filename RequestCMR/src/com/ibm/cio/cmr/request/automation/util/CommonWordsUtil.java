@@ -98,6 +98,17 @@ public class CommonWordsUtil {
     addEqual("9th", "ninth");
     addEqual("10th", "tenth");
     addEqual("bhd", "berhad");
+    addEqual("1", "one");
+    addEqual("2", "two");
+    addEqual("3", "three");
+    addEqual("4", "four");
+    addEqual("5", "five");
+    addEqual("6", "six");
+    addEqual("7", "seven");
+    addEqual("8", "eight");
+    addEqual("9", "nine");
+    addEqual("0", "zero");
+    addEqual("mfg", "manufacturing");
 
     addIrrelevant("llc", "gmbh");
 

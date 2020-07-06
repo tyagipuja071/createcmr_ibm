@@ -684,6 +684,38 @@ function cmrNoValidatorForInternalScenario() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function validateExistCMRNum() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number...');
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (reqType == 'C' && cmrNo) {
+          var exists = cmr.query('GETCMRNUMFORPROCESSOR', {
+            CNTRY : cntry,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+          if (exists && exists.ret1) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -737,6 +769,7 @@ dojo.addOnLoad(function() {
   
   //For Legacy PT,CY,GR 
   GEOHandler.registerValidator(cmrNoValidator, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistCMRNum, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(cmrNoValidatorForInternalScenario, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);

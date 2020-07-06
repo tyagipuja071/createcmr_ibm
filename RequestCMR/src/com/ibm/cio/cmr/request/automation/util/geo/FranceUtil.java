@@ -392,8 +392,7 @@ public class FranceUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     Addr zs01 = requestData.getAddress("ZS01");
     details.append("\n");
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)
-        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       // If calculated using buying group then skip any other calculation
       FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboValue = "";
@@ -435,8 +434,8 @@ public class FranceUtil extends AutomationUtil {
           CoverageContainer coverage = coverages.get(0);
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, container, CalculateCoverageElement.FINAL, null,
-              null, true);
+          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
+              CalculateCoverageElement.COV_REQ, true);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {
