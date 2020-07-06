@@ -3546,6 +3546,8 @@ function setISRValuesGR() {
     FormManager.readOnly('repTeamMemberNo');
   } else if (custSubGrp == 'INTER'  || custSubGrp == 'XINTR') {
     FormManager.setValue('repTeamMemberNo', '000000');
+  } else if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && _isScenarioChanged && FormManager.getActualValue('repTeamMemberNo') == '') {
+    FormManager.setValue('repTeamMemberNo', '200005' );
   }
   var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   setEnterprise(repTeamMemberNo);
