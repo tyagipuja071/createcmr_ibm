@@ -223,6 +223,7 @@ public class EMEAHandler extends BaseSOFHandler {
           int zd01count = 0;
 
           boolean isNewCmrRecordsGR = false;
+          boolean seq5Exist = false;
           if ("726".equals(cmrIssueCd)) {
             isNewCmrRecordsGR = checkIfNewCmrRecords(source.getItems());
           }
@@ -274,6 +275,9 @@ public class EMEAHandler extends BaseSOFHandler {
             if ("862".equals(cmrIssueCd)) {
               seqNo = record.getCmrAddrSeq();
               System.out.println("seqNo = " + seqNo);
+              if ("5".equals(seqNo)) {
+                seq5Exist = true;
+              }
               if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
                 addrType = record.getCmrAddrTypeCode();
                 if (!StringUtils.isEmpty(addrType)) {
@@ -381,7 +385,11 @@ public class EMEAHandler extends BaseSOFHandler {
             FindCMRRecordModel newzi01 = new FindCMRRecordModel();
             PropertyUtils.copyProperties(newzi01, mainRecord);
             newzi01.setCmrAddrTypeCode("ZI01");
-            newzi01.setCmrAddrSeq("00005");
+            if (!seq5Exist) {
+              newzi01.setCmrAddrSeq("00005");
+            } else {
+              newzi01.setCmrAddrSeq("00006");
+            }
             newzi01.setParentCMRNo("");
             newzi01.setCmrSapNumber("");
 
