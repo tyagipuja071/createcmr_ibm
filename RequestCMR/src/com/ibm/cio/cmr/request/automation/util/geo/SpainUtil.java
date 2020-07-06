@@ -240,7 +240,7 @@ public class SpainUtil extends AutomationUtil {
             // new address
             if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-              checkDetails.append("Addition of new ZD01 and ZD02(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              checkDetails.append("Addition of new ZD01 and ZS02(" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
             } else if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Customer Name")
                 && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
               LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
@@ -289,7 +289,7 @@ public class SpainUtil extends AutomationUtil {
   public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
-    String address = "";
+    String address = "ZS01";
 
     LOG.debug("Address for the scenario to check: " + scenario);
     if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
