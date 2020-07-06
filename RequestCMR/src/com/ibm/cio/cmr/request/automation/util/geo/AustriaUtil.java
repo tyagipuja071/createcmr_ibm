@@ -145,6 +145,7 @@ public class AustriaUtil extends AutomationUtil {
           cmdeReview = true;
         }
         break;
+      case "Sensitve Flag":
       case "ISIC":
       case "Subindustry":
       case "INAC/NAC Code":
