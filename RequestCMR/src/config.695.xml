@@ -81,7 +81,7 @@
 					<label>Engineering BO</label>
 					<dbColumn>ENGINEERING_BO</dbColumn>
 					<width>15</width>
-					<length>6</length>					
+					<length>7</length>					
 				</column>
 				
 				<column>
