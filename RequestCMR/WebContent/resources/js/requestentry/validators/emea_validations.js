@@ -3654,12 +3654,20 @@ function addHandlersForGRCYTR() {
     _gtcAddrTypeHandler[i] = null;
     if (_gtcAddrTypeHandler[i] == null) {
       _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value) {
-        convertToUpperCaseGR();
         disableAddrFieldsGRCYTR();
-        disableAddrFieldsGR();
-        preFillTranslationAddrWithSoldToForGR();
-        preFillTranslationAddrWithSoldToForTR();
         disableTaxOfficeTR();
+       	preFillTranslationAddrWithSoldToForTR();
+       	
+       	if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+          convertToUpperCaseGR();
+          disableAddrFieldsGR();
+          preFillTranslationAddrWithSoldToForGR();    
+       	}
+       	
+       	if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS){
+          disableAddrFieldsCY();
+       	}
+       	
       });
     }
   }
@@ -3668,6 +3676,24 @@ function addHandlersForGRCYTR() {
     _gtcVatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       setVatValidatorGRCYTR();
     });
+  }
+}
+
+function disableAddrFieldsCY(){
+  
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS && FormManager.getActualValue('addrType') != 'ZS01') {
+    FormManager.setValue('taxOffice', '');
+    FormManager.disable('taxOffice');
+  } else {
+    FormManager.enable('taxOffice');
+  }
+  
+  if ((FormManager.getActualValue('addrType') == 'ZS01' || FormManager
+      .getActualValue('addrType') == 'ZD01')) {
+    FormManager.enable('custPhone');
+  } else {
+    FormManager.setValue('custPhone', '');
+    FormManager.disable('custPhone');
   }
 }
 
@@ -3767,6 +3793,8 @@ function setISRValuesGR() {
     FormManager.readOnly('repTeamMemberNo');
   } else if (custSubGrp == 'INTER'  || custSubGrp == 'XINTR') {
     FormManager.setValue('repTeamMemberNo', '000000');
+  } else if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && _isScenarioChanged && FormManager.getActualValue('repTeamMemberNo') == '') {
+    FormManager.setValue('repTeamMemberNo', '200005' );
   }
   var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   setEnterprise(repTeamMemberNo);
@@ -8989,5 +9017,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAddrFunction(disableAddrFieldsCY, [ SysLoc.CYPRUS ]);
 
 });
