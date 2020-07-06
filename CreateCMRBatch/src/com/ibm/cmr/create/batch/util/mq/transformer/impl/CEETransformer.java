@@ -1126,7 +1126,19 @@ public class CEETransformer extends EMEATransformer {
     } else {
       legacyCust.setLangCd("");
     }
-
+    
+    String cebo = data.getEngineeringBo();
+    if(!StringUtils.isBlank(cebo)){
+    	if(SystemLocation.SERBIA.equals(data.getCmrIssuingCntry())){
+    		if(cebo.length() < 7){
+    			cebo=StringUtils.rightPad(cebo, 7, '0');
+    		}
+    	}
+    	legacyCust.setCeBo(cebo);
+    }else{
+    	legacyCust.setCeBo("");
+    }
+    
     if (!StringUtils.isBlank(data.getSalesTeamCd())) {
       legacyCust.setSalesGroupRep(data.getSalesTeamCd());
     } else {
