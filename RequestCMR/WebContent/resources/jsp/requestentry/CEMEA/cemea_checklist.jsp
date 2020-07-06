@@ -19,20 +19,15 @@
 <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label=" Customer Company: ">
      ${reqentry.mainCustNm1} ${reqentry.mainCustNm2}
      </cmr:chk-lbl-field>
-  <br>
    <cmr:chk-lbl-field addSpace="true" boldLabel="true" labelWidth="40%" label="Address: ">
    <%=RequestUtils.generateChecklistLocalAddress(request)%>
   </cmr:chk-lbl-field>
     </cmr:chk-section>
-    <br>
-    <br>
   <cmr:chk-section name="DPL Check" >
     <cmr:chk-entry dplField="true">
        <span style="font-weight:bold">Is the customer/vendor on the Denied Party List ?</span>
     </cmr:chk-entry>
   </cmr:chk-section>
-  <br>
-  <br>
     <cmr:chk-section name="Section A:  Diversion Risk Assessment" >
     <cmr:chk-entry number="1" section="A">
       The order (hardware, software, solution) does not match the customer's business requirements.    
@@ -50,8 +45,6 @@
       There is an indication that the products/services are destined for <span style="font-weight: bold;">restricted countries (Cuba, Iran, Sudan, North Korea, & Syria)</span>.   
     </cmr:chk-entry>
   </cmr:chk-section>
-  <br>
-  <br>
   <cmr:chk-section name="Section B: Proliferation" >
   
     <cmr:chk-entry number="1" section="B">
@@ -84,8 +77,6 @@
      </ul>
     </cmr:chk-entry>
     </cmr:chk-section>
-    <br>
-    <br>
     <cmr:chk-section name="Section C: Military" > 
     <cmr:chk-entry number="1" section="C">To the best of your knowledge or belief is your customer involved in
      <span style="font-weight: bold; text-decoration: underline"> Defense and/or Military*</span> activities? 
