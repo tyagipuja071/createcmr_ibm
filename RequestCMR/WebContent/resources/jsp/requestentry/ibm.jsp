@@ -195,7 +195,8 @@ dojo.addOnLoad(function(){
               <cmr:delta text="${rdcdata.enterprise}" oldValue="${reqentry.enterprise}" />
           </cmr:label>
           <cmr:field id="enterprise" path="enterprise" fieldId="Enterprise" tabId="MAIN_IBM_TAB" />  
-          <cmr:view forCountry="618">
+    <!-- Austria - Removal of logic for Company number -->
+<%--           <cmr:view forCountry="618">
 			       <%
   			       if (reqentry.getReqType().equalsIgnoreCase("C")) {
   			       String findCmrJs = "onclick=\"importByEnterprise()\"";
@@ -207,7 +208,7 @@ dojo.addOnLoad(function(){
              <%
                }
              %>
-          </cmr:view>        
+          </cmr:view>  --%>       
         </p>
       </cmr:column>
       <cmr:column span="2" containerForField="Company" exceptForCountry="666,726,862,822,838,724" exceptForGEO="MCO1,MCO2,CEMEA,BELUX,NL">
