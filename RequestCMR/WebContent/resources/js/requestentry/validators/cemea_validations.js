@@ -2640,34 +2640,45 @@ function filterCmrnoForCEE() {
   });
 }
 
-function setPPSCEIDMandatory() {
-  // var reqType = null;
-  // if (typeof (_pagemodel) != 'undefined') {
-  // reqType = FormManager.getActualValue('reqType');
-  // }
+function toggleBPRelMemTypeForTurkey() {
+  var reqType = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var custType = FormManager.getActualValue('custSubGrp');
-  if (custType == 'BUSPR' || custType == 'XBP') {
-    FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  if (reqType == 'U') {
+    FormManager.show('MembLevel', 'memLvl');
+    FormManager.show('BPRelationType', 'bpRelType');
+    FormManager.resetValidations('bpRelType');
+    FormManager.resetValidations('memLvl');
   } else {
-    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-  }
-}
-
-var _custSubTypeHandlerForCEE = null;
-function addHandlerForCustSubTypeOnchangeForCEE() {
-  if (_custSubTypeHandler == null) {
-    _custSubTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      setPPSCEIDMandatory();
-    });
+    var _custType = FormManager.getActualValue('custSubGrp');
+    if (_custType == 'BUSPR' || _custType == 'XBP') {
+      FormManager.show('PPSCEID', 'ppsceid');
+      FormManager.show('MembLevel', 'memLvl');
+      FormManager.show('BPRelationType', 'bpRelType');
+      FormManager.resetValidations('ppsceid');
+      FormManager.resetValidations('bpRelType');
+      FormManager.resetValidations('memLvl');
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('memLvl', Validators.REQUIRED, [ 'Membership Level' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('bpRelType', Validators.REQUIRED, [ 'BP Relation Type' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.hide('PPSCEID', 'ppsceid');
+      FormManager.hide('MembLevel', 'memLvl');
+      FormManager.hide('BPRelationType', 'bpRelType');
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+      FormManager.removeValidator('memLvl', Validators.REQUIRED);
+      FormManager.removeValidator('bpRelType', Validators.REQUIRED);
+    }
   }
 }
 
 function afterConfigForCEE() {
   filterCmrnoForCEE();
-  addHandlerForCustSubTypeOnchangeForCEE();
+  toggleBPRelMemTypeForTurkey();
 }
 
 dojo.addOnLoad(function() {
