@@ -4316,10 +4316,10 @@ function setCustSubTypeBpGRTRCY() {
     }
     // Control Classification Code
     if (custType == 'BUSPR' || custType == 'XBP') {
-      FormManager.show('custClass', 'custClass');
+      FormManager.show('CustClass', 'custClass');
       FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
     } else {
-      FormManager.hide('custClass', 'custClass');
+      FormManager.hide('CustClass', 'custClass');
       FormManager.setValue('custClass', '');
       FormManager.resetValidations('custClass');
     }
