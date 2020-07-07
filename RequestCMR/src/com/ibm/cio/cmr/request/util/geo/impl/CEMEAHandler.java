@@ -1164,7 +1164,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getAgreementSignDate(), "AECISubDate", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd()) && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getLegacyCurrencyCd(), "CurrencyCode", cmrCountry));

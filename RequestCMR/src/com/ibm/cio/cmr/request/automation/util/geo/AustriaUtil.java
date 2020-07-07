@@ -140,11 +140,12 @@ public class AustriaUtil extends AutomationUtil {
 
         }
         break;
-      case "Order Block Code":
+      case "Central order block code":
         if ("94".equals(change.getOldData()) || "94".equals(change.getNewData())) {
           cmdeReview = true;
         }
         break;
+      case "Sensitive Flag":
       case "ISIC":
       case "Subindustry":
       case "INAC/NAC Code":
