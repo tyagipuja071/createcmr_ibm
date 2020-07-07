@@ -134,7 +134,8 @@ public class CEMEAHandler extends BaseSOFHandler {
   public static final List<String> CEMEA_POSTAL_FORMAT = Arrays.asList("603", "607", "644", "651", "740", "705", "708", "626", "694", "695", "826",
       "821", "363", "359", "741", "699", "704", "707", "707", "889", "668", "693", "787", "820", "358");
 
-  private static final String[] CIS_DUPLICATE_COUNTRIES = { "607", "358", "626", "651", "694", "695", "787", "363", "359", "889", "741" };
+  private static final List<String> CIS_DUPLICATE_COUNTRIES = Arrays.asList("607", "358", "626", "651", "694", "695", "787", "363", "359", "889",
+      "741");
   
   protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
   "Install At" };
@@ -932,7 +933,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       loadDuplicateCMR(data, data.getDupIssuingCntryCd(), mainRecord.getCmrNum());
     } else if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       // Not ticked - check and load CIS duplicate fields
-      for (String dupCntry : Arrays.asList(CIS_DUPLICATE_COUNTRIES)) {
+      for (String dupCntry : CIS_DUPLICATE_COUNTRIES) {
         if (loadDuplicateCMR(data, dupCntry, mainRecord.getCmrNum())) {
           data.setCisServiceCustIndc("Y");
           data.setDupIssuingCntryCd(dupCntry);
@@ -950,26 +951,31 @@ public class CEMEAHandler extends BaseSOFHandler {
     dupRecord.setCmrIssuedBy(dupCntry);
     dupRecord.setCmrNum(dupCmrNo);
     // retrieveSOFValues(dupRecord);
+    boolean checks = dupCMRExists(dupCntry, dupCmrNo);
+    LOG.debug("dupCMRExists: " + checks);
+    LOG.debug("dupCmrNo: " + dupCmrNo);
 
+    if (checks) {
     if (this.currentImportValues != null && !this.currentImportValues.isEmpty()) {
       String abbrevNm = this.currentImportValues.get("CompanyName");
       if (!StringUtils.isEmpty(abbrevNm) && abbrevNm.endsWith(" CIS")) {
         data.setDupEnterpriseNo(this.currentImportValues.get("EnterpriseNo"));
-        LOG.trace("EnterpriseNo2: " + data.getDupEnterpriseNo());
+          LOG.debug("EnterpriseNo2: " + data.getDupEnterpriseNo());
         data.setDupSalesRepNo(this.currentImportValues.get("SR"));
-        LOG.trace("SalRepNameNo2: " + data.getDupSalesRepNo());
+          LOG.debug("SalRepNameNo2: " + data.getDupSalesRepNo());
         data.setDupSalesBoCd(this.currentImportValues.get("SBO"));
-        LOG.trace("SalesBusOff2: " + data.getDupSalesBoCd());
+          LOG.debug("SalesBusOff2: " + data.getDupSalesBoCd());
 
         String isuCtc = this.currentImportValues.get("ISU");
         if (!StringUtils.isEmpty(isuCtc) && isuCtc.length() > 2) {
           data.setDupIsuCd(isuCtc.substring(0, 2));
-          LOG.trace("ISU2: " + data.getIsuCd());
+            LOG.debug("ISU2: " + data.getIsuCd());
           data.setDupClientTierCd(isuCtc.substring(2, 3));
-          LOG.trace("ClientTier2: " + data.getDupClientTierCd());
+            LOG.debug("ClientTier2: " + data.getDupClientTierCd());
         }
         return true;
-      }
+        }
+    }
     }
     return false;
   }
@@ -1510,7 +1516,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     query.addField("MANDT");
     query.addField("KUNNR");
 
-    LOG.debug("Getting existing SPRAS value from RDc DB..");
+    LOG.debug("Getting existing SPRAS value from RDc DB..For PARVW ");
     QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
     QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
 
@@ -1621,4 +1627,30 @@ public class CEMEAHandler extends BaseSOFHandler {
     return fields;
   }
 
+  private boolean dupCMRExists(String katr6, String cmrNo) throws Exception {
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("CEE.CHECKDUPCMR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + katr6 + "'");
+    sql = StringUtils.replace(sql, ":CMRNO", "'" + cmrNo + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("MANDT");
+    query.addField("KATR6");
+    query.addField("CMRNO");
+
+    LOG.debug("Check Dup CMR .. Getting existing SPRAS value from RDc DB.." + "KATR6 =" + katr6);
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
