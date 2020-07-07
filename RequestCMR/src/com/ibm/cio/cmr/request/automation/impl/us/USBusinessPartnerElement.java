@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +76,6 @@ import com.ibm.cmr.services.client.pps.PPSResponse;
 import com.ibm.cmr.services.client.query.QueryRequest;
 import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.json.java.JSONObject;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AutomationElement} handling the US - Business Partner End User

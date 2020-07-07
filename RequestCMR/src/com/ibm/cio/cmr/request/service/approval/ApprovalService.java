@@ -22,7 +22,6 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -46,6 +45,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
@@ -587,8 +587,10 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
   private void initEngine() {
     this.log.info("Initializing velocity engine for Approvals...");
     engine = new VelocityEngine();
-    engine.addProperty(Velocity.RESOURCE_LOADER, "classpath");
-    engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+    // engine.addProperty(Velocity.RESOURCE_LOADER, "classpath");
+    engine.addProperty(Velocity.FILE_RESOURCE_LOADER_PATH, ConfigUtil.getConfigDir());
+    // engine.setProperty("classpath.resource.loader.class",
+    // ClasspathResourceLoader.class.getName());
     engine.init();
   }
 

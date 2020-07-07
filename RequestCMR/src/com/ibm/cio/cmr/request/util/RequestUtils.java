@@ -49,7 +49,6 @@ import com.ibm.cio.cmr.request.model.requestentry.MassCreateBatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
-import com.ibm.cio.cmr.request.ui.UIMgr;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.external.CreateCMRBPHandler;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -627,9 +626,9 @@ public class RequestUtils {
     try {
       InputStream is = null;
       if (batchemailTemplate != null) {
-        is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email_batch.html");
+        is = ConfigUtil.getResourceStream("cmr-email_batch.html");
       } else {
-        is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email.html");
+        is = ConfigUtil.getResourceStream("cmr-email.html");
       }
 
       try {
@@ -658,7 +657,7 @@ public class RequestUtils {
 
   private static String getExternalEmailTemplate(String sourceSystId) {
     try {
-      InputStream is = UIMgr.class.getClassLoader().getResourceAsStream((sourceSystId.toLowerCase()) + ".html");
+      InputStream is = ConfigUtil.getResourceStream((sourceSystId.toLowerCase()) + ".html");
 
       try {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
@@ -689,7 +688,7 @@ public class RequestUtils {
   private static String getCMREmailTemplate() {
     StringBuilder sb = new StringBuilder();
     try {
-      InputStream is = UIMgr.class.getClassLoader().getResourceAsStream("cmr-email_mc.html");
+      InputStream is = ConfigUtil.getResourceStream("cmr-email_mc.html");
       try {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         try {
