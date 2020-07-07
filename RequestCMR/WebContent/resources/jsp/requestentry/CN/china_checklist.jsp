@@ -169,7 +169,6 @@
    To be completed by Marketing / Client Representative for new customers.
    <br>
    -->
-   Please indicate YES or NO to all questions in Sections A – C.
   </cmr:chk-block>
   
   <cmr:chk-section name="Section A" >
@@ -197,7 +196,7 @@
     </cmr:chk-entry>
     <cmr:chk-entry number="7" section="A">
       There is an indication that the customer or supplier is owned or controlled 
-      by the government of any of the sanctioned countries or region??   
+      by the government of any of the sanctioned countries or region?  
     </cmr:chk-entry>
     <cmr:chk-entry number="8" section="A">
       There is an indication (anywhere in the world) that our products will be used in the 
@@ -236,18 +235,14 @@
       Egypt, Iran, Iraq, Israel, Jordan, Kuwait, Korea (North), Lebanon, Libya, Macao, Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, United Arab Emirates, Yemen                                                            
     </cmr:chk-entry>
     <cmr:chk-entry number="2" section="B">
-      <span style="font-weight:bold;text-decoration:underline">Chemical or Biological Weapons</span> ----To the best of your knowledge or belief is your customer involved with design, development, production, stockpiling or use of Chemical or Biological Weapons in or by one of the countries listed below?    
-      <br>
-      <br>
-      Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, 
-      People's Republic of China,
-      Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macao, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Vietnam, Yemen
-    </cmr:chk-entry>
+      <span style="font-weight:bold;text-decoration:underline">Chemical or Biological Weapons</span> ----To the best of your knowledge or belief is your customer involved with design, development, production, stockpiling or use of Chemical or Biological Weapons involved with design, development, production, stockpiling or use of Chemical or Biological Weapons in or by one of the countries listed below?
+
+     Afghanistan, Armenia, Azerbaijan, Bahrain, Belarus, People's Republic of China, Cuba, Egypt, Georgia, Iran, Iraq, Israel, Jordan, Kazakhstan, Korea (North), Kuwait, Kyrgyzstan, Lebanon, Libya, Macao, Moldova, Mongolia, Myanmar (Burma), Oman, Pakistan, Qatar, Russia, Saudi Arabia, Syria, Taiwan, Tajikistan, Turkmenistan, United Arab Emirates, Uzbekistan, Vietnam, Yemen
+     </cmr:chk-entry>
     <cmr:chk-entry number="3" section="B">
-      <span style="font-weight:bold;text-decoration:underline">Nuclear</span> ----To the best of your knowledge or belief is your customer involved in nuclear activities in any of the 10 countries listed below? (USERP Section 4 Part 2.2.2)      
-      <br>
-      <br>
-      People's Republic of China, Cuba, India, Iran, Iraq, Israel, Korea(North), Libya, Pakistan, Russia 
+      <span style="font-weight:bold;text-decoration:underline">Nuclear</span> Nuclear ---To the best of your knowledge or belief is your customer involved in nuclear activities in any of the countries listed below?
+
+     People's Republic of China, Cuba, Iran, Iraq, Israel, Korea (North), Libya, Pakistan, Russia
     </cmr:chk-entry>
   </cmr:chk-section>
   
@@ -261,7 +256,7 @@
       <br>
       Afghanistan, Armenia, Azerbaijan, Belarus, Cambodia, People's Republic of China, Georgia, 
       Iraq, Kazakhstan, Korea (North), Kyrgyzstan, Laos, Libya,  
-      Macao, Moldova, Mongolia, Myanmar (Burma), Russia, Sudan, Tajikstan, Turkmenistan, Ukraine, Uzbekistan, Venezuela, Vietnam.                                                            
+      Macao, Moldova, Mongolia, Myanmar (Burma), Russia, Sudan, Tajikistan, Turkmenistan, Ukraine, Uzbekistan, Venezuela, Vietnam.                                                            
    <br>
      <span style="font-weight:bold;text-decoration:underline">Definitions </span>
      <br>
@@ -270,14 +265,7 @@
      <span style="font-weight:bold;">Military End Uses : </span>
       That will be directly part, component or subsystems of weapons or defense articles, or that indirectly supports or contributes to the operation, installation, maintenance, repair, overhaul, refurbishing, development or production of military items.
     
-    </cmr:chk-entry>
-    
-     
+    </cmr:chk-entry>     
   </cmr:chk-section>
-  
-    <cmr:chk-block boldText="true">
-   If any of the above questions have been answered YES, please STOP and CONTACT China S&D ERC (Zhou Bei Bei at NOTES ID: ZHOUBB@IBMCN) or legal counsel for further guidance. Transactions (with customers found to be engaged in prohibited activities) may only proceed as reviewed and authorized by IBM ERC and/or AP STC.
-   </cmr:chk-block>
-
 </cmr:checklist>
   
