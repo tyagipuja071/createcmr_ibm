@@ -119,7 +119,7 @@
 -->
 <!-- CMR - 4424 -->
 <cmr:checklist title1="China Customer Screening Checklist" title2="(Diversion Risk Profile / Proliferation / Military , Defense)">
-  <cmr:chk-block>
+ <!--   <cmr:chk-block>
     Customer Company Full Name
   </cmr:chk-block>
   <cmr:chk-lbl-field addSpace="false" labelWidth="12%" boldLabel="false" label="(in English):">
@@ -168,6 +168,7 @@
   <cmr:chk-block>Transactions (with customers found DPL matched) may only proceed as reviewed and authorized by IBM ERO (Export Regulation Office) and/or AP STC (Sensitive Transaction Council).
    To be completed by Marketing / Client Representative for new customers.
    <br>
+   -->
    Please indicate YES or NO to all questions in Sections A – C.
   </cmr:chk-block>
   
