@@ -222,7 +222,16 @@ public class RequestUtils {
 
     service.createEntity(hist, entityManager);
 
-    sendEmailNotifications(entityManager, admin, hist);
+    if (StringUtils.isNotEmpty(admin.getSourceSystId())) {
+      String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+      String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+
+      if (!"Y".equals(onlySkipPartner)) {
+        sendEmailNotifications(entityManager, admin, hist);
+      }
+
+    }
+    // sendEmailNotifications(entityManager, admin, hist);
   }
 
   public static void createWorkflowHistory(BaseService<?, ?> service, EntityManager entityManager, String user, Admin admin, String cmt,
@@ -260,7 +269,17 @@ public class RequestUtils {
 
     service.createEntity(hist, entityManager);
 
-    sendEmailNotifications(entityManager, admin, hist);
+    if (StringUtils.isNotEmpty(admin.getSourceSystId())) {
+      String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+      String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+
+      if (!"Y".equals(onlySkipPartner)) {
+        sendEmailNotifications(entityManager, admin, hist);
+      }
+
+    }
+
+    // sendEmailNotifications(entityManager, admin, hist);
   }
 
   private static void completeLastHistoryRecord(EntityManager entityManager, long reqId) {
