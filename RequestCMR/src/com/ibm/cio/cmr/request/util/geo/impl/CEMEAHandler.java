@@ -1074,7 +1074,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 			results.add(update);
 		}
 		if (RequestSummaryService.TYPE_IBM.equals(type)
-				&& !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())) {
+				&& !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd()) && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
 			update = new UpdatedDataModel();
 			update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
 			update.setNewData(service.getCodeAndDescription(newData.getLegacyCurrencyCd(), "CurrencyCode", cmrCountry));
