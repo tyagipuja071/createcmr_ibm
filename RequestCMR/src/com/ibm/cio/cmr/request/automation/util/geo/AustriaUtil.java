@@ -158,7 +158,7 @@ public class AustriaUtil extends AutomationUtil {
       case "ISU Code":
         // noop, for switch handling only
         break;
-      case "MUBOTY(SORTL)":
+      case "SBO":
         // noop, for switch handling only
         break;
       default:
