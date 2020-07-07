@@ -84,7 +84,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private static final String[] GREECE_CYPRUS_TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
       "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department" };
+      "Floor", "Building", "County", "City2", "Department","INACType" };
 
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
