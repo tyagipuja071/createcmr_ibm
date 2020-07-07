@@ -68,9 +68,9 @@ public class SpainUtil extends AutomationUtil {
     LOG.debug("Scenario to check: " + scenario);
 
     if ("C".equals(requestData.getAdmin().getReqType())) {
-      if (!SCENARIO_THIRD_PARTY.equals(scenario) || !SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
+      if (!SCENARIO_THIRD_PARTY.equals(scenario) && !SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
         if (!addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
-          engineData.addRejectionComment("SCENARIO_CHECK", "‘3rd Party should be selected’.", "", "");
+          engineData.addRejectionComment("SCENARIO_CHECK", "3rd Party should be selected.", "", "");
           details.append("Scenario should be 3rd Party");
           return false;
 
