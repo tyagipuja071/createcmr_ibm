@@ -51,6 +51,7 @@ if (readOnly == null){
 <%} %>
 
 </cmr:row>
+<cmr:view exceptForCountry="641">
       <cmr:row topPad="10">
 <%if (!readOnly){ %>
         <cmr:column span="2" >
@@ -61,3 +62,4 @@ if (readOnly == null){
           </cmr:column>
 <%}%>
           </cmr:row>
+</cmr:view>
