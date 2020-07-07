@@ -970,4 +970,26 @@ public abstract class AutomationUtil {
     // NOOP
   }
 
+  public boolean addressEquals(Addr addr1, Addr addr2) {
+    String addr1Details = null;
+    String addr2Details = null;
+    if (addr1 != null && addr2 != null) {
+      addr1Details = (StringUtils.isNotBlank(addr1.getCustNm1()) ? addr1.getCustNm1().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getCustNm2()) ? addr1.getCustNm2().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getAddrTxt()) ? addr1.getAddrTxt().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getCity1()) ? addr1.getCity1().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getPostCd()) ? addr1.getPostCd().trim() : "");
+      addr2Details = (StringUtils.isNotBlank(addr2.getCustNm1()) ? addr2.getCustNm1().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getCustNm2()) ? addr2.getCustNm2().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getAddrTxt()) ? addr2.getAddrTxt().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getCity1()) ? addr2.getCity1().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getPostCd()) ? addr2.getPostCd().trim() : "");
+    }
+    if (addr1Details.equalsIgnoreCase(addr2Details)) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
 }

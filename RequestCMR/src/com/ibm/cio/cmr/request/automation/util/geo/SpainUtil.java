@@ -58,17 +58,50 @@ public class SpainUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     Addr soldTo = requestData.getAddress("ZS01");
     String customerName = soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
-
+    if (StringUtils.isBlank(scenario)) {
+      details.append("Scenario not correctly specified on the request");
+      engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
+      return true;
+    }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
 
     LOG.debug("Scenario to check: " + scenario);
 
+    if ("C".equals(requestData.getAdmin().getReqType())) {
+      if (!SCENARIO_THIRD_PARTY.equals(scenario) || !SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
+        if (!addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
+          engineData.addRejectionComment("SCENARIO_CHECK", "‘3rd Party should be selected’.", "", "");
+          details.append("Scenario should be 3rd Party");
+          return false;
+
+        }
+      } else {
+        if (addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
+          engineData.addRejectionComment("SCENARIO_CHECK", "‘Billing and installing address should be different’.", "", "");
+          details.append("For 3rd Party Billing and installing address should be different");
+          return false;
+
+        }
+      }
+    }
+
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
-      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, true);
+      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_BUSINESS_PARTNER_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+    case SCENARIO_INTERNAL:
+    case SCENARIO_INTERNAL_SO:
+      Addr mailTo = requestData.getAddress("ZP01");
+      String customerName2 = (StringUtils.isNotBlank(mailTo.getCustNm1()) ? mailTo.getCustNm1().trim() : "")
+          + (!StringUtils.isBlank(mailTo.getCustNm2()) ? " " + mailTo.getCustNm2() : "");
+      if (!customerName2.toUpperCase().contains("IBM") && !customerName.toUpperCase().contains("IBM")) {
+        details.append("Mailing and Billing addresses should have IBM in them.");
+        engineData.addRejectionComment("SCENARIO_CHECK", "‘Mailing and Billing addresses should have IBM in them.’.", "", "");
+        return false;
+      }
+
     }
     return true;
   }
