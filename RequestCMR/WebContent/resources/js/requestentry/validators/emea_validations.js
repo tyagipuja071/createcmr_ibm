@@ -5115,6 +5115,7 @@ function showCommercialFinanced() {
     FormManager.hide('CommercialFinanced', 'commercialFinanced');
   } else {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
+    FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [ 'R', 'S', 'T' ]);
     FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER') {
