@@ -4536,10 +4536,10 @@ function setCustSubTypeBpGRTRCY() {
     }
     // Control Classification Code
     if (custType == 'BUSPR' || custType == 'XBP') {
-      FormManager.show('custClass', 'custClass');
+      FormManager.show('CustClass', 'custClass');
       FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
     } else {
-      FormManager.hide('custClass', 'custClass');
+      FormManager.hide('CustClass', 'custClass');
       FormManager.setValue('custClass', '');
       FormManager.resetValidations('custClass');
     }
@@ -5335,6 +5335,7 @@ function showCommercialFinanced() {
     FormManager.hide('CommercialFinanced', 'commercialFinanced');
   } else {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
+    FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [ 'R', 'S', 'T' ]);
     FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER') {

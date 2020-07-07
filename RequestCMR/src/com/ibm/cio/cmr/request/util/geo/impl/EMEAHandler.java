@@ -84,8 +84,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private static final String[] GREECE_CYPRUS_TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
       "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department" };
+      "Floor", "Building", "County", "City2", "Department","INACType" };
 
+  private static final String[] TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
+	      "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
+	      "Floor", "Building", "County", "City2", "Department","INACType","SalRepNameNo" };
+  
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
 
@@ -2929,7 +2933,7 @@ public class EMEAHandler extends BaseSOFHandler {
     case SystemLocation.CYPRUS:
       return Arrays.asList(GREECE_CYPRUS_TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     case SystemLocation.TURKEY:
-      return Arrays.asList(GREECE_CYPRUS_TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+      return Arrays.asList(TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
     }
     return false;
   }
