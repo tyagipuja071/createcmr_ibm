@@ -1736,12 +1736,6 @@ function applyAddrChangesModal_onLoad() {
       if (useCntry && type.ret3 != cntry) {
         break;
       }
-
-      // update For TR
-
-      if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
-        break;
-      }
       
       if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
     	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {

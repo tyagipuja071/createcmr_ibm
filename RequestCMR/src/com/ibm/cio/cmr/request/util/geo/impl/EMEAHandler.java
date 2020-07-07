@@ -3374,6 +3374,8 @@ public class EMEAHandler extends BaseSOFHandler {
       return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01");
     } else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
       return Arrays.asList("ZP01", "ZS01");
+    } else if (SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01", "ZS02");
     }
     return null;
   }
@@ -3397,6 +3399,10 @@ public class EMEAHandler extends BaseSOFHandler {
     if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
       return Arrays.asList("ZD01", "ZI01");
     }
+    if (SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZD01", "ZI01");
+    }
+
     return null;
   }
 
