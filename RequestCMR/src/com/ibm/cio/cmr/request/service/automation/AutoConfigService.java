@@ -389,7 +389,10 @@ public class AutoConfigService extends BaseSimpleService<Map<String, Object>> {
           mapping = entityManager.find(AutoEngineMapping.class, pk);
           if (mapping != null) {
             LOG.debug("Removing country " + country + " from config " + model.getConfigId());
-            entityManager.remove(mapping);
+            AutoEngineMapping merged = entityManager.merge(mapping);
+            if (merged != null) {
+              entityManager.remove(merged);
+            }
           }
           if (country.length() == 3) {
             SuppCntryPK suppPk = new SuppCntryPK();
@@ -563,7 +566,10 @@ public class AutoConfigService extends BaseSimpleService<Map<String, Object>> {
         exc = entityManager.find(ScenarioExceptions.class, pk);
         if (exc != null) {
           LOG.debug("Removing exception for " + model.getCmrIssuingCntry() + " - " + model.getCustTyp() + "/" + model.getCustSubTyp());
-          entityManager.remove(exc);
+          ScenarioExceptions merged = entityManager.merge(exc);
+          if (merged != null) {
+            entityManager.remove(merged);
+          }
         }
         break;
       case "M":

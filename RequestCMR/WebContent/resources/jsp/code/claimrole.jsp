@@ -233,7 +233,7 @@
         </cmr:column>
         <cmr:column span="2">
           <p>
-            <form:input path="status" dojoType="dijit.form.TextBox" />
+            <form:input path="status" maxlength="1" dojoType="dijit.form.TextBox" />
           </p>
         </cmr:column>
       </cmr:row>

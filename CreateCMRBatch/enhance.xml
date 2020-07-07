@@ -8,14 +8,6 @@
 	
 	<!-- Environment variables -->
 	<property environment="env"/>
-	<property name="ws.runtime.dir" value="${WAS85_HOME_DIR}" />
-	<property name="ws.plugins.dir" value="${ws.runtime.dir}/plugins" />
-	<property name="ws.lib.dir" value="${ws.runtime.dir}" />
-	<property name="ws.runtimes.dir" value="${ws.runtime.dir}/runtimes" />
-	<property name="jpa.jar" value="com.ibm.ws.jpa.jar" />
-	<property name="j2ee.jar" value="j2ee.jar" />
-	<property name="thinclient.jar" value="com.ibm.ws.jpa.thinclient_8.5.0.jar" />
-  <property name="jpa.enhancer.class" value="org.apache.openjpa.ant.PCEnhancerTask" />
 	
 	
 	<!-- App Variables -->
@@ -27,47 +19,28 @@
 	<property name="batch.jar" value="application/CreateCMRBatch.jar" />
 	
 	
-	<path id="enhance.cp">
-    <pathelement location="${batch.app}" />
-    <pathelement location="build" />
-		<fileset dir="${ws.plugins.dir}">
-			<include name="${jpa.jar}" />
-		</fileset>
-		<fileset dir="${ws.lib.dir}">
-			<include name="${j2ee.jar}" />
-		</fileset>
-		<fileset dir="${ws.runtimes.dir}">
-			<include name="${thinclient.jar}" />
-		</fileset>
-		<fileset dir="${web.lib}">
-			<include name="*.jar" />
-		</fileset>
-	</path>
-	<property name="cp" refid="enhance.cp" />
-
-	<target name="create-enhanced-jar" depends="enhance-jpa">
+	<target name="create-enhanced-jar" depends="prepare-enhance">
 		 <echo>Creating Enhanced Batch Jar</echo>
 		 <jar destfile="application/CreateCMRBatch.jar">
 		 	 <fileset dir="build"></fileset>
 		 </jar>
 <!--   <delete dir="build" /> -->
-		<delete file="application/log4j.properties"/>
   </target>
 	
 	<target name="prepare-enhance">
 		<echo>Creating Build Dir</echo>
     <delete dir="build" />
 		<mkdir dir="build"/>
-		<echo>Creating dummy log4j</echo>
-		<copy file="application/batch-log4j.properties" tofile="application/log4j.properties" />
 		<echo>Copying web and batch classes</echo>
 		<copy todir="build">
       <fileset dir="${batch.classes}" includes="**/*.class" />
 			 <fileset dir="${web.classes}" includes="**/*.class" />
        <fileset dir="${web.classes}" includes="**/*.properties" />
+      <fileset dir="${web.classes}" includes="**/*.xml" />
 		</copy>
 	</target>
-	
+
+	<!--
 	<target name="enhance-jpa" depends="prepare-enhance">
 		<echo message="Classpath used for enhancer" />
 		<echo message="  - ${cp}" />
@@ -79,4 +52,5 @@
 		</openjpac>
 		<echo message="JPA enhancement successfull" />
 	</target>
+	--> 
 </project>

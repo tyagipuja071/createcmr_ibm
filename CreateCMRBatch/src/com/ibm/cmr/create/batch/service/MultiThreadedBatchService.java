@@ -40,7 +40,7 @@ public abstract class MultiThreadedBatchService extends BaseBatchService {
     LOG.debug("Retrieving requests to process..");
     // get first all request ids using one entitymanager
     Queue<Long> requestIds = null;
-    EntityManager entityManager = JpaManager.getEntityManager(getPersistenceUnitName());
+    EntityManager entityManager = JpaManager.getEntityManager();
     try {
       requestIds = getRequestsToProcess(entityManager);
       if (requestIds == null || requestIds.isEmpty()) {
