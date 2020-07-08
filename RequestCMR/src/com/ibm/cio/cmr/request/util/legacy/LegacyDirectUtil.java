@@ -787,6 +787,9 @@ public class LegacyDirectUtil {
     List<String> tempList = new ArrayList<String>();
     // if (SystemLocation.UNITED_KINGDOM.equals(cntry) ||
     // SystemLocation.IRELAND.equals(cntry)) {
+    if(SystemLocation.TURKEY.equals(cntry)){
+    	FIELDS_CLEAR_LIST.add("CommercialFinanced");
+    }
     if (FIELDS_CLEAR_LIST.contains(fieldId)) {
       LOG.debug("***Field " + fieldId + " is on clear list. Adding '@'");
       if (codeOnly) {
