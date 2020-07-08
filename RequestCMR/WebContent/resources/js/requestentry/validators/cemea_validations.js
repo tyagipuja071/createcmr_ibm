@@ -225,7 +225,12 @@ function setAustriaUIFields() {
     FormManager.setValue("enterprise", "");
     FormManager.readOnly("enterprise");
   }
-
+  // PPS CEID locked for other than BP scenario
+  if (custSubType != null && custSubType != '' && custSubType != 'BUSPR' && custSubType != 'XBP') {
+    FormManager.readOnly("ppsceid");
+  } else {
+    FormManager.enable("ppsceid");
+  }
 }
 
 /**
