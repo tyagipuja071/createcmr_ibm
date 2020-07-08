@@ -1598,7 +1598,7 @@ function addCmrNoValidatorForCEE() {
           return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
         } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
           return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
-        } else if (cmrNo != '' && custSubType != '' && cmrNo.startsWith('99')) {
+        } else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER') && cmrNo.startsWith('99')) {
           return new ValidationResult(null, false, 'CMR Number should be in 99XXXX for scenarios');
         } else {
           var qParams = {
