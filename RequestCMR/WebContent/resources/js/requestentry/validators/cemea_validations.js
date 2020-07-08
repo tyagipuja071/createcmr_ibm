@@ -150,6 +150,15 @@ function afterConfigForCEMEA() {
       FormManager.enable('custClass');
     }
   }
+
+  if (FormManager.getActualValue('cmrIssuingCntry') == '618') {
+    if (custSubType == 'BUSPR' || custSubType == 'XBP') {
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    }
+  }
+
   setAustriaUIFields();
   setExpediteReason();
   setTypeOfCustomerRequiredProcessor();
