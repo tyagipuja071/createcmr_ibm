@@ -57,7 +57,7 @@ public class AustriaUtil extends AutomationUtil {
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
 
-  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "FAX", "Customer Name 4");
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone number", "FAX", "Customer Name 4");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -149,10 +149,8 @@ public class AustriaUtil extends AutomationUtil {
       case "ISIC":
       case "Subindustry":
       case "INAC/NAC Code":
+      case "Company Number":
         cmdeReview = true;
-        break;
-      case "Tax Code":
-        // noop, for switch handling only
         break;
       case "Client Tier Code":
         // noop, for switch handling only
@@ -160,7 +158,7 @@ public class AustriaUtil extends AutomationUtil {
       case "ISU Code":
         // noop, for switch handling only
         break;
-      case "MUBOTY(SORTL)":
+      case "SBO":
         // noop, for switch handling only
         break;
       default:
