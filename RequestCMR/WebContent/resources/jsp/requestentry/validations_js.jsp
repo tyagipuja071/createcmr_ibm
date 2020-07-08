@@ -26,7 +26,12 @@
 </cmr:view>
 
 <cmr:view forGEO="EMEA">
+  <cmr:view forCountry="862">
+  <script src="${resourcesPath}/js/requestentry/validators/emea_validations_tr.js?${cmrv}" type="text/javascript"></script>
+  </cmr:view>
+  <cmr:view exceptForCountry="862">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
+  </cmr:view>
 </cmr:view>
 <cmr:view forCountry="758">
   <script src="${resourcesPath}/js/requestentry/validators/sr_import.js?${cmrv}" type="text/javascript"></script>

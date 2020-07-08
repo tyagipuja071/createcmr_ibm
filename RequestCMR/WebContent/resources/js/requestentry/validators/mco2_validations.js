@@ -14,6 +14,35 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   }
 }
 
+/**
+ * After config handlers
+ */
+var _ISUHandler = null;
+var _CTCHandler = null;
+var _SalesRepHandler = null;
+
+function addHandlersForMCO2() {
+
+  if (_ISUHandler == null) {
+    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setSalesRepValues(value);
+    });
+  }
+
+  if (_CTCHandler == null) {
+    _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      setSalesRepValues(value);
+    });
+  }
+
+  if (_SalesRepHandler == null) {
+    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
+      setSORTLValues(value);
+    });
+  }
+  
+}
+
 var _addrTypesForCEWA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypeHandler = [];
 function addHandlersForCEWA() {
@@ -1102,7 +1131,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
+  //GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(hideCustName4, GEOHandler.MCO2);
@@ -1120,7 +1149,7 @@ dojo.addOnLoad(function() {
   
   GEOHandler.registerValidator(addTinBillingValidator, [ SysLoc.TANZANIA ], null, true);
   
-//  GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2, GEOHandler.REQUESTER,true); 
+  //GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2, GEOHandler.REQUESTER,true); 
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TANZANIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TANZANIA ], null, true);
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
