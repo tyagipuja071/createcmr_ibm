@@ -18,7 +18,19 @@
 
 <cmr:view forGEO="CEMEA">
   <cmr:row topPad="10">
-   <% if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("693")){ %>
+   <% if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("603")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("607") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("626")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("644") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("651")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("668") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("693")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("694") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("695")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("699") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("704")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("705") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("707")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("708") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("740")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("741") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("787")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("820") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("821")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("826") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("889")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("358") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("359")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("363")){ %>
       <form:hidden path="repTeamMemberNo" id="repTeamMemberNo"/>
     <%} else { %>
     <cmr:column span="2" containerForField="SalRepNameNo">
@@ -42,8 +54,19 @@
     </cmr:column>
 
 <!-- CEEME - show SBO for processors only -->
-    <%if (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("693") 
-    	&& (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") && !"Processor".equalsIgnoreCase(reqentry.getUserRole()))){%>
+    <%if (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("603") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("363") 
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("607") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("626")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("644") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("651")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("668") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("693")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("694") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("695")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("699") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("704")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("705") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("707")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("708") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("740")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("741") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("787")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("820") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("821")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("826") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("889")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("358") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("359")
+&& (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") && !"Processor".equalsIgnoreCase(reqentry.getUserRole()))){%>
       <form:hidden path="salesBusOffCd" id="salesBusOffCd"/>
     <%} else { %>
       <cmr:column span="2" containerForField="SalesBusOff">
