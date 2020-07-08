@@ -79,7 +79,19 @@
       </cmr:column>      
     <%} %>
   </cmr:row>
-  
+  <cmr:view forCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
+  	<cmr:row topPad="10">
+  		<cmr:column span="2" containerForField="LocalTax2">
+	      <p>
+	        <cmr:label fieldId="taxCd2">
+	          <cmr:fieldLabel fieldId="LocalTax2" />: 
+	            <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
+	        </cmr:label>
+	        <cmr:field fieldId="LocalTax2" id="taxCd2" path="taxCd2" tabId="MAIN_IBM_TAB" />
+	      </p>
+	    </cmr:column>
+  	</cmr:row>
+  </cmr:view>
   <!-- CIS Duplicate CMR -->
   <cmr:view forCountry="821">
   <cmr:row topPad="10">
