@@ -1587,7 +1587,9 @@ function addCmrNoValidatorForCEE() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubType = FormManager.getActualValue('custSubGrp');
         var cmrNo = FormManager.getField('cmrNo').value;
-
+        if (FormManager.getActualValue('reqType') == 'U'){
+        	return new ValidationResult(null, true);
+        }
         if (cmrNo != '' && cmrNo.length != 6) {
           return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
         } else if (isNaN(cmrNo)) {
@@ -1622,7 +1624,7 @@ function cmrNoEnableForCEE() {
   var reqType = FormManager.getActualValue('reqType');
   var cmrNo = FormManager.getActualValue('cmrNo');
 
-  if (role != "PROCESSOR" || FormManager.getActualValue('viewOnlyPage') == 'true') {
+  if (role != "PROCESSOR" || FormManager.getActualValue('viewOnlyPage') == 'true' || reqType == 'U') {
     FormManager.readOnly('cmrNo');
   } else {
     FormManager.enable('cmrNo');
@@ -2856,17 +2858,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
 
-  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, [ '603','607','626','644','651','668','693','694','695','699','704','705',
-	  '707','708','740','741','787','820','821','826','889','358','359','363']);
-  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, [ '603','607','626','644','651','668','693','694','695','699','704','705',
-	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, GEOHandler.CEE);
+  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, GEOHandler.CEE);
 
-  GEOHandler.addAfterConfig(cmrNoEnableForCEE, [ '603','607','626','644','651','668','693','694','695','699','704','705',
-	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
-  GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, ['603','607','626','644','651','668','693','694','695','699','704','705',
-	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
-  GEOHandler.registerValidator(addCmrNoValidatorForCEE, [ '603','607','626','644','651','668','693','694','695','699','704','705',
-	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
+  GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
+  GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
