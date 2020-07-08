@@ -1843,21 +1843,21 @@ public class TurkeyTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
-    Data data = cmrObjects.getData();
-    boolean crossBorder = false;
-    String landedCountry = "";
-    for (Addr addr : cmrObjects.getAddresses()) {
-      // additional Address
-      if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
-
-        if (!StringUtils.isBlank(addr.getTaxOffice())) {
-          legacyCustExt.setiTaxCode((addr.getTaxOffice()));
-        } else {
-          legacyCustExt.setiTaxCode("");
-        }
-      }
-
-    }
+    // Data data = cmrObjects.getData();
+    // boolean crossBorder = false;
+    // String landedCountry = "";
+    // for (Addr addr : cmrObjects.getAddresses()) {
+    // // additional Address
+    // if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
+    //
+    // if (!StringUtils.isBlank(addr.getTaxOffice())) {
+    // legacyCustExt.setiTaxCode((addr.getTaxOffice()));
+    // } else {
+    // legacyCustExt.setiTaxCode("");
+    // }
+    // }
+    //
+    // }
 
     // // IBM Tab
     // legacyCustExt.setItCompanyCustomerNo(!StringUtils.isEmpty(data.getCompany())
