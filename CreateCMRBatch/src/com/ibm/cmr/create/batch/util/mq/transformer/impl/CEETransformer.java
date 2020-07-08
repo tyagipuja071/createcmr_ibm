@@ -652,10 +652,8 @@ public class CEETransformer extends EMEATransformer {
 		}
 		LOG.debug("that is CEE INTER CMR");
 	} else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp)) {
-		if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
 			generateCMRNoObj.setMin(1000);
 			generateCMRNoObj.setMax(9999);
-		}
 	} else {
 		generateCMRNoObj.setMin(369320);
 		generateCMRNoObj.setMax(999999);
