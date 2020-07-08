@@ -85,6 +85,7 @@ public class LegacyDirectUtil {
     FIELDS_CLEAR_LIST.add("ModeOfPayment");
     FIELDS_CLEAR_LIST.add("CrosSubTyp");
     FIELDS_CLEAR_LIST.add("TipoCliente");
+    FIELDS_CLEAR_LIST.add("CommercialFinanced");
 
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }
@@ -787,9 +788,6 @@ public class LegacyDirectUtil {
     List<String> tempList = new ArrayList<String>();
     // if (SystemLocation.UNITED_KINGDOM.equals(cntry) ||
     // SystemLocation.IRELAND.equals(cntry)) {
-    if(SystemLocation.TURKEY.equals(cntry)){
-    	FIELDS_CLEAR_LIST.add("CommercialFinanced");
-    }
     if (FIELDS_CLEAR_LIST.contains(fieldId)) {
       LOG.debug("***Field " + fieldId + " is on clear list. Adding '@'");
       if (codeOnly) {
