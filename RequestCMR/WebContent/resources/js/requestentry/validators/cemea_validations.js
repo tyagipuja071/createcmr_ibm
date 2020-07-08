@@ -2797,9 +2797,30 @@ function toggleBPRelMemTypeForTurkey() {
   }
 }
 
+function setICOAndDICMandatory() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+    FormManager.resetValidations('taxCd1');
+    FormManager.resetValidations('company');
+    FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'DIČ' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
+  } else {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    FormManager.removeValidator('company', Validators.REQUIRED);
+  }
+}
+
 function afterConfigForCEE() {
   filterCmrnoForCEE();
   toggleBPRelMemTypeForTurkey();
+}
+
+function afterConfigForSlovakia() {
+  setICOAndDICMandatory();
 }
 
 dojo.addOnLoad(function() {
@@ -2807,7 +2828,7 @@ dojo.addOnLoad(function() {
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
   GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '603', '607', '620', '626', '651', '675', '677', '680', '694', '695', '699', '705', '707', '713', '741', '752', '762', '767', '768', '772',
       '787', '805', '808', '821', '823', '832', '849', '850', '865', '889' ];
-  GEOHandler.CEE = [ '693' ];
+  GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ];
   console.log('adding CEMEA functions...');
   GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
   // GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy);
@@ -2944,4 +2965,7 @@ dojo.addOnLoad(function() {
   // CEE
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
+  // Slovakia
+  GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
 });
