@@ -2,7 +2,8 @@
 
 // Exclusive countries for GBM/SBM 
 var CEMEA_EXCL = new Set([ '620', '767', '805', '823', '677', '680', '832' ]);
-var CEE_INCL = new Set([ '693' ]);
+var CEE_INCL = new Set([ '603','607','626','644','651','668','693','694','695','699','704','705',
+	'707','708','740','741','787','820','821','826','889','358','359','363' ]);
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
