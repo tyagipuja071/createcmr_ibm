@@ -203,15 +203,22 @@
           <cmr:field path="legacyCurrencyCd" id="legacyCurrencyCd" fieldId="CurrencyCd" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>   
-      <cmr:column span="2" containerForField="CustClass" >
+     <cmr:row topPad="10" addBackground="false">
+    <cmr:column span="2" containerForField="IbmDeptCostCenter">
       <p>
-        <label for="custClass"> 
-        <cmr:fieldLabel fieldId="CustClass" />: 
-        <cmr:delta text="${rdcdata.custClass}" oldValue="${reqentry.custClass}" id="delta-custClass" />
-        </label>
-        <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>  
+        <cmr:label fieldId="ibmDeptCostCenter">
+          <cmr:fieldLabel fieldId="IbmDeptCostCenter" />: 
+          </cmr:label>
+        <cmr:field fieldId="IbmDeptCostCenter" id="ibmDeptCostCenter" path="ibmDeptCostCenter" tabId="MAIN_IBM_TAB" />
+    </cmr:column>
+    <cmr:column span="2" containerForField="CustClass">
+      <p>
+        <cmr:label fieldId="custClass">
+          <cmr:fieldLabel fieldId="CustClass" />: 
+          </cmr:label>
+        <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_IBM_TAB" />
+    </cmr:column>
+    </cmr:row>
     </cmr:row>
   </cmr:view>
   
