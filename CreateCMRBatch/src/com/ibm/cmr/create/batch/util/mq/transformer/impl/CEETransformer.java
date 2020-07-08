@@ -487,6 +487,9 @@ public class CEETransformer extends EMEATransformer {
     if ("704".equals(data.getCmrIssuingCntry())) {
         DEFAULT_LANDED_COUNTRY = "HR";
         }
+    if ("668".equals(data.getCmrIssuingCntry())) {
+        DEFAULT_LANDED_COUNTRY = "CZ";
+        }    
   }
 
   /**
