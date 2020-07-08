@@ -3093,14 +3093,18 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmLocMandatoryProcessor, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA);
 
-  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, [ SysLoc.SLOVAKIA ]);
-  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, [ '603','607','626','644','651','668','693','694','695','699','704','705',
+	  '707','708','740','741','787','820','821','826','889','358','359','363']);
+  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, [ '603','607','626','644','651','668','693','694','695','699','704','705',
+	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
 
-  GEOHandler.addAfterConfig(cmrNoEnableForCEE, [ SysLoc.SLOVAKIA ]);
-  GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, [ SysLoc.SLOVAKIA ]);
-  GEOHandler.registerValidator(addCmrNoValidatorForCEE, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.addAfterConfig(cmrNoEnableForCEE, [ '603','607','626','644','651','668','693','694','695','699','704','705',
+	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, ['603','607','626','644','651','668','693','694','695','699','704','705',
+	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
+  GEOHandler.registerValidator(addCmrNoValidatorForCEE, [ '603','607','626','644','651','668','693','694','695','699','704','705',
+	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
@@ -3134,7 +3138,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
   GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
-  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.registerValidator(addCmrNoValidator, GEOHandler.CEMEA, null, true, ['603','607','626','644','651','668','693','694','695','699','704','705',
+	  '707','708','740','741','787','820','821','826','889','358','359','363' ]);
   GEOHandler.registerValidator(cemeaCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), GEOHandler.CEMEA, null, true);
   // GEOHandler.registerValidator(customCrossPostCdValidator, GEOHandler.CEMEA,
   // null, true);
