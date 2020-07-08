@@ -30,10 +30,10 @@
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations_tr.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
   <cmr:view forCountry="726">
-  <script src="${resourcesPath}/js/requestentry/validators/emea_validations_gr.js?${cmrv}" type="text/javascript"></script>
+  <script src="${resourcesPath}/js/requestentry/validators/gr_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
   <cmr:view forCountry="666">
-  <script src="${resourcesPath}/js/requestentry/validators/emea_validations_cy.js?${cmrv}" type="text/javascript"></script>
+  <script src="${resourcesPath}/js/requestentry/validators/cy_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
   <cmr:view exceptForCountry="726,666,862">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
