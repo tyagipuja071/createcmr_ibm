@@ -26,7 +26,7 @@
   <form:hidden path="searchTerm" />
 
   <cmr:row addBackground="false">
-    <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
+<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
         <cmr:label fieldId="locationNumber">
           <cmr:fieldLabel fieldId="LocationNumber" />: 
@@ -34,7 +34,7 @@
         </cmr:label>
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column> --%>
     <cmr:column span="2" containerForField="SpecialTaxCd" forCountry="822">
       <p>
         <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
@@ -190,6 +190,7 @@
   </cmr:view>
   <cmr:view forCountry="838">
     <form:hidden path="acAdminBo" id="acAdminBo"/>
+    <form:hidden path="locationNo" id="locationNumber"/>
   </cmr:view>
     
   <form:hidden path="economicCd" id="economicCd"/>
