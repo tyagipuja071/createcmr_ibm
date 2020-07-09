@@ -779,7 +779,7 @@ function setClientTierValues(isuCd) {
   if (isuCd != '') {
     if (SysLoc.SLOVAKIA == cntry
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-            .getActualValue('custSubGrp') == 'XCOM')) {
+            .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
       if (isuCd == '34') {
         clientTiers = [ 'V' ];
       } else if (isuCd == '32') {
@@ -791,7 +791,7 @@ function setClientTierValues(isuCd) {
     		|| SysLoc.BULGARIA == cntry || SysLoc.GEORGIA == cntry || SysLoc.KAZAKHSTAN == cntry || SysLoc.KYRGYZSTAN == cntry || SysLoc.MACEDONIA == cntry
     		|| SysLoc.SERBIA == cntry || SysLoc.UZBEKISTAN == cntry || SysLoc.UKRAINE == cntry)
             && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-                    .getActualValue('custSubGrp') == 'XCOM') || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC') {
+                    .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
               if (isuCd == '34') {
                 clientTiers = [ 'V' ];
               } else if (isuCd == '32') {
@@ -799,7 +799,7 @@ function setClientTierValues(isuCd) {
               } 
     }else if ((SysLoc.CZECH_REPUBLIC == cntry )
             && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-                    .getActualValue('custSubGrp') == 'XCOM') || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC') {
+                    .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
               if (isuCd == '34') {
                 clientTiers = [ 'V' ];
               } else if (isuCd == '32') {
@@ -809,7 +809,7 @@ function setClientTierValues(isuCd) {
               }
     }else if ((SysLoc.BOSNIA_HERZEGOVINA == cntry || SysLoc.CROATIA == cntry || SysLoc.SLOVENIA == cntry )
             && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-                    .getActualValue('custSubGrp') == 'XCOM') || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC') {
+                    .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
               if (isuCd == '34') {
                 clientTiers = [ 'V' ];
               } else if (isuCd == '32') {
@@ -817,7 +817,7 @@ function setClientTierValues(isuCd) {
               }  
     }else if ((SysLoc.HUNGARY == cntry )
             && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-                    .getActualValue('custSubGrp') == 'XCOM') || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC') {
+                    .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
               if (isuCd == '34') {
                 clientTiers = [ 'V','A' ];
               } else if (isuCd == '32') {
@@ -827,7 +827,7 @@ function setClientTierValues(isuCd) {
               }
     }else if ((SysLoc.MOLDOVA == cntry || SysLoc.ROMANIA == cntry)
             && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-                    .getActualValue('custSubGrp') == 'XCOM') || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC') {
+                    .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
               if (isuCd == '34') {
                 clientTiers = [ 'V' ];
               } else if (isuCd == '32') {
@@ -837,7 +837,7 @@ function setClientTierValues(isuCd) {
               }
     }else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry )
             && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-                    .getActualValue('custSubGrp') == 'XCOM') || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC') {
+                    .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
               if (isuCd == '34') {
                 clientTiers = [ 'V', 'A'];
               } else if (isuCd == '32') {
@@ -1596,7 +1596,7 @@ function setEnterpriseValues(clientTier) {
   if (isuCd != '' && clientTier != '') {
     if (SysLoc.SLOVAKIA == cntry
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager
-            .getActualValue('custSubGrp') == 'XCOM')) {
+            .getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU')) {
       if (isuCd == '32' && clientTier == 'M') {
         enterprises = [ '985069', '985070' ];
       } else if (isuCd == '34' && clientTier == 'V') {
@@ -3047,9 +3047,30 @@ function toggleBPRelMemTypeForTurkey() {
   }
 }
 
+function setICOAndDICMandatory() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+    FormManager.resetValidations('taxCd1');
+    FormManager.resetValidations('company');
+    FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'DIČ' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
+  } else {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    FormManager.removeValidator('company', Validators.REQUIRED);
+  }
+}
+
 function afterConfigForCEE() {
   filterCmrnoForCEE();
   toggleBPRelMemTypeForTurkey();
+}
+
+function afterConfigForSlovakia() {
+  setICOAndDICMandatory();
 }
 
 dojo.addOnLoad(function() {
@@ -3059,7 +3080,7 @@ dojo.addOnLoad(function() {
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
   GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '603', '607', '620', '626', '651', '675', '677', '680', '694', '695', '699', '705', '707', '713', '741', '752', '762', '767', '768', '772',
       '787', '805', '808', '821', '823', '832', '849', '850', '865', '889' ];
-  GEOHandler.CEE = [ '693' ];
+  GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ];
   console.log('adding CEMEA functions...');
   GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
   // GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy);
@@ -3201,4 +3222,7 @@ dojo.addOnLoad(function() {
   // CEE
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
+  // Slovakia
+  GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
 });
