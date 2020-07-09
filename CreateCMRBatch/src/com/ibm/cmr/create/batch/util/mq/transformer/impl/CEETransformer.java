@@ -1122,11 +1122,11 @@ public class CEETransformer extends EMEATransformer {
     }
 
     // if (data.getCustPrefLang() != null) {
-    if (!StringUtils.isBlank(data.getCustPrefLang())) {
-      legacyCust.setLangCd(data.getCustPrefLang());
-    } else {
-      legacyCust.setLangCd("");
-    }
+//    if (!StringUtils.isBlank(data.getCustPrefLang())) {
+//      legacyCust.setLangCd(data.getCustPrefLang());
+//    } else {
+//      legacyCust.setLangCd("");
+//    }
     
     String cebo = data.getEngineeringBo();
     if(!StringUtils.isBlank(cebo)){
@@ -1213,9 +1213,9 @@ public class CEETransformer extends EMEATransformer {
     }
     
     // use svcArOffice to store custLang
-    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      cust.setLangCd(muData.getSvcArOffice());
-    }
+//    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
+//      cust.setLangCd(muData.getSvcArOffice());
+//    }
 
     // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
