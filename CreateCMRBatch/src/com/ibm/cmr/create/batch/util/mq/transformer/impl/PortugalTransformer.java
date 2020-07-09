@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +18,13 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
@@ -379,12 +384,14 @@ public class PortugalTransformer extends MessageTransformer {
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-          legacyCust.setTelNoOrVat(addr.getCustPhone());
-          landedCntry = addr.getLandCntry();
-          break;
+          if (!StringUtils.isEmpty(addr.getCustPhone())) {
+            legacyCust.setTelNoOrVat("TF" + addr.getCustPhone());
+            landedCntry = addr.getLandCntry();
+            break;
+          }
         }
       }
-      
+
       // mrc
       String custSubType = data.getCustSubGrp();
       if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custSubType) || "XBP".equals(custSubType)) {
@@ -397,19 +404,19 @@ public class PortugalTransformer extends MessageTransformer {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           if (!StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyCust.setTelNoOrVat(addr.getCustPhone());
+            legacyCust.setTelNoOrVat("TF" + addr.getCustPhone());
+            landedCntry = addr.getLandCntry();
+            break;
           }
-          landedCntry = addr.getLandCntry();
-          break;
         }
       }
-      
+
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
-        if (!StringUtils.isBlank(rdcEmbargoCd) && "E".equals(rdcEmbargoCd)) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && "Y".equals(rdcEmbargoCd)) {
           if (StringUtils.isBlank(data.getEmbargoCd())) {
             legacyCust.setEmbargoCd("");
           }
@@ -419,7 +426,7 @@ public class PortugalTransformer extends MessageTransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd("");
         blankOrdBlockFromData(entityManager, data);
       }
@@ -427,38 +434,78 @@ public class PortugalTransformer extends MessageTransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
     }
 
     // common data for C/U
-    
-    // VAT
-    if (!StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
-      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-        legacyCust.setVat(dummyHandler.cmrData.getVat().substring(2));
-      } else {
-        legacyCust.setVat(dummyHandler.cmrData.getVat());
-      }
+    if (!StringUtils.isBlank(data.getAbbrevNm())) {
+      legacyCust.setAbbrevNm(data.getAbbrevNm());
     } else {
-      legacyCust.setVat("");
+      legacyCust.setAbbrevNm("");
     }
-    
+
+    String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
+        + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
+    if (isuClientTier != null && isuClientTier.length() == 3) {
+      legacyCust.setIsuCd(isuClientTier);
+    } else {
+      legacyCust.setIsuCd("");
+    }
+
+    if (!StringUtils.isBlank(data.getIsicCd())) {
+      legacyCust.setIsicCd(data.getIsicCd());
+    } else {
+      legacyCust.setIsicCd("");
+    }
+
+    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+      legacyCust.setImsCd(data.getSubIndustryCd());
+    } else {
+      legacyCust.setImsCd("");
+    }
+
+    // SBO,IBO,REMXA,REMXD
+    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+      legacyCust.setIbo(data.getSalesBusOffCd());
+      legacyCust.setSbo(data.getSalesBusOffCd());
+    } else {
+      legacyCust.setIbo("");
+      legacyCust.setSbo("");
+    }
+    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+    } else {
+      legacyCust.setSalesRepNo("");
+    }
+
+    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+    } else {
+      legacyCust.setSalesGroupRep("");
+    }
+
+    if (!StringUtils.isBlank(data.getCollectionCd())) {
+      legacyCust.setCollectionCd(data.getCollectionCd());
+    } else {
+      legacyCust.setCollectionCd("");
+    }
+
     // CeDivision
     legacyCust.setCeDivision("3");
-    
+
     // Type of Customer : CMRTCUST.CCUAI
     legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ? data.getCrosSubTyp() : "");
-    
+
     // LANG_CD
     legacyCust.setLangCd("1");
-    
+
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
       legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
     }
-    
+
     if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
       if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
@@ -470,7 +517,7 @@ public class PortugalTransformer extends MessageTransformer {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       }
     }
-    
+
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
@@ -495,14 +542,10 @@ public class PortugalTransformer extends MessageTransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     formatAddressLines(dummyHandler);
-
     if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
       if (!(StringUtils.isBlank(currAddr.getCustPhone())) || !(StringUtils.isEmpty(currAddr.getCustPhone()))) {
         legacyAddr.setAddrPhone("TF"+currAddr.getCustPhone());
       }
-    }
-    if ("N".equals(currAddr.getImportInd()) && MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
-      legacyAddr.getId().setAddrNo(StringUtils.isEmpty(currAddr.getPrefSeqNo()) ? legacyAddr.getId().getAddrNo() : currAddr.getPrefSeqNo());
     }
   }
 
@@ -511,7 +554,7 @@ public class PortugalTransformer extends MessageTransformer {
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
     LOG.debug("Set max and min range For Portugal...");
-    
+
     if (custSubGrp != null && ("INTER".equals(custSubGrp) || "CRINT".equals(custSubGrp))) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(998999);
@@ -519,6 +562,349 @@ public class PortugalTransformer extends MessageTransformer {
       generateCMRNoObj.setMin(997000);
       generateCMRNoObj.setMax(999999);
     }
+  }
+  
+  @Override
+  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust legacyCust, CMRRequestContainer cmrObjects,
+      MassUpdtData muData) {
+    
+    // default mapping for DATA and CMRTCUST
+    LOG.debug("Mapping default Data values..");
+    
+    if (!StringUtils.isBlank(muData.getAbbrevNm())) {
+      legacyCust.setAbbrevNm(muData.getAbbrevNm());
+    }
+
+    if (!StringUtils.isBlank(muData.getAbbrevLocn())) {
+      legacyCust.setAbbrevLocn(muData.getAbbrevLocn());
+    }
+
+    if (!StringUtils.isBlank(muData.getModeOfPayment())) {
+      if ("@".equals(muData.getModeOfPayment().trim())) {
+        legacyCust.setModeOfPayment("");
+      } else {
+        legacyCust.setModeOfPayment(muData.getModeOfPayment());
+      }
+    }
+
+    String isuClientTier = (!StringUtils.isEmpty(muData.getIsuCd()) ? muData.getIsuCd() : "")
+        + (!StringUtils.isEmpty(muData.getClientTier()) ? muData.getClientTier() : "");
+    if (isuClientTier != null && isuClientTier.length() == 3) {
+      legacyCust.setIsuCd(isuClientTier);
+    }
+
+    if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
+      if ("@".equals(muData.getSpecialTaxCd().trim())) {
+        legacyCust.setTaxCd("");
+      } else {
+        legacyCust.setTaxCd(muData.getSpecialTaxCd());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
+      legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
+      legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
+    }
+
+    if (!StringUtils.isBlank(muData.getEnterprise())) {
+      legacyCust.setEnterpriseNo(muData.getEnterprise());
+    }
+
+    if (!StringUtils.isBlank(muData.getCustNm2())) {
+      legacyCust.setCeBo(muData.getCustNm2());
+    }
+
+    if (!StringUtils.isBlank(muData.getCollectionCd())) {
+      if ("@".equals(muData.getCollectionCd().trim())) {
+        // cust.setCollectionCd("");
+        legacyCust.setDistrictCd("");
+      } else {
+        legacyCust.setDistrictCd(muData.getCollectionCd());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getIsicCd())) {
+      legacyCust.setIsicCd(muData.getIsicCd());
+    }
+
+    if (!StringUtils.isBlank(muData.getVat())) {
+      String newVat = handleVatMassUpdateChanges(muData.getVat(), legacyCust.getVat());
+      legacyCust.setVat(newVat);
+    }
+
+    if (!StringUtils.isBlank(muData.getCustNm1())) {
+      legacyCust.setSbo(muData.getCustNm1());
+      legacyCust.setIbo(muData.getCustNm1());
+    }
+
+    if (!StringUtils.isBlank(muData.getInacCd())) {
+      if ("@".equals(muData.getInacCd().trim())) {
+        legacyCust.setInacCd("");
+      } else {
+        legacyCust.setInacCd(muData.getInacCd());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+      if ("@".equals(muData.getMiscBillCd().trim())) {
+        legacyCust.setEmbargoCd("");
+      } else {
+        legacyCust.setEmbargoCd(muData.getMiscBillCd());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getOutCityLimit())) {
+      if ("@".equals(muData.getOutCityLimit().trim())) {
+        legacyCust.setMailingCond("");
+      } else {
+        legacyCust.setMailingCond(muData.getOutCityLimit());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      String subInd = muData.getSubIndustryCd();
+      legacyCust.setImsCd(subInd);
+      // Defect 1776715: Fix for Economic code
+      String firstChar = String.valueOf(subInd.charAt(0));
+      StringBuilder builder = new StringBuilder();
+      builder.append(firstChar);
+      builder.append(subInd);
+      LOG.debug("***Auto setting Economic code as > " + builder.toString());
+      legacyCust.setEconomicCd(builder.toString());
+    }
+    legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+    legacyCust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+  }
+
+  @Override
+  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
+      Data data, LegacyDirectObjectContainer legacyObjects) {
+    CmrtAddr legacyFiscalAddr = null;
+
+    if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType())) {
+      legacyFiscalAddr = LegacyDirectUtil.getLegacyFiscalAddr(entityManager, cntry, addr.getCmrNo(), true);
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setForUpdate(true);
+      }
+    }
+
+    legacyAddr.setForUpdate(true);
+
+    if (!StringUtils.isBlank(addr.getCustNm1())) {
+      legacyAddr.setAddrLine1(addr.getCustNm1());
+
+      if (legacyFiscalAddr != null) {
+        String prefix = !StringUtils.isEmpty(legacyFiscalAddr.getAddrLine1()) ? legacyFiscalAddr.getAddrLine1().substring(0, 1) : "";
+        legacyFiscalAddr.setAddrLine1(prefix + addr.getCustNm1());
+      }
+
+    }
+
+    if (!StringUtils.isBlank(addr.getCustNm2())) {
+      legacyAddr.setAddrLine2(addr.getCustNm2());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setAddrLine2("CL" + addr.getCustNm2());
+      }
+    }
+
+    if (!StringUtils.isBlank(addr.getAddrTxt())) {
+      legacyAddr.setStreet(addr.getAddrTxt());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setStreet(addr.getAddrTxt());
+      }
+    }
+
+    if (!StringUtils.isBlank(addr.getAddrTxt2())) {
+      legacyAddr.setStreetNo(addr.getAddrTxt2());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setStreetNo(addr.getAddrTxt2());
+      }
+    }
+
+    if (!StringUtils.isBlank(addr.getCity1())) {
+      legacyAddr.setCity(addr.getCity1());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setCity(addr.getCity1());
+      }
+    }
+
+    if (!StringUtils.isBlank(addr.getDept())) {
+      legacyAddr.setContact(addr.getDept());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setContact(addr.getDept());
+      }
+    }
+
+    if (!StringUtils.isBlank(addr.getPostCd())) {
+      legacyAddr.setZipCode(addr.getPostCd());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setZipCode(addr.getPostCd());
+      }
+
+      if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType()) && isCrossBorderForMass(addr, legacyAddr)) {
+        handlePostCdSpecialLogic(cust, data, addr.getPostCd(), entityManager);
+      }
+    }
+
+    String poBox = addr.getPoBox();
+    if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
+      poBox = " APTO " + poBox;
+      legacyAddr.setPoBox(addr.getPoBox());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setPoBox(addr.getPoBox());
+      }
+    }
+
+    boolean crossBorder = false;
+    if (!StringUtils.isEmpty(addr.getLandCntry()) && !"PT".equals(addr.getLandCntry())) {
+      crossBorder = true;
+    } else {
+      crossBorder = false;
+    }
+
+    if (!StringUtils.isBlank(addr.getLandCntry()) && crossBorder) {
+      legacyAddr.setAddrLine5(LandedCountryMap.getCountryName(addr.getLandCntry()));
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setPoBox(LandedCountryMap.getCountryName(addr.getLandCntry()));
+      }
+    }
+
+    if (!StringUtils.isBlank(addr.getCounty()) && !crossBorder) {
+      legacyAddr.setAddrLine5(addr.getCounty());
+      if (legacyFiscalAddr != null) {
+        legacyFiscalAddr.setPoBox(addr.getCounty());
+      }
+    }
+
+    formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
+    legacyObjects.addAddress(legacyAddr);
+    if (legacyFiscalAddr != null) {
+      formatMassUpdateAddressLines(entityManager, legacyFiscalAddr, addr, true);
+      legacyObjects.addAddress(legacyFiscalAddr);
+    }
+    
+  }
+  
+  @Override
+  public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
+    
+    boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
+    String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
+    Map<String, String> messageHash = new LinkedHashMap<String, String>();
+
+    messageHash.put("SourceCode", "EF0");
+    messageHash.remove(addrKey + "Name");
+    messageHash.remove(addrKey + "ZipCode");
+    messageHash.remove(addrKey + "City");
+    messageHash.remove(addrKey + "POBox");
+
+    String line1 = "";
+    String line2 = "";
+    String line3 = "";
+    String line4 = "";
+    String line5 = "";
+    String line6 = "";
+
+    // fiscal address
+    if (isFAddr) {
+      line1 = legacyAddr.getAddrLine1();
+      line2 = "CL " + legacyAddr.getStreet();
+
+      StringBuilder street = new StringBuilder();
+      line2 = StringUtils.replace(line2, " - ", "-");
+      line2 = StringUtils.replace(line2, "- ", "-");
+      line2 = StringUtils.replace(line2, " -", "-");
+      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
+      for (String part : parts) {
+        if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
+          line3 = part;
+        } else if (!StringUtils.isEmpty(part)) {
+          street.append(street.length() > 0 ? " " : "");
+          street.append(part);
+        }
+      }
+
+      line2 = street.toString();
+      if (StringUtils.isEmpty(legacyAddr.getStreet()) && !StringUtils.isEmpty(legacyAddr.getPoBox())) {
+        line2 = "CLAPTO " + legacyAddr.getPoBox().replaceAll("[^\\d]", "");
+      }
+      line3 = StringUtils.leftPad(line3, 5, '0');
+
+      line4 = legacyAddr.getCity();
+      if (crossBorder) {
+        line5 = "88888";
+      } else {
+        line5 = legacyAddr.getZipCode();
+      }
+    } else {
+      line1 = legacyAddr.getAddrLine1();
+      line2 = legacyAddr.getAddrLine2();
+
+      if (StringUtils.isEmpty(line2) && crossBorder) {
+        if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+          line2 = "ATT " + line2;
+        }
+        if (line2.length() > 30) {
+          line2 = line2.substring(0, 30);
+        }
+      }
+
+      if (StringUtils.isEmpty(line2)) {
+        line2 = legacyAddr.getStreetNo();
+      }
+
+      line3 = legacyAddr.getStreet() != null ? legacyAddr.getStreet().trim() : "";
+
+      String poBox = !StringUtils.isEmpty(legacyAddr.getPoBox()) ? legacyAddr.getPoBox() : "";
+      if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
+        poBox = " APTO " + poBox;
+      }
+
+      line3 = (StringUtils.isEmpty(line3) ? poBox : line3.trim()) + poBox;
+      line4 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() : "") + " "
+          + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
+
+      if (!crossBorder) {
+        line5 = !StringUtils.isEmpty(legacyAddr.getAddrLine5()) ? legacyAddr.getAddrLine5().trim() : "";
+        if (!StringUtils.isEmpty(line5) && !line5.toUpperCase().startsWith("ATT ") && !line5.toUpperCase().startsWith("ATT:")) {
+          // Defect 1740670: SPAIN - attention person - ATT
+          line5 = "ATT " + line5;
+        }
+        if (line5.length() > 30) {
+          line5 = line5.substring(0, 30);
+        }
+      } else {
+        if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
+          line5 = massUpdtAddr.getLandCntry();
+        } else {
+          line5 = legacyAddr.getAddrLine5();
+        }
+      }
+
+      line6 = "";
+      if ("Y".equalsIgnoreCase(legacyAddr.getIsAddrUseShipping())) {
+        // DTN: Commented because we are not passing phone numbers on the
+        // template
+        // line6 = legacyAddr.getAddrPhone();
+      }
+    }
+
+    String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
+        (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : "") };
+    int lineNo = 1;
+    LOG.debug("Lines: " + (line1 != null ? line1.trim() : "") + " | " + (line2 != null ? line2.trim() : "") + " | "
+        + (line3 != null ? line3.trim() : "") + " | " + (line4 != null ? line4.trim() : "") + " | " + (line5 != null ? line5.trim() : ""));
+
+    for (String line : lines) {
+      messageHash.put(getAddressKey((massUpdtAddr.getId().getAddrType()) + "Address" + lineNo).toString(), line);
+      lineNo++;
+    }
+
+    legacyAddr.setAddrLine1(line1 != null ? line1.trim() : "");
+    legacyAddr.setAddrLine2(line2 != null ? line2.trim() : "");
+    legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
+    legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
+    legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
   }
 
 }
