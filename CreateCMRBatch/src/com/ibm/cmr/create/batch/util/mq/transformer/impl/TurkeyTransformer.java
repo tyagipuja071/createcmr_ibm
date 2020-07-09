@@ -504,7 +504,7 @@ public class TurkeyTransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZP01:
       // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
       // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
@@ -533,7 +533,7 @@ public class TurkeyTransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZP01:
       // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
       // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
