@@ -528,6 +528,66 @@ public abstract class AutomationUtil {
     }
     return true;
   }
+  
+  
+
+  /**
+   * Does the private person and IBM employee checks
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param result
+   * @param details
+   * @param output
+   * @return
+   */
+  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
+      boolean checkBluepages,RequestData reqData) {
+      boolean legalEndingExists = false;
+	  for(Addr addr : reqData.getAddresses()){
+		String customerName =  getCustomerFullName(addr);
+		if (hasLegalEndings(customerName)){
+			legalEndingExists = true;
+			break;
+		}
+	  }
+    if (legalEndingExists) {
+      engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
+      details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
+      return false;
+    }
+
+    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
+    PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+
+    switch (checkStatus) {
+    case BluepagesError:
+      engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
+      break;
+    case DuplicateCMR:
+      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
+      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
+          checkResult.getCmrNo(), "");
+      return false;
+    case DuplicateCheckError:
+      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      break;
+    case NoIBMRecord:
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+      details.append("Employee details not found in IBM BluePages.").append("\n");
+      break;
+    case Passed:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      break;
+    case PassedBoth:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      details.append("Name validated against IBM BluePages successfully.").append("\n");
+      break;
+    }
+    return true;
+  }
 
   /**
    * Checks the private person record against current CMR records and optionally
@@ -991,5 +1051,13 @@ public abstract class AutomationUtil {
       return false;
     }
 
+  }
+  
+  private String getCustomerFullName(Addr addr){
+	  String custNm1 = addr.getCustNm1();
+	  String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "" ;
+	  String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "" ;
+	  String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "" ;	  
+	  return custNm1 + custNm2 + custNm3 + custNm4;
   }
 }
