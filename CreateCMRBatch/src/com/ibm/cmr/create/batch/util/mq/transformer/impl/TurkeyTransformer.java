@@ -1614,6 +1614,15 @@ public class TurkeyTransformer extends EMEATransformer {
       List<Addr> addrList = cmrObjects.getAddresses();
       List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
       String billingseq = getSeqForBilling(entityManager, cmrObjects.getAdmin().getId().getReqId());
+      boolean isExistBilling = false;
+
+      for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
+        if ("Y".equals(currAddr.getIsAddrUseBilling())) {
+          isExistBilling = true;
+        } else {
+          isExistBilling = false;
+        }
+      }
 
       for (int i = 0; i < addrList.size(); i++) {
         Addr addr = addrList.get(i);
@@ -1621,7 +1630,9 @@ public class TurkeyTransformer extends EMEATransformer {
         if ("Y".equals(addr.getChangedIndc())) {
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
           CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
-          if ("Y".equals(olddataaddr.getIsAddrUseMailing()) && "Y".equals(olddataaddr.getIsAddrUseBilling())) {
+            // if ("Y".equals(olddataaddr.getIsAddrUseMailing()) &&
+            // "Y".equals(olddataaddr.getIsAddrUseBilling())) {
+            if (!isExistBilling) {
             // copy billing from mailing
             copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
             olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
