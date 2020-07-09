@@ -1871,7 +1871,7 @@ public class TurkeyTransformer extends EMEATransformer {
             if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
               custExt.setiTaxCode("");
             } else {
-              custExt.setiTaxCode(muData.getNewEntpName1());
+              custExt.setiTaxCode(mua.getFloor());
             }
             break;
           }
