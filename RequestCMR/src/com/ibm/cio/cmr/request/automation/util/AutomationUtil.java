@@ -532,7 +532,7 @@ public abstract class AutomationUtil {
   
 
   /**
-   * Does the private person and IBM employee checks
+   * Overloaded method does the private person and IBM employee checks
    * 
    * @param entityManager
    * @param requestData
