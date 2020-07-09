@@ -634,17 +634,17 @@ public class TurkeyTransformer extends EMEATransformer {
     // country
     line6 = countryName;
 
-    if (!StringUtils.isBlank(addrData.getCustPhone())) {
+    if (!StringUtils.isEmpty(addrData.getCustPhone())) {
       phone = addrData.getCustPhone().trim();
     } else {
       phone = "";
     }
 
-    if (!StringUtils.isBlank(addrData.getTaxOffice())) {
-      addrLineT = addrData.getTaxOffice();
-    } else {
-      addrLineT = "";
-    }
+    // if (!StringUtils.isBlank(addrData.getTaxOffice())) {
+    // addrLineT = addrData.getTaxOffice();
+    // } else {
+    // addrLineT = "";
+    // }
 
     // ZS01 Installing Address
     // if (MQMsgConstants.ADDR_ZS01.equals(addrType)) {
@@ -711,6 +711,7 @@ public class TurkeyTransformer extends EMEATransformer {
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
     legacyAddr.setContact("");
+    legacyAddr.setAddrLineU("");
 
   }
 
@@ -1810,21 +1811,21 @@ public class TurkeyTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
-    // Data data = cmrObjects.getData();
-    // boolean crossBorder = false;
-    // String landedCountry = "";
-    // for (Addr addr : cmrObjects.getAddresses()) {
-    // // additional Address
-    // if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
-    //
-    // if (!StringUtils.isBlank(addr.getTaxOffice())) {
-    // legacyCustExt.setiTaxCode((addr.getTaxOffice()));
-    // } else {
-    // legacyCustExt.setiTaxCode("");
-    // }
-    // }
-    //
-    // }
+    Data data = cmrObjects.getData();
+    boolean crossBorder = false;
+    String landedCountry = "";
+    for (Addr addr : cmrObjects.getAddresses()) {
+      // additional Address
+      if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
+
+        if (!StringUtils.isEmpty(addr.getTaxOffice())) {
+          legacyCustExt.setiTaxCode((addr.getTaxOffice()));
+        } else {
+          legacyCustExt.setiTaxCode("");
+        }
+      }
+
+    }
 
     // // IBM Tab
     // legacyCustExt.setItCompanyCustomerNo(!StringUtils.isEmpty(data.getCompany())
