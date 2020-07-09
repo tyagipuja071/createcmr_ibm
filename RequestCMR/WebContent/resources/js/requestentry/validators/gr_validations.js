@@ -4278,22 +4278,7 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.resetValidations('custClass');
     }
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
-    if (custType == 'BUSPR') {
-      FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', '7');
-      FormManager.readOnly('isuCd');
-      FormManager.setValue('isuCd', '21');
-    } else if (custType == 'INTER') {
-      FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', 'Z');
-      FormManager.readOnly('isuCd');
-      FormManager.setValue('isuCd', '34');
-    } else {
-      FormManager.enable('clientTier');
-      FormManager.enable('isuCd');
-    }
-  }
+  
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE && (FormManager.getActualValue('custSubGrp') != 'COMME'
       || FormManager.getActualValue('custSubGrp') != 'CROSS' || FormManager.getActualValue('custSubGrp') != 'GOVRN' 
       || FormManager.getActualValue('custSubGrp') != 'PRICU')) {
