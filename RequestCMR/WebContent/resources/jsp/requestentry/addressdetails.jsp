@@ -198,7 +198,7 @@
     <input type="hidden" name="custNm4_view" id="custNm4_view">
   </cmr:view>
 
-  <cmr:view forCountry="726,666">
+  <cmr:view forCountry="666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
