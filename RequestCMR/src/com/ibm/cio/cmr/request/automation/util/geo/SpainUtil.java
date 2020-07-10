@@ -87,7 +87,7 @@ public class SpainUtil extends AutomationUtil {
 
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
-      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false);
+      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false,requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_BUSINESS_PARTNER_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
