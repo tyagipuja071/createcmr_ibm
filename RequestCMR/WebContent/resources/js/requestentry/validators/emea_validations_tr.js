@@ -3372,9 +3372,8 @@ function addTRAddressTypeValidator() {
                   value = value[0];
                 }
                 if (value != null && value != undefined && value != '' && typeof (value) == 'string') {
-                  if (value != value.match(/^[0-9A-Za-z\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)) {
-                    // return new ValidationResult(null, false, addrTypeText + '
-                    // must be in English.');
+                  var reg = /[^\u0000-\u007f]/;
+                  if (reg.test(value)) {
                     enErrMsg += addrTypeText + ', ';
                     break;
                   }
