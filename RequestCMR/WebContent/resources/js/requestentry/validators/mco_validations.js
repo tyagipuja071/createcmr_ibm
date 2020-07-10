@@ -657,7 +657,7 @@ function disableAddrFieldsPTES() {
   var checkImportIndc = getImportedIndcForPT();
   
   // Sequence Number - enable for additional shipping
-  if (cmr.currentRequestType == 'U' && checkImportIndc != 'Y' && addrType == 'ZD01') {
+  if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && checkImportIndc != 'Y' && addrType == 'ZD01') {
     FormManager.enable('prefSeqNo');
   } else {
     FormManager.setValue('prefSeqNo', '');

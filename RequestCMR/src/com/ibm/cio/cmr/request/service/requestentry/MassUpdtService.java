@@ -118,7 +118,7 @@ public class MassUpdtService extends BaseService<MassUpdateModel, MassUpdt> {
           Object[] resultCntry = resultsCntry.get(0);
           cmrIssuingCntry = resultCntry[0] != null ? (String) resultCntry[0] : "";
           if ("838".equals(cmrIssuingCntry) || "866".equals(cmrIssuingCntry) || "754".equals(cmrIssuingCntry) 
-           || "758".equals(cmrIssuingCntry) || "822".equals(cmrIssuingCntry))
+           || "758".equals(cmrIssuingCntry) || "822".equals(cmrIssuingCntry) || "666".equals(cmrIssuingCntry))
             cntryFlag = true;
         }
 

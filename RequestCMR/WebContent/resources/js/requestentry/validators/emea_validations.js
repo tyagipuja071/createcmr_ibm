@@ -8614,7 +8614,6 @@ function setIsicClassificationCodeTR(value) {
 }
 
 function validateSingleReactParentCMR() {
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -8629,22 +8628,52 @@ function validateSingleReactParentCMR() {
             CMR_NO : cmrNo
           };
           var resultComp = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT_COMPANY', qParams);
-
           var resultBill = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT_BILLING', qParams);
-
+          //Check RDC side
+          var rdcQParams = null;
+          var rdcResultComp = null;
+          var rdcResultBill = null
+          if(resultComp.ret2 != null ){
+            rdcQParams = {
+                COUNTRY : cntry,
+                CMR_NO : resultComp.ret2,
+                MANDT : cmr.MANDT
+              };
+            rdcResultComp = cmr.query('RDC.SINGLE_REACT_CHECK_ACTIVE_PARENT_COMPANY', rdcQParams);
+          }
+          if(resultBill.ret2 != null ){
+            rdcQParams = {
+                COUNTRY : cntry,
+                CMR_NO : resultBill.ret2,
+                MANDT : cmr.MANDT
+              };
+            rdcResultBill = cmr.query('RDC.SINGLE_REACT_CHECK_ACTIVE_PARENT_BILLING', rdcQParams);
+          }
           if (resultComp.ret1 != null && 'C' == resultComp.ret1) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'Parents CMR#' + resultComp.ret2 + ' is inactive So, first reactivate this.');
-          } else if (resultBill.ret1 != null && ('C' == resultBill.ret1 && cmrNo != resultBill.ret2)) {
+            }, false, 'Parents CMR#' + resultComp.ret2 + ' is inactive in DB2 So, first reactivate this.');
+          }  else if (resultBill.ret1 != null && ('C' == resultBill.ret1 && cmrNo != resultBill.ret2)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'Parents CMR#' + resultBill.ret2 + ' is inactive So, first reactivate this.');
-          } else {
+            }, false, 'Parents CMR#' + resultBill.ret2 + ' is inactive in DB2 So, first reactivate this.');
+          }else if(rdcResultComp != null && (rdcResultComp.ret1 != '' || rdcResultComp.ret2 != '')){
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'Parents CMR#' + resultComp.ret2 + ' is inactive in RDC So, first reactivate this.');
+          }else if(rdcResultBill != null && (rdcResultBill.ret1 != '' || rdcResultBill.ret2 != '')){
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'Parents CMR#' + resultBill.ret2 + ' is inactive in RDC So, first reactivate this.');
+          }else{
             return new ValidationResult(null, true);
           }
         }
