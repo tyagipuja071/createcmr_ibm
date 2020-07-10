@@ -1696,28 +1696,30 @@ function addCmrNoValidatorForCEE() {
         if (FormManager.getActualValue('reqType') == 'U') {
           return new ValidationResult(null, true);
         }
-        if (cmrNo != '' && cmrNo.length != 6) {
-          return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
-        } else if (isNaN(cmrNo)) {
-          return new ValidationResult(null, false, 'CMR Number should be only numbers.');
-        } else if (cmrNo == "000000") {
-          return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-        } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
-          return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
-        } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
-          return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
-        } else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER') && cmrNo.startsWith('99')) {
-          return new ValidationResult(null, false, 'CMR Number should not be in 99XXXX for scenarios');
-        } else {
-          var qParams = {
-            CMRNO : cmrNo,
-            CNTRY : cntry,
-            MANDT : cmr.MANDT
-          };
-          var results = cmr.query('GET.CMR.CEE', qParams);
-          if (results.ret1 != null) {
-            return new ValidationResult(null, false, 'The CMR Number already exists.');
-          }
+        if(cmrNo != '' && cmrNo != null){
+        	if (cmrNo.length != 6) {
+        		return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+        	} else if (isNaN(cmrNo)) {
+        		return new ValidationResult(null, false, 'CMR Number should be only numbers.');
+        	} else if (cmrNo == "000000") {
+        		return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+        	} else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
+        		return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
+        	} else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
+        		return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
+        	} else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER') && cmrNo.startsWith('99')) {
+        		return new ValidationResult(null, false, 'CMR Number should not be in 99XXXX for scenarios');
+        	} else {
+        		var qParams = {
+        				CMRNO : cmrNo,
+        				CNTRY : cntry,
+        				MANDT : cmr.MANDT
+        		};
+        		var results = cmr.query('GET.CMR.CEE', qParams);
+        		if (results.ret1 != null) {
+        			return new ValidationResult(null, false, 'The CMR Number already exists.');
+        		}
+        	}        	
         }
         return new ValidationResult(null, true);
       }
