@@ -30,9 +30,9 @@
   dojo.addOnLoad(function(){
   if (FormManager) {
   var cntry= _pagemodel.cmrIssuingCntry;
-   if ((cntry == '838' || cntry == '866' || cntry == '754' || cntry == '758') && _pagemodel.reqType=='R') {
+   if ((cntry == '838' || cntry == '866' || cntry == '754' || cntry == '758' || cntry == '822' || cntry == '666') && _pagemodel.reqType=='R') {
      cmr.hideNode('cmrsearchid');
-   }   
+   } 
   }
   });
 </script>
@@ -77,7 +77,7 @@
     <%
       if (!readOnly) {
     %>
-    <cmr:view exceptForCountry="838,866,754,758">
+    <cmr:view exceptForCountry="838,866,754,758,822,666">
     <cmr:column span="2">
       <cmr:row>
         <cmr:buttonsRow>
@@ -92,7 +92,7 @@
       </cmr:row>
     </cmr:column>
     </cmr:view>
-    <cmr:view forCountry="838,866,754,758">
+    <cmr:view forCountry="838,866,754,758,822,666">
     <%if(!"E".equals(reqentry.getProcessedFlag())){%>
     <cmr:column span="2">
       <cmr:row>
