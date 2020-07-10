@@ -43,8 +43,7 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
  * cmr.showConfirm('doImportCmrs()', 'Results from a previous CMR Search have
  * already been accepted for this request. Importing will overwrite existing
  * data records. Continue importing the CMR records?', null, null, { OK : 'Yes',
- * CANCEL : 'Cancel' }); } else { importCMRs(cmrNo); }
- *  }
+ * CANCEL : 'Cancel' }); } else { importCMRs(cmrNo); } }
  */
 
 /**
@@ -230,6 +229,33 @@ function setAustriaUIFields() {
   } else {
     FormManager.enable("ppsceid");
   }
+}
+
+function lockIBMtab() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+    if (custSubGrp != 'XBP' && custSubGrp != 'BUSPR') {
+      FormManager.readOnly('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('locationNumber');
+
+  }
+
 }
 
 /**
@@ -1579,6 +1605,7 @@ function phoneNoValidationOnChange() {
 }
 
 function setEnterpriseValues(clientTier) {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
       || custSubGrp == 'INTSO') {
@@ -1590,7 +1617,9 @@ function setEnterpriseValues(clientTier) {
 
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
-  FormManager.enable('enterprise');
+  if (role != 'REQUESTER') {
+    FormManager.enable('enterprise');
+  }
   clientTier = FormManager.getActualValue('clientTier');
 
   var enterprises = [];
@@ -3208,6 +3237,8 @@ dojo.addOnLoad(function() {
   // CEE
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
+  GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
