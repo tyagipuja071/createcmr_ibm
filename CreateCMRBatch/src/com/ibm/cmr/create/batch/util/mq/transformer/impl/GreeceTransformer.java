@@ -193,20 +193,25 @@ public class GreeceTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(addrData.getCustNm4())) {
       line3 = "ATT " + addrData.getCustNm4();
+      if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+        line3 = "Υ/Ο " + addrData.getCustNm4();
+      }
     } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
       line3 = addrData.getAddrTxt2();
-    } else if (!StringUtils.isBlank(addrData.getPoBox())
-        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType)) {
       line3 = "PO BOX " + addrData.getPoBox();
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line3 = "Τ.Θ. " + addrData.getPoBox();
     }
 
     // Street
     String line4 = "";
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
       line4 = addrData.getAddrTxt();
-    } else if (!StringUtils.isBlank(addrData.getPoBox())
-        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType)) {
       line4 = "PO BOX " + addrData.getPoBox();
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line4 = "Τ.Θ. " + addrData.getPoBox();
     }
 
     // postal code + city
@@ -1023,10 +1028,19 @@ public class GreeceTransformer extends EMEATransformer {
       if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
         line3 = "ATT " + line3;
       }
+      if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("Υ/Ο ") && !line3.toUpperCase().startsWith("Υ/Ο:")) {
+        line3 = "Υ/Ο " + line3;
+      }
+
       if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm4())) {
         line3 = "";
       } else {
-        line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
+        if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(massUpdtAddr.getId().getAddrType())) {
+          line3 = "Υ/Ο " + massUpdtAddr.getCustNm4().trim();
+        } else {
+          line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
+        }
+
       }
     }
 
@@ -1042,7 +1056,11 @@ public class GreeceTransformer extends EMEATransformer {
         line4 = "";
         legacyAddr.setPoBox("");
       } else {
-        line4 = "PO BOX " + massUpdtAddr.getPoBox();
+        if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(massUpdtAddr.getId().getAddrType())) {
+          line4 = "Τ.Θ. " + massUpdtAddr.getPoBox();
+        } else {
+          line4 = "PO BOX " + massUpdtAddr.getPoBox();
+        }
         legacyAddr.setPoBox(massUpdtAddr.getPoBox());
       }
     }
@@ -1209,20 +1227,25 @@ public class GreeceTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(addrData.getCustNm4())) {
       line3 = "ATT " + addrData.getCustNm4();
+      if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+        line3 = "Υ/Ο " + addrData.getCustNm4();
+      }
     } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
       line3 = addrData.getAddrTxt2();
-    } else if (!StringUtils.isBlank(addrData.getPoBox())
-        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType)) {
       line3 = "PO BOX " + addrData.getPoBox();
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line3 = "Τ.Θ. " + addrData.getPoBox();
     }
 
     // Street
     String line4 = "";
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
       line4 = addrData.getAddrTxt();
-    } else if (!StringUtils.isBlank(addrData.getPoBox())
-        && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType) || CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType))) {
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(addrType)) {
       line4 = "PO BOX " + addrData.getPoBox();
+    } else if (!StringUtils.isBlank(addrData.getPoBox()) && CmrConstants.ADDR_TYPE.ZP01.toString().equals(addrType)) {
+      line4 = "Τ.Θ. " + addrData.getPoBox();
     }
 
     // postal code + city
