@@ -1065,6 +1065,7 @@ function forceLockScenariosPortugal() {
     fieldsToDisable.push('abbrevNm');
     fieldsToDisable.push('abbrevLocn');
     FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+
   }
   fieldsToDisable.push('cmrOwner');
   fieldsToDisable.push('collectionCd');
@@ -1261,6 +1262,21 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('abbrevNm');
     fieldsToDisable.push('abbrevLocn');
     FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+    fieldsToDisable.push('isuCd');
+    fieldsToDisable.push('clientTier');
+    fieldsToDisable.push('inacCd');
+    fieldsToDisable.push('enterprise');
+    fieldsToDisable.push('buyingGroupId');
+    fieldsToDisable.push('globalBuyingGroupId');
+    fieldsToDisable.push('covId');
+    fieldsToDisable.push('geoLocationCode');
+    fieldsToDisable.push('dunsNo');
+    fieldsToDisable.push('ppsceid');
+    fieldsToDisable.push('memLvl');
+    fieldsToDisable.push('bpRelType');
+    fieldsToDisable.push('soeReqNo');
+    fieldsToDisable.push('repTeamMemberNo');
+    fieldsToDisable.push('salesBusoffCd');
   }
   fieldsToDisable.push('cmrOwner');
   fieldsToDisable.push('collectionCd');

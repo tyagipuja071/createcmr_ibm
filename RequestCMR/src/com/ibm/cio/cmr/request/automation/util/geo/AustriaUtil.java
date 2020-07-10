@@ -55,7 +55,7 @@ public class AustriaUtil extends AutomationUtil {
   private static final String SCENARIO_INTERNAL_SO = "INTSO";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO);
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attention Person", "Phone number", "FAX", "Customer Name 4");
 
@@ -94,7 +94,7 @@ public class AustriaUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
-          SCENARIO_IBM_EMPLOYEE.equals(scenario));
+          SCENARIO_IBM_EMPLOYEE.equals(scenario),requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_BUSINESS_PARTNER_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
