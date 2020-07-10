@@ -1914,9 +1914,24 @@ function setEnterpriseBasedOnSubIndustry() {
     if(cmr.currentTab == "CUST_REQ_TAB") {
       _subindustryChanged = true;
       var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
-      setEnterprise(repTeamMemberNo);  
+      setEnterprise(repTeamMemberNo);
+      isicScenarioHandler();
     }      
   });
+  }
+}
+
+function isicScenarioHandler() {
+  var isicCd = FormManager.getActualValue('isicCd');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isicUnderB = new Set([ '7230', '7240', '7290', '7210', '7221', '7229']);
+  if(isicCd != null) {
+    if(isicUnderB.has(isicCd)) {
+      if(custSubGrp == "COMME" || custSubGrp == "GOVRN") {
+        FormManager.setValue('isuCd', '32' );
+        FormManager.setValue('clientTier', 'N' );        
+      }
+    }
   }
 }
 
@@ -3469,8 +3484,6 @@ function setVatValidatorGRCYTR() {
     FormManager.resetValidations('vat');
     if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-    } else if (!dijit.byId('vatExempt').get('checked') && cntry == SysLoc.TURKEY) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'Tax Number' ]);
     }
   }
 }
