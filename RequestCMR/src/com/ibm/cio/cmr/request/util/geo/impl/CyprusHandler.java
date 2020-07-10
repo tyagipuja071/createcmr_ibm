@@ -2195,16 +2195,16 @@ public class CyprusHandler extends BaseSOFHandler {
           entityManager.flush();
         }
 
-        if (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"CY".equals(addr.getLandCntry())) {
-          updateLandCntry(entityManager, addr);
-        }
-
         if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
           addr.setCustPhone("");
         }
 
         if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
           addr.setTaxOffice("");
+        }
+
+        if ("ZS01".equals(addr.getId().getAddrType())) {
+          copyAndSaveAddressesCreateScratch(entityManager, data.getId().getReqId(), addr);
         }
       }
 
@@ -2556,6 +2556,25 @@ public class CyprusHandler extends BaseSOFHandler {
         addr.setHwInstlMstrFlg("");
       }
       break;
+    }
+  }
+
+  private void copyAndSaveAddressesCreateScratch(EntityManager entityManager, long reqId, Addr addr) {
+    if (getCountAddrSaved(entityManager, reqId) == 0) {
+      doActualCopySaveAllAddrs(entityManager, addr);
+    }
+  }
+
+  private void copyAndSaveAddressesDNBImport(EntityManager entityManager, long reqId, Addr addr) {
+    if (getCountAddrSaved(entityManager, reqId) == 1) {
+      doActualCopySaveAllAddrs(entityManager, addr);
+    }
+  }
+
+  private void doActualCopySaveAllAddrs(EntityManager entityManager, Addr addr) {
+    String[] addrTypeToBeCopied = { "ZP01", "ZD01", "ZI01", "ZS02" };
+    for (String addrType : addrTypeToBeCopied) {
+      saveAddrCopyForCy(entityManager, addr, addrType);
     }
   }
 
@@ -3056,6 +3075,11 @@ public class CyprusHandler extends BaseSOFHandler {
 
   @Override
   public void createOtherAddressesOnDNBImport(EntityManager entityManager, Admin admin, Data data) throws Exception {
+    Addr address = getAddressByType(entityManager, "ZS01", data.getId().getReqId());
+    if (SystemLocation.CYPRUS.equals(data.getCmrIssuingCntry()) && StringUtils.isNotBlank(address.getImportInd())
+        && address.getImportInd().equalsIgnoreCase("D")) {
+      copyAndSaveAddressesDNBImport(entityManager, data.getId().getReqId(), address);
+    }
   }
 
   public static boolean isITIssuingCountry(String cmrIssuingCntry) {
@@ -3979,6 +4003,32 @@ public class CyprusHandler extends BaseSOFHandler {
   }
 
   // END -- missing code greece code
+
+  private void saveAddrCopyForCy(EntityManager entityManager, Addr addr, String addrType) {
+    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
+    addrCopy.getId().setAddrType(addrType);
+
+    if (addrType.equals("ZI01") || addrType.equals("ZD01") || addrType.equals("ZS02")) {
+      addrCopy.setPoBox(null);
+    }
+    if (addrType.equals("ZP01") || addrType.equals("ZI01") || addrType.equals("ZS02")) {
+      addrCopy.setCustPhone(null);
+    }
+    if (!addrType.equals("ZS01")) {
+      addrCopy.setTaxOffice(null);
+    }
+
+    entityManager.persist(addrCopy);
+    entityManager.flush();
+  }
+
+  private int getCountAddrSaved(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.COUNT.ALLTYPE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    int count = query.getSingleResult(Integer.class);
+    return count;
+  }
 
   private Addr getAddressByType(EntityManager entityManager, String addrType, long reqId) {
     String sql = ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE");
