@@ -3344,6 +3344,10 @@ function addTRAddressTypeValidator() {
           var compareFieldsLocal = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'stateProv', 'postCd', 'dept', 'poBox', 'taxOffice' ];
           var enErrMsg = '';
           var turkishErrMsg = '';
+          var reqType = cmr.currentRequestType;
+          if(reqType == undefined){
+            reqType = FormManager.getActualValue('reqType');
+          }
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -3361,16 +3365,15 @@ function addTRAddressTypeValidator() {
             // 1: All address types except ZP01
             // 2: For ZP01, create request => scenario is CROSS,
             // update request=> land country is not TR
-            if (type != 'ZP01' || (type == 'ZP01' && (custType == 'CROSS' || (cmr.currentRequestType == 'U' && record['landCntry'][0] != 'TR')))) {
+            if (type != 'ZP01' || (type == 'ZP01' && (custType == 'CROSS' || (reqType == 'U' && record['landCntry'][0] != 'TR')))) {
               for (var j = 0; j < compareFieldsLocal.length; j++) {
                 var value = record[compareFieldsLocal[j]];
                 if (typeof (value) == 'object') {
                   value = value[0];
                 }
                 if (value != null && value != undefined && value != '' && typeof (value) == 'string') {
-                  if (value != value.match(/^[0-9A-Za-z\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/)) {
-                    // return new ValidationResult(null, false, addrTypeText + '
-                    // must be in English.');
+                  var reg = /[^\u0000-\u007f]/;
+                  if (reg.test(value)) {
                     enErrMsg += addrTypeText + ', ';
                     break;
                   }
@@ -3406,11 +3409,11 @@ function addTRAddressTypeValidator() {
 
           var mismatchErrMsg = '';
           for (var i = 0; i < compareFields.length; i++) {
-            if (custType == 'CROSS' || (cmr.currentRequestType == 'U' && zp01Copy['landCntry'][0] != 'TR')) {
+            if (custType == 'CROSS' || (reqType == 'U' && zp01Copy['landCntry'][0] != 'TR')) {
               if (zs01Copy[compareFields[i]][0] != zp01Copy[compareFields[i]][0]) {
                 mismatchErrMsg += mappingAddressField(compareFields[i]) + ', ';
               }
-            } else if (custType == 'LOCAL' || (cmr.currentRequestType == 'U' && zp01Copy['landCntry'][0] == 'TR')) {
+            } else if (custType == 'LOCAL' || (reqType == 'U' && zp01Copy['landCntry'][0] == 'TR')) {
               if ((zs01Copy[compareFields[i]] == '' || zs01Copy[compareFields[i]] == null || zs01Copy[compareFields[i]] == undefined)
                   && (zp01Copy[compareFields[i]] != '' && zp01Copy[compareFields[i]] != null && zp01Copy[compareFields[i]] != undefined)) {
                 mismatchErrMsg += mappingAddressField(compareFields[i]) + ', ';
@@ -3427,7 +3430,7 @@ function addTRAddressTypeValidator() {
             return new ValidationResult(null, false, 'Sold-to mismatch, please update Language translation of Sold-to: ' + mismatchErrMsg);
           }
 
-          if (cmr.currentRequestType == 'U' && zs01Copy.importInd[0] == 'Y' && zp01Copy.importInd[0] == 'Y') {
+          if (reqType == 'U' && zs01Copy.importInd[0] == 'Y' && zp01Copy.importInd[0] == 'Y') {
             if (zs01Copy.updateInd[0] != zp01Copy.updateInd[0]) {
               return new ValidationResult(null, false, 'If Sold-To is updated, Local Language Translation of Sold-To must be updated and vice versa');
             }

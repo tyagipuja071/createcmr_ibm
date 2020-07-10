@@ -396,6 +396,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            }
 	            newzi01.setParentCMRNo("");
 	            newzi01.setCmrSapNumber("");
+            newzi01.setCmrDept(mainRecord.getCmrCity2());
 
 	            converted.add(newzi01);
 	          }
@@ -406,6 +407,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            newzd01.setCmrAddrSeq("00004");
 	            newzd01.setParentCMRNo("");
 	            newzd01.setCmrSapNumber("");
+            newzd01.setCmrDept(mainRecord.getCmrCity2());
 
 	            converted.add(newzd01);
 	          }
