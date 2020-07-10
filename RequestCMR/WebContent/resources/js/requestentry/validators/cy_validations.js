@@ -97,6 +97,12 @@ function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
           GEOHandler.disableCopyAddress();
       }
   }
+  
+  if(landCntry == 'CY') {
+    if (_allAddressData == null || _allAddressData.length == 0) {
+          GEOHandler.disableCopyAddress();
+    }
+  }
 }
 
 /**
@@ -3321,6 +3327,11 @@ function addCYAddressTypeValidator() {
           var type = null;
           var zs01Cnt = 0;
           var zd01Cnt = 0;
+          var zp01Cnt = 0;
+          var zi01Cnt = 0;
+          var zs02Cnt = 0;
+          var zs01Data = null;
+          var zp01Data = null;
 
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -3332,16 +3343,32 @@ function addCYAddressTypeValidator() {
               type = type[0];
             }
             if (type == 'ZS01') {
+              zs01Data = record;  
               zs01Cnt++;
             } else if (type == 'ZD01') {
               zd01Cnt++;
+            } else if (type == 'ZP01') {
+              zp01Data = record;  
+              zp01Cnt++;
+            } else if (type == 'ZI01') {
+              zi01Cnt++;
+            } else if (type == 'ZS02') {
+              zs02Cnt++;
             }
           }
-
-          if (zs01Cnt == 0) {
+          
+          if(!isLandedCntryMatch(zs01Data, zp01Data)) {
+            return new ValidationResult(null, false, 'Mailing and Billing should have the same landed country.');
+          }
+          
+          if (zs01Cnt == 0 || zd01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'Mailing/Billing/Installing/Shipping/EPL address is required.');
           } else if (zs01Cnt > 1) {
-            return new ValidationResult(null, false, 'Only one Mailing/Billing/Installing/Shipping/EPL is allowed.');
+            return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
+          } else if (zp01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Billing address is allowed.');
+          } else if (zs02Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one EPL address is allowed.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -8047,6 +8074,15 @@ function mandatoryForBusinessPartnerCY() {
   }
 }
 
+function showOnlyMailingOnFirstAddrAdd() {
+  if(_allAddressData == null || _allAddressData.length == 0) {
+    cmr.hideNode('radiocont_ZP01');
+    cmr.hideNode('radiocont_ZD01');
+    cmr.hideNode('radiocont_ZI01');
+    cmr.hideNode('radiocont_ZS02');
+  } 
+}
+
 function validateSingleReactParentCMR() {
   
   FormManager.addFormValidator((function() {
@@ -8327,5 +8363,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(disableAddrFieldsCY, [ SysLoc.CYPRUS ]);
+  
+  GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);
 
 });
