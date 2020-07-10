@@ -3357,36 +3357,29 @@ function addTRAddressTypeValidator() {
             if (typeof (type) == 'object') {
               type = type[0];
             }
-            // var addrTypeText = record.addrTypeText;
-            // if (typeof (addrTypeText) == 'object') {
-            // addrTypeText = addrTypeText[0];
-            // }
-            // // Valid english for all address types when
-            // // 1: All address types except ZP01
-            // // 2: For ZP01, create request => scenario is CROSS,
-            // // update request=> land country is not TR
-            // if (type != 'ZP01' || (type == 'ZP01' && (custType == 'CROSS' ||
-            // (reqType ==
-            // 'U' && record['landCntry'][0] != 'TR')))) {
-            // for (var j = 0; j < compareFieldsLocal.length; j++) {
-            // var value = record[compareFieldsLocal[j]];
-            // if (typeof (value) == 'object') {
-            // value = value[0];
-            // }
-            // if (value != null && value != undefined && value != '' && typeof
-            // (value) ==
-            // 'string') {
-            // if (value !=
-            // value.match(/^[0-9A-Za-z\'\"\,\.\!\-\$\(\)\?\:\s|“|”|‘|’|！|＂|．|？|：|。|，]+/))
-            // {
-            // // return new ValidationResult(null, false, addrTypeText + '
-            // // must be in English.');
-            // enErrMsg += addrTypeText + ', ';
-            // break;
-            // }
-            // }
-            // }
-            // }
+            var addrTypeText = record.addrTypeText;
+            if (typeof (addrTypeText) == 'object') {
+              addrTypeText = addrTypeText[0];
+            }
+            // Valid english for all address types when
+            // 1: All address types except ZP01
+            // 2: For ZP01, create request => scenario is CROSS,
+            // update request=> land country is not TR
+            if (type != 'ZP01' || (type == 'ZP01' && (custType == 'CROSS' || (reqType == 'U' && record['landCntry'][0] != 'TR')))) {
+              for (var j = 0; j < compareFieldsLocal.length; j++) {
+                var value = record[compareFieldsLocal[j]];
+                if (typeof (value) == 'object') {
+                  value = value[0];
+                }
+                if (value != null && value != undefined && value != '' && typeof (value) == 'string') {
+                  var reg = /[^\u0000-\u007f]/;
+                  if (reg.test(value)) {
+                    enErrMsg += addrTypeText + ', ';
+                    break;
+                  }
+                }
+              }
+            }
             if (type == 'ZS01') {
               zs01Cnt++;
               zs01Copy = record;
@@ -3400,11 +3393,11 @@ function addTRAddressTypeValidator() {
             }
           }
 
-          // if (enErrMsg != '') {
-          // enErrMsg = enErrMsg.substring(0, enErrMsg.lastIndexOf(','));
-          // enErrMsg += ' must be in English.';
-          // return new ValidationResult(null, false, enErrMsg);
-          // }
+          if (enErrMsg != '') {
+            enErrMsg = enErrMsg.substring(0, enErrMsg.lastIndexOf(','));
+            enErrMsg += ' must be in English.';
+            return new ValidationResult(null, false, enErrMsg);
+          }
 
           if (zs01Cnt == 0 || zp01Cnt == 0 || zd01Cnt == 0 || zi01Cnt == 0) {
             return new ValidationResult(null, false, 'Sold-To/Ship-To/Install-At/Local Language Translation of Sold-To are mandatory.');
