@@ -1695,7 +1695,7 @@ public class TurkeyTransformer extends EMEATransformer {
         String addrType = addr.getId().getAddrType();
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
           CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
-          if (null != olddataaddr && "Y".equals(olddataaddr.getIsAddrUseMailing()) && "Y".equals(olddataaddr.getIsAddrUseBilling())) {
+          if (null != olddataaddr && "Y".equals(olddataaddr.getIsAddrUseMailing()) && "Y".equals(olddataaddr.getIsAddrUseMailing())) {
             // copy billing from mailing
             copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
             olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
@@ -1705,8 +1705,7 @@ public class TurkeyTransformer extends EMEATransformer {
       }
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
         CmrtAddr mailingaddre = legacyObjects.findBySeqNo("00002");
-        if (null != mailingaddre && "00001".equals(currAddr.getId().getAddrNo()) && "N".equals(currAddr.getIsAddrUseBilling())
-            && "Y".equals(currAddr.getIsAddrUseLitMailing())) {
+        if (null != mailingaddre && "N".equals(currAddr.getIsAddrUseBilling()) && "Y".equals(currAddr.getIsAddrUseMailing())) {
           // if ("00001".equals(currAddr.getId().getAddrNo())) {
           currAddr.setAddrLine1(mailingaddre.getAddrLine1());
           if (!StringUtils.isBlank(mailingaddre.getAddrLine2())) {
