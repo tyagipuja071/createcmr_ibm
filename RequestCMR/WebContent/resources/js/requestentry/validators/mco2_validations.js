@@ -773,6 +773,9 @@ function setSalesRepValues(isuCd,clientTier) {
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
       }
+      if (salesReps.length == 0) {
+        FormManager.setValue('repTeamMemberNo', '');
+      }
     }
   }
   
@@ -802,14 +805,13 @@ function setSalesRepValues(isuCd,clientTier) {
 function setSORTLValues(repTeamMemberNo){
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (reqType != 'C' && role != 'PROCESSOR') {
+
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
     return;
   }
 
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
   var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   
   var SORTL = [];
@@ -829,6 +831,9 @@ function setSORTLValues(repTeamMemberNo){
         FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), SORTL);
         if (SORTL.length == 1) {
           FormManager.setValue('salesBusOffCd', SORTL[0]);
+        }
+        if (SORTL.length == 0) {
+          FormManager.setValue('salesBusOffCd', '');
         }
       }
     }
