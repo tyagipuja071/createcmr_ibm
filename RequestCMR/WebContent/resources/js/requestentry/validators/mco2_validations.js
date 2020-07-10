@@ -25,19 +25,12 @@ function addHandlersForMCO2() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setSalesRepValues(value);
-      setSORTLValues(value);
     });
   }
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSalesRepValues(value);
-    });
-  }
-
-  if (_SalesRepHandler == null) {
-    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      setSORTLValues(value);
     });
   }
   
@@ -783,10 +776,16 @@ function setSalesRepValues(isuCd,clientTier) {
   if(cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857'){
     if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
       FormManager.setValue('repTeamMemberNo', 'DUMMY8');
+      FormManager.setValue('salesBusOffCd', '0080');
+    } else {
+      FormManager.setValue('salesBusOffCd', '0010');
     }
   } else if (cntry == '698' || cntry == '745') {
     if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
       FormManager.setValue('repTeamMemberNo', 'DUMMY6');
+      FormManager.setValue('salesBusOffCd', '0060');
+    } else {
+      FormManager.setValue('salesBusOffCd', '0010');
     }
   }
 
@@ -803,53 +802,6 @@ function setSalesRepValues(isuCd,clientTier) {
   }
 }
 
-function setSORTLValues(isuCd,repTeamMemberNo){
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
-    return;
-  }
-
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
-  
-  var SORTL = [];
-  if (repTeamMemberNo != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%',
-      REP_TEAM_CD : '%' + repTeamMemberNo + '%'
-    };
-    var results = cmr.query('GET.MCO2SBOLIST.BYSR', qParams);
-    if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
-        SORTL.push(results[i].ret1);
-      }
-      if (SORTL != null) {
-        FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), SORTL);
-        if (SORTL.length == 1) {
-          FormManager.setValue('salesBusOffCd', SORTL[0]);
-        }
-        if (SORTL.length == 0) {
-          FormManager.setValue('salesBusOffCd', '');
-        }
-      }
-    }
-
-    if(cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857'){
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
-        FormManager.setValue('salesBusOffCd', '0080');
-      }
-    } else if (cntry == '698' || cntry == '745') {
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
-        FormManager.setValue('salesBusOffCd', '0060');
-      }
-    }
-  }
-}
 
 var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01','ZS02'];
 var addrTypeHandler = [];
