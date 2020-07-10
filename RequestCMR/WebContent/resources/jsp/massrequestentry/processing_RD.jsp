@@ -30,9 +30,9 @@
   dojo.addOnLoad(function(){
   if (FormManager) {
   var cntry= _pagemodel.cmrIssuingCntry;
-   if ((cntry == '838' || cntry == '866' || cntry == '754' || cntry == '758') && _pagemodel.reqType=='R') {
+   if ((cntry == '838' || cntry == '866' || cntry == '754' || cntry == '758' || cntry == '822' || cntry == '666') && _pagemodel.reqType=='R') {
      cmr.hideNode('cmrsearchid');
-   }   
+   } 
   }
   });
 </script>
