@@ -3,6 +3,8 @@
 // Exclusive countries for GBM/SBM 
 var CEMEA_EXCL = new Set([ '620', '767', '805', '823', '677', '680', '832' ]);
 var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ]);
+var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '8010', '8021', '8022', '8030', '8090', '8511',
+    '8512', '8519', '8532', '8809', '8813', '8818', '9900' ]);
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -2764,7 +2766,7 @@ function filterCmrnoForCEE() {
   });
 }
 
-function toggleBPRelMemTypeForTurkey() {
+function togglePPSCeidCEE() {
   var reqType = null;
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
@@ -2800,9 +2802,39 @@ function setICOAndDICMandatory() {
   }
 }
 
-function afterConfigForCEE() {
+function setClassificationCodeCEE() {
+  FormManager.readOnly('custClass');
+  if ('C' == FormManager.getActualValue('reqType')) {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    var isicCd = FormManager.getActualValue('isicCd');
+    if (_custType == 'BUSPR' || _custType == 'XBP') {
+      FormManager.setValue('custClass', '46');
+    } else if (_custType == 'INTER' || _custType == 'XINT') {
+      FormManager.setValue('custClass', '81');
+    } else if (_custType == 'PRICU') {
+      FormManager.setValue('custClass', '60');
+    } else if (isicCds.has(isicCd)) {
+      FormManager.setValue('custClass', '13');
+    } else {
+      FormManager.setValue('custClass', '11');
+    }
+  }
+}
+
+function isicCdOnChangeCEE() {
+  dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    setClassificationCodeCEE();
+  });
+}
+
+function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
-  toggleBPRelMemTypeForTurkey();
+  togglePPSCeidCEE();
+  setClassificationCodeCEE();
+}
+
+function afterConfigForCEE() {
+  isicCdOnChangeCEE();
 }
 
 function afterConfigForSlovakia() {
@@ -2949,8 +2981,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(validateSBO, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(validateSBO, [ SysLoc.AUSTRIA ]);
   // CEE
+  GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
