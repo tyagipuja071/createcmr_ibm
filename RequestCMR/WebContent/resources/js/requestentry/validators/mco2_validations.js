@@ -25,6 +25,7 @@ function addHandlersForMCO2() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setSalesRepValues(value);
+      setSORTLValues(value);
     });
   }
 
@@ -802,7 +803,7 @@ function setSalesRepValues(isuCd,clientTier) {
   }
 }
 
-function setSORTLValues(repTeamMemberNo){
+function setSORTLValues(isuCd,repTeamMemberNo){
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
