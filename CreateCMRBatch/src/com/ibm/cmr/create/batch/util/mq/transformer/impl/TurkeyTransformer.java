@@ -1911,8 +1911,8 @@ public class TurkeyTransformer extends EMEATransformer {
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
     CmrtAddr mailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
     mailingAddr.getId().setAddrNo("00002");
-    mailingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
-    mailingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+    mailingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
+    mailingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
     legacyObjects.getAddresses().add(mailingAddr);
   }
