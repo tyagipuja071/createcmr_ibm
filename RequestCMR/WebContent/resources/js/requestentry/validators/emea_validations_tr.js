@@ -8447,42 +8447,27 @@ function addDPLCheckValidatorTR() {
         if (typeof (_pagemodel) != 'undefined') {
           role = _pagemodel.userRole;
         }
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          var record = null;
-          var type = null;
-          var updateInd = null;
-          var updateIndCount = 0;
-          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-              record = _allAddressData[i];
-            }
-            type = record.addrType;
-            updateInd = record.updateInd;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-            if (typeof (updateInd) == 'object') {
-              updateInd = updateInd[0];
-            }
-            if (updateInd == 'U' || updateInd == 'N') {
-              updateIndCount = ++updateIndCount;
-            }
-            console.log('updateIndCount =' + updateIndCount);
-            console.log('updateInd =' + updateInd);
-            if (updateInd == 'U' || updateInd == 'N') {
-              if (role == 'Processor' && reqType == 'U') {
-                if (result == '' || result.toUpperCase() == 'NR') {
-                  return new ValidationResult(null, false, 'DPL Check has not been performed yet.');
-                } else if (result == '' || result.toUpperCase() == 'ALL FAILED') {
-                  return new ValidationResult(null, false, 'DPL Check has failed. This record cannot be processed.');
-                } else {
-                  return new ValidationResult(null, true);
-                }
-              }
-            }
-          }
-        }
+        /*
+         * if (CmrGrid.GRIDS.ADDRESS_GRID_GRID &&
+         * CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) { var record = null;
+         * var type = null; var updateInd = null; var updateIndCount = 0; for
+         * (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+         * record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i); if (record ==
+         * null && _allAddressData != null && _allAddressData[i] != null) {
+         * record = _allAddressData[i]; } type = record.addrType; updateInd =
+         * record.updateInd; if (typeof (type) == 'object') { type = type[0]; }
+         * if (typeof (updateInd) == 'object') { updateInd = updateInd[0]; } if
+         * (updateInd == 'U' || updateInd == 'N') { updateIndCount =
+         * ++updateIndCount; } console.log('updateIndCount =' + updateIndCount);
+         * console.log('updateInd =' + updateInd); if (updateInd == 'U' ||
+         * updateInd == 'N') { if (role == 'Processor' && reqType == 'U') { if
+         * (result == '' || result.toUpperCase() == 'NR') { return new
+         * ValidationResult(null, false, 'DPL Check has not been performed
+         * yet.'); } else if (result == '' || result.toUpperCase() == 'ALL
+         * FAILED') { return new ValidationResult(null, false, 'DPL Check has
+         * failed. This record cannot be processed.'); } else { return new
+         * ValidationResult(null, true); } } } } }
+         */
         console.log('result =' + result);
         console.log('reqType =' + reqType);
         console.log('role =' + role);
