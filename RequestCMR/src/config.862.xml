@@ -105,7 +105,12 @@
 					<dbColumn>CURRENCY_CD</dbColumn>
 					<length>2</length>
 					<width>20</width>
-				</column>				
+				</column>	
+				<column>
+					<label>Phone #</label>
+					<dbColumn>EMAIL1</dbColumn>
+					<length>16</length>
+				</column>			
 			</columns>
 		</tab>
 
@@ -195,11 +200,6 @@
 					<!-- we use FLOOR to store tax office -->
 					<dbColumn>FLOOR</dbColumn>
 					<length>30</length>
-				</column>
-				<column>
-					<label>Phone #</label>
-					<dbColumn>CUST_PHONE</dbColumn>
-					<length>16</length>
 				</column>
 				<column>
 					<label>Preferred Language</label>
