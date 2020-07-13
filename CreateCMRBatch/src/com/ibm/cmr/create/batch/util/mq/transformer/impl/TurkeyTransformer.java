@@ -504,7 +504,7 @@ public class TurkeyTransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZP01:
       // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
       // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
@@ -533,7 +533,7 @@ public class TurkeyTransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZP01:
       // return MQMsgConstants.SOF_ADDRESS_USE_MAILING +
       // MQMsgConstants.SOF_ADDRESS_USE_BILLING;
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
@@ -1340,20 +1340,13 @@ public class TurkeyTransformer extends EMEATransformer {
       cust.setCeBo(cebo);
     }
 
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getCustPhone())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
-              cust.setTelNoOrVat("");
-            } else {
-              cust.setTelNoOrVat(mua.getCustPhone());
-            }
-            break;
-          }
+    //Email1 used to store Phone#
+    if (!StringUtils.isBlank(muData.getEmail1())) {
+        if (DEFAULT_CLEAR_CHAR.equals(muData.getEmail1())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(muData.getEmail1());
         }
-      }
     }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
@@ -1604,7 +1597,11 @@ public class TurkeyTransformer extends EMEATransformer {
       for (int i = 0; i < addrList.size(); i++) {
         Addr addr = addrList.get(i);
         String addrType = addr.getId().getAddrType();
+        CmrtAddr mailaddr = legacyObjects.findBySeqNo("00001");
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+          mailaddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+          mailaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+
           // copy mailing from billing
           copyMailingFromBilling(legacyObjects, legacyAddrList.get(i));
         }
@@ -1614,11 +1611,12 @@ public class TurkeyTransformer extends EMEATransformer {
       List<Addr> addrList = cmrObjects.getAddresses();
       List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
       String billingseq = getSeqForBilling(entityManager, cmrObjects.getAdmin().getId().getReqId());
-      boolean isExistBilling = false;
+      boolean isExistBilling = true;
 
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
         if ("Y".equals(currAddr.getIsAddrUseBilling())) {
           isExistBilling = true;
+          break;
         } else {
           isExistBilling = false;
         }
@@ -1635,6 +1633,7 @@ public class TurkeyTransformer extends EMEATransformer {
             if (!isExistBilling) {
             // copy billing from mailing
             copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+              olddataaddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
             olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
             olddataaddr.setForUpdate(true);
           }
@@ -1682,6 +1681,7 @@ public class TurkeyTransformer extends EMEATransformer {
           if (!StringUtils.isBlank(mailingaddre.getContact())) {
             currAddr.setContact(mailingaddre.getContact());
           }
+          currAddr.setForUpdate(true);
 
         }
       }

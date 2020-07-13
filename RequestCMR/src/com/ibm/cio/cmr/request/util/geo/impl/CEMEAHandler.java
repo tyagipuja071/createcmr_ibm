@@ -1653,4 +1653,46 @@ public class CEMEAHandler extends BaseSOFHandler {
       return false;
     }
   }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String newAddrSeq = null;
+    if (CEE_COUNTRY_LIST.contains(cmrIssuingCntry)) {
+      int addrSeq = 0;
+      String maxAddrSeq = null;
+      String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+
+      List<Object[]> results = query.getResults();
+      if (results != null && results.size() > 0) {
+        Object[] result = results.get(0);
+        maxAddrSeq = (String) (result != null && result.length > 0 && result[0] != null ? result[0] : "00000");
+
+        if (!(Integer.valueOf(maxAddrSeq) >= 00000 && Integer.valueOf(maxAddrSeq) <= 20849)) {
+          maxAddrSeq = "";
+        }
+        if (StringUtils.isEmpty(maxAddrSeq)) {
+          maxAddrSeq = "00000";
+        }
+        try {
+          addrSeq = Integer.parseInt(maxAddrSeq);
+        } catch (Exception e) {
+          // if returned value is invalid
+        }
+        addrSeq++;
+      }
+
+      newAddrSeq = "0000" + Integer.toString(addrSeq);
+
+      newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
+    }
+    return newAddrSeq;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newSeq;
+  }
 }
