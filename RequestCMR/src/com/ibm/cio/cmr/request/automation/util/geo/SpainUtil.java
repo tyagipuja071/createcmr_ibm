@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -27,10 +28,14 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cio.cmr.request.automation.util.geo.SpainFieldsCompContainer;
 
 /**
  * {@link AutomationUtil} for Spain specific validations
@@ -48,6 +53,10 @@ public class SpainUtil extends AutomationUtil {
   public static final String SCENARIO_INTERNAL = "INTER";
   public static final String SCENARIO_INTERNAL_SO = "INTSO";
 
+  private boolean srExistsOrSetOnReq = false;
+  private boolean sboExistsOrSetOnReq = false;
+  private boolean entpExistsOrSetOnReq = false;
+  
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
 
@@ -109,8 +118,63 @@ public class SpainUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+	  boolean hasValidMatches = false;
+	  Data data = requestData.getData();
+	  boolean highQualityMatchExists = false;
+	  String scenario = data.getCustSubGrp();
+	  StringBuilder elementResults = new StringBuilder();
+
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
+      hasValidMatches = DnBUtil.hasValidMatches(response);
+      if (response != null && response.getMatched()) {
+        List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        engineData.put(AutomationEngineData.DNB_ALL_MATCHES, dnbMatches);
+        if (hasValidMatches) {
+          // actions to be performed only when matches with high confidence are
+          // found
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            if (dnbRecord.getConfidenceCode() > 7) {
+            	highQualityMatchExists = true;
+            	break;
+            }
+          }
+        }
+      }
+      if(!highQualityMatchExists && SCENARIO_THIRD_PARTY.equalsIgnoreCase(scenario)){
+          details.append("Since no high quality match found for Installing Address, in case of Third pary scenario, ISIC overriden.").append("\n");  
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC", data.getIsicCd(), "7499");
+          results.setResults("ISIC set to 7499."); 
+    	  details.append("ISIC : 7499 \n");
+          // also skip find gbg and coverage calc.
+          
+      }
+      
+      // override 32S logic
+      SpainFieldsCompContainer fields = get32SLogicFieldsValues(entityManager,data,data.getIsuCd(),data.getClientTier());
+      if(fields != null && (srExistsOrSetOnReq && sboExistsOrSetOnReq && entpExistsOrSetOnReq) ){
+    	  details.append("Found ISU CTC Mapping, overrding Sales Rep , Enterprise and SBO").append("\n");
+    	  details.append("Sales Rep : "+fields.getSalesRep()).append("\n");
+    	  details.append("Enterprise : "+fields.getEnterprise()).append("\n");
+    	  details.append("SBO : "+fields.getSbo()).append("\n");
+
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ENTERPRISE", data.getEnterprise(), fields.getEnterprise());
+          elementResults.append("Field values computed successfully");  
+      }
+      else if(srExistsOrSetOnReq && sboExistsOrSetOnReq && entpExistsOrSetOnReq){
+    	  elementResults.append("Correct values already existed on request.");  
+      }
+      else{
+          elementResults.append("Field Values could not be computed successfully in FieldsComputationElement.");
+          engineData.addNegativeCheckStatus("_esFieldsCompFailed", "Field Values could not be computed successfully.");
+      }
+      
+      results.setDetails(details.toString());
+      results.setResults(elementResults.toString());
+      results.setProcessOutput(overrides);
+      LOG.debug(details.toString());
+         return results;
   }
 
   @Override
@@ -170,7 +234,7 @@ public class SpainUtil extends AutomationUtil {
           }
           if (!matchesDnb) {
             cmdeReview = true;
-            engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
             details.append("VAT # on the request did not match D&B\n");
           } else {
             details.append("VAT # on the request matches D&B\n");
@@ -227,11 +291,11 @@ public class SpainUtil extends AutomationUtil {
     }
     if (resultCodes.contains("D")) {
       output.setOnError(true);
-      engineData.addRejectionComment("_atVATUpd", "VAT # on the request has characters updated other than the first character", "", "");
+      engineData.addRejectionComment("_esVATUpd", "VAT # on the request has characters updated other than the first character", "", "");
       validation.setSuccess(false);
       validation.setMessage("VAT Updated");
     } else if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_atDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
       details.append("Updates to one or more fields cannot be validated.\n");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
@@ -306,7 +370,7 @@ public class SpainUtil extends AutomationUtil {
     if (resultCodes.contains("R")) {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
-      engineData.addNegativeCheckStatus("_atCheckFailed", "Updated elements cannot be checked automatically.");
+      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
     } else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
@@ -331,4 +395,58 @@ public class SpainUtil extends AutomationUtil {
     return address;
   }
 
+  
+  /**
+   * Checks for duplicate cmr based on vat
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param addr
+   * @param sqlKey
+   */
+  private SpainFieldsCompContainer get32SLogicFieldsValues(EntityManager entityManager,Data data, String isuCd, String clientTier) {
+     // get salesrep value
+	String salesRepSql = ExternalizedQuery.getSql("QUERY.GET.SRLIST.BYISU");
+    PreparedQuery query = new PreparedQuery(entityManager, salesRepSql);
+    query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+    query.setParameter("ISU","%"+ isuCd + clientTier + "%");
+    query.setForReadOnly(true);
+    SpainFieldsCompContainer fieldsValue = new SpainFieldsCompContainer();
+    List<Object[]> salesRepRes = query.getResults();
+    if (salesRepRes != null) {
+    	if(salesRepRes.size() > 1){
+        	// for multiple values in result, check if already exists on request
+    		srExistsOrSetOnReq = StringUtils.isNotBlank(data.getRepTeamMemberNo()) ? true : false ;
+    	}
+    	else if(salesRepRes.size() == 1){
+            // for single value, override
+    		srExistsOrSetOnReq = true;
+        	fieldsValue.setSalesRep(salesRepRes.get(0)[0].toString());
+    	}    
+    }
+    
+    
+    // get sbo & enterprise value
+	String sboEntpSql = ExternalizedQuery.getSql("QUERY.GET.SBO.BYSR");
+   PreparedQuery query_1 = new PreparedQuery(entityManager, sboEntpSql);
+   query_1.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+   query_1.setParameter("REP_TEAM_CD",data.getLocationNumber());
+   query_1.setForReadOnly(true);
+   List<Object[]> sboEntpRes = query_1.getResults();
+   if (sboEntpRes != null  ) {
+	   if(sboEntpRes.size() > 1){
+			// for multiple values in result, check if already exists on request
+		   sboExistsOrSetOnReq =   StringUtils.isNotBlank(data.getSalesBusOffCd()) ? true : false;
+		   entpExistsOrSetOnReq =   StringUtils.isNotBlank(data.getEnterprise()) ? true : false;
+	   }
+	   else if(sboEntpRes.size() ==  1){
+	        // for single value override
+		   sboExistsOrSetOnReq = true;
+		   entpExistsOrSetOnReq = true;
+		   fieldsValue.setSbo(sboEntpRes.get(0)[0].toString());
+		   	fieldsValue.setEnterprise(sboEntpRes.get(0)[2].toString());   
+	   }
+   }
+    return fieldsValue;
+  }
 }
