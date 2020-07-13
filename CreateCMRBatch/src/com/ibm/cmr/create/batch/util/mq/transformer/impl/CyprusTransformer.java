@@ -266,18 +266,14 @@ public class CyprusTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
       CMRRequestContainer cmrObjects) {
-    LOG.debug("transformLegacyCustomerData GREECE transformer...");
+    LOG.debug("transformLegacyCustomerData CYPRUS transformer...");
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
     formatDataLines(dummyHandler);
     String landedCntry = "";
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("CEdivision"))) {
-        legacyCust.setCeDivision(dummyHandler.messageHash.get("CEdivision"));
-      }
+      legacyCust.setCeDivision("3"); // CCEDA
       legacyCust.setAccAdminBo("");
-      // legacyCust.setCeDivision("2"); // extract the phone from billing
-      // as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
           legacyCust.setTelNoOrVat(addr.getCustPhone());
@@ -288,9 +284,8 @@ public class CyprusTransformer extends EMEATransformer {
       // other fields to be transformed is pending
       // mrc
       String custType = data.getCustSubGrp();
-      if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "ZAXBP".equals(custType)) {
+      if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "CRBUS".equals(custType)) {
         legacyCust.setMrcCd("5");
-        legacyCust.setAuthRemarketerInd("Y");
       } else {
         legacyCust.setMrcCd("3");
       }
@@ -417,7 +412,7 @@ public class CyprusTransformer extends EMEATransformer {
       legacyCust.setDcRepeatAgreement("0"); // CAGXB
       legacyCust.setLeasingInd("0"); // CIEDC
       legacyCust.setAuthRemarketerInd("0"); // CIEXJ
-      if (data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("XBP")) {
+      if (data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("CRBUS")) {
         legacyCust.setAuthRemarketerInd("1");
       }
       String formatSBO = data.getSalesBusOffCd() + "0000";
