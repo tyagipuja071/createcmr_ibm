@@ -228,11 +228,12 @@ public class RequestUtils {
 
     if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
       skip = true;
-
-      if (skip) {
-        return;
-      }
     }
+
+    if (skip) {
+      return;
+    }
+
     sendEmailNotifications(entityManager, admin, hist);
   }
 
@@ -277,11 +278,12 @@ public class RequestUtils {
 
     if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
       skip = true;
-
-      if (skip) {
-        return;
-      }
     }
+
+    if (skip) {
+      return;
+    }
+
     sendEmailNotifications(entityManager, admin, hist);
   }
 
