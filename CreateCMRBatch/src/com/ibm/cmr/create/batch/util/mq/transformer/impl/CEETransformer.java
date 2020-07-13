@@ -594,16 +594,16 @@ public class CEETransformer extends EMEATransformer {
       line2 = "";
     }
 
-    line3 = addrData.getAddrTxt();
+    line3 = addrData.getCustNm3();
 
-    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line4 = addrData.getAddrTxt2();
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 = addrData.getAddrTxt();
     } else {
       line4 = "";
     }
 
     // Dept + Postal code + City
-    line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
+    line5 = addrData.getPostCd() + " " + addrData.getCity1();
 
     if (!StringUtils.isBlank(addrData.getLandCntry())) {
       line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
@@ -628,9 +628,12 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
-    legacyAddr.setAddrLine4(line4);
+//    legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
+    legacyAddr.setCity(addrData.getCity1());
+    legacyAddr.setZipCode(addrData.getPostCd());
     legacyAddr.setAddrLine6(line6);
+    legacyAddr.setStreet(line4);
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
@@ -748,9 +751,13 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getPostCd())) {
-      legacyAddr.setZipCode(addr.getPostCd());
-      addrLine5.append(addr.getPostCd() + " ");
-
+    	if ("@".equals(addr.getPostCd())) {
+            legacyAddr.setZipCode("");
+            // addrLine5.append(" ");
+          }else{
+		      legacyAddr.setZipCode(addr.getPostCd());
+		      addrLine5.append(addr.getPostCd() + " ");
+          }
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setZipCode(addr.getPostCd());
       }
@@ -761,9 +768,13 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
-      legacyAddr.setCity(addr.getCity1());
-      addrLine5.append(addr.getCity1());
-
+    	if ("@".equals(addr.getCity1())) {
+            legacyAddr.setCity("");
+            // addrLine5.append(" ");
+          }else{
+		      legacyAddr.setCity(addr.getCity1());
+		      addrLine5.append(addr.getCity1() + " ");
+          }
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setCity(addr.getCity1());
       }
