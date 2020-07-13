@@ -551,6 +551,9 @@ function setEnterpriseValues(clientTier) {
   var isuCd = FormManager.getActualValue('isuCd');
   if ((cntry == SysLoc.PORTUGAL) || (cntry == SysLoc.SPAIN && custSubGrp != 'XBP' && custSubGrp != 'BUSPR')) {
     FormManager.enable('enterprise');
+  } else {
+    FormManager.setValue('enterprise', '');
+    FormManager.readOnly('enterprise');
   }
   clientTier = FormManager.getActualValue('clientTier');
 
