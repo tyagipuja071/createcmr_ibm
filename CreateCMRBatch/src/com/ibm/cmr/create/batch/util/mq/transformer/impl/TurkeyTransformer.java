@@ -1195,11 +1195,11 @@ public class TurkeyTransformer extends EMEATransformer {
       String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
       legacyCust.setSbo(sbo);
       legacyCust.setIbo(sbo);
-      // legacyCust.setCeBo(sbo);
+       legacyCust.setCeBo(sbo);
     } else {
       legacyCust.setSbo("");
       legacyCust.setIbo("");
-      // legacyCust.setCeBo("");
+       legacyCust.setCeBo("");
     }
 
     // common data for C/U
