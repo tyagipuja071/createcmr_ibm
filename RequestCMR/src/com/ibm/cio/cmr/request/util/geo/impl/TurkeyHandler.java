@@ -3315,12 +3315,15 @@ public class TurkeyHandler extends BaseSOFHandler {
 	    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
 	      fields.add("HW_INSTL_MSTR_FLG");
 	    }
-	    if (SystemLocation.GREECE.equals(cmrIssuingCntry) || SystemLocation.TURKEY.equals(cmrIssuingCntry)
-	        || SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
-	      fields.remove("DEPT");
-	      fields.add("ADDR_TXT_2");
-	      fields.add("CUST_PHONE");
-	    }
+    if (SystemLocation.GREECE.equals(cmrIssuingCntry) || SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
+      fields.remove("DEPT");
+      fields.add("ADDR_TXT_2");
+      fields.add("CUST_PHONE");
+    }
+    if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
+      fields.add("ADDR_TXT_2");
+      fields.add("CUST_PHONE");
+    }
 	    return fields;
 	  }
 
