@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrPK;
@@ -2404,9 +2405,21 @@ public class LegacyDirectService extends TransConnService {
 
           boolean isDataUpdated = false;
           isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+          
+          if(SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && !isDataUpdated){
+        	  for(Addr addr: addresses){
+        		  if("ZS01".equals(addr.getId().getAddrType())){
+        			  AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
+        			  if(addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))){
+        				  isDataUpdated = true;
+        			  }	          			  
+        		  }
+        	  }
+            }
 
           for (Addr addr : addresses) {
             entityManager.detach(addr);
+            
             if (usedSequences.contains(addr.getId().getAddrSeq())) {
               LOG.warn("Sequence " + addr.getId().getAddrSeq() + " already sent in a previous request. Skipping.");
               continue;
@@ -2811,6 +2824,17 @@ public class LegacyDirectService extends TransConnService {
         isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
         MessageTransformer transformer = TransformerManager.getTransformer(data.getCmrIssuingCntry());
 
+        if(SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && !isDataUpdated){
+	      	  for(Addr addr: addresses){
+	      		  if("ZS01".equals(addr.getId().getAddrType())){
+	      			  AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
+	      			  if(addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))){
+	      				  isDataUpdated = true;
+	      			  }	          			  
+	      		  }
+	      	  }
+          }
+        
         for (Addr addr : addresses) {
           entityManager.detach(addr);
           if (usedSequences.contains(addr.getId().getAddrSeq())) {
@@ -4048,6 +4072,19 @@ public class LegacyDirectService extends TransConnService {
     query.setParameter("REQ_ID", data.getId().getReqId());
     query.setForReadOnly(true);
     return query.getSingleResult(DataRdc.class);
+  }
+  
+  private AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr){
+	    LOG.debug("Searching for Addr_RDC records for Legacy Processing " + addr.getId().getReqId());
+	    String sql = ExternalizedQuery.getSql("SUMMARY.OLDADDR");
+	    PreparedQuery query = new PreparedQuery(entityManager, sql);
+	    query.setParameter("REQ_ID", addr.getId().getReqId());
+	    query.setParameter("SEQ", addr.getId().getAddrSeq());
+	    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+	    query.setForReadOnly(true);
+	    return query.getSingleResult(AddrRdc.class);
+	  
+	  
   }
 
   private List<String> checkIfSeqExistOnRDC(EntityManager entityManager, String cmrNo, String cntry) {
