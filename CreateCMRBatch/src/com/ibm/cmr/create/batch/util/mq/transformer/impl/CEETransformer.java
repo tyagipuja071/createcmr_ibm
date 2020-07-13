@@ -594,10 +594,10 @@ public class CEETransformer extends EMEATransformer {
       line2 = "";
     }
 
-    line3 = addrData.getAddrTxt();
+    line3 = addrData.getCustNm3();
 
-    if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line4 = addrData.getAddrTxt2();
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 = addrData.getAddrTxt();
     } else {
       line4 = "";
     }
@@ -628,9 +628,12 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
-    legacyAddr.setAddrLine4(line4);
+//    legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
+    legacyAddr.setCity(addrData.getCity1());
+    legacyAddr.setZipCode(addrData.getPostCd());
     legacyAddr.setAddrLine6(line6);
+    legacyAddr.setStreet(line4);
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
