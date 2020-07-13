@@ -603,7 +603,7 @@ public class CEETransformer extends EMEATransformer {
     }
 
     // Dept + Postal code + City
-    line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
+    line5 = addrData.getPostCd() + " " + addrData.getCity1();
 
     if (!StringUtils.isBlank(addrData.getLandCntry())) {
       line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
@@ -751,9 +751,13 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getPostCd())) {
-      legacyAddr.setZipCode(addr.getPostCd());
-      addrLine5.append(addr.getPostCd() + " ");
-
+    	if ("@".equals(addr.getPostCd())) {
+            legacyAddr.setZipCode("");
+            // addrLine5.append(" ");
+          }else{
+		      legacyAddr.setZipCode(addr.getPostCd());
+		      addrLine5.append(addr.getPostCd() + " ");
+          }
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setZipCode(addr.getPostCd());
       }
@@ -764,9 +768,13 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
-      legacyAddr.setCity(addr.getCity1());
-      addrLine5.append(addr.getCity1());
-
+    	if ("@".equals(addr.getCity1())) {
+            legacyAddr.setCity("");
+            // addrLine5.append(" ");
+          }else{
+		      legacyAddr.setCity(addr.getCity1());
+		      addrLine5.append(addr.getCity1() + " ");
+          }
       if (legacyFiscalAddr != null) {
         legacyFiscalAddr.setCity(addr.getCity1());
       }
