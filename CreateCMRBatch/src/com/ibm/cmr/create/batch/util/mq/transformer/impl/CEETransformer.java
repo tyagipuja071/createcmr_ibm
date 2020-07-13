@@ -1630,22 +1630,31 @@ public class CEETransformer extends EMEATransformer {
       MassUpdtData muData, String cmr) throws Exception {
 
     // for tax office
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getFloor())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
-              custExt.setiTaxCode("");
-            } else {
-              custExt.setiTaxCode(mua.getFloor());
-            }
-            break;
-          }
-
-        }
-      }
-    }
+//    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+//    if (muaList != null && muaList.size() > 0) {
+//      for (MassUpdtAddr mua : muaList) {
+//        if ("ZP01".equals(mua.getId().getAddrType())) {
+//          if (!StringUtils.isBlank(mua.getFloor())) {
+//            if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
+//              custExt.setiTaxCode("");
+//            } else {
+//              custExt.setiTaxCode(mua.getFloor());
+//            }
+//            break;
+//          }
+//
+//        }
+//      }
+//    }
+	  
+	    // RABXA :Bank Account Number
+	    if (!StringUtils.isBlank(muData.getEmail2())) {
+	      if ("@".equals(muData.getEmail2())) {
+	    	  custExt.setBankAcctNo("");
+	      } else {
+	    	  custExt.setBankAcctNo(muData.getEmail2());
+	      }
+	    }
 
     List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     MassUpdtAddr zp01Addr = new MassUpdtAddr();
