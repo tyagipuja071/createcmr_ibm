@@ -12,7 +12,7 @@
           <label>Abbreviated Name</label>
           <dbColumn>ABBREV_NM</dbColumn>
           <width>40</width>
-          <length>20</length>
+          <length>22</length>
         </column>
         <column>
           <label>Abbreviated Location</label>
@@ -36,6 +36,7 @@
           <label>Enterprise Number</label>
           <dbColumn>ENTERPRISE</dbColumn>
           <width>30</width>
+          <length>6</length>
           <lovId>Enterprise</lovId>
         </column>
         <column>
@@ -55,6 +56,7 @@
           <label>Client Tier</label>
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>25</width>
+          <length>1</length>
           <lovId>ClientTier</lovId>
         </column>
         <column>
@@ -77,8 +79,7 @@
         </column>
       </columns>
     </tab>
-
-	<tab name="Billing Address" type="Address" typeCode="ZS01">
+	<tab name="Mailing Address" type="Address" typeCode="ZS01">
       <columns>
         <column exactLength="true">
           <label>CMR. No</label>
@@ -111,40 +112,28 @@
           <length>30</length>
         </column>
         <column>
-          <label>Address con't</label>
+          <label>Address con't/Occupation</label>
           <dbColumn>ADDR_TXT2</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
         <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
-          <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
-          <width>18</width>
-          <length>26</length>
-        </column>
-        <column>
-          <label>Local Postal Code</label>
-          <dbColumn>POST_CD</dbColumn>
-          <width>18</width>
-          <length>5</length>
-        </column>
-        <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>25</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>4</length>
         </column>
         <column>
           <label>Cross Border Postal Code</label>
@@ -157,10 +146,27 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>23</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
+        </column>
+        <column>
+          <label>Phone #</label>
+          <dbColumn>RESTRICT_TO</dbColumn>
+          <length>30</length>
         </column>
       </columns>
     </tab>
-    <tab name="Mailing Address" type="Address" typeCode="ZP01">
+    <tab name="Billing Address" type="Address" typeCode="ZP01">
       <columns>
         <column exactLength="true">
           <label>CMR. No</label>
@@ -193,34 +199,16 @@
           <length>30</length>
         </column>
         <column>
-          <label>Address con't</label>
+          <label>Address con't/Occupation</label>
           <dbColumn>ADDR_TXT2</dbColumn>
           <width>40</width>
           <length>30</length>
-        </column>
-        <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
-          <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
-          <width>18</width>
-          <length>26</length>
-        </column>
-        <column>
-          <label>Local Postal Code</label>
-          <dbColumn>POST_CD</dbColumn>
-          <width>18</width>
-          <length>5</length>
-        </column>
+        </column>        
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>25</length>
         </column>
         <column>
           <label>Cross Border City</label>
@@ -229,6 +217,12 @@
           <length>20</length>
         </column>
         <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>4</length>
+        </column>
+        <column>        
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
@@ -239,6 +233,18 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>23</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
         </column>
       </columns>
     </tab>
@@ -275,40 +281,28 @@
           <length>30</length>
         </column>
         <column>
-          <label>Address con't</label>
+          <label>Address con't/Occupation</label>
           <dbColumn>ADDR_TXT2</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
         <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
-          <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
-          <width>18</width>
-          <length>26</length>
-        </column>
-        <column>
-          <label>Local Postal Code</label>
-          <dbColumn>POST_CD</dbColumn>
-          <width>18</width>
-          <length>5</length>
-        </column>
-        <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>25</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>4</length>
         </column>
         <column>
           <label>Cross Border Postal Code</label>
@@ -321,6 +315,18 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
         </column>
       </columns>
     </tab>
@@ -357,40 +363,28 @@
           <length>30</length>
         </column>
         <column>
-          <label>Address con't</label>
+          <label>Address con't/Occupation</label>
           <dbColumn>ADDR_TXT2</dbColumn>
           <width>40</width>
           <length>30</length>
         </column>
         <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
-          <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
-          <width>18</width>
-          <length>26</length>
-        </column>
-        <column>
-          <label>Local Postal Code</label>
-          <dbColumn>POST_CD</dbColumn>
-          <width>18</width>
-          <length>5</length>
-        </column>
-        <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>25</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>4</length>
         </column>
         <column>
           <label>Cross Border Postal Code</label>
@@ -403,6 +397,12 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
         </column>
       </columns>
     </tab>
@@ -439,40 +439,28 @@
           <length>30</length>
         </column>
         <column>
-          <label>Address con't</label>
+          <label>Address con't/Occupation</label>
           <dbColumn>ADDR_TXT2</dbColumn>
           <width>40</width>
           <length>30</length>
-        </column>
-        <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
-          <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
-          <width>18</width>
-          <length>26</length>
-        </column>
-        <column>
-          <label>Local Postal Code</label>
-          <dbColumn>POST_CD</dbColumn>
-          <width>18</width>
-          <length>5</length>
-        </column>
+        </column>        
         <column>
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>25</length>
         </column>
         <column>
           <label>Cross Border City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
           <length>20</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>4</length>
         </column>
         <column>
           <label>Cross Border Postal Code</label>
@@ -485,6 +473,12 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
         </column>
       </columns>
     </tab>

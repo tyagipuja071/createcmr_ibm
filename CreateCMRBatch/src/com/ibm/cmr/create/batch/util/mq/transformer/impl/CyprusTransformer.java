@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +18,13 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
@@ -42,6 +47,7 @@ public class CyprusTransformer extends EMEATransformer {
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
+  private static final String DEFAULT_CLEAR_CHAR = "@";
 
   public CyprusTransformer() {
     super(SystemLocation.CYPRUS);
@@ -473,6 +479,118 @@ public class CyprusTransformer extends EMEATransformer {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
+  }
+
+  @Override
+  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
+    LOG.debug("CY >> Mapping default Data values..");
+    LegacyCommonUtil.legacyCustDataMassUpdtCommonData(entityManager, cust, muData);
+  }
+
+  @Override
+  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
+      Data data, LegacyDirectObjectContainer legacyObjects) {
+    legacyAddr.setForUpdate(true);
+    LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
+    formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
+    legacyObjects.addAddress(legacyAddr);
+
+  }
+
+  @Override
+  public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
+    LOG.debug("***START CY formatMassUpdateAddressLines >>>");
+
+    boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
+    String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
+    Map<String, String> messageHash = new LinkedHashMap<String, String>();
+
+    messageHash.put("SourceCode", "EF0");
+    messageHash.remove(addrKey + "Name");
+    messageHash.remove(addrKey + "ZipCode");
+    messageHash.remove(addrKey + "City");
+    messageHash.remove(addrKey + "POBox");
+
+    String line1 = legacyAddr.getAddrLine1();
+    String line2 = legacyAddr.getAddrLine2();
+    String line3 = legacyAddr.getAddrLine3();
+    String line4 = legacyAddr.getAddrLine4();
+    String line5 = legacyAddr.getAddrLine5();
+    String line6 = legacyAddr.getAddrLine6();
+
+    // customer name
+    line1 = legacyAddr.getAddrLine1();
+
+    if (!StringUtils.isBlank(massUpdtAddr.getCustNm2())) {
+      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm2())) {
+        line2 = "";
+      } else {
+        line2 = massUpdtAddr.getCustNm2();
+      }
+    }
+
+    // Att Person or Address Con't/Occupation
+    if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
+      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt2())) {
+        line3 = "";
+      } else {
+        line3 = massUpdtAddr.getAddrTxt2();
+      }
+    } else if (!StringUtils.isBlank(massUpdtAddr.getCustNm4())) {
+      if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
+        line3 = "ATT " + line3;
+      }
+      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm4())) {
+        line3 = "";
+      } else {
+        line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
+      }
+    }
+
+    // Street OR PO BOX
+    if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt())) {
+      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt())) {
+        line4 = "";
+      } else {
+        line4 = massUpdtAddr.getAddrTxt();
+      }
+    } else if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
+      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getPoBox())) {
+        line4 = "";
+        legacyAddr.setPoBox("");
+      } else {
+        line4 = "PO BOX " + massUpdtAddr.getPoBox();
+        legacyAddr.setPoBox(massUpdtAddr.getPoBox());
+      }
+    }
+
+    if (!StringUtils.isEmpty(massUpdtAddr.getPostCd()) || !StringUtils.isEmpty(massUpdtAddr.getCity1())) {
+      line5 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() + " " : "")
+          + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
+    }
+
+    if (!StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
+      line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
+    }
+
+    String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
+        (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : ""), (line6 != null ? line6.trim() : "") };
+
+    int lineNo = 1;
+    LOG.debug("Lines: " + (line1 != null ? line1.trim() : "") + " | " + (line2 != null ? line2.trim() : "") + " | "
+        + (line3 != null ? line3.trim() : "") + " | " + (line4 != null ? line4.trim() : "") + " | " + (line5 != null ? line5.trim() : "") + " | "
+        + (line6 != null ? line6.trim() : ""));
+
+    for (String line : lines) {
+      messageHash.put(getAddressKey((massUpdtAddr.getId().getAddrType()) + "Address" + lineNo).toString(), line);
+      lineNo++;
+    }
+    legacyAddr.setAddrLine1(line1 != null ? line1.trim() : "");
+    legacyAddr.setAddrLine2(line2 != null ? line2.trim() : "");
+    legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
+    legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
+    legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
+    legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
   }
 
 }
