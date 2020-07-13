@@ -1611,14 +1611,14 @@ public class TurkeyTransformer extends EMEATransformer {
       List<Addr> addrList = cmrObjects.getAddresses();
       List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
       String billingseq = getSeqForBilling(entityManager, cmrObjects.getAdmin().getId().getReqId());
-      boolean isExistBilling = true;
+      boolean isExistMailing = true;
 
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
-        if ("Y".equals(currAddr.getIsAddrUseBilling())) {
-          isExistBilling = true;
+        if ("Y".equals(currAddr.getIsAddrUseMailing())) {
+          isExistMailing = true;
           break;
         } else {
-          isExistBilling = false;
+          isExistMailing = false;
         }
       }
 
@@ -1630,12 +1630,12 @@ public class TurkeyTransformer extends EMEATransformer {
           CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
             // if ("Y".equals(olddataaddr.getIsAddrUseMailing()) &&
             // "Y".equals(olddataaddr.getIsAddrUseBilling())) {
-            if (!isExistBilling) {
+            if (!isExistMailing) {
             // copy billing from mailing
             copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
-              olddataaddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
-            olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
-            olddataaddr.setForUpdate(true);
+              // olddataaddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+              // olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
+              // olddataaddr.setForUpdate(true);
           }
         }
         }
@@ -1920,8 +1920,8 @@ public class TurkeyTransformer extends EMEATransformer {
   private void copyBillingFromMailing(LegacyDirectObjectContainer legacyObjects, CmrtAddr mailingAddr, String billingseq) {
     CmrtAddr billingAddr = (CmrtAddr) SerializationUtils.clone(mailingAddr);
     billingAddr.getId().setAddrNo(billingseq);
-    billingAddr.setIsAddrUseMailing(ADDRESS_USE_NOT_EXISTS);
-    billingAddr.setIsAddrUseBilling(ADDRESS_USE_EXISTS);
+    billingAddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
+    billingAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
     billingAddr.setForCreate(true);
     billingAddr.setForUpdate(false);
     // modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, mailingAddr);
