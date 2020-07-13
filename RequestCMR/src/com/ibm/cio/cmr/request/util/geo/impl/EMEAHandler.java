@@ -3551,14 +3551,11 @@ public class EMEAHandler extends BaseSOFHandler {
       return true;
     } else if (SystemLocation.GREECE.equals(issuingCountry)) {
       return true;
-    }
-
-    // *abner revert begin
-    // else if (SystemLocation.TURKEY.equals(issuingCountry)) {
-    // return true;
-    // }
-    // *abner revert end
-    else {
+    } else if (SystemLocation.PORTUGAL.equals(issuingCountry)) {
+      return true;
+    } else if (SystemLocation.CYPRUS.equals(issuingCountry)) {
+      return true;
+    } else {
       return false;
     }
   }
