@@ -3554,9 +3554,7 @@ function setClientTierAndISR(value) {
 function setISRValuesGR() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'SPAS') {
-    FormManager.setValue('repTeamMemberNo', '000000');
     FormManager.setValue('abbrevLocn', 'SAAS');
-    FormManager.readOnly('repTeamMemberNo');
   } else if (custSubGrp == 'INTER'  || custSubGrp == 'XINTR') {
     FormManager.setValue('repTeamMemberNo', '000000');
   } else if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && _isScenarioChanged && FormManager.getActualValue('repTeamMemberNo') == '') {
@@ -3566,7 +3564,7 @@ function setISRValuesGR() {
   setEnterprise(repTeamMemberNo);
   FormManager.readOnly('subIndustryCd');
   if (custSubGrp == 'COMME' || custSubGrp == 'CROSS' || custSubGrp == 'PRICU' || custSubGrp == 'GOVRN' || custSubGrp == ''
-    || custSubGrp == 'BUSPR' || custSubGrp == 'XBP') {
+    || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'SPAS') {
     setISRValues();
   }  
   if (repTeamMemberNo == '') {
