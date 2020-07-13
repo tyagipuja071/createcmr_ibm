@@ -8086,6 +8086,10 @@ function validateSingleReactParentCMR() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function countryScenarioProcessorRules() {
+  return false;
+}
+
  
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];

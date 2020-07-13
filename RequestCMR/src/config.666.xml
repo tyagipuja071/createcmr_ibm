@@ -1,0 +1,493 @@
+<template id="666" for="UPDATE">
+  <tabs>
+    <tab name="Data" type="Data" >
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column>
+          <label>Abbreviated Name</label>
+          <dbColumn>ABBREV_NM</dbColumn>
+          <width>40</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Abbreviated Location</label>
+          <dbColumn>ABBREV_LOCN</dbColumn>
+          <width>20</width>
+          <length>12</length>
+        </column>
+        <column>
+          <label>ISIC</label>
+          <dbColumn>ISIC_CD</dbColumn>
+          <width>20</width>
+          <bdsId>ISIC</bdsId>
+        </column>
+        <column>
+          <label>Collection Code</label>
+          <dbColumn>COLLECTION_CD</dbColumn>
+          <width>30</width>
+          <lovId>CollectionCd</lovId>
+        </column>
+        <column>
+          <label>Enterprise Number</label>
+          <dbColumn>ENTERPRISE</dbColumn>
+          <width>30</width>
+          <lovId>Enterprise</lovId>
+        </column>
+        <column>
+          <label>INAC/NAC</label>
+          <dbColumn>INAC_CD</dbColumn>
+          <length>4</length>
+          <width>20</width>
+        </column>
+        <column>
+          <label>Industry Solution Unit (ISU)</label>
+          <dbColumn>ISU_CD</dbColumn>
+          <width>25</width>
+          <lovId>ISU</lovId>
+          <length>2</length>
+        </column>
+        <column>
+          <label>Client Tier</label>
+          <dbColumn>CLIENT_TIER</dbColumn>
+          <width>25</width>
+          <lovId>ClientTier</lovId>
+          <length>1</length>
+        </column>
+        <column>
+          <label>Embargo Code</label>
+          <dbColumn>EMBARGO_CD</dbColumn>
+          <width>10</width>
+          <length>1</length>
+        </column>
+        <column>
+          <label>Mode of Payment</label>
+          <dbColumn>MODE_OF_PAYMENT</dbColumn>
+          <width>20</width>
+          <lovId>ModeOfPayment</lovId>
+        </column>
+        <column number="false">
+          <label>VAT</label>
+          <dbColumn>VAT</dbColumn>
+          <width>5</width>
+          <length>1</length>
+        </column>
+      </columns>
+    </tab>
+
+	<tab name="Billing Address" type="Address" typeCode="ZS01">
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column exactLength="true">
+          <label>Address Seq. No.</label>
+          <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+          <width>10</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Customer Name</label>
+          <dbColumn>CUST_NM1</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Customer Name Cont'd</label>
+          <dbColumn>CUST_NM2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Street</label>
+          <dbColumn>ADDR_TXT</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Address con't</label>
+          <dbColumn>ADDR_TXT2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Local City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>24</length>
+        </column>
+        <column>
+          <label>Cross Border City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Cross Border Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>10</length>
+        </column>
+        <column>
+          <label>Landed Country</label>
+          <dbColumn>LAND_CNTRY</dbColumn>
+          <width>18</width>
+          <bdsId>LandedCountry</bdsId>
+        </column>
+      </columns>
+    </tab>
+    <tab name="Mailing Address" type="Address" typeCode="ZP01">
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column exactLength="true">
+          <label>Address Seq. No.</label>
+          <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+          <width>10</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Customer Name</label>
+          <dbColumn>CUST_NM1</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Customer Name Cont'd</label>
+          <dbColumn>CUST_NM2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Street</label>
+          <dbColumn>ADDR_TXT</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Address con't</label>
+          <dbColumn>ADDR_TXT2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Local City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>24</length>
+        </column>
+        <column>
+          <label>Cross Border City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Cross Border Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>10</length>
+        </column>
+        <column>
+          <label>Landed Country</label>
+          <dbColumn>LAND_CNTRY</dbColumn>
+          <width>18</width>
+          <bdsId>LandedCountry</bdsId>
+        </column>
+      </columns>
+    </tab>
+    <tab name="Installing Address" type="Address" typeCode="ZI01">
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column exactLength="true">
+          <label>Address Seq. No.</label>
+          <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+          <width>10</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Customer Name</label>
+          <dbColumn>CUST_NM1</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Customer Name Cont'd</label>
+          <dbColumn>CUST_NM2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Street</label>
+          <dbColumn>ADDR_TXT</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Address con't</label>
+          <dbColumn>ADDR_TXT2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Local City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>24</length>
+        </column>
+        <column>
+          <label>Cross Border City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Cross Border Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>10</length>
+        </column>
+        <column>
+          <label>Landed Country</label>
+          <dbColumn>LAND_CNTRY</dbColumn>
+          <width>18</width>
+          <bdsId>LandedCountry</bdsId>
+        </column>
+      </columns>
+    </tab>
+    <tab name="Shipping Address (Update)" type="Address" typeCode="ZD01">
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column exactLength="true">
+          <label>Address Seq. No.</label>
+          <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+          <width>10</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Customer Name</label>
+          <dbColumn>CUST_NM1</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Customer Name Cont'd</label>
+          <dbColumn>CUST_NM2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Street</label>
+          <dbColumn>ADDR_TXT</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Address con't</label>
+          <dbColumn>ADDR_TXT2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Local City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>24</length>
+        </column>
+        <column>
+          <label>Cross Border City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Cross Border Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>10</length>
+        </column>
+        <column>
+          <label>Landed Country</label>
+          <dbColumn>LAND_CNTRY</dbColumn>
+          <width>18</width>
+          <bdsId>LandedCountry</bdsId>
+        </column>
+      </columns>
+    </tab>
+    <tab name="EPL Address" data="false" type="Address" typeCode="ZS02">
+      <columns>
+        <column exactLength="true">
+          <label>CMR. No</label>
+          <dbColumn>CMR_NO</dbColumn>
+          <width>20</width>
+          <length>6</length>
+        </column>
+        <column exactLength="true">
+          <label>Address Seq. No.</label>
+          <dbColumn>ADDR_SEQUENCE_NO</dbColumn>
+          <width>10</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Customer Name</label>
+          <dbColumn>CUST_NM1</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Customer Name Cont'd</label>
+          <dbColumn>CUST_NM2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Street</label>
+          <dbColumn>ADDR_TXT</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>Address con't</label>
+          <dbColumn>ADDR_TXT2</dbColumn>
+          <width>40</width>
+          <length>30</length>
+        </column>
+        <column>
+          <label>PO Box</label>
+          <dbColumn>PO_BOX</dbColumn>
+          <width>18</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Att. Person</label>
+          <dbColumn>COUNTY</dbColumn>
+          <width>18</width>
+          <length>26</length>
+        </column>
+        <column>
+          <label>Local Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>5</length>
+        </column>
+        <column>
+          <label>Local City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>24</length>
+        </column>
+        <column>
+          <label>Cross Border City</label>
+          <dbColumn>CITY1</dbColumn>
+          <width>40</width>
+          <length>20</length>
+        </column>
+        <column>
+          <label>Cross Border Postal Code</label>
+          <dbColumn>POST_CD</dbColumn>
+          <width>18</width>
+          <length>10</length>
+        </column>
+        <column>
+          <label>Landed Country</label>
+          <dbColumn>LAND_CNTRY</dbColumn>
+          <width>18</width>
+          <bdsId>LandedCountry</bdsId>
+        </column>
+      </columns>
+    </tab>
+  </tabs>
+</template>

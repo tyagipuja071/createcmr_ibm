@@ -20,6 +20,7 @@ var _addrTypesForOnChange = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01' ];
 var SCOTLAND_POST_CD = [ 'AB', 'KA', 'DD', 'KW', 'DG', 'KY', 'EH', 'ML', 'FK', 'PA', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'PH', 'TD', 'IV' ];
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
 var UK_LANDED_CNTRY = [ 'AI', 'BM', 'IO', 'VG', 'KY', 'FK', 'GI', 'MS', 'PN', 'SH', 'TC', 'GS', 'GG', 'JE', 'IM' ];
+var COUNTRY_PROCESSOR_CHANGE = ['758', '866', '754'];
 var _addrTypeITHandler = [];
 var _streetITHandler = null;
 var _custNameITHandler = null;
@@ -8789,6 +8790,19 @@ function afterConfigForTR() {
   disableSitePartyIdTR();
 }
 
+
+function countryScenarioProcessorRules() {
+  console.log('Inside emea countryScenarioProcessorRules method');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  for (var i = 0; i < COUNTRY_PROCESSOR_CHANGE.length; i++) {
+    if (cntry == COUNTRY_PROCESSOR_CHANGE[i]) {
+      return false;
+      break;
+    }
+  }
+  return true;
+}
+ 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
