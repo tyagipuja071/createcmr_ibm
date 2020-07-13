@@ -56,7 +56,6 @@
           <dbColumn>CLIENT_TIER</dbColumn>
           <width>25</width>
           <lovId>ClientTier</lovId>
-          <length>1</length>
         </column>
         <column>
           <label>Embargo Code</label>
