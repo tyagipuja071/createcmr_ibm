@@ -8471,7 +8471,7 @@ function addDPLCheckValidatorTR() {
         console.log('result =' + result);
         console.log('reqType =' + reqType);
         console.log('role =' + role);
-        console.log('updateIndCount =' + updateIndCount);
+//        console.log('updateIndCount =' + updateIndCount);
         console.log('updateInd =' + updateInd);
         if (role == 'Processor' && reqType == 'U') {
           if (result == '' || result.toUpperCase() == 'NOT DONE') {
