@@ -1340,20 +1340,13 @@ public class TurkeyTransformer extends EMEATransformer {
       cust.setCeBo(cebo);
     }
 
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getCustPhone())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getCustPhone())) {
-              cust.setTelNoOrVat("");
-            } else {
-              cust.setTelNoOrVat(mua.getCustPhone());
-            }
-            break;
-          }
+    //Email1 used to store Phone#
+    if (!StringUtils.isBlank(muData.getEmail1())) {
+        if (DEFAULT_CLEAR_CHAR.equals(muData.getEmail1())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(muData.getEmail1());
         }
-      }
     }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
