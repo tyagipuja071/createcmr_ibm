@@ -205,9 +205,6 @@ public class SpainUtil extends AutomationUtil {
       case "Mailing Condition":
         cmdeReview = true;
         break;
-      case "Tax Code":
-        // noop, for switch handling only
-        break;
       case "ISU Code":
         // noop, for switch handling only
         break;
