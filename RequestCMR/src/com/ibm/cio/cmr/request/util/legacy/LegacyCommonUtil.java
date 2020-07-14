@@ -1,7 +1,5 @@
 package com.ibm.cio.cmr.request.util.legacy;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -10,7 +8,6 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -160,12 +157,6 @@ public class LegacyCommonUtil {
         legacyAddr.setPoBox(addr.getPoBox());
       }
     }
-
-  }
-
-  public static void setkna1MassUpdtCommonRules(EntityManager cmmaMgr, Kna1 kna1, MassUpdtData muData, List<Kna1> forUpdate, CmrtCust cust,
-      MassUpdtAddr addr) {
-
   }
 
 }
