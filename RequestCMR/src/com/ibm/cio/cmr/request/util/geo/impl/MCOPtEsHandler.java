@@ -39,7 +39,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
- * Handler for MCO Spain + Portugal
+ * Handler for MCO Spain And Portugal
  * 
  * @author Jeffrey Zamora
  * 
@@ -1111,6 +1111,7 @@ public class MCOPtEsHandler extends MCOHandler {
     } else {
       return false;
     }
+    
   }
   
 }
