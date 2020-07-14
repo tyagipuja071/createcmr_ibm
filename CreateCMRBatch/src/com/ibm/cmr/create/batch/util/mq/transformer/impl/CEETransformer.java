@@ -376,9 +376,9 @@ public class CEETransformer extends EMEATransformer {
     case "ZD01":
       return "Ship-To";
     case "ZI01":
-      return "Mail-To";
-    case "ZS02":
       return "Install-at";
+    case "ZS02":
+      return "Mail-To";
     case "ZP02":
       return "G address (Address in local language)";
     default:
@@ -396,9 +396,9 @@ public class CEETransformer extends EMEATransformer {
     case "ZD01":
       return "Ship-To";
     case "ZI01":
-      return "Mail-To";
-    case "ZS02":
       return "Install-at";
+    case "ZS02":
+      return "Mail-To";
     case "ZP02":
       return "G address (Address in local language)";
     default:
