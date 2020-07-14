@@ -8124,7 +8124,44 @@ function validateSingleReactParentCMR() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
- 
+function validateCollectionCodeforCyprus(){
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking collection code for update request..');
+        if(FormManager.getActualValue('reqType') != 'U' || FormManager.getActualValue('collectionCd') == ''){
+          return;
+        }
+        var reqId = FormManager.getActualValue('reqId');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var origCollectionCd = null;
+        var lovCollectionCd = [];
+        var result = cmr.query("GET.CMRINFO.IMPORTED", {
+          REQ_ID : reqId
+        });
+        lovCollectionCd = cmr.query("GET.COLLECTIONCD", {
+          CMR_ISSUING_CNTRY : cntry,
+          _qall : 'Y'
+        });
+        
+        if (result != null && result != '') {
+          origCollectionCd = result.ret5;
+        }
+      
+        var check = lovCollectionCd.map(obj => obj.ret1);
+        if(origCollectionCd != '' && !check.includes(origCollectionCd)){
+            return new ValidationResult({
+              id : 'collectionCd',
+              type : 'text',
+              name : 'collectionCd'}, false, 'Please select correct Collection Code.');
+        }else{
+          return new ValidationResult(null,true);
+        }
+     }
+   };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8365,5 +8402,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(disableAddrFieldsCY, [ SysLoc.CYPRUS ]);
   
   GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);
-
+  GEOHandler.registerValidator(validateCollectionCodeforCyprus, [ SysLoc.CYPRUS ],null, true);
 });
