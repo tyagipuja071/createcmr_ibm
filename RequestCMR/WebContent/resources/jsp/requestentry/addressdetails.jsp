@@ -52,7 +52,7 @@
     </cmr:column>
   </cmr:row>
   <!-- defect : 1444422 for FR -->
-  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS" exceptForCountry="618,866,754,755,862,726,666">
+  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS" exceptForCountry="618,866,754,755,726,666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="ierpSitePrtyId_view">

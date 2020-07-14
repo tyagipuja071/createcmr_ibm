@@ -335,7 +335,7 @@
       <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
     </p>
   </cmr:column>
-  <cmr:view forCountry="758">
+  <cmr:view forCountry="758,862">
   	<cmr:column span="2">
      <p>
       <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
@@ -345,7 +345,6 @@
      </p>
   	</cmr:column>
   </cmr:view>
-
 </cmr:row>
 <cmr:view exceptForCountry="758">
 <cmr:row addBackground="true">
