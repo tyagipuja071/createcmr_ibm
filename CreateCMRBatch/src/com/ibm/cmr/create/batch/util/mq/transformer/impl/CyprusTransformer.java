@@ -377,7 +377,23 @@ public class CyprusTransformer extends EMEATransformer {
       } else {
         legacyCust.setCollectionCd("");
       }
-
+      
+      long reqId = cmrObjects.getAdmin().getId().getReqId();
+      try {
+        if(LegacyDirectUtil.checkFieldsUpdated(entityManager, cmrIssuingCntry, admin, reqId)){
+          legacyCust.setAbbrevNm(data.getAbbrevNm());
+          legacyCust.setAbbrevLocn(data.getAbbrevLocn());
+          legacyCust.setIsicCd(data.getIsicCd());
+          legacyCust.setImsCd(data.getSubIndustryCd());
+          legacyCust.setInacCd(data.getInacCd());
+          legacyCust.setIsicCd(isuClientTier);
+          legacyCust.setSbo(data.getSalesBusOffCd());
+          legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+          legacyCust.setCollectionCd(data.getCollectionCd());
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     } // common data for C/U
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {

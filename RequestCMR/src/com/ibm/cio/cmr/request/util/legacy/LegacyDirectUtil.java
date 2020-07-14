@@ -27,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -41,6 +42,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -1375,6 +1377,33 @@ public class LegacyDirectUtil {
     }
    
     return flage;
+  }
+  
+  public static boolean checkFieldsUpdated(EntityManager entityManager, String cmrIssuingCntry, Admin admin, long reqId) throws Exception {
+    RequestChangeContainer changes = new RequestChangeContainer(entityManager, cmrIssuingCntry, admin, reqId);
+    if (changes != null && changes.hasDataChanges()) {
+      for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
+        if (updatedDataModel != null) {
+          String field = updatedDataModel.getDataField();
+          switch (field) {
+          case "Abbreviated Name":
+          case "ISIC":
+          case "Subindustry":
+          case "INAC/NAC Code":
+          case "Client Tier":
+          case "SBO":
+          case "ISU Code":
+          case "ISR":
+          case "Collection Code":
+          case "Abbreviated Location":
+            return true;
+          default:
+            return false;
+          }
+        }
+      }
+    }
+    return false;
   }
     
 }
