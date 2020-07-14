@@ -1679,7 +1679,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (CEE_COUNTRY_LIST.contains(cmrIssuingCntry)) {
       int addrSeq = 0;
       String maxAddrSeq = null;
-      String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+      String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", reqId);
 
