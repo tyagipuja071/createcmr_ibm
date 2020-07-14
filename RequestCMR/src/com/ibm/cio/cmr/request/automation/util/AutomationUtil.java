@@ -378,8 +378,9 @@ public abstract class AutomationUtil {
    * @param entityManager
    * @param request
    * @param requestData
+   * @param engineData
    */
-  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     // NOOP
   }
 
@@ -528,8 +529,6 @@ public abstract class AutomationUtil {
     }
     return true;
   }
-  
-  
 
   /**
    * Overloaded method does the private person and IBM employee checks
@@ -543,15 +542,15 @@ public abstract class AutomationUtil {
    * @return
    */
   protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
-      boolean checkBluepages,RequestData reqData) {
-      boolean legalEndingExists = false;
-	  for(Addr addr : reqData.getAddresses()){
-		String customerName =  getCustomerFullName(addr);
-		if (hasLegalEndings(customerName)){
-			legalEndingExists = true;
-			break;
-		}
-	  }
+      boolean checkBluepages, RequestData reqData) {
+    boolean legalEndingExists = false;
+    for (Addr addr : reqData.getAddresses()) {
+      String customerName = getCustomerFullName(addr);
+      if (hasLegalEndings(customerName)) {
+        legalEndingExists = true;
+        break;
+      }
+    }
     if (legalEndingExists) {
       engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
       details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
@@ -1052,12 +1051,12 @@ public abstract class AutomationUtil {
     }
 
   }
-  
-  private String getCustomerFullName(Addr addr){
-	  String custNm1 = addr.getCustNm1();
-	  String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "" ;
-	  String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "" ;
-	  String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "" ;	  
-	  return custNm1 + custNm2 + custNm3 + custNm4;
+
+  private String getCustomerFullName(Addr addr) {
+    String custNm1 = addr.getCustNm1();
+    String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
+    String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
+    String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
+    return custNm1 + custNm2 + custNm3 + custNm4;
   }
 }

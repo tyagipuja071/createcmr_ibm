@@ -91,8 +91,12 @@ public class GBGMatchingElement extends MatchingElement {
         result.setDetails(details.toString());
         result.setResults("Skipped");
         result.setProcessOutput(output);
-        return result;
+      } else {
+        result.setDetails("GBG Matching skipped due to previous element execution results.");
+        result.setResults("Skipped");
+        result.setProcessOutput(output);
       }
+      return result;
     }
 
     // boolean continueCheck = true;
@@ -133,7 +137,7 @@ public class GBGMatchingElement extends MatchingElement {
       }
 
       if (automationUtil != null) {
-        automationUtil.tweakGBGFinderRequest(entityManager, request, requestData);
+        automationUtil.tweakGBGFinderRequest(entityManager, request, requestData, engineData);
       }
 
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
