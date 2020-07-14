@@ -555,7 +555,7 @@ function setSBOAndEBO() {
       // For Spain, domestic with 32 & 21 ISU, set enterprise based on LocNo
       var isuCtc = isuCd + clientTier;
       if (isuCtc == '32B' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217') {
-        if (ent == undefined) {
+        if (ent == undefined || custSubGroup == 'BUSPR') {
           FormManager.setValue('enterprise', '');
         } else {
           FormManager.resetDropdownValues(FormManager.getField('enterprise'));
@@ -1220,7 +1220,9 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('covId');
     fieldsToDisable.push('geoLocationCode');
     fieldsToDisable.push('dunsNo');
-    fieldsToDisable.push('ppsceid');
+    if (custSubGrp != 'XBP' && custSubGrp != 'BUSPR') {
+      fieldsToDisable.push('ppsceid');
+    }
     fieldsToDisable.push('memLvl');
     fieldsToDisable.push('bpRelType');
     fieldsToDisable.push('soeReqNo');
