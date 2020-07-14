@@ -195,12 +195,11 @@ public class CEMEAHandler extends BaseSOFHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
 
-            int parvmCount = getKnvpParvmCount(record.getCmrSapNumber());
-            System.out.println("parvmCount = " + parvmCount);
-
-            if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && (parvmCount > 1)) {
-              record.setCmrAddrTypeCode("ZS02");
-            }
+            // if
+            // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
+            // && (parvmCount > 1)) {
+            // record.setCmrAddrTypeCode("ZS02");
+            // }
 
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
@@ -208,6 +207,13 @@ public class CEMEAHandler extends BaseSOFHandler {
               if (!StringUtils.isEmpty(addrType)) {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
+                if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
+                  String stkzn = "";
+                  stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
+                  if ("0".equals(stkzn)) {
+                  addr.setCmrAddrTypeCode("ZS02");
+                  }
+                }
                 converted.add(addr);
               }
               if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
@@ -1566,6 +1572,21 @@ public class CEMEAHandler extends BaseSOFHandler {
     System.out.println("adrnr = " + adrnr);
 
     return adrnr;
+  }
+
+  public static String getStkznFromDataRdc(EntityManager entityManager, String kunnr, String mandt) {
+    String stkzn = "";
+    String sql = ExternalizedQuery.getSql("CEE.GET_STKZN_FROM_DATA_RDC");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("MANDT", mandt);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      stkzn = result;
+    }
+    LOG.debug("stkzn of Data_RDC>" + stkzn);
+    return stkzn;
   }
 
   public Sadr getCEEAddtlAddr(EntityManager entityManager, String adrnr, String mandt) {
