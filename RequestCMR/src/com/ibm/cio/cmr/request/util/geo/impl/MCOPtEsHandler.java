@@ -1101,4 +1101,18 @@ public class MCOPtEsHandler extends MCOHandler {
   public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
     return Arrays.asList("6");
   }
+
+  
+  @Override
+  public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
+    if (SystemLocation.SPAIN.equals(issuingCountry)) {
+      return true;
+    } else if (SystemLocation.PORTUGAL.equals(issuingCountry)) {
+      return true;
+    } else {
+      return false;
+    }
+    
+  }
+  
 }
