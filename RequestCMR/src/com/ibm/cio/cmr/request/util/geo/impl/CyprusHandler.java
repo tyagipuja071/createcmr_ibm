@@ -3112,9 +3112,9 @@ public class CyprusHandler extends BaseSOFHandler {
   protected String getAddressTypeByUse(String addressUse) {
     switch (addressUse) {
     case "1":
-      return "ZP01";
-    case "2":
       return "ZS01";
+    case "2":
+      return "ZP01";
     case "3":
       return "ZI01";
     case "4":
