@@ -484,7 +484,7 @@ public class CyprusTransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
     LOG.debug("CY >> Mapping default Data values..");
-    LegacyCommonUtil.legacyCustDataMassUpdtCommonData(entityManager, cust, muData);
+    LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, cust, muData);
   }
 
   @Override
@@ -492,6 +492,9 @@ public class CyprusTransformer extends EMEATransformer {
       Data data, LegacyDirectObjectContainer legacyObjects) {
     legacyAddr.setForUpdate(true);
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
+    if (!StringUtils.isBlank(addr.getPostCd())) {
+      legacyAddr.setZipCode(addr.getPostCd());
+    }
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 

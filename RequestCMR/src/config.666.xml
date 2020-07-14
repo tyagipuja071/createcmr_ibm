@@ -155,7 +155,7 @@
         </column>
         <column>
           <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
+          <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
           <length>26</length>
         </column>
@@ -242,7 +242,7 @@
         </column>
         <column>
           <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
+          <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
           <length>26</length>
         </column>
@@ -324,7 +324,7 @@
         </column>
         <column>
           <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
+          <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
           <length>26</length>
         </column>
@@ -400,7 +400,7 @@
         </column>
         <column>
           <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
+          <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
           <length>26</length>
         </column>
@@ -476,7 +476,7 @@
         </column>
         <column>
           <label>Att. Person</label>
-          <dbColumn>COUNTY</dbColumn>
+          <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
           <length>26</length>
         </column>
