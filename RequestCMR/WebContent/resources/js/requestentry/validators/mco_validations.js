@@ -748,28 +748,56 @@ function changeLocationNoByPostCd(cntry, postCd, reqType) {
   }
 }
 
+function TaxCdOnPostalChange() {
+
+  dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+    var req = FormManager.getActualValue('reqType').toUpperCase();
+    if (req == 'C') {
+      setTaxCdByPostCd();
+    }
+  });
+}
+
 function setTaxCdByPostCd() {
   var reqType = FormManager.getActualValue('reqType');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-  var postcd = null;
-  var qParams = {
-    REQ_ID : FormManager.getActualValue('reqId')
-  };
-  var result = cmr.query('GET.ZS01POSTCD.BY_REQID', qParams);
-  if (result != null && result != '' && result.ret1 != undefined) {
-    postcd = result.ret1.substring(0, 2);
+  var addrType = FormManager.getActualValue('addrType');
+  if (reqType != 'C') {
+    return;
+  }
+  var postcd = FormManager.getActualValue('postCd');
+  if (postcd != '' && postcd != undefined) {
+    if (addrType == 'ZS01') {
+      postcd = postcd.substring(0, 2);
+    }
+  } else {
+    var qParams = {
+      REQ_ID : FormManager.getActualValue('reqId')
+    };
+    var result = cmr.query('GET.ZS01POSTCD.BY_REQID', qParams);
+    if (result != null && result != '' && result.ret1 != undefined) {
+      postcd = result.ret1.substring(0, 2);
+    }
   }
   console.log(postcd);
   var postalCdList = new Set([ '35', '38', '51', '52' ]);
   if (postalCdList.has(postcd)) {
     if (reqType == 'C' && (custSubGroup == 'GOVRN' || custSubGroup == 'GOVIG')) {
       FormManager.setValue('specialTaxCd', '18');
-    } else if (reqType == 'C' && (custSubGroup != 'GOVRN' || custSubGroup != 'GOVIG' || custSubGroup != 'INTSO' || custSubGroup != 'INTER' || custSubGroup != 'XINSO' || custSubGroup != 'XINTR')) {
+    } else if (reqType == 'C' && (custSubGroup != 'GOVRN' && custSubGroup != 'GOVIG' && custSubGroup != 'INTSO' && custSubGroup != 'INTER' && custSubGroup != 'XINSO' && custSubGroup != 'XINTR')) {
       FormManager.setValue('specialTaxCd', '23');
     }
+  } else {
+    var qParams = {
+      CUST_TYP : FormManager.getActualValue('custSubGroup')
+    };
+    var result = cmr.query('GET.TAXCD.BY_CUSTSUBGRP', qParams);
+    if (result != null && result != '' && result.ret1 != undefined) {
+      FormManager.setValue('specialTaxCd', result.ret1);
+    }
+
   }
 }
-
 function abbrvNmProcessorMandatory() {
   abbrvNmProcessorInterval = setInterval(function() {
     var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -1977,6 +2005,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
 
