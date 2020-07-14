@@ -505,17 +505,7 @@ function addAddressTypeValidator() {
           if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0)) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
           } else if (cntry == SysLoc.AUSTRIA) {
-            var reqLob = FormManager.getActualValue('requestingLob');// request
-            // LOB=IGF
-            // will
-            // have 2
-            // additional
-            // address
-            // type to
-            // own
-            if (reqLob == 'IGF' && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0)) {
-              return new ValidationResult(null, false, 'All address types are mandatory.');
-            } else if (zs01Cnt == 0) {
+            	if (zs01Cnt == 0) {
               // CMR-3389
               return new ValidationResult(null, false, 'Sold-to address is mandatory for CMR creation.');
             }

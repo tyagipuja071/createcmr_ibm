@@ -642,7 +642,7 @@ function setSBOAndEBO() {
       // For Spain, domestic with 32 & 21 ISU, set enterprise based on LocNo
       var isuCtc = isuCd + clientTier;
       if (isuCtc == '32B' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217') {
-        if (ent == undefined) {
+        if (ent == undefined || custSubGroup == 'BUSPR') {
           FormManager.setValue('enterprise', '');
         } else {
           FormManager.resetDropdownValues(FormManager.getField('enterprise'));
