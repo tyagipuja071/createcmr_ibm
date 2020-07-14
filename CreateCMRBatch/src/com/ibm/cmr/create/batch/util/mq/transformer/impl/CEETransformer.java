@@ -1757,7 +1757,7 @@ public class CEETransformer extends EMEATransformer {
 
   @Override
   public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
-    return true;
+    return false;
   }
 
   private void updateRequiredAddresses(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq,
