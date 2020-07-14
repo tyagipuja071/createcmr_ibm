@@ -51,7 +51,7 @@ public class CEETransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02" };
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02", "ZP03" };
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
@@ -381,6 +381,10 @@ public class CEETransformer extends EMEATransformer {
       return "Install-at";
     case "ZP02":
       return "G address (Address in local language)";
+    case "ZD02":
+    	return "IGF Ship-To";
+    case "ZP03":
+    	return "IGF Bill-To";
     default:
       return "";
     }

@@ -71,6 +71,7 @@ import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.impl.SOFMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.TransformerManager;
+import com.ibm.cmr.create.batch.util.mq.transformer.impl.CEETransformer;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.GenerateCMRNoClient;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
@@ -1540,8 +1541,8 @@ public class LegacyDirectService extends TransConnService {
             } else {
               newAddrSeq = addr.getId().getAddrSeq();
             }
-
-            newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+            
+           	newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');            	
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
             legacyAddrPk.setAddrNo(newAddrSeq);
@@ -1606,6 +1607,11 @@ public class LegacyDirectService extends TransConnService {
           }
           if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
             legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+          }
+          if(transformer instanceof CEETransformer){
+              if ("ZD02".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
+                  legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+                }
           }
           if (!StringUtils.isBlank(addr.getCity1())) {
             legacyAddr.setCity(addr.getCity1());
