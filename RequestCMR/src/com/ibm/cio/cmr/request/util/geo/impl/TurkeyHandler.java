@@ -2357,13 +2357,13 @@ public class TurkeyHandler extends BaseSOFHandler {
 	          // Sync Sold to and Local lauguage address
 	          if ("ZS01".equals(addr.getId().getAddrType())) {
 	            if (getAddressByType(entityManager, "ZP01", data.getId().getReqId()) == null) {
-	              saveAddrCopyForTR(entityManager, addr, "ZP01");
+              saveAddrCopyForTR(entityManager, addr, "ZP01", admin.getReqType());
 	            } else {
 	              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	            }
 	          } else if ("ZP01".equals(addr.getId().getAddrType())) {
 	            if (getAddressByType(entityManager, "ZS01", data.getId().getReqId()) == null) {
-	              saveAddrCopyForTR(entityManager, addr, "ZS01");
+              saveAddrCopyForTR(entityManager, addr, "ZS01", admin.getReqType());
 	            } else {
 	              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	            }
@@ -4284,7 +4284,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	    }
 	  }
 
-	  private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType) {
+  private void saveAddrCopyForTR(EntityManager entityManager, Addr addr, String addrType, String reqType) {
 	    Addr addrCopy = (Addr) SerializationUtils.clone(addr);
 	    addrCopy.getId().setAddrType(addrType);
 
@@ -4292,7 +4292,11 @@ public class TurkeyHandler extends BaseSOFHandler {
 	      addrCopy.setTaxOffice(null);
 	      addrCopy.getId().setAddrSeq("00003");
 	    } else if (addrType.equals("ZP01")) {
-	      addrCopy.getId().setAddrSeq("00002");
+      String seqZP01 = "00001";
+	      if(reqType.equals("U")){
+	        seqZP01 = "00002";
+	      }
+	      addrCopy.getId().setAddrSeq(seqZP01);
 	    }
 
 	    entityManager.persist(addrCopy);
