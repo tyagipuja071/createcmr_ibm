@@ -707,7 +707,7 @@ public class TurkeyTransformer extends EMEATransformer {
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
     legacyAddr.setAddrLine6(line6);
-    legacyAddr.setAddrPhone(phone);
+//    legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
     legacyAddr.setContact("");
