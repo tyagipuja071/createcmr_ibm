@@ -4086,6 +4086,7 @@ function disableAddrFieldsGRCYTR() {
 //    FormManager.setValue('custPhone', '');
     FormManager.hide('CustPhone', 'custPhone');
   } else {
+	FormManager.show('CustPhone', 'custPhone');
     FormManager.enable('custPhone');
   }
   // Lock land country when 'LOCAL' scenario
