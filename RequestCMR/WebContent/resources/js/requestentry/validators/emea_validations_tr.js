@@ -5312,7 +5312,9 @@ function addCrossBorderValidatorForIT() {
 }
 
 function addPhoneValidatorEMEA() {
-  FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
+	if(FormManager.getActualValue('addrType') == 'ZS01'){
+		FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);		
+	}
 }
 function addPOBOXValidatorEMEA() {
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
