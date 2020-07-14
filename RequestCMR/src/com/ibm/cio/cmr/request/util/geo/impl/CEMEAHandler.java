@@ -137,6 +137,9 @@ public class CEMEAHandler extends BaseSOFHandler {
   private static final List<String> CIS_DUPLICATE_COUNTRIES = Arrays.asList("607", "358", "626", "651", "694", "695", "787", "363", "359", "889",
       "741");
   
+  private static final List<String> CEE_COUNTRIES_LIST = Arrays.asList("358", "359", "363", "603", "607", "626", "644", "651", "668", "693", "694",
+      "695", "699", "704", "705", "707", "708", "740", "741", "787", "820", "821", "826", "889");
+
   protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
   "Install At" };
 
@@ -191,6 +194,13 @@ public class CEMEAHandler extends BaseSOFHandler {
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
+
+            int parvmCount = getKnvpParvmCount(record.getCmrSapNumber());
+            System.out.println("parvmCount = " + parvmCount);
+
+            if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && (parvmCount > 1)) {
+              record.setCmrAddrTypeCode("ZS02");
+            }
 
             System.out.println("seqNo = " + seqNo);
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
@@ -276,12 +286,14 @@ public class CEMEAHandler extends BaseSOFHandler {
               }
             }
 
-            int parvmCount = getKnvpParvmCount(record.getCmrSapNumber());
-            System.out.println("parvmCount = " + parvmCount);
-
-            if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && (parvmCount > 1)) {
-              record.setCmrAddrTypeCode("ZS02");
-            }
+            // int parvmCount = getKnvpParvmCount(record.getCmrSapNumber());
+            // System.out.println("parvmCount = " + parvmCount);
+            //
+            // if
+            // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
+            // && (parvmCount > 1)) {
+            // record.setCmrAddrTypeCode("ZS02");
+            // }
           }
         }
       } else {
@@ -988,6 +1000,9 @@ public class CEMEAHandler extends BaseSOFHandler {
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     boolean doSplit = (currentRecord.getCmrName1Plain() != null && currentRecord.getCmrName1Plain().length() > 30)
         || (currentRecord.getCmrName2Plain() != null && currentRecord.getCmrName2Plain().length() > 30);
+
+    String country = currentRecord.getCmrIssuedBy();
+
     if (doSplit) {
       String[] names = splitName(currentRecord.getCmrName1Plain(), currentRecord.getCmrName2Plain(), 30, 100);
       address.setCustNm1(names[0]);
@@ -1024,6 +1039,10 @@ public class CEMEAHandler extends BaseSOFHandler {
       address.setBldg(currentRecord.getCmrBldg());
     } else {
       address.setBldg(null);
+    }
+    if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+        && "ZS01".equalsIgnoreCase(address.getId().getAddrType()) && CEE_COUNTRIES_LIST.contains(country)) {
+      address.getId().setAddrSeq("00001");
     }
   }
 
