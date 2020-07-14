@@ -58,6 +58,10 @@ import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -2996,7 +3000,66 @@ public class TurkeyHandler extends BaseSOFHandler {
 	      autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
 	    }
 
+    if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+      // QUERY RDC
+      String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      List<Addr> addresses = query.getResults(Addr.class);
+
+      for (Addr addr : addresses) {
+        String sapNo = addr.getSapNo();
+
+        try {
+          String spid = "";
+
+          if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+            spid = getRDcIerpSitePartyId(sapNo);
+            addr.setIerpSitePrtyId(spid);
+          } else if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+            addr.setIerpSitePrtyId(spid);
+          }
+
+          entityManager.merge(addr);
+          entityManager.flush();
+        } catch (Exception e) {
+          LOG.error("Error occured on setting SPID after import.");
+          e.printStackTrace();
+        }
+
+      }
+    }
+
 	  }
+
+  private String getRDcIerpSitePartyId(String kunnr) throws Exception {
+    String spid = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.IERP.BRAN5");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("BRAN5");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing BRAN5 value from RDc DB..");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      spid = record.get("BRAN5") != null ? record.get("BRAN5").toString() : "";
+    }
+
+    return spid;
+  }
 
 	  private void updateImportIndicatior(EntityManager entityManager, long reqId) {
 	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.IMPORTIND.N"));
@@ -3498,6 +3561,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	    map.put("##CommercialFinanced", "commercialFinanced");
 	    map.put("##CustClass", "custClass");
 	    map.put("##TypeOfCustomer", "crosSubTyp");
+    map.put("##IERPSitePrtyId", "ierpSitePrtyId");
 	    return map;
 	  }
 
