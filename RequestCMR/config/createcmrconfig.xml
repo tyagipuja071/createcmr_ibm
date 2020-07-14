@@ -142,7 +142,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://localhost:9444/FindCMR</value>
+     <value>https://findcmr.c360-dev-cluster.us-south.containers.appdomain.cloud/FindCMR</value>
   </item>
   <item>
     <id>MAIL_SUBJECT</id>
@@ -208,7 +208,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-    <value>https://localhost:9444/CMRServices</value>
+    <value>https://cmrservices.c360-dev-cluster.us-south.containers.appdomain.cloud/CMRServices</value>
   </item>
   <item>
     <id>ADDRESS_VERIFICATION_RULES_LINK</id>
