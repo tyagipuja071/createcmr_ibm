@@ -8517,17 +8517,7 @@ function filterCmrnoForTR() {
   });
 }
 
-function disableSitePartyIdTR() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'C') {
-    FormManager.setValue('sitePartyId', '');
-  }
-  FormManager.resetValidations('sitePartyId');
-  FormManager.readOnly('sitePartyId');
-}
-
 function afterConfigForTR() {
-  disableSitePartyIdTR();
 }
 
 dojo.addOnLoad(function() {
