@@ -3567,22 +3567,9 @@ public class CyprusHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    if (SystemLocation.SPAIN.equals(issuingCountry)) {
+    if (SystemLocation.CYPRUS.equals(issuingCountry)) {
       return true;
-    } else if (SystemLocation.UNITED_KINGDOM.equals(issuingCountry)) {
-      return true;
-    } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
-      return true;
-    } else if (SystemLocation.GREECE.equals(issuingCountry)) {
-      return true;
-    }
-
-    // *abner revert begin
-    // else if (SystemLocation.TURKEY.equals(issuingCountry)) {
-    // return true;
-    // }
-    // *abner revert end
-    else {
+    } else {
       return false;
     }
   }
