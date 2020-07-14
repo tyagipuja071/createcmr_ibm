@@ -39,7 +39,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
  */
 public class PortugalTransformer extends MessageTransformer {
 
-  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "ZP02" };
+  private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02" };
 
   private static final Logger LOG = Logger.getLogger(PortugalTransformer.class);
 
@@ -122,45 +122,38 @@ public class PortugalTransformer extends MessageTransformer {
       vatDigit = vat.substring(2, vat.length());
     }
 
-    // fiscal address
-    if (MQMsgConstants.ADDR_ZP02.equals(addrData.getId().getAddrType())) {
-      line1 = vatDigit;
-      if (crossBorder)
-        line1 = vat;
-    } else {
-      line1 = addrData.getCustNm1();
-      line2 = addrData.getCustNm2();
-      if (StringUtils.isEmpty(line2)) {
-        line2 = addrData.getAddrTxt2();
-      }
+    line1 = addrData.getCustNm1();
+    line2 = addrData.getCustNm2();
+    if (StringUtils.isEmpty(line2)) {
+      line2 = addrData.getAddrTxt2();
+    }
 
-      line3 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
-      if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
-        line3 = "ATT: " + line3;
-      }
-      if (line3.length() > 30) {
-        line3 = line3.substring(0, 30);
-      }
-      if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(addrData.getCustNm2())) {
-        line3 = addrData.getAddrTxt2();
-      }
+    line3 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
+    if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
+      line3 = "ATT: " + line3;
+    }
+    if (line3.length() > 30) {
+      line3 = line3.substring(0, 30);
+    }
+    if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(addrData.getCustNm2())) {
+      line3 = addrData.getAddrTxt2();
+    }
 
-      line4 = addrData.getAddrTxt();
-      String poBox = !StringUtils.isEmpty(addrData.getPoBox()) ? addrData.getPoBox() : "";
-      if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
-        poBox = " APTO " + poBox;
-      }
-      line4 = (StringUtils.isEmpty(line4) ? "" : line4) + poBox;
+    line4 = addrData.getAddrTxt();
+    String poBox = !StringUtils.isEmpty(addrData.getPoBox()) ? addrData.getPoBox() : "";
+    if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
+      poBox = " APTO " + poBox;
+    }
+    line4 = (StringUtils.isEmpty(line4) ? "" : line4) + poBox;
 
-      line5 = addrData.getPostCd() + " " + addrData.getCity1();
-      line6 = "";
-      if (crossBorder) {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-      } else if (MQMsgConstants.ADDR_ZS02.equals(addrData.getId().getAddrType())) {
-        line6 = "Portugal";
-      } else if (MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType()) && update) {
-        line6 = addrData.getCustPhone();
-      }
+    line5 = addrData.getPostCd() + " " + addrData.getCity1();
+    line6 = "";
+    if (crossBorder) {
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    } else if (MQMsgConstants.ADDR_ZS02.equals(addrData.getId().getAddrType())) {
+      line6 = "Portugal";
+    } else if (MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType()) && update) {
+      line6 = addrData.getCustPhone();
     }
 
     String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
@@ -267,8 +260,6 @@ public class PortugalTransformer extends MessageTransformer {
       return "Billing";
     case "ZS02":
       return "Soft";
-    case "ZP02":
-      return "Fiscal";
     default:
       return "";
     }
@@ -287,8 +278,6 @@ public class PortugalTransformer extends MessageTransformer {
       return "Billing";
     case "ZS02":
       return "EPL";
-    case "ZP02":
-      return "Fiscal";
     default:
       return "";
     }
@@ -317,8 +306,6 @@ public class PortugalTransformer extends MessageTransformer {
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZS02:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
-    case MQMsgConstants.ADDR_ZP02:
-      return MQMsgConstants.SOF_ADDRESS_USE_FISCAL;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -326,19 +313,6 @@ public class PortugalTransformer extends MessageTransformer {
 
   protected boolean isCrossBorder(Addr addr) {
     return !"PT".equals(addr.getLandCntry());
-  }
-
-  @Override
-  public boolean shouldSendAddress(EntityManager entityManager, MQMessageHandler handler, Addr nextAddr) {
-    if (nextAddr == null) {
-      return false;
-    }
-    Data cmrData = handler.cmrData;
-    if (cmrData != null && StringUtils.isEmpty(cmrData.getVat()) && "ZP02".equals(nextAddr.getId().getAddrType())) {
-      // 1562483 - do not send fiscal if VAT is empty
-      return false;
-    }
-    return true;
   }
   
   protected boolean zs01CrossBorder(MQMessageHandler handler) {
