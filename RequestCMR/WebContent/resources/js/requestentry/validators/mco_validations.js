@@ -661,7 +661,53 @@ function setDistrictCode() {
   }
 }
 
-function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
+function changeAbbrevNmLocnSpain(cntry, addressMode, saving, finalSave, force) {
+  console.log(">>>> onSavingAddress ");
+  var reqType = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if ((finalSave || force) && cmr.addressMode) {
+    var copyTypes = document.getElementsByName('copyTypes');
+    var copyingToA = false;
+    if (copyTypes != null && copyTypes.length > 0) {
+      copyTypes.forEach(function(input, i) {
+        if (input.value == 'ZI01' && input.checked) {
+          copyingToA = true;
+        }
+      });
+    }
+    var addrType = FormManager.getActualValue('addrType');
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if ((addrType == 'ZI01' || copyingToA) && reqType == 'C' && role == 'REQUESTER') {
+      var abbrevNm = FormManager.getActualValue('custNm1');
+      var abbrevLocn = FormManager.getActualValue('city1');
+      if ([ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbrevNm.includes('IBM/')) {
+        abbrevNm = "IBM/".concat(abbrevNm);
+      }
+      if (abbrevNm && abbrevNm.length > 22) {
+        abbrevNm = abbrevNm.substring(0, 22);
+      }
+      if (abbrevLocn && abbrevLocn.length > 12) {
+        abbrevLocn = abbrevLocn.substring(0, 12);
+      }
+      FormManager.setValue('abbrevNm', abbrevNm);
+      if (custSubGrp != 'SOFTL') {
+        FormManager.setValue('abbrevLocn', abbrevLocn);
+      }
+    }
+
+    if (addrType == 'ZS01') {
+      // ES - Local: set locNo based from postCd
+      var postCd = FormManager.getActualValue('postCd');
+      changeLocationNoByPostCd(cntry, postCd, cmr.currentRequestType);
+    }
+
+  }
+}
+
+function changeAbbrevNmLocnPortugal(cntry, addressMode, saving, finalSave, force) {
   if (finalSave || force || addressMode == 'COPY') {
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
@@ -1461,13 +1507,13 @@ function hideCustPhoneonSummary() {
   }, 1000);
 }
 
-function setAbbrvPortugalSpain() {
+function setAbbrvPortugal() {
   var reqType = FormManager.getActualValue('reqType');
   var reqId = FormManager.getActualValue('reqId');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (reqType == 'C' && role == 'REQUESTER') {
-    var addrType = FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN ? 'ZI01' : 'ZS01';
+    var addrType = 'ZS01';
     if (reqId != null) {
       reqParam = {
         REQ_ID : reqId,
@@ -1478,11 +1524,6 @@ function setAbbrvPortugalSpain() {
     var city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
     var abbrvNm = custNm.ret1;
     var abbrevLocn = city.ret1;
-
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN && [ 'INTER', 'INTSO' ].includes(custSubGrp)) {
-      if (!abbrvNm.includes('IBM/'))
-        abbrvNm = "IBM/".concat(abbrvNm);
-    }
     if (abbrvNm && abbrvNm.length > 22) {
       abbrvNm = abbrvNm.substring(0, 22);
     }
@@ -1919,6 +1960,28 @@ function addBilingMailingValidatorSpain() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function changeAbbNmSpainOnScenario() {
+  var reqType = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqId = FormManager.getActualValue('reqId');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var abbName = FormManager.getActualValue('abbrevNm');
+  if (reqType == 'C' && role == 'REQUESTER' && [ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbName.includes('IBM/')) {
+    var reqParam = {
+      REQ_ID : reqId,
+      ADDR_TYPE : 'ZI01'
+    };
+    var installingAddrName = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', reqParam);
+    abbName = 'IBM/'.concat(installingAddrName.ret1);
+    if (abbName.length > 22)
+      abbName = abbName.substring(0, 22);
+    FormManager.setValue('abbrevNm', abbName);
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -1953,12 +2016,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLocOnChange, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setVatValidatorPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
-  GEOHandler.addAfterConfig(setAbbrvPortugalSpain, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setAbbrvPortugal, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setDPCEBObasedOnCntry, [ SysLoc.SPAIN ]);
   // GEOHandler.addAfterConfig(setDPCEBObasedOnCntryOnChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(disableVATforViewOnly, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setAddressDetailsForView, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
-  GEOHandler.addAfterConfig(setAbbrvNameLocLengthLimit, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setAbbrvNameLocLengthLimit, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setLocationNumberBaseOnCntry, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setLocationNoByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setLocNoOnChange, [ SysLoc.SPAIN ]);
@@ -1987,7 +2050,9 @@ dojo.addOnLoad(function() {
   // true);
   GEOHandler.registerValidator(addMailingConditionValidator, [ SysLoc.SPAIN ], null, true);
 
-  GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.MCO);
+  GEOHandler.addAddrFunction(changeAbbrevNmLocnSpain, [ SysLoc.SPAIN ]);
+  GEOHandler.addAddrFunction(changeAbbrevNmLocnPortugal, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(changeAbbNmSpainOnScenario, [ SysLoc.SPAIN ]);
   GEOHandler.addAddrFunction(disableAddrFieldsPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
