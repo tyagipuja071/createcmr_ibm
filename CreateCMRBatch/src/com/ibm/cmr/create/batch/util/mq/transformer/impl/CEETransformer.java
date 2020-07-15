@@ -654,6 +654,8 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
+    //CMR-4937
+    legacyAddr.setAddrLineU("");
 
   }
 
