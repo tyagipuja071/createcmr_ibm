@@ -30,7 +30,7 @@
 	  	</init-param>
 	  	<init-param>
 	    	<param-name>pathList</param-name>
-	    	<param-value>tgme,login,nps,timeout,performLogin,logout,messages,error,dropdown,systemRefresh,TouchRequestCMR.process,getTestSearchResult.process,config,approval,external</param-value>
+	    	<param-value>tgme,login,nps,timeout,performLogin,logout,messages,error,dropdown,systemRefresh,TouchRequestCMR.process,getTestSearchResult.process,config,approval,external,update</param-value>
 	  	</init-param>
 	  	<init-param>
 	    	<param-name>sessionTimeoutPath</param-name>
