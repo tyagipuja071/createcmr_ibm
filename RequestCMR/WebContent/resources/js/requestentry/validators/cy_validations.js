@@ -4305,17 +4305,17 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.resetValidations('custClass');
     }
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
-    if (custType == 'BUSPR') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
+    if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
-    } else if (custType == 'INTER') {
+    } else if (custType == 'PRICU' || custType == 'SAASP') {
       FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', 'Z');
+      FormManager.setValue('clientTier', 'S');
       FormManager.readOnly('isuCd');
-      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('isuCd', '32');
     } else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
