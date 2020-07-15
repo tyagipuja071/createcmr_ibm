@@ -616,7 +616,11 @@ public class TurkeyTransformer extends EMEATransformer {
     }
 
     // Dept + Postal code + City
-    line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
+    if (!StringUtils.isEmpty(addrData.getDept())) {
+      line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
+    } else {
+      line5 = addrData.getPostCd() + " " + addrData.getCity1();
+    }
 
     // if (!StringUtils.isBlank(addrData.getLandCntry())) {
     // line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
