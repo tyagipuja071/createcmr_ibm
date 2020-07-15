@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -51,8 +52,16 @@ public class CEETransformer extends EMEATransformer {
 
   private static final String[] NO_UPDATE_FIELDS = { "OrganizationNo", "CurrencyCode" };
 
-  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02" };
-
+  private static final String[] ADDRESS_ORDER = { "ZS01", "ZP01", "ZI01", "ZD01", "ZS02", "ZP02", "ZD02", "ZP03" };
+  
+  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA,
+			SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA, SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN,
+			SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA, SystemLocation.BELARUS,
+			SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN,
+			SystemLocation.BOSNIA_AND_HERZEGOVINA, SystemLocation.MACEDONIA, SystemLocation.SLOVENIA,
+			SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA, SystemLocation.POLAND,
+			SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);	
+	
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
   public static String DEFAULT_LANDED_COUNTRY = "SK";
@@ -381,6 +390,10 @@ public class CEETransformer extends EMEATransformer {
       return "Mail-To";
     case "ZP02":
       return "G address (Address in local language)";
+    case "ZD02":
+    	return "IGF Ship-To";
+    case "ZP03":
+    	return "IGF Bill-To";
     default:
       return "";
     }
@@ -507,10 +520,14 @@ public class CEETransformer extends EMEATransformer {
     switch (addr.getId().getAddrType()) {
     case MQMsgConstants.ADDR_ZP01:
       return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
+    case MQMsgConstants.ADDR_ZP03:
+        return MQMsgConstants.SOF_ADDRESS_USE_BILLING;      
     case MQMsgConstants.ADDR_ZS01:
       return MQMsgConstants.SOF_ADDRESS_USE_INSTALLING;
     case MQMsgConstants.ADDR_ZD01:
-      return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+        return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
+    case MQMsgConstants.ADDR_ZD02:
+        return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;        
     case MQMsgConstants.ADDR_ZI01:
       return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZS02:
