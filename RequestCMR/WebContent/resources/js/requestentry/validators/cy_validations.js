@@ -4163,7 +4163,7 @@ function hideMOPAFieldForGR() {
 }
 
 function setTypeOfCustomerBehaviorForCY() {
-  
+  //Customer Type behaviour for CY
   if (FormManager.getActualValue('reqType') == 'C') {
     FormManager.hide('CrosSubTyp', 'crosSubTyp');
   } else if(FormManager.getActualValue('reqType') == 'U') {
@@ -4305,17 +4305,17 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.resetValidations('custClass');
     }
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
-    if (custType == 'BUSPR') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
+    if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
-    } else if (custType == 'INTER') {
+    } else if (custType == 'PRICU' || custType == 'SAASP') {
       FormManager.readOnly('clientTier');
-      FormManager.setValue('clientTier', 'Z');
+      FormManager.setValue('clientTier', 'S');
       FormManager.readOnly('isuCd');
-      FormManager.setValue('isuCd', '34');
+      FormManager.setValue('isuCd', '32');
     } else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
@@ -8259,6 +8259,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE, SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
+  //Customer Type behaviour for CY
   GEOHandler.addAfterConfig(setTypeOfCustomerBehaviorForCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(disableAddrFieldsGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.GREECE ]);

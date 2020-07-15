@@ -1790,6 +1790,7 @@ function addLatinCharValidator() {
       checkAndAddValidator('addrTxt2', Validators.LATIN, [ 'Address Con\'t' ]);
       checkAndAddValidator('dept', Validators.LATIN, [ 'Attention Person' ]);
     } else if (cntry == SysLoc.GREECE) {
+      checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
       checkAndAddValidator('custNm2', Validators.LATIN, [ 'Customer Name Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.LATIN, [ ' Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.LATIN, [ 'District' ]);
@@ -1845,8 +1846,8 @@ function addNonLatinCharValidator() {
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'Attention Person' ]);
       checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
     } else if (cntry == SysLoc.GREECE) {
-      // commenting custNm2 for defect Fix 1359086
-      // checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Nickname' ]);
+      checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
+      checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.NON_LATIN, [ 'Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'District' ]);
       checkAndAddValidator('taxOffice', Validators.NON_LATIN, [ 'Tax Office' ]);
@@ -8093,7 +8094,7 @@ dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
   GEOHandler.addAddrFunction(addEMEALandedCountryHandler, GEOHandler.EMEA);
-  GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, [ 'ZD01', 'CTYC' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.EMEA, validateEMEACopy, [ 'ZD01', 'ZI01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.EMEA);
   // GEOHandler.addAfterConfig(addEMEAClientTierISULogic, [ SysLoc.ITALY]);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.EMEA);
