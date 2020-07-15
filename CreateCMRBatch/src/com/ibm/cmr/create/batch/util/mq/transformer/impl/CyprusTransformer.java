@@ -384,10 +384,10 @@ public class CyprusTransformer extends EMEATransformer {
       } else {
         legacyCust.setCollectionCd("");
       }
-      
+
       long reqId = cmrObjects.getAdmin().getId().getReqId();
       try {
-        if(LegacyDirectUtil.checkFieldsUpdated(entityManager, cmrIssuingCntry, admin, reqId)){
+        if (LegacyDirectUtil.checkFieldsUpdated(entityManager, cmrIssuingCntry, admin, reqId)) {
           legacyCust.setAbbrevNm(data.getAbbrevNm());
           legacyCust.setAbbrevLocn(data.getAbbrevLocn());
           legacyCust.setIsicCd(data.getIsicCd());
@@ -459,7 +459,7 @@ public class CyprusTransformer extends EMEATransformer {
       }
     }
   }
-  
+
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
     data.setOrdBlk("");
     entityManager.merge(data);
@@ -512,16 +512,37 @@ public class CyprusTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
     LOG.debug("CY >> Mapping default Data values..");
     LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, cust, muData);
+
+    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    if (muaList != null && muaList.size() > 0) {
+      for (MassUpdtAddr mua : muaList) {
+        if ("ZS01".equals(mua.getId().getAddrType())) {
+          if (!StringUtils.isBlank(mua.getCounty())) {
+            cust.setTelNoOrVat(mua.getCounty());
+          }
+          break;
+        }
+      }
+    }
+
   }
 
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     legacyAddr.setForUpdate(true);
+
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
+
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
     }
+
+    if (!StringUtils.isBlank(addr.getCounty())) {
+      if (addr.getId().getAddrType().equals("ZD01"))
+        legacyAddr.setAddrPhone(addr.getCounty());
+    }
+
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 
