@@ -141,14 +141,6 @@ public class LegacyCommonUtil {
       legacyAddr.setCity(addr.getCity1());
     }
 
-    if (!StringUtils.isBlank(addr.getCustPhone())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
-        legacyAddr.setAddrPhone("");
-      } else {
-        legacyAddr.setAddrPhone(addr.getCustPhone());
-      }
-    }
-
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
       if (DEFAULT_CLEAR_CHAR.equals(poBox)) {
