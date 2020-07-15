@@ -163,6 +163,12 @@
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
         </column>
+        <column>
+          <label>Phone #</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>18</width>
+          <length>10</length>
+        </column>
       </columns>
     </tab>
     <tab name="Mailing Address" type="Address" typeCode="ZP01">
@@ -396,6 +402,12 @@
           <dbColumn>LAND_CNTRY</dbColumn>
           <width>18</width>
           <bdsId>LandedCountry</bdsId>
+        </column>
+        <column>
+          <label>Phone #</label>
+          <dbColumn>CUST_PHONE</dbColumn>
+          <width>18</width>
+          <length>10</length>
         </column>
       </columns>
     </tab>
