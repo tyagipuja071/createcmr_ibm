@@ -73,7 +73,6 @@
           <label>VAT</label>
           <dbColumn>VAT</dbColumn>
           <width>5</width>
-          <length>1</length>
         </column>
         <column>
           <label>Tax Code</label>
@@ -138,7 +137,7 @@
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
-          <length>5</length>
+          <length>8</length>
         </column>
         <column>
           <label>Local City</label>
@@ -287,12 +286,6 @@
           <length>30</length>
         </column>
         <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
           <label>Att. Person</label>
           <dbColumn>COUNTY</dbColumn>
           <width>18</width>
@@ -302,7 +295,7 @@
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
-          <length>5</length>
+          <length>8</length>
         </column>
         <column>
           <label>Local City</label>
@@ -369,12 +362,6 @@
           <length>30</length>
         </column>
         <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
           <label>Att. Person</label>
           <dbColumn>COUNTY</dbColumn>
           <width>18</width>
@@ -384,7 +371,7 @@
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
-          <length>5</length>
+          <length>8</length>
         </column>
         <column>
           <label>Local City</label>
@@ -451,12 +438,6 @@
           <length>30</length>
         </column>
         <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
           <label>Att. Person</label>
           <dbColumn>COUNTY</dbColumn>
           <width>18</width>
@@ -466,7 +447,7 @@
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
-          <length>5</length>
+          <length>8</length>
         </column>
         <column>
           <label>Local City</label>
