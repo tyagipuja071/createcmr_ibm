@@ -1248,7 +1248,7 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('covId');
     fieldsToDisable.push('geoLocationCode');
     fieldsToDisable.push('dunsNo');
-    if (custSubGrp != 'XBP' && custSubGrp != 'BUSPR') {
+    if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
       fieldsToDisable.push('ppsceid');
     }
     fieldsToDisable.push('memLvl');
