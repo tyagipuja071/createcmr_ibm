@@ -1242,9 +1242,12 @@ public class LegacyDirectService extends TransConnService {
         legacyAddr.setAddrLineU(dummyHandler.messageHash.get(sofKey + "AddressU"));
 
         legacyAddr.setStreet(addr.getAddrTxt());
-
-        if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
-          legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+        
+        //Turkey not store phone on Address level
+        if(!SystemLocation.TURKEY.equals(cntry)){
+        	if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
+        		legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+        	}        	
         }
         legacyAddr.setCity(addr.getCity1());
         legacyAddr.setContact(addr.getDept());
