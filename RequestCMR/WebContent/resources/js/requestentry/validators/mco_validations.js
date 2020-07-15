@@ -958,8 +958,8 @@ function disableVatIfNotEmptySpain() {
   var vat = FormManager.getActualValue('vat');
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
-  if (role == 'REQUESTER' && vat.length > 0 && FormManager.getActualValue('reqType') == 'U') {
-    FormManager.readOnly('vat');
+  if (role == 'REQUESTER' && FormManager.getActualValue('reqType') == 'U') {
+    FormManager.enable('vat');
     return;
   }
 
