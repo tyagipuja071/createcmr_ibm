@@ -654,6 +654,8 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
+    //CMR-4937
+    legacyAddr.setAddrLineU("");
 
   }
 
@@ -1010,32 +1012,23 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setBankAcctNo("");
       }
 
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        if (data.getTaxCd1().length() > 8) {
-          legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
-        } else {
-        legacyCust.setBankBranchNo(data.getTaxCd1());
-        }
-      } else {
-        legacyCust.setBankBranchNo("");
-      }
-
       if ("693".equals(data.getCmrIssuingCntry())) {
-        if (!StringUtils.isBlank(data.getCompany())) {
-          legacyCust.setBankAcctNo(data.getCompany());
-        } else {
-          legacyCust.setBankAcctNo("");
-        }
-        if (!StringUtils.isBlank(data.getTaxCd1())) {
-          if (data.getTaxCd1().length() > 8) {
-            legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
-          } else {
-          legacyCust.setBankBranchNo(data.getTaxCd1());
+          if (!StringUtils.isBlank(data.getTaxCd1())) {
+              legacyCust.setBankAcctNo(data.getTaxCd1());
+            } else {
+              legacyCust.setBankAcctNo("");
+            }
+            
+            if (!StringUtils.isBlank(data.getCompany())) {
+              if (data.getTaxCd1().length() > 8) {
+                legacyCust.setBankBranchNo(data.getCompany().substring(0, 7));
+              } else {
+              legacyCust.setBankBranchNo(data.getCompany());
+              }
+            } else {
+              legacyCust.setBankBranchNo("");
+            }
           }
-        } else {
-          legacyCust.setBankBranchNo("");
-        }
-      }
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -1048,33 +1041,18 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
-      if (!StringUtils.isBlank(data.getCompany())) {
-        legacyCust.setBankAcctNo(data.getCompany());
-      } else {
-        legacyCust.setBankAcctNo("");
-      }
-
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        if (data.getTaxCd1().length() > 8) {
-          legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
-        } else {
-          legacyCust.setBankBranchNo(data.getTaxCd1());
-        }
-      } else {
-        legacyCust.setBankBranchNo("");
-      }
-
       if ("693".equals(data.getCmrIssuingCntry())) {
-        if (!StringUtils.isBlank(data.getCompany())) {
-          legacyCust.setBankAcctNo(data.getCompany());
+        if (!StringUtils.isBlank(data.getTaxCd1())) {
+          legacyCust.setBankAcctNo(data.getTaxCd1());
         } else {
           legacyCust.setBankAcctNo("");
         }
-        if (!StringUtils.isBlank(data.getTaxCd1())) {
+        
+        if (!StringUtils.isBlank(data.getCompany())) {
           if (data.getTaxCd1().length() > 8) {
-            legacyCust.setBankBranchNo(data.getTaxCd1().substring(0, 7));
+            legacyCust.setBankBranchNo(data.getCompany().substring(0, 7));
           } else {
-          legacyCust.setBankBranchNo(data.getTaxCd1());
+          legacyCust.setBankBranchNo(data.getCompany());
           }
         } else {
           legacyCust.setBankBranchNo("");
