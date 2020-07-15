@@ -5047,6 +5047,9 @@ function updateAbbrLocWithZS01TR() {
 
   if (isCross) {
     _abbrevLocn = document.getElementById('landCntry').value;
+    if (_abbrevLocn != null && _abbrevLocn.length > 12) {
+      _abbrevLocn = _abbrevLocn.substr(0, 12);
+    }
     FormManager.setValue('abbrevLocn', _abbrevLocn);
   } else {
     if (newAddrCity != oldAddrCity) {
