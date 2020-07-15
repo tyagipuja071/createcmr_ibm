@@ -322,7 +322,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        installing.setCmrStreetAddress(sadr.getStras());
 	                        installing.setCmrName3(sadr.getName3());
 	                        installing.setCmrName4(sadr.getName4());
-	                        installing.setCmrCountryLanded("TR");
+                        installing.setCmrCountryLanded(sadr.getLand1());
 	                        installing.setCmrCountry(sadr.getSpras());
 	                        installing.setCmrStreetAddressCont(sadr.getStrs2());
 	                        installing.setCmrState(sadr.getRegio());
