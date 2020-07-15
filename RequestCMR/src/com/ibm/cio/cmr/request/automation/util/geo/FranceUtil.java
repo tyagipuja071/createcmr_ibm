@@ -375,7 +375,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   @Override
-  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     String siret = requestData.getData().getTaxCd1();
     if (!StringUtils.isBlank(siret) && siret.length() > 9) {
       request.setOrgId(siret.substring(0, 9)); // SIREN
