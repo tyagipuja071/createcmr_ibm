@@ -30,10 +30,14 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  * {@link AutomationUtil} for Spain specific validations
@@ -119,16 +123,61 @@ public class SpainUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if (!"C".equals(admin.getReqType())) {
+      details.append("Field Computation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
 
-    // TemporaryCode to skip below overrides
-    engineData.addPositiveCheckStatus("DNB_MATCHED_ZI01");
-
-    if ("C".equals(admin.getReqType()) && !engineData.hasPositiveCheckStatus("DNB_MATCHED_ZI01")
-        && SCENARIO_THIRD_PARTY.equalsIgnoreCase(requestData.getData().getCustSubGrp())) {
-      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC", data.getIsicCd(), "7499");
-      results.setDetails("No high quality matches found for Installing Address, setting ISIC to 7499.");
-      results.setResults("Calculated.");
-      results.setProcessOutput(overrides);
+    if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean hasValidMatches = false;
+      boolean highQualityMatchExists = false;
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
+      hasValidMatches = DnBUtil.hasValidMatches(response);
+      if (response != null && response.getMatched()) {
+        List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        if (hasValidMatches) {
+          // actions to be performed only when matches with high confidence are
+          // found
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+            if (closelyMatches) {
+              engineData.put("ZI01_DNB_MATCH", dnbRecord);
+              highQualityMatchExists = true;
+              details.append("High Quality DnB Match found for Installing address.\n");
+              details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+              LOG.debug("Connecting to D&B details service..");
+              DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+              if (dnbData != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+                details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+                String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+                if (subInd != null) {
+                  overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                  details.append("Subindustry Code  =  " + subInd).append("\n");
+                }
+              }
+              results.setResults("Calculated.");
+              results.setProcessOutput(overrides);
+              break;
+            }
+          }
+        }
+      }
+      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
+        results.setDetails("No high quality matches found for Installing Address, setting ISIC to 7499.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC", data.getIsicCd(), "7499");
+        String subInd = RequestUtils.getSubIndustryCd(entityManager, "7499", data.getCmrIssuingCntry());
+        if (subInd != null) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+        }
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        results.setResults("Calculated.");
+        results.setProcessOutput(overrides);
+      }
     } else {
       results.setDetails("No specific fields to calculate.");
       results.setResults("Skipped.");
@@ -368,8 +417,7 @@ public class SpainUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
 
     if ((!isCoverageCalculated || SCENARIO_PRIVATE_CUSTOMER.equals(scenario)
-        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario))
-            && engineData.hasPositiveCheckStatus("DNB_MATCHED_ZI01")))
+        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
         && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       details.setLength(0);
       overrides.clearOverrides();
@@ -379,10 +427,9 @@ public class SpainUtil extends AutomationUtil {
         details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
         details.append("Enterprise : " + fields.getEnterprise()).append("\n");
         details.append("SBO : " + fields.getSbo()).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ENTERPRISE", data.getEnterprise(), fields.getEnterprise());
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(),
-            fields.getSalesRep());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), fields.getEnterprise());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
@@ -403,4 +450,19 @@ public class SpainUtil extends AutomationUtil {
     }
     return true;
   }
+
+  @Override
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if ("C".equals(admin.getReqType()) && (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario))) {
+      DnBMatchingResponse dnbRecord = (DnBMatchingResponse) engineData.get("ZI01_DNB_MATCH");
+      if (dnbRecord != null) {
+        request.setDunsNo(dnbRecord.getDunsNo());
+      }
+    }
+
+  }
+
 }
