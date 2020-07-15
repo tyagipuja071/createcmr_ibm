@@ -303,6 +303,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                  String kunnr = addr.getCmrSapNumber();
 	                  String adrnr = getaddAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
 	                      addr.getCmrAddrSeq());
+                  String taxOffice = gettaxOfficeFromRDC(entityManager, SystemConfiguration.getValue("MANDT"), record.getCmrSapNumber());
 	                  if (!StringUtils.isBlank(adrnr)) {
 	                    Sadr sadr = getTRAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
 	                    if (sadr != null) {
@@ -328,12 +329,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        installing.setCmrState(sadr.getRegio());
 	                        installing.setCmrPostalCode(sadr.getPstlz());
 	                        installing.setCmrDept(sadr.getOrt02());
-	                        if (!StringUtils.isBlank(sadr.getTxjcd())) {
-	                          installing.setCmrTaxOffice(sadr.getTxjcd());
-	                        }
-	                        if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
-	                          installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
-	                        }
+                        installing.setCmrTaxOffice(taxOffice);
 	                        installing.setCmrSapNumber("");
 	                        converted.add(installing);
 	                      }
@@ -4556,5 +4552,20 @@ public class TurkeyHandler extends BaseSOFHandler {
 
 	    return zd01count;
 	  }
+
+  public static String gettaxOfficeFromRDC(EntityManager entityManager, String mandt, String kunnr) {
+    String taxOffice = "";
+    String sql = ExternalizedQuery.getSql("CEE.GET_TAXOFFICE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KUNNR", kunnr);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      taxOffice = result;
+    }
+    LOG.debug("taxOffice of RDC" + taxOffice);
+    return taxOffice;
+  }
 
 }
