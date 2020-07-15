@@ -71,6 +71,7 @@ import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.impl.SOFMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.TransformerManager;
+import com.ibm.cmr.create.batch.util.mq.transformer.impl.CEETransformer;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.GenerateCMRNoClient;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
@@ -119,6 +120,15 @@ public class LegacyDirectService extends TransConnService {
   private static final String MASS_UPDATE_DONE = "DONE";
   private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
   private static final List<String> EMBARGO_LIST = Arrays.asList("E", "Y");
+  
+  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA,
+			SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA, SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN,
+			SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA, SystemLocation.BELARUS,
+			SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN,
+			SystemLocation.BOSNIA_AND_HERZEGOVINA, SystemLocation.MACEDONIA, SystemLocation.SLOVENIA,
+			SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA, SystemLocation.POLAND,
+			SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);
+  
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
@@ -1540,8 +1550,17 @@ public class LegacyDirectService extends TransConnService {
             } else {
               newAddrSeq = addr.getId().getAddrSeq();
             }
-
-            newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+            
+            if(CEE_COUNTRY_LIST.contains(cntry)){
+	            if("598".equals(addr.getId().getAddrSeq()) || "599".equals(addr.getId().getAddrSeq())){
+	            	newAddrSeq = addr.getId().getAddrSeq();
+	            } else {
+	            	newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');            	            	
+	            }
+            }else{
+            	newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');            	            	
+            }
+            
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
             legacyAddrPk.setAddrNo(newAddrSeq);
@@ -1606,6 +1625,12 @@ public class LegacyDirectService extends TransConnService {
           }
           if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
             legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+          }
+          //this is for CEE countries IGF address
+          if(CEE_COUNTRY_LIST.contains(cntry)){
+              if ("ZD02".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
+                  legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+                }
           }
           if (!StringUtils.isBlank(addr.getCity1())) {
             legacyAddr.setCity(addr.getCity1());
