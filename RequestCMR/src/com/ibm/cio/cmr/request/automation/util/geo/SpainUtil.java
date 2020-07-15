@@ -168,8 +168,8 @@ public class SpainUtil extends AutomationUtil {
         }
       }
       if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
-        results.setDetails("No high quality matches found for Installing Address, setting ISIC to 7499.");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC", data.getIsicCd(), "7499");
+        details.append("No high quality matches found for Installing Address, setting ISIC to 7499.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7499");
         String subInd = RequestUtils.getSubIndustryCd(entityManager, "7499", data.getCmrIssuingCntry());
         if (subInd != null) {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
@@ -179,10 +179,11 @@ public class SpainUtil extends AutomationUtil {
         results.setProcessOutput(overrides);
       }
     } else {
-      results.setDetails("No specific fields to calculate.");
+      details.append("No specific fields to calculate.");
       results.setResults("Skipped.");
       results.setProcessOutput(overrides);
     }
+    results.setDetails(details.toString());
     LOG.debug(results.getDetails());
     return results;
   }
