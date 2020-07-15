@@ -369,6 +369,18 @@ public class CEMEAHandler extends BaseSOFHandler {
             record.setCmrAddrTypeCode("ZP02");
           }
 
+            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
+                && "598".equals(record.getCmrAddrSeq())) {
+              record.setCmrAddrTypeCode("ZD02");
+            }
+
+            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+                && "599".equals(record.getCmrAddrSeq())) {
+              record.setCmrAddrTypeCode("ZP03");
+            }
+
             // if
             // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())
             // && (!"Z000000001".equals(record.getCmrTransportZone()))
@@ -1706,6 +1718,13 @@ public class CEMEAHandler extends BaseSOFHandler {
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     String newAddrSeq = null;
     if (CEE_COUNTRY_LIST.contains(cmrIssuingCntry)) {
+      if (!StringUtils.isEmpty(addrType)) {
+        if ("ZD02".equals(addrType)) {
+          return "598";
+        } else if ("ZP03".equals(addrType)) {
+          return "599";
+        }
+      }
       int addrSeq = 0;
       String maxAddrSeq = null;
       String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
