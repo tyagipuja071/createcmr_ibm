@@ -4163,7 +4163,7 @@ function hideMOPAFieldForGR() {
 }
 
 function setTypeOfCustomerBehaviorForCY() {
-  
+  //Customer Type behaviour for CY
   if (FormManager.getActualValue('reqType') == 'C') {
     FormManager.hide('CrosSubTyp', 'crosSubTyp');
   } else if(FormManager.getActualValue('reqType') == 'U') {
@@ -8259,6 +8259,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE, SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
+  //Customer Type behaviour for CY
   GEOHandler.addAfterConfig(setTypeOfCustomerBehaviorForCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(disableAddrFieldsGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.GREECE ]);
