@@ -148,6 +148,7 @@
 		</cmr:row>
 	</cmr:view>
 	
+	<!-- Type Of Customer CY -->
 	<c:if test="${reqentry.reqType != 'C'}">
 	<cmr:view forCountry="666">
 			<cmr:column span="2" containerForField="TypeOfCustomer">
