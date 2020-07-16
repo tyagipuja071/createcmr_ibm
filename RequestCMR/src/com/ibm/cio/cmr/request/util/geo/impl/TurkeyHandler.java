@@ -2325,18 +2325,6 @@ public class TurkeyHandler extends BaseSOFHandler {
 	    case SystemLocation.TURKEY:
 	      if (data != null && admin.getReqType().equals("C")) {
 	        
-        // if ("ZP01".equals(addr.getId().getAddrType()) &&
-        // ("CROSS".equals(data.getCustGrp()) ||
-        // !"TR".equals(addr.getLandCntry()))) {
-        // LOG.debug("Computing Abbreviated Name/Location for address of TURKEY.
-        // Request " + addr.getId().getReqId());
-        // data.setAbbrevNm(addr.getCustNm1());
-        // if (data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
-        // data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
-        // }
-        // entityManager.merge(data);
-        // entityManager.flush();
-        // }
 	        if ("ZS01".equals(addr.getId().getAddrType())) {
 	          LOG.debug("Computing Abbreviated Name/Location for address of TURKEY. Request " + addr.getId().getReqId());
 	          data.setAbbrevNm(addr.getCustNm1());
@@ -2373,15 +2361,10 @@ public class TurkeyHandler extends BaseSOFHandler {
 	          } else if ("ZP01".equals(addr.getId().getAddrType())) {
 	            if (getAddressByType(entityManager, "ZS01", data.getId().getReqId()) == null) {
               saveAddrCopyForTR(entityManager, addr, "ZS01", admin.getReqType());
+              updateAabbNameCopyLoacl(entityManager, addr);
 	            } else {
 	              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	            }
-            data.setAbbrevNm(addr.getCustNm1());
-            if (data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
-              data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
-            }
-            entityManager.merge(data);
-            entityManager.flush();
 	          }
 	        }
 
@@ -4585,6 +4568,13 @@ public class TurkeyHandler extends BaseSOFHandler {
     }
     LOG.debug("taxOffice of RDC" + taxOffice);
     return taxOffice;
+  }
+
+  private void updateAabbNameCopyLoacl(EntityManager entityManager, Addr addr) throws Exception {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.UPDATE.ABBNAME"));
+    query.setParameter("ABBREV_NM", addr.getCustNm1());
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.executeSql();
   }
 
 }
