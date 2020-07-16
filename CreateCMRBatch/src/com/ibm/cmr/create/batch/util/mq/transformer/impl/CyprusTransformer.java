@@ -460,6 +460,11 @@ public class CyprusTransformer extends EMEATransformer {
     }
   }
 
+  @Override
+  public boolean hasCmrtCustExt() {
+    return true;
+  }
+
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
     data.setOrdBlk("");
     entityManager.merge(data);
