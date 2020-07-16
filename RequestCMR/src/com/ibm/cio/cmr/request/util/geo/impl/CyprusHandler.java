@@ -3463,6 +3463,7 @@ public class CyprusHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
+    // add this condition entry for Cyprus in main branch
     if (SystemLocation.CYPRUS.equals(issuingCountry)) {
       return true;
     } else {
