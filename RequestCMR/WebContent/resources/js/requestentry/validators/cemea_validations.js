@@ -1609,15 +1609,21 @@ function phoneNoValidationOnChange() {
 function setEnterpriseValues(clientTier) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
-      || custSubGrp == 'INTSO') {
-    return;
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if(!CEE_INCL.has(cntry)){
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
+	      || custSubGrp == 'INTSO') {
+	    return;
+	  }else {
+		  if (FormManager.getActualValue('viewOnlyPage') == 'true'){
+			  return;
+		  }
+	  }
   }
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
 
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   if (role != 'REQUESTER') {
     FormManager.enable('enterprise');
