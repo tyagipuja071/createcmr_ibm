@@ -1730,7 +1730,7 @@ public class TurkeyTransformer extends EMEATransformer {
       }
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
           CmrtAddr mailingaddre = legacyObjects.findBySeqNo("00002");
-          if ("Y".equals(currAddr.getIsAddrUseBilling()) || "Y".equals(currAddr.getIsAddrUseMailing())) {
+          if (mailingaddre!=null && ("Y".equals(currAddr.getIsAddrUseBilling()) || "Y".equals(currAddr.getIsAddrUseMailing()))) {
             currAddr.setAddrLine1(mailingaddre.getAddrLine1());
             if (!StringUtils.isBlank(mailingaddre.getAddrLine2())) {
               currAddr.setAddrLine2(mailingaddre.getAddrLine2());
