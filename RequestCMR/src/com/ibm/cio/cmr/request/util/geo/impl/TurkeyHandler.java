@@ -303,6 +303,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                  String kunnr = addr.getCmrSapNumber();
 	                  String adrnr = getaddAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
 	                      addr.getCmrAddrSeq());
+                  String taxOffice = gettaxOfficeFromRDC(entityManager, SystemConfiguration.getValue("MANDT"), record.getCmrSapNumber());
 	                  if (!StringUtils.isBlank(adrnr)) {
 	                    Sadr sadr = getTRAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
 	                    if (sadr != null) {
@@ -322,18 +323,13 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        installing.setCmrStreetAddress(sadr.getStras());
 	                        installing.setCmrName3(sadr.getName3());
 	                        installing.setCmrName4(sadr.getName4());
-	                        installing.setCmrCountryLanded("TR");
+                        installing.setCmrCountryLanded(sadr.getLand1());
 	                        installing.setCmrCountry(sadr.getSpras());
 	                        installing.setCmrStreetAddressCont(sadr.getStrs2());
 	                        installing.setCmrState(sadr.getRegio());
 	                        installing.setCmrPostalCode(sadr.getPstlz());
 	                        installing.setCmrDept(sadr.getOrt02());
-	                        if (!StringUtils.isBlank(sadr.getTxjcd())) {
-	                          installing.setCmrTaxOffice(sadr.getTxjcd());
-	                        }
-	                        if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
-	                          installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
-	                        }
+                        installing.setCmrTaxOffice(taxOffice);
 	                        installing.setCmrSapNumber("");
 	                        converted.add(installing);
 	                      }
@@ -2328,6 +2324,19 @@ public class TurkeyHandler extends BaseSOFHandler {
 
 	    case SystemLocation.TURKEY:
 	      if (data != null && admin.getReqType().equals("C")) {
+	        
+        // if ("ZP01".equals(addr.getId().getAddrType()) &&
+        // ("CROSS".equals(data.getCustGrp()) ||
+        // !"TR".equals(addr.getLandCntry()))) {
+        // LOG.debug("Computing Abbreviated Name/Location for address of TURKEY.
+        // Request " + addr.getId().getReqId());
+        // data.setAbbrevNm(addr.getCustNm1());
+        // if (data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
+        // data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
+        // }
+        // entityManager.merge(data);
+        // entityManager.flush();
+        // }
 	        if ("ZS01".equals(addr.getId().getAddrType())) {
 	          LOG.debug("Computing Abbreviated Name/Location for address of TURKEY. Request " + addr.getId().getReqId());
 	          data.setAbbrevNm(addr.getCustNm1());
@@ -2367,6 +2376,12 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            } else {
 	              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	            }
+            data.setAbbrevNm(addr.getCustNm1());
+            if (data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
+              data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
+            }
+            entityManager.merge(data);
+            entityManager.flush();
 	          }
 	        }
 
@@ -4556,5 +4571,20 @@ public class TurkeyHandler extends BaseSOFHandler {
 
 	    return zd01count;
 	  }
+
+  public static String gettaxOfficeFromRDC(EntityManager entityManager, String mandt, String kunnr) {
+    String taxOffice = "";
+    String sql = ExternalizedQuery.getSql("CEE.GET_TAXOFFICE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KUNNR", kunnr);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      taxOffice = result;
+    }
+    LOG.debug("taxOffice of RDC" + taxOffice);
+    return taxOffice;
+  }
 
 }

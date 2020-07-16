@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
@@ -383,10 +384,10 @@ public class CyprusTransformer extends EMEATransformer {
       } else {
         legacyCust.setCollectionCd("");
       }
-      
+
       long reqId = cmrObjects.getAdmin().getId().getReqId();
       try {
-        if(LegacyDirectUtil.checkFieldsUpdated(entityManager, cmrIssuingCntry, admin, reqId)){
+        if (LegacyDirectUtil.checkFieldsUpdated(entityManager, cmrIssuingCntry, admin, reqId)) {
           legacyCust.setAbbrevNm(data.getAbbrevNm());
           legacyCust.setAbbrevLocn(data.getAbbrevLocn());
           legacyCust.setIsicCd(data.getIsicCd());
@@ -449,6 +450,21 @@ public class CyprusTransformer extends EMEATransformer {
     legacyCust.setCeBo("");
   }
 
+  @Override
+  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+      CMRRequestContainer cmrObjects) {
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZS01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
+        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
+      }
+    }
+  }
+
+  @Override
+  public boolean hasCmrtCustExt() {
+    return true;
+  }
+
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
     data.setOrdBlk("");
     entityManager.merge(data);
@@ -501,16 +517,37 @@ public class CyprusTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
     LOG.debug("CY >> Mapping default Data values..");
     LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, cust, muData);
+
+    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    if (muaList != null && muaList.size() > 0) {
+      for (MassUpdtAddr mua : muaList) {
+        if ("ZS01".equals(mua.getId().getAddrType())) {
+          if (!StringUtils.isBlank(mua.getCounty())) {
+            cust.setTelNoOrVat(mua.getCounty());
+          }
+          break;
+        }
+      }
+    }
+
   }
 
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     legacyAddr.setForUpdate(true);
+
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
+
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
     }
+
+    if (!StringUtils.isBlank(addr.getCounty())) {
+      if (addr.getId().getAddrType().equals("ZD01"))
+        legacyAddr.setAddrPhone(addr.getCounty());
+    }
+
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
 

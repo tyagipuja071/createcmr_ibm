@@ -176,7 +176,7 @@ public class MCOPtEsHandler extends MCOHandler {
           // add unmapped addresses
           FindCMRRecordModel record = createAddress(entityManager, mainRecord.getCmrIssuedBy(), CmrConstants.ADDR_TYPE.ZP02.toString(), "Fiscal",
               new HashMap<String, FindCMRRecordModel>());
-          if (record == null) {
+          if (record == null && "838".equals(reqEntry.getCmrIssuingCntry())) {
             record = new FindCMRRecordModel();
             // record.setCmrAddrSeq("6");
             record.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZP02.toString());
@@ -193,7 +193,6 @@ public class MCOPtEsHandler extends MCOHandler {
         // c. Import EplMailing from RDc, if found. This will also be an
         // installing in RDc
         // d. Import all shipping, fiscal, and mailing from SOF
-
         // customer phone is in BillingPhone
         if (StringUtils.isEmpty(mainRecord.getCmrCustPhone())) {
           mainRecord.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
@@ -614,7 +613,9 @@ public class MCOPtEsHandler extends MCOHandler {
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     addr.setTransportZone("Z000000001");
     serBlankFieldsAtCopy(addr);
-    addEditFiscalAddress(entityManager, addr);
+    if("838".equals(cmrIssuingCntry)){
+      addEditFiscalAddress(entityManager, addr);
+    } 
   }
 
   private void serBlankFieldsAtCopy(Addr addr) {
@@ -1078,8 +1079,10 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    if (SystemLocation.SPAIN.equals(cmrIssuingCntry) || SystemLocation.PORTUGAL.equals(cmrIssuingCntry)) {
+    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
       return Arrays.asList("ZP01", "ZS01", "ZI01", "ZD01", "ZS02", "ZP02");
+    } else if (SystemLocation.PORTUGAL.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZP01", "ZS01", "ZI01", "ZD01", "ZS02");
     }
     return null;
   }
@@ -1099,7 +1102,11 @@ public class MCOPtEsHandler extends MCOHandler {
 
   @Override
   public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
-    return Arrays.asList("6");
+    if (SystemLocation.SPAIN.equals(cmrIssuingCntry)) {
+      return Arrays.asList("6");
+    } else {
+      return Arrays.asList("5");
+    }
   }
 
   
