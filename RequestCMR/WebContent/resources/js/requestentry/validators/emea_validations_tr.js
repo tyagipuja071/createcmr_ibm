@@ -8375,6 +8375,7 @@ function controlFieldsBySubScenarioTR(value) {
     if (!value) {
       value = FormManager.getActualValue('custSubGrp');
     }
+    FormManager.removeValidator('crosSubTyp', Validators.REQUIRED);
     // Control Type Of Customer
     if (value == 'BUSPR' || value == 'XBP') {
       FormManager.setValue('crosSubTyp', 'BP');
