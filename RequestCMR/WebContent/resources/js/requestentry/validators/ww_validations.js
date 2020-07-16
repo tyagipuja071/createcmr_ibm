@@ -649,6 +649,10 @@ function cmrNoValidator() {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var cmrNo = FormManager.getActualValue('cmrNo');
+        // Condition For Prospect CMRs
+        if (cmrNo.startsWith('P')){
+          return;
+        }
         var cmrNoRegEx = /^[0-9]*$/;
         if (cmrNo == '000000') {
           return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed Except -> 000000');
@@ -670,13 +674,14 @@ function cmrNoValidatorForInternalScenario() {
         var cmrNo = FormManager.getActualValue('cmrNo').substring(0, 2);
         var requestType = FormManager.getActualValue('reqType');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (requestType != 'C') {
+        // Condition For Create and Prospect CMRs
+        if (requestType != 'C' || (cmrNo.startsWith('P'))) {
           return;
         }
-        if ((cmrNo == '99') && (custSubGrp == 'INTER' || custSubGrp == 'CRINT')) {
+        if ((cmrNo == '' || cmrNo == '99') && (custSubGrp == 'INTER' || custSubGrp == 'CRINT')) {
           return new ValidationResult(null, true);
         } else if (cmrNo != undefined && cmrNo != '99' && (custSubGrp == 'INTER' || custSubGrp == 'CRINT')) {
-          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 99.');
+          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 99 For INTERNAL Scenario.');
         }
         return new ValidationResult(null, true);
       }
@@ -691,6 +696,10 @@ function validateExistCMRNum() {
         console.log('checking requested cmr number...');
         var reqType = FormManager.getActualValue('reqType');
         var cmrNo = FormManager.getActualValue('cmrNo');
+        // Condition For Prospect CMRs
+        if (cmrNo.startsWith('P')){
+          return;
+        }
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (reqType == 'C' && cmrNo) {
           var exists = cmr.query('GETCMRNUMFORPROCESSOR', {
