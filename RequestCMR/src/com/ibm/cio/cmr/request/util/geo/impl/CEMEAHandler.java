@@ -210,7 +210,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
-                  if ("0".equals(stkzn)) {
+                  int parvmCount = getKnvpParvmCount(addr.getCmrSapNumber());
+                  if ("0".equals(stkzn) || parvmCount > 1) {
                   addr.setCmrAddrTypeCode("ZS02");
                   }
                 }
@@ -223,6 +224,13 @@ public class CEMEAHandler extends BaseSOFHandler {
                 int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
                     record.getCmrNum());
                 String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
+                String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), reqEntry.getCmrNo());
+                String gAddrSeq = "";
+                if (!StringUtils.isBlank(legacyGaddrSeq)) {
+                  gAddrSeq = legacyGaddrSeq;
+                } else {
+                  gAddrSeq = gAddrSeq;
+                }
                 if (!StringUtils.isBlank(adrnr)) {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
                   if (sadr != null) {
@@ -231,7 +239,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
-                      copyAddrData(installing, installingAddr, maxSeq);
+                      copyAddrData(installing, installingAddr, gAddrSeq);
                       // installing.setParentCMRNo(mainRecord.getCmrNum());
                       installing.setCmrName1Plain(sadr.getName1());
                       installing.setCmrName2Plain(sadr.getName2());
@@ -265,7 +273,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
-                      copyAddrData(installing, installingAddr, maxSeq);
+                      copyAddrData(installing, installingAddr, gAddrSeq);
                       // add value
                       installing.setCmrName1Plain(mailingAddr.getAddrLine1());
                       if (!StringUtils.isBlank(mailingAddr.getAddrLine2())) {
@@ -360,6 +368,18 @@ public class CEMEAHandler extends BaseSOFHandler {
               && "599".equals(record.getCmrAddrSeq())) {
             record.setCmrAddrTypeCode("ZP02");
           }
+
+            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
+                && "598".equals(record.getCmrAddrSeq())) {
+              record.setCmrAddrTypeCode("ZD02");
+            }
+
+            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+                && "599".equals(record.getCmrAddrSeq())) {
+              record.setCmrAddrTypeCode("ZP03");
+            }
 
             // if
             // ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())
@@ -1698,6 +1718,13 @@ public class CEMEAHandler extends BaseSOFHandler {
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     String newAddrSeq = null;
     if (CEE_COUNTRY_LIST.contains(cmrIssuingCntry)) {
+      if (!StringUtils.isEmpty(addrType)) {
+        if ("ZD02".equals(addrType)) {
+          return "598";
+        } else if ("ZP03".equals(addrType)) {
+          return "599";
+        }
+      }
       int addrSeq = 0;
       String maxAddrSeq = null;
       String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_CEE");
@@ -1734,5 +1761,20 @@ public class CEMEAHandler extends BaseSOFHandler {
   public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
     String newSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
     return newSeq;
+  }
+
+  public static String getGaddressSeqFromLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
+    String gSeq = "";
+    String sql = ExternalizedQuery.getSql("CEE.GET_G_SEQ_FROM_LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      gSeq = result;
+    }
+    LOG.debug("gSeq of Legacy" + gSeq);
+    return gSeq;
   }
 }

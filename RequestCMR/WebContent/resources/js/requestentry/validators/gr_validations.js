@@ -3035,7 +3035,7 @@ function addGRAddressGridValidatorStreetPOBox() {
           }
           
           if(missingPOBoxStreetAddrs != '') {
-            return new ValidationResult(null, false, 'Please fill-out either Street Address or PO Box for the following address: ' + missingPOBoxStreetAddrs);
+            return new ValidationResult(null, false, 'Please fill-out Street for the following address: ' + missingPOBoxStreetAddrs);
           }
           
           return new ValidationResult(null, true);

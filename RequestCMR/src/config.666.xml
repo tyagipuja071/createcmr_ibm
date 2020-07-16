@@ -161,7 +161,7 @@
         </column>
         <column>
           <label>Phone #</label>
-          <dbColumn>RESTRICT_TO</dbColumn>
+          <dbColumn>COUNTY</dbColumn>
           <length>30</length>
         </column>
       </columns>
@@ -317,12 +317,6 @@
           <bdsId>LandedCountry</bdsId>
         </column>
         <column>
-          <label>PO Box</label>
-          <dbColumn>PO_BOX</dbColumn>
-          <width>18</width>
-          <length>20</length>
-        </column>
-        <column>
           <label>Att. Person</label>
           <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
@@ -403,6 +397,11 @@
           <dbColumn>CUST_NM4</dbColumn>
           <width>18</width>
           <length>26</length>
+        </column>
+        <column>
+          <label>Phone #</label>
+          <dbColumn>COUNTY</dbColumn>
+          <length>30</length>
         </column>
       </columns>
     </tab>

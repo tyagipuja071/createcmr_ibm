@@ -221,17 +221,12 @@ public class CyprusHandler extends BaseSOFHandler {
           String addrType = null;
           String seqNo = null;
           List<String> sofUses = null;
-          FindCMRRecordModel addr = null;
-
-          boolean isNewCmrRecordsGR = false;
-          if ("726".equals(cmrIssueCd)) {
-            isNewCmrRecordsGR = checkIfNewCmrRecords(source.getItems());
-          }
+          FindCMRRecordModel addr = new FindCMRRecordModel();
 
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && !("862".equals(cmrIssueCd) || "726".equals(cmrIssueCd))) {
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUse(sofUse);
@@ -239,31 +234,20 @@ public class CyprusHandler extends BaseSOFHandler {
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
 
-                  if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-                    addr.setCmrStreetAddressCont(record.getCmrName4());
-                    addr.setCmrName3(record.getCmrName3());
-
-                    addr.setCmrName2Plain(record.getCmrName2Plain());
-                  } else {
-                    // name3 in rdc = Address Con't on SOF
-                    addr.setCmrStreetAddressCont(record.getCmrName3());
-                    addr.setCmrName3(null);
-
-                    addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                  if (!(record.getCmrAddrTypeCode().equals(addrType))) {
+                    // addr.setCmrAddrSeq(String.format("%05d",
+                    // record.getCmrAddrSeq()));
+                    addr.setCmrSapNumber(null);
                   }
 
-                  // addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain())
-                  // ? record.getCmrName2Plain() :
-                  // record.getCmrName4());
+                  // name3 in rdc = Address Con't on SOF
+                  addr.setCmrStreetAddressCont(record.getCmrName3());
+                  addr.setCmrName3(null);
 
+                  addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-                      addr.setCmrPOBox(record.getCmrPOBox());
-                    } else {
-                      addr.setCmrPOBox("PO BOX " + record.getCmrPOBox());
-                    }
+                    addr.setCmrPOBox(record.getCmrPOBox());
                   }
-
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
                   }
@@ -271,84 +255,6 @@ public class CyprusHandler extends BaseSOFHandler {
                   converted.add(addr);
                 }
               }
-            }
-            if ("862".equals(cmrIssueCd)) {
-              seqNo = record.getCmrAddrSeq();
-              System.out.println("seqNo = " + seqNo);
-              if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-                addrType = record.getCmrAddrTypeCode();
-                if (!StringUtils.isEmpty(addrType)) {
-                  addr = cloneAddress(record, addrType);
-                  converted.add(addr);
-                }
-                if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
-                  String kunnr = addr.getCmrSapNumber();
-                  String adrnr = getaddAddressAdrnr(entityManager, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
-                      addr.getCmrAddrSeq());
-                  if (!StringUtils.isBlank(adrnr)) {
-                    Sadr sadr = getTRAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
-                    if (sadr != null) {
-                      Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                      if (installingAddr != null) {
-                        LOG.debug("Adding installing to the records");
-                        FindCMRRecordModel installing = new FindCMRRecordModel();
-                        PropertyUtils.copyProperties(installing, mainRecord);
-                        copyAddrData(installing, installingAddr);
-                        // installing.setParentCMRNo(mainRecord.getCmrNum());
-                        installing.setCmrName1Plain(sadr.getName1());
-                        installing.setCmrName2Plain(sadr.getName2());
-                        installing.setCmrCity(sadr.getOrt01());
-                        installing.setCmrCity2(sadr.getOrt02());
-                        installing.setCmrStreetAddress(sadr.getStras());
-                        installing.setCmrName3(sadr.getName3());
-                        installing.setCmrName4(sadr.getName4());
-                        installing.setCmrCountryLanded(sadr.getSpras());
-                        installing.setCmrCountry(sadr.getSpras());
-                        installing.setCmrStreetAddressCont(sadr.getStrs2());
-                        installing.setCmrState(sadr.getRegio());
-                        installing.setCmrPostalCode(sadr.getPstlz());
-                        converted.add(installing);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-
-            if ("726".equals(cmrIssueCd)) {
-              if (isNewCmrRecordsGR) {
-                converted.add(handleNewCmrRecordsGR(record));
-                if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
-                  converted.add(mapLocalLanguageTranslationOfSoldTo(entityManager, record, cmrIssueCd));
-                }
-              } else {
-                converted.addAll(handleOldCmrRecordsGR(entityManager, record, cmrIssueCd, converted.size()));
-                break;
-              }
-            }
-          }
-
-          if (SystemLocation.UNITED_KINGDOM.equals(mainRecord.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(mainRecord.getCmrIssuedBy())) {
-            boolean needToImportMailing = checkIZP01ExistsOnRDCUKI(entityManager, mainRecord.getCmrIssuedBy(), mainRecord.getCmrNum());
-            // add unmapped addresses
-            if (needToImportMailing == false) {
-              FindCMRRecordModel record = new FindCMRRecordModel();
-              if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, mainRecord.getCmrIssuedBy())) {
-                record.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZP01.toString());
-                record.setCmrIssuedBy(mainRecord.getCmrIssuedBy());
-                setMailingAddressFromLegacy(entityManager, mainRecord.getCmrIssuedBy(), "Mailing", record);
-              } else {
-                record = createAddress(entityManager, mainRecord.getCmrIssuedBy(), CmrConstants.ADDR_TYPE.ZP01.toString(), "Mailing",
-                    new HashMap<String, FindCMRRecordModel>());
-                if (record == null) {
-                  record = new FindCMRRecordModel();
-                  // record.setCmrAddrSeq("6");
-                  record.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZP01.toString());
-                  record.setCmrIssuedBy(mainRecord.getCmrIssuedBy());
-                  setMailingAddressFromLegacy(entityManager, mainRecord.getCmrIssuedBy(), "Mailing", record);
-                }
-              }
-              converted.add(record);
             }
           }
         }
@@ -808,24 +714,15 @@ public class CyprusHandler extends BaseSOFHandler {
   @Override
   protected void handleSOFAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
 
-    String zipCode = this.currentImportValues.get(addressKey + "ZipCode");
+    // String zipCode = this.currentImportValues.get(addressKey + "ZipCode");
+    handleCyprusSOFAddress(entityManager, address, cmrIssuingCntry, addressKey);
+    /*
+     * // zip codes in SOF with **** *** are cross borders if (zipCode != null
+     * && zipCode.startsWith("****")) {
+     * handleCrossBorderSOFAddress(entityManager, address, addressKey); } else {
+     * handleLocalSOFAddress(entityManager, address, addressKey); }
+     */
 
-    if (SystemLocation.ISRAEL.equals(cmrIssuingCntry) || SystemLocation.SAP_ISRAEL_SOF_ONLY.equals(cmrIssuingCntry)) {
-      handleIsraelSOFAddress(entityManager, address, addressKey);
-    } else if (SystemLocation.GREECE.equals(cmrIssuingCntry) || SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
-      handleGreeceCyprusSOFAddress(entityManager, address, cmrIssuingCntry, addressKey);
-    } else if (SystemLocation.ITALY.equals(cmrIssuingCntry)) {
-      handleItalySOFAddress(entityManager, address, cmrIssuingCntry, addressKey);
-    } else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
-      handleTurkeySOFAddress(entityManager, address, cmrIssuingCntry, addressKey);
-    } else {
-      // zip codes in SOF with **** *** are cross borders
-      if (zipCode != null && zipCode.startsWith("****")) {
-        handleCrossBorderSOFAddress(entityManager, address, addressKey);
-      } else {
-        handleLocalSOFAddress(entityManager, address, addressKey);
-      }
-    }
   }
 
   /**
@@ -1336,7 +1233,7 @@ public class CyprusHandler extends BaseSOFHandler {
    * @param address
    * @param addressKey
    */
-  private void handleGreeceCyprusSOFAddress(EntityManager entityManager, FindCMRRecordModel address, String cmrIssuingCntry, String addressKey) {
+  private void handleCyprusSOFAddress(EntityManager entityManager, FindCMRRecordModel address, String cmrIssuingCntry, String addressKey) {
     String name = this.currentImportValues.get(addressKey + "Address1");
     String nickName = this.currentImportValues.get(addressKey + "Address2");
     String occuOrPOBoxOrPhone = this.currentImportValues.get(addressKey + "Address3");
@@ -2195,19 +2092,18 @@ public class CyprusHandler extends BaseSOFHandler {
           entityManager.flush();
         }
 
-        if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
-          addr.setCustPhone("");
-        }
-
-        if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
-          addr.setTaxOffice("");
-        }
-
         if ("ZS01".equals(addr.getId().getAddrType())) {
           copyAndSaveAddressesCreateScratch(entityManager, data.getId().getReqId(), addr);
         }
       }
 
+      if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
+        addr.setCustPhone("");
+      }
+
+      if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
+        addr.setTaxOffice("");
+      }
       break;
 
     case SystemLocation.TURKEY:
@@ -3567,25 +3463,13 @@ public class CyprusHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    if (SystemLocation.SPAIN.equals(issuingCountry)) {
+    // add this condition entry for Cyprus in main branch
+    if (SystemLocation.CYPRUS.equals(issuingCountry)) {
       return true;
-    } else if (SystemLocation.UNITED_KINGDOM.equals(issuingCountry)) {
-      return true;
-    } else if (SystemLocation.IRELAND.equals(issuingCountry)) {
-      return true;
-    } else if (SystemLocation.GREECE.equals(issuingCountry)) {
-      return true;
-    }
-
-    // *abner revert begin
-    // else if (SystemLocation.TURKEY.equals(issuingCountry)) {
-    // return true;
-    // }
-    // *abner revert end
-    else {
+    } else {
       return false;
     }
-    
+
   }
 
   @Override

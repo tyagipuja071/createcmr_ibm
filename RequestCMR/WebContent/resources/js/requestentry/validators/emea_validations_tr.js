@@ -4083,7 +4083,7 @@ function disableAddrFieldsGRCYTR() {
 
   // Phone - for mailing/billing address only
   if ((cntryCd == SysLoc.TURKEY) && FormManager.getActualValue('addrType') != 'ZS01') {
-//    FormManager.setValue('custPhone', '');
+// FormManager.setValue('custPhone', '');
     FormManager.hide('CustPhone', 'custPhone');
   } else {
 	FormManager.show('CustPhone', 'custPhone');
@@ -5047,6 +5047,9 @@ function updateAbbrLocWithZS01TR() {
 
   if (isCross) {
     _abbrevLocn = document.getElementById('landCntry').value;
+    if (_abbrevLocn != null && _abbrevLocn.length > 12) {
+      _abbrevLocn = _abbrevLocn.substr(0, 12);
+    }
     FormManager.setValue('abbrevLocn', _abbrevLocn);
   } else {
     if (newAddrCity != oldAddrCity) {
@@ -5119,7 +5122,7 @@ function showCommercialFinanced() {
     FormManager.hide('CommercialFinanced', 'commercialFinanced');
   } else {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
-    FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [ 'R', 'S', 'T' ]);
+//    FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [ '','R', 'S', 'T' ]);
     FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER') {
@@ -8372,6 +8375,7 @@ function controlFieldsBySubScenarioTR(value) {
     if (!value) {
       value = FormManager.getActualValue('custSubGrp');
     }
+    FormManager.removeValidator('crosSubTyp', Validators.REQUIRED);
     // Control Type Of Customer
     if (value == 'BUSPR' || value == 'XBP') {
       FormManager.setValue('crosSubTyp', 'BP');
@@ -8612,7 +8616,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTRLandedCountryValidtor, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
-  GEOHandler.registerValidator(addDPLCheckValidatorTR, [ SysLoc.TURKEY ], null, true);
+  // GEOHandler.registerValidator(addDPLCheckValidatorTR, [ SysLoc.TURKEY ],
+  // null, true);
 
   GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
