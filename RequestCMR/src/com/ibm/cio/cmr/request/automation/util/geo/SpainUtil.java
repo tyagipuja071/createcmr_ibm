@@ -89,7 +89,7 @@ public class SpainUtil extends AutomationUtil {
         }
       } else {
         if (addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
-          engineData.addRejectionComment("SCENARIO_CHECK", "‘Billing and installing address should be different’.", "", "");
+          engineData.addRejectionComment("SCENARIO_CHECK", "Billing and installing address should be different.", "", "");
           details.append("For 3rd Party Billing and installing address should be different");
           return false;
 
@@ -110,7 +110,7 @@ public class SpainUtil extends AutomationUtil {
           + (!StringUtils.isBlank(mailTo.getCustNm2()) ? " " + mailTo.getCustNm2() : "");
       if (!customerName2.toUpperCase().contains("IBM") && !customerName.toUpperCase().contains("IBM")) {
         details.append("Mailing and Billing addresses should have IBM in them.");
-        engineData.addRejectionComment("SCENARIO_CHECK", "‘Mailing and Billing addresses should have IBM in them.’.", "", "");
+        engineData.addRejectionComment("SCENARIO_CHECK", "Mailing and Billing addresses should have IBM in them.", "", "");
         return false;
       }
 
