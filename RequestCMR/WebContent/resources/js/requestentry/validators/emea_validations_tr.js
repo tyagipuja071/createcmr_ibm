@@ -4083,7 +4083,7 @@ function disableAddrFieldsGRCYTR() {
 
   // Phone - for mailing/billing address only
   if ((cntryCd == SysLoc.TURKEY) && FormManager.getActualValue('addrType') != 'ZS01') {
-//    FormManager.setValue('custPhone', '');
+// FormManager.setValue('custPhone', '');
     FormManager.hide('CustPhone', 'custPhone');
   } else {
 	FormManager.show('CustPhone', 'custPhone');
@@ -8615,7 +8615,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTRLandedCountryValidtor, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
-  GEOHandler.registerValidator(addDPLCheckValidatorTR, [ SysLoc.TURKEY ], null, true);
+  // GEOHandler.registerValidator(addDPLCheckValidatorTR, [ SysLoc.TURKEY ],
+  // null, true);
 
   GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
