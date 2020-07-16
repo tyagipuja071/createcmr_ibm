@@ -2324,6 +2324,19 @@ public class TurkeyHandler extends BaseSOFHandler {
 
 	    case SystemLocation.TURKEY:
 	      if (data != null && admin.getReqType().equals("C")) {
+	        
+        // if ("ZP01".equals(addr.getId().getAddrType()) &&
+        // ("CROSS".equals(data.getCustGrp()) ||
+        // !"TR".equals(addr.getLandCntry()))) {
+        // LOG.debug("Computing Abbreviated Name/Location for address of TURKEY.
+        // Request " + addr.getId().getReqId());
+        // data.setAbbrevNm(addr.getCustNm1());
+        // if (data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
+        // data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
+        // }
+        // entityManager.merge(data);
+        // entityManager.flush();
+        // }
 	        if ("ZS01".equals(addr.getId().getAddrType())) {
 	          LOG.debug("Computing Abbreviated Name/Location for address of TURKEY. Request " + addr.getId().getReqId());
 	          data.setAbbrevNm(addr.getCustNm1());
@@ -2363,6 +2376,12 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            } else {
 	              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	            }
+            data.setAbbrevNm(addr.getCustNm1());
+            if (data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
+              data.setAbbrevNm(data.getAbbrevNm().substring(0, 22));
+            }
+            entityManager.merge(data);
+            entityManager.flush();
 	          }
 	        }
 
