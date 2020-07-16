@@ -655,27 +655,27 @@ function setPreferredLang() {
   if ('618' == cntry) {
     return;
   }
-	  FormManager.readOnly('custPrefLang');
-	  if ('693' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', 'Q');
-	  } else if ('668' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', 'C');
-	  } else if ('820' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', 'L');
-	  } else if ('708' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', '5');
-	  } else if ('642' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', 'F');
-	  } else if ('832' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', 'A');
-	  } else if ('821' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', 'R');
-	  } else if ('826' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
-	    FormManager.setValue('custPrefLang', '4');
-	  } else {
-	    FormManager.setValue('custPrefLang', 'E');
-	    FormManager.enable('custPrefLang');
-	  }
+  FormManager.readOnly('custPrefLang');
+  if ('693' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', 'Q');
+  } else if ('668' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', 'C');
+  } else if ('820' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', 'L');
+  } else if ('708' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', '5');
+  } else if ('642' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', 'F');
+  } else if ('832' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', 'A');
+  } else if ('821' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', 'R');
+  } else if ('826' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+    FormManager.setValue('custPrefLang', '4');
+  } else {
+    FormManager.setValue('custPrefLang', 'E');
+    FormManager.enable('custPrefLang');
+  }
 }
 
 function setClientTierValues(isuCd) {
@@ -1593,30 +1593,30 @@ function addCmrNoValidatorForCEE() {
         if (FormManager.getActualValue('reqType') == 'U') {
           return new ValidationResult(null, true);
         }
-        if(cmrNo != '' && cmrNo != null){
-        	if (cmrNo.length != 6) {
-        		return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
-        	} else if (isNaN(cmrNo)) {
-        		return new ValidationResult(null, false, 'CMR Number should be only numbers.');
-        	} else if (cmrNo == "000000") {
-        		return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-        	} else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
-        		return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
-        	} else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
-        		return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
-        	} else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER') && cmrNo.startsWith('99')) {
-        		return new ValidationResult(null, false, 'CMR Number should not be in 99XXXX for scenarios');
-        	} else {
-        		var qParams = {
-        				CMRNO : cmrNo,
-        				CNTRY : cntry,
-        				MANDT : cmr.MANDT
-        		};
-        		var results = cmr.query('GET.CMR.CEE', qParams);
-        		if (results.ret1 != null) {
-        			return new ValidationResult(null, false, 'The CMR Number already exists.');
-        		}
-        	}        	
+        if (cmrNo != '' && cmrNo != null) {
+          if (cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
+          } else if (isNaN(cmrNo)) {
+            return new ValidationResult(null, false, 'CMR Number should be only numbers.');
+          } else if (cmrNo == "000000") {
+            return new ValidationResult(null, false, 'CMR Number should not be 000000.');
+          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
+          } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
+            return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
+          } else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER') && cmrNo.startsWith('99')) {
+            return new ValidationResult(null, false, 'CMR Number should not be in 99XXXX for scenarios');
+          } else {
+            var qParams = {
+              CMRNO : cmrNo,
+              CNTRY : cntry,
+              MANDT : cmr.MANDT
+            };
+            var results = cmr.query('GET.CMR.CEE', qParams);
+            if (results.ret1 != null) {
+              return new ValidationResult(null, false, 'The CMR Number already exists.');
+            }
+          }
         }
         return new ValidationResult(null, true);
       }
@@ -2792,12 +2792,9 @@ function setICOAndDICMandatory() {
   var _custType = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
-    FormManager.resetValidations('taxCd1');
     FormManager.resetValidations('company');
-    FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'DIČ' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
   } else {
-    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
     FormManager.removeValidator('company', Validators.REQUIRED);
   }
 }
