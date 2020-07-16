@@ -2361,7 +2361,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	          } else if ("ZP01".equals(addr.getId().getAddrType())) {
 	            if (getAddressByType(entityManager, "ZS01", data.getId().getReqId()) == null) {
               saveAddrCopyForTR(entityManager, addr, "ZS01", admin.getReqType());
-              updateAabbNameCopyLoacl(entityManager, addr);
+              updateAabbNameCopyLoacl(entityManager, addr.getCustNm1(), addr.getId().getReqId());
 	            } else {
 	              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	            }
@@ -4570,10 +4570,10 @@ public class TurkeyHandler extends BaseSOFHandler {
     return taxOffice;
   }
 
-  private void updateAabbNameCopyLoacl(EntityManager entityManager, Addr addr) throws Exception {
+  private void updateAabbNameCopyLoacl(EntityManager entityManager, String abbrev_nm, long req_id) throws Exception {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.UPDATE.ABBNAME"));
-    query.setParameter("ABBREV_NM", addr.getCustNm1());
-    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("ABBREV_NM", abbrev_nm);
+    query.setParameter("REQ_ID", req_id);
     query.executeSql();
   }
 

@@ -5122,7 +5122,8 @@ function showCommercialFinanced() {
     FormManager.hide('CommercialFinanced', 'commercialFinanced');
   } else {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
-//    FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [ '','R', 'S', 'T' ]);
+// FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [
+// '','R', 'S', 'T' ]);
     FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER') {
@@ -7023,6 +7024,27 @@ function autoPopulateISUClientTierUK() {
   }
 }
 
+function autoPopulateAbbNameCopySoldToTR() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (cmr.currentRequestType != 'C') {
+    return;
+  }
+  var custGroup = FormManager.getActualValue('custGrp');
+
+  if (custGroup != undefined && (custGroup == 'CROSS'|| "TR" != FormManager.getActualValue("landCntry"))) {
+
+    var addrType = FormManager.getActualValue('addrType');
+    var abbName = FormManager.getActualValue('custNm1');
+    
+    console.log('addrType = ' + addrType);
+    console.log('abbName = ' + abbName);
+    if (addrType != '' && addrType == 'ZP01') {
+      
+    FormManager.setValue('abbrevNm', abbName);
+  }
+}
+}
+  
 function autoSetISUClientTierUK() {
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
@@ -8766,6 +8788,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setISUDefaultValueOnSubTypeChange, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(disableTaxOfficeTR, [ SysLoc.TURKEY ]);
+  GEOHandler.addAddrFunction(autoPopulateAbbNameCopySoldToTR, [ SysLoc.TURKEY ]);
 
   // CMR-2093
 
