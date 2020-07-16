@@ -1478,14 +1478,23 @@ function phoneNoValidationOnChange() {
 }
 
 function setEnterpriseValues(clientTier) {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if(!CEE_INCL.has(cntry)){
+	  if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
+	      || custSubGrp == 'INTSO') {
+	    return;
+	  }else {
+		  if (FormManager.getActualValue('viewOnlyPage') == 'true'){
+			  return;
+		  }
+	  }
   }
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
 
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var isuCd = FormManager.getActualValue('isuCd');
   FormManager.enable('enterprise');
   clientTier = FormManager.getActualValue('clientTier');
