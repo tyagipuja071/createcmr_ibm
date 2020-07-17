@@ -119,6 +119,12 @@ public class LegacyDirectService extends TransConnService {
   private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
   private static final List<String> EMBARGO_LIST = Arrays.asList("E", "Y");
 
+  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA,
+      SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN, SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA,
+      SystemLocation.BELARUS, SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN, SystemLocation.BOSNIA_AND_HERZEGOVINA,
+      SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
+      SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);
+
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
 
@@ -1531,9 +1537,25 @@ public class LegacyDirectService extends TransConnService {
             legacyAddrPk = new CmrtAddrPK();
             legacyAddrPk.setCustomerNo(cmrNo);
             legacyAddrPk.setSofCntryCode(cntry);
-            int newSeq = availableSequences.remove();
-            String newAddrSeq = Integer.toString(newSeq);
-            newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+            int newSeq;
+            String newAddrSeq;
+            if (transformer.sequenceNoUpdateLogic(entityManager, cmrObjects, addr, false)) {
+              newSeq = availableSequences.remove();
+              newAddrSeq = Integer.toString(newSeq);
+            } else {
+              newAddrSeq = addr.getId().getAddrSeq();
+            }
+
+            if (CEE_COUNTRY_LIST.contains(cntry)) {
+              if ("598".equals(addr.getId().getAddrSeq()) || "599".equals(addr.getId().getAddrSeq())) {
+                newAddrSeq = addr.getId().getAddrSeq();
+              } else {
+                newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+              }
+            } else {
+              newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+            }
+
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
             legacyAddrPk.setAddrNo(newAddrSeq);
@@ -1598,6 +1620,12 @@ public class LegacyDirectService extends TransConnService {
           }
           if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
             legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+          }
+          // this is for CEE countries IGF address
+          if (CEE_COUNTRY_LIST.contains(cntry)) {
+            if ("ZD02".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
+              legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+            }
           }
           if (!StringUtils.isBlank(addr.getCity1())) {
             legacyAddr.setCity(addr.getCity1());
