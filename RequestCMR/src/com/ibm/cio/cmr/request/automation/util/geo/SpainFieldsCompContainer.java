@@ -17,9 +17,9 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
  *
  */
 public class SpainFieldsCompContainer {
-  private String sbo;
-  private String salesRep;
-  private String enterprise;
+  private String sbo = null;
+  private String salesRep = null;
+  private String enterprise = null;
 
   public SpainFieldsCompContainer(EntityManager entityManager, Data data, String isuCd, String clientTier) {
     // get salesrep value
@@ -37,14 +37,26 @@ public class SpainFieldsCompContainer {
     }
 
     // get sbo & enterprise value
-    String sboEntpSql = ExternalizedQuery.getSql("QUERY.GET.SBO.BYSR");
+    String sboEntpSql = ExternalizedQuery.getSql("QUERY.GET.SBO.BYSR_ISUCTC");
     query = new PreparedQuery(entityManager, sboEntpSql);
     query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
     query.setParameter("REP_TEAM_CD", data.getLocationNumber());
+    query.setParameter("CLIENT_TIER", "%" + isuCd + clientTier + "%");
     query.setForReadOnly(true);
     List<Object[]> sboEntpRes = query.getResults();
-    if (sboEntpRes != null) {
+    if (sboEntpRes != null && !sboEntpRes.isEmpty()) {
       if (sboEntpRes.size() == 1) {
+        setSbo(sboEntpRes.get(0)[0].toString());
+        setEnterprise(sboEntpRes.get(0)[2].toString());
+      }
+    } else {
+      sboEntpSql = ExternalizedQuery.getSql("QUERY.GET.SBO.BYSR_ES");
+      query = new PreparedQuery(entityManager, sboEntpSql);
+      query.setParameter("ISSUING_CNTRY", data.getCmrIssuingCntry());
+      query.setParameter("REP_TEAM_CD", data.getLocationNumber());
+      query.setForReadOnly(true);
+      sboEntpRes = query.getResults();
+      if (sboEntpRes != null && !sboEntpRes.isEmpty() && sboEntpRes.size() == 1) {
         setSbo(sboEntpRes.get(0)[0].toString());
         setEnterprise(sboEntpRes.get(0)[2].toString());
       }
@@ -52,7 +64,8 @@ public class SpainFieldsCompContainer {
   }
 
   public boolean allFieldsCalculated() {
-    return StringUtils.isNotBlank(this.salesRep) && StringUtils.isNotBlank(this.sbo) && StringUtils.isNotBlank(this.enterprise);
+    return this.salesRep != null && this.sbo != null && this.enterprise != null && StringUtils.isNotBlank(this.salesRep)
+        && StringUtils.isNotBlank(this.sbo) && StringUtils.isNotBlank(this.enterprise);
   }
 
   public String getSbo() {
