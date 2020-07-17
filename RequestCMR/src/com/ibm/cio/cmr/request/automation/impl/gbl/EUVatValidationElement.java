@@ -184,14 +184,12 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     boolean isVATChanged = false;
     String vatImported = "";
     String vatCurrent = !StringUtils.isEmpty(requestData.getData().getVat()) ? requestData.getData().getVat() : "";
-    String sql = ExternalizedQuery.getSql("NORDX.GET_IMPORTED_VAT");
+    String sql = ExternalizedQuery.getSql("AUTO.GET_EXISTING_VAT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_TYPE", requestData.getAdmin().getId().getReqId());
+    query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
     query.setForReadOnly(true);
-    List<String> vatImportedList = query.getResults(String.class);
-    if (vatImportedList != null && vatImportedList.size() > 0) {
-      vatImported = !StringUtils.isEmpty(vatImportedList.get(0)) ? vatImportedList.get(0) : "";
-    }
+    vatImported = query.getSingleResult(String.class);
+    vatImported = !StringUtils.isEmpty(vatImported) ? vatImported : "";
     if (!vatCurrent.trim().equalsIgnoreCase(vatImported.trim())) {
       isVATChanged = true;
     }
