@@ -682,7 +682,7 @@ function changeAbbrevNmLocnSpain(cntry, addressMode, saving, finalSave, force) {
     reqType = FormManager.getActualValue('reqType');
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if ((finalSave || force) && cmr.addressMode) {
+  if ((finalSave || force || cmr.addressMode) && saving) {
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
     if (copyTypes != null && copyTypes.length > 0) {
@@ -1995,7 +1995,7 @@ function changeAbbNmSpainOnScenario() {
       ADDR_TYPE : 'ZI01'
     };
     var installingAddrName = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', reqParam);
-    abbName = 'IBM/'.concat(installingAddrName.ret1);
+    abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
     if (abbName.length > 22)
       abbName = abbName.substring(0, 22);
     FormManager.setValue('abbrevNm', abbName);
@@ -2073,6 +2073,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(changeAbbrevNmLocnSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAddrFunction(changeAbbrevNmLocnPortugal, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(changeAbbNmSpainOnScenario, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(changeAbbNmSpainOnScenario, [ SysLoc.SPAIN ]);
   GEOHandler.addAddrFunction(disableAddrFieldsPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
