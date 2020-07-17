@@ -12,7 +12,7 @@
           <label>Abbreviated Name</label>
           <dbColumn>ABBREV_NM</dbColumn>
           <width>40</width>
-          <length>20</length>
+          <length>22</length>
         </column>
         <column>
           <label>Abbreviated Location</label>
@@ -73,6 +73,7 @@
           <label>VAT</label>
           <dbColumn>VAT</dbColumn>
           <width>5</width>
+          <length>11</length>
         </column>
         <column>
           <label>Tax Code</label>
@@ -225,7 +226,7 @@
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
-          <length>5</length>
+          <length>8</length>
         </column>
         <column>
           <label>Local City</label>
