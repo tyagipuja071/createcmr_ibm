@@ -8162,6 +8162,25 @@ function validateCollectionCodeforCyprus(){
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function setAbbrvCyprus(){
+  var reqType = FormManager.getActualValue('reqType');
+  var reqId = FormManager.getActualValue('reqId');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    if (reqId != null) {
+      reqParam = {
+        REQ_ID : reqId
+      };
+    }
+    var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
+    var abbrvNm = custNm.ret1;
+    if (abbrvNm != null) {
+      FormManager.setValue('abbrevNm', abbrvNm);
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8404,4 +8423,6 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(validateCollectionCodeforCyprus, [ SysLoc.CYPRUS ],null, true);
+  GEOHandler.addAfterConfig(setAbbrvCyprus, [ SysLoc.CYPRUS ]);
+  
 });
