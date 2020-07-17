@@ -73,7 +73,7 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("Skipped.");
           output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
           LOG.debug("Landed Country does not belong to the European Union. Skipping VAT Validation.");
-        } else if ("U".equals(admin.getReqType()) && !isVatUpdated(entityManager, requestData)) {
+        } else if ("U".equals(admin.getReqType()) && !isVatChanged(entityManager, requestData)) {
           validation.setSuccess(true);
           validation.setMessage("Vat not updated");
           output.setDetails("Skipping VAT validation as VAT was not updated on the request.");
