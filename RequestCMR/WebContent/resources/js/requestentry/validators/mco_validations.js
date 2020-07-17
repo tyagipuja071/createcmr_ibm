@@ -1708,16 +1708,17 @@ function setFieldMandatoryForProcessorSpain() {
 
   if (typeof (_pagemodel) != 'undefined') {
     if (reqType == 'C' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
-      checkAndAddValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ]);
-      checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
-      checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
-      checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
-      checkAndAddValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ]);
       FormManager.resetValidations('enterprise');
       FormManager.resetValidations('isuCd');
       FormManager.resetValidations('clientTier');
       FormManager.resetValidations('repTeamMemberNo');
       FormManager.resetValidations('salesBusOffCd');
+      checkAndAddValidator('enterprise', Validators.REQUIRED, [ 'Enterprise Number' ]);
+      checkAndAddValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ]);
+      checkAndAddValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ]);
+      checkAndAddValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ]);
+      checkAndAddValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ]);
+
     }
 
     if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93' && _pagemodel.userRole == GEOHandler.ROLE_PROCESSOR) {
