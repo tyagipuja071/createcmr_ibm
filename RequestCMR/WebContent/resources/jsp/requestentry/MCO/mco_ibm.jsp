@@ -26,7 +26,7 @@
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
+    <%-- <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
       <p>
         <cmr:label fieldId="engineeringBo">
           <cmr:fieldLabel fieldId="EngineeringBo" />:
@@ -34,7 +34,7 @@
         </cmr:label>
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
-    </cmr:column>    
+    </cmr:column>     --%>
     <cmr:column span="2" containerForField="SalesBusOff" exceptForCountry="838">
       <p>
         <cmr:label fieldId="salesBusOffCd">
@@ -119,5 +119,8 @@
     </cmr:view>
     <% } %>      
     </cmr:row>
+  </cmr:view>
+  <cmr:view forCountry="838">
+    <form:hidden path="engineeringBo" id="engineeringBo"/>
   </cmr:view>
 </cmr:view>
