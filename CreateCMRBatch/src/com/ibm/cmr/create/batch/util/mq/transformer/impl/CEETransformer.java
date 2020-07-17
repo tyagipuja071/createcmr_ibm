@@ -679,7 +679,10 @@ public class CEETransformer extends EMEATransformer {
 	} else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp)) {
 			generateCMRNoObj.setMin(1000);
 			generateCMRNoObj.setMax(9999);
-	} else {
+    } else if ("XCE".equals(custSubGrp)) {
+      generateCMRNoObj.setMin(510000);
+      generateCMRNoObj.setMax(799999);
+    } else {
 		generateCMRNoObj.setMin(369320);
 		generateCMRNoObj.setMax(999999);
 		LOG.debug("that is CEE No INTER CMR");
@@ -1136,7 +1139,7 @@ public class CEETransformer extends EMEATransformer {
     
     String cebo = data.getEngineeringBo();
     if(!StringUtils.isBlank(cebo)){
-    	if(SystemLocation.SERBIA.equals(data.getCmrIssuingCntry())){
+      if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) || SystemLocation.KYRGYZSTAN.equals(data.getCmrIssuingCntry())) {
     		if(cebo.length() < 7){
     			cebo=StringUtils.rightPad(cebo, 7, '0');
     		}
@@ -1203,6 +1206,7 @@ public class CEETransformer extends EMEATransformer {
     } else {
       legacyCust.setMrcCd("3");
     }
+
 
   }
 
