@@ -142,7 +142,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-     <value>https://localhost:9444/FindCMR</value>
+    <value>https://localhost:9444/FindCMR</value>
   </item>
   <item>
     <id>MAIL_SUBJECT</id>
@@ -374,6 +374,94 @@
     <required>true</required>
     <editType>text</editType>
     <value>https://tdydalbpgui01.sl.bluecloud.ibm.com:20002/CMRBPPortal/home</value>
+  </item>
+  <item>
+    <id>BATCH_CMR_POOL_ISSUING_CNTRY</id>
+    <order>38</order>
+    <name>Batch CMR Pool Issuing Country</name>
+    <description>Issuing country used when picking up requests for automated CMR pool assignment</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>897</value>
+  </item>
+  <item>
+    <id>BATCH_CMR_POOL_PROCESSING_TYPE</id>
+    <order>39</order>
+    <name>Batch CMR Pool Processing Type</name>
+    <description>Processing type used when picking up requests for automated CMR pool assignment</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>TC</value>
+  </item>
+    <item>
+    <id>BATCH_CMR_POOL_CUST_NAME</id>
+    <order>40</order>
+    <name>Batch CMR Pool Customer name</name>
+    <description>Customer name used when searching for Pool record</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>MARKETPLACE*POOL</value>
+  </item>
+  <item>
+    <id>BATCH_CMR_POOL_STREET</id>
+    <order>41</order>
+    <name>Batch CMR Pool Street</name>
+    <description>Street used when searching for Pool record</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>150 KETTLETOWN RD</value>
+  </item>
+    <item>
+    <id>BATCH_CMR_POOL_CITY</id>
+    <order>42</order>
+    <name>Batch CMR Pool City</name>
+    <description>City used when searching for Pool record</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>SOUTHBURY</value>
+  </item>
+  <item>
+    <id>BATCH_CMR_POOL_STATE</id>
+    <order>43</order>
+    <name>Batch CMR Pool State</name>
+    <description>State used when searching for Pool record</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>CT</value>
+  </item>
+    <item>
+    <id>BATCH_CMR_POOL_POSTAL</id>
+    <order>44</order>
+    <name>Batch CMR Pool Postal Code</name>
+    <description>Postal code used when searching for Pool record</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>06488-2685</value>
+  </item>
+  <item>
+    <id>BATCH_CMR_POOL_LANDED_CNTRY_CD</id>
+    <order>45</order>
+    <name>Batch CMR Pool Country Code</name>
+    <description>Country code used when searching for Pool record</description>
+    <type>string</type>
+    <editable>true</editable>
+    <required>true</required>
+    <editType>text</editType>
+    <value>US</value>
   </item>
   <item>
     <id>SYSTEM_TYPE</id>
