@@ -405,8 +405,14 @@ function setClientTierValues(value) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
     if (tierValues.length == 1) {
       FormManager.setValue('clientTier', tierValues[0]);
-      setSalesRepValues();
-      setEnterpriseValues();
+      var isuCd = FormManager.getActualValue(isuCd);
+      var clientTier = FormManager.getActualValue(clientTier);
+      if (isuCd == '32' && clientTier == 'N' && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
+        setSalesRepEntpValues32N();
+      } else {
+        setSalesRepValues();
+        setEnterpriseValues();
+      }
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -566,6 +572,37 @@ function setSBOAndEBO() {
   }
 }
 
+function setSalesRepEntpValues32N() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGroup = FormManager.getActualValue('custSubGrp');
+  if (cntry == SysLoc.SPAIN && _noISRLogicES.has(custSubGroup)) {
+    return;
+  }
+
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  if (isuCd != '') {
+    var qParams = {
+      ISSUING_CNTRY : FormManager.getActualValue('cmrIssuingCntry'),
+      ISU_CTC : isuCd + clientTier,
+      LOC_NO : FormManager.getActualValue('locationNumber')
+    };
+    var results = cmr.query('GET.SR_ENTP_SBO.BYISU_LOCNO', qParams);
+    if (results != null) {
+      var salesRep = results.ret1 != undefined ? results.ret1 : '';
+      var sBo = results.ret2 != undefined ? results.ret2 : '';
+      var enterprise = results.ret3 != undefined ? results.ret3 : '';
+
+      FormManager.setValue('repTeamMemberNo', salesRep);
+      FormManager.setValue('salesBusOffCd', sBo);
+      FormManager.setValue('enterprise', enterprise);
+
+    }
+  }
+}
 function disableAddrFieldsPTES() {
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
   var custType = FormManager.getActualValue('custGrp');
@@ -2005,6 +2042,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(setSalesRepEntpValues32N, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setFieldMandatoryForProcessorPT, [ SysLoc.PORTUGAL ]);
   // GEOHandler.addAfterConfig(setLocationNumber, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setCollectionCode, [ SysLoc.SPAIN, SysLoc.PORTUGAL ]);
@@ -2042,6 +2080,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
+  GEOHandler.addAfterTemplateLoad(setSalesRepEntpValues32N, [ SysLoc.SPAIN ]);
 
   GEOHandler.addAfterTemplateLoad(setDPCEBObasedOnCntry, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setVatValidatorPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
