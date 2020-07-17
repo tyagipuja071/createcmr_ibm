@@ -1658,8 +1658,7 @@ public class CyprusHandler extends BaseSOFHandler {
           data.setAbbrevLocn("");
         }
       }
-      
-      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+
     } // End of Story 1389065
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
