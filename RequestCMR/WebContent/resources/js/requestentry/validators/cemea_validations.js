@@ -701,8 +701,9 @@ function setClientTierValues(isuCd) {
     } else if ((SysLoc.AZERBAIJAN == cntry || SysLoc.TURKMENISTAN == cntry || SysLoc.TAJIKISTAN == cntry || SysLoc.ALBANIA == cntry || SysLoc.ARMENIA == cntry || SysLoc.BELARUS == cntry
         || SysLoc.BULGARIA == cntry || SysLoc.GEORGIA == cntry || SysLoc.KAZAKHSTAN == cntry || SysLoc.KYRGYZSTAN == cntry || SysLoc.MACEDONIA == cntry || SysLoc.SERBIA == cntry
         || SysLoc.UZBEKISTAN == cntry || SysLoc.UKRAINE == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
+        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE' || FormManager.getActualValue('custSubGrp') == 'THDPT' 
+        	|| FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' 
+        		|| FormManager.getActualValue('custSubGrp') == 'XPC')) {
       if (isuCd == '34') {
         clientTiers = [ 'V' ];
       } else if (isuCd == '32') {
@@ -1624,9 +1625,21 @@ function addCmrNoValidatorForCEE() {
             return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
           } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
             return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
-          } else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER') && cmrNo.startsWith('99')) {
-            return new ValidationResult(null, false, 'CMR Number should not be in 99XXXX for scenarios');
-          } else {
+          } else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER' || custSubType == 'RSXIN' 
+        	  || custSubType == 'MEINT'|| custSubType == 'RSINT' || custSubType == 'CSINT') && cmrNo.startsWith('99')) {
+            return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
+          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'THDPT' || custSubType.includes('PRICU') 
+        		|| custSubType == 'XCOM' || custSubType.includes('XTP') || custSubType == 'COMME' || custSubType.includes('MECOM') 
+        		|| custSubType == 'MEPC' || custSubType.includes('METP') || custSubType == 'RSXCO' || custSubType.includes('RSXPC') 
+        		|| custSubType == 'RSXTP' || custSubType.includes('RSCOM') || custSubType == 'RSPC' || custSubType.includes('RSTP') 
+        		|| custSubType == 'CSCOM' || custSubType.includes('CSPC') || custSubType == 'CSTP') && (cmrNo.startsWith('00') ||cmrNo.startsWith('99'))) {
+            return new ValidationResult(null, false, 'CMR Number should not start with 99xxxx or 00xxxx for Commercial scenarios');
+          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'BUSPR' || custSubType.includes('BP') 
+          		|| custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP') ) && !(cmrNo.startsWith('00'))) {
+              return new ValidationResult(null, false, 'CMR Number should start with 00xxxx for Business Partner scenarios');
+            } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XCEM' || custSubType == 'XCE') && !(cmrNo >= 500000 && cmrNo <= 799999)) {
+          return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
+        }else {
             var qParams = {
               CMRNO : cmrNo,
               CNTRY : cntry,
