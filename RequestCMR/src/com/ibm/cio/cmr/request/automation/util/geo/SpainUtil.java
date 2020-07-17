@@ -16,21 +16,28 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  * {@link AutomationUtil} for Spain specific validations
@@ -40,16 +47,21 @@ import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 public class SpainUtil extends AutomationUtil {
 
   private static final Logger LOG = Logger.getLogger(SpainUtil.class);
+  public static final String SCENARIO_COMMERCIAL = "COMME";
+  public static final String SCENARIO_IGS_GSE = "IGSGS";
   public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
-  public static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
   public static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
   public static final String SCENARIO_THIRD_PARTY = "THDPT";
   public static final String SCENARIO_THIRD_PARTY_IG = "THDIG";
   public static final String SCENARIO_INTERNAL = "INTER";
   public static final String SCENARIO_INTERNAL_SO = "INTSO";
+  public static final String SCENARIO_CROSSBORDER = "XCRO";
+  public static final String SCENARIO_CROSSBORDER_BP = "XBP";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+  private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_INTERNAL_SO, SCENARIO_BUSINESS_PARTNER,
+      SCENARIO_CROSSBORDER_BP);
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -77,7 +89,7 @@ public class SpainUtil extends AutomationUtil {
         }
       } else {
         if (addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
-          engineData.addRejectionComment("SCENARIO_CHECK", "‘Billing and installing address should be different’.", "", "");
+          engineData.addRejectionComment("SCENARIO_CHECK", "Billing and installing address should be different.", "", "");
           details.append("For 3rd Party Billing and installing address should be different");
           return false;
 
@@ -87,9 +99,9 @@ public class SpainUtil extends AutomationUtil {
 
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
-      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false);
+      return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_BUSINESS_PARTNER:
-    case SCENARIO_BUSINESS_PARTNER_CROSS:
+    case SCENARIO_CROSSBORDER_BP:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
     case SCENARIO_INTERNAL:
     case SCENARIO_INTERNAL_SO:
@@ -98,7 +110,7 @@ public class SpainUtil extends AutomationUtil {
           + (!StringUtils.isBlank(mailTo.getCustNm2()) ? " " + mailTo.getCustNm2() : "");
       if (!customerName2.toUpperCase().contains("IBM") && !customerName.toUpperCase().contains("IBM")) {
         details.append("Mailing and Billing addresses should have IBM in them.");
-        engineData.addRejectionComment("SCENARIO_CHECK", "‘Mailing and Billing addresses should have IBM in them.’.", "", "");
+        engineData.addRejectionComment("SCENARIO_CHECK", "Mailing and Billing addresses should have IBM in them.", "", "");
         return false;
       }
 
@@ -109,8 +121,71 @@ public class SpainUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if (!"C".equals(admin.getReqType())) {
+      details.append("Field Computation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+
+    if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean hasValidMatches = false;
+      boolean highQualityMatchExists = false;
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
+      hasValidMatches = DnBUtil.hasValidMatches(response);
+      if (response != null && response.getMatched()) {
+        List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        if (hasValidMatches) {
+          // actions to be performed only when matches with high confidence are
+          // found
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+            if (closelyMatches) {
+              engineData.put("ZI01_DNB_MATCH", dnbRecord);
+              highQualityMatchExists = true;
+              details.append("High Quality DnB Match found for Installing address.\n");
+              details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+              LOG.debug("Connecting to D&B details service..");
+              DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+              if (dnbData != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+                details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+                String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+                if (subInd != null) {
+                  overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                  details.append("Subindustry Code  =  " + subInd).append("\n");
+                }
+              }
+              results.setResults("Calculated.");
+              results.setProcessOutput(overrides);
+              break;
+            }
+          }
+        }
+      }
+      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
+        details.append("No high quality matches found for Installing Address, setting ISIC to 7499.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7499");
+        String subInd = RequestUtils.getSubIndustryCd(entityManager, "7499", data.getCmrIssuingCntry());
+        if (subInd != null) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+        }
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        results.setResults("Calculated.");
+        results.setProcessOutput(overrides);
+      }
+    } else {
+      details.append("No specific fields to calculate.");
+      results.setResults("Skipped.");
+      results.setProcessOutput(overrides);
+    }
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
+    return results;
   }
 
   @Override
@@ -170,7 +245,7 @@ public class SpainUtil extends AutomationUtil {
           }
           if (!matchesDnb) {
             cmdeReview = true;
-            engineData.addNegativeCheckStatus("_atVATCheckFailed", "VAT # on the request did not match D&B");
+            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
             details.append("VAT # on the request did not match D&B\n");
           } else {
             details.append("VAT # on the request matches D&B\n");
@@ -227,11 +302,11 @@ public class SpainUtil extends AutomationUtil {
     }
     if (resultCodes.contains("D")) {
       output.setOnError(true);
-      engineData.addRejectionComment("_atVATUpd", "VAT # on the request has characters updated other than the first character", "", "");
+      engineData.addRejectionComment("_esVATUpd", "VAT # on the request has characters updated other than the first character", "", "");
       validation.setSuccess(false);
       validation.setMessage("VAT Updated");
     } else if (cmdeReview) {
-      engineData.addNegativeCheckStatus("_atDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
       details.append("Updates to one or more fields cannot be validated.\n");
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
@@ -254,7 +329,6 @@ public class SpainUtil extends AutomationUtil {
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
-    Data data = requestData.getData();
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -306,7 +380,7 @@ public class SpainUtil extends AutomationUtil {
     if (resultCodes.contains("R")) {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
-      engineData.addNegativeCheckStatus("_atCheckFailed", "Updated elements cannot be checked automatically.");
+      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
     } else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
@@ -329,6 +403,70 @@ public class SpainUtil extends AutomationUtil {
       address = "ZI01";
     }
     return address;
+  }
+
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+    // override 32S logic
+    if (!"C".equals(requestData.getAdmin().getReqType())) {
+      details.append("Coverage Calculation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return true;
+    }
+
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+
+    if ((!isCoverageCalculated || SCENARIO_PRIVATE_CUSTOMER.equals(scenario)
+        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
+        && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
+      details.setLength(0);
+      overrides.clearOverrides();
+      SpainFieldsCompContainer fields = new SpainFieldsCompContainer(entityManager, data, data.getIsuCd(), data.getClientTier());
+      if (fields != null && fields.allFieldsCalculated()) {
+        details.append("Coverage calculated successfully using 32S logic.").append("\n");
+        details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
+        details.append("Enterprise : " + fields.getEnterprise()).append("\n");
+        details.append("SBO : " + fields.getSbo()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "ENTERPRISE", data.getEnterprise(), fields.getEnterprise());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())
+          && StringUtils.isNotBlank(data.getEnterprise())) {
+        details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
+        details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
+        details.append("Enterprise : " + fields.getEnterprise()).append("\n");
+        details.append("SBO : " + fields.getSbo()).append("\n");
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else {
+        String msg = "Coverage cannot be calculated. No valid 32S mapping found from request data.";
+        details.append(msg);
+        results.setResults("Cannot Calculate");
+        results.setDetails(details.toString());
+        engineData.addNegativeCheckStatus("_esCoverage", msg);
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if ("C".equals(admin.getReqType()) && (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario))) {
+      DnBMatchingResponse dnbRecord = (DnBMatchingResponse) engineData.get("ZI01_DNB_MATCH");
+      if (dnbRecord != null) {
+        request.setDunsNo(dnbRecord.getDunsNo());
+      }
+    }
+
   }
 
 }

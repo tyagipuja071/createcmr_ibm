@@ -75,7 +75,7 @@ public class CompanyFinder {
       if (isLatin(searchModel.getName())) {
         matches.addAll(findCMRs(searchModel));
         boolean searchDnb = false;
-        List<String> lowLevelMatches = Arrays.asList("F4", "F5", "VAT", "DUNS");
+        List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT", "DUNS");
         if (!matches.isEmpty()) {
           for (CompanyRecordModel cmrMatch : matches) {
             if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {

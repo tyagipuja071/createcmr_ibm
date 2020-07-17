@@ -23,6 +23,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
@@ -99,12 +101,18 @@ public class DPLCheckElement extends ValidatingElement {
 
         if (StringUtils.isNotEmpty(scorecard.getDplChkResult())
             && ("AF".equals(scorecard.getDplChkResult()) || "SF".equals(scorecard.getDplChkResult()))) {
-          validation.setSuccess(false);
-          output.setOnError(true);
-          engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
-          validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
+          if (!isDPLApprovalPresent(entityManager, data.getCmrIssuingCntry(), admin.getReqType())) {
+            validation.setSuccess(false);
+            validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
+            output.setOnError(true);
+            engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+            output.setDetails("DPL check failed for one or more addresses on the request.");
+          } else {
+            validation.setSuccess(true);
+            validation.setMessage("Approval Required");
+            output.setDetails("DPL check failed for one or more addresses but DPL Approvals are configured.");
+          }
           output.setResults(validation.getMessage());
-          output.setDetails("DPL check failed for one or more addresses on the request.");
         } else {
           validation.setSuccess(true);
           validation.setMessage("No DPL check needed.");
@@ -322,6 +330,18 @@ public class DPLCheckElement extends ValidatingElement {
     }
     log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
     updateEntity(scorecard, entityManager);
+  }
+
+  private boolean isDPLApprovalPresent(EntityManager entityManager, String cmrIssuingCntry, String reqType) {
+    if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(reqType)) {
+      String sql = ExternalizedQuery.getSql("AUTO.CHECK_DPL_APPROVAL");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", "%" + cmrIssuingCntry + "%");
+      query.setParameter("REQ_TYPE", reqType);
+      query.setForReadOnly(true);
+      return query.exists();
+    }
+    return false;
   }
 
   @Override
