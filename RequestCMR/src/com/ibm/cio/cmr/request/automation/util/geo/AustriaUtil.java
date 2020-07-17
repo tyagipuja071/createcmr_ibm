@@ -84,8 +84,10 @@ public class AustriaUtil extends AutomationUtil {
     if (!SCENARIO_THIRD_PARTY_DC.equals(scenario) && (customerName.toUpperCase().contains("C/O") || customerName.toUpperCase().contains("CAREOF")
         || customerName.toUpperCase().contains("CARE OF"))) {
       details.append("Scenario should be Third Party/Data Center based on custmer name.").append("\n");
-      engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario should be for 3rd Party / Data Center.");
-      return true;
+      // engineData.addNegativeCheckStatus("SCENARIO_CHECK", "The scenario
+      // should be for 3rd Party / Data Center.");
+      engineData.addRejectionComment("OTH", "The scenario should be for 3rd Party / Data Center.", "", "");
+      return false;
     }
 
     LOG.debug("Scenario to check: " + scenario);
@@ -94,7 +96,7 @@ public class AustriaUtil extends AutomationUtil {
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
       return doPrivatePersonChecks(engineData, SystemLocation.AUSTRIA, soldTo.getLandCntry(), customerName, details,
-          SCENARIO_IBM_EMPLOYEE.equals(scenario),requestData);
+          SCENARIO_IBM_EMPLOYEE.equals(scenario), requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_BUSINESS_PARTNER_CROSS:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
