@@ -561,7 +561,7 @@ function setEnterpriseValues(clientTier) {
   // LocNo
   var isuCtc = isuCd + clientTier;
   if (custGroup != 'CROSS') {
-    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
+    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
       FormManager.readOnly('enterprise');
       setSBOAndEBO();
       return;
@@ -625,14 +625,29 @@ function setSBOAndEBO() {
     var noSBOLogicES = new Set([ 'IGSGS', 'INTER', 'INTSO', 'XCRO', 'XIGS', 'GOVIG', 'THDIG', 'XINTR', 'XINSO' ]);
 
     if (locationNumber != '') {
+      var isuCtc = isuCd + clientTier;
       var qParams = {
         ISSUING_CNTRY : FormManager.getActualValue('cmrIssuingCntry'),
-        REP_TEAM_CD : locationNumber
+        REP_TEAM_CD : locationNumber,
+        CLIENT_TIER : '%' + isuCtc + '%'
       };
-      var result = cmr.query('GET.SBO.BYSR', qParams);
-      var salesBoCd = result.ret1;
-      var eBo = result.ret2;
-      var ent = result.ret3;
+      var result = cmr.query('GET.SBO.BYSR_ISUCTC', qParams);
+      var salesBoCd = '';
+      var eBo = '';
+      var ent = '';
+      if (Object.keys(result).length != 0) {
+        salesBoCd = result.ret1;
+        eBo = result.ret2;
+        ent = result.ret3;
+      } else {
+        result = cmr.query('GET.SBO.BYSR_ES', {
+          ISSUING_CNTRY : FormManager.getActualValue('cmrIssuingCntry'),
+          REP_TEAM_CD : locationNumber
+        });
+        salesBoCd = result.ret1;
+        eBo = result.ret2;
+        ent = result.ret3;
+      }
       if (FormManager.getActualValue('reqType') == 'C') {
         FormManager.setValue('engineeringBo', eBo);
         if (custSubGroup != undefined && custSubGroup != '' && !noSBOLogicES.has(custSubGroup) && 'BUSPR' != custSubGroup) {
@@ -640,8 +655,7 @@ function setSBOAndEBO() {
         }
       }
       // For Spain, domestic with 32 & 21 ISU, set enterprise based on LocNo
-      var isuCtc = isuCd + clientTier;
-      if (isuCtc == '32B' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217') {
+      if (isuCtc == '32B' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217' || isuCtc == '32N') {
         if (ent == undefined || custSubGroup == 'BUSPR') {
           FormManager.setValue('enterprise', '');
         } else {
@@ -768,7 +782,7 @@ function changeAbbrevNmLocnSpain(cntry, addressMode, saving, finalSave, force) {
     reqType = FormManager.getActualValue('reqType');
   }
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if ((finalSave || force) && cmr.addressMode) {
+  if ((finalSave || force || cmr.addressMode) && saving) {
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
     if (copyTypes != null && copyTypes.length > 0) {
@@ -2112,7 +2126,7 @@ function changeAbbNmSpainOnScenario() {
       ADDR_TYPE : 'ZI01'
     };
     var installingAddrName = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', reqParam);
-    abbName = 'IBM/'.concat(installingAddrName.ret1);
+    abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
     if (abbName.length > 22)
       abbName = abbName.substring(0, 22);
     FormManager.setValue('abbrevNm', abbName);
@@ -2191,6 +2205,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(changeAbbrevNmLocnSpain, [ SysLoc.SPAIN ]);
   GEOHandler.addAddrFunction(changeAbbrevNmLocnPortugal, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(changeAbbNmSpainOnScenario, [ SysLoc.SPAIN ]);
+  GEOHandler.addAfterConfig(changeAbbNmSpainOnScenario, [ SysLoc.SPAIN ]);
   GEOHandler.addAddrFunction(disableAddrFieldsPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
