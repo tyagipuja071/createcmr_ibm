@@ -1008,19 +1008,14 @@ public class CEETransformer extends EMEATransformer {
           break;
         }
       }
-//
-//      if (!StringUtils.isBlank(data.getCompany())) {
-//        legacyCust.setBankAcctNo(data.getCompany());
-//      } else {
-//        legacyCust.setBankAcctNo("");
-//      }
 
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+    	  legacyCust.setBankAcctNo(data.getTaxCd1());
+      } else {
+    	  legacyCust.setBankAcctNo("");
+      }
+      
       if ("693".equals(data.getCmrIssuingCntry())) {
-          if (!StringUtils.isBlank(data.getTaxCd1())) {
-              legacyCust.setBankAcctNo(data.getTaxCd1());
-            } else {
-              legacyCust.setBankAcctNo("");
-            }
             
             if (!StringUtils.isBlank(data.getCompany())) {
               if (data.getCompany().length() > 9) {
@@ -1044,12 +1039,12 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+    	  legacyCust.setBankAcctNo(data.getTaxCd1());
+      } else {
+    	  legacyCust.setBankAcctNo("");
+      }
       if ("693".equals(data.getCmrIssuingCntry())) {
-        if (!StringUtils.isBlank(data.getTaxCd1())) {
-          legacyCust.setBankAcctNo(data.getTaxCd1());
-        } else {
-          legacyCust.setBankAcctNo("");
-        }
         
         if (!StringUtils.isBlank(data.getCompany())) {
           if (data.getCompany().length() > 9) {
