@@ -226,10 +226,10 @@ public class CEMEAHandler extends BaseSOFHandler {
                 String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
                 String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), reqEntry.getCmrNo());
                 String gAddrSeq = "";
-                if (!StringUtils.isBlank(legacyGaddrSeq)) {
+                if (!StringUtils.isEmpty(legacyGaddrSeq)) {
                   gAddrSeq = legacyGaddrSeq;
                 } else {
-                  gAddrSeq = gAddrSeq;
+                  gAddrSeq = maxSeq;
                 }
                 if (!StringUtils.isBlank(adrnr)) {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
