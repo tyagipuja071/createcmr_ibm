@@ -135,9 +135,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
       if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
-
         if (source.getItems() != null) {
-
           String addrType = null;
           String seqNo = null;
           List<String> sofUses = null;
@@ -147,7 +145,6 @@ public class MCOPtEsHandler extends MCOHandler {
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
             if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-              // Mukesh:Story 1698123
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUse(sofUse);
@@ -172,7 +169,6 @@ public class MCOPtEsHandler extends MCOHandler {
               }
             }
           }
-
           // add unmapped addresses
           FindCMRRecordModel record = createAddress(entityManager, mainRecord.getCmrIssuedBy(), CmrConstants.ADDR_TYPE.ZP02.toString(), "Fiscal",
               new HashMap<String, FindCMRRecordModel>());
@@ -183,8 +179,9 @@ public class MCOPtEsHandler extends MCOHandler {
             record.setCmrIssuedBy(mainRecord.getCmrIssuedBy());
             record.setCmrAddrType("Fiscal");// Fiscal
             setFAddressFromLegacy(record);
+            converted.add(record);
           }
-          converted.add(record);
+          
         }
       } else {
         // old SOF import process:
@@ -450,7 +447,8 @@ public class MCOPtEsHandler extends MCOHandler {
     LOG.trace("SBO: " + data.getSalesBusOffCd());
     data.setEmbargoCd(this.currentImportValues.get("EmbargoCode"));
     LOG.trace("EmbargoCode: " + data.getEmbargoCd());
-    // Mukesh: Defect 1698949: FVT: Mismatch between Data.AC_ADMIN_BO and CMRTCUST.RACBO
+    // Mukesh: Defect 1698949: FVT: Mismatch between Data.AC_ADMIN_BO and
+    // CMRTCUST.RACBO
     data.setAcAdminBo(this.currentImportValues.get("AccAdBo"));
     LOG.trace("AccAdBo: " + data.getAcAdminBo());
 
@@ -464,7 +462,7 @@ public class MCOPtEsHandler extends MCOHandler {
         data.getAbbrevLocn();
       }
     }
-    
+
     if (SystemLocation.PORTUGAL.equalsIgnoreCase(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       CmrtCust cust = this.legacyObjects.getCustomer();
       if (cust != null) {
@@ -472,7 +470,7 @@ public class MCOPtEsHandler extends MCOHandler {
         data.setCrosSubTyp(customerType);
       }
     }
-    
+
   }
 
   @Override
@@ -537,7 +535,7 @@ public class MCOPtEsHandler extends MCOHandler {
         address.setCmrCustPhone(cmrtAddr.getAddrPhone());
       }
     }
-    
+
   }
 
   @Override
@@ -613,9 +611,9 @@ public class MCOPtEsHandler extends MCOHandler {
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     addr.setTransportZone("Z000000001");
     serBlankFieldsAtCopy(addr);
-    if("838".equals(cmrIssuingCntry)){
+    if ("838".equals(cmrIssuingCntry)) {
       addEditFiscalAddress(entityManager, addr);
-    } 
+    }
   }
 
   private void serBlankFieldsAtCopy(Addr addr) {
@@ -624,7 +622,7 @@ public class MCOPtEsHandler extends MCOHandler {
         addr.setCustPhone("");
       }
     }
-    
+
     if (!StringUtils.isEmpty(addr.getPoBox())) {
       if (!"ZS01".equals(addr.getId().getAddrType()) && !"ZP01".equals(addr.getId().getAddrType())) {
         addr.setPoBox("");
@@ -746,8 +744,8 @@ public class MCOPtEsHandler extends MCOHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM4", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX",
-        "CUST_PHONE"));
+    fields.addAll(
+        Arrays.asList("CUST_NM1", "CUST_NM2", "CUST_NM4", "ADDR_TXT", "ADDR_TXT_2", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_PHONE"));
     return fields;
   }
 
@@ -844,7 +842,7 @@ public class MCOPtEsHandler extends MCOHandler {
   public void doFilterAddresses(List<AddressModel> results) {
     List<AddressModel> addrsToRemove = new ArrayList<AddressModel>();
     for (AddressModel addrModel : results) {
-      if (CmrConstants.ADDR_TYPE.ZP02.toString().equalsIgnoreCase(addrModel.getAddrType())) {
+      if (CmrConstants.ADDR_TYPE.ZP02.toString().equalsIgnoreCase(addrModel.getAddrType()) && "838".equals(addrModel.getCmrIssuingCntry())) {
         addrsToRemove.add(addrModel);
       }
     }
@@ -854,7 +852,7 @@ public class MCOPtEsHandler extends MCOHandler {
   @Override
   public void doBeforeDPLCheck(EntityManager entityManager, Data data, List<Addr> addresses) throws Exception {
     for (Addr addr : addresses) {
-      if ("ZP02".equals(addr.getId().getAddrType())) {
+      if ("ZP02".equals(addr.getId().getAddrType()) && "838".equals(data.getCmrIssuingCntry())) {
         addr.setDplChkResult("N");
       }
     }
@@ -1109,7 +1107,6 @@ public class MCOPtEsHandler extends MCOHandler {
     }
   }
 
-  
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
     if (SystemLocation.SPAIN.equals(issuingCountry)) {
