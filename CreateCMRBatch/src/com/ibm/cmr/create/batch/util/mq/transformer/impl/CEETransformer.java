@@ -684,7 +684,7 @@ public class CEETransformer extends EMEATransformer {
       generateCMRNoObj.setMax(799999);
     } else {
 		generateCMRNoObj.setMin(369320);
-		generateCMRNoObj.setMax(999999);
+		generateCMRNoObj.setMax(979999);
 		LOG.debug("that is CEE No INTER CMR");
 	}
   }
