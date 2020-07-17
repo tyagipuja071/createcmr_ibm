@@ -59,6 +59,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
@@ -1443,6 +1444,9 @@ public class LegacyDirectService extends TransConnService {
       // call the specific transformer to change data as needed
       dummyQueue.setReqStatus(MQMsgConstants.REQ_STATUS_NEW);
       transformer.transformLegacyCustomerData(entityManager, dummyHandler, cust, cmrObjects);
+      if (transformer.enableTempReactOnUpdates()) {
+        LegacyCommonUtil.processDB2TemporaryReactChanges(admin, cust, data, entityManager);
+      }
     }
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
