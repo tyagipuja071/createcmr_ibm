@@ -5,6 +5,7 @@ package com.ibm.cmr.create.batch.service;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -19,21 +20,33 @@ import org.codehaus.jackson.map.JsonMappingException;
 import com.ibm.cio.cmr.create.entity.NotifyReq;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
+import com.ibm.cio.cmr.request.entity.ReservedCMRNos;
+import com.ibm.cio.cmr.request.entity.ReservedCMRNosPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
+import com.ibm.cio.cmr.request.model.CompanyRecordModel;
+import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.QuickSearchService;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
@@ -87,6 +100,8 @@ public class TransConnService extends BaseBatchService {
   protected ProcessClient serviceClient;
   private MassProcessClient massServiceClient;
   private UpdateByEntClient updtByEntClient;
+  
+  private SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
 
   private static final List<String> SINGLE_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_CREATE, CmrConstants.REQ_TYPE_UPDATE);
   private static final List<String> MASS_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_MASS_UPDATE, CmrConstants.REQ_TYPE_REACTIVATE,
@@ -114,6 +129,9 @@ public class TransConnService extends BaseBatchService {
 
       LOG.info("Processing Completed Manual records...");
       monitorDisAutoProcRec(entityManager);
+
+      LOG.info("Processing Pending if Host is Down...");
+      monitorLegacyPending(entityManager);  
 
       return true;
     } catch (Exception e) {
@@ -400,6 +418,212 @@ public class TransConnService extends BaseBatchService {
       }
     }
   }
+  
+  private void monitorLegacyPending(EntityManager entityManager) {
+	//  Search the records with Status PCP and check if current timestamp falls within host down outage 
+	    String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
+	    PreparedQuery query = new PreparedQuery(entityManager, sql);
+	    query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
+	    query.setParameter("ISSU_CNTRY", SystemConfiguration.getValue("BATCH_CMR_POOL_ISSUING_CNTRY"));
+	    List<Admin> pvcRecords = query.getResults(Admin.class);
+	    LOG.debug("Size of PVC Records : " + pvcRecords.size());	
+		    
+//		Update CREQCMR.ADMIN set STATUS to 'PCR' (Processing Validation), Lock info CreateCMR, DISABLE_AUTO_PROC = 'Y'
+	    for (Admin admin : pvcRecords) {
+	        try {
+
+	          LOG.info("Processing PVC Record " + admin.getId().getReqId() + " [Request ID: " + admin.getId().getReqId() + "]");
+	          admin.setReqStatus("PCR");
+	          admin.setLockInd("Y");
+	          admin.setLockBy(BATCH_USER_ID);
+	          admin.setLockByNm(BATCH_USER_ID);
+	          admin.setLockTs(SystemUtil.getCurrentTimestamp());
+	          updateEntity(admin, entityManager);
+	          
+//	     	  Query FindCMR using filter on configuration file         
+	          CompanyRecordModel search = new CompanyRecordModel();
+	          search.setName(SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
+	          search.setIssuingCntry(SystemConfiguration.getValue("BATCH_CMR_POOL_ISSUING_CNTRY"));	          
+	          search.setCountryCd(SystemConfiguration.getValue("BATCH_CMR_POOL_LANDED_CNTRY_CD"));
+	          search.setStreetAddress1(SystemConfiguration.getValue("BATCH_CMR_POOL_STREET"));
+	          search.setCity(SystemConfiguration.getValue("BATCH_CMR_POOL_CITY"));
+	          search.setStateProv(SystemConfiguration.getValue("BATCH_CMR_POOL_STATE"));
+	          search.setPostCd(SystemConfiguration.getValue("BATCH_CMR_POOL_POSTAL"));
+//	          Select first record from FindCMR which is not in CREQCMR.RESERVED_CMR_NOS    
+	          
+	          List<CompanyRecordModel> records = CompanyFinder.findCompanies(search);
+	          
+	          if(records.size() == 0) {
+	        	  LOG.error("CMR Pool depleted. Cannot proceed with automatic CMR number assignment");
+	        	  return;
+	          }
+
+	          for(CompanyRecordModel record : records) {
+	        	  //check if CMR is in reserved
+	        	  String sqlReservedCMR = ExternalizedQuery.getSql("LD.REACDEL_RESERVED_CMR_CHECK");
+	        	  PreparedQuery queryReservedCMR = new PreparedQuery(entityManager, sqlReservedCMR);
+	        	  
+	        	  queryReservedCMR.setParameter("CMR_NO", record.getCmrNo());
+	              queryReservedCMR.setParameter("COUNTRY", record.getIssuingCntry());
+	              queryReservedCMR.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+	              if (queryReservedCMR.exists() && (records.indexOf(record) == (records.size() - 1))) {
+	            	  LOG.error("All CMR numbers in the Pool are existing in reserved. Cannot proceed with automatic CMR number assignment");
+	            	  return;
+	              } else if(queryReservedCMR.exists()) {
+	            	  continue;
+	              }
+	              
+		          partialCommit(entityManager);	              
+	              LOG.info("CMR no does not exist on reserved. Continuing...");
+//	              Update CREQCMR.DATA set CMR_NO = from pool CMR, set CREQCMR.ADMIN REQ_STATUS to 'COM', put CMR_NO in RESERVED_CMR_NOS
+	              
+	              sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
+	              query = new PreparedQuery(entityManager, sql);
+	              query.setParameter("REQ_ID", admin.getId().getReqId());
+
+	              Data data = query.getSingleResult(Data.class);
+	              entityManager.detach(data);
+	              
+	              data.setCmrNo(record.getCmrNo());              
+	              updateEntity(data, entityManager);
+	              
+	              admin.setLockInd(CmrConstants.YES_NO.N.toString());
+	              admin.setLockTs(null);
+	              admin.setLockBy(null);
+	              admin.setLockByNm(null);
+	              admin.setReqStatus("COM");
+	              updateEntity(admin, entityManager);
+	              
+	              ReservedCMRNos reservedCMRNo = new ReservedCMRNos();
+	              ReservedCMRNosPK reservedCMRNoPK = new ReservedCMRNosPK();
+	              
+	              reservedCMRNoPK.setCmrIssuingCntry(record.getIssuingCntry());
+	              reservedCMRNoPK.setCmrNo(record.getCmrNo());
+	              reservedCMRNoPK.setMandt(SystemConfiguration.getValue("MANDT"));
+	              reservedCMRNo.setId(reservedCMRNoPK);
+	              
+	              reservedCMRNo.setStatus("A");
+	              reservedCMRNo.setCreateTs(SystemUtil.getCurrentTimestamp());
+	              reservedCMRNo.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+	              reservedCMRNo.setCreateBy(BATCH_USER_ID);
+	              reservedCMRNo.setLastUpdtBy(BATCH_USER_ID);
+	              
+	              createEntity(reservedCMRNo, entityManager);
+	              
+	              String knaSql = ExternalizedQuery.getSql("BATCH.GET.KNA1_MANDT_CMRNO");
+	      	      PreparedQuery knaQuery = new PreparedQuery(entityManager, knaSql);
+	      	      knaQuery.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+	      	      knaQuery.setParameter("CMR_NO", record.getCmrNo());	              
+	              Kna1 kna1 = knaQuery.getSingleResult(Kna1.class);
+	              kna1.setAufsd("93");
+	              kna1.setErnam(BATCH_USER_ID);
+	              kna1.setErdat(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+	              
+	              updateEntity(kna1, entityManager);
+	              
+	              partialCommit(entityManager);
+	              
+	              // Workflow history creation
+	              RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, "Completed using Pool CMR assignment", "Pool Assignment", null, null, true);
+	              RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(), "Completed using Pool CMR assignment");
+	              
+//	              Create a new Update request using the CMR_NO from Pool and overwrite with data from original request              
+	              QuickSearchService qs = new QuickSearchService();
+	              ParamContainer params = new ParamContainer();
+
+	              record.setReqType("C");
+	              params.addParam("model", record);
+	              
+	              AppUser user = new AppUser();
+	              user.setIntranetId(BATCH_USER_ID);
+	              user.setBluePagesName(BATCH_USER_ID);
+	              DummyServletRequest dummyReq = new DummyServletRequest();
+	              if (dummyReq.getSession() != null) {
+	                LOG.trace("Session found for dummy req");
+	                dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+	              } else {
+	                LOG.warn("Session not found for dummy req");
+	              }
+	              RequestEntryModel reqModel = qs.process(dummyReq, params);
+	              // get a request id, get the request and update data from the original request?
+	              AdminPK adminPk = new AdminPK();
+	              long reqId = reqModel.getReqId();
+	              adminPk.setReqId(reqId);
+	              Admin newAdmin = entityManager.find(Admin.class, adminPk);
+	              copyValuesToEntity(admin, newAdmin);
+	              newAdmin.setId(adminPk);
+	              newAdmin.setCreateTs(SystemUtil.getCurrentTimestamp());
+	              newAdmin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
+	              newAdmin.setInternalTyp("UPDATE_AUTO");
+	              newAdmin.setLockInd(CmrConstants.YES_NO.N.toString());
+	              newAdmin.setLockTs(null);
+	              newAdmin.setLockBy(null);
+	              newAdmin.setLockByNm(null);
+	              newAdmin.setModelCmrNo(null);             
+	              newAdmin.setReqType("U");
+	              newAdmin.setReqReason("POOL");
+	              newAdmin.setCustType(null);
+	              newAdmin.setLastUpdtBy(BATCH_USER_ID);
+	              newAdmin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
+	              newAdmin.setProcessedTs(null);
+	              newAdmin.setDisableAutoProc(CmrConstants.YES_NO.N.toString());
+	              newAdmin.setRdcProcessingStatus(null);
+	              newAdmin.setRdcProcessingTs(null);
+	              newAdmin.setRdcProcessingMsg(null);
+	              
+	              updateEntity(newAdmin, entityManager);
+
+	              DataPK dataPk = new DataPK();
+	              dataPk.setReqId(reqId);
+	              Data newData = entityManager.find(Data.class, dataPk);
+	              
+	              copyValuesToEntity(data, newData);
+	              	              
+	              newData.setId(dataPk);
+	              newData.setCustGrp(null);
+	              newData.setCustSubGrp(null);
+	              
+	              updateEntity(newData, entityManager);
+
+	              String addrSql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO");
+	              PreparedQuery addrQuery = new PreparedQuery(entityManager, addrSql);
+	              addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+	              Addr addr = addrQuery.getSingleResult(Addr.class);
+	              
+	              PreparedQuery newAddrQuery = new PreparedQuery(entityManager, addrSql);
+	              newAddrQuery.setParameter("REQ_ID", reqId);
+	              List<Addr> newAddresses = newAddrQuery.getResults(Addr.class);
+
+	              for (Addr newAddr : newAddresses) {
+	            	  AddrPK addrPK = newAddr.getId();
+	            	  copyValuesToEntity(addr, newAddr);
+	            	  newAddr.setId(addrPK);
+	            	  newAddr.setAddrStdResult("X");
+	            	  newAddr.setAddrStdAcceptInd(null);
+	            	  newAddr.setAddrStdRejReason(null);
+	            	  newAddr.setAddrStdRejCmt(null);
+	            	  newAddr.setAddrStdTs(null);
+	            	  newAddr.setSapNo(kna1.getId().getKunnr());
+	            	  newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
+	            	  newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+	            	  newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+	            	  newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
+	            	  updateEntity(newAddr, entityManager);
+	              }
+	              
+	              newAdmin.setReqStatus("PCP");
+	              
+	              break;
+	          }
+
+	          partialCommit(entityManager);
+
+	        } catch (Exception e) {
+	          LOG.error("Error in processing PVC Record " + admin.getId().getReqId() + " for Request ID " + admin.getId().getReqId() + " ["
+	              + e.getMessage() + "]", e);
+	        }
+	      }
+	  }
 
   /**
    * Calls the createCMRService and process the response returned
