@@ -8163,6 +8163,7 @@ function validateCollectionCodeforCyprus(){
 }
 
 function setAbbrvCyprus(){
+  
   var reqType = FormManager.getActualValue('reqType');
   var reqId = FormManager.getActualValue('reqId');
   var role = FormManager.getActualValue('userRole').toUpperCase();
