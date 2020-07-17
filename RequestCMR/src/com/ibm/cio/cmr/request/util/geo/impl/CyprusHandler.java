@@ -1690,6 +1690,13 @@ public class CyprusHandler extends BaseSOFHandler {
         address.setCustNm2(currentRecord.getCmrName2Plain());
 
       }
+      
+      if (!StringUtils.isEmpty(address.getCustPhone())) {
+        if (!"ZS01".equals(address.getId().getAddrType()) && !"ZD01".equals(address.getId().getAddrType())
+            && !"ZP02".equals(address.getId().getAddrType())) {
+          address.setCustPhone("");
+        }
+      }
 
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
       // if (StringUtils.isNotBlank(currentRecord.getCmrCountryLanded())

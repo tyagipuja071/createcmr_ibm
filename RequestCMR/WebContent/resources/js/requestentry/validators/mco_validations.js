@@ -1962,13 +1962,14 @@ function cmrNoValidatorForInternalSO() {
         var cmrNo = FormManager.getActualValue('cmrNo').substring(0, 3);
         var requestType = FormManager.getActualValue('reqType');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (requestType != 'C') {
+        // Condition For Create and Prospect CMRs
+        if (requestType != 'C' || (cmrNo.startsWith('P'))) {
           return;
         }
-        if ((cmrNo == '997') && (custSubGrp == 'INTSO' || custSubGrp == 'CRISO')) {
+        if ((cmrNo == '' || cmrNo == '997') && (custSubGrp == 'INTSO' || custSubGrp == 'CRISO')) {
           return new ValidationResult(null, true);
         } else if (cmrNo != undefined && cmrNo != '997' && (custSubGrp == 'INTSO' || custSubGrp == 'CRISO')) {
-          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 997.');
+          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 997 For INTERNAL SO Scenario.');
         }
         return new ValidationResult(null, true);
       }
