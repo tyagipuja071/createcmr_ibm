@@ -628,11 +628,11 @@ public class CEETransformer extends EMEATransformer {
       line6 = "";
     }
 
-    if (!StringUtils.isBlank(addrData.getCustPhone())) {
-      phone = addrData.getCustPhone().trim();
-    } else {
-      phone = "";
-    }
+    // if (!StringUtils.isBlank(addrData.getCustPhone())) {
+    // phone = addrData.getCustPhone().trim();
+    // } else {
+    // phone = "";
+    // }
 
     if (!StringUtils.isBlank(addrData.getTaxOffice())) {
       addrLineT = addrData.getTaxOffice();
