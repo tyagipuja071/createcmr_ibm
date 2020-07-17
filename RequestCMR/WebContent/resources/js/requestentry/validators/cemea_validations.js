@@ -179,7 +179,8 @@ function addCmrNoValidator() {
           return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
         } else if (cmrNo != '' && custSubType != '' && custSubType.includes('IN') && !cmrNo.startsWith('99')) {
           return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenarios');
-        } else if (cntry != SysLoc.AUSTRIA && cmrNo != '' && custSubType != '' && (custSubType == 'BUSPR' || custSubType.includes('BP')) && !(cmrNo >= 002000 && cmrNo <= 009999)) {
+        } else if (cntry != SysLoc.AUSTRIA && cmrNo != '' && custSubType != '' && (custSubType == 'BUSPR' || custSubType.includes('BP') 
+        		|| custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP') ) && !(cmrNo >= 002000 && cmrNo <= 009999)) {
           return new ValidationResult(null, false, 'CMR Number should be within range: 002000 - 009999 for Business Partner scenarios');
         } else if (cmrNo != '' && custSubType != '' && custSubType == 'XCEM' && !(cmrNo >= 500000 && cmrNo <= 799999)) {
           return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
@@ -1501,7 +1502,9 @@ function setEnterpriseValues(clientTier) {
 
   var enterprises = [];
   if (isuCd != '' && clientTier != '') {
-    if (SysLoc.SLOVAKIA == cntry
+	if(SysLoc.SERBIA == cntry){
+		enterprises = [ '' ];
+	} else if (SysLoc.SLOVAKIA == cntry
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU')) {
       if (isuCd == '32' && clientTier == 'M') {
@@ -1571,7 +1574,12 @@ function setEnterpriseValues(clientTier) {
       } else if (isuCd == '34' && clientTier == 'V') {
         enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985040', '985041', '985055', '985082' ];
       }
-    } else {
+    } else if(FormManager.getActualValue('custSubGrp') == 'XINT'|| FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') =='CSINT'
+    		|| FormManager.getActualValue('custSubGrp')== 'MEINT' || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'RSINT'
+    		|| FormManager.getActualValue('custSubGrp') == 'XBP'|| FormManager.getActualValue('custSubGrp') == 'BP' || FormManager.getActualValue('custSubGrp') =='CSBP'
+    	    || FormManager.getActualValue('custSubGrp')== 'MEBP' || FormManager.getActualValue('custSubGrp') == 'RSXBP' || FormManager.getActualValue('custSubGrp') == 'RSBP'){
+    	 enterprises = [ '' ];
+    }  else {
       var qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
