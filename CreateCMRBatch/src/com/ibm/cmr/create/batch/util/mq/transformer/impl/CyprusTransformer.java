@@ -649,4 +649,9 @@ public class CyprusTransformer extends EMEATransformer {
     legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
   }
 
+  @Override
+  public boolean enableTempReactOnUpdates() {
+    return true;
+  }
+
 }
