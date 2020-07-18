@@ -358,7 +358,7 @@ public abstract class MessageTransformer {
   }
 
   public boolean enableTempReactOnUpdates() {
-    return true;
+    return false;
   }
 
 }
