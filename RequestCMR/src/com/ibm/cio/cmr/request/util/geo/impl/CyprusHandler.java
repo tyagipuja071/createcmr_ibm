@@ -1599,6 +1599,7 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
       }
+      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
       String collCd = this.currentImportValues.get("CollectionCode");
@@ -1657,6 +1658,7 @@ public class CyprusHandler extends BaseSOFHandler {
           data.setAbbrevLocn("");
         }
       }
+
     } // End of Story 1389065
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType()) && SystemLocation.GREECE.equalsIgnoreCase(data.getCmrIssuingCntry())) {
@@ -1668,8 +1670,6 @@ public class CyprusHandler extends BaseSOFHandler {
         String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
-
-      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
     }
   }
 
