@@ -2205,7 +2205,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_TR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
