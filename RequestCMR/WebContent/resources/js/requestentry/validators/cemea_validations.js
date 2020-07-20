@@ -179,8 +179,9 @@ function addCmrNoValidator() {
           return new ValidationResult(null, false, 'CMR Number should be exactly 6 digits long.');
         } else if (cmrNo != '' && custSubType != '' && custSubType.includes('IN') && !cmrNo.startsWith('99')) {
           return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenarios');
-        } else if (cntry != SysLoc.AUSTRIA && cmrNo != '' && custSubType != '' && (custSubType == 'BUSPR' || custSubType.includes('BP') 
-        		|| custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP') ) && !(cmrNo >= 002000 && cmrNo <= 009999)) {
+        } else if (cntry != SysLoc.AUSTRIA && cmrNo != '' && custSubType != ''
+            && (custSubType == 'BUSPR' || custSubType.includes('BP') || custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP'))
+            && !(cmrNo >= 002000 && cmrNo <= 009999)) {
           return new ValidationResult(null, false, 'CMR Number should be within range: 002000 - 009999 for Business Partner scenarios');
         } else if (cmrNo != '' && custSubType != '' && custSubType == 'XCEM' && !(cmrNo >= 500000 && cmrNo <= 799999)) {
           return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
@@ -701,14 +702,14 @@ function setClientTierValues(isuCd) {
     } else if ((SysLoc.AZERBAIJAN == cntry || SysLoc.TURKMENISTAN == cntry || SysLoc.TAJIKISTAN == cntry || SysLoc.ALBANIA == cntry || SysLoc.ARMENIA == cntry || SysLoc.BELARUS == cntry
         || SysLoc.BULGARIA == cntry || SysLoc.GEORGIA == cntry || SysLoc.KAZAKHSTAN == cntry || SysLoc.KYRGYZSTAN == cntry || SysLoc.MACEDONIA == cntry || SysLoc.SERBIA == cntry
         || SysLoc.UZBEKISTAN == cntry || SysLoc.UKRAINE == cntry)
-        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE' || FormManager.getActualValue('custSubGrp') == 'THDPT' 
-        	|| FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' 
-        		|| FormManager.getActualValue('custSubGrp') == 'XPC')) {
+        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE' || FormManager.getActualValue('custSubGrp') == 'THDPT'
+            || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager
+            .getActualValue('custSubGrp') == 'XPC')) {
       if (isuCd == '34') {
         clientTiers = [ 'V' ];
       } else if (isuCd == '32') {
         clientTiers = [ 'S' ];
-      } 
+      }
     } else if ((SysLoc.CZECH_REPUBLIC == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
@@ -1483,15 +1484,15 @@ function setEnterpriseValues(clientTier) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if(!CEE_INCL.has(cntry)){
-	  if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
-	      || custSubGrp == 'INTSO') {
-	    return;
-	  }else {
-		  if (FormManager.getActualValue('viewOnlyPage') == 'true'){
-			  return;
-		  }
-	  }
+  if (!CEE_INCL.has(cntry)) {
+    if (FormManager.getActualValue('viewOnlyPage') == 'true' || custSubGrp == 'IBMEM' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'INTER'
+        || custSubGrp == 'INTSO') {
+      return;
+    } else {
+      if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+        return;
+      }
+    }
   }
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
@@ -1503,9 +1504,9 @@ function setEnterpriseValues(clientTier) {
 
   var enterprises = [];
   if (isuCd != '' && clientTier != '') {
-	if(SysLoc.SERBIA == cntry){
-		enterprises = [ '' ];
-	} else if (SysLoc.SLOVAKIA == cntry
+    if (SysLoc.SERBIA == cntry) {
+      enterprises = [ '' ];
+    } else if (SysLoc.SLOVAKIA == cntry
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU')) {
       if (isuCd == '32' && clientTier == 'M') {
@@ -1541,15 +1542,15 @@ function setEnterpriseValues(clientTier) {
       } else if (isuCd == '34' && clientTier == 'V') {
         enterprises = [ '985014', '985055' ];
       }
-    } else if ((SysLoc.UZBEKISTAN == cntry  || SysLoc.TURKMENISTAN == cntry|| SysLoc.TAJIKISTAN == cntry)
+    } else if ((SysLoc.UZBEKISTAN == cntry || SysLoc.TURKMENISTAN == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'XPC'
             || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM')) {
       if (isuCd == '32' && clientTier == 'S') {
         enterprises = [ '985014' ];
       }
     } else if (SysLoc.ALBANIA == cntry) {
-            enterprises = [ '' ];
-        } else if (SysLoc.POLAND == cntry
+      enterprises = [ '' ];
+    } else if (SysLoc.POLAND == cntry
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'XPC'
             || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM')) {
       if (isuCd == '32' && clientTier == 'S') {
@@ -1575,12 +1576,12 @@ function setEnterpriseValues(clientTier) {
       } else if (isuCd == '34' && clientTier == 'V') {
         enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985040', '985041', '985055', '985082' ];
       }
-    } else if(FormManager.getActualValue('custSubGrp') == 'XINT'|| FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') =='CSINT'
-    		|| FormManager.getActualValue('custSubGrp')== 'MEINT' || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'RSINT'
-    		|| FormManager.getActualValue('custSubGrp') == 'XBP'|| FormManager.getActualValue('custSubGrp') == 'BP' || FormManager.getActualValue('custSubGrp') =='CSBP'
-    	    || FormManager.getActualValue('custSubGrp')== 'MEBP' || FormManager.getActualValue('custSubGrp') == 'RSXBP' || FormManager.getActualValue('custSubGrp') == 'RSBP'){
-    	 enterprises = [ '' ];
-    }  else {
+    } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'CSINT'
+        || FormManager.getActualValue('custSubGrp') == 'MEINT' || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'RSINT'
+        || FormManager.getActualValue('custSubGrp') == 'XBP' || FormManager.getActualValue('custSubGrp') == 'BP' || FormManager.getActualValue('custSubGrp') == 'CSBP'
+        || FormManager.getActualValue('custSubGrp') == 'MEBP' || FormManager.getActualValue('custSubGrp') == 'RSXBP' || FormManager.getActualValue('custSubGrp') == 'RSBP') {
+      enterprises = [ '' ];
+    } else {
       var qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
@@ -1625,21 +1626,23 @@ function addCmrNoValidatorForCEE() {
             return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
           } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
             return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
-          } else if (cmrNo != '' && custSubType != '' && !(custSubType == 'XINT' || custSubType == 'INTER' || custSubType == 'RSXIN' 
-        	  || custSubType == 'MEINT'|| custSubType == 'RSINT' || custSubType == 'CSINT') && cmrNo.startsWith('99')) {
+          } else if (cmrNo != '' && custSubType != ''
+              && !(custSubType == 'XINT' || custSubType == 'INTER' || custSubType == 'RSXIN' || custSubType == 'MEINT' || custSubType == 'RSINT' || custSubType == 'CSINT') && cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
-          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'THDPT' || custSubType.includes('PRICU') 
-        		|| custSubType == 'XCOM' || custSubType.includes('XTP') || custSubType == 'COMME' || custSubType.includes('MECOM') 
-        		|| custSubType == 'MEPC' || custSubType.includes('METP') || custSubType == 'RSXCO' || custSubType.includes('RSXPC') 
-        		|| custSubType == 'RSXTP' || custSubType.includes('RSCOM') || custSubType == 'RSPC' || custSubType.includes('RSTP') 
-        		|| custSubType == 'CSCOM' || custSubType.includes('CSPC') || custSubType == 'CSTP') && (cmrNo.startsWith('00') ||cmrNo.startsWith('99'))) {
+          } else if (cmrNo != ''
+              && custSubType != ''
+              && (custSubType == 'THDPT' || custSubType.includes('PRICU') || custSubType == 'XCOM' || custSubType.includes('XTP') || custSubType == 'COMME' || custSubType.includes('MECOM')
+                  || custSubType == 'MEPC' || custSubType.includes('METP') || custSubType == 'RSXCO' || custSubType.includes('RSXPC') || custSubType == 'RSXTP' || custSubType.includes('RSCOM')
+                  || custSubType == 'RSPC' || custSubType.includes('RSTP') || custSubType == 'CSCOM' || custSubType.includes('CSPC') || custSubType == 'CSTP')
+              && (cmrNo.startsWith('00') || cmrNo.startsWith('99'))) {
             return new ValidationResult(null, false, 'CMR Number should not start with 99xxxx or 00xxxx for Commercial scenarios');
-          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'BUSPR' || custSubType.includes('BP') 
-          		|| custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP') ) && !(cmrNo.startsWith('00'))) {
-              return new ValidationResult(null, false, 'CMR Number should start with 00xxxx for Business Partner scenarios');
-            } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XCEM' || custSubType == 'XCE') && !(cmrNo >= 500000 && cmrNo <= 799999)) {
-          return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
-        }else {
+          } else if (cmrNo != '' && custSubType != ''
+              && (custSubType == 'BUSPR' || custSubType.includes('BP') || custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP'))
+              && !(cmrNo.startsWith('00'))) {
+            return new ValidationResult(null, false, 'CMR Number should start with 00xxxx for Business Partner scenarios');
+          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XCEM' || custSubType == 'XCE') && !(cmrNo >= 500000 && cmrNo <= 799999)) {
+            return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
+          } else {
             var qParams = {
               CMRNO : cmrNo,
               CNTRY : cntry,
