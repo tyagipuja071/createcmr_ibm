@@ -982,6 +982,10 @@ public class CEMEAHandler extends BaseSOFHandler {
 
     // Type of Customer
     data.setBpAcctTyp(this.currentImportValues.get("BpAcctTyp"));
+    
+    if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      data.setEngineeringBo("");
+    }
   }
 
   private boolean loadDuplicateCMR(Data data, String dupCntry, String dupCmrNo) throws Exception {
