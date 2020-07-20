@@ -1198,7 +1198,7 @@ public class CEETransformer extends EMEATransformer {
     // data.getIbmDeptCostCenter() : "");
     if (StringUtils.isEmpty(data.getCrosSubTyp())) {
       legacyCust.setMrcCd("3");
-    } else if (!StringUtils.isEmpty(data.getCrosSubTyp()) && ("BP".equals(data.getCrosSubTyp()) || "XBP".equals(data.getCrosSubTyp()))) {
+    } else if (!StringUtils.isEmpty(data.getCrosSubTyp()) && ("BP".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp()))) {
       legacyCust.setMrcCd("5");
     } else {
       legacyCust.setMrcCd("3");
