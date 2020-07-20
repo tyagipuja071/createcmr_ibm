@@ -64,7 +64,7 @@
 					<width>15</width>
 					<length>6</length>
 				</column>
-				<column>
+				<column number="true">
 					<label>Company number</label>
 					<dbColumn>COMPANY</dbColumn>
 					<width>15</width>
@@ -120,7 +120,7 @@
 					<width>20</width>
 					<lovId>CommercialFinanced</lovId>
 				</column>
-				<column>
+				<column number="true">
 					<label>Phone</label>
 					<dbColumn>EMAIL1</dbColumn>
 					<width>20</width>
