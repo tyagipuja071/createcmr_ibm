@@ -317,20 +317,6 @@ public class CyprusTransformer extends EMEATransformer {
             legacyCust.setEmbargoCd("");
           }
         }
-      } // Support temporary reactivation
-      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
-          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
-          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
-        legacyCust.setEmbargoCd("");
-        blankOrdBlockFromData(entityManager, data);
-      }
-      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
-          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
-          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
-        legacyCust.setEmbargoCd(rdcEmbargoCd);
-        resetOrdBlockToData(entityManager, data);
       }
 
       if (!StringUtils.isBlank(data.getAbbrevNm())) {
@@ -647,6 +633,11 @@ public class CyprusTransformer extends EMEATransformer {
     legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
     legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
     legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
+  }
+
+  @Override
+  public boolean enableTempReactOnUpdates() {
+    return true;
   }
 
 }
