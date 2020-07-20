@@ -198,6 +198,7 @@
     <input type="hidden" name="custNm4_view" id="custNm4_view">
   </cmr:view>
 
+<!-- Address summary for GR and CY -->
   <cmr:view forCountry="726,666">
     <cmr:row>
       <cmr:column span="1">
