@@ -50,7 +50,9 @@
         <cmr:info text="${ui.info.custNm2CEMEA}" />
       </cmr:view>
       <cmr:view forCountry="740">
-        <cmr:info text="${ui.info.custNm2HU}" />
+      	<a id = 'custNm2HUInfoBubble'>
+        	<cmr:info text="${ui.info.custNm2HU}" />
+        </a>
       </cmr:view>
       <cmr:view forCountry="618">
         <cmr:info text="${ui.info.nameAustria}" />

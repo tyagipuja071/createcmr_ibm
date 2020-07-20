@@ -3238,6 +3238,18 @@ function isicCdOnChangeCEE() {
   });
 }
 
+function setCustomerName2LblAndBubble() {
+  var custType = FormManager.getActualValue('custGrp');
+  var customerName2Lbl = FormManager.getLabel('CustomerName2');
+  if (custType == 'LOCAL') {
+    FormManager.changeLabel('CustomerName2', 'Customer Name (2)/Local VAT');
+    document.getElementById('custNm2HUInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = '';
+  } else {
+    FormManager.changeLabel('CustomerName2', 'Customer Name (2)');
+    document.getElementById('custNm2HUInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = 'none';
+  }
+}
+
 function setTaxCd1Mandatory() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -3265,6 +3277,10 @@ function afterConfigForCEE() {
 
 function afterConfigForSlovakia() {
   setICOAndDICMandatory();
+}
+
+function initAddressPageHungary() {
+  setCustomerName2LblAndBubble();
 }
 
 function afterConfigTemplateForCzech() {
@@ -3428,8 +3444,9 @@ dojo.addOnLoad(function() {
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
+  // Hungary
+  GEOHandler.addAddrFunction(initAddressPageHungary, [ SysLoc.HUNGARY ]);
   // Czech
   GEOHandler.addAfterConfig(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
-
 });
