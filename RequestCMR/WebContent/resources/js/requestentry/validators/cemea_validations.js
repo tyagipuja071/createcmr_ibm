@@ -1513,7 +1513,7 @@ function setEnterpriseValues(clientTier) {
       } else if (isuCd == '34' && clientTier == 'V') {
         enterprises = [ '985013' ];
       }
-    } else if ((SysLoc.AZERBAIJAN == cntry || SysLoc.TAJIKISTAN == cntry)
+    } else if ((SysLoc.AZERBAIJAN == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'XPC'
             || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM')) {
       if (isuCd == '34' && clientTier == 'V') {
@@ -1541,7 +1541,7 @@ function setEnterpriseValues(clientTier) {
       } else if (isuCd == '34' && clientTier == 'V') {
         enterprises = [ '985014', '985055' ];
       }
-    } else if ((SysLoc.UZBEKISTAN == cntry  || SysLoc.TURKMENISTAN == cntry)
+    } else if ((SysLoc.UZBEKISTAN == cntry  || SysLoc.TURKMENISTAN == cntry|| SysLoc.TAJIKISTAN == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'XPC'
             || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM')) {
       if (isuCd == '32' && clientTier == 'S') {
