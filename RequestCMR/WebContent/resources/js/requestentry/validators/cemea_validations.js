@@ -2965,7 +2965,6 @@ function isicCdOnChangeCEE() {
 
 function setCustomerName2LblAndBubble() {
   var custType = FormManager.getActualValue('custGrp');
-  var customerName2Lbl = FormManager.getLabel('CustomerName2');
   if (custType == 'LOCAL') {
     FormManager.changeLabel('CustomerName2', 'Customer Name (2)/Local VAT');
     document.getElementById('custNm2HUInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = '';
@@ -2986,6 +2985,15 @@ function setTaxCd1Mandatory() {
     FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'IČ' ], 'MAIN_CUST_TAB');
   } else {
     FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  }
+}
+
+function setCityBubble() {
+  var custType = FormManager.getActualValue('custGrp');
+  if (custType == 'LOCAL') {
+    document.getElementById('cityRomaniaInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = '';
+  } else {
+    document.getElementById('cityRomaniaInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = 'none';
   }
 }
 
@@ -3010,6 +3018,10 @@ function initAddressPageHungary() {
 
 function afterConfigTemplateForCzech() {
   setTaxCd1Mandatory();
+}
+
+function initAddressPageRomania() {
+  setCityBubble();
 }
 
 dojo.addOnLoad(function() {
@@ -3164,4 +3176,6 @@ dojo.addOnLoad(function() {
   // Czech
   GEOHandler.addAfterConfig(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
+  // Romania
+  GEOHandler.addAddrFunction(initAddressPageRomania, [ SysLoc.ROMANIA ]);
 });
