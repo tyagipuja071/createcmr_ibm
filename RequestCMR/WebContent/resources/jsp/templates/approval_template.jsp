@@ -44,10 +44,9 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 <meta name="Description" content="CMR Search" />
 <meta name="feedback" content="CMR Search Feedback" />
 
-<jsp:include page="idastats.jsp" />
 
 <title><tiles:getAsString name="title" /></title>
-<script src="https://1.w3.s81c.com/common/js/dojo/w3.js" type="text/javascript">
+<script src="${resourcesPath}/js/w3.js" type="text/javascript">
   //
 </script>
 
