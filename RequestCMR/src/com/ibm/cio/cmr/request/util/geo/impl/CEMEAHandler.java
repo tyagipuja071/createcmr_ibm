@@ -872,7 +872,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       LOG.trace("TeleCovRep: " + data.getBpSalesRepNo());
       data.setCreditCd(this.currentImportValues.get("CreditCode"));
       LOG.trace("CreditCode: " + data.getCreditCd());
-      data.setCommercialFinanced(this.currentImportValues.get("CoF"));
+      data.setCommercialFinanced(this.currentImportValues.get("ModeOfPayment"));
       LOG.trace("CoF: " + data.getCommercialFinanced());
 
       data.setPhone1(this.currentImportValues.get("TelephoneNo"));
