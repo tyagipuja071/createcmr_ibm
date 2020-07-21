@@ -224,7 +224,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                 int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
                     record.getCmrNum());
                 String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
-                String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), reqEntry.getCmrNo());
+                String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String gAddrSeq = "";
                 if (!StringUtils.isEmpty(legacyGaddrSeq)) {
                   gAddrSeq = legacyGaddrSeq;
