@@ -622,11 +622,18 @@ public class CEETransformer extends EMEATransformer {
     // Dept + Postal code + City
     line5 = addrData.getPostCd() + " " + addrData.getCity1();
 
-    if (!StringUtils.isBlank(addrData.getLandCntry())) {
-      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-    } else {
-      line6 = "";
+    if ("ZP02".equals(addrData.getId().getAddrType())) {
+      if (!StringUtils.isBlank(addrData.getBldg())) {
+        line6 = addrData.getBldg();
+      } else {
+        line6 = "";
+      }
     }
+    // if (!StringUtils.isBlank(addrData.getLandCntry())) {
+    // line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+    // } else {
+    // line6 = "";
+    // }
 
     // if (!StringUtils.isBlank(addrData.getCustPhone())) {
     // phone = addrData.getCustPhone().trim();

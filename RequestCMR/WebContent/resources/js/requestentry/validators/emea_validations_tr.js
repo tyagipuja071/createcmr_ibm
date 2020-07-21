@@ -4083,7 +4083,7 @@ function disableAddrFieldsGRCYTR() {
 
   // Phone - for mailing/billing address only
   if ((cntryCd == SysLoc.TURKEY) && FormManager.getActualValue('addrType') != 'ZS01') {
-// FormManager.setValue('custPhone', '');
+    FormManager.setValue('custPhone', '');
     FormManager.hide('CustPhone', 'custPhone');
   } else {
 	FormManager.show('CustPhone', 'custPhone');
