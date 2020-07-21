@@ -918,6 +918,10 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
 
     }
+    // Phone
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+      data.setPhone1(mainRecord.getCmrCustPhone());
+    }
     // ICO field
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
       data.setCompany(this.currentImportValues.get("BankBranchNo"));
