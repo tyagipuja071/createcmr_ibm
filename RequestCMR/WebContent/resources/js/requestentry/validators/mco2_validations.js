@@ -34,12 +34,6 @@ function addHandlersForMCO2() {
       setSalesRepValues(value);
     });
   }
-
-  if (_SalesRepHandler == null) {
-    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      setSORTLValues(value);
-    });
-  }
   
 }
 
@@ -816,7 +810,6 @@ function setSalesRepValue(){
     }
   }
 }
-
 
 
 var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01','ZS02'];
