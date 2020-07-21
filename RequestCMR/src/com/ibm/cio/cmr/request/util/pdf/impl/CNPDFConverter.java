@@ -63,8 +63,8 @@ public class CNPDFConverter extends DefaultPDFConverter {
       Table checklistMain = createDetailsTable(new float[] { 25, 75 });
 
       checklistMain.addCell(createLabelCell("Customer Name:"));
-      checklistMain.addCell(createValueCell(admin.getMainCustNm1()
-          + (!StringUtils.isEmpty(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "")));
+      checklistMain
+          .addCell(createValueCell(admin.getMainCustNm1() + (!StringUtils.isEmpty(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "")));
       if (!StringUtils.isEmpty(checklist.getLocalCustNm())) {
         checklistMain.addCell(createLabelCell("Local Customer Name:"));
         checklistMain.addCell(createValueCell(checklist.getLocalCustNm()));
@@ -95,8 +95,8 @@ public class CNPDFConverter extends DefaultPDFConverter {
         for (ChecklistItem item : items) {
           int padding = 1;
           int textLength = item.getLabel().length();
-          if (textLength > 150) {
-            padding = textLength / 100;
+          if (textLength > 125) {
+            padding = textLength / 85;
           }
           checklistSection.addCell(createValueCellExtended(item.getLabel(), 1, 1, padding));
           answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";
