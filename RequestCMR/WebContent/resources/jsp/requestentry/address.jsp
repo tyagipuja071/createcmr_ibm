@@ -356,11 +356,11 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
-        <cmr:view forGEO="EMEA" exceptForCountry="862,758,726">
+        <cmr:view forGEO="EMEA" exceptForCountry="862,758,726,666">
           <cmr:gridCol width="100px" field="dept" header="Dept/Attn" />
         </cmr:view>
-		<!-- Attn for Greece -->
-        <cmr:view forCountry="726">
+		<!-- Attn for Greece & Cyprus-->
+        <cmr:view forCountry="726,666">
           <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" />
         </cmr:view>
         <!--  District for Turkey -->
