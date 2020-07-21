@@ -203,6 +203,10 @@ function setVATOnScenario() {
       FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
 
+    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
+      // RC: Temporary fix for story CMR-5134, until TAX exempt is implemented
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
     } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO'
         || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
       if (countyCd == 'FR' || countyCd == 'AD') {

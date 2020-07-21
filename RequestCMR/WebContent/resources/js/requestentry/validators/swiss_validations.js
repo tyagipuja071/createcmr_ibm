@@ -123,15 +123,7 @@ function addAfterConfigForSWISS() {
     FormManager.getField('capInd').set('checked', true);
     FormManager.readOnly('capInd');
   }
-  
-  // CMR-4715 -> muboty cannot be blank for update requests
-  if(role == 'REQUESTER' && reqType == 'U'){
-  FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'MUBOTY(SORTL)' ], 'MAIN_IBM_TAB');
-  }
-  else{
-  FormManager.removeValidator('searchTerm', Validators.REQUIRED);  
-  }
-
+ 
   // disable copy address
   GEOHandler.disableCopyAddress();
 
@@ -1051,7 +1043,8 @@ function setFieldsMandtStatus() {
       }
     }
   }
-  if (reqType == 'C') {
+  // CMR-4715 -> muboty cannot be blank for update requests
+  if (reqType == 'C' || (reqType == 'U' && role == 'REQUESTER')) {
     FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'MUBOTY' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('searchTerm', Validators.REQUIRED);
