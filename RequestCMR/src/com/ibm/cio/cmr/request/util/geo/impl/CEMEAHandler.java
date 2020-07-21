@@ -872,7 +872,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       LOG.trace("TeleCovRep: " + data.getBpSalesRepNo());
       data.setCreditCd(this.currentImportValues.get("CreditCode"));
       LOG.trace("CreditCode: " + data.getCreditCd());
-      data.setCommercialFinanced(this.currentImportValues.get("CoF"));
+      data.setCommercialFinanced(this.currentImportValues.get("ModeOfPayment"));
       LOG.trace("CoF: " + data.getCommercialFinanced());
 
       data.setPhone1(this.currentImportValues.get("TelephoneNo"));
@@ -917,6 +917,10 @@ public class CEMEAHandler extends BaseSOFHandler {
         data.setRepTeamMemberNo(mainRecord.getSR());
       }
 
+    }
+    // Phone
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+      data.setPhone1(mainRecord.getCmrCustPhone());
     }
     // ICO field
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
@@ -1110,6 +1114,9 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+    if ("BUSPR".equals(data.getCustSubGrp()) && CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+      data.setBpRelType("CA");
+    }
   }
 
   @Override
