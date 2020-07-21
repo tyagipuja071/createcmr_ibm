@@ -219,7 +219,8 @@
     <input type="hidden" name="custNm3_view" id="custNm3_view">
   </cmr:view>
 
-  <cmr:view forCountry="666">
+<!-- Address summary for GR and CY -->
+  <cmr:view forCountry="726,666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>

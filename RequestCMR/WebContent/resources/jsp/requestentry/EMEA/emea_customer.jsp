@@ -103,20 +103,6 @@
 			</p>
 		</cmr:column>
 
-		<!-- Type Of Customer CY -->
-		<c:if test="${reqentry.reqType != 'C'}">
-		<cmr:view forCountry="666">
-				<cmr:column span="2" containerForField="TypeOfCustomer">
-	        		<p>
-	          			<cmr:label fieldId="crosSubTyp">
-							<cmr:fieldLabel fieldId="TypeOfCustomer" />:
-							<cmr:info text="${ui.info.crosSubTyp}" />
-						</cmr:label>
-	          			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
-	        		</p>
-	      		</cmr:column>
-		</cmr:view>
-		</c:if>
 		<!-- fields for Cyprus Legacy -->
 		<cmr:view forCountry="666">
 			<c:if test="${reqentry.reqType != 'C'}">
@@ -160,6 +146,22 @@
 		</cmr:row>
 	</cmr:view>
 	
+	<!-- Type Of Customer CY -->
+	<c:if test="${reqentry.reqType != 'C'}">
+	<cmr:view forCountry="666">
+			<cmr:column span="2" containerForField="TypeOfCustomer">
+        		<p>
+          			<cmr:label fieldId="crosSubTyp">
+						<cmr:fieldLabel fieldId="TypeOfCustomer" />:
+						<cmr:info text="${ui.info.crosSubTyp}" />
+					</cmr:label>
+          			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+        		</p>
+      		</cmr:column>
+	</cmr:view>
+	</c:if>
+	
+
 	<cmr:view forCountry="XXXX">
 		<cmr:row addBackground="false">
 			<cmr:column span="2" containerForField="OrgNo">
