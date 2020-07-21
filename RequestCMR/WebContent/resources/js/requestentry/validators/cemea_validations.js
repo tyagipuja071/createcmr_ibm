@@ -3309,6 +3309,7 @@ dojo.addOnLoad(function() {
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
   GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '603', '607', '620', '626', '651', '675', '677', '680', '694', '695', '699', '705', '707', '713', '741', '752', '762', '767', '768', '772',
       '787', '805', '808', '821', '823', '832', '849', '850', '865', '889' ];
+  GEOHandler.NON_CEE_CHECK = [ '620', '675', '677', '680', '713', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865' ];
   GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ];
   console.log('adding CEMEA functions...');
   GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
@@ -3423,7 +3424,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCEMEAChecklistValidator, GEOHandler.CEMEA_CHECKLIST);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
-  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEMEA, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
   GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
