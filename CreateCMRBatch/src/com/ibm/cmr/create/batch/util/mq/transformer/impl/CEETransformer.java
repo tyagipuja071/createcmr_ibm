@@ -1213,14 +1213,13 @@ public class CEETransformer extends EMEATransformer {
       cust.setAbbrevLocn(muData.getAbbrevLocn());
     }
     
-    if (!StringUtils.isBlank(muData.getOrdBlk())) {
-        if ("@".equals(muData.getOrdBlk())) {
-          cust.setEmbargoCd("");
-        }else{
-          cust.setEmbargoCd(muData.getOrdBlk());        
-        }
+    if (!StringUtils.isBlank(muData.getMiscBillCd())) {
+      if ("@".equals(muData.getMiscBillCd())) {
+        cust.setEmbargoCd("");
+      } else {
+        cust.setEmbargoCd(muData.getMiscBillCd());
       }
-
+    }
     // we use RestrictTo to store CoF in muData
     if (!StringUtils.isBlank(muData.getRestrictTo())) {
       if ("@".equals(muData.getRestrictTo())) {

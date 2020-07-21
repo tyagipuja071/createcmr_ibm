@@ -78,7 +78,7 @@
 				</column>	
 				<column>
 					<label>Order block code</label>
-					<dbColumn>ORD_BLK</dbColumn>
+					<dbColumn>EMBARGO_CD</dbColumn>
 					<width>10</width>
 					<length>1</length>
 				</column>
