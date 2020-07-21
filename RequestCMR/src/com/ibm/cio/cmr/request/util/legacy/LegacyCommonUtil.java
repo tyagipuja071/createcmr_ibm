@@ -5,7 +5,6 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -25,9 +24,6 @@ public class LegacyCommonUtil {
 
   private static final String DEFAULT_CLEAR_CHAR = "@";
   private static final String DEFAULT_CLEAR_4_CHAR = "@@@@";
-  public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
-  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
-  public static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   public static void setlegacyCustDataMassUpdtFields(EntityManager entityManager, CmrtCust cust, MassUpdtData muData) {
 
@@ -153,38 +149,6 @@ public class LegacyCommonUtil {
         legacyAddr.setPoBox(addr.getPoBox());
       }
     }
-  }
-
-  public static void processDB2TemporaryReactChanges(Admin admin, CmrtCust legacyCust, Data data, EntityManager entityManager) {
-    String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
-    String dataEmbargoCd = data.getEmbargoCd();
-    if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
-        && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
-        && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-        && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
-      legacyCust.setEmbargoCd("");
-      blankOrdBlockFromData(entityManager, data);
-    }
-    if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
-        && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
-        && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-        && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
-      legacyCust.setEmbargoCd(rdcEmbargoCd);
-      resetOrdBlockToData(entityManager, data);
-    }
-
-  }
-
-  private static void blankOrdBlockFromData(EntityManager entityManager, Data data) {
-    data.setOrdBlk("");
-    entityManager.merge(data);
-    entityManager.flush();
-  }
-
-  private static void resetOrdBlockToData(EntityManager entityManager, Data data) {
-    data.setOrdBlk("88");
-    entityManager.merge(data);
-    entityManager.flush();
   }
 
 }
