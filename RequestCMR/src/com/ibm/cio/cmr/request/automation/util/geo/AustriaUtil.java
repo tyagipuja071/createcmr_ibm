@@ -48,7 +48,7 @@ public class AustriaUtil extends AutomationUtil {
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRICU";
   private static final String SCENARIO_IBM_EMPLOYEE = "IBMEM";
   private static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
-  private static final String SCENARIO_THIRD_PARTY_DC = "3PA";
+  private static final String SCENARIO_THIRD_PARTY_DC = "THDPT";
   private static final String SCENARIO_BUSINESS_PARTNER_CROSS = "XBP";
   private static final String SCENARIO_CROSS_COMMERICAL = "XCOM";
   private static final String SCENARIO_INTERNAL = "INTER";
@@ -371,6 +371,7 @@ public class AustriaUtil extends AutomationUtil {
     switch (scenario) {
     case SCENARIO_COMMERCIAL:
     case SCENARIO_CROSS_COMMERICAL:
+    case SCENARIO_THIRD_PARTY_DC:
       if (!isCoverageCalculated) {
         sbo = getSBOFromIMS(entityManager, data.getSubIndustryCd(), data.getIsuCd(), data.getClientTier());
       }
