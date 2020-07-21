@@ -1786,6 +1786,7 @@ public class GreeceHandler extends BaseSOFHandler {
           address.getId().setAddrSeq(seq);
         }
       }
+      address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
     }
   }
 
