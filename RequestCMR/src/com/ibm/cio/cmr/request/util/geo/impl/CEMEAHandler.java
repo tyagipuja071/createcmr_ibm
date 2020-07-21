@@ -1110,6 +1110,9 @@ public class CEMEAHandler extends BaseSOFHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
+    if ("BUSPR".equals(data.getCustSubGrp()) && CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+      data.setBpRelType("CA");
+    }
   }
 
   @Override
