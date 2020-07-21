@@ -95,8 +95,11 @@ public class CNPDFConverter extends DefaultPDFConverter {
         for (ChecklistItem item : items) {
           int padding = 1;
           int textLength = item.getLabel().length();
-          if (textLength > 125) {
-            padding = textLength / 85;
+          if (textLength > 150) {
+            padding = textLength / 80;
+          }
+          if (items.indexOf(item) == 9) {
+            padding = textLength / 70;
           }
           checklistSection.addCell(createValueCellExtended(item.getLabel(), 1, 1, padding));
           answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";
