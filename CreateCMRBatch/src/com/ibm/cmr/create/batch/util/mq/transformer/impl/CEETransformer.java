@@ -960,6 +960,10 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
+      if (!StringUtils.isBlank(data.getPhone1())) {
+        legacyCust.setTelNoOrVat(data.getPhone1());
+      }
+
       if (!StringUtils.isBlank(data.getTaxCd1())) {
     	  legacyCust.setBankAcctNo(data.getTaxCd1());
       } else {
@@ -988,6 +992,10 @@ public class CEETransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if (!StringUtils.isBlank(data.getPhone1())) {
+        legacyCust.setTelNoOrVat(data.getPhone1());
       }
 
       if (!StringUtils.isBlank(data.getTaxCd1())) {
