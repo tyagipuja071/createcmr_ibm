@@ -628,6 +628,12 @@ public class CEETransformer extends EMEATransformer {
       } else {
         line6 = "";
       }
+    } else {
+      if (!StringUtils.isBlank(addrData.getLandCntry())) {
+        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+      } else {
+        line6 = "";
+      }
     }
     // if (!StringUtils.isBlank(addrData.getLandCntry())) {
     // line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
@@ -652,7 +658,7 @@ public class CEETransformer extends EMEATransformer {
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
-//    legacyAddr.setAddrLine4(line4);
+    legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
     legacyAddr.setCity(addrData.getCity1());
     legacyAddr.setZipCode(addrData.getPostCd());
