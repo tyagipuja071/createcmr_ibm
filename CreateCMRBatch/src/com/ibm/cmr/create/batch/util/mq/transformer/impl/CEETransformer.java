@@ -701,24 +701,10 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
-    CmrtAddr legacyFiscalAddr = null;
-
-    if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType())) {
-      legacyFiscalAddr = LegacyDirectUtil.getLegacyFiscalAddr(entityManager, cntry, addr.getCmrNo(), true);
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setForUpdate(true);
-      }
-    }
-
     legacyAddr.setForUpdate(true);
 
     if (!StringUtils.isBlank(addr.getCustNm1())) {
       legacyAddr.setAddrLine1(addr.getCustNm1());
-
-      if (legacyFiscalAddr != null) {
-        String prefix = !StringUtils.isEmpty(legacyFiscalAddr.getAddrLine1()) ? legacyFiscalAddr.getAddrLine1().substring(0, 1) : "";
-        legacyFiscalAddr.setAddrLine1(prefix + addr.getCustNm1());
-      }
 
     }
 
@@ -728,9 +714,6 @@ public class CEETransformer extends EMEATransformer {
       } else {
         legacyAddr.setAddrLine2(addr.getCustNm2());
 
-        if (legacyFiscalAddr != null) {
-          legacyFiscalAddr.setAddrLine2("CL" + addr.getCustNm2());
-        }
       }
     }
 
@@ -738,10 +721,6 @@ public class CEETransformer extends EMEATransformer {
       legacyAddr.setStreet(addr.getAddrTxt());
       legacyAddr.setAddrLine4(addr.getAddrTxt());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setStreet(addr.getAddrTxt());
-        legacyFiscalAddr.setAddrLine4(addr.getAddrTxt());
-      }
     }
 
     if (!StringUtils.isBlank(addr.getCustNm3())) {
@@ -753,15 +732,6 @@ public class CEETransformer extends EMEATransformer {
         // legacyAddr.setContact(addr.getCustNm3());
       }
 
-      if (legacyFiscalAddr != null) {
-        if ("@".equals(addr.getCustNm3())) {
-          legacyAddr.setAddrLine3("");
-          legacyAddr.setContact("");
-        } else {
-          legacyFiscalAddr.setAddrLine3("CL" + addr.getCustNm3());
-          // legacyFiscalAddr.setContact(addr.getCustNm4());
-        }
-      }
     }
 
     // legacy addr line5 is set in order district+postCd+City
@@ -775,9 +745,6 @@ public class CEETransformer extends EMEATransformer {
         addrLine5.append(addr.getDept() + " ");
         legacyAddr.setDistrict(addr.getDept());
 
-        if (legacyFiscalAddr != null) {
-          legacyFiscalAddr.setDistrict(addr.getDept());
-        }
       }
     }
 
@@ -789,9 +756,6 @@ public class CEETransformer extends EMEATransformer {
 		      legacyAddr.setZipCode(addr.getPostCd());
 		      addrLine5.append(addr.getPostCd() + " ");
           }
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setZipCode(addr.getPostCd());
-      }
 
       if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType()) && isCrossBorderForMass(addr, legacyAddr)) {
         handlePostCdSpecialLogic(cust, data, addr.getPostCd(), entityManager);
@@ -806,33 +770,21 @@ public class CEETransformer extends EMEATransformer {
 		      legacyAddr.setCity(addr.getCity1());
 		      addrLine5.append(addr.getCity1() + " ");
           }
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setCity(addr.getCity1());
-      }
     }
 
     if (!StringUtils.isBlank(addr.getCustLangCd())) {
       legacyAddr.setLanguage(addr.getCustLangCd());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setLanguage(addr.getCustLangCd());
-      }
     }
 
     if (!StringUtils.isBlank(addrLine5.toString())) {
       legacyAddr.setAddrLine5(addrLine5.toString());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setAddrLine5(addrLine5.toString());
-      }
     }
 
     if (!StringUtils.isEmpty(addr.getLandCntry())) {
       legacyAddr.setAddrLine6(addr.getLandCntry());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setAddrLine6(addr.getLandCntry());
-      }
     }
 
     boolean crossBorder = false;
@@ -845,25 +797,15 @@ public class CEETransformer extends EMEATransformer {
     if (!StringUtils.isBlank(addr.getLandCntry()) && crossBorder) {
       legacyAddr.setAddrLine5(LandedCountryMap.getCountryName(addr.getLandCntry()));
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(LandedCountryMap.getCountryName(addr.getLandCntry()));
-      }
     }
 
     if (!StringUtils.isBlank(addr.getCounty()) && !crossBorder) {
       legacyAddr.setAddrLine5(addr.getCounty());
 
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(addr.getCounty());
-      }
     }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
 
-    if (legacyFiscalAddr != null) {
-      formatMassUpdateAddressLines(entityManager, legacyFiscalAddr, addr, true);
-      legacyObjects.addAddress(legacyFiscalAddr);
-    }
   }
 
   @Override
