@@ -1366,15 +1366,23 @@ function forceLockScenariosSpain() {
       fieldsToDisable.push('ppsceid');
       fieldsToDisable.push('memLvl');
       fieldsToDisable.push('bpRelType');
+      fieldsToDisable.push('salesBusoffCd');
     }
     fieldsToDisable.push('soeReqNo');
     fieldsToDisable.push('repTeamMemberNo');
-    fieldsToDisable.push('salesBusoffCd');
+  } else {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+    FormManager.enable('inacCd');
+    FormManager.enable('enterprise');
+    FormManager.enable('dunsNo');
+    FormManager.enable('ppsceid');
+    FormManager.enable('repTeamMemberNo');
+    FormManager.enable('salesBusoffCd');
   }
   fieldsToDisable.push('cmrOwner');
   fieldsToDisable.push('collectionCd');
   fieldsToDisable.push('subIndustryCd');
-  fieldsToDisable.push('salesBusOffCd');
   fieldsToDisable.push('modeOfPayment');
   // fieldsToDisable.push('locationNumber');
 
