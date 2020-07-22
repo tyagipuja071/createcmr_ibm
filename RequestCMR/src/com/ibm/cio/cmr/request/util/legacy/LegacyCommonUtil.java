@@ -11,6 +11,8 @@ import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 
 /**
@@ -162,6 +164,23 @@ public class LegacyCommonUtil {
     data.setOrdBlk("88");
     entityManager.merge(data);
     entityManager.flush();
+  }
+
+  /**
+   * Get the salesGroupRep mapped to repTeamMemberNo
+   * 
+   * @param entityManager
+   * @param cmrIssuingCntry
+   * @param repTeamMembeNo
+   * @return String
+   */
+  public static String getSalesGroupRepMap(EntityManager entityManager, String cmrIssuingCntry, String repTeamMemberNo) {
+    String sql = ExternalizedQuery.getSql("QUERY.DATA.GET.SALESBO_CD");
+    PreparedQuery q = new PreparedQuery(entityManager, sql);
+    q.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+    q.setParameter("REP_TEAM_CD", repTeamMemberNo);
+    String salesGroupRep = q.getSingleResult(String.class);
+    return salesGroupRep;
   }
 
 }
