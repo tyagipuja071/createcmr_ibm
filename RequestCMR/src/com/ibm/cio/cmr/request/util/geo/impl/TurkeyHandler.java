@@ -291,6 +291,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                if (!StringUtils.isEmpty(addrType)) {
 	                  addr = cloneAddress(record, addrType);
 	                  addr.setCmrDept(record.getCmrCity2());
+                  if (StringUtils.isEmpty(record.getCmrIntlAddress())) {
+                    addr.setCmrStreetAddress("\u00a0");
+                  }
 	                  converted.add(addr);
 	                }
 	                if ("ZI01".equals(addrType)) {
@@ -320,7 +323,11 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        installing.setCmrName2Plain(sadr.getName2());
 	                        installing.setCmrCity(sadr.getOrt01());
 	                        installing.setCmrCity2(sadr.getOrt02());
+                        if (StringUtils.isEmpty(sadr.getStras())) {
+                          installing.setCmrStreetAddress("\u00a0");
+                        } else {
 	                        installing.setCmrStreetAddress(sadr.getStras());
+                        }
 	                        installing.setCmrName3(sadr.getName3());
 	                        installing.setCmrName4(sadr.getName4());
                         installing.setCmrCountryLanded(sadr.getLand1());
@@ -397,6 +404,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            newzi01.setParentCMRNo("");
 	            newzi01.setCmrSapNumber("");
             newzi01.setCmrDept(mainRecord.getCmrCity2());
+            if (StringUtils.isEmpty(mainRecord.getCmrIntlAddress())) {
+              newzi01.setCmrStreetAddress("\u00a0");
+            }
 
 	            converted.add(newzi01);
 	          }
@@ -408,7 +418,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            newzd01.setParentCMRNo("");
 	            newzd01.setCmrSapNumber("");
             newzd01.setCmrDept(mainRecord.getCmrCity2());
-
+            if (StringUtils.isEmpty(mainRecord.getCmrIntlAddress())) {
+              newzd01.setCmrStreetAddress("\u00a0");
+            }
 	            converted.add(newzd01);
 	          }
 
