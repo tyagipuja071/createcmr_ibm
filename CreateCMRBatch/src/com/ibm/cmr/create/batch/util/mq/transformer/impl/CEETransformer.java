@@ -1159,9 +1159,9 @@ public class CEETransformer extends EMEATransformer {
     }
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
-    if (StringUtils.isEmpty(data.getCrosSubTyp())) {
+    if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
-    } else if (!StringUtils.isEmpty(data.getCrosSubTyp()) && ("BP".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp()))) {
+    } else if (!StringUtils.isEmpty(data.getCustSubGrp()) && ("BP".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp()))) {
       legacyCust.setMrcCd("5");
     } else {
       legacyCust.setMrcCd("3");
@@ -1189,10 +1189,14 @@ public class CEETransformer extends EMEATransformer {
 
     // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getRestrictTo())) {
+      if ("@".equals(muData.getNewEntpName1())) {
         cust.setBankBranchNo("");
       } else {
-        cust.setBankBranchNo(muData.getNewEntpName1());
+        if (muData.getNewEntpName1().length() > 9) {
+          cust.setBankBranchNo(muData.getNewEntpName1().substring(0, 8));
+        } else {
+          cust.setBankBranchNo(muData.getNewEntpName1());
+        }
       }
     }
     
@@ -1592,6 +1596,23 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
+    Data data = cmrObjects.getData();
+
+    if (!StringUtils.isBlank(data.getTaxCd1())) {
+      legacyCustExt.setBankAcctNo(data.getTaxCd1());
+    } else {
+      legacyCustExt.setBankAcctNo("");
+    }
+
+    if (!StringUtils.isBlank(data.getCompany())) {
+      if (data.getCompany().length() > 9) {
+        legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
+      } else {
+        legacyCustExt.setiTaxCode(data.getCompany());
+      }
+    } else {
+      legacyCustExt.setiTaxCode("");
+    }
   }
 
   @Override
@@ -1616,14 +1637,26 @@ public class CEETransformer extends EMEATransformer {
 //      }
 //    }
 	  
-	    // RABXA :Bank Account Number
-	    if (!StringUtils.isBlank(muData.getEmail2())) {
-	      if ("@".equals(muData.getEmail2())) {
-	    	  custExt.setBankAcctNo("");
-	      } else {
-	    	  custExt.setBankAcctNo(muData.getEmail2());
-	      }
-	    }
+    // RBBXA :Bank Branch Number
+    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+      if ("@".equals(muData.getNewEntpName1())) {
+        custExt.setiTaxCode("");
+      } else {
+        if (muData.getNewEntpName1().length() > 9) {
+          custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
+        } else {
+          custExt.setiTaxCode(muData.getNewEntpName1());
+        }
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getEmail2())) {
+      if ("@".equals(muData.getEmail2())) {
+        custExt.setBankAcctNo("");
+      } else {
+        custExt.setBankAcctNo(muData.getEmail2());
+      }
+    }
 
     List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     MassUpdtAddr zp01Addr = new MassUpdtAddr();
