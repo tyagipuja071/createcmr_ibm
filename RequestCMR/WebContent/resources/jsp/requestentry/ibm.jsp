@@ -372,7 +372,7 @@ dojo.addOnLoad(function(){
           </p>
         </cmr:column>
 		</cmr:row>
-    <cmr:view exceptForGEO="MCO2,CN">
+    <cmr:view exceptForGEO="MCO2,CN" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
   		<cmr:row topPad="10" addBackground="true">
         <cmr:column span="2" containerForField="SOENumber">
           <p>
