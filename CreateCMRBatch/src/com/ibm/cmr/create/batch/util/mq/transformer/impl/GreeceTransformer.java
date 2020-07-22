@@ -29,6 +29,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -878,14 +879,15 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      // String newVat = handleVatMassUpdateChanges(muData.getVat(),
-      // cust.getVat());
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getVat().trim())) {
-        cust.setVat("");
-      } else {
-        cust.setVat(muData.getVat());
-      }
+      cust.setVat(muData.getVat());
     }
+
+    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
+      cust.setSalesRepNo(muData.getRepTeamMemberNo());
+      String salesGroupRep = LegacyCommonUtil.getSalesGroupRepMap(entityManager, cmrIssuingCntry, muData.getRepTeamMemberNo());
+      cust.setSalesGroupRep(salesGroupRep);
+    }
+
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
@@ -899,27 +901,15 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getCustNm2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustNm2())) {
-        legacyAddr.setAddrLine2("");
-      } else {
-        legacyAddr.setAddrLine2(addr.getCustNm2());
-      }
+      legacyAddr.setAddrLine2(addr.getCustNm2());
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getAddrTxt())) {
-        legacyAddr.setStreet("");
-      } else {
-        legacyAddr.setStreet(addr.getAddrTxt());
-      }
+      legacyAddr.setStreet(addr.getAddrTxt());
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getAddrTxt2())) {
-        legacyAddr.setStreetNo("");
-      } else {
-        legacyAddr.setStreetNo(addr.getAddrTxt2());
-      }
+      legacyAddr.setStreetNo(addr.getAddrTxt2());
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
@@ -927,10 +917,12 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getCustPhone())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
-        legacyAddr.setAddrPhone("");
-      } else {
-        legacyAddr.setAddrPhone(addr.getCustPhone());
+      if ("ZD01".equals(addr.getId().getAddrType())) {
+        if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+          legacyAddr.setAddrPhone("");
+        } else {
+          legacyAddr.setAddrPhone(addr.getCustPhone());
+        }
       }
     }
 
@@ -940,11 +932,7 @@ public class GreeceTransformer extends EMEATransformer {
 
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
-      if (DEFAULT_CLEAR_CHAR.equals(poBox)) {
-        legacyAddr.setPoBox("");
-      } else {
-        legacyAddr.setPoBox(addr.getPoBox());
-      }
+      legacyAddr.setPoBox(addr.getPoBox());
     }
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
@@ -983,20 +971,12 @@ public class GreeceTransformer extends EMEATransformer {
     line1 = legacyAddr.getAddrLine1();
 
     if (!StringUtils.isBlank(massUpdtAddr.getCustNm2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm2())) {
-        line2 = "";
-      } else {
-        line2 = massUpdtAddr.getCustNm2();
-      }
+      line2 = massUpdtAddr.getCustNm2();
     }
 
     // Att Person or Address Con't/Occupation
     if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt2())) {
-        line3 = "";
-      } else {
-        line3 = massUpdtAddr.getAddrTxt2();
-      }
+      line3 = massUpdtAddr.getAddrTxt2();
     } else if (!StringUtils.isBlank(massUpdtAddr.getCustNm4())) {
       if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
         line3 = "ATT " + line3;
@@ -1005,37 +985,24 @@ public class GreeceTransformer extends EMEATransformer {
         line3 = "Υ/Ο " + line3;
       }
 
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm4())) {
-        line3 = "";
+      if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(massUpdtAddr.getId().getAddrType())) {
+        line3 = "Υ/Ο " + massUpdtAddr.getCustNm4().trim();
       } else {
-        if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(massUpdtAddr.getId().getAddrType())) {
-          line3 = "Υ/Ο " + massUpdtAddr.getCustNm4().trim();
-        } else {
-          line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
-        }
-
+        line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
       }
+
     }
 
     // Street OR PO BOX
     if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt())) {
-        line4 = "";
-      } else {
-        line4 = massUpdtAddr.getAddrTxt();
-      }
+      line4 = massUpdtAddr.getAddrTxt();
     } else if (!StringUtils.isEmpty(massUpdtAddr.getPoBox())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getPoBox())) {
-        line4 = "";
-        legacyAddr.setPoBox("");
+      if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(massUpdtAddr.getId().getAddrType())) {
+        line4 = "Τ.Θ. " + massUpdtAddr.getPoBox();
       } else {
-        if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(massUpdtAddr.getId().getAddrType())) {
-          line4 = "Τ.Θ. " + massUpdtAddr.getPoBox();
-        } else {
-          line4 = "PO BOX " + massUpdtAddr.getPoBox();
-        }
-        legacyAddr.setPoBox(massUpdtAddr.getPoBox());
+        line4 = "PO BOX " + massUpdtAddr.getPoBox();
       }
+      legacyAddr.setPoBox(massUpdtAddr.getPoBox());
     }
 
     if (!StringUtils.isEmpty(massUpdtAddr.getPostCd()) || !StringUtils.isEmpty(massUpdtAddr.getCity1())) {

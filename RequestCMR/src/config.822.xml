@@ -58,6 +58,19 @@
           <lovId>ClientTier</lovId>
         </column>
         <column>
+          <label>Sales Rep. No.</label>
+          <dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
+          <width>30</width>
+          <lovId>SalRepNameNo</lovId>
+          <length>6</length>
+        </column>
+        <column>
+          <label>SBO</label>
+          <dbColumn>SALES_BO_CD</dbColumn>
+          <width>20</width>
+          <lovId>SalesBusOff2</lovId>
+        </column>
+        <column>
           <label>Embargo Code</label>
           <dbColumn>EMBARGO_CD</dbColumn>
           <width>10</width>
