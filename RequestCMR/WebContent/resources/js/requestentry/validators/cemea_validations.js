@@ -1623,6 +1623,11 @@ function setVatValidator() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGroup = FormManager.getActualValue('custGrp');
 
+  var excludeCountries = new Set([ '707', '821', '826' ]);
+  if (excludeCountries.has(cntry)) {
+    return;
+  }
+
   if ((role == 'PROCESSOR' || role == 'REQUESTER') && (cntry == '620') && custGroup == 'LOCAL') {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
   } else {
