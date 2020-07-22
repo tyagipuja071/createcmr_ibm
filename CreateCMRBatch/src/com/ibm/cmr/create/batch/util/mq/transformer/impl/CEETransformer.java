@@ -1592,6 +1592,23 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
+    Data data = cmrObjects.getData();
+
+    if (!StringUtils.isBlank(data.getTaxCd1())) {
+      legacyCustExt.setBankAcctNo(data.getTaxCd1());
+    } else {
+      legacyCustExt.setBankAcctNo("");
+    }
+
+    if (!StringUtils.isBlank(data.getCompany())) {
+      if (data.getCompany().length() > 9) {
+        legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
+      } else {
+        legacyCustExt.setiTaxCode(data.getCompany());
+      }
+    } else {
+      legacyCustExt.setiTaxCode("");
+    }
   }
 
   @Override
