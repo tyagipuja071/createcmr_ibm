@@ -59,6 +59,7 @@ public class GreeceTransformer extends EMEATransformer {
 
   private static final Logger LOG = Logger.getLogger(GreeceTransformer.class);
   private static final String DEFAULT_CLEAR_CHAR = "@";
+  private static final String DEFAULT_CLEAR_NUM = "0";
   public static final String DEFAULT_LANDED_COUNTRY = "GR";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
@@ -871,7 +872,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(muData.getRestrictTo())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getRestrictTo())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
         cust.setTelNoOrVat("");
       } else {
         cust.setTelNoOrVat(muData.getRestrictTo());
@@ -916,9 +917,9 @@ public class GreeceTransformer extends EMEATransformer {
       legacyAddr.setCity(addr.getCity1());
     }
 
-    if (!StringUtils.isBlank(addr.getCustPhone())) {
-      if ("ZD01".equals(addr.getId().getAddrType())) {
-        if (DEFAULT_CLEAR_CHAR.equals(addr.getCustPhone())) {
+    if ("ZD01".equals(addr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(addr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
           legacyAddr.setAddrPhone("");
         } else {
           legacyAddr.setAddrPhone(addr.getCustPhone());
