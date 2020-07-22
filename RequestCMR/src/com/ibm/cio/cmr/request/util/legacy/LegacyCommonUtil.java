@@ -5,6 +5,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -26,6 +27,9 @@ public class LegacyCommonUtil {
 
   private static final String DEFAULT_CLEAR_CHAR = "@";
   private static final String DEFAULT_CLEAR_4_CHAR = "@@@@";
+  public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
+  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  public static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   public static void setlegacyCustDataMassUpdtFields(EntityManager entityManager, CmrtCust cust, MassUpdtData muData) {
 
