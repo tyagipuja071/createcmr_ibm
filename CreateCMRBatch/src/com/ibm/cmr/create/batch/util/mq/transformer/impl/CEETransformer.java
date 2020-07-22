@@ -1189,10 +1189,14 @@ public class CEETransformer extends EMEATransformer {
 
     // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getRestrictTo())) {
+      if ("@".equals(muData.getNewEntpName1())) {
         cust.setBankBranchNo("");
       } else {
-        cust.setBankBranchNo(muData.getNewEntpName1());
+        if (muData.getNewEntpName1().length() > 9) {
+          cust.setBankBranchNo(muData.getNewEntpName1().substring(0, 8));
+        } else {
+          cust.setBankBranchNo(muData.getNewEntpName1());
+        }
       }
     }
     
@@ -1633,14 +1637,26 @@ public class CEETransformer extends EMEATransformer {
 //      }
 //    }
 	  
-	    // RABXA :Bank Account Number
-	    if (!StringUtils.isBlank(muData.getEmail2())) {
-	      if ("@".equals(muData.getEmail2())) {
-	    	  custExt.setBankAcctNo("");
-	      } else {
-	    	  custExt.setBankAcctNo(muData.getEmail2());
-	      }
-	    }
+    // RBBXA :Bank Branch Number
+    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+      if ("@".equals(muData.getNewEntpName1())) {
+        custExt.setiTaxCode("");
+      } else {
+        if (muData.getNewEntpName1().length() > 9) {
+          custExt.setiTaxCode(muData.getNewEntpName1().substring(0, 8));
+        } else {
+          custExt.setiTaxCode(muData.getNewEntpName1());
+        }
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getEmail2())) {
+      if ("@".equals(muData.getEmail2())) {
+        custExt.setBankAcctNo("");
+      } else {
+        custExt.setBankAcctNo(muData.getEmail2());
+      }
+    }
 
     List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     MassUpdtAddr zp01Addr = new MassUpdtAddr();
