@@ -1789,6 +1789,14 @@ public class GreeceHandler extends BaseSOFHandler {
         }
       }
       address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+
+      if ("ZD01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
+        address.setPoBox("");
+      }
+
+      if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
+        address.setCustPhone("");
+      }
     }
   }
 
@@ -2105,6 +2113,15 @@ public class GreeceHandler extends BaseSOFHandler {
         }
       }
 
+      if (data != null) {
+        if ("ZD01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType())) {
+          addr.setPoBox("");
+        }
+
+        if ("ZP01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType())) {
+          addr.setCustPhone("");
+        }
+      }
       break;
 
     case SystemLocation.CYPRUS:
