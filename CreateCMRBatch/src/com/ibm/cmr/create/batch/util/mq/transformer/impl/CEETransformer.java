@@ -529,9 +529,9 @@ public class CEETransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZD02:
         return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;        
     case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZS02:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZP02:
       return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
     default:
@@ -548,11 +548,13 @@ public class CEETransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZS02:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZP02:
       return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
+    case MQMsgConstants.ADDR_ZP03:
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
@@ -1123,8 +1125,12 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      legacyCust.setSbo(data.getSalesBusOffCd());
-      legacyCust.setIbo(data.getSalesBusOffCd());
+      String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
+      if (sbo.length() < 7) {
+        sbo = StringUtils.rightPad(sbo, 7, '0');
+      }
+      legacyCust.setSbo(sbo);
+      legacyCust.setIbo(sbo);
     } else {
       legacyCust.setSbo("");
       legacyCust.setIbo("");
@@ -1138,9 +1144,12 @@ public class CEETransformer extends EMEATransformer {
 
     if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
       if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
+        // legacyCust.setVat(landedCntry +
+        // dummyHandler.cmrData.getVat().substring(2));
+        legacyCust.setVat(dummyHandler.cmrData.getVat().substring(2));
       } else {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+        // legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+        legacyCust.setVat(dummyHandler.cmrData.getVat());
       }
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
@@ -1161,7 +1170,10 @@ public class CEETransformer extends EMEATransformer {
     // data.getIbmDeptCostCenter() : "");
     if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
-    } else if (!StringUtils.isEmpty(data.getCustSubGrp()) && ("BP".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp()))) {
+    } else if (!StringUtils.isEmpty(data.getCustSubGrp())
+        && ("BUSPR".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp())
+            || "CSBP".equals(data.getCustSubGrp()) || "MEBP".equals(data.getCustSubGrp()) || "RSXBP".equals(data.getCustSubGrp())
+            || "BP".equals(data.getCustSubGrp()) || "RSBP".equals(data.getCustSubGrp()))) {
       legacyCust.setMrcCd("5");
     } else {
       legacyCust.setMrcCd("3");
@@ -1338,10 +1350,15 @@ public class CEETransformer extends EMEATransformer {
         cust.setSbo("");
         cust.setIbo("");
       } else {
-        cust.setSbo(muData.getCustNm1());
-        cust.setIbo(muData.getCustNm1());
+        String sbo = muData.getCustNm1();
+        if (sbo.length() < 7) {
+          sbo = StringUtils.rightPad(sbo, 7, '0');
+        }
+        cust.setSbo(sbo);
+        cust.setIbo(sbo);
       }
     }
+
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@".equals(muData.getInacCd())) {
         cust.setInacCd("");
@@ -1590,7 +1607,7 @@ public class CEETransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-    return false;
+    return true;
   }
 
   @Override
