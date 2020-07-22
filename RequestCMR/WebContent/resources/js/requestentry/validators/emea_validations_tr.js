@@ -3333,6 +3333,7 @@ function addTRAddressTypeValidator() {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
           var type = null;
+          var updateInd = null;
           var zs01Cnt = 0;
           var zp01Cnt = 0;
           var zd01Cnt = 0;
@@ -3354,12 +3355,16 @@ function addTRAddressTypeValidator() {
               record = _allAddressData[i];
             }
             type = record.addrType;
+            updateInd = record.updateInd;
             if (typeof (type) == 'object') {
               type = type[0];
             }
             var addrTypeText = record.addrTypeText;
             if (typeof (addrTypeText) == 'object') {
               addrTypeText = addrTypeText[0];
+            }
+            if (typeof (updateInd) == 'object') {
+              updateInd = updateInd[0];
             }
             // Valid english for all address types when
             // 1: All address types except ZP01
@@ -3371,7 +3376,7 @@ function addTRAddressTypeValidator() {
                 if (typeof (value) == 'object') {
                   value = value[0];
                 }
-                if (value != null && value != undefined && value != '' && typeof (value) == 'string') {
+                if ((value != null && value != undefined && value != '' && typeof (value) == 'string') && updateInd == 'U') {
                   var reg = /[^\u0000-\u007f]/;
                   if (reg.test(value)) {
                     enErrMsg += addrTypeText + ', ';

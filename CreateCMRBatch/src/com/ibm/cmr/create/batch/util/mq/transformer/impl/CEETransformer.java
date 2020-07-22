@@ -529,9 +529,9 @@ public class CEETransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZD02:
         return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;        
     case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZS02:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZP02:
       return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
     default:
@@ -548,11 +548,13 @@ public class CEETransformer extends EMEATransformer {
     case MQMsgConstants.ADDR_ZD01:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     case MQMsgConstants.ADDR_ZI01:
-      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
-    case MQMsgConstants.ADDR_ZS02:
       return MQMsgConstants.SOF_ADDRESS_USE_EPL;
+    case MQMsgConstants.ADDR_ZS02:
+      return MQMsgConstants.SOF_ADDRESS_USE_MAILING;
     case MQMsgConstants.ADDR_ZP02:
       return MQMsgConstants.SOF_ADDRESS_USE_COUNTRY_USE_G;
+    case MQMsgConstants.ADDR_ZP03:
+      return MQMsgConstants.SOF_ADDRESS_USE_BILLING;
     default:
       return MQMsgConstants.SOF_ADDRESS_USE_SHIPPING;
     }
