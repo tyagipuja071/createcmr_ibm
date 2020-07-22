@@ -90,19 +90,11 @@ public class LegacyCommonUtil {
     }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getSpecialTaxCd().trim())) {
-        cust.setTaxCd("");
-      } else {
-        cust.setTaxCd(muData.getSpecialTaxCd());
-      }
+      cust.setTaxCd(muData.getSpecialTaxCd());
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getVat().trim())) {
-        cust.setVat("");
-      } else {
-        cust.setVat(muData.getVat());
-      }
+      cust.setVat(muData.getVat());
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
@@ -118,27 +110,16 @@ public class LegacyCommonUtil {
     }
 
     if (!StringUtils.isBlank(addr.getCustNm2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustNm2())) {
-        legacyAddr.setAddrLine2("");
-      } else {
-        legacyAddr.setAddrLine2(addr.getCustNm2());
-      }
+      legacyAddr.setAddrLine2(addr.getCustNm2());
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getAddrTxt())) {
-        legacyAddr.setStreet("");
-      } else {
-        legacyAddr.setStreet(addr.getAddrTxt());
-      }
+      legacyAddr.setStreet(addr.getAddrTxt());
+
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getAddrTxt2())) {
-        legacyAddr.setStreetNo("");
-      } else {
-        legacyAddr.setStreetNo(addr.getAddrTxt2());
-      }
+      legacyAddr.setStreetNo(addr.getAddrTxt2());
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
@@ -147,11 +128,7 @@ public class LegacyCommonUtil {
 
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
-      if (DEFAULT_CLEAR_CHAR.equals(poBox)) {
-        legacyAddr.setPoBox("");
-      } else {
-        legacyAddr.setPoBox(addr.getPoBox());
-      }
+      legacyAddr.setPoBox(addr.getPoBox());
     }
   }
 
