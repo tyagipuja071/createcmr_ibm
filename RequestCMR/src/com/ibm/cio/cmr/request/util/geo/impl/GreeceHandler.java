@@ -2971,7 +2971,7 @@ public class GreeceHandler extends BaseSOFHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_NM4"));
 
     if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       fields.add("ADDR_TXT_2");
