@@ -1123,8 +1123,12 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      legacyCust.setSbo(data.getSalesBusOffCd());
-      legacyCust.setIbo(data.getSalesBusOffCd());
+      String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
+      if (sbo.length() < 7) {
+        sbo = StringUtils.rightPad(sbo, 7, '0');
+      }
+      legacyCust.setSbo(sbo);
+      legacyCust.setIbo(sbo);
     } else {
       legacyCust.setSbo("");
       legacyCust.setIbo("");
@@ -1338,10 +1342,15 @@ public class CEETransformer extends EMEATransformer {
         cust.setSbo("");
         cust.setIbo("");
       } else {
-        cust.setSbo(muData.getCustNm1());
-        cust.setIbo(muData.getCustNm1());
+        String sbo = muData.getCustNm1();
+        if (sbo.length() < 7) {
+          sbo = StringUtils.rightPad(sbo, 7, '0');
+        }
+        cust.setSbo(sbo);
+        cust.setIbo(sbo);
       }
     }
+
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@".equals(muData.getInacCd())) {
         cust.setInacCd("");
