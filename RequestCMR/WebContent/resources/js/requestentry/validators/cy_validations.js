@@ -1498,15 +1498,15 @@ function addOccupationPOBoxValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
-function addOccupationPOBoxAttnPersonValidatorForGR() {
-    console.log("GREECE - addOccupationPOBoxAttnPersonValidatorForGR..............");
+function addOccupationPOBoxAttnPersonValidatorForCY() {
+    console.log("CYPRUS - addOccupationPOBoxAttnPersonValidatorForCY..............");
     
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
         var filledCount = 0; 
           
-          if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.GREECE) {
+          if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.CYPRUS) {
             return new ValidationResult(null, true);
           }
           
@@ -8292,7 +8292,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGRAddressTypeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addGRAddressGridValidatorStreetPOBox, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addOccupationPOBoxValidator, [  SysLoc.CYPRUS ], null, true);
-  GEOHandler.registerValidator(addOccupationPOBoxAttnPersonValidatorForGR, [ SysLoc.GREECE ], null, true);
+  GEOHandler.registerValidator(addOccupationPOBoxAttnPersonValidatorForCY, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addStreetAddressFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
