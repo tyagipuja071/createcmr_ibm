@@ -506,8 +506,7 @@ function addAddressTypeValidator() {
             }
           }
 
-          var custType = FormManager.getActualValue('custGrp');
-          if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0) && custType == 'LOCAL') {
+          if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0)) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
           } else if (cntry == SysLoc.AUSTRIA) {
             var reqLob = FormManager.getActualValue('requestingLob');// request
@@ -534,6 +533,86 @@ function addAddressTypeValidator() {
             return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
           } else if (zs02Cnt > 1) {
             return new ValidationResult(null, false, 'Only one EPL address is allowed.');
+          } else if (zp02Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one G address is allowed.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addAddressTypeValidatorCEE() {
+  console.log("addAddressTypeValidator for CEE..........");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var reqLocalAddr = new Set([ '832', '821', '820', '693' ]);
+
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          return new ValidationResult(null, false, 'Address types are mandatory.');
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var zs01Cnt = 0;
+          var zp01Cnt = 0;
+          var zi01Cnt = 0;
+          var zd01Cnt = 0;
+          var zs02Cnt = 0;
+          var zp02Cnt = 0;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              zs01Cnt++;
+            } else if (type == 'ZP01') {
+              zp01Cnt++;
+            } else if (type == 'ZI01') {
+              zi01Cnt++;
+            } else if (type == 'ZD01') {
+              zd01Cnt++;
+            } else if (type == 'ZS02') {
+              zs02Cnt++;
+            } else if (type == 'ZP02') {
+              zp02Cnt++;
+            }
+          }
+
+          var custType = FormManager.getActualValue('custGrp');
+          if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0) && custType == 'LOCAL') {
+            return new ValidationResult(null, false, 'All address types are mandatory.');
+          } else if (cntry == SysLoc.AUSTRIA) {
+            var reqLob = FormManager.getActualValue('requestingLob');// request
+            // LOB=IGF
+            // will
+            // have 2
+            // additional
+            // address
+            // type to
+            // own
+            if (reqLob == 'IGF' && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0)) {
+              return new ValidationResult(null, false, 'All address types are mandatory.');
+            } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
+              return new ValidationResult(null, false, 'All address types are mandatory.');
+            }
+          } else if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
+            return new ValidationResult(null, false, 'All address types are mandatory except G Address.');
+          } else if (zs01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Sold-To address is allowed.');
+          } else if (zp01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Bill-To address is allowed.');
+          } else if (zs02Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Mail-To address is allowed.');
           } else if (zp02Cnt > 1) {
             return new ValidationResult(null, false, 'Only one G address is allowed.');
           }
@@ -3317,6 +3396,9 @@ dojo.addOnLoad(function() {
       '787', '805', '808', '821', '823', '832', '849', '850', '865', '889' ];
   GEOHandler.NON_CEE_CHECK = [ '620', '675', '677', '680', '713', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865' ];
   GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ];
+  GEOHandler.CEMEA_EXCLUDE_CEE = GEOHandler.CEMEA.filter(function(v) {
+    return GEOHandler.CEE.indexOf(v) == -1
+  });
   console.log('adding CEMEA functions...');
   GEOHandler.addAddrFunction(addCEMEALandedCountryHandler, GEOHandler.CEMEA);
   // GEOHandler.enableCopyAddress(GEOHandler.CEMEA, validateCEMEACopy);
@@ -3401,7 +3483,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(orderBlockValidation, [ SysLoc.AUSTRIA ], null, true);
 
-  GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA, null, true);
+  GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA_EXCLUDE_CEE, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
@@ -3455,14 +3537,15 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(validateSBO, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
   // CEE
   GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);  
+  GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
+  GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);  
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
