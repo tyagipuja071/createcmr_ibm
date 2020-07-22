@@ -53,7 +53,7 @@ function addHandlersForCEWA() {
 
 /*
  * EmbargoCode field locked for REQUESTER
- **/
+ */
 function lockEmbargo() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -179,11 +179,11 @@ function addAddressTypeValidator() {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           var record = null;
           var type = null;
-          var billingCnt = 0; //ZP01
-          var installCnt = 0; //ZI01 multiple
-          var mailingCnt = 0; //ZS01
-          var shippingCnt = 0; //ZD01 multiple
-          var eplCnt = 0;//ZS02
+          var billingCnt = 0; // ZP01
+          var installCnt = 0; // ZI01 multiple
+          var mailingCnt = 0; // ZS01
+          var shippingCnt = 0; // ZD01 multiple
+          var eplCnt = 0;// ZS02
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -205,10 +205,12 @@ function addAddressTypeValidator() {
               eplCnt++;
             }
           }
-//          if (installCnt == 0 || mailingCnt == 0 || billingCnt == 0 || shippingCnt == 0 || eplCnt == 0) {
-//            return new ValidationResult(null, false,
-//                'Only mailing address is mandatory. Only multiple Shipping & Installing addresses are allowed.');
-//          } else
+// if (installCnt == 0 || mailingCnt == 0 || billingCnt == 0 || shippingCnt == 0
+// || eplCnt == 0) {
+// return new ValidationResult(null, false,
+// 'Only mailing address is mandatory. Only multiple Shipping & Installing
+// addresses are allowed.');
+// } else
           if (billingCnt > 1) {
             return new ValidationResult(null, false, 'What we need is to have only One Billing address. Please remove the additional Billing address.');
           } else if (mailingCnt > 1) {
@@ -849,62 +851,56 @@ function setSalesRepValues(isuCd,clientTier) {
       FormManager.setValue('salesBusOffCd', '0010');
     }
   }
-}
 
+  /*
+   * if ('780' != FormManager.getActualValue('cmrIssuingCntry')) { var
+   * custSubGrp = FormManager.getActualValue('custSubGrp'); if (custSubGrp !=
+   * "BUSPR" && custSubGrp != "XBP") { FormManager.setValue('repTeamMemberNo',
+   * '016757'); } else { FormManager.setValue('repTeamMemberNo', '780780'); } }
+   */
+  
+  }
+}
 
 var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01','ZS02'];
 var addrTypeHandler = [];
-/*function diplayTinNumberforTZ() {
-  
-  var role = FormManager.getActualValue('role');
-  
-  if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress' && FormManager.getActualValue('cmrIssuingCntry') == '851') {
-    cmr.hideNode('tin');
-    //FormManager.clearValue('dept');
-    for (var i = 0; i < _addrTypesForMCO2.length; i++) {
-      if (addrTypeHandler[i] == null) {
-        addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForMCO2[i]), 'onClick', function(value) {
-          if (FormManager.getField('addrType_ZP01').checked && FormManager.getActualValue('custGrp') == 'LOCAL') {
-            cmr.showNode('tin');
-            if(role == 'REQUESTER'){
-            FormManager.addValidator('dept', Validators.REQUIRED, [ 'TIN#' ], null);
-            }
-          } else {
-            cmr.hideNode('tin');
-            //FormManager.clearValue('dept');
-            FormManager.removeValidator('dept', Validators.REQUIRED);
-          }
-       });
-    } else {
-        if (FormManager.getField('addrType_ZP01').checked && FormManager.getActualValue('custGrp') == 'LOCAL')
-        cmr.showNode('tin');
-      }
-    }
-  }
-  if (cmr.addressMode == 'updateAddress') {
-    if (FormManager.getActualValue('addrType') == 'ZP01') {
-      cmr.showNode('tin');
-      if(role == 'REQUESTER'){
-        FormManager.addValidator('dept', Validators.REQUIRED, [ 'TIN#' ], null);
-      }
-    } else {
-    cmr.hideNode('tin');
-     // FormManager.clearValue('dept');
-      FormManager.removeValidator('dept', Validators.REQUIRED);
-    }
-   }
-} */
+/*
+ * function diplayTinNumberforTZ() {
+ * 
+ * var role = FormManager.getActualValue('role');
+ * 
+ * if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress' &&
+ * FormManager.getActualValue('cmrIssuingCntry') == '851') {
+ * cmr.hideNode('tin'); //FormManager.clearValue('dept'); for (var i = 0; i <
+ * _addrTypesForMCO2.length; i++) { if (addrTypeHandler[i] == null) {
+ * addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' +
+ * _addrTypesForMCO2[i]), 'onClick', function(value) { if
+ * (FormManager.getField('addrType_ZP01').checked &&
+ * FormManager.getActualValue('custGrp') == 'LOCAL') { cmr.showNode('tin');
+ * if(role == 'REQUESTER'){ FormManager.addValidator('dept',
+ * Validators.REQUIRED, [ 'TIN#' ], null); } } else { cmr.hideNode('tin');
+ * //FormManager.clearValue('dept'); FormManager.removeValidator('dept',
+ * Validators.REQUIRED); } }); } else { if
+ * (FormManager.getField('addrType_ZP01').checked &&
+ * FormManager.getActualValue('custGrp') == 'LOCAL') cmr.showNode('tin'); } } }
+ * if (cmr.addressMode == 'updateAddress') { if
+ * (FormManager.getActualValue('addrType') == 'ZP01') { cmr.showNode('tin');
+ * if(role == 'REQUESTER'){ FormManager.addValidator('dept',
+ * Validators.REQUIRED, [ 'TIN#' ], null); } } else { cmr.hideNode('tin'); //
+ * FormManager.clearValue('dept'); FormManager.removeValidator('dept',
+ * Validators.REQUIRED); } } }
+ */
 
 function diplayTinNumberforTZ() {
   
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var scenario = FormManager.getActualValue('custGrp');
   
-  //var role = FormManager.getActualValue('role');
+  // var role = FormManager.getActualValue('role');
   
   if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress' && FormManager.getActualValue('cmrIssuingCntry') == '851') {
     cmr.hideNode('tin');
-    //FormManager.clearValue('dept');
+    // FormManager.clearValue('dept');
     for (var i = 0; i < _addrTypesForMCO2.length; i++) {
       if (addrTypeHandler[i] == null) {
         addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForMCO2[i]), 'onClick', function(value) {         
@@ -925,11 +921,11 @@ function diplayTinNumberforTZ() {
             }
           } else {
             cmr.hideNode('tin');
-            //FormManager.clearValue('dept');
+            // FormManager.clearValue('dept');
             FormManager.resetValidations('dept');
-            //FormManager.removeValidator('dept', Validators.REQUIRED);
+            // FormManager.removeValidator('dept', Validators.REQUIRED);
           }
-          //setTinNumber();
+          // setTinNumber();
         });
       } else {
         if (FormManager.getField('addrType_ZP01').checked && ((cmr.currentRequestType == 'C' && scenario == 'LOCAL') || cmr.currentRequestType == 'U' ))
@@ -955,12 +951,13 @@ function diplayTinNumberforTZ() {
 } 
 
 
-/*function setTinNumber(){
-  if (FormManager.getField('addrType_ZS01').checked || FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZD01').checked || FormManager.getField('addrType_ZS02').checked){
-    //cmr.showNode('tin');
-    FormManager.setValue('dept', ' ');
-  }
-}*/
+/*
+ * function setTinNumber(){ if (FormManager.getField('addrType_ZS01').checked ||
+ * FormManager.getField('addrType_ZI01').checked ||
+ * FormManager.getField('addrType_ZD01').checked ||
+ * FormManager.getField('addrType_ZS02').checked){ //cmr.showNode('tin');
+ * FormManager.setValue('dept', ' '); } }
+ */
 
 
 function addTinFormatValidationTanzania() {
@@ -968,7 +965,7 @@ function addTinFormatValidationTanzania() {
   return {
   validate : function() {
   var dept = FormManager.getActualValue('dept');
-  //var lbl1 = FormManager.getLabel('LocalTax1');
+  // var lbl1 = FormManager.getLabel('LocalTax1');
   if (FormManager.getField('addrType_ZP01').checked && dept && dept.length > 0 && !dept.match("([0-9]{3}-[0-9]{3}-[0-9]{3})|^(X{3})$")) {
   return new ValidationResult({
   id : 'dept',
@@ -1160,11 +1157,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(streetAvenueValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(enterpriseMalta, GEOHandler.MCO2);
-//  GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
+// GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
-  //GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
+  // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(hideCustName4, GEOHandler.MCO2);
@@ -1176,13 +1173,14 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.MALTA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.MALTA ], null, true);
-  //Story 1718889: Tanzania: new mandatory TIN number field fix
+  // Story 1718889: Tanzania: new mandatory TIN number field fix
   GEOHandler.addAddrFunction(diplayTinNumberforTZ, [ SysLoc.TANZANIA ]);
   GEOHandler.registerValidator(addTinFormatValidationTanzania, [ SysLoc.TANZANIA ], null, true);
   
   GEOHandler.registerValidator(addTinBillingValidator, [ SysLoc.TANZANIA ], null, true);
   
-  //GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2, GEOHandler.REQUESTER,true); 
+  // GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2,
+  // GEOHandler.REQUESTER,true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TANZANIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TANZANIA ], null, true);
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
@@ -1195,7 +1193,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO2, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO2);
   
-  //Malta Legacy
+  // Malta Legacy
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrFunctionMalta, [ SysLoc.MALTA ]);
