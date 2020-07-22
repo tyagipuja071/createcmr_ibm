@@ -1159,9 +1159,9 @@ public class CEETransformer extends EMEATransformer {
     }
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
-    if (StringUtils.isEmpty(data.getCrosSubTyp())) {
+    if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
-    } else if (!StringUtils.isEmpty(data.getCrosSubTyp()) && ("BP".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp()))) {
+    } else if (!StringUtils.isEmpty(data.getCustSubGrp()) && ("BP".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp()))) {
       legacyCust.setMrcCd("5");
     } else {
       legacyCust.setMrcCd("3");
