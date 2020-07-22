@@ -12,6 +12,10 @@ var _importedIndc = null;
 var _postalCodeHandler = null;
 var _ISICHandler = null;
 
+function afterConfigPT (){
+  FormManager.enable('vat');
+}
+
 function addHandlersForPT() {
   if (_postalCodeHandler == null) {
     _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
@@ -942,6 +946,7 @@ function disableVatIfNotEmptyPortugal() {
       FormManager.enable('vat');
     }
   }
+  afterConfigPT ();
 }
 
 function disableVatIfNotEmptySpain() {
@@ -1913,6 +1918,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
   
   // PT Legacy 
+  GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
