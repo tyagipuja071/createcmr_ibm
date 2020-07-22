@@ -917,8 +917,8 @@ public class GreeceTransformer extends EMEATransformer {
       legacyAddr.setCity(addr.getCity1());
     }
 
-    if (!StringUtils.isBlank(addr.getCustPhone())) {
-      if ("ZD01".equals(addr.getId().getAddrType())) {
+    if ("ZD01".equals(addr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(addr.getCustPhone())) {
         if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
           legacyAddr.setAddrPhone("");
         } else {
