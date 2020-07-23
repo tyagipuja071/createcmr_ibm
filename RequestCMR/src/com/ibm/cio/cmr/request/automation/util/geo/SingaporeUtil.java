@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +20,9 @@ import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
@@ -169,7 +172,54 @@ public class SingaporeUtil extends AutomationUtil {
       }
     }
   }
-  
+
+  @Override
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Admin admin = requestData.getAdmin();
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+    StringBuilder details = new StringBuilder();
+    boolean cmdeReview = false;
+    List<String> ignoredUpdates = new ArrayList<String>();
+    for (UpdatedDataModel change : changes.getDataUpdates()) {
+      switch (change.getDataField()) {
+      case "ISIC":
+      case "Market Responsibility Code (MRC)":
+      case "Cluster":
+      case "GB segment":
+      case "ISU Code":
+      case "INAC/NAC Code":
+      case "Sales Rep No":
+      case "AR Code":
+        cmdeReview = true;
+        break;
+      default:
+        ignoredUpdates.add(change.getDataField());
+        break;
+      }
+    }
+    if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      details.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
+      }
+    }
+    output.setDetails(details.toString());
+    output.setProcessOutput(validation);
+    return true;
+  }
+
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
