@@ -507,7 +507,7 @@ public class CyprusTransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     String custSubGrp = data.getCustSubGrp();
     LOG.debug("Set max and min range For CY...");
-    if (custSubGrp != null && "INTER".equals(custSubGrp) || custSubGrp != null && "XINTR".equals(custSubGrp)) {
+    if (custSubGrp != null && "INTER".equals(custSubGrp) || custSubGrp != null && "CRINT".equals(custSubGrp)) {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }

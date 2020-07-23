@@ -88,7 +88,7 @@
           <label>Sales Rep. No.</label>
           <dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
           <width>30</width>
-          <bdsId>SalRepNameNo</bdsId>
+          <lovId>SalRepNameNo</lovId>
         </column>
       </columns>
     </tab>
