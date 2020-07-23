@@ -1179,6 +1179,8 @@ function forceLockScenariosSpain() {
   FormManager.enable('clientTier');
   FormManager.enable('specialTaxCd');
   FormManager.enable('repTeamMemberNo');
+  fieldsToDisable.push('cmrNo');
+  fieldsToDisable.push('soeReqNo');
 
   if (custSubGroup == 'COMME') {
     fieldsToDisable.push('mailingCondition');
@@ -1194,7 +1196,7 @@ function forceLockScenariosSpain() {
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
+    // fieldsToDisable.push('repTeamMemberNo');
     // fieldsToDisable.push('isuCd');
     // fieldsToDisable.push('clientTier');
     // fieldsToDisable.push('inacCd');
@@ -1266,9 +1268,8 @@ function forceLockScenariosSpain() {
       fieldsToDisable.push('ppsceid');
       fieldsToDisable.push('memLvl');
       fieldsToDisable.push('bpRelType');
-      fieldsToDisable.push('salesBusOffCd');
     }
-    fieldsToDisable.push('soeReqNo');
+    fieldsToDisable.push('salesBusOffCd');
     fieldsToDisable.push('repTeamMemberNo');
   } else {
     FormManager.enable('isuCd');
@@ -1276,7 +1277,9 @@ function forceLockScenariosSpain() {
     FormManager.enable('inacCd');
     FormManager.enable('enterprise');
     FormManager.enable('dunsNo');
-    FormManager.enable('ppsceid');
+    if (custSubGroup == 'XBP' || custSubGroup == 'BUSPR') {
+      FormManager.enable('ppsceid');
+    }
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('salesBusOffCd');
   }
