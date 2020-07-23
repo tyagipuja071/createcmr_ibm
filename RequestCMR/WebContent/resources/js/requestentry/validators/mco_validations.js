@@ -1268,8 +1268,8 @@ function forceLockScenariosSpain() {
       fieldsToDisable.push('ppsceid');
       fieldsToDisable.push('memLvl');
       fieldsToDisable.push('bpRelType');
+      fieldsToDisable.push('salesBusOffCd');
     }
-    fieldsToDisable.push('salesBusOffCd');
     fieldsToDisable.push('repTeamMemberNo');
   } else {
     FormManager.enable('isuCd');
