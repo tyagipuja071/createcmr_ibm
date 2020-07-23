@@ -49,6 +49,7 @@ public class CyprusTransformer extends EMEATransformer {
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
   private static final String DEFAULT_CLEAR_CHAR = "@";
+  private static final String DEFAULT_CLEAR_NUM = "0";
 
   public CyprusTransformer() {
     super(SystemLocation.CYPRUS);
@@ -509,7 +510,11 @@ public class CyprusTransformer extends EMEATransformer {
       for (MassUpdtAddr mua : muaList) {
         if ("ZS01".equals(mua.getId().getAddrType())) {
           if (!StringUtils.isBlank(mua.getCounty())) {
-            cust.setTelNoOrVat(mua.getCounty());
+            if (DEFAULT_CLEAR_NUM.equals(mua.getCounty().trim())) {
+              cust.setTelNoOrVat("");
+            } else {
+              cust.setTelNoOrVat(mua.getCounty());
+            }
           }
           break;
         }
@@ -530,8 +535,14 @@ public class CyprusTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isBlank(addr.getCounty())) {
-      if (addr.getId().getAddrType().equals("ZD01"))
-        legacyAddr.setAddrPhone(addr.getCounty());
+      if (addr.getId().getAddrType().equals("ZD01")) {
+        if (DEFAULT_CLEAR_NUM.equals(addr.getCounty().trim())) {
+          legacyAddr.setAddrPhone("");
+        } else {
+          legacyAddr.setAddrPhone(addr.getCounty());
+        }
+      }
+
     }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
@@ -573,37 +584,20 @@ public class CyprusTransformer extends EMEATransformer {
 
     // Att Person or Address Con't/Occupation
     if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt2())) {
-        line3 = "";
-      } else {
-        line3 = massUpdtAddr.getAddrTxt2();
-      }
+      line3 = massUpdtAddr.getAddrTxt2();
     } else if (!StringUtils.isBlank(massUpdtAddr.getCustNm4())) {
       if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
         line3 = "ATT " + line3;
       }
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getCustNm4())) {
-        line3 = "";
-      } else {
-        line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
-      }
+      line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
     }
 
     // Street OR PO BOX
     if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getAddrTxt())) {
-        line4 = "";
-      } else {
-        line4 = massUpdtAddr.getAddrTxt();
-      }
+      line4 = massUpdtAddr.getAddrTxt();
     } else if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
-      if (DEFAULT_CLEAR_CHAR.equals(massUpdtAddr.getPoBox())) {
-        line4 = "";
-        legacyAddr.setPoBox("");
-      } else {
-        line4 = "PO BOX " + massUpdtAddr.getPoBox();
-        legacyAddr.setPoBox(massUpdtAddr.getPoBox());
-      }
+      line4 = "PO BOX " + massUpdtAddr.getPoBox();
+      legacyAddr.setPoBox(massUpdtAddr.getPoBox());
     }
 
     if (!StringUtils.isEmpty(massUpdtAddr.getPostCd()) || !StringUtils.isEmpty(massUpdtAddr.getCity1())) {
