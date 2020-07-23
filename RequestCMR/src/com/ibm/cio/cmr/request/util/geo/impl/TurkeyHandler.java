@@ -291,7 +291,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                if (!StringUtils.isEmpty(addrType)) {
 	                  addr = cloneAddress(record, addrType);
 	                  addr.setCmrDept(record.getCmrCity2());
-                  if (StringUtils.isEmpty(record.getCmrIntlAddress())) {
+                  if (StringUtils.isEmpty(record.getCmrStreetAddress())) {
                     addr.setCmrStreetAddress("\u00a0");
                   }
 	                  converted.add(addr);
@@ -404,7 +404,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            newzi01.setParentCMRNo("");
 	            newzi01.setCmrSapNumber("");
             newzi01.setCmrDept(mainRecord.getCmrCity2());
-            if (StringUtils.isEmpty(mainRecord.getCmrIntlAddress())) {
+            if (StringUtils.isEmpty(mainRecord.getCmrStreetAddress())) {
               newzi01.setCmrStreetAddress("\u00a0");
             }
 
@@ -418,7 +418,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            newzd01.setParentCMRNo("");
 	            newzd01.setCmrSapNumber("");
             newzd01.setCmrDept(mainRecord.getCmrCity2());
-            if (StringUtils.isEmpty(mainRecord.getCmrIntlAddress())) {
+            if (StringUtils.isEmpty(mainRecord.getCmrStreetAddress())) {
               newzd01.setCmrStreetAddress("\u00a0");
             }
 	            converted.add(newzd01);

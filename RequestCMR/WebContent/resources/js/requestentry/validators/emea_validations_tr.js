@@ -4215,24 +4215,24 @@ function addPostalCodeLenForTurGreCypValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
-function setPostalCodeTurGreCypValidator() {
-  var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-  var postal_cd = FormManager.getActualValue('postCd');
-  var custType = FormManager.getActualValue('custGrp');
-  if (custType == 'CROSS') {
-    FormManager.removeValidator('postCd', Validators.NUMBER);
-  } else {
-    if (cmrIssuingCntry == SysLoc.GREECE || cmrIssuingCntry == SysLoc.TURKEY) {
-      if (postal_cd.length == 5) {
-        FormManager.addValidator('postCd', Validators.NUMBER, [ 'Postal Code' ]);
-      }
-    } else if (cmrIssuingCntry == SysLoc.CYPRUS) {
-      if (postal_cd.length == 4) {
-        FormManager.addValidator('postCd', Validators.NUMBER, [ 'Postal Code' ]);
-      }
-    }
-  }
-}
+// function setPostalCodeTurGreCypValidator() {
+// var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+// var postal_cd = FormManager.getActualValue('postCd');
+// var custType = FormManager.getActualValue('custGrp');
+// if (custType == 'CROSS') {
+// FormManager.removeValidator('postCd', Validators.NUMBER);
+// } else {
+// if (cmrIssuingCntry == SysLoc.GREECE || cmrIssuingCntry == SysLoc.TURKEY) {
+// if (postal_cd.length == 5) {
+// FormManager.addValidator('postCd', Validators.NUMBER, [ 'Postal Code' ]);
+// }
+// } else if (cmrIssuingCntry == SysLoc.CYPRUS) {
+// if (postal_cd.length == 4) {
+// FormManager.addValidator('postCd', Validators.NUMBER, [ 'Postal Code' ]);
+// }
+// }
+// }
+// }
 
 function abbrvLocMandatory() {
   var interval = new Object();
@@ -8693,7 +8693,9 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator, [
   // SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ], null, true);
-  GEOHandler.addAddrFunction(setPostalCodeTurGreCypValidator, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+  // GEOHandler.addAddrFunction(setPostalCodeTurGreCypValidator, [
+  // SysLoc.GREECE,
+  // SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(abbrvLocMandatory, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(abbrvLocMandatoryOnChange, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.GREECE, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.GREECE ], null, true);
