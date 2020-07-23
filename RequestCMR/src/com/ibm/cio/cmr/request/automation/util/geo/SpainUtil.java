@@ -254,18 +254,19 @@ public class SpainUtil extends AutomationUtil {
         if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
             && !(change.getOldData().equals(change.getNewData()))) {
           // UPDATE
-          String oldData = change.getOldData().substring(1);
-          String newData = change.getNewData().substring(1);
+          String oldData = change.getOldData().substring(3, 11);
+          String newData = change.getNewData().substring(3, 11);
           if (!(oldData.equals(newData))) {
             resultCodes.add("D");// Reject
-            details.append("VAT # on the request has characters updated other than the first character\n");
+            details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
           } else {
             details.append("VAT # on the request differs only in the first Character\n");
           }
         }
         break;
       case "Order Block Code":
-        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData())) {
+        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData()) || "92".equals(change.getOldData())
+            || "92".equals(change.getNewData())) {
           cmdeReview = true;
         }
         break;
@@ -329,6 +330,7 @@ public class SpainUtil extends AutomationUtil {
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -367,7 +369,26 @@ public class SpainUtil extends AutomationUtil {
               LOG.debug("Update to InstallAt and Mailing " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to InstallAt and Mailing (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
             } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && null == changes.getDataChange("VAT #")) {
-              checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks").append("\n");
+              Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+              if (!matchesDnb) {
+                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                resultCodes.add("R");
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+              } else {
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
+              }
             } else {
               checkDetails.append("Updates to Updated Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
                   .append("\n");

@@ -574,10 +574,10 @@ function setEnterpriseValues(clientTier) {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
   if ((cntry == SysLoc.PORTUGAL) || (cntry == SysLoc.SPAIN && custSubGrp != 'XBP' && custSubGrp != 'BUSPR')) {
-    FormManager.enable('enterprise');
+    // FormManager.enable('enterprise');
   } else {
     FormManager.setValue('enterprise', '');
-    FormManager.readOnly('enterprise');
+    // FormManager.readOnly('enterprise');
   }
   clientTier = FormManager.getActualValue('clientTier');
 
@@ -586,7 +586,7 @@ function setEnterpriseValues(clientTier) {
   var isuCtc = isuCd + clientTier;
   if (custGroup != 'CROSS') {
     if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
-      FormManager.readOnly('enterprise');
+      // FormManager.readOnly('enterprise');
       setSBOAndEBO();
       return;
     }
@@ -1309,38 +1309,38 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('mailingCondition');
 
   } else if (custSubGroup == 'BUSPR') {
-    fieldsToDisable.push('isuCd');
-    fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('enterprise');
-    fieldsToDisable.push('inacCd');
-    fieldsToDisable.push('repTeamMemberNo');
+    // fieldsToDisable.push('isuCd');
+    // fieldsToDisable.push('clientTier');
+    // fieldsToDisable.push('enterprise');
+    // fieldsToDisable.push('inacCd');
+    // fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
     fieldsToDisable.push('repTeamMemberNo');
-    fieldsToDisable.push('isuCd');
-    fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('inacCd');
+    // fieldsToDisable.push('isuCd');
+    // fieldsToDisable.push('clientTier');
+    // fieldsToDisable.push('inacCd');
     // fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'INTSO') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
-    fieldsToDisable.push('isuCd');
-    fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('inacCd');
+    // fieldsToDisable.push('repTeamMemberNo');
+    // fieldsToDisable.push('isuCd');
+    // fieldsToDisable.push('clientTier');
+    // fieldsToDisable.push('inacCd');
     // fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'PRICU') {
     fieldsToDisable.push('isicCd');
-    fieldsToDisable.push('isuCd');
-    fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('repTeamMemberNo');
+    // fieldsToDisable.push('isuCd');
+    // fieldsToDisable.push('clientTier');
+    // fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('vat');
-    fieldsToDisable.push('inacCd');
+    // fieldsToDisable.push('inacCd');
     // fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'XCRO') {
@@ -1351,30 +1351,30 @@ function forceLockScenariosSpain() {
 
   } else if (custSubGroup == 'XBP') {
     // fieldsToDisable.push(('locationNumber'));
-    fieldsToDisable.push(('isuCd'));
-    fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('enterprise');
-    fieldsToDisable.push('inacCd');
-    fieldsToDisable.push('repTeamMemberNo');
+    // fieldsToDisable.push(('isuCd'));
+    // fieldsToDisable.push('clientTier');
+    // fieldsToDisable.push('enterprise');
+    // fieldsToDisable.push('inacCd');
+    // fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'XINSO') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
-    fieldsToDisable.push('isuCd');
-    fieldsToDisable.push('clientTier');
+    // fieldsToDisable.push('repTeamMemberNo');
+    // fieldsToDisable.push('isuCd');
+    // fieldsToDisable.push('clientTier');
 
   } else if (custSubGroup == 'XINTR') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    fieldsToDisable.push('repTeamMemberNo');
-    fieldsToDisable.push('isuCd');
-    fieldsToDisable.push('clientTier');
+    // fieldsToDisable.push('repTeamMemberNo');
+    // fieldsToDisable.push('isuCd');
+    // fieldsToDisable.push('clientTier');
   }
 
   // common to all scenarios
-  if (reqType = 'C' && role == 'REQUESTER') {
+  if (role == 'REQUESTER') {
     fieldsToDisable.push('abbrevNm');
     fieldsToDisable.push('abbrevLocn');
     FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
@@ -1391,7 +1391,7 @@ function forceLockScenariosSpain() {
       fieldsToDisable.push('ppsceid');
       fieldsToDisable.push('memLvl');
       fieldsToDisable.push('bpRelType');
-      fieldsToDisable.push('salesBusoffCd');
+      fieldsToDisable.push('salesBusOffCd');
     }
     fieldsToDisable.push('soeReqNo');
     fieldsToDisable.push('repTeamMemberNo');
@@ -1403,7 +1403,7 @@ function forceLockScenariosSpain() {
     FormManager.enable('dunsNo');
     FormManager.enable('ppsceid');
     FormManager.enable('repTeamMemberNo');
-    FormManager.enable('salesBusoffCd');
+    FormManager.enable('salesBusOffCd');
   }
   fieldsToDisable.push('cmrOwner');
   fieldsToDisable.push('collectionCd');
