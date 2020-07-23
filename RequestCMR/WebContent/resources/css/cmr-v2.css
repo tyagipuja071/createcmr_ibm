@@ -1,0 +1,38 @@
+div#v2-title {
+	position: relative;
+	top: -30px;
+	color:white;
+  font-style: normal !important;
+  width:400px;
+  float:left;
+  padding-left:10px;
+}
+
+div#v2-logon {
+  position: relative;
+  top: -30px;
+  color:white;
+  font-style: normal !important;
+  width:600px;
+  float:right;
+  text-align: right;
+  padding-right:10px;
+  font-size: 13px;
+}
+
+div#v2-logon a {
+	background: white;
+	border-radius: 3px;
+	width:50px;
+	height: 20px;
+	font-size: 11px;
+	color: black;
+	text-decoration: none;
+	margin-left:10px;
+  padding-right: 5px;
+	padding-left: 5px;
+	padding-top: 3px;
+  padding-bottom: 3px;
+  text-transform: uppercase;
+  font-weight: bold;
+}

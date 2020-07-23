@@ -7,6 +7,17 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 
+<script>
+  dojo.addOnLoad(function(){
+    var msg  = 'CreateCMR has moved to the IBM Public Cloud on <strong> July 20, 2020</strong>. <br><span style="color:red">This link will be sunset after 2 months.</span><br><br>';
+    msg +='We advise everyone to bookmark and start using the new application';
+    msg += ' at<br><strong><a style="font-size:16px" href="https://createcmr.c360-staging-cluster.us-south.containers.appdomain.cloud/CreateCMR/login">https://createcmr.c360-staging-cluster.us-south.containers.appdomain.cloud/CreateCMR/login</a></strong><br>';
+    msg += '<br>For any issues or concerns, kindly reach out to CI Operations via <strong>CCM Worldwide Support/Raleigh/Contr/IBM</strong>';
+    var node = '<div style="font-size:17px">'+msg+'</div>';
+    //cmr.showAlert(node);
+  });
+</script>
+
 <script src="${resourcesPath}/js/login.js?${cmrv}" type="text/javascript"></script>
 
 <!-- start main content -->
