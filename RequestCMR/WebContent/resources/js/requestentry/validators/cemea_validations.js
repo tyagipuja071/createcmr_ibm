@@ -1700,6 +1700,12 @@ function addCEMEAChecklistValidator() {
             }
           }
         }
+        // add check for checklist on DB
+        var reqId = FormManager.getActualValue('reqId');
+        var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {REQID : reqId});
+        if (!record || !record.sectionA1){
+          return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
+        }
         return new ValidationResult(null, true);
       }
     };
