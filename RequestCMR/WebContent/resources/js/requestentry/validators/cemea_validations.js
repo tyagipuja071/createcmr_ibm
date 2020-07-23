@@ -2942,11 +2942,12 @@ function setClassificationCodeCEE() {
 function lockIsicCdCEE() {
   var reqType = FormManager.getActualValue('reqType');
   if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    // var isic = FormManager.getActualValue('isicCd');
-    // if ('9500' == isic || '0000' == isic) {
-    FormManager.readOnly('isicCd');
-    // } else {
-    // FormManager.enable('isicCd');
+    var isic = FormManager.getActualValue('isicCd');
+    if ('9500' == isic || '0000' == isic) {
+      FormManager.readOnly('isicCd');
+    } else {
+      FormManager.enable('isicCd');
+    }
   }
 }
 
