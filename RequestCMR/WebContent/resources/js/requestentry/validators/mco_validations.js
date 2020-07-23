@@ -1279,6 +1279,8 @@ function forceLockScenariosSpain() {
     FormManager.enable('dunsNo');
     if (custSubGroup == 'XBP' || custSubGroup == 'BUSPR') {
       FormManager.enable('ppsceid');
+    } else {
+      fieldsToDisable.push('ppsceid');
     }
     FormManager.enable('repTeamMemberNo');
     FormManager.enable('salesBusOffCd');
