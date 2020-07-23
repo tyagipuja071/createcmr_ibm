@@ -403,6 +403,14 @@ function addVatExemptHandler() {
     if (_vatExemptHandler == null) {
       _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
         setVatRequired(value);
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (cntry == '704') {
+          setTaxCd1MandatoryCroatia();
+        } else if (cntry == '668') {
+          setTaxCd1MandatoryCzech();
+        } else if (cntry == '693') {
+          setICOAndDICMandatory();
+        }
       });
     }
   }
@@ -3196,13 +3204,19 @@ function setICOAndDICMandatory() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var _custType = FormManager.getActualValue('custSubGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
-    FormManager.resetValidations('company');
-    FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
-  } else {
+  if (!dijit.byId('vatExempt')) {
+    window.setTimeout('setICOAndDICMandatory()', 500);
+  } else if (dijit.byId('vatExempt').get('checked')) {
     FormManager.removeValidator('company', Validators.REQUIRED);
+  } else {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+      FormManager.resetValidations('company');
+      FormManager.addValidator('company', Validators.REQUIRED, [ 'IČO' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('company', Validators.REQUIRED);
+    }
   }
 }
 
@@ -3228,12 +3242,33 @@ function setClassificationCodeCEE() {
 function lockIsicCdCEE() {
   var reqType = FormManager.getActualValue('reqType');
   if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    // var isic = FormManager.getActualValue('isicCd');
-    // if ('9500' == isic || '0000' == isic) {
-    FormManager.readOnly('isicCd');
-    // } else {
-    // FormManager.enable('isicCd');
+    var isic = FormManager.getActualValue('isicCd');
+    if ('9500' == isic || '0000' == isic) {
+      FormManager.readOnly('isicCd');
+    } else {
+      FormManager.enable('isicCd');
+    }
   }
+}
+
+function validateIsicCEEValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var isic = FormManager.getActualValue('isicCd');
+        if ('9500' == isic
+            && !(FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'CSPC'
+                || FormManager.getActualValue('custSubGrp') == 'MEPC' || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSPC')) {
+          return new ValidationResult(null, false, 'ISIC 9500 should not be used for this Scenario Sub-type');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function reqReasonOnChange() {
@@ -3356,17 +3391,23 @@ function setCustomerName2LblAndBubble() {
   }
 }
 
-function setTaxCd1Mandatory() {
+function setTaxCd1MandatoryCzech() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  var _custType = FormManager.getActualValue('custSubGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
-    FormManager.resetValidations('taxCd1');
-    FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'IČ' ], 'MAIN_CUST_TAB');
-  } else {
+  if (!dijit.byId('vatExempt')) {
+    window.setTimeout('setTaxCd1MandatoryCzech()', 500);
+  } else if (dijit.byId('vatExempt').get('checked')) {
     FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  } else {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if (role == 'REQUESTER' && (_custType == 'BUSPR' || _custType == 'COMME' || _custType == 'THDPT')) {
+      FormManager.resetValidations('taxCd1');
+      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'IČ' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    }
   }
 }
 
@@ -3376,6 +3417,26 @@ function setCityBubble() {
     document.getElementById('cityRomaniaInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = '';
   } else {
     document.getElementById('cityRomaniaInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = 'none';
+  }
+}
+
+function setTaxCd1MandatoryCroatia() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (!dijit.byId('vatExempt')) {
+    window.setTimeout('setTaxCd1MandatoryCroatia()', 500);
+  } else if (dijit.byId('vatExempt').get('checked')) {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  } else {
+    var custType = FormManager.getActualValue('custGrp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if (role == 'REQUESTER' && custType == 'LOCAL') {
+      FormManager.resetValidations('taxCd1');
+      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'OIB' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    }
   }
 }
 
@@ -3399,11 +3460,15 @@ function initAddressPageHungary() {
 }
 
 function afterConfigTemplateForCzech() {
-  setTaxCd1Mandatory();
+  setTaxCd1MandatoryCzech();
 }
 
 function initAddressPageRomania() {
   setCityBubble();
+}
+
+function afterConfigTemplateForCroatia() {
+  setTaxCd1MandatoryCroatia();
 }
 
 dojo.addOnLoad(function() {
@@ -3567,7 +3632,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
-  GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);  
+  GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
+  GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
@@ -3578,4 +3644,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
   // Romania
   GEOHandler.addAddrFunction(initAddressPageRomania, [ SysLoc.ROMANIA ]);
+  // Croatia
+  GEOHandler.addAfterConfig(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
+
 });

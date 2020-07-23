@@ -947,6 +947,7 @@ public class CEETransformer extends EMEATransformer {
     String landedCntry = "";
 
     formatDataLines(dummyHandler);
+    setDefaultLandedCountry(data);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
@@ -1607,12 +1608,14 @@ public class CEETransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-    return true;
+    // return true;
+    return (!"SI".equals(DEFAULT_LANDED_COUNTRY));
   }
 
   @Override
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
+
     Data data = cmrObjects.getData();
 
     if (!StringUtils.isBlank(data.getTaxCd1())) {
