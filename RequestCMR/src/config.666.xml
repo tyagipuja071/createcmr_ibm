@@ -164,6 +164,12 @@
           <dbColumn>COUNTY</dbColumn>
           <length>30</length>
         </column>
+        <column>
+        	<label>Tax Office</label>
+        	<dbColumn>COUNTY</dbColumn>
+        	<length>30</length>
+        	<width>18</width>
+        </column>
       </columns>
     </tab>
     <tab name="Billing Address" type="Address" typeCode="ZP01">
