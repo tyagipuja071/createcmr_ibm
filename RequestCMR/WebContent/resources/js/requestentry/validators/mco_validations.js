@@ -65,7 +65,7 @@ function addEmbargoCodeValidatorSpain() {
 
         if (embargoCd != '' && embargoCd.length > 0) {
           embargoCd = embargoCd.trim();
-          if ((embargoCd != '' && embargoCd.length == 1) && (embargoCd == 'E' || embargoCd == 'J')) {
+          if ((embargoCd != '' && embargoCd.length == 2) && (embargoCd == '88' || embargoCd == '92' || embargoCd == '94')) {
             return new ValidationResult(null, true);
           } else {
             return new ValidationResult({
