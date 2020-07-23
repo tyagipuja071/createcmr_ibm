@@ -188,7 +188,7 @@ public class PortugalTransformer extends MessageTransformer {
   }
 
   protected void handleDataDefaults(MQMessageHandler handler, Map<String, String> messageHash, Data cmrData, boolean crossBorder, Addr addrData) {
-    
+
     String custType = cmrData.getCustSubGrp();
     if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
       messageHash.put("MarketingResponseCode", "5");
@@ -196,8 +196,8 @@ public class PortugalTransformer extends MessageTransformer {
       messageHash.put("ARemark", "YES");
     } else if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType) || "CRGOV".equals(custType)) {
       messageHash.put("CustomerType", "G");
-    } else if (MQMsgConstants.CUSTSUBGRP_INTER.equals(custType) || MQMsgConstants.CUSTSUBGRP_INTSO.equals(custType)
-      || "CRINT".equals(custType) || "CRISO".equals(custType)) {
+    } else if (MQMsgConstants.CUSTSUBGRP_INTER.equals(custType) || MQMsgConstants.CUSTSUBGRP_INTSO.equals(custType) || "CRINT".equals(custType)
+        || "CRISO".equals(custType)) {
       messageHash.put("CustomerType", "91");
     } else {
       messageHash.put("ARemark", "");
@@ -206,7 +206,7 @@ public class PortugalTransformer extends MessageTransformer {
 
     String sbo = messageHash.get("SBO");
     messageHash.put("IBO", sbo);
-    
+
     messageHash.put("CICode", "3");
     messageHash.put("AccAdBo", "");
     messageHash.put("LangCode", "1");
@@ -215,13 +215,13 @@ public class PortugalTransformer extends MessageTransformer {
     messageHash.put("CustomerLanguage", "1");
     handler.messageHash.put("SourceCode", "FO5");
     messageHash.put("MarketingResponseCode", "3");
-    
+
     boolean create = "C".equals(handler.adminData.getReqType());
     if (create) {
       messageHash.put("NationalCust", "N");
       messageHash.put("DPCEBO", "00A0811");
     }
-    
+
   }
 
   /**
@@ -241,7 +241,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
     return "";
   }
-  
+
   @Override
   public String[] getAddressOrder() {
     return ADDRESS_ORDER;
@@ -287,12 +287,12 @@ public class PortugalTransformer extends MessageTransformer {
   public String getSysLocToUse() {
     return SystemLocation.PORTUGAL;
   }
-  
+
   @Override
   public String getFixedAddrSeqForProspectCreation() {
     return "00002";
   }
-  
+
   @Override
   public String getAddressUse(Addr addr) {
     switch (addr.getId().getAddrType()) {
@@ -314,7 +314,7 @@ public class PortugalTransformer extends MessageTransformer {
   protected boolean isCrossBorder(Addr addr) {
     return !"PT".equals(addr.getLandCntry());
   }
-  
+
   protected boolean zs01CrossBorder(MQMessageHandler handler) {
     EntityManager entityManager = handler.getEntityManager();
     if (entityManager == null) {
@@ -349,12 +349,12 @@ public class PortugalTransformer extends MessageTransformer {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
     String landedCntry = "";
-    
+
     formatDataLines(dummyHandler);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
-      
+
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
@@ -420,7 +420,7 @@ public class PortugalTransformer extends MessageTransformer {
     } else {
       legacyCust.setAbbrevNm("");
     }
-    
+
     // vat
     if (!StringUtils.isEmpty(data.getVat()) || !StringUtils.isBlank(data.getVat())) {
       legacyCust.setVat(data.getVat());
@@ -488,7 +488,7 @@ public class PortugalTransformer extends MessageTransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
-    
+
     legacyCust.setDistrictCd(data.getTerritoryCd() != null ? data.getTerritoryCd() : "");
     legacyCust.setBankBranchNo(data.getCollectionCd() != null ? data.getCollectionCd() : "");
   }
@@ -511,7 +511,7 @@ public class PortugalTransformer extends MessageTransformer {
     formatAddressLines(dummyHandler);
     if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
       if (!(StringUtils.isBlank(currAddr.getCustPhone())) || !(StringUtils.isEmpty(currAddr.getCustPhone()))) {
-        legacyAddr.setAddrPhone("TF"+currAddr.getCustPhone());
+        legacyAddr.setAddrPhone("TF" + currAddr.getCustPhone());
       }
     }
   }
@@ -530,14 +530,14 @@ public class PortugalTransformer extends MessageTransformer {
       generateCMRNoObj.setMax(999999);
     }
   }
-  
+
   @Override
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust legacyCust, CMRRequestContainer cmrObjects,
       MassUpdtData muData) {
-    
+
     // default mapping for DATA and CMRTCUST
     LOG.debug("Mapping default Data values..");
-    
+
     if (!StringUtils.isBlank(muData.getAbbrevNm())) {
       legacyCust.setAbbrevNm(muData.getAbbrevNm());
     }
@@ -586,7 +586,8 @@ public class PortugalTransformer extends MessageTransformer {
         // cust.setCollectionCd("");
         legacyCust.setDistrictCd("");
       } else {
-        legacyCust.setDistrictCd(muData.getCollectionCd());
+        String distCode = getDistrictCodeForMassUpdate(muData.getCollectionCd().trim(), entityManager);
+        legacyCust.setDistrictCd(distCode != null ? distCode : "");
       }
     }
 
@@ -749,12 +750,12 @@ public class PortugalTransformer extends MessageTransformer {
       formatMassUpdateAddressLines(entityManager, legacyFiscalAddr, addr, true);
       legacyObjects.addAddress(legacyFiscalAddr);
     }
-    
+
   }
-  
+
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
-    
+
     boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
     Map<String, String> messageHash = new LinkedHashMap<String, String>();
@@ -878,5 +879,19 @@ public class PortugalTransformer extends MessageTransformer {
   public boolean enableTempReactOnUpdates() {
     return true;
   }
-  
+
+  private String getDistrictCodeForMassUpdate(String collectionCd, EntityManager entityManager) {
+    String distCd = null;
+    if (entityManager == null) {
+      return null;
+    }
+    String sql = ExternalizedQuery.getSql("GET_DISTRICT_CODE_PT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CD", collectionCd);
+    query.setForReadOnly(true);
+    distCd = query.getSingleResult(String.class);
+    return distCd;
+
+  }
+
 }
