@@ -3357,7 +3357,7 @@ function addCYAddressTypeValidator() {
             }
           }
           
-          if(!isLandedCntryMatch(zs01Data, zp01Data)) {
+          if(zs01Data!= null && zp01Data!= null && !isLandedCntryMatch(zs01Data, zp01Data)) {
             return new ValidationResult(null, false, 'Mailing and Billing should have the same landed country.');
           }
           
@@ -4163,7 +4163,7 @@ function hideMOPAFieldForGR() {
 }
 
 function setTypeOfCustomerBehaviorForCY() {
-  //Customer Type behaviour for CY
+  // Customer Type behaviour for CY
   if (FormManager.getActualValue('reqType') == 'C') {
     FormManager.hide('CrosSubTyp', 'crosSubTyp');
   } else if(FormManager.getActualValue('reqType') == 'U') {
@@ -8279,7 +8279,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE, SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
-  //Customer Type behaviour for CY
+  // Customer Type behaviour for CY
   GEOHandler.addAfterConfig(setTypeOfCustomerBehaviorForCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(disableAddrFieldsGR, [ SysLoc.GREECE ]);
   GEOHandler.addAddrFunction(addLatinCharValidator, [ SysLoc.GREECE ]);
