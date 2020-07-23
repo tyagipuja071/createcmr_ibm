@@ -2951,6 +2951,26 @@ function lockIsicCdCEE() {
   }
 }
 
+function validateIsicCEEValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var isic = FormManager.getActualValue('isicCd');
+        if ('9500' == isic
+            && !(FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'CSPC'
+                || FormManager.getActualValue('custSubGrp') == 'MEPC' || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSPC')) {
+          return new ValidationResult(null, false, 'ISIC 9500 should not be used for this Scenario Sub-type');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function reqReasonOnChange() {
   var reqReason = FormManager.getActualValue('reqReason');
   var addressListIGF = [ 'ZP03', 'ZD02' ];
@@ -3272,6 +3292,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
+  GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
