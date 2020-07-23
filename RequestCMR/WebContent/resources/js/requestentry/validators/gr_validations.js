@@ -95,7 +95,9 @@ function addEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
     var scenario = FormManager.getActualValue('custGrp');
     if ((scenario == 'LOCAL' || FormManager.getActualValue('reqType') == 'U') && FormManager.getActualValue('addrType') == 'ZP01') {
           GEOHandler.disableCopyAddress();
-      }
+    } else {
+      GEOHandler.enableCopyAddress([SysLoc.GREECE], validateEMEACopy, [ 'ZD01', 'ZI01' ]);
+    }
   }
 }
 
@@ -1658,6 +1660,7 @@ function addLatinCharValidator() {
       checkAndAddValidator('addrTxt2', Validators.LATIN, [ 'Address Con\'t' ]);
       checkAndAddValidator('dept', Validators.LATIN, [ 'Attention Person' ]);
     } else if (cntry == SysLoc.GREECE) {
+      checkAndAddValidator('custNm4', Validators.LATIN, [ 'Att. Person' ]);
       checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
       checkAndAddValidator('custNm2', Validators.LATIN, [ 'Customer Name Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.LATIN, [ ' Address Con\'t/Occupation' ]);
@@ -1672,6 +1675,7 @@ function addLatinCharValidator() {
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
     FormManager.removeValidator('custNm2', Validators.LATIN);
+    FormManager.removeValidator('custNm4', Validators.LATIN);
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('addrTxt2', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
@@ -1733,6 +1737,7 @@ function addNonLatinCharValidator() {
   } else {
     FormManager.removeValidator('custNm1', Validators.NON_LATIN);
     FormManager.removeValidator('custNm2', Validators.NON_LATIN);
+    FormManager.removeValidator('custNm4', Validators.NON_LATIN);
     FormManager.removeValidator('addrTxt', Validators.NON_LATIN);
     FormManager.removeValidator('addrTxt2', Validators.NON_LATIN);
     FormManager.removeValidator('city1', Validators.NON_LATIN);
