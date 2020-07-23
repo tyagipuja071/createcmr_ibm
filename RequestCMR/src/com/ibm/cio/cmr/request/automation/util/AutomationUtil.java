@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.UnitedKingdomUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -95,6 +96,7 @@ public abstract class AutomationUtil {
       put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
       put(SystemLocation.AUSTRIA, AustriaUtil.class);
       put(SystemLocation.SPAIN, SpainUtil.class);
+      put(SystemLocation.UNITED_KINGDOM, UnitedKingdomUtil.class);
 
     }
   };
