@@ -785,10 +785,10 @@ function setClientTierValues(isuCd) {
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'XCE' || FormManager.getActualValue('custSubGrp') == 'THDPT'
             || FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU'
             || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'CSCOM' || FormManager.getActualValue('custSubGrp') == 'CSPC'
-            || FormManager.getActualValue('custSubGrp') == 'CSTP' || FormManager.getActualValue('custSubGrp') == 'MECOM'|| FormManager.getActualValue('custSubGrp') == 'MEPC'
-              || FormManager.getActualValue('custSubGrp') == 'METP'|| FormManager.getActualValue('custSubGrp') == 'RSXCO'
-                || FormManager.getActualValue('custSubGrp') == 'RSXPC'|| FormManager.getActualValue('custSubGrp') == 'RSXTP'
-                  || FormManager.getActualValue('custSubGrp') == 'RSCOM'|| FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager.getActualValue('custSubGrp') == 'RSTP')) {
+            || FormManager.getActualValue('custSubGrp') == 'CSTP' || FormManager.getActualValue('custSubGrp') == 'MECOM' || FormManager.getActualValue('custSubGrp') == 'MEPC'
+            || FormManager.getActualValue('custSubGrp') == 'METP' || FormManager.getActualValue('custSubGrp') == 'RSXCO' || FormManager.getActualValue('custSubGrp') == 'RSXPC'
+            || FormManager.getActualValue('custSubGrp') == 'RSXTP' || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
+            .getActualValue('custSubGrp') == 'RSTP')) {
       if (isuCd == '34') {
         clientTiers = [ 'V' ];
       } else if (isuCd == '32') {
@@ -2939,6 +2939,17 @@ function setClassificationCodeCEE() {
   }
 }
 
+function lockIsicCdCEE() {
+  var reqType = FormManager.getActualValue('reqType');
+  if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
+// var isic = FormManager.getActualValue('isicCd');
+// if ('9500' == isic || '0000' == isic) {
+    FormManager.readOnly('isicCd');
+// } else {
+// FormManager.enable('isicCd');
+// }
+}
+
 function reqReasonOnChange() {
   var reqReason = FormManager.getActualValue('reqReason');
   var addressListIGF = [ 'ZP03', 'ZD02' ];
@@ -3175,6 +3186,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
+
+  GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
