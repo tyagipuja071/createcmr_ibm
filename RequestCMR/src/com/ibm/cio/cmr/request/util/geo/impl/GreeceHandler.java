@@ -1760,9 +1760,11 @@ public class GreeceHandler extends BaseSOFHandler {
       }
 
       if (SystemLocation.GREECE.equals(country)) {
-        String attPerson = currentRecord.getCmrName4().replaceFirst("ATT ", "");
-        attPerson = attPerson.replaceFirst("Υ/Ο ", "");
-        address.setCustNm4(attPerson);
+        if (!StringUtils.isBlank(currentRecord.getCmrName4())) {
+          String attPerson = currentRecord.getCmrName4().replaceFirst("ATT ", "");
+          attPerson = attPerson.replaceFirst("Υ/Ο ", "");
+          address.setCustNm4(attPerson);
+        }
       }
 
       if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
