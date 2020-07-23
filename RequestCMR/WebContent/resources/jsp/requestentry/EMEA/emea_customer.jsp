@@ -122,7 +122,9 @@
 			<cmr:column span="2" containerForField="ModeOfPayment">
 				<p>
 					<cmr:label fieldId="modeOfPayment">
-						<cmr:fieldLabel fieldId="ModeOfPayment" />: 
+						<cmr:fieldLabel fieldId="ModeOfPayment" />:
+						<cmr:delta text="${rdcdata.modeOfPayment}"
+						oldValue="${reqentry.paymentMode}" /> 
           			</cmr:label>
 					<cmr:field path="paymentMode" id="modeOfPayment"
 						fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />

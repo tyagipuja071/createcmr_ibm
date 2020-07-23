@@ -545,6 +545,17 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
 
+          if ("726".equals(oldData.getCmrIssuingCntry())) {
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "ModeOfPayment"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+              update.setNewData(getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+              update.setOldData(getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+              results.add(update);
+            }
+          }
+
           if (geoHandler != null) {
             geoHandler.addSummaryUpdatedFields(this, type, cmrCountry, newData, oldData, results);
           }
