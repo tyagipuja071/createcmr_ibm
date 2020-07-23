@@ -224,6 +224,8 @@ public class SingaporeUtil extends AutomationUtil {
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     List<Addr> addresses = null;
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
     StringBuilder checkDetails = new StringBuilder();
     boolean cmdeReview = false;
     for (String addrType : RELEVANT_ADDRESSES) {
@@ -245,7 +247,12 @@ public class SingaporeUtil extends AutomationUtil {
               && null == changes.getAddressChange(addrType, "Customer Name Con't"))) {
             Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+            boolean matchesDnb = false;
             if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
               // proceed
               checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks").append("\n");
             } else {
@@ -258,7 +265,12 @@ public class SingaporeUtil extends AutomationUtil {
           if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && multiAddressitr > 1) {
             Addr address = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
             List<DnBMatchingResponse> matches = getMatches(requestData, engineData, address, true);
-            if (matches != null && addressEquals(requestData.getAddress("ZS01"), requestData.getAddress(addrType))) {
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb && addressEquals(requestData.getAddress("ZS01"), requestData.getAddress(addrType))) {
               // proceed
               checkDetails.append("Updates to Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks").append("\n");
             } else {
