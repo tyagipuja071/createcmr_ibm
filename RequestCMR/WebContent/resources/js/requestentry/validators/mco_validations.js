@@ -12,6 +12,30 @@ var _importedIndc = null;
 var _postalCodeHandler = null;
 var _ISICHandler = null;
 
+function afterConfigPT (){
+  FormManager.enable('vat');
+}
+
+function afterTemplateLoadPT() {
+  var _reqId = FormManager.getActualValue('reqId');
+  var subCustGrp = FormManager.getActualValue('custSubGrp');
+  var addrType = FormManager.getActualValue('addrType');
+  var city1 = FormManager.getActualValue('city1');
+
+  var city1Params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZS01",
+  };
+  var city1Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city1Params);
+  var city1 = city1Result.ret1;
+  if (city1 != '' && subCustGrp != 'SAAPA') {
+    FormManager.setValue('abbrevLocn', city1);
+  } else if (subCustGrp == 'SAAPA') {
+    FormManager.setValue('abbrevLocn', 'SAAS');
+  }
+  
+}
+
 function addHandlersForPT() {
   if (_postalCodeHandler == null) {
     _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
@@ -942,6 +966,7 @@ function disableVatIfNotEmptyPortugal() {
       FormManager.enable('vat');
     }
   }
+  afterConfigPT ();
 }
 
 function disableVatIfNotEmptySpain() {
@@ -1913,9 +1938,11 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
   
   // PT Legacy 
+  GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(afterTemplateLoadPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.registerValidator(cmrNoValidatorForInternalSO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
 

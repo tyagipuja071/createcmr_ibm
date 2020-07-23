@@ -84,6 +84,12 @@
           <dbColumn>RESTRICT_TO</dbColumn>
           <length>16</length>
         </column>
+        <column>
+          <label>Sales Rep. No.</label>
+          <dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
+          <width>30</width>
+          <lovId>SalRepNameNo</lovId>
+        </column>
       </columns>
     </tab>
     <tab name="Local Lang translation Sold-to" type="Address" typeCode="ZP01">

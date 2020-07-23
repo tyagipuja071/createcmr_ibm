@@ -11,6 +11,8 @@ import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 
 /**
@@ -90,19 +92,11 @@ public class LegacyCommonUtil {
     }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getSpecialTaxCd().trim())) {
-        cust.setTaxCd("");
-      } else {
-        cust.setTaxCd(muData.getSpecialTaxCd());
-      }
+      cust.setTaxCd(muData.getSpecialTaxCd());
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getVat().trim())) {
-        cust.setVat("");
-      } else {
-        cust.setVat(muData.getVat());
-      }
+      cust.setVat(muData.getVat());
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
@@ -118,27 +112,16 @@ public class LegacyCommonUtil {
     }
 
     if (!StringUtils.isBlank(addr.getCustNm2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getCustNm2())) {
-        legacyAddr.setAddrLine2("");
-      } else {
-        legacyAddr.setAddrLine2(addr.getCustNm2());
-      }
+      legacyAddr.setAddrLine2(addr.getCustNm2());
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getAddrTxt())) {
-        legacyAddr.setStreet("");
-      } else {
-        legacyAddr.setStreet(addr.getAddrTxt());
-      }
+      legacyAddr.setStreet(addr.getAddrTxt());
+
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      if (DEFAULT_CLEAR_CHAR.equals(addr.getAddrTxt2())) {
-        legacyAddr.setStreetNo("");
-      } else {
-        legacyAddr.setStreetNo(addr.getAddrTxt2());
-      }
+      legacyAddr.setStreetNo(addr.getAddrTxt2());
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
@@ -147,11 +130,7 @@ public class LegacyCommonUtil {
 
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
-      if (DEFAULT_CLEAR_CHAR.equals(poBox)) {
-        legacyAddr.setPoBox("");
-      } else {
-        legacyAddr.setPoBox(addr.getPoBox());
-      }
+      legacyAddr.setPoBox(addr.getPoBox());
     }
   }
 
@@ -185,6 +164,23 @@ public class LegacyCommonUtil {
     data.setOrdBlk("88");
     entityManager.merge(data);
     entityManager.flush();
+  }
+
+  /**
+   * Get the salesGroupRep mapped to repTeamMemberNo
+   * 
+   * @param entityManager
+   * @param cmrIssuingCntry
+   * @param repTeamMembeNo
+   * @return String
+   */
+  public static String getSalesGroupRepMap(EntityManager entityManager, String cmrIssuingCntry, String repTeamMemberNo) {
+    String sql = ExternalizedQuery.getSql("QUERY.DATA.GET.SALESBO_CD");
+    PreparedQuery q = new PreparedQuery(entityManager, sql);
+    q.setParameter("ISSUING_CNTRY", cmrIssuingCntry);
+    q.setParameter("REP_TEAM_CD", repTeamMemberNo);
+    String salesGroupRep = q.getSingleResult(String.class);
+    return salesGroupRep;
   }
 
 }

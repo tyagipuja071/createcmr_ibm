@@ -63,8 +63,8 @@ public class CNPDFConverter extends DefaultPDFConverter {
       Table checklistMain = createDetailsTable(new float[] { 25, 75 });
 
       checklistMain.addCell(createLabelCell("Customer Name:"));
-      checklistMain.addCell(createValueCell(admin.getMainCustNm1()
-          + (!StringUtils.isEmpty(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "")));
+      checklistMain
+          .addCell(createValueCell(admin.getMainCustNm1() + (!StringUtils.isEmpty(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "")));
       if (!StringUtils.isEmpty(checklist.getLocalCustNm())) {
         checklistMain.addCell(createLabelCell("Local Customer Name:"));
         checklistMain.addCell(createValueCell(checklist.getLocalCustNm()));
@@ -93,7 +93,15 @@ public class CNPDFConverter extends DefaultPDFConverter {
         checklistSection.addCell(createLabelCell("Item"));
         checklistSection.addCell(createLabelCell("Response"));
         for (ChecklistItem item : items) {
-          checklistSection.addCell(createValueCell(item.getLabel()));
+          int padding = 1;
+          int textLength = item.getLabel().length();
+          if (textLength > 150) {
+            padding = textLength / 80;
+          }
+          if (items.indexOf(item) == 9) {
+            padding = textLength / 70;
+          }
+          checklistSection.addCell(createValueCellExtended(item.getLabel(), 1, 1, padding));
           answer = "Y".equals(item.getAnswer()) ? "Yes" : "No";
           answerCell = createValueCell(answer);
           if ("Y".equals(item.getAnswer())) {
@@ -247,4 +255,43 @@ public class CNPDFConverter extends DefaultPDFConverter {
     // ibm.addCell(createValueCell(null));
 
   }
+
+  private Cell createValueCellExtended(String text, int rowSpan, int colSpan, int padding) {
+    Cell cell = new Cell(rowSpan, colSpan);
+    ClassLoader classLoader = getClass().getClassLoader();
+    String FONT = null;
+    PdfFont font = null;
+    if ((text != null && (!text.isEmpty())) && (textContainingLanguage(text) != null)) {
+      try {
+        if (textContainingLanguage(text).equalsIgnoreCase("CHINESE")) {
+          LOG.debug(">> classLoader.getResource('ARIALUNI.TTF') >> " + classLoader.getResource("ARIALUNI.TTF"));
+          FONT = classLoader.getResource("ARIALUNI.TTF").getPath();
+          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, true);
+          cell.setFont(font);
+          Paragraph label = new Paragraph();
+          label.setFontSize(7);
+          label.add(text);
+          cell.setFont(font);
+          cell.add(label);
+          return cell;
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else {
+      cell.setHeight(10 * padding);
+      Paragraph label = null;
+      if (!StringUtils.isBlank(text)) {
+        label = new Paragraph(text);
+      } else {
+        label = new Paragraph();
+      }
+      label.setFont(this.regularFont);
+      label.setFontSize(7);
+      cell.add(label);
+      return cell;
+    }
+    return cell;
+  }
+
 }

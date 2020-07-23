@@ -1760,7 +1760,9 @@ public class GreeceHandler extends BaseSOFHandler {
       }
 
       if (SystemLocation.GREECE.equals(country)) {
-        address.setCustNm4(currentRecord.getCmrName4());
+        String attPerson = currentRecord.getCmrName4().replaceFirst("ATT ", "");
+        attPerson = attPerson.replaceFirst("Υ/Ο ", "");
+        address.setCustNm4(attPerson);
       }
 
       if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
@@ -1785,6 +1787,15 @@ public class GreeceHandler extends BaseSOFHandler {
           String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
           address.getId().setAddrSeq(seq);
         }
+      }
+      address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+
+      if ("ZD01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
+        address.setPoBox("");
+      }
+
+      if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
+        address.setCustPhone("");
       }
     }
   }
@@ -2102,6 +2113,15 @@ public class GreeceHandler extends BaseSOFHandler {
         }
       }
 
+      if (data != null) {
+        if ("ZD01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType())) {
+          addr.setPoBox("");
+        }
+
+        if ("ZP01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType())) {
+          addr.setCustPhone("");
+        }
+      }
       break;
 
     case SystemLocation.CYPRUS:
@@ -2970,7 +2990,7 @@ public class GreeceHandler extends BaseSOFHandler {
   @Override
   public List<String> getAddressFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX"));
+    fields.addAll(Arrays.asList("CUST_NM1", "CUST_NM2", "ADDR_TXT", "DEPT", "CITY1", "POST_CD", "LAND_CNTRY", "PO_BOX", "CUST_NM4"));
 
     if (SystemLocation.UNITED_KINGDOM.equals(cmrIssuingCntry) || SystemLocation.IRELAND.equals(cmrIssuingCntry)) {
       fields.add("ADDR_TXT_2");
@@ -3949,10 +3969,14 @@ public class GreeceHandler extends BaseSOFHandler {
       }
 
       if (!StringUtils.isBlank(record.getCmrIntlName4())) {
-        localTransAddr.setCmrName4(record.getCmrIntlName4());
+        String attPersonIntl = record.getCmrIntlName4().replaceFirst("ATT ", "");
+        attPersonIntl = attPersonIntl.replaceFirst("Υ/Ο ", "");
+        localTransAddr.setCmrName4(attPersonIntl);
       } else if (!StringUtils.isBlank(record.getCmrName4())) {
-        if (db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
-          localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
+        if (db2LocalTransAddr.getAddrLine3().startsWith("ATT") || db2LocalTransAddr.getAddrLine3().startsWith("Υ/Ο")) {
+          String attPersonDb2 = db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", "");
+          attPersonDb2 = attPersonDb2.replaceFirst("Υ/Ο ", "");
+          localTransAddr.setCmrName4(attPersonDb2);
         }
       }
 
@@ -3965,7 +3989,8 @@ public class GreeceHandler extends BaseSOFHandler {
       if (!StringUtils.isBlank(record.getCmrOtherIntlAddress())) {
         localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
       } else if (!StringUtils.isBlank(record.getCmrStreetAddressCont())) {
-        if (!db2LocalTransAddr.getAddrLine3().startsWith("ATT") && !db2LocalTransAddr.getAddrLine3().startsWith("PO BOX")) {
+        if (!(db2LocalTransAddr.getAddrLine3().startsWith("ATT") || db2LocalTransAddr.getAddrLine3().startsWith("Υ/Ο"))
+            && !(db2LocalTransAddr.getAddrLine3().startsWith("PO BOX") || db2LocalTransAddr.getAddrLine3().startsWith("Τ.Θ."))) {
           localTransAddr.setCmrStreetAddressCont(db2LocalTransAddr.getAddrLine3());
         }
 
@@ -3987,7 +4012,7 @@ public class GreeceHandler extends BaseSOFHandler {
       String poBox = db2LocalTransAddr.getPoBox();
       if (poBox.contains("PO BOX")) {
         poBox = poBox.substring(6).trim();
-      } else if (poBox.contains("APTO")) {
+      } else if (poBox.contains("APTO") || poBox.contains("Τ.Θ.")) {
         poBox = poBox.substring(5).trim();
       }
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
