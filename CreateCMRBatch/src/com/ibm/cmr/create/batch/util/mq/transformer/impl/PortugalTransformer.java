@@ -420,6 +420,11 @@ public class PortugalTransformer extends MessageTransformer {
     } else {
       legacyCust.setAbbrevNm("");
     }
+    
+    // vat
+    if (!StringUtils.isEmpty(data.getVat()) || !StringUtils.isBlank(data.getVat())) {
+      legacyCust.setVat(data.getVat());
+    }
 
     String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
         + (!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier() : "");
@@ -478,18 +483,6 @@ public class PortugalTransformer extends MessageTransformer {
 
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
       legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
-    }
-
-    if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
-      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
-      } else {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
-      }
-    } else {
-      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
-        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
-      }
     }
 
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
@@ -881,4 +874,9 @@ public class PortugalTransformer extends MessageTransformer {
     legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
   }
 
+  @Override
+  public boolean enableTempReactOnUpdates() {
+    return true;
+  }
+  
 }
