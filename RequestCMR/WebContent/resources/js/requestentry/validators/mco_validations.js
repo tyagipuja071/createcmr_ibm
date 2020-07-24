@@ -2282,8 +2282,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   
-  GEOHandler.registerValidator(cmrNoValidatorForInternalSO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
-  
   GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
