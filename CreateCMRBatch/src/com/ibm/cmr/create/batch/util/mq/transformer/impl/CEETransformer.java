@@ -906,6 +906,10 @@ public class CEETransformer extends EMEATransformer {
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("2");
 
+      legacyCust.setDcRepeatAgreement("0");
+      legacyCust.setLeasingInd("0");
+      legacyCust.setAuthRemarketerInd("0");
+
       if (!StringUtils.isBlank(data.getCrosSubTyp())) {
         legacyCust.setCustType(data.getCrosSubTyp());
       } else {
