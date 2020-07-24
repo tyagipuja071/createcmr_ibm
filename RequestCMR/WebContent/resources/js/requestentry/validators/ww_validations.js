@@ -643,67 +643,69 @@ function addINACValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function cmrNoValidator() {
+/*
+ * validate CMRNumber for Legacy Countries
+ */
+function validateCMRNumberForLegacy() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var cmrNo = FormManager.getActualValue('cmrNo');
-        // Condition For Prospect CMRs
-        if (cmrNo.startsWith('P')){
-          return;
-        }
-        var cmrNoRegEx = /^[0-9]*$/;
-        if (cmrNo == '000000') {
-          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed Except -> 000000');
-        } else if (cmrNo != '' && cmrNoRegEx.test(cmrNo)) {
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        var numPattern = /^[0-9]+$/;
+        if (FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
-        } else if (cmrNo != undefined && cmrNo != '') {
-          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed.');
         }
-        return new ValidationResult(null, true);
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        } else {
+          // Skip validation for Prospect Request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumberForLegacy ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            return new ValidationResult(null, true);
+          }
+          // Validation for Internal Scenario
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT') {
+            if (!cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+            }
+          }
+          if (cmrNo.length >= 1 && cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+          }
+          if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be number only.');
+          }
+          return new ValidationResult(null, true);
+        }
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function cmrNoValidatorForInternalScenario() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var cmrNo = FormManager.getActualValue('cmrNo').substring(0, 2);
-        var requestType = FormManager.getActualValue('reqType');
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        // Condition For Create and Prospect CMRs
-        if (requestType != 'C' || (cmrNo.startsWith('P'))) {
-          return;
-        }
-        if ((cmrNo == '' || cmrNo == '99') && (custSubGrp == 'INTER' || custSubGrp == 'CRINT')) {
-          return new ValidationResult(null, true);
-        } else if (cmrNo != undefined && cmrNo != '99' && (custSubGrp == 'INTER' || custSubGrp == 'CRINT')) {
-          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 99 For INTERNAL Scenario.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
-function validateExistCMRNum() {
+/*
+ * validate Existing CMRNo
+ */
+function validateExistingCMRNo() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         console.log('checking requested cmr number...');
         var reqType = FormManager.getActualValue('reqType');
         var cmrNo = FormManager.getActualValue('cmrNo');
-        // Condition For Prospect CMRs
-        if (cmrNo.startsWith('P')){
-          return;
-        }
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (reqType == 'C' && cmrNo) {
-          var exists = cmr.query('GETCMRNUMFORPROCESSOR', {
-            CNTRY : cntry,
+          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+            COUNTRY : cntry,
             CMR_NO : cmrNo,
             MANDT : cmr.MANDT
           });
@@ -713,6 +715,19 @@ function validateExistCMRNum() {
               type : 'text',
               name : 'cmrNo'
             }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          } else {
+            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+              COUNTRY : cntry,
+              CMR_NO : cmrNo,
+              MANDT : cmr.MANDT
+            });
+            if (exists && exists.ret1) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            }
           }
         }
         return new ValidationResult({
@@ -775,11 +790,10 @@ dojo.addOnLoad(function() {
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
-  
-  //For Legacy PT,CY,GR 
-  GEOHandler.registerValidator(cmrNoValidator, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistCMRNum, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(cmrNoValidatorForInternalScenario, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+
+  // For Legacy PT,CY,GR
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic
