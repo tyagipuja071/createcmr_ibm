@@ -217,9 +217,6 @@ public class CEMEAHandler extends BaseSOFHandler {
                 }
                 converted.add(addr);
               }
-              if (CmrConstants.ADDR_TYPE.ZP02.toString().equals(record.getCmrAddrTypeCode())) {
-                addr.setCmrBldg("abner");
-              }
               if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
                 String kunnr = addr.getCmrSapNumber();
                 String adrnr = getaddAddressAdrnr(entityManager, cmrIssueCd, SystemConfiguration.getValue("MANDT"), kunnr, addr.getCmrAddrTypeCode(),
@@ -1076,7 +1073,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     address.setTransportZone("");
 
     if ("ZP02".equals(address.getId().getAddrType())) {
-      address.setBldg(currentRecord.getCmrBldg());// abner
+      address.setBldg(currentRecord.getCmrBldg());
     } else {
       address.setBldg(null);
     }
