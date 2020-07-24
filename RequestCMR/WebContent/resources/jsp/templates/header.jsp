@@ -15,7 +15,7 @@
 	
 
 	<div id="v2-title">
-			CreateCMR
+			<span class="v2-name">CreateCMR</span>
 	 	  <span id="cmr-release-note" class="cmr-release-note">R<%=SystemConfiguration.getSystemProperty("RELEASE")%>.b-<%=SystemConfiguration.getSystemProperty("PREFIX")%><%=SystemConfiguration.getSystemProperty("BUILD")%> (<%=SystemConfiguration.getValue("SERVER_ALIAS")%>)</span>
 			<span style="padding-left: 20% !important;"></span>
 	</div>

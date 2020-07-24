@@ -120,12 +120,6 @@ System.out.println("hello");
 		</div>
 		<div id="ibm-content-nav"></div>
 <%} else {%>
-		<div id="ibm-leadspace-head" class="ibm-alternate ibm-no-tabs">
-			<div id="ibm-leadspace-body">
-				<tiles:insertAttribute name="breadcrumbs" /><br />
-			</div>
-		</div>
-
 		<div id="ibm-content-nav">
 			<tiles:insertAttribute name="tabs" />
 		</div>

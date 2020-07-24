@@ -406,7 +406,7 @@ div#ibm-content-main {
       <div class="cmr-action-txt" id="viewOnlyText" style="display: none">View Only</div>
     </div>
     <script>
-      addMoveHandler();
+      //addMoveHandler();
     </script>
 
     <%

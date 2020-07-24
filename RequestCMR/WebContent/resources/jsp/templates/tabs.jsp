@@ -109,10 +109,10 @@ boolean approver = user != null && user.isApprover();
 				  
     			<c:if test="${primaryTabId ==  'WORKFLOW'}">
 				  <!-- Home Secondary Tabs -->
-				  <li id="OPEN_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/open')">My Open Requests</a></li>
-				  <li id="COMPLETED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/completed')">My Completed Requests</a></li>
-				  <li id="REJECTED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/rejected')">My Rejected Requests</a></li>
-				  <li id="ALL_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/all')">All My Requests</a></li>
+				  <li id="OPEN_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/open')">Open Requests</a></li>
+				  <li id="COMPLETED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/completed')">Completed Requests</a></li>
+				  <li id="REJECTED_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/rejected')">Rejected Requests</a></li>
+				  <li id="ALL_REQ_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/all')">All Requests</a></li>
 				  <li id="SEARCH_REQUESTS_TAB"><a href="javascript: goToUrl('${contextPath}/workflow/search')">Search Requests</a></li>
 				</c:if>
         

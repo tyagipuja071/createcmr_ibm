@@ -589,7 +589,7 @@ h2.larger, h3.larger, h4.larger {
 
 .ibm-type #ibm-content-nav #ibm-primary-tabs a, .ibm-type #ibm-content-nav #ibm-secondary-tabs a
 	{
-	font-family: "HelvRegularIBM", Arial, sans-serif
+	font-family: IBM Plex Sans, Calibri, "HelvRegularIBM", Arial, sans-serif
 }
 
 [class*="ibm-btn-"] {
@@ -3387,7 +3387,7 @@ span.ibm-thumbnail span.ibm-video-play {
 }
 
 #ibm-leadspace-body {
-	width: 980px;
+	width: 100%;
 	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
 	margin: 0 auto;
 	padding: 0 0 50px;
@@ -3747,7 +3747,6 @@ span.ibm-thumbnail span.ibm-video-play {
 }
 
 .ibm-columns {
-	width: 960px;
 	padding: 0 10px;
 	margin: 0 auto;
 	clear: both
@@ -3851,7 +3850,6 @@ span.ibm-thumbnail span.ibm-video-play {
 }
 
 .ibm-col-1-1 {
-	width: 940px
 }
 
 .ibm-default #ibm-content .ibm-col-1-1, .ibm-default #ibm-content .ibm-col-5-3,
@@ -4915,7 +4913,7 @@ a.ibm-ribbon-prev {
 #ibm-content-nav #ibm-primary-tabs ul.ibm-tabs {
 	margin: 0 auto;
 	padding: 0 20px;
-	width: 940px
+	width: 100%;
 }
 
 #ibm-content-nav #ibm-primary-tabs ul.ibm-tabs li {
@@ -4938,7 +4936,7 @@ a.ibm-ribbon-prev {
 	border-left: 1px solid rgba(125, 125, 125, 0.25);
 	color: #FFF;
 	min-height: 15px;
-	padding: 12px 15px;
+	padding: 10px 12px;
 	background-color: #333;
 	background-color: rgba(0, 0, 0, 0.75);
 	opacity: .90;
@@ -5000,7 +4998,7 @@ a.ibm-ribbon-prev {
 #ibm-content-nav #ibm-secondary-tabs ul.ibm-tabs, .dj_ie7 #ibm-content-nav #ibm-secondary-tab-list.ibm-columns
 	{
 	margin: 0 auto;
-	width: 940px
+	width: 100%;
 }
 
 .ibm-landing-page #ibm-content-nav #ibm-secondary-tabs ul.ibm-tabs li {
