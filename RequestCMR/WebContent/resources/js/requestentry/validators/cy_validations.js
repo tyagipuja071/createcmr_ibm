@@ -6425,14 +6425,9 @@ function validateCMRNumExistForTR() {
 
 function enableCMRNUMForPROCESSOR() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  if ('C' == FormManager.getActualValue('reqType')) {
     if (role == "PROCESSOR") {
       FormManager.enable('cmrNo');
-    } else {
-      FormManager.readOnly('cmrNo');
     }
-  }
 }
 
 function checkIfStateProvBlankForProcIT() {
@@ -8417,13 +8412,16 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockCmrOwner,[SysLoc.TURKEY]);
 
   // CYPRUS Legacy
-  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAddrFunction(disableAddrFieldsCY, [ SysLoc.CYPRUS ]);
-  
-  GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(validateCollectionCodeforCyprus, [ SysLoc.CYPRUS ],null, true);
+  
   GEOHandler.addAfterConfig(setAbbrvCyprus, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  
+  GEOHandler.addAddrFunction(disableAddrFieldsCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);
+  
+  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   
 });
