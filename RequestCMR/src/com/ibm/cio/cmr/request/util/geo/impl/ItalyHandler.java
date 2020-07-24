@@ -283,7 +283,7 @@ public class ItalyHandler extends BaseSOFHandler {
         // Handle ZS02 records..
         for (FindCMRRecordModel record : source.getItems()) {
           if (BILLING_INSTALLING_ADDR_TYPE_PP.equals(record.getCmrAddrTypeCode())
-              && (StringUtils.isBlank(record.getCmrOrderBlock()) || "88".equals(record.getCmrOrderBlock()))) {
+              && (StringUtils.isBlank(record.getCmrOrderBlock()) || Arrays.asList("88", "92", "94").contains(record.getCmrOrderBlock()))) {
             record.setCmrAddrTypeCode(INSTALLING_ADDR_TYPE);
           } else if (BILLING_INSTALLING_ADDR_TYPE_PP.equals(record.getCmrAddrTypeCode()) && "90".equals(record.getCmrOrderBlock())) {
             record.setCmrAddrTypeCode(BILLING_ADDR_TYPE);
