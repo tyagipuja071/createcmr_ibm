@@ -4060,12 +4060,20 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
       FormManager.readOnly('landCntry');
     }
     // for Turkey - cross border
-    if (cntryCd == SysLoc.TURKEY && custType == 'CROSS') {
-      FormManager.removeValidator('dept', Validators.REQUIRED);
-    } else if (cntryCd == SysLoc.TURKEY) {
-      checkAndAddValidator('dept', Validators.REQUIRED, [ 'District' ]);
-    }
+    setDistrictMandatoryTR();
     checkAndAddValidator('landCntry', Validators.REQUIRED, [ 'Country (Landed)' ]);
+  }
+}
+
+function setDistrictMandatoryTR(){
+  var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
+  if(cntryCd == SysLoc.TURKEY){
+    var landCntry = FormManager.getActualValue('landCntry');
+    if (landCntry == 'TR') {
+      checkAndAddValidator('dept', Validators.REQUIRED, [ 'District' ]);
+    } else {
+      FormManager.removeValidator('dept', Validators.REQUIRED);
+    }
   }
 }
 
@@ -8552,6 +8560,11 @@ function filterCmrnoForTR() {
 }
 
 function afterConfigForTR() {
+  if (_landCntryHandler == null) {
+    _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+      setDistrictMandatoryTR();
+    });
+  }
 }
 
 dojo.addOnLoad(function() {
