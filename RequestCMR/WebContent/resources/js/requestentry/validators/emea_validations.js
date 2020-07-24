@@ -804,7 +804,9 @@ function autoSetVAT(_custType, custTypeinDB) {
     FormManager.resetValidations('vat');
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
-    FormManager.disable('vatExempt');
+    if(_custType == 'IBMEM'){
+      FormManager.disable('vatExempt');
+    }
   }
 
   if (_custType == 'XPRIC') {
