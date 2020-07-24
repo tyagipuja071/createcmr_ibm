@@ -7604,6 +7604,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.UK ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
-  GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
 
 });
