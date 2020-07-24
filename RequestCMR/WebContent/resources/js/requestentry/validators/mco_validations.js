@@ -12,7 +12,7 @@ var _importedIndc = null;
 var _postalCodeHandler = null;
 var _ISICHandler = null;
 
-function afterConfigPT (){
+function afterConfigPT() {
   FormManager.enable('vat');
 }
 
@@ -33,7 +33,7 @@ function afterTemplateLoadPT() {
   } else if (subCustGrp == 'SAAPA') {
     FormManager.setValue('abbrevLocn', 'SAAS');
   }
-  
+
 }
 
 function addHandlersForPT() {
@@ -42,7 +42,7 @@ function addHandlersForPT() {
       setTaxCodeOnPostalCodePT();
     });
   }
-  
+
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       isuAndCtcBasedOnISIC();
@@ -67,17 +67,16 @@ function getImportedIndcForPT() {
   return _importedIndc;
 }
 
-function setTaxCodeOnPostalCodePT(postCd){
-  
+function setTaxCodeOnPostalCodePT(postCd) {
+
   var postCd = FormManager.getActualValue('postCd');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
-  
+
   if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
-  if (custSubGrp == 'CRISO' || custSubGrp == 'CRIINT' || custSubGrp == 'CRPRI' 
-    || custSubGrp == 'XCRO' || custSubGrp == 'XBP') {
+
+  if (custSubGrp == 'CRISO' || custSubGrp == 'CRIINT' || custSubGrp == 'CRPRI' || custSubGrp == 'XCRO' || custSubGrp == 'XBP') {
     return;
   }
   var zs01ReqId = FormManager.getActualValue('reqId');
@@ -92,18 +91,18 @@ function setTaxCodeOnPostalCodePT(postCd){
   } else {
     postCodeOrg = '';
   }
-  
+
   var postCode = parseInt(postCodeOrg.substring(0, 1));
   if (postCd && postCd != undefined && postCd != '') {
     postCode = postCd.substring(0, 1);
   }
-  
-  //set Tax code based on postal-Code logic
+
+  // set Tax code based on postal-Code logic
   var checkImportIndc = getImportedIndcForPT();
   if (checkImportIndc != 'Y') {
     if (custSubGrp == 'GOVRN' && postCode == 9) {
       FormManager.setValue('specialTaxCd', '18');
-    } else if(custSubGrp != 'GOVRN' && postCode == 9){
+    } else if (custSubGrp != 'GOVRN' && postCode == 9) {
       FormManager.setValue('specialTaxCd', '23');
     }
   }
@@ -175,11 +174,11 @@ function afterConfigForMCO() {
 }
 
 function afterConfigForPT() {
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
@@ -187,8 +186,7 @@ function afterConfigForPT() {
   FormManager.readOnly('custPrefLang');
 
   // Control Type Of Customer
-  if ((custSubGrp != 'GOVRN' && custSubGrp != 'INTER' && custSubGrp != 'INTSO' 
-    && custSubGrp != 'XGOV' && custSubGrp != 'XBP') && (reqType != 'U')) {
+  if ((custSubGrp != 'GOVRN' && custSubGrp != 'INTER' && custSubGrp != 'INTSO' && custSubGrp != 'XGOV' && custSubGrp != 'XBP') && (reqType != 'U')) {
     FormManager.setValue('crosSubTyp', '');
   }
 
@@ -197,7 +195,7 @@ function afterConfigForPT() {
   } else {
     FormManager.enable('crosSubTyp');
   }
-  
+
   if (role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
   } else {
@@ -255,11 +253,14 @@ function addAddressTypeValidator() {
             return new ValidationResult(null, false, 'Only one Billing address is allowed.');
           } else if (zp01Cnt > 1) {
             return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-          } /*else if (zi01Cnt > 1 && cntry != SysLoc.SPAIN) {
-            return new ValidationResult(null, false, 'Only one Installing address is allowed.');
-          } else if (zd01Cnt > 1 && cntry != SysLoc.SPAIN && FormManager.getActualValue('reqType') == 'C') {
-            return new ValidationResult(null, false, 'Only one Shipping address is allowed for create requests.');
-          }*/ else if (zs02Cnt > 1) {
+          } /*
+             * else if (zi01Cnt > 1 && cntry != SysLoc.SPAIN) { return new
+             * ValidationResult(null, false, 'Only one Installing address is
+             * allowed.'); } else if (zd01Cnt > 1 && cntry != SysLoc.SPAIN &&
+             * FormManager.getActualValue('reqType') == 'C') { return new
+             * ValidationResult(null, false, 'Only one Shipping address is
+             * allowed for create requests.'); }
+             */else if (zs02Cnt > 1) {
             return new ValidationResult(null, false, 'Only one EPL address is allowed.');
           }
           return new ValidationResult(null, true);
@@ -696,7 +697,7 @@ function disableAddrFieldsPTES() {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
   var checkImportIndc = getImportedIndcForPT();
-  
+
   // Sequence Number - enable for additional shipping
   if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && checkImportIndc != 'Y' && addrType == 'ZD01') {
     FormManager.enable('prefSeqNo');
@@ -704,35 +705,35 @@ function disableAddrFieldsPTES() {
     FormManager.setValue('prefSeqNo', '');
     FormManager.readOnly('prefSeqNo');
   }
-  
+
   if (custType != 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
   }
-  
+
   if (addrType != 'ZS01' && addrType != 'ZD01') {
     FormManager.readOnly('custPhone');
     FormManager.setValue('custPhone', '');
   } else {
     FormManager.enable('custPhone');
   }
-  
-  if(addrType != 'ZS01' && addrType != 'ZP01'){
+
+  if (addrType != 'ZS01' && addrType != 'ZP01') {
     FormManager.readOnly('poBox');
     FormManager.setValue('poBox', '');
-  }else{
+  } else {
     FormManager.enable('poBox');
   }
-  
+
   FormManager.setValue('dept', '');
   FormManager.readOnly('dept');
-  
-  //Phone: Create-billing address only, Update-also shipping address for ES
+
+  // Phone: Create-billing address only, Update-also shipping address for ES
   if (cntryCd == SysLoc.SPAIN && cmr.currentRequestType == 'U' && addrType == 'ZD01') {
     FormManager.enable('custPhone');
   }
-  
+
 }
 
 function setVatValidatorPTES() {
@@ -1090,7 +1091,7 @@ function disableVatIfNotEmptyPortugal() {
       FormManager.enable('vat');
     }
   }
-  afterConfigPT ();
+  afterConfigPT();
 }
 
 function disableVatIfNotEmptySpain() {
@@ -1132,11 +1133,11 @@ function forceLockScenariosPortugal() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   var fieldsToDisable = new Array();
-  /*FormManager.enable('isicCd');
-  FormManager.enable('isuCd');
-  FormManager.enable('clientTier');
-  FormManager.enable('specialTaxCd');
-  FormManager.enable('repTeamMemberNo');*/
+  /*
+   * FormManager.enable('isicCd'); FormManager.enable('isuCd');
+   * FormManager.enable('clientTier'); FormManager.enable('specialTaxCd');
+   * FormManager.enable('repTeamMemberNo');
+   */
 
   if (custSubGroup == 'COMME') {
     fieldsToDisable.push('cmrOwner');
@@ -1999,31 +2000,46 @@ function getOldFieldValues() {
   _oldOrdBlk = FormManager.getActualValue('ordBlk');
 }
 
-function isuAndCtcBasedOnISIC(){
+function isuAndCtcBasedOnISIC() {
   var isicCd = FormManager.getActualValue('isicCd');
-  if (isicCd =='7230' || isicCd =='7240' || isicCd =='7290' || isicCd =='7210' || isicCd =='7221' || isicCd =='7229') {
+  if (isicCd == '7230' || isicCd == '7240' || isicCd == '7290' || isicCd == '7210' || isicCd == '7221' || isicCd == '7229') {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
   }
 }
 
-function cmrNoValidatorForInternalSO() {
+/*
+ * validate CMRNumber for Internal So Scenario
+ */
+function validateCMRNumberForISO() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var cmrNo = FormManager.getActualValue('cmrNo').substring(0, 3);
-        var requestType = FormManager.getActualValue('reqType');
-        var custSubGrp = FormManager.getActualValue('custSubGrp');
-        // Condition For Create and Prospect CMRs
-        if (requestType != 'C' || (cmrNo.startsWith('P'))) {
-          return;
-        }
-        if ((cmrNo == '' || cmrNo == '997') && (custSubGrp == 'INTSO' || custSubGrp == 'CRISO')) {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
-        } else if (cmrNo != undefined && cmrNo != '997' && (custSubGrp == 'INTSO' || custSubGrp == 'CRISO')) {
-          return new ValidationResult(null, false, 'CMR Number format error. It Should Start with 997 For INTERNAL SO Scenario.');
         }
-        return new ValidationResult(null, true);
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        } else {
+          // Skip validation for Prospect Request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumberForLegacy ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            return new ValidationResult(null, true);
+          }
+          // Validation for Internal Scenario
+          if (_custSubGrp == 'INTSO' || _custSubGrp == 'CRISO') {
+            if (!cmrNo.startsWith("997")) {
+              return new ValidationResult(null, false, 'Internal SO CMR should begin with 997.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
@@ -2186,7 +2202,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(afterConfigForMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(addHandlersForPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
-  
+
   GEOHandler.addAfterConfig(setClientTierValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setSalesRepValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setEnterpriseValues, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
@@ -2237,7 +2253,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.SPAIN, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.SPAIN ], null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.PORTUGAL, SysLoc.SPAIN ], null, true);
-  // GEOHandler.registerValidator(addVatValidator, [ SysLoc.PORTUGAL ], null, true);
+  // GEOHandler.registerValidator(addVatValidator, [ SysLoc.PORTUGAL ], null,
+  // true);
   GEOHandler.registerValidator(addMailingConditionValidator, [ SysLoc.SPAIN ], null, true);
 
   GEOHandler.addAddrFunction(changeAbbrevNmLocnSpain, [ SysLoc.SPAIN ]);
@@ -2252,9 +2269,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO);
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
-  GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN], null, true);
-  
-  // PT Legacy 
+  GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN ], null, true);
+
+  // PT Legacy
   GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
@@ -2265,10 +2282,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   
-  GEOHandler.registerValidator(cmrNoValidatorForInternalSO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
-  
   GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
+  GEOHandler.registerValidator(validateCMRNumberForISO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
 
 });
