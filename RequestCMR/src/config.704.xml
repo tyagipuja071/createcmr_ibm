@@ -96,7 +96,7 @@
 				</column>
 				<column>
 					<label>OIB</label>
-					<dbColumn>SPECIAL_TAX_CD</dbColumn>
+					<dbColumn>SEARCH_TERM</dbColumn>
 					<width>5</width>
 					<length>20</length>
 				</column>				

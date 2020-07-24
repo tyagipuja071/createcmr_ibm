@@ -795,24 +795,14 @@ public class CEETransformer extends EMEATransformer {
 
     }
 
-    boolean crossBorder = false;
-    if (!StringUtils.isEmpty(addr.getLandCntry()) && !"ES".equals(addr.getLandCntry())) {
-      crossBorder = true;
-    } else {
-      crossBorder = false;
-    }
-
-    if (!StringUtils.isBlank(addr.getLandCntry()) && crossBorder) {
-      legacyAddr.setAddrLine5(LandedCountryMap.getCountryName(addr.getLandCntry()));
-
-    }
-
-    if (!StringUtils.isBlank(addr.getCounty()) && !crossBorder) {
-      legacyAddr.setAddrLine5(addr.getCounty());
-
-    }
-
-    formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
+    // boolean crossBorder = false;
+    // if (!StringUtils.isEmpty(addr.getLandCntry()) &&
+    // !"ES".equals(addr.getLandCntry())) {
+    // crossBorder = true;
+    // } else {
+    // crossBorder = false;
+    // }
+    // formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
 
   }
 
@@ -835,38 +825,6 @@ public class CEETransformer extends EMEATransformer {
     String line5 = "";
     String line6 = "";
 
-    // fiscal address
-    if (isFAddr) {
-      line1 = legacyAddr.getAddrLine1();
-      line2 = "CL " + legacyAddr.getStreet();
-
-      StringBuilder street = new StringBuilder();
-      line2 = StringUtils.replace(line2, " - ", "-");
-      line2 = StringUtils.replace(line2, "- ", "-");
-      line2 = StringUtils.replace(line2, " -", "-");
-      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
-      for (String part : parts) {
-        if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
-          line3 = part;
-        } else if (!StringUtils.isEmpty(part)) {
-          street.append(street.length() > 0 ? " " : "");
-          street.append(part);
-        }
-      }
-
-      line2 = street.toString();
-      if (StringUtils.isEmpty(legacyAddr.getStreet()) && !StringUtils.isEmpty(legacyAddr.getPoBox())) {
-        line2 = "CLAPTO " + legacyAddr.getPoBox().replaceAll("[^\\d]", "");
-      }
-      line3 = StringUtils.leftPad(line3, 5, '0');
-
-      line4 = legacyAddr.getCity();
-      if (crossBorder) {
-        line5 = "88888";
-      } else {
-        line5 = legacyAddr.getZipCode();
-      }
-    } else {
       line1 = legacyAddr.getAddrLine1();
       line2 = legacyAddr.getAddrLine2();
 
@@ -879,18 +837,13 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
-      if (StringUtils.isEmpty(line2)) {
-        line2 = legacyAddr.getStreetNo();
-      }
-
-      line3 = legacyAddr.getStreet() != null ? legacyAddr.getStreet().trim() : "";
+    line3 = legacyAddr.getAddrLine3() != null ? legacyAddr.getAddrLine3().trim() : "";
 
       String poBox = !StringUtils.isEmpty(legacyAddr.getPoBox()) ? legacyAddr.getPoBox() : "";
       if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
         poBox = " APTO " + poBox;
       }
 
-      line3 = (StringUtils.isEmpty(line3) ? poBox : line3.trim()) + poBox;
       line4 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() : "") + " "
           + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
 
@@ -918,7 +871,6 @@ public class CEETransformer extends EMEATransformer {
         // template
         // line6 = legacyAddr.getAddrPhone();
       }
-    }
 
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
         (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : "") };
@@ -953,6 +905,10 @@ public class CEETransformer extends EMEATransformer {
 
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("2");
+
+      legacyCust.setDcRepeatAgreement("0");
+      legacyCust.setLeasingInd("0");
+      legacyCust.setAuthRemarketerInd("0");
 
       if (!StringUtils.isBlank(data.getCrosSubTyp())) {
         legacyCust.setCustType(data.getCrosSubTyp());
@@ -1212,23 +1168,23 @@ public class CEETransformer extends EMEATransformer {
         }
       }
     }
-    
-    if(SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())){
-    	if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-    		if ("@".equals(muData.getSpecialTaxCd())) {
-    			cust.setTaxCd("");
-    		} else {
-    			cust.setTaxCd(muData.getSpecialTaxCd());
-    		}
-    	}    	
-    }
 
     // RABXA :Bank Account Number
-    if (!StringUtils.isBlank(muData.getEmail2())) {
-      if ("@".equals(muData.getEmail2())) {
-        cust.setBankAcctNo("");
-      } else {
-        cust.setBankAcctNo(muData.getEmail2());
+    if (SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())) {
+      if (!StringUtils.isBlank(muData.getSearchTerm())) {
+        if ("@".equals(muData.getSearchTerm())) {
+          cust.setBankAcctNo("");
+        } else {
+          cust.setBankAcctNo(muData.getSearchTerm());
+        }
+      }
+    } else {
+      if (!StringUtils.isBlank(muData.getEmail2())) {
+        if ("@".equals(muData.getEmail2())) {
+          cust.setBankAcctNo("");
+        } else {
+          cust.setBankAcctNo(muData.getEmail2());
+        }
       }
     }
 
@@ -1609,7 +1565,8 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public boolean hasCmrtCustExt() {
     // return true;
-    return (!"SI".equals(DEFAULT_LANDED_COUNTRY));
+
+    return true;
   }
 
   @Override

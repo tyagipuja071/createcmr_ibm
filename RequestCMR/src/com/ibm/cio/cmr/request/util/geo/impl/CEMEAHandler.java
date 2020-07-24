@@ -225,6 +225,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                     record.getCmrNum());
                 String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
                 String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String gAddrSeq = "";
                 if (!StringUtils.isEmpty(legacyGaddrSeq)) {
                   gAddrSeq = legacyGaddrSeq;
@@ -254,6 +255,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                       installing.setCmrState(sadr.getRegio());
                       installing.setCmrPostalCode(sadr.getPstlz());
                       installing.setCmrDept(sadr.getOrt02());
+                      installing.setCmrBldg(legacyGaddrLN6);
                       if (!StringUtils.isBlank(sadr.getTxjcd())) {
                         installing.setCmrTaxOffice(sadr.getTxjcd());
                       }
@@ -288,6 +290,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                       installing.setCmrCountryLanded("");
                       installing.setCmrPostalCode(record.getCmrPostalCode());
                       installing.setCmrState(record.getCmrState());
+                      installing.setCmrBldg(legacyGaddrLN6);
                       if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
                         installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
                       } else {
@@ -1787,5 +1790,20 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     LOG.debug("gSeq of Legacy" + gSeq);
     return gSeq;
+  }
+
+  public static String getGaddressAddLN6FromLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
+    String gLn6 = "";
+    String sql = ExternalizedQuery.getSql("CEE.GET_G_ADRLN6_FROM_LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      gLn6 = result;
+    }
+    LOG.debug("gLn6 of Legacy" + gLn6);
+    return gLn6;
   }
 }

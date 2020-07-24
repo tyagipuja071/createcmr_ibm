@@ -3259,7 +3259,7 @@ function validateIsicCEEValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var isic = FormManager.getActualValue('isicCd');
-        if ('9500' == isic
+        if (('9500' == isic || '0000' == isic)
             && !(FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'CSPC'
                 || FormManager.getActualValue('custSubGrp') == 'MEPC' || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSPC')) {
           return new ValidationResult(null, false, 'ISIC 9500 should not be used for this Scenario Sub-type');
@@ -3376,6 +3376,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
 
 function isicCdOnChangeCEE() {
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+    lockIsicCdCEE();
     setClassificationCodeCEE();
   });
 }
@@ -3541,9 +3542,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
 
-  GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
-
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
   GEOHandler.addAfterTemplateLoad(setCountryDuplicateFields, SysLoc.RUSSIA);
@@ -3648,4 +3646,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCroatia, [ SysLoc.CROATIA ]);
 
+  GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
 });

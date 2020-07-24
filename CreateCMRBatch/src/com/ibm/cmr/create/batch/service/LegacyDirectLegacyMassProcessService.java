@@ -1092,7 +1092,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
 
     if (transformer.hasCmrtCustExt()) {
       CmrtCustExt custExt = legacyObjects.getCustomerExt();
-      if (transformer != null) {
+      if (transformer != null && custExt != null) {
         try {
           transformer.transformLegacyCustomerExtDataMassUpdate(entityManager, custExt, cmrObjects, muData, massUpdt.getCmrNo());
         } catch (Exception e) {
