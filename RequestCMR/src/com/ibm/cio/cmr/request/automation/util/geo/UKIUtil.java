@@ -13,9 +13,9 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.entity.Data;
 
-public class UnitedKingdomUtil extends AutomationUtil {
+public class UKIUtil extends AutomationUtil {
 
-  private static final Logger LOG = Logger.getLogger(UnitedKingdomUtil.class);
+  private static final Logger LOG = Logger.getLogger(UKIUtil.class);
   public static final String SCENARIO_BUSINESS_PARTNER = "BUSPR";
 
   @Override
