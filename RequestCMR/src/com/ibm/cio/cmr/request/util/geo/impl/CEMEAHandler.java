@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Sadr;
@@ -984,6 +986,12 @@ public class CEMEAHandler extends BaseSOFHandler {
           data.setDupIssuingCntryCd(dupCntry);
           break;
         }
+      }
+      CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
+      if (cmrtExt != null) {
+        SimpleDateFormat sdf = new SimpleDateFormat("ddMMyy");
+        String aECISUBDateString = sdf.format(cmrtExt.getAeciSubDt());
+        data.setAgreementSignDate(aECISUBDateString);
       }
     }
 
