@@ -2018,6 +2018,13 @@ public class GreeceHandler extends BaseSOFHandler {
       data.setInstallBranchOff(data.getSalesBusOffCd());
       data.setEngineeringBo(data.getSalesBusOffCd());
     }
+
+    DataRdc rdcData = null;
+    rdcData = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+
+    if (rdcData != null) {
+      data.setInacType(rdcData.getInacType());
+    }
   }
 
   @Override
