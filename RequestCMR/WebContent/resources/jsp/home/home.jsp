@@ -62,7 +62,6 @@ dojo.addOnLoad(function(){
 
 	<div class="ibm-col-1-1">
 		<!-- start main content -->
-		<div id="wwq-content">
 			
 			<%if (alert != null && !"".equals(alert.trim())){%>		    
 			<div class="ibm-columns">
@@ -158,6 +157,5 @@ dojo.addOnLoad(function(){
 			</div>
 			
 			<!-- stop main content -->
-		</div>
 	</div>
 </div>

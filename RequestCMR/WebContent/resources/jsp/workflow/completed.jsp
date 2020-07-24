@@ -56,7 +56,6 @@ function completedRequestgrid_GRID_onLoad(){
         <cmr:gridCol width="90px" field="expediteInd" header="${ui.grid.expedite}" align="center">
           <cmr:formatter functionName="expediteFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="60px" field="cmrOwnerDesc" header="${ui.grid.cmrOwner}" />
         <cmr:gridCol width="75px" field="cmrIssuingCntry" header="${ui.grid.cmrIssuingCntry}" >
          <cmr:formatter functionName="countryFormatter" />
         </cmr:gridCol>
@@ -78,10 +77,6 @@ function completedRequestgrid_GRID_onLoad(){
         <cmr:gridCol width="120px" field="createTsString" header="${ui.grid.createDate}" />
         <cmr:gridCol width="120px" field="lastUpdtTsString" header="${ui.grid.lastAction}" />
         <cmr:gridCol width="120px" field="requesterNm" header="${ui.grid.requesterNm}" />
-        <cmr:gridCol width="120px" field="originatorNm" header="${ui.grid.originatorNm}" />
-        <cmr:gridCol width="120px" field="processingStatus" header="${ui.grid.processingStatus}" />
-        <cmr:gridCol width="200px" field="reqReason" header="${ui.grid.reqReason}" />
-        <cmr:gridCol width="90px" field="requestDueDate" header="${ui.grid.requestDueDate}" />
 
       </cmr:grid>
       <br>

@@ -538,6 +538,7 @@ img.cmr-delta-icon {
 
 input.cmr-grid-btn {
   font-size: 12px;
+  font-family : IBM Plex Sans, Calibri, Geneva, Arial, Helvetica, sans-serif;
   border-radius: 3px;
   background-color: #FFF;
   border-color: #CCC rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
@@ -827,11 +828,13 @@ img.approval-icon {
 span.source-syst {
   padding: 2px;
   color: White;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.5px;
   text-shadow: none;
   border-radius: 3px;
-  background: green;
+  background: #777;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 div.cmr-feedback-btn {

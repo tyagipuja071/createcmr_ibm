@@ -21,8 +21,8 @@ function expediteFormatter(value, rowIndex) {
   var source = rowData.sourceSystId[0];
   if (source) {
     return '<span class="source-syst">' + source + '</span>';
-  } else if (expediteInd == 'Y') {
-    return '<img src="' + cmr.CONTEXT_ROOT + '/resources/images/check-icon.png" class="cmr-grid-check">';
+//  } else if (expediteInd == 'Y') {
+//    return '<img src="' + cmr.CONTEXT_ROOT + '/resources/images/check-icon.png" class="cmr-grid-check">';
   } else {
     return '';
   }
