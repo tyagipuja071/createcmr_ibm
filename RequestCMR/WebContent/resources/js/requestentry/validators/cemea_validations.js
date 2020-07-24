@@ -1664,7 +1664,7 @@ function setEnterpriseValues(clientTier) {
       } else if (isuCd == '32' && clientTier == 'M') {
         enterprises = [ '985069', '985070' ];
       } else if (isuCd == '34' && clientTier == 'A') {
-        enterprises = [ '985080', '985081' ];
+        enterprises = [ '985081' ];
       } else if (isuCd == '34' && clientTier == 'V') {
         enterprises = [ '985012', '985013', '985014', '985016', '985017', '985018', '985021', '985040', '985041', '985055', '985082' ];
       }
