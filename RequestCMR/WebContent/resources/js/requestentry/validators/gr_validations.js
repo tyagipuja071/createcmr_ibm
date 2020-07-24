@@ -3454,6 +3454,7 @@ function addInacCodeValidator() {
 }
 
 function setISRValues() {
+  if(FormManager.getActualValue('reqType') == 'C') {  
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isrs = [];
@@ -3476,6 +3477,7 @@ function setISRValues() {
       setSalesBoSboIbo();
     }
   }
+  }
 }
 
 var _oldEnterpriseValue = '';
@@ -3495,7 +3497,7 @@ function setEnterprise(value) {
     shouldSetEnterprise = true;
   }
 
-  if (cmrCntry == SysLoc.GREECE) {
+  if (cmrCntry == SysLoc.GREECE && FormManager.getActualValue('reqType') == 'C') {
     if (shouldSetEnterprise) {
 
       var subindustry = FormManager.getActualValue('subIndustryCd');
