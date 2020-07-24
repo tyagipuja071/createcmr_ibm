@@ -208,6 +208,10 @@ function lockLandCntry() {
     local = true;
   }
   if (local && FormManager.getActualValue('addrType') == 'ZS01') {
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (CEE_INCL.has(cntry)) {
+      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+    }
     FormManager.readOnly('landCntry');
   } else {
     FormManager.enable('landCntry');
