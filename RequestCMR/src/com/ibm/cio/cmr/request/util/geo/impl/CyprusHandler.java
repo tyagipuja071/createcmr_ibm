@@ -234,12 +234,6 @@ public class CyprusHandler extends BaseSOFHandler {
                   addr = cloneAddress(record, addrType);
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
 
-                  if (!(record.getCmrAddrTypeCode().equals(addrType))) {
-                    // addr.setCmrAddrSeq(String.format("%05d",
-                    // record.getCmrAddrSeq()));
-                    addr.setCmrSapNumber(null);
-                  }
-
                   // name3 in rdc = Address Con't on SOF
                   addr.setCmrStreetAddressCont(record.getCmrName3());
                   addr.setCmrName3(null);
@@ -1690,7 +1684,7 @@ public class CyprusHandler extends BaseSOFHandler {
         address.setCustNm2(currentRecord.getCmrName2Plain());
 
       }
-      
+
       if (!StringUtils.isEmpty(address.getCustPhone())) {
         if (!"ZS01".equals(address.getId().getAddrType()) && !"ZD01".equals(address.getId().getAddrType())
             && !"ZP02".equals(address.getId().getAddrType())) {

@@ -5447,7 +5447,7 @@ function setISUCTCBasedScenarios() {
 }
 
 function countryScenarioProcessorRules() {
-  return false;
+  return true;
 }
 
 dojo.addOnLoad(function() {
