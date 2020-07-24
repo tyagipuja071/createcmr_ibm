@@ -1562,7 +1562,7 @@ public class CEETransformer extends EMEATransformer {
   public boolean hasCmrtCustExt() {
     // return true;
 
-    return false;
+    return true;
   }
 
   @Override
