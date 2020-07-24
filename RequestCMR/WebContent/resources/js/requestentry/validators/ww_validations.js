@@ -659,6 +659,8 @@ function validateCMRNumberForLegacy() {
         }
         if (cmrNo == '') {
           return new ValidationResult(null, true);
+        } else if (cmrNo == '000000') {
+          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed Except -> 000000');
         } else {
           // Skip validation for Prospect Request
           var ifProspect = FormManager.getActualValue('prospLegalInd');
