@@ -1164,23 +1164,23 @@ public class CEETransformer extends EMEATransformer {
         }
       }
     }
-    
-    if(SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())){
-    	if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-    		if ("@".equals(muData.getSpecialTaxCd())) {
-    			cust.setTaxCd("");
-    		} else {
-    			cust.setTaxCd(muData.getSpecialTaxCd());
-    		}
-    	}    	
-    }
 
     // RABXA :Bank Account Number
-    if (!StringUtils.isBlank(muData.getEmail2())) {
-      if ("@".equals(muData.getEmail2())) {
-        cust.setBankAcctNo("");
-      } else {
-        cust.setBankAcctNo(muData.getEmail2());
+    if (SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())) {
+      if (!StringUtils.isBlank(muData.getSearchTerm())) {
+        if ("@".equals(muData.getSearchTerm())) {
+          cust.setBankAcctNo("");
+        } else {
+          cust.setBankAcctNo(muData.getSearchTerm());
+        }
+      }
+    } else {
+      if (!StringUtils.isBlank(muData.getEmail2())) {
+        if ("@".equals(muData.getEmail2())) {
+          cust.setBankAcctNo("");
+        } else {
+          cust.setBankAcctNo(muData.getEmail2());
+        }
       }
     }
 
@@ -1561,7 +1561,8 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public boolean hasCmrtCustExt() {
     // return true;
-    return (!"SI".equals(DEFAULT_LANDED_COUNTRY));
+
+    return false;
   }
 
   @Override
