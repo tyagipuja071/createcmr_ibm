@@ -1236,7 +1236,7 @@ public class CEETransformer extends EMEATransformer {
         if ("@".equals(muData.getCustNm2())) {
           cust.setCeBo("");
         } else {
-          cust.setCeBo(muData.getCustNm2());
+        cust.setCeBo(cebo);
         }
     }
     
