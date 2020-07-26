@@ -1581,11 +1581,11 @@ public class CEETransformer extends EMEATransformer {
 
     Data data = cmrObjects.getData();
 
-    if (!StringUtils.isBlank(data.getTaxCd1())) {
-      legacyCustExt.setBankAcctNo(data.getTaxCd1());
-    } else {
-      legacyCustExt.setBankAcctNo("");
-    }
+    // if (!StringUtils.isBlank(data.getTaxCd1())) {
+    // legacyCustExt.setBankAcctNo(data.getTaxCd1());
+    // } else {
+    // legacyCustExt.setBankAcctNo("");
+    // }
 
     if (!StringUtils.isBlank(data.getCompany())) {
       if (data.getCompany().length() > 9) {
@@ -1632,14 +1632,14 @@ public class CEETransformer extends EMEATransformer {
         }
       }
     }
-
-    if (!StringUtils.isBlank(muData.getEmail2())) {
-      if ("@".equals(muData.getEmail2())) {
-        custExt.setBankAcctNo("");
-      } else {
-        custExt.setBankAcctNo(muData.getEmail2());
-      }
-    }
+    //
+    // if (!StringUtils.isBlank(muData.getEmail2())) {
+    // if ("@".equals(muData.getEmail2())) {
+    // custExt.setBankAcctNo("");
+    // } else {
+    // custExt.setBankAcctNo(muData.getEmail2());
+    // }
+    // }
 
     List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     MassUpdtAddr zp01Addr = new MassUpdtAddr();
