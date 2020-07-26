@@ -2966,6 +2966,18 @@ function lockIsicCdCEE() {
     } else {
       FormManager.enable('isicCd');
     }
+  } else if ('C' == reqType) {
+    if (FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'CSPC'
+        || FormManager.getActualValue('custSubGrp') == 'MEPC' || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSPC') {
+      if ('9500' == isic) {
+        FormManager.readOnly('isicCd');
+      }
+    } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'CSINT'
+        || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'MEINT' || FormManager.getActualValue('custSubGrp') == 'RSINT') {
+      if ('0000' == isic) {
+        FormManager.readOnly('isicCd');
+      }
+    }
   }
 }
 
@@ -2974,13 +2986,21 @@ function validateIsicCEEValidator() {
     return {
       validate : function() {
         var role = FormManager.getActualValue('userRole').toUpperCase();
+        var reqType = FormManager.getActualValue('reqType');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var isic = FormManager.getActualValue('isicCd');
-        if (('9500' == isic)
-            && !(FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'CSPC'
+        if ('U' == reqType && ('9500' == isic || '0000' == isic)) {
+          FormManager.enable('isicCd');
+          return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
+        }
+        if (('C' == reqType && ('9500' == isic || '0000' == isic))
+            && !(FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'CSINT'
+                || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'MEINT' || FormManager.getActualValue('custSubGrp') == 'RSINT'
+                || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'CSPC'
                 || FormManager.getActualValue('custSubGrp') == 'MEPC' || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSPC')) {
-          return new ValidationResult(null, false, 'ISIC 9500 should not be used for this Scenario Sub-type');
+          FormManager.enable('isicCd');
+          return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
         } else {
           return new ValidationResult(null, true);
         }
@@ -3094,7 +3114,6 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
 
 function isicCdOnChangeCEE() {
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-    lockIsicCdCEE();
     setClassificationCodeCEE();
   });
 }
