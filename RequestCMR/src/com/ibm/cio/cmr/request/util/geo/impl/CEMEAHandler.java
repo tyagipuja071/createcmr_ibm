@@ -212,8 +212,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
-                  int parvmCount = getKnvpParvmCount(addr.getCmrSapNumber());
-                  if ("0".equals(stkzn) || parvmCount > 1) {
+                  int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
+                  if ("0".equals(stkzn) || parvmCount > 0) {
                   addr.setCmrAddrTypeCode("ZS02");
                   }
                 }
@@ -1814,5 +1814,34 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     LOG.debug("gLn6 of Legacy" + gLn6);
     return gLn6;
+  }
+
+  private int getCeeKnvpParvmCount(String kunnr) throws Exception {
+    int knvpParvmCount = 0;
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("CEE.GET.KNVP.PARVW");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("PARVW");
+    query.addField("MANDT");
+    query.addField("KUNNR");
+
+    LOG.debug("Getting existing SPRAS value from RDc DB..For PARVW ");
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      // Map<String, Object> record = records.get(0);
+      knvpParvmCount = records.size();
+      LOG.debug("GET.KNVP.PARVW " + knvpParvmCount + " WHERE KUNNR IS > " + kunnr);
+    }
+    return knvpParvmCount;
   }
 }
