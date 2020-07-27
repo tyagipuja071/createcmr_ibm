@@ -353,7 +353,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column span="2" containerForField="MembLevel">
+        <cmr:column span="2" containerForField="MembLevel" exceptForCountry="866">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -362,7 +362,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column span="2" containerForField="BPRelationType">
+        <cmr:column span="2" containerForField="BPRelationType" exceptForCountry="866">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:
@@ -374,7 +374,7 @@ dojo.addOnLoad(function(){
 		</cmr:row>
     <cmr:view exceptForGEO="MCO2,CN">
   		<cmr:row topPad="10" addBackground="true">
-        <cmr:column span="2" containerForField="SOENumber">
+        <cmr:column span="2" containerForField="SOENumber" exceptForCountry="866">
           <p>
             <cmr:label fieldId="soeReqNo">
               <cmr:fieldLabel fieldId="SOENumber" />:
