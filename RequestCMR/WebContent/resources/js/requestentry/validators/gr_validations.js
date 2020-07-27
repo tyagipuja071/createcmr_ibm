@@ -3310,7 +3310,7 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndcForGreece();
   var reqId = FormManager.getActualValue('reqId');
 
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVRN')) {
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'CROSS')) {
 
     var origISU;
     var origClientTier;
