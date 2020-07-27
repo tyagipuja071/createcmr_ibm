@@ -3,8 +3,10 @@
  */
 package com.ibm.cio.cmr.request.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -501,6 +503,40 @@ public class BluePagesHelper {
           if (row != null) {
             String mgrmail = row.get("INTERNET");
             if (!StringUtils.isBlank(mgrmail) && mgrmail.toLowerCase().equals(managerEmail.toLowerCase())) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+
+  }
+
+  /**
+   * Checks if the employee is under any manager provided in the list
+   * 
+   * @param employeeEmail
+   * @param managerEmails
+   * @return
+   */
+  public static boolean isBluePagesHeirarchyManager(String employeeEmail, List<String> managerEmails) {
+    if (StringUtils.isNotBlank(employeeEmail) && !managerEmails.isEmpty()) {
+      List<String> managerEmailList = new ArrayList<>();
+      for (String str : managerEmails) {
+        managerEmailList.add(str.toLowerCase());
+      }
+      if (managerEmailList.contains(employeeEmail.toLowerCase())) {
+        return true;
+      }
+      String cnum = getCNUMByIntranetAddr(employeeEmail);
+      BPResults results = BluePages.getMgrChainOf(cnum);
+      if (results != null) {
+        for (int i = 0; i < results.rows(); i++) {
+          Hashtable<String, String> row = results.getRow(i);
+          if (row != null) {
+            String mgrmail = row.get("INTERNET");
+            if (!StringUtils.isBlank(mgrmail) && managerEmailList.contains(mgrmail.toLowerCase())) {
               return true;
             }
           }
