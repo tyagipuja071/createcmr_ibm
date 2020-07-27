@@ -3242,7 +3242,7 @@ function setClientTierAndISR(value) {
         } 
       } else if (value == '21') {
         tierValues = [ '7' ];
-      }      
+      }
     } else if(reqType == 'U') {
       tierValues = [ 'V', '6', 'A', 'N', 'S', '7' ];
     }
@@ -3297,6 +3297,7 @@ function setClientTierForCreates(value) {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
   var isuCd = FormManager.getActualValue('isuCd');
+  var clientTiers = FormManager.getActualValue('clientTier');  
   if (reqType != 'C') {
     return;
   }
@@ -3317,7 +3318,35 @@ function setClientTierForCreates(value) {
         enterpriseLov = [ '822806', '822830'];
       }     
     } 
-  }  
+  }
+
+  if (reqType == 'C') {
+    enterpriseLov = [ ];
+    if (isuCd == '34') {
+      tierValues = [ 'V', '6', 'A' ];
+      if(clientTiers == '6') {
+        enterpriseLov = [ '822836', '822835'];
+      }      
+    } else if (isuCd == '32') {
+      tierValues = [ 'N', 'S' ];
+      if(clientTiers == 'S') {
+        enterpriseLov = [ '822806', '822830'];
+      } 
+    } else if (isuCd == '21') {
+      tierValues = [ '7' ];
+    }
+  } else if(reqType == 'U') {
+    tierValues = [ 'V', '6', 'A', 'N', 'S', '7' ];
+  }
+  if (tierValues != null) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
+    if (tierValues.length == 1) {
+      FormManager.setValue('clientTier', tierValues[0]);
+    }
+  } else {
+    FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+  }
+  
   if (enterpriseLov != null) {
     FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
     if (enterpriseLov.length == 1) {
@@ -5693,5 +5722,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(resetSubIndustryCdGR, [ SysLoc.GREECE ]);
   GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(addHandlersForSubindustryCd, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierForCreates, [ SysLoc.GREECE ]);
+  
 
 });
