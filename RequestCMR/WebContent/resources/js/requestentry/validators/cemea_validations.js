@@ -714,6 +714,24 @@ function addLatinCharValidator() {
     FormManager.removeValidator('postCd', Validators.LATIN);
   }
 }
+function addGaddrValidatorForCEE() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var result = cmr.query('VALIDATOR.GADDRCNTRY', {
+          REQID : reqId
+        });
+        if (result == null || result.ret1 == '') {
+          return new ValidationResult(null, false, 'Country Name value of the G Address is required.');
+        }
+
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+
+}
 
 function addCrossBorderValidatorForCEMEA() {
   FormManager.addFormValidator((function() {
@@ -3630,6 +3648,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.CEMEA_EXCLUDE_CEE, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null, true);
+  GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
   GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
