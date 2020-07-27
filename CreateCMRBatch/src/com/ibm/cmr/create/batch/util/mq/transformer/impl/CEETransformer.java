@@ -3,6 +3,7 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -905,7 +906,7 @@ public class CEETransformer extends EMEATransformer {
 
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("");
-      legacyCust.setLocNo(data.getCmrNo() + data.getSubIndustryCd());
+      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
       legacyCust.setSalesGroupRep("099998");
       legacyCust.setSalesRepNo("099998");
       legacyCust.setDcRepeatAgreement("0");
@@ -1577,6 +1578,17 @@ public class CEETransformer extends EMEATransformer {
 
     Data data = cmrObjects.getData();
 
+//    String acei = data.getAgreementSignDate();
+//    if (!StringUtils.isBlank(acei) && acei.length() == 6) {
+//      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//      Date date;
+//        String year = acei.substring(0, 2);
+//        String month = acei.substring(2, 4);
+//        String day = acei.substring(4, 6);
+////        date = sdf.parse("20" + year + "-" + month + "-" + day);
+//        date = Timestamp.valueOf("20" + year + "-" + month + "-" + day + " 00:00:00");
+//        legacyCustExt.setAeciSubDt(date);
+//    }
     // if (!StringUtils.isBlank(data.getTaxCd1())) {
     // legacyCustExt.setBankAcctNo(data.getTaxCd1());
     // } else {
