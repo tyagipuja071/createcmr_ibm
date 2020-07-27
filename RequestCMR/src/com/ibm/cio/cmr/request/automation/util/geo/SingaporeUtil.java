@@ -246,7 +246,7 @@ public class SingaporeUtil extends AutomationUtil {
           if (CmrConstants.RDC_SOLD_TO.equals(addrType) && "Y".equals(addr.getImportInd())) {
             if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
               Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-              List<DnBMatchingResponse> matchesSoldTo = getMatches(requestData, engineData, soldTo, true);
+              List<DnBMatchingResponse> matchesSoldTo = getMatches(requestData, engineData, soldTo, false);
               boolean matchesDnbSoldTo = false;
               if (matchesSoldTo != null) {
                 // check against D&B
@@ -254,12 +254,12 @@ public class SingaporeUtil extends AutomationUtil {
               }
               if (!matchesDnbSoldTo) {
                 // CMDE Review
-                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified").append("\n");
+                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.").append("\n");
                 cmdeReview = true;
                 break;
               } else {
                 // proceed
-                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks").append("\n");
+                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
               }
             } else {
               // CMDE Review
@@ -273,7 +273,7 @@ public class SingaporeUtil extends AutomationUtil {
           if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && multiAddressitr > 1) {
             if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
               Addr address = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, address, true);
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, address, false);
               boolean matchesDnb = false;
               if (matches != null) {
                 // check against D&B
@@ -281,13 +281,13 @@ public class SingaporeUtil extends AutomationUtil {
               }
               if (!matchesDnb && addressEquals(requestData.getAddress("ZS01"), requestData.getAddress(addrType))) {
                 // CMDE Review
-                checkDetails.append("Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified").append("\n");
+                checkDetails.append("Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.")
+                    .append("\n");
                 cmdeReview = true;
                 break;
               } else {
                 // proceed
-                checkDetails.append("Updates to Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks")
-                    .append("\n");
+                checkDetails.append("Updates to Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
               }
             } else {
               // CMDE Review
