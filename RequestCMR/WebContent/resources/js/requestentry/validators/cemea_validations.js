@@ -722,7 +722,7 @@ function addGaddrValidatorForCEE() {
         var result = cmr.query('VALIDATOR.GADDRCNTRY', {
           REQID : reqId
         });
-        if (result == null || result.ret1 == '') {
+        if (result == null && result.ret1 == '') {
           return new ValidationResult(null, false, 'Country Name value of the G Address is required.');
         }
 
