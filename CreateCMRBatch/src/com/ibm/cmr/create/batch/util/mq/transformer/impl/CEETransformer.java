@@ -904,17 +904,14 @@ public class CEETransformer extends EMEATransformer {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
       legacyCust.setAccAdminBo("");
-      legacyCust.setCeDivision("2");
-
+      legacyCust.setCeDivision("");
+      legacyCust.setLocNo(data.getCmrNo() + data.getSubIndustryCd());
+      legacyCust.setSalesGroupRep("099998");
+      legacyCust.setSalesRepNo("099998");
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
-
-      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
-        legacyCust.setCustType(data.getCrosSubTyp());
-      } else {
-        legacyCust.setCustType("");
-      }
+      legacyCust.setCustType("N");
 
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -957,6 +954,18 @@ public class CEETransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+        legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+      } else {
+        legacyCust.setSalesGroupRep("");
+      }
+
+      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      } else {
+        legacyCust.setSalesRepNo("");
       }
 
       if (!StringUtils.isBlank(data.getPhone1())) {
@@ -1066,19 +1075,6 @@ public class CEETransformer extends EMEATransformer {
     	legacyCust.setCeBo(cebo);
     }else{
     	legacyCust.setCeBo("");
-    }
-    
-    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
-    } else {
-      legacyCust.setSalesGroupRep("");
-    }
-
-    // if (data.getRepTeamMemberNo() != null) {
-    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-    } else {
-      legacyCust.setSalesRepNo("");
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
