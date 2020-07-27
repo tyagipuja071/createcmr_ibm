@@ -650,13 +650,20 @@ public class GreeceTransformer extends EMEATransformer {
 
       } else if (billingAddr != null && mailingAddrIndex == -1) {
         LOG.info("GREECE -- UPDATING - create new mailing");
-        CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
-        newMailingAddr.getId().setAddrNo(getAvailableAddrSeq(legacyObjects.getAddresses()));
-        newMailingAddr.setForCreate(true);
-        modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
-        legacyObjects.getAddresses().add(newMailingAddr);
+        legacyObjects.getAddresses().add(createNewMailingData(billingAddr, getAvailableAddrSeq(legacyObjects.getAddresses())));
       }
+    } else if (billingAddr != null && billingAddr.isForCreate()) {
+      LOG.info("GREECE -- UPDATING - create new mailing from new billing");
+      legacyObjects.getAddresses().add(createNewMailingData(billingAddr, getAvailableAddrSeq(legacyObjects.getAddresses())));
     }
+  }
+
+  private CmrtAddr createNewMailingData(CmrtAddr billingAddr, String addrSeq) {
+    CmrtAddr newMailingAddr = (CmrtAddr) SerializationUtils.clone(billingAddr);
+    newMailingAddr.getId().setAddrNo(addrSeq);
+    newMailingAddr.setForCreate(true);
+    modifyAddrUseFields(MQMsgConstants.SOF_ADDRESS_USE_MAILING, newMailingAddr);
+    return newMailingAddr;
   }
 
   private void modifSoldToYFlag(LegacyDirectObjectContainer legacyObjects) {
@@ -670,6 +677,11 @@ public class GreeceTransformer extends EMEATransformer {
           if (flagToNList.contains("ZI01")) {
             legacyObjects.getAddresses().get(i).setIsAddrUseEPL("N");
           }
+          if (flagToNList.contains("ZP01")) {
+            legacyObjects.getAddresses().get(i).setIsAddrUseBilling("N");
+            legacyObjects.getAddresses().get(i).setIsAddrUseMailing("N");
+          }
+
           legacyObjects.getAddresses().get(i).setForUpdate(true);
         }
       }
