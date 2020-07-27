@@ -230,6 +230,7 @@ var _CTC2Handler = null;
 var _SalesRep2Handler = null;
 var _ExpediteHandler = null;
 var _IMSHandler = null;
+var _landCntryHandler = null;
 function addHandlersForCEMEA() {
   for (var i = 0; i < _addrTypesForCEMEA.length; i++) {
     _addrTypeHandler[i] = null;
@@ -3101,7 +3102,8 @@ function isicCdOnChangeCEE() {
 
 function setCustomerName2LblAndBubble() {
   var custType = FormManager.getActualValue('custGrp');
-  if (custType == 'LOCAL') {
+  var landCntry = FormManager.getActualValue('landCntry');
+  if (custType == 'LOCAL' || landCntry == 'HU') {
     FormManager.changeLabel('CustomerName2', 'Customer Name (2)/Local VAT');
     document.getElementById('custNm2HUInfoBubble').getElementsByClassName('cmr-info-bubble')[0].style.display = '';
   } else {
@@ -3188,6 +3190,14 @@ function initAddressPageRomania() {
 
 function afterConfigTemplateForCroatia() {
   setTaxCd1MandatoryCroatia();
+}
+
+function afterConfigTemplateForHungary() {
+  if (_landCntryHandler == null) {
+    _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
+      setCustomerName2LblAndBubble();
+    });
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -3345,6 +3355,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   // Hungary
   GEOHandler.addAddrFunction(initAddressPageHungary, [ SysLoc.HUNGARY ]);
+  GEOHandler.addAfterConfig(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
+  GEOHandler.addAfterTemplateLoad(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
   // Czech
   GEOHandler.addAfterConfig(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
