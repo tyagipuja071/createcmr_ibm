@@ -346,13 +346,16 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-        if (admin.getSourceSystId() != null) {
-          if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
-          } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-          }
-        }
+        // if (admin.getSourceSystId() != null) {
+        // // if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+        // // engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review
+        // // is required for MARKETPLACE requests.");
+        // // } else
+        // if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+        // engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is
+        // required for BP Portal requests.");
+        // }
+        // }
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
