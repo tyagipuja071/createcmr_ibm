@@ -97,12 +97,16 @@ public class GermanyUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     // cmr-2067 fix
     engineData.setMatchDepartment(true);
-    if (admin.getSourceSystId() != null && "CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-      // BP skip checks - remove after BP is enabled
-      details.append("Processor review is required for BP Portal requests.").append("\n");
-      engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-      skipAllChecks(engineData); // remove after BP is enabled
-    } else if (StringUtils.isNotBlank(scenario)) {
+    // if (admin.getSourceSystId() != null &&
+    // "CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+    // // BP skip checks - remove after BP is enabled
+    // details.append("Processor review is required for BP Portal
+    // requests.").append("\n");
+    // engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is
+    // required for BP Portal requests.");
+    // skipAllChecks(engineData); // remove after BP is enabled
+    // } else
+    if (StringUtils.isNotBlank(scenario)) {
       switch (scenario) {
       case "PRIPE":
       case "IBMEM":
