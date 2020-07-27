@@ -70,9 +70,9 @@
       <cmr:view exceptForCountry="618,740">
         <cmr:info text="${ui.info.custNm3CEMEA}" />
       </cmr:view>
-      <cmr:view forCountry="740">
+      <!--<cmr:view forCountry="740">
         <cmr:info text="${ui.info.custNm3HU}" />
-      </cmr:view>
+      </cmr:view>-->
       <cmr:view forCountry="618">
         <cmr:info text="${ui.info.nameAustria}" />
       </cmr:view>
