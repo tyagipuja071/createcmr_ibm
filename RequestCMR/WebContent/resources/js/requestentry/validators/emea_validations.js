@@ -7358,7 +7358,7 @@ function autoSetAbbrNameUKI(){
                                                     ADDR_TYPE : 'ZI01'});
     if(result.ret1 != undefined){
       installingCustNm = result.ret1;
-      if(installingCustNm.includes('VR999/')){
+      if(installingCustNm.match('^VR[0-9]{3}')){
         FormManager.setValue('abbrevNm',installingCustNm);
       } else {
         var result2 = cmr.query('GET.CUSTNM1_ADDR_UKI', {REQ_ID : reqId,
