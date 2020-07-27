@@ -936,7 +936,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
 
     // DIC and OIB fields
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())) {
+    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry()) || SystemLocation.CROATIA.equals(data.getCmrIssuingCntry())
+        || SystemLocation.CZECH_REPUBLIC.equals(data.getCmrIssuingCntry())) {
       data.setTaxCd1(this.currentImportValues.get("BankAccountNo"));
       LOG.trace("BankAccountNo: " + data.getTaxCd1());
     }
