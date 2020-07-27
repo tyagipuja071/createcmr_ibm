@@ -57,6 +57,9 @@ public class SpainUtil extends AutomationUtil {
   public static final String SCENARIO_INTERNAL_SO = "INTSO";
   public static final String SCENARIO_CROSSBORDER = "XCRO";
   public static final String SCENARIO_CROSSBORDER_BP = "XBP";
+  public static final String SCENARIO_CROSSBORDER_IGS = "XIGS";
+  public static final String SCENARIO_GOVERNMENT = "GOVRN";
+  public static final String SCENARIO_GOVERNMENT_IGS = "GOVIG";
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
@@ -80,7 +83,8 @@ public class SpainUtil extends AutomationUtil {
     LOG.debug("Scenario to check: " + scenario);
 
     if ("C".equals(requestData.getAdmin().getReqType())) {
-      if (!SCENARIO_THIRD_PARTY.equals(scenario) && !SCENARIO_THIRD_PARTY_IG.equals(scenario)) {
+      if (SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_IGS_GSE.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
+          || SCENARIO_CROSSBORDER_IGS.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_GOVERNMENT_IGS.equals(scenario)) {
         if (!addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
           engineData.addRejectionComment("SCENARIO_CHECK", "3rd Party should be selected.", "", "");
           details.append("Scenario should be 3rd Party");
