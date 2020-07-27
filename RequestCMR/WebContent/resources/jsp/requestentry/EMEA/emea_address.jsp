@@ -277,7 +277,7 @@
     </p>
   </cmr:column>
   
-  <cmr:column span="2" containerForField="Department" exceptForCountry="726">
+  <cmr:column span="2" containerForField="Department" exceptForCountry="726,666">
     <p>
       <cmr:label fieldId="dept">
         <cmr:fieldLabel fieldId="Department" />:
