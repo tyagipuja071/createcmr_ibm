@@ -396,13 +396,14 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            FindCMRRecordModel newzi01 = new FindCMRRecordModel();
 	            PropertyUtils.copyProperties(newzi01, mainRecord);
 	            newzi01.setCmrAddrTypeCode("ZI01");
-	            if (!seq5Exist) {
-	              newzi01.setCmrAddrSeq("00005");
-	            } else {
-	              newzi01.setCmrAddrSeq("00006");
-	            }
+            // if (!seq5Exist) {
+            // newzi01.setCmrAddrSeq("00005");
+            // } else {
+            // newzi01.setCmrAddrSeq("00006");
+            // }
+            newzi01.setCmrAddrSeq(mainRecord.getCmrAddrSeq());
 	            newzi01.setParentCMRNo("");
-	            newzi01.setCmrSapNumber("");
+            newzi01.setCmrSapNumber(mainRecord.getCmrSapNumber());
             newzi01.setCmrDept(mainRecord.getCmrCity2());
             if (StringUtils.isEmpty(mainRecord.getCmrStreetAddress())) {
               newzi01.setCmrStreetAddress("\u00a0");
@@ -414,9 +415,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            FindCMRRecordModel newzd01 = new FindCMRRecordModel();
 	            PropertyUtils.copyProperties(newzd01, mainRecord);
 	            newzd01.setCmrAddrTypeCode("ZD01");
-	            newzd01.setCmrAddrSeq("00004");
+            newzd01.setCmrAddrSeq(mainRecord.getCmrAddrSeq());
 	            newzd01.setParentCMRNo("");
-	            newzd01.setCmrSapNumber("");
+            newzd01.setCmrSapNumber(mainRecord.getCmrSapNumber());
             newzd01.setCmrDept(mainRecord.getCmrCity2());
             if (StringUtils.isEmpty(mainRecord.getCmrStreetAddress())) {
               newzd01.setCmrStreetAddress("\u00a0");
@@ -2056,6 +2057,31 @@ public class TurkeyHandler extends BaseSOFHandler {
 
 	  @Override
 	  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+
+    if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
+
+      String zs01seq = getZS01Seq(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo());
+      String zs01updateinit = getZS01UpdateInit(entityManager, data.getId().getReqId(), zs01seq);
+      String zi01updateinit = getZI01UpdateInit(entityManager, data.getId().getReqId(), zs01seq);
+      String zd01updateinit = getZD01UpdateInit(entityManager, data.getId().getReqId(), zs01seq);
+
+      if ("Y".equals(zs01updateinit) || "Y".equals(zi01updateinit) || "Y".equals(zd01updateinit)) {
+        updateImportIndForTRSharezi01Addr(entityManager, data.getId().getReqId(), zs01seq);
+        updateSeqForTRSharezi01Addr(entityManager, data.getId().getReqId(), zs01seq);
+        updateImportIndForTRSharezd01Addr(entityManager, data.getId().getReqId(), zs01seq);
+        updateSeqForTRSharezd01Addr(entityManager, data.getId().getReqId(), zs01seq);
+
+        // updateImportIndForTRCopyzi01Addr(entityManager,
+        // data.getId().getReqId());
+        // updateDPLCheckForTRCopyzi01Addr(entityManager,
+        // data.getId().getReqId());
+        // updateImportIndForTRCopyzd01Addr(entityManager,
+        // data.getId().getReqId());
+        // updateDPLCheckForTRCopyzd01Addr(entityManager,
+        // data.getId().getReqId());
+      }
+    }
+
 	    if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
 	      doSetInFSLAbbrevName(data);
 	      String postCdLandcntry = getPostalCd_LandedCntry(entityManager, data);
@@ -4595,6 +4621,96 @@ public class TurkeyHandler extends BaseSOFHandler {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.UPDATE.ABBNAME"));
     query.setParameter("ABBREV_NM", abbrev_nm);
     query.setParameter("REQ_ID", req_id);
+    query.executeSql();
+  }
+
+
+  public static String getZS01Seq(EntityManager entityManager, String katr6, String mandt, String cmr_no) {
+    String ZS01Seq = "";
+    String sql = ExternalizedQuery.getSql("TR.GET.ZS01SEQ");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR_NO", cmr_no);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      ZS01Seq = result;
+    }
+    LOG.debug("ZS01Seq Addr>" + ZS01Seq);
+    return ZS01Seq;
+  }
+
+  public static String getZS01UpdateInit(EntityManager entityManager, long req_id, String seq) {
+    String ZS01UpdateInit = "";
+    String sql = ExternalizedQuery.getSql("TR.GET.ZS01UPDATEINIT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      ZS01UpdateInit = result;
+    }
+    LOG.debug("ZS01UpdateInit Addr>" + ZS01UpdateInit);
+    return ZS01UpdateInit;
+  }
+
+  public static String getZI01UpdateInit(EntityManager entityManager, long req_id, String seq) {
+    String ZI01UpdateInit = "";
+    String sql = ExternalizedQuery.getSql("TR.GET.ZI01UPDATEINIT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      ZI01UpdateInit = result;
+    }
+    LOG.debug("ZS01UpdateInit Addr>" + ZI01UpdateInit);
+    return ZI01UpdateInit;
+  }
+
+  public static String getZD01UpdateInit(EntityManager entityManager, long req_id, String seq) {
+    String ZD01UpdateInit = "";
+    String sql = ExternalizedQuery.getSql("TR.GET.ZD01UPDATEINIT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    query.setParameter("SEQ", seq);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      ZD01UpdateInit = result;
+    }
+    LOG.debug("ZS01UpdateInit Addr>" + ZD01UpdateInit);
+    return ZD01UpdateInit;
+  }
+
+  private void updateImportIndForTRSharezi01Addr(EntityManager entityManager, long reqId, String seq) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZI01SHARE.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("SEQ", seq);
+    query.executeSql();
+  }
+
+  private void updateSeqForTRSharezi01Addr(EntityManager entityManager, long reqId, String seq) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZI01SHARE.SEQ"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("SEQ", seq);
+    query.executeSql();
+  }
+
+  private void updateImportIndForTRSharezd01Addr(EntityManager entityManager, long reqId, String seq) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZD01SHARE.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("SEQ", seq);
+    query.executeSql();
+  }
+
+  private void updateSeqForTRSharezd01Addr(EntityManager entityManager, long reqId, String seq) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZD01SHARE.SEQ"));
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("SEQ", seq);
     query.executeSql();
   }
 
