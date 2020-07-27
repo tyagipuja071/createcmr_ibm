@@ -353,7 +353,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column span="2" containerForField="MembLevel" exceptForCountry="822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
+        <cmr:column span="2" containerForField="MembLevel" exceptForCountry="866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -362,7 +362,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column span="2" containerForField="BPRelationType" exceptForCountry="822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
+        <cmr:column span="2" containerForField="BPRelationType" exceptForCountry="866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:
@@ -374,7 +374,7 @@ dojo.addOnLoad(function(){
 		</cmr:row>
     <cmr:view exceptForGEO="MCO2,CN" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
   		<cmr:row topPad="10" addBackground="true">
-        <cmr:column span="2" containerForField="SOENumber">
+        <cmr:column span="2" containerForField="SOENumber" exceptForCountry="866">
           <p>
             <cmr:label fieldId="soeReqNo">
               <cmr:fieldLabel fieldId="SOENumber" />:

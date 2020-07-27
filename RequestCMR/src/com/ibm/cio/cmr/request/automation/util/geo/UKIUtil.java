@@ -1,5 +1,8 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +40,11 @@ public class UKIUtil extends AutomationUtil {
 
     }
     return true;
+  }
+
+  @Override
+  protected List<String> getCountryLegalEndings() {
+    return Arrays.asList("LLP", "LTD", "Ltd.", "CIC", "CIO", "Cyf", "CCC", "Unltd.", "Ultd.");
   }
 
   @Override

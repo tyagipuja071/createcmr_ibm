@@ -2187,6 +2187,39 @@ function changeAbbNmSpainOnScenario() {
   }
 }
 
+function addValidatorForCollectionCdUpdateSpain() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var reqId = FormManager.getActualValue('reqId');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (reqType == 'U' && role == 'REQUESTER') {
+          var requestingLOB = FormManager.getActualValue('requestingLob');
+          var collectionCd = FormManager.getActualValue('collectionCd');
+          var result = cmr.query('GETDATARDCVALUESIT', {
+            REQ_ID : reqId
+          });
+          var collCdOld = null;
+          if (result && result.ret1 != null) {
+            collCdOld = result.ret1;
+          }
+          if (collCdOld != null && collCdOld != collectionCd && requestingLOB != 'AR') {
+            return new ValidationResult({
+              id : 'requestingLob',
+              name : 'Requesting LOB'
+            }, false, 'Requesting LOB should be \'Accounts Receivable\' only, if Collection Code is updated.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
   console.log('adding MCO functions...');
@@ -2270,6 +2303,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN ], null, true);
+  GEOHandler.registerValidator(addBilingMailingValidatorSpain, [ SysLoc.SPAIN ], null, true);
+  GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
 
   // PT Legacy
   GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
