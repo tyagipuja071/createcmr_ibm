@@ -428,6 +428,8 @@ function afterConfigForUKI() {
       autoSetAbbrevNmFrmDept();
     });
   }
+  
+     autoSetAbbrNameUKI();
   if (_customerTypeHandler == null) {
     var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
@@ -451,6 +453,8 @@ function afterConfigForUKI() {
         unlockINACForINTERUKI();
         autoSetISUClientTierUK();
         optionalRuleForVatUK();
+        autoSetAbbrNameUKI();
+        autoSetUIFieldsOnScnrioUKI();
       }
       ;
     });
@@ -8968,6 +8972,47 @@ function countryScenarioProcessorRules() {
   return true;
 }
  
+function autoSetAbbrNameUKI(){
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+  // CMR - 5063
+  if(custSubGrp == 'THDPT'){
+    var billingCustNm = '';
+    var installingCustNm = '';
+    var reqId = FormManager.getActualValue('reqId');
+    var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+    var abbName = FormManager.getActualValue('abbrevNm');
+    var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {REQ_ID : reqId,
+                                                    ADDR_TYPE : 'ZI01'});
+    if(result.ret1 != undefined){
+      installingCustNm = result.ret1;
+      if(installingCustNm.match('^VR[0-9]{3}')){
+        FormManager.setValue('abbrevNm',installingCustNm);
+      } else {
+        var result2 = cmr.query('GET.CUSTNM1_ADDR_UKI', {REQ_ID : reqId,
+                                                         ADDR_TYPE : 'ZS01'});
+        billingCustNm = result2.ret1 != undefined ? result2.ret1 : '' ;
+        if(billingCustNm != '' && !abbName.includes('c/o')){
+          FormManager.setValue('abbrevNm',installingCustNm + ' c/o ' + billingCustNm);   
+        }
+      }
+    }
+  } 
+}
+
+function  autoSetUIFieldsOnScnrioUKI(){
+ var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if(custSubGrp == 'INTER'){
+    FormManager.setValue('company','');
+    FormManager.readOnly('company');
+    FormManager.setValue('collectionCd','88');
+    FormManager.readOnly('collectionCd');
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.getField('vatExempt').set('checked', false);
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
