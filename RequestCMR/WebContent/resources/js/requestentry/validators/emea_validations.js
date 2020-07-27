@@ -8064,7 +8064,7 @@ function validateSingleReactParentCMR() {
             };
           var resultComp = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT_COMPANY', qParams);
           var resultBill = cmr.query('LD.SINGLE_REACT_CHECK_ACTIVE_PARENT_BILLING', qParams);
-          //Check RDC side
+          // Check RDC side
           var rdcQParams = null;
           var rdcResultComp = null;
           var rdcResultBill = null
@@ -8123,7 +8123,7 @@ function countryScenarioProcessorRules() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   for (var i = 0; i < COUNTRY_PROCESSOR_CHANGE.length; i++) {
     if (cntry == COUNTRY_PROCESSOR_CHANGE[i]) {
-      return false;
+      return true;
       break;
     }
   }
