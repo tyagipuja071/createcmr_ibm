@@ -904,17 +904,14 @@ public class CEETransformer extends EMEATransformer {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
       legacyCust.setAccAdminBo("");
-      legacyCust.setCeDivision("2");
-
+      legacyCust.setCeDivision("");
+      legacyCust.setLocNo(data.getCmrNo() + data.getSubIndustryCd());
+      legacyCust.setSalesGroupRep("099998");
+      legacyCust.setSalesRepNo("099998");
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
-
-      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
-        legacyCust.setCustType(data.getCrosSubTyp());
-      } else {
-        legacyCust.setCustType("");
-      }
+      legacyCust.setCustType("N");
 
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -957,6 +954,18 @@ public class CEETransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+        legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+      } else {
+        legacyCust.setSalesGroupRep("");
+      }
+
+      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      } else {
+        legacyCust.setSalesRepNo("");
       }
 
       if (!StringUtils.isBlank(data.getPhone1())) {
@@ -1066,19 +1075,6 @@ public class CEETransformer extends EMEATransformer {
     	legacyCust.setCeBo(cebo);
     }else{
     	legacyCust.setCeBo("");
-    }
-    
-    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
-    } else {
-      legacyCust.setSalesGroupRep("");
-    }
-
-    // if (data.getRepTeamMemberNo() != null) {
-    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-    } else {
-      legacyCust.setSalesRepNo("");
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
@@ -1236,7 +1232,7 @@ public class CEETransformer extends EMEATransformer {
         if ("@".equals(muData.getCustNm2())) {
           cust.setCeBo("");
         } else {
-          cust.setCeBo(muData.getCustNm2());
+        cust.setCeBo(cebo);
         }
     }
     
@@ -1581,11 +1577,11 @@ public class CEETransformer extends EMEATransformer {
 
     Data data = cmrObjects.getData();
 
-    if (!StringUtils.isBlank(data.getTaxCd1())) {
-      legacyCustExt.setBankAcctNo(data.getTaxCd1());
-    } else {
-      legacyCustExt.setBankAcctNo("");
-    }
+    // if (!StringUtils.isBlank(data.getTaxCd1())) {
+    // legacyCustExt.setBankAcctNo(data.getTaxCd1());
+    // } else {
+    // legacyCustExt.setBankAcctNo("");
+    // }
 
     if (!StringUtils.isBlank(data.getCompany())) {
       if (data.getCompany().length() > 9) {
@@ -1632,14 +1628,14 @@ public class CEETransformer extends EMEATransformer {
         }
       }
     }
-
-    if (!StringUtils.isBlank(muData.getEmail2())) {
-      if ("@".equals(muData.getEmail2())) {
-        custExt.setBankAcctNo("");
-      } else {
-        custExt.setBankAcctNo(muData.getEmail2());
-      }
-    }
+    //
+    // if (!StringUtils.isBlank(muData.getEmail2())) {
+    // if ("@".equals(muData.getEmail2())) {
+    // custExt.setBankAcctNo("");
+    // } else {
+    // custExt.setBankAcctNo(muData.getEmail2());
+    // }
+    // }
 
     List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     MassUpdtAddr zp01Addr = new MassUpdtAddr();
