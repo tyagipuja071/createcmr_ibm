@@ -455,7 +455,7 @@ function addAddressTypeValidatorCEE() {
           var zd01Cnt = 0;
           var zs02Cnt = 0;
           var zp02Cnt = 0;
-
+          var zs01LandCountry = null;
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -467,6 +467,10 @@ function addAddressTypeValidatorCEE() {
             }
             if (type == 'ZS01') {
               zs01Cnt++;
+              zs01LandCountry = record.landCntry;
+              if (typeof (zs01LandCountry) == 'object') {
+                zs01LandCountry = zs01LandCountry[0];
+              }
             } else if (type == 'ZP01') {
               zp01Cnt++;
             } else if (type == 'ZI01') {
@@ -481,7 +485,8 @@ function addAddressTypeValidatorCEE() {
           }
 
           var custType = FormManager.getActualValue('custGrp');
-          if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0) && custType == 'LOCAL') {
+          if (reqLocalAddr.has(cntry) && (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0 || zp02Cnt == 0)
+              && zs01LandCountry == FormManager.getActualValue('defaultLandedCountry')) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
           } else if (cntry == SysLoc.AUSTRIA) {
             var reqLob = FormManager.getActualValue('requestingLob');// request
