@@ -150,8 +150,7 @@ public class GreeceHandler extends BaseSOFHandler {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
       // name4 in rdc = Attn on SOF
-      record.setCmrDept(record.getCmrName4());
-      record.setCmrName4(null);
+      record.setCmrName4(record.getCmrName4());
       if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
         record.setCmrStreetAddressCont(record.getCmrName4());
         record.setCmrName3(record.getCmrName3());
@@ -161,13 +160,6 @@ public class GreeceHandler extends BaseSOFHandler {
         record.setCmrName3(null);
       }
 
-      if (!StringUtils.isBlank(record.getCmrPOBox())) {
-        if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-          record.setCmrPOBox(record.getCmrPOBox());
-        } else {
-          record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
-        }
-      }
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
       } else {
@@ -253,6 +245,15 @@ public class GreeceHandler extends BaseSOFHandler {
                   converted.add(addr);
                   if ("ZS01".equals(addrType)) {
                     FindCMRRecordModel zp01Addr = mapLocalLanguageTranslationOfSoldTo(entityManager, record, cmrIssueCd);
+
+                    if (record.getCmrAddrSeq() != null && record.getCmrAddrSeq().length() < 5) {
+                      String zs01Seq = StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0');
+
+                      if (zp01Addr.getCmrAddrSeq().equals(zs01Seq)) {
+                        zp01Addr.setCmrAddrSeq(record.getCmrAddrSeq());
+                      }
+                    }
+
                     zp01Addr.setCmrPostalCode(mainRecord.getCmrPostalCode());
                     converted.add(zp01Addr);
                   }
@@ -1721,60 +1722,24 @@ public class GreeceHandler extends BaseSOFHandler {
 
       String country = currentRecord.getCmrIssuedBy();
 
-      if (!SystemLocation.GREECE.equals(country) && !SystemLocation.CYPRUS.equals(country) && !SystemLocation.TURKEY.equals(country)
-          && !SystemLocation.UNITED_KINGDOM.equals(country) && !SystemLocation.IRELAND.equals(country)) {
-        String[] names = splitName(currentRecord.getCmrName1Plain(), currentRecord.getCmrName2Plain(), 30, 30);
-        address.setCustNm1(names[0]);
-        address.setCustNm2(names[1]);
-
-      } else {
-        address.setCustNm1(currentRecord.getCmrName1Plain());
-        address.setCustNm2(currentRecord.getCmrName2Plain());
-
-      }
-
+      address.setCustNm1(currentRecord.getCmrName1Plain());
+      address.setCustNm2(currentRecord.getCmrName2Plain());
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-      // if (StringUtils.isNotBlank(currentRecord.getCmrCountryLanded())
-      // &&
-      // currentRecord.getCmrCountryLanded().equalsIgnoreCase("IE")) {
-      // address.setPostCd(StringUtils.isNotBlank(currentRecord.getCmrPostalCode())
-      // ? currentRecord.getCmrPostalCode() : "II1 1II");
-      // }
-
-      // no addr std for israel
-      if ("IL".equals(currentRecord.getCmrCountryLanded()) && (SystemLocation.ISRAEL.equals(currentRecord.getCmrIssuedBy())
-          || SystemLocation.SAP_ISRAEL_SOF_ONLY.equals(currentRecord.getCmrIssuedBy()))) {
-        address.setAddrStdResult("X");
-      }
-
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
-
       address.setVat(currentRecord.getCmrTaxNumber());
-      // set tax office here
-
       address.setTaxOffice(currentRecord.getCmrTaxOffice());
       address.setVat(currentRecord.getCmrTaxNumber());
 
-      if (SystemLocation.TURKEY.equals(country)) {
-        address.setDept(currentRecord.getCmrDept());
+      if (!StringUtils.isBlank(currentRecord.getCmrName4())) {
+        String attPerson = currentRecord.getCmrName4().replaceFirst("ATT ", "");
+        attPerson = attPerson.replaceFirst("Υ/Ο ", "");
+        address.setCustNm4(attPerson);
       }
 
-      if (SystemLocation.GREECE.equals(country)) {
-        if (!StringUtils.isBlank(currentRecord.getCmrName4())) {
-          String attPerson = currentRecord.getCmrName4().replaceFirst("ATT ", "");
-          attPerson = attPerson.replaceFirst("Υ/Ο ", "");
-          address.setCustNm4(attPerson);
-        }
-      }
-
-      if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
-        if (!StringUtils.isEmpty(currentRecord.getCmrName3())) {
-          address.setDept(removeATT(currentRecord.getCmrName3()));
-        }
-        if (!StringUtils.isEmpty(address.getCustPhone()) && !"ZS01".equals(address.getId().getAddrType())
-            && !"ZD01".equals(address.getId().getAddrType())) {
-          address.setCustPhone("");
-        }
+      if (!StringUtils.isBlank(currentRecord.getCmrPOBox())) {
+        String poBox = currentRecord.getCmrPOBox().replace("PO BOX", "").trim();
+        poBox = poBox.replace("Τ.Θ.", "").trim();
+        address.setPoBox(poBox);
       }
 
       String processingType = PageManager.getProcessingType(country, "U");

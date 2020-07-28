@@ -164,7 +164,6 @@
         		<p>
           			<cmr:label fieldId="crosSubTyp">
 						<cmr:fieldLabel fieldId="TypeOfCustomer" />:
-						<cmr:info text="${ui.info.crosSubTyp}" />
 					</cmr:label>
           			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
         		</p>

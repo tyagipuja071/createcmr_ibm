@@ -3457,11 +3457,6 @@ var custType = FormManager.getActualValue('custGrp');
     }
   }
 
-  if (_gtcVatExemptHandler == null) {
-    _gtcVatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      setVatValidatorGRCYTR();
-    });
-  }
 }
 
 function disableAddrFieldsCY(){
@@ -3480,26 +3475,20 @@ function disableAddrFieldsCY(){
     FormManager.setValue('custPhone', '');
     FormManager.disable('custPhone');
   }
+  
+  if (FormManager.getActualValue('addrType') == 'ZP01'
+    || FormManager.getActualValue('addrType') == 'ZS01') {
+  FormManager.enable('poBox');
+  } else {
+    FormManager.setValue('poBox', '');
+    FormManager.disable('poBox');
+  }
 }
 
 function addPOBoxValidatorGR() {
   FormManager.removeValidator('poBox', Validators.LATIN);
   FormManager.removeValidator('poBox', Validators.NON_LATIN);
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
-}
-
-function setVatValidatorGRCYTR() {
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
-    FormManager.resetValidations('vat');
-    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked') && cntry == SysLoc.GREECE) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-    } else if (!dijit.byId('vatExempt').get('checked') && cntry == SysLoc.TURKEY) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'Tax Number' ]);
-    }
-  }
 }
 
 function setClientTierAndISR(value) {
@@ -4306,6 +4295,7 @@ function setCustSubTypeBpGRTRCY() {
     }
   }
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '7');
@@ -8291,7 +8281,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetAddressFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
-  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.GREECE ]);
@@ -8319,7 +8309,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCommonCollectionCd, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(disableINACEnterpriseOnViewOnly, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(viewOnlyAddressDetails, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(setVatValidatorGRCYTR, [ SysLoc.GREECE, SysLoc.TURKEY, ]);
 
   // common israel/greece/cyprus/turkey
   GEOHandler.addAfterConfig(defaultCapIndicator, [ SysLoc.ISRAEL, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
