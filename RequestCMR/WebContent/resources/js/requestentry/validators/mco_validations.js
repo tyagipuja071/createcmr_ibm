@@ -369,6 +369,11 @@ function addHandlersForPTES() {
 
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      if (dijit.byId('vatExempt').get('checked') && FormManager.getActualValue('custSubGrp') == 'PRICU') {
+        FormManager.readOnly('vatExempt');
+      } else {
+        FormManager.enable('vatExempt');
+      }
       setVatValidatorPTES();
     });
   }
@@ -1985,7 +1990,7 @@ function addBilingMailingValidatorSpain() {
               addrType = addrType[0];
             }
 
-            if (!custNm1.concat(custNm2).includes("IBM") && (addrType == 'ZP01' || addrType == 'ZS01')) {
+            if (!(custNm1.concat(custNm2).includes("IBM") || custNm1.concat(custNm2).includes('INTERNATIONAL BUSINESS MACHINES')) && (addrType == 'ZP01' || addrType == 'ZS01')) {
               inValidCnt++;
             }
           }
