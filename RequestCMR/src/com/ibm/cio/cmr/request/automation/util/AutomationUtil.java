@@ -723,7 +723,7 @@ public abstract class AutomationUtil {
     client.setRequestMethod(Method.Get);
     client.setReadTimeout(1000 * 60 * 5);
     PPSRequest request = new PPSRequest();
-    request.setCeid(ppsCeId);
+    request.setCeid(ppsCeId.toLowerCase());
     PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
     if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
       return false;
@@ -904,6 +904,9 @@ public abstract class AutomationUtil {
   public static String getCleanString(String str) {
     if (StringUtils.isNotBlank(str)) {
       str = str.trim().replaceAll("[^a-zA-Z0-9\\s\\-]", " ").toUpperCase();
+      if (str.length() > 0) {
+        str = str.trim();
+      }
       return str;
     }
     return "";
@@ -1055,7 +1058,7 @@ public abstract class AutomationUtil {
 
   }
 
-  private String getCustomerFullName(Addr addr) {
+  protected String getCustomerFullName(Addr addr) {
     String custNm1 = addr.getCustNm1();
     String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
     String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
