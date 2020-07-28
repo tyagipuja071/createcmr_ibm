@@ -273,7 +273,7 @@ public class SpainUtil extends AutomationUtil {
 	          requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
 	          if ("9".equals(change.getNewData().substring(1, 2)) && !requesterFromTeam) {
 	            resultCodes.add("D");// Reject
-	            details.append("Requester is not allowed to submit updates to 'SBO' field. \n");
+	            details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
 	          }
 	          if (!"9".equals(change.getNewData().substring(1, 2))) {
 	            cmdeReview = true;
@@ -290,7 +290,7 @@ public class SpainUtil extends AutomationUtil {
 	        requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
 	        if (!requesterFromTeam) {
 	          resultCodes.add("D");// Reject
-	          details.append("Requester is not allowed to submit updates to 'Mailing Condition' field. \n");
+	          details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
 	        }
 	        break;
 	      case "Tax Code":
