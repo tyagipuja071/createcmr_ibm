@@ -147,10 +147,11 @@
 </cmr:view>
 <cmr:view forCountry="754,866">
   <cmr:row topPad="10" addBackground="true">
-    <cmr:column span="2" containerForField="InternalDept">
+    <cmr:column span="4" containerForField="InternalDept">
       <p>
         <cmr:label fieldId="ibmDeptCostCenter">
           <cmr:fieldLabel fieldId="InternalDept" />: 
+     <div id = "deptInfo"><cmr:info text="${ui.info.department}"/> </div>
         </cmr:label>
         <cmr:field path="ibmDeptCostCenter" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
       </p>
