@@ -310,15 +310,17 @@ function autoSetAbbrevNmFrmDept() {
   var result = cmr.query('UKI.GET_TOP_INSTALL_1', qParams);
   tmInstallName1 = result.ret4;
 
-  if (('XINTR' == custType) && (SysLoc.IRELAND == cntry || SysLoc.UK == cntry)) {
+  if (('XINTR' == custType || 'INTER' == custType) && (SysLoc.IRELAND == cntry || SysLoc.UK == cntry)) {
     var dept = FormManager.getActualValue('ibmDeptCostCenter');
 
     if (tmInstallName1.length > 10) {
       tmInstallName1 = tmInstallName1.substring(0, 10);
     }
-    abbrevNm = 'IBM/' + dept + '/' + tmInstallName1;
-    FormManager.setValue('abbrevNm', abbrevNm);
-    FormManager.readOnly('abbrevNm');
+    if (!abbrevNm.includes('IBM/')) {
+      abbrevNm = 'IBM/' + dept + '/' + tmInstallName1;
+      FormManager.setValue('abbrevNm', abbrevNm);
+      FormManager.readOnly('abbrevNm');
+    }
   }
 }
 
@@ -7579,19 +7581,6 @@ function autoSetAbbrNameUKI() {
         if (billingCustNm != '' && !abbName.includes('c/o')) {
           FormManager.setValue('abbrevNm', installingCustNm + ' c/o ' + billingCustNm);
         }
-      }
-    }
-  }
-  // CMR 4543
-  else if (custSubGrp == 'INTER') {
-    var result2 = cmr.query('GET.CUSTNM1_ADDR_UKI', {
-      REQ_ID : reqId,
-      ADDR_TYPE : 'ZI01'
-    });
-    if (result2.ret1 != undefined) {
-      installingCustNm = result2.ret1;
-      if (!abbName.startsWith('IBM / ODB')) {
-        FormManager.setValue('abbrevNm', 'IBM / ODB / ' + installingCustNm);
       }
     }
   }
