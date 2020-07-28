@@ -235,7 +235,6 @@ public class SpainUtil extends AutomationUtil {
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       boolean requesterFromTeam = false;
-      requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
       switch (change.getDataField()) {
       case "VAT #":
         if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
@@ -271,9 +270,10 @@ public class SpainUtil extends AutomationUtil {
       case "SBO":
         if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
             && !(change.getOldData().equals(change.getNewData()))) {
+          requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
           if ("9".equals(change.getNewData().substring(1, 2)) && !requesterFromTeam) {
             resultCodes.add("D");// Reject
-            details.append("Requester not from CMDE Team. \n");
+            details.append("Requester is not allowed to submit updates to 'SBO' field. \n");
           }
           if (!"9".equals(change.getNewData().substring(1, 2))) {
             cmdeReview = true;
@@ -287,9 +287,10 @@ public class SpainUtil extends AutomationUtil {
         break;
       case "Mode Of Payment":
       case "Mailing Condition":
+        requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
         if (!requesterFromTeam) {
           resultCodes.add("D");// Reject
-          details.append("Requester not from CMDE Team. \n");
+          details.append("Requester is not allowed to submit updates to 'Mailing Condition' field. \n");
         }
         break;
       case "Tax Code":
