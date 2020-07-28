@@ -30,8 +30,10 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -72,7 +74,9 @@ public class SpainUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     Addr soldTo = requestData.getAddress("ZS01");
-    String customerName = soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
+    String customerName = getCustomerFullName(soldTo);
+    Addr installAt = requestData.getAddress("ZI01");
+    String customerNameZI01 = getCustomerFullName(installAt);
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -85,12 +89,12 @@ public class SpainUtil extends AutomationUtil {
     if ("C".equals(requestData.getAdmin().getReqType())) {
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_IGS_GSE.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
           || SCENARIO_CROSSBORDER_IGS.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_GOVERNMENT_IGS.equals(scenario))
-          && !addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
-        engineData.addRejectionComment("SCENARIO_CHECK", "3rd Party should be selected.", "", "");
-        details.append("Scenario should be 3rd Party");
+          && StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZI01))) {
+        engineData.addRejectionComment("SCENARIO_CHECK",
+            "Customer names on billing and installing address are not identical, 3rd Party should be selected.", "", "");
+        details.append("Customer names on billing and installing address are not identical, 3rd Party should be selected.");
         return false;
-      } else if (SCENARIO_THIRD_PARTY.equals(scenario)
-          || SCENARIO_THIRD_PARTY_IG.equals(scenario) && addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
+      } else if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario) && addressEquals(soldTo, installAt)) {
         engineData.addRejectionComment("SCENARIO_CHECK", "Billing and installing address should be different.", "", "");
         details.append("For 3rd Party Billing and installing address should be different");
         return false;
@@ -103,19 +107,9 @@ public class SpainUtil extends AutomationUtil {
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-    case SCENARIO_INTERNAL:
-    case SCENARIO_INTERNAL_SO:
-      Addr mailTo = requestData.getAddress("ZP01");
-      String customerName2 = (StringUtils.isNotBlank(mailTo.getCustNm1()) ? mailTo.getCustNm1().trim() : "")
-          + (!StringUtils.isBlank(mailTo.getCustNm2()) ? " " + mailTo.getCustNm2() : "");
-      if (!customerName2.toUpperCase().contains("IBM") && !customerName.toUpperCase().contains("IBM")) {
-        details.append("Mailing and Billing addresses should have IBM in them.");
-        engineData.addRejectionComment("SCENARIO_CHECK", "Mailing and Billing addresses should have IBM in them.", "", "");
-        return false;
-      }
-
     }
     return true;
+
   }
 
   @Override
@@ -232,6 +226,7 @@ public class SpainUtil extends AutomationUtil {
     Set<String> resultCodes = new HashSet<String>();// D for Reject
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
+      boolean requesterFromTeam = false;
       switch (change.getDataField()) {
       case "VAT #":
         if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
@@ -264,22 +259,31 @@ public class SpainUtil extends AutomationUtil {
           }
         }
         break;
-      case "Order Block Code":
-        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData()) || "92".equals(change.getOldData())
-            || "92".equals(change.getNewData())) {
-          cmdeReview = true;
-        }
-        break;
       case "SBO":
         if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
             && !(change.getOldData().equals(change.getNewData()))) {
-          cmdeReview = true;
+          requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
+          if ("9".equals(change.getNewData().substring(1, 2)) && !requesterFromTeam) {
+            resultCodes.add("D");// Reject
+            details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
+          }
+          if (!"9".equals(change.getNewData().substring(1, 2))) {
+            cmdeReview = true;
+          }
         }
         break;
       case "INAC/NAC Code":
+      case "ISIC":
+      case "Currency Code":
+        cmdeReview = true;
+        break;
       case "Mode Of Payment":
       case "Mailing Condition":
-        cmdeReview = true;
+        requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
+        if (!requesterFromTeam) {
+          resultCodes.add("D");// Reject
+          details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
+        }
         break;
       case "Tax Code":
         // noop, for switch handling only
