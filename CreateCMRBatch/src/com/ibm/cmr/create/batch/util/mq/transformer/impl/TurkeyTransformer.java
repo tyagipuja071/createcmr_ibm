@@ -1027,15 +1027,6 @@ public class TurkeyTransformer extends EMEATransformer {
         }
       }
 
-      // extract the phone from billing as main phone
-      for (Addr addr : cmrObjects.getAddresses()) {
-        if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-          legacyCust.setTelNoOrVat(addr.getCustPhone());
-          landedCntry = addr.getLandCntry();
-          break;
-        }
-      }
-
       // mrc
       // String custType = data.getCustSubGrp();
       // if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) ||
@@ -1047,15 +1038,6 @@ public class TurkeyTransformer extends EMEATransformer {
       // }
 
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      for (Addr addr : cmrObjects.getAddresses()) {
-        if ("ZS01".equals(addr.getId().getAddrType())) {
-          if (!StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyCust.setTelNoOrVat(addr.getCustPhone());
-          }
-          landedCntry = addr.getLandCntry();
-          break;
-        }
-      }
 
       if (!StringUtils.isBlank(data.getCrosSubTyp())) {
         legacyCust.setCustType(data.getCrosSubTyp());
@@ -1127,6 +1109,19 @@ public class TurkeyTransformer extends EMEATransformer {
           && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
+      }
+    }
+
+    // extract the phone from billing as main phone
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+        if (!StringUtils.isEmpty(addr.getCustPhone())) {
+          legacyCust.setTelNoOrVat(addr.getCustPhone());
+        } else {
+          legacyCust.setTelNoOrVat("");
+        }
+        landedCntry = addr.getLandCntry();
+        break;
       }
     }
 
