@@ -344,7 +344,6 @@ function afterConfigForUKI() {
   }
 
   autoSetAbbrNameUKI();
-
   if (_customerTypeHandler == null) {
     var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
@@ -411,6 +410,7 @@ function afterConfigForUKI() {
   if (_isicHandler == null) {
     _isicHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       setISUCTCOnISIC();
+      setCustClassCd();
     });
   }
 }
@@ -426,6 +426,19 @@ function setISUCTCOnISIC() {
       FormManager.setValue('clientTier', 'N');
     } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
       FormManager.setValue('clientTier', 'S');
+    }
+  }
+}
+
+function setCustClassCd() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isic = FormManager.getActualValue('isicCd');
+  var isicList = new Set([ '7320', '9808', '8512', '9818', '8030', '8090', '8010', '8021', '8022', '7704', '8511', '8519', '7704', '9231' ]);
+  if (custSubGrp == 'GOVRN' || custSubGrp == 'XGOVR') {
+    if (isicList.has(isic)) {
+      FormManager.setValue('custClass', '16');
+    } else {
+      FormManager.setValue('custClass', '12');
     }
   }
 }
@@ -6191,6 +6204,26 @@ function lockRequireFieldsUKI() {
   }
 }
 
+function lockCustClassUKI() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+  }
+  if (reqType == 'U' && role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  } else if (reqType == 'U' && role == 'PROCESSOR') {
+    FormManager.enable('custClass');
+  }
+  if (custSubType == 'BUSPR') {
+    cmr.showNode('info');
+  } else {
+    cmr.hideNode('info');
+  }
+
+}
+
 function addStreetPoBoxValidatorUKI() {
   FormManager.addFormValidator((function() {
     return {
@@ -7821,5 +7854,10 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.UK ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
+
+  GEOHandler.addAfterTemplateLoad(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(lockCustClassUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(lockCustClassUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
 
 });
