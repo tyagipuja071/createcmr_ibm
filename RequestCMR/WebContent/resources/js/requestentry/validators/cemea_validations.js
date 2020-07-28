@@ -244,6 +244,9 @@ function addHandlersForCEMEA() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
+      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
+        togglePPSCeidCEE();
+      }
     });
   }
 
@@ -255,6 +258,9 @@ function addHandlersForCEMEA() {
         setSalesRepValues(value);
       }
       setSBOValuesForIsuCtc();// CMR-2101
+      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
+        togglePPSCeidCEE();
+      }
     });
   }
 
@@ -2957,11 +2963,20 @@ function togglePPSCeidCEE() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var reqType = FormManager.getActualValue('reqType');
   var _custType = FormManager.getActualValue('custSubGrp');
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var cmrNo = FormManager.getActualValue('cmrNo');
   if (_custType == 'BUSPR' || _custType == 'XBP') {
     FormManager.show('PPSCEID', 'ppsceid');
+    FormManager.enable('ppsceid');
     FormManager.resetValidations('ppsceid');
     FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+  } else if (reqType == 'U' && isuCd == '8B' && clientTier == '7' && (cmrNo.length > 0 && cmrNo.substr(0, 2) == '00')) {
+    FormManager.show('PPSCEID', 'ppsceid');
+    FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+    FormManager.readOnly('ppsceid');
   } else {
     FormManager.hide('PPSCEID', 'ppsceid');
     FormManager.removeValidator('ppsceid', Validators.REQUIRED);
@@ -3229,10 +3244,15 @@ function setTaxCd1MandatoryCroatia() {
   }
 }
 
+function disableSBO() {
+  FormManager.readOnly('salesBusOffCd');
+}
+
 function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
   togglePPSCeidCEE();
   setClassificationCodeCEE();
+  disableSBO();
 }
 
 function afterConfigForCEE() {
