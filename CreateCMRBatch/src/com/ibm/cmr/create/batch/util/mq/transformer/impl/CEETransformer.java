@@ -921,6 +921,21 @@ public class CEETransformer extends EMEATransformer {
           break;
         }
       }
+      List<String> scenario_list = Arrays.asList("XTP", "XCE", "THDPT", "COMME", "XCOM", "PRICU", "XPC", "CSCOM", "CSPC", "CSTP", "MECOM", "MEPC",
+          "METP", "RSXCO", "RSXPC", "RSXTP", "RSCOM", "RSPC", "RSTP");
+      if (scenario_list.contains(data.getCustSubGrp())) {// commerical
+        if (!StringUtils.isBlank(data.getEnterprise())) {
+          legacyCust.setEnterpriseNo(data.getEnterprise());
+        }else{
+          legacyCust.setEnterpriseNo("");
+        }
+      } else if ("INTER".equals(data.getCustSubGrp()) || "XINT".equals(data.getCustSubGrp()) || "CSINT".equals(data.getCustSubGrp())
+          || "MEINT".equals(data.getCustSubGrp()) || "RSXIN".equals(data.getCustSubGrp()) || "RSINT".equals(data.getCustSubGrp())) {// internal
+        legacyCust.setEnterpriseNo("");
+      } else {// bp
+        legacyCust.setEnterpriseNo("");
+      }
+     
 
       if (!StringUtils.isBlank(data.getPhone1())) {
         legacyCust.setTelNoOrVat(data.getPhone1());
@@ -954,6 +969,10 @@ public class CEETransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if (!StringUtils.isBlank(data.getEnterprise())) {
+        legacyCust.setEnterpriseNo(data.getEnterprise());
       }
 
       if (!StringUtils.isBlank(data.getSalesTeamCd())) {
@@ -1236,23 +1255,24 @@ public class CEETransformer extends EMEATransformer {
         }
     }
     
-    if (!cust.getId().getCustomerNo().startsWith("99") && !StringUtils.isBlank(muData.getCompany())) {
-        if ("@".equals(muData.getCompany())) {
-          cust.setEnterpriseNo("");
-        } else {
-          cust.setEnterpriseNo(muData.getCompany());
-        }
-      } else if (cust.getId().getCustomerNo().startsWith("99")) {
+    if (!StringUtils.isBlank(muData.getCompany())) {
+      if ("@".equals(muData.getCompany())) {
         cust.setEnterpriseNo("");
+      } else {
+        cust.setEnterpriseNo(muData.getCompany());
       }
-  	
-  	// if (!StringUtils.isBlank(muData.getEnterprise())) {
-      // if ("@".equals(muData.getEnterprise())) {
-      // cust.setEnterpriseNo("");
-      // } else {
-      // cust.setEnterpriseNo(muData.getEnterprise());
-      // }
-      // }
+    }
+
+    // if (!cust.getId().getCustomerNo().startsWith("99") &&
+    // !StringUtils.isBlank(muData.getCompany())) {
+    // if ("@".equals(muData.getCompany())) {
+    // cust.setEnterpriseNo("");
+    // } else {
+    // cust.setEnterpriseNo(muData.getCompany());
+    // }
+    // } else if (cust.getId().getCustomerNo().startsWith("99")) {
+    // cust.setEnterpriseNo("");
+    // }
 
     // Email1 used to store phone
     if (!StringUtils.isBlank(muData.getEmail1())) {
