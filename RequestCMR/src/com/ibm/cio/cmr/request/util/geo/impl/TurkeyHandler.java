@@ -368,16 +368,6 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        installing.setCmrCity2(record.getCmrCity2());
 	                        installing.setCmrCountry(mailingAddr.getAddrLine6());
 	                        installing.setCmrCountryLanded("TR");
-
-                        String s = mailingAddr.getAddrLine5();
-                        String str[] = s.split(" ");
-                        String postcode = "";
-                        for (int i = 0; i < str.length; i++) {
-                          if (i == 1) {
-                            postcode = (str[i]);
-                          }
-                        }
-                        installing.setCmrPostalCode(postcode);
 	                        installing.setCmrState(record.getCmrState());
                         installing.setCmrDept(mainRecord.getCmrCity2());
 	                        if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
@@ -408,7 +398,6 @@ public class TurkeyHandler extends BaseSOFHandler {
 	          }
 	          
 	          if("862".equals(cmrIssueCd) && zi01count == 0){
-            CmrtAddr mailingAddr = getLegacyMailingAddress(entityManager, searchModel.getCmrNum());
 	            FindCMRRecordModel newzi01 = new FindCMRRecordModel();
 	            PropertyUtils.copyProperties(newzi01, mainRecord);
 	            newzi01.setCmrAddrTypeCode("ZI01");
@@ -421,15 +410,6 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            newzi01.setParentCMRNo("");
             newzi01.setCmrSapNumber(mainRecord.getCmrSapNumber());
             newzi01.setCmrDept(mainRecord.getCmrCity2());
-            String s = mailingAddr.getAddrLine5();
-            String str[] = s.split(" ");
-            String postcode = "";
-            for (int i = 0; i < str.length; i++) {
-              if (i == 1) {
-                postcode = (str[i]);
-              }
-            }
-            newzi01.setCmrPostalCode(postcode);
             if (StringUtils.isEmpty(mainRecord.getCmrStreetAddress())) {
               newzi01.setCmrStreetAddress("\u00a0");
             }
@@ -445,16 +425,6 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            newzd01.setParentCMRNo("");
             newzd01.setCmrSapNumber(mainRecord.getCmrSapNumber());
             newzd01.setCmrDept(mainRecord.getCmrCity2());
-            String s = mailingAddr.getAddrLine5();
-            String str[] = s.split(" ");
-            String postcode = "";
-            for (int i = 0; i < str.length; i++) {
-              if (i == 1) {
-                postcode = (str[i]);
-              }
-            }
-            newzd01.setCmrPostalCode(postcode);
-            // newzd01.setCmrPostalCode("");
             if (StringUtils.isEmpty(mainRecord.getCmrStreetAddress())) {
               newzd01.setCmrStreetAddress("\u00a0");
             }
