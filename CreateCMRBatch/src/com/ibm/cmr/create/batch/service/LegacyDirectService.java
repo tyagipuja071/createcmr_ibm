@@ -3685,6 +3685,7 @@ public class LegacyDirectService extends TransConnService {
           untagAddrUseForSequence(use, address);
           taggedUse = StringUtils.replace(taggedUse, use, "");
           address.setAddressUse(taggedUse);
+          address.setForUpdate(true);
         }
       }
       LOG.trace("Untagged Address Use: " + address.getAddressUse());

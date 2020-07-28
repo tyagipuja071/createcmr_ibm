@@ -2105,6 +2105,10 @@ public class CyprusHandler extends BaseSOFHandler {
       if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
         addr.setTaxOffice("");
       }
+      
+      if (!StringUtils.isEmpty(addr.getPoBox()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setPoBox("");
+      }
       break;
 
     case SystemLocation.TURKEY:

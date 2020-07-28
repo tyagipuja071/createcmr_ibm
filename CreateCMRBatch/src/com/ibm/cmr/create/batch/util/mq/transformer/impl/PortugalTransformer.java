@@ -370,9 +370,10 @@ public class PortugalTransformer extends MessageTransformer {
       String custSubType = data.getCustSubGrp();
       if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custSubType) || "XBP".equals(custSubType)) {
         legacyCust.setMrcCd("5");
-        legacyCust.setAuthRemarketerInd("Y");
+        legacyCust.setAuthRemarketerInd("YES");
       } else {
         legacyCust.setMrcCd("3");
+        legacyCust.setAuthRemarketerInd("1");
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
