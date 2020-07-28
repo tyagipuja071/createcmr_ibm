@@ -838,7 +838,7 @@ function setClientTierValues(isuCd) {
             || FormManager.getActualValue('custSubGrp') == 'RSXTP' || FormManager.getActualValue('custSubGrp') == 'RSCOM' || FormManager.getActualValue('custSubGrp') == 'RSPC' || FormManager
             .getActualValue('custSubGrp') == 'RSTP')) {
       if (isuCd == '34') {
-        clientTiers = [ '6', 'V' ];
+        clientTiers = [ 'V' ];
       } else if (isuCd == '32') {
         clientTiers = [ 'S' ];
       }
