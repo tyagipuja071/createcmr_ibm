@@ -8344,9 +8344,10 @@ function addTRLandedCountryValidtor() {
                   if (addressItems != null && addressItems.length != 0) {
                     for ( var key in addressItems) {
                       addrGridRow++;
-                      var currentAddr = addressItems[key], landCtry = '', scenario = FormManager.getActualValue('custGrp');
+                      var currentAddr = addressItems[key], landCtry = '', taxOffice = '', scenario = FormManager.getActualValue('custGrp');
                       var addrType = currentAddr.addrType[0];
                       landCtry = currentAddr.landCntry[0];
+                      taxOffice = currentAddr.taxOffice[0];
                       console.log('addrType >> ' + addrType);
                       console.log('landCntry >> ' + landCtry);
                       if (addrType == 'ZS01' && landCtry == 'TR' && reqType == 'C' && scenario == 'CROSS') {
@@ -8354,6 +8355,10 @@ function addTRLandedCountryValidtor() {
                       }
                       if (addrType == 'ZS01' && landCtry != 'TR' && reqType == 'C' && scenario == 'LOCAL') {
                         genericMsg = 'Landed Country value of the Sold-to (Main) Address should be "TR" for Local customers.';
+                        return new ValidationResult(null, false, genericMsg);
+                      }
+                      if (addrType == 'ZP01' && reqType == 'C' && scenario == 'LOCAL' && (taxOffice == '' || taxOffice == null || taxOffice == undefined)) {
+                        genericMsg = 'Tax office of the Local Language translation of Sold-to Address is required.';
                         return new ValidationResult(null, false, genericMsg);
                       }
                     } // for
