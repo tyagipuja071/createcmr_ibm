@@ -1800,12 +1800,10 @@ function lockRequireFieldsSpain() {
       }
     }
   }
-
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('legacyCurrencyCd');
   }
-
   // Story 1681921: SPAIN - mailing condition & collection code fields
   if (reqType == 'C' && role == 'PROCESSOR') {
     FormManager.enable('mailingCondition');
