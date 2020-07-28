@@ -83,21 +83,17 @@ public class SpainUtil extends AutomationUtil {
     LOG.debug("Scenario to check: " + scenario);
 
     if ("C".equals(requestData.getAdmin().getReqType())) {
-      if (SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_IGS_GSE.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
-          || SCENARIO_CROSSBORDER_IGS.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_GOVERNMENT_IGS.equals(scenario)) {
-        if (!addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
-          engineData.addRejectionComment("SCENARIO_CHECK", "3rd Party should be selected.", "", "");
-          details.append("Scenario should be 3rd Party");
-          return false;
-
-        }
-      } else {
-        if (addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
-          engineData.addRejectionComment("SCENARIO_CHECK", "Billing and installing address should be different.", "", "");
-          details.append("For 3rd Party Billing and installing address should be different");
-          return false;
-
-        }
+      if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_IGS_GSE.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
+          || SCENARIO_CROSSBORDER_IGS.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_GOVERNMENT_IGS.equals(scenario))
+          && !addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
+        engineData.addRejectionComment("SCENARIO_CHECK", "3rd Party should be selected.", "", "");
+        details.append("Scenario should be 3rd Party");
+        return false;
+      } else if (SCENARIO_THIRD_PARTY.equals(scenario)
+          || SCENARIO_THIRD_PARTY_IG.equals(scenario) && addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
+        engineData.addRejectionComment("SCENARIO_CHECK", "Billing and installing address should be different.", "", "");
+        details.append("For 3rd Party Billing and installing address should be different");
+        return false;
       }
     }
 
