@@ -72,7 +72,9 @@ public class SpainUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     Addr soldTo = requestData.getAddress("ZS01");
-    String customerName = soldTo.getCustNm1() + (!StringUtils.isBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "");
+    String customerName = getCustomerFullName(soldTo);
+    Addr installAt = requestData.getAddress("ZI01");
+    String customerNameZI01 = getCustomerFullName(installAt);
     if (StringUtils.isBlank(scenario)) {
       details.append("Scenario not correctly specified on the request");
       engineData.addNegativeCheckStatus("_atNoScenario", "Scenario not correctly specified on the request");
@@ -85,12 +87,12 @@ public class SpainUtil extends AutomationUtil {
     if ("C".equals(requestData.getAdmin().getReqType())) {
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_IGS_GSE.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
           || SCENARIO_CROSSBORDER_IGS.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_GOVERNMENT_IGS.equals(scenario))
-          && !addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
-        engineData.addRejectionComment("SCENARIO_CHECK", "3rd Party should be selected.", "", "");
-        details.append("Scenario should be 3rd Party");
+          && StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZI01))) {
+        engineData.addRejectionComment("SCENARIO_CHECK",
+            "Customer names on billing and installing address are not identical, 3rd Party should be selected.", "", "");
+        details.append("Customer names on billing and installing address are not identical, 3rd Party should be selected.");
         return false;
-      } else if (SCENARIO_THIRD_PARTY.equals(scenario)
-          || SCENARIO_THIRD_PARTY_IG.equals(scenario) && addressEquals(requestData.getAddress("ZS01"), requestData.getAddress("ZI01"))) {
+      } else if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario) && addressEquals(soldTo, installAt)) {
         engineData.addRejectionComment("SCENARIO_CHECK", "Billing and installing address should be different.", "", "");
         details.append("For 3rd Party Billing and installing address should be different");
         return false;
@@ -103,19 +105,9 @@ public class SpainUtil extends AutomationUtil {
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
-    case SCENARIO_INTERNAL:
-    case SCENARIO_INTERNAL_SO:
-      Addr mailTo = requestData.getAddress("ZP01");
-      String customerName2 = (StringUtils.isNotBlank(mailTo.getCustNm1()) ? mailTo.getCustNm1().trim() : "")
-          + (!StringUtils.isBlank(mailTo.getCustNm2()) ? " " + mailTo.getCustNm2() : "");
-      if (!customerName2.toUpperCase().contains("IBM") && !customerName.toUpperCase().contains("IBM")) {
-        details.append("Mailing and Billing addresses should have IBM in them.");
-        engineData.addRejectionComment("SCENARIO_CHECK", "Mailing and Billing addresses should have IBM in them.", "", "");
-        return false;
-      }
-
     }
     return true;
+
   }
 
   @Override
