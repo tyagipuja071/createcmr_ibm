@@ -230,6 +230,22 @@
 		    </cmr:column>
 		</cmr:row>
 	</cmr:view>
+	
+		<cmr:view forCountry="866,754">
+		<cmr:row addBackground="true">
+	   <cmr:column span="2" containerForField="CustClass">
+				<p>
+					<cmr:label fieldId="custClass">
+				    <cmr:fieldLabel fieldId="CustClass" /> :  
+				    <div id="info">  
+                    <cmr:info text="${ui.info.custClass}"></cmr:info>
+                    </div>   
+                    </cmr:label>
+                    <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_IBM_TAB" /> 
+				</p>
+			</cmr:column>
+		</cmr:row>
+	</cmr:view>
 
 	<cmr:view forCountry="755">
 		<form:hidden path="economicCd" id="economicCd" />
