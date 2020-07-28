@@ -3,7 +3,6 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -1568,8 +1567,11 @@ public class CEETransformer extends EMEATransformer {
   @Override
   public boolean hasCmrtCustExt() {
     // return true;
-
-    return true;
+    if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)) {
+      return true;
+    }else{
+      return false;
+    }
   }
 
   @Override
