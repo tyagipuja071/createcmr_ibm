@@ -336,7 +336,11 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        installing.setCmrState(sadr.getRegio());
 	                        installing.setCmrPostalCode(sadr.getPstlz());
 	                        installing.setCmrDept(sadr.getOrt02());
+                        if (!"NO_VALUE_RETRIEVED".equals(taxOffice)) {
                         installing.setCmrTaxOffice(taxOffice);
+                        } else {
+                          installing.setCmrTaxOffice("");
+                        }
 	                        installing.setCmrSapNumber("");
 	                        converted.add(installing);
 	                      }
