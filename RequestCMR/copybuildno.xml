@@ -21,6 +21,8 @@
     </tstamp>
   	<echo>Build No: ${cmrconfig.BUILD}</echo>
   	<echo>Target File: ${target.file}</echo>
+    <echo>Build Time: ${build-time}</echo>
+    <echo>Label: ${label}</echo>
   	<echo>Setting Build No to ${cmrprefix.PREFIX}${cmrconfig.BUILD}_${build-time}</echo>
   	<echo file="${target.file}" append="false">${cmrprefix.PREFIX}${cmrconfig.BUILD}_${build-time}</echo>
   </target>
