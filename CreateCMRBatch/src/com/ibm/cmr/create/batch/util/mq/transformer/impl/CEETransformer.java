@@ -971,8 +971,8 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
-      if (!StringUtils.isBlank(data.getCompany())) {
-        legacyCust.setEnterpriseNo(data.getCompany());
+      if (!StringUtils.isBlank(data.getEnterprise())) {
+        legacyCust.setEnterpriseNo(data.getEnterprise());
       }
 
       if (!StringUtils.isBlank(data.getSalesTeamCd())) {
