@@ -3349,6 +3349,9 @@ function addTRAddressTypeValidator() {
           if(reqType == undefined){
             reqType = FormManager.getActualValue('reqType');
           }
+          if(reqType == 'U'){
+            compareFields.push('custNm4');
+          }
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
@@ -3432,7 +3435,7 @@ function addTRAddressTypeValidator() {
 
           if (mismatchErrMsg != '') {
             mismatchErrMsg = mismatchErrMsg.substring(0, mismatchErrMsg.lastIndexOf(','));
-            return new ValidationResult(null, false, 'Sold-to mismatch, please update Language translation of Sold-to: ' + mismatchErrMsg);
+            return new ValidationResult(null, false, 'Sold-to and Local Translation, mismatched fields: ' + mismatchErrMsg);
           }
 
           if (reqType == 'U' && zs01Copy.importInd[0] == 'Y' && zp01Copy.importInd[0] == 'Y') {
@@ -3454,6 +3457,8 @@ function mappingAddressField(key) {
     value = 'Customer Name';
   } else if (key == 'custNm2') {
     value = 'Customer Name Con\'t';
+  } else if (key == 'custNm4') {
+    value = 'Name 4';
   } else if (key == 'addrTxt') {
     value = 'Street Address';
   } else if (key == 'addrTxt2') {
