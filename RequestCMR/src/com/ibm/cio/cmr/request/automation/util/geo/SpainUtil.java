@@ -30,8 +30,10 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -232,6 +234,8 @@ public class SpainUtil extends AutomationUtil {
     Set<String> resultCodes = new HashSet<String>();// D for Reject
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
+      boolean requesterFromTeam = false;
+      requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
       switch (change.getDataField()) {
       case "VAT #":
         if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
@@ -264,22 +268,29 @@ public class SpainUtil extends AutomationUtil {
           }
         }
         break;
-      case "Order Block Code":
-        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData()) || "92".equals(change.getOldData())
-            || "92".equals(change.getNewData())) {
-          cmdeReview = true;
-        }
-        break;
       case "SBO":
         if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
             && !(change.getOldData().equals(change.getNewData()))) {
-          cmdeReview = true;
+          if ("9".equals(change.getNewData().substring(1, 2)) && !requesterFromTeam) {
+            resultCodes.add("D");// Reject
+            details.append("Requester not from CMDE Team. \n");
+          }
+          if (!"9".equals(change.getNewData().substring(1, 2))) {
+            cmdeReview = true;
+          }
         }
         break;
       case "INAC/NAC Code":
+      case "ISIC":
+      case "Currency Code":
+        cmdeReview = true;
+        break;
       case "Mode Of Payment":
       case "Mailing Condition":
-        cmdeReview = true;
+        if (!requesterFromTeam) {
+          resultCodes.add("D");// Reject
+          details.append("Requester not from CMDE Team. \n");
+        }
         break;
       case "Tax Code":
         // noop, for switch handling only
