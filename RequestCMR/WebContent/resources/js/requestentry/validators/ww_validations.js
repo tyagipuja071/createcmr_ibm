@@ -666,8 +666,6 @@ function validateCMRNumberForLegacy() {
         }
         if (cmrNo == '') {
           return new ValidationResult(null, true);
-        } else if (cmrNo == '000000') {
-          return new ValidationResult(null, false, 'CMR Number format error. Only digits are allowed Except -> 000000');
         } else {
           // Skip validation for Prospect Request
           var ifProspect = FormManager.getActualValue('prospLegalInd');
@@ -683,6 +681,13 @@ function validateCMRNumberForLegacy() {
             if (!cmrNo.startsWith("99")) {
               return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
             }
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT') {
+            if (cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
+            }
+          }
+          if (cmrNo == '000000') {
+            return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
           }
           if (cmrNo.length >= 1 && cmrNo.length != 6) {
             return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');

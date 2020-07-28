@@ -253,6 +253,15 @@ public class GreeceHandler extends BaseSOFHandler {
                   converted.add(addr);
                   if ("ZS01".equals(addrType)) {
                     FindCMRRecordModel zp01Addr = mapLocalLanguageTranslationOfSoldTo(entityManager, record, cmrIssueCd);
+
+                    if (record.getCmrAddrSeq() != null && record.getCmrAddrSeq().length() < 5) {
+                      String zs01Seq = StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0');
+
+                      if (zp01Addr.getCmrAddrSeq().equals(zs01Seq)) {
+                        zp01Addr.setCmrAddrSeq(record.getCmrAddrSeq());
+                      }
+                    }
+
                     zp01Addr.setCmrPostalCode(mainRecord.getCmrPostalCode());
                     converted.add(zp01Addr);
                   }
