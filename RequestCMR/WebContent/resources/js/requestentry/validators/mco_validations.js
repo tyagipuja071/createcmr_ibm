@@ -147,7 +147,7 @@ function addEmbargoCodeValidatorSpain() {
 
         if (embargoCd != '' && embargoCd.length > 0) {
           embargoCd = embargoCd.trim();
-          if ((embargoCd != '' && embargoCd.length == 2) && (embargoCd == '88' || embargoCd == '92' || embargoCd == '94')) {
+          if ((embargoCd != '' && embargoCd.length == 1) && (embargoCd == 'E' || embargoCd == 'J')) {
             return new ValidationResult(null, true);
           } else {
             return new ValidationResult({
@@ -1921,10 +1921,16 @@ function lockRequireFieldsSpain() {
       }
     }
   }
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('specialTaxCd');
+    FormManager.readOnly('legacyCurrencyCd');
+  }
   // Story 1681921: SPAIN - mailing condition & collection code fields
   if (reqType == 'C' && role == 'PROCESSOR') {
     FormManager.enable('mailingCondition');
     FormManager.enable('collectionCd');
+    FormManager.enable('specialTaxCd');
+    FormManager.enable('legacyCurrencyCd');
   }
   /*
    * if (role == 'REQUESTER') { FormManager.readOnly('mailingCondition'); }
