@@ -6208,33 +6208,6 @@ function lockCustClassUKI() {
   } else if (reqType == 'U' && role == 'PROCESSOR') {
     FormManager.enable('custClass');
   }
-  switch (custSubType) {
-
-  case 'THDPT':
-  case 'COMME':
-  case 'DC':
-  case 'CROSS':
-    FormManager.setValue('custClass', '11');
-    break;
-  case 'INFSL':
-    FormManager.setValue('custClass', '33');
-    break;
-  case 'IGF':
-  case 'XIGF':
-    FormManager.setValue('custClass', '35');
-    break;
-  case 'PRICU':
-    FormManager.setValue('custClass', '60');
-    break;
-  case 'INTER':
-    FormManager.setValue('custClass', '81');
-    break;
-  case 'BUSPR':
-    FormManager.enable('custClass');
-    FormManager.setValue('custClass', '45');
-    break;
-  }
-
   if (custSubType == 'BUSPR') {
     cmr.showNode('info');
   } else {
