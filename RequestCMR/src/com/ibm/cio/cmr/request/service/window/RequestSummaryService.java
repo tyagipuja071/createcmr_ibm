@@ -905,6 +905,9 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         }
         if (!equals(addr.getCustPhone(), addr.getCustPhoneOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CustPhone"))) {
+          if (!"ZS01".equals(addr.getId().getAddrType()) && SystemLocation.TURKEY.equals(cmrCountry)) {
+            // if Turkey and non sold-to address, do nothing
+          } else {
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
@@ -914,6 +917,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setNewData(addr.getCustPhone());
           update.setOldData(addr.getCustPhoneOld());
           results.add(update);
+          }
         }
         if (!equals(addr.getTransportZone(), addr.getTransportZoneOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "TransportZone"))) {
