@@ -903,6 +903,9 @@ public abstract class AutomationUtil {
   public static String getCleanString(String str) {
     if (StringUtils.isNotBlank(str)) {
       str = str.trim().replaceAll("[^a-zA-Z0-9\\s\\-]", " ").toUpperCase();
+      if (str.length() > 0) {
+        str = str.trim();
+      }
       return str;
     }
     return "";
@@ -1054,7 +1057,7 @@ public abstract class AutomationUtil {
 
   }
 
-  private String getCustomerFullName(Addr addr) {
+  protected String getCustomerFullName(Addr addr) {
     String custNm1 = addr.getCustNm1();
     String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
     String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
