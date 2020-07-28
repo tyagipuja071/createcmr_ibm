@@ -6234,6 +6234,13 @@ function lockCustClassUKI() {
     FormManager.setValue('custClass', '45');
     break;
   }
+
+  if (custSubType == 'BUSPR') {
+    cmr.showNode('info');
+  } else {
+    cmr.hideNode('info');
+  }
+
 }
 
 function addStreetPoBoxValidatorUKI() {
