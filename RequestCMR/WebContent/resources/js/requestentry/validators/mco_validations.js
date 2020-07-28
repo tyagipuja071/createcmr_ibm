@@ -1847,10 +1847,14 @@ function validateCMRNumberForISO() {
           if ('Y' == ifProspect) {
             return new ValidationResult(null, true);
           }
-          // Validation for Internal Scenario
-          if (_custSubGrp == 'INTSO' || _custSubGrp == 'CRISO') {
+          // Validation for Internal SO Scenario
+          if (_custSubGrp == 'INTSO') {
             if (!cmrNo.startsWith("997")) {
               return new ValidationResult(null, false, 'Internal SO CMR should begin with 997.');
+            }
+          } else if (_custSubGrp != 'INTSO') {
+            if (cmrNo.startsWith("997")) {
+              return new ValidationResult(null, false, 'CMR Starting with 997 is allowed for InternalSO Scenario Only.');
             }
           }
           return new ValidationResult(null, true);
