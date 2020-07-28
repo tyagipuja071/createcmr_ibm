@@ -1795,8 +1795,6 @@ function lockRequireFieldsSpain() {
       }
     }
   }
-
-  lockRequireFieldsSpain()
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('legacyCurrencyCd');
