@@ -169,7 +169,7 @@ function lockEmbargo() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (role == 'REQUESTER') {
-    if ((issu_cntry == '866' || issu_cntry == '754' || issu_cntry == '758') && (FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X')) {
+    if (FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') {
       FormManager.enable('embargoCd');
     } else {
       FormManager.readOnly('embargoCd');
@@ -8365,7 +8365,7 @@ dojo.addOnLoad(function() {
   // *abner revert end
 
   // For EmbargoCode
-  GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.EMEA);
+  GEOHandler.addAfterConfig(lockEmbargo, SysLoc.CYPRUS);
 
   // For Legacy Direct
   GEOHandler.addAfterConfig(optionalFieldsForUpdateReqUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
