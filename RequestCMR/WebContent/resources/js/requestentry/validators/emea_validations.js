@@ -819,7 +819,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
   var _zs01ReqId = FormManager.getActualValue('reqId');
   var abbrevLocnDB = null;
   var qParams = {
-    REQ_ID : _zi01ReqId, //
+    REQ_ID : _zs01ReqId, //
   };
   var res = cmr.query('GET_ABBREV_LOCN_DB', qParams);
   abbrevLocnDB = res.ret1;
@@ -837,12 +837,12 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
 
     if (finalSave || force || copyingToA) {
 
-      if (addressTyp == 'ZI01') { //
+      if (addressTyp == 'ZS01') { //
         autoSetAbbrevLocUKI();
-      } else if (addressTyp == 'ZS01') { //
+      } else if (addressTyp == 'ZI01') { //
         var addressSeq = FormManager.getActualValue('addrSeq');
         var qParams = {
-          REQ_ID : _zi01ReqId, //
+          REQ_ID : _zs01ReqId, //
           ADDR_SEQ : addressSeq,
         };
         var _result = cmr.query('CHECK_IF_MAIN_ZI01', qParams);
@@ -7128,7 +7128,7 @@ function validateCompanyNoForUKI() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function forceLockScenariosUK() {
+function forceLockScenariosUKI() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -9135,8 +9135,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.ISRAEL, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
 
   // UKI Specific
-  GEOHandler.addAfterConfig(forceLockScenariosUK, [ SysLoc.UK ]);
-  GEOHandler.addAfterTemplateLoad(forceLockScenariosUK, [ SysLoc.UK ]);
+  GEOHandler.addAfterConfig(forceLockScenariosUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(forceLockScenariosUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(addIEClientTierISULogic, [ SysLoc.IRELAND ]);
