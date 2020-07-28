@@ -722,7 +722,7 @@ public abstract class AutomationUtil {
     client.setRequestMethod(Method.Get);
     client.setReadTimeout(1000 * 60 * 5);
     PPSRequest request = new PPSRequest();
-    request.setCeid(ppsCeId);
+    request.setCeid(ppsCeId.toLowerCase());
     PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
     if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
       return false;
