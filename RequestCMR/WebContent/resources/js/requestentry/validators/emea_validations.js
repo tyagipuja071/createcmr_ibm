@@ -6037,40 +6037,69 @@ function lockRequireFieldsUKI() {
   var vat = FormManager.getActualValue('vat');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
+  var custSubGroup = FormManager.getActualValue('custSubGrp');
   if (cntry == SysLoc.IRELAND) {
     FormManager.readOnly('salesBusOffCd');
   }
   if (role == 'REQUESTER') {
+    FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('isuCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('inacCd');
     FormManager.readOnly('enterprise');
+    FormManager.readOnly('collectionCd');
     FormManager.readOnly('buyingGroupId');
     FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('company');
     FormManager.readOnly('covId');
     FormManager.readOnly('geoLocationCode');
     FormManager.readOnly('inacCd');
     FormManager.readOnly('dunsNo');
-    if (custSubType != 'XBP' && custSubType != 'BUSPR') {
+    FormManager.readOnly('soeReqNo');
+    FormManager.readOnly('salesBusOffCd'); // isse SBO should be locked pata
+                                            // nhi kyo lock nhi ho rha
+    FormManager.readOnly('repTeamMemberNo');
+    if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
       FormManager.readOnly('ppsceid');
     } else {
       FormManager.enable('ppsceid');
     }
-    FormManager.readOnly('soeReqNo');
-    FormManager.readOnly('salesBusOffCd');
+  } else if (role == 'PROCESSOR') {
+    FormManager.enable('abbrevNm');
+    FormManager.enable('abbrevLocn');
+    FormManager.enable('cmrNo');
+    FormManager.enable('cmrOwner');
+    FormManager.enable('company');
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+    FormManager.enable('collectionCd');
+    FormManager.enable('inacCd');
+    FormManager.enable('enterprise');
+    FormManager.enable('buyingGroupId');
+    FormManager.enable('globalBuyingGroupId');
+    FormManager.enable('covId');
+    FormManager.enable('geoLocationCode');
+    FormManager.enable('inacCd');
+    FormManager.enable('dunsNo');
+    FormManager.enable('soeReqNo');
+    FormManager.enable('salesBusOffCd');
+    FormManager.enable('repTeamMemberNo');
+    FormManager.enable('ppsceid');
   }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('specialTaxCd');
+  } else if (role == 'PROCESSOR') {
+    FormManager.enable('specialTaxCd');
   }
-
   if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('salesBusOffCd');
+  } else if (role == 'PROCESSOR') {
+    FormManager.enable('abbrevNm');
+    FormManager.enable('abbrevLocn');
   }
   // defect 5475
   if (role == 'REQUESTER') {
@@ -6078,6 +6107,8 @@ function lockRequireFieldsUKI() {
       fieldsToDisable.push('salesBusOffCd');
       fieldsToDisable.push('repTeamMemberName');
       fieldsToDisable.push('repTeamMemberNo');
+    } else if (custSubGroup == 'INTER') {
+      fieldsToDisable.push('dept');
     }
   }
   if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
@@ -6092,7 +6123,6 @@ function lockRequireFieldsUKI() {
     }
   }
 }
-
 function lockCustClassUKI() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
