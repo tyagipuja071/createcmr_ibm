@@ -3287,7 +3287,25 @@ function afterConfigTemplateForHungary() {
     });
   }
 }
+function validatorsDIGIT() {
+  FormManager.addValidator('EngineeringBo', Validators.DIGIT, [ 'EngineeringBo' ]);
+  FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'LocalTax2' ]);
 
+}
+function addEmbargoCdValidatorForCEE(){
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        if (embargoCd && !(embargoCd == 'E'||embargoCd == 'R'||embargoCd == '')){
+           return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
+       }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762',
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
@@ -3354,6 +3372,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
+  GEOHandler.addAfterConfig(addEmbargoCdValidatorForCEE, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
@@ -3412,6 +3431,8 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
   GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
   GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
