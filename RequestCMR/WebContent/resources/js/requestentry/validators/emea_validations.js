@@ -6165,7 +6165,7 @@ function addStreetPoBoxValidatorUKI() {
           var mailNm = "";
           if (billingCount > 0) {
             // get billing name from db
-            var res_billNm = cmr.query('GET.CUSTNM1_ADDR_UKI', {
+            var res_billNm = cmr.query('GET.CUSTNM_ADDR', {
               REQ_ID : reqId,
               ADDR_TYPE : 'ZS01'
             });
@@ -6175,7 +6175,7 @@ function addStreetPoBoxValidatorUKI() {
           }
           if (mailingCount > 0) {
             // get billing name from db
-            var res_mailNm = cmr.query('GET.CUSTNM1_ADDR_UKI', {
+            var res_mailNm = cmr.query('GET.CUSTNM_ADDR', {
               REQ_ID : reqId,
               ADDR_TYPE : 'ZP01'
             });
