@@ -6217,6 +6217,7 @@ function lockCustClassUKI() {
     FormManager.enable('custClass');
   }
   if (custSubType == 'BUSPR') {
+    FormManager.enable('custClass');
     cmr.showNode('info');
   } else {
     cmr.hideNode('info');
