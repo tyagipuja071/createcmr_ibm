@@ -87,50 +87,50 @@ public class NPSService extends BaseBatchService {
               feedbackUrl = StringUtils.replace(feedbackUrl, "%20", " ");
               feedbackUrl = StringUtils.replace(feedbackUrl, "%26", "&");
 
-              if (feedbackUrl.contains("/survey/")) {
+              // if (feedbackUrl.contains("/survey/")) {
 
-                // build the mail
-                urlElem = feedbackUrl.substring(feedbackUrl.indexOf("/survey/") + 8);
+              // build the mail
+              urlElem = feedbackUrl.substring(feedbackUrl.indexOf("/survey/") + 8);
 
-                urlParts = urlElem.split("[/]");
-                if (urlParts != null && urlParts.length == 4) {
-                  market = urlParts[0];
-                  tribe = urlParts[1];
-                  squad = urlParts[2];
-                  area = urlParts[3];
-                }
-                LOG.debug("Sending client statisfaction survey to Request " + admin.getId().getReqId());
-
-                String npsMail = new String(template);
-                npsMail = StringUtils.replace(npsMail, "{{REQUEST}}",
-                    admin.getId().getReqId() + " (" + this.requestTypeDescriptions.get(admin.getReqType()) + ")");
-                npsMail = StringUtils.replace(npsMail, "{{TRIBE}}", tribe);
-                npsMail = StringUtils.replace(npsMail, "{{CMR}}",
-                    data.getCmrNo() + " (" + admin.getMainCustNm1()
-                        + (!StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "") + ")");
-                npsMail = StringUtils.replace(npsMail, "{{SQUAD}}", squad);
-                npsMail = StringUtils.replace(npsMail, "{{MARKET}}", market);
-                npsMail = StringUtils.replace(npsMail, "{{AREA}}", area);
-                npsMail = StringUtils.replace(npsMail, "{{NPS_URL}}", SystemConfiguration.getValue("APPLICATION_URL") + "/nps");
-                npsMail = StringUtils.replace(npsMail, "{{REQUEST_URL}}", SystemConfiguration.getValue("APPLICATION_URL") + "/request/"
-                    + admin.getId().getReqId());
-                npsMail = StringUtils.replace(npsMail, "{{FEEDBACK_URL}}", FEEDBACK_BUNDLE.getString(data.getCmrIssuingCntry()));
-
-                Email mail = new Email();
-                mail.setFrom(SystemConfiguration.getValue("MAIL_FROM"));
-                mail.setTo(admin.getRequesterId());
-                mail.setSubject("Request " + admin.getId().getReqId() + " - Client Satisfaction Survey");
-                mail.setMessage(npsMail.toString());
-                mail.setType(MessageType.HTML);
-
-                LOG.info("Sending NPS survey to " + admin.getRequesterId() + " for Request " + admin.getId().getReqId());
-                mail.send(SystemConfiguration.getValue("MAIL_HOST"));
-
-                admin.setWaitRevInd("Y");
-              } else {
-                LOG.warn("Request " + admin.getId().getReqId() + " has unparseable feedback URL. Skipping.");
-                admin.setWaitRevInd("Y");
+              urlParts = urlElem.split("[/]");
+              if (urlParts != null && urlParts.length == 4) {
+                market = urlParts[0];
+                tribe = urlParts[1];
+                squad = urlParts[2];
+                area = urlParts[3];
               }
+              LOG.debug("Sending client statisfaction survey to Request " + admin.getId().getReqId());
+
+              String npsMail = new String(template);
+              npsMail = StringUtils.replace(npsMail, "{{REQUEST}}",
+                  admin.getId().getReqId() + " (" + this.requestTypeDescriptions.get(admin.getReqType()) + ")");
+              npsMail = StringUtils.replace(npsMail, "{{TRIBE}}", tribe);
+              npsMail = StringUtils.replace(npsMail, "{{CMR}}", data.getCmrNo() + " (" + admin.getMainCustNm1()
+                  + (!StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "") + ")");
+              npsMail = StringUtils.replace(npsMail, "{{SQUAD}}", squad);
+              npsMail = StringUtils.replace(npsMail, "{{MARKET}}", market);
+              npsMail = StringUtils.replace(npsMail, "{{AREA}}", area);
+              npsMail = StringUtils.replace(npsMail, "{{NPS_URL}}", SystemConfiguration.getValue("APPLICATION_URL") + "/nps");
+              npsMail = StringUtils.replace(npsMail, "{{REQUEST_URL}}",
+                  SystemConfiguration.getValue("APPLICATION_URL") + "/request/" + admin.getId().getReqId());
+              npsMail = StringUtils.replace(npsMail, "{{FEEDBACK_URL}}", FEEDBACK_BUNDLE.getString(data.getCmrIssuingCntry()));
+
+              Email mail = new Email();
+              mail.setFrom(SystemConfiguration.getValue("MAIL_FROM"));
+              mail.setTo(admin.getRequesterId());
+              mail.setSubject("Request " + admin.getId().getReqId() + " - Client Satisfaction Survey");
+              mail.setMessage(npsMail.toString());
+              mail.setType(MessageType.HTML);
+
+              LOG.info("Sending NPS survey to " + admin.getRequesterId() + " for Request " + admin.getId().getReqId());
+              mail.send(SystemConfiguration.getValue("MAIL_HOST"));
+
+              admin.setWaitRevInd("Y");
+              // } else {
+              // LOG.warn("Request " + admin.getId().getReqId() + " has
+              // unparseable feedback URL. Skipping.");
+              // admin.setWaitRevInd("Y");
+              // }
 
             }
           } else {
