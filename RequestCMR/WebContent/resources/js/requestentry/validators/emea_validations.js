@@ -6101,9 +6101,9 @@ function forceLockScenariosUKI() {
     fieldsToDisable.push('covId');
     fieldsToDisable.push('geoLocationCode');
     fieldsToDisable.push('dunsNo');
-    fieldsToDisable.push('salesBusOffCd');
     if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
       fieldsToDisable.push('ppsceid');
+      fieldsToDisable.push('salesBusOffCd');
     }
     fieldsToDisable.push('repTeamMemberNo');
   } else if ((reqType == 'C' || reqType == 'U') && role == 'PROCESSOR') {
