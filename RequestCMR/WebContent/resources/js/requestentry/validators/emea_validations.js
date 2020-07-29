@@ -6046,79 +6046,43 @@ function forceLockScenariosUKI() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
 
   var fieldsToDisable = new Array();
-  /*
-   * FormManager.enable('isicCd'); FormManager.enable('isuCd');
-   * FormManager.enable('clientTier'); FormManager.enable('specialTaxCd');
-   * FormManager.enable('repTeamMemberNo'); fieldsToDisable.push('cmrNo');
-   * fieldsToDisable.push('soeReqNo');
-   */
 
   if (custSubGroup == 'COMME') {
     fieldsToDisable.push('mailingCondition');
 
   } else if (custSubGroup == 'BUSPR') {
-    // fieldsToDisable.push('isuCd');
-    // fieldsToDisable.push('clientTier');
-    // fieldsToDisable.push('enterprise');
-    // fieldsToDisable.push('inacCd');
-    // fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'INTER') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    // fieldsToDisable.push('repTeamMemberNo');
-    // fieldsToDisable.push('isuCd');
-    // fieldsToDisable.push('clientTier');
-    // fieldsToDisable.push('inacCd');
-    // fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'INTSO') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    // fieldsToDisable.push('repTeamMemberNo');
-    // fieldsToDisable.push('isuCd');
-    // fieldsToDisable.push('clientTier');
-    // fieldsToDisable.push('inacCd');
-    // fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'PRICU') {
     fieldsToDisable.push('isicCd');
-    // fieldsToDisable.push('isuCd');
-    // fieldsToDisable.push('clientTier');
-    // fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('vat');
-    // fieldsToDisable.push('inacCd');
-    // fieldsToDisable.push('custClass');
-
-  } else if (custSubGroup == 'XCRO') {
-    // fieldsToDisable.push(('locationNumber'));
-
-  } else if (custSubGroup == 'XIGS') {
-    // fieldsToDisable.push(('locationNumber'));
 
   } else if (custSubGroup == 'XBP') {
-    // fieldsToDisable.push(('locationNumber'));
-    // fieldsToDisable.push(('isuCd'));
-    // fieldsToDisable.push('clientTier');
-    // fieldsToDisable.push('enterprise');
-    // fieldsToDisable.push('inacCd');
-    // fieldsToDisable.push('repTeamMemberNo');
     fieldsToDisable.push('custClass');
 
   } else if (custSubGroup == 'XINSO') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    // fieldsToDisable.push('repTeamMemberNo');
-    // fieldsToDisable.push('isuCd');
-    // fieldsToDisable.push('clientTier');
 
   } else if (custSubGroup == 'XINTR') {
     fieldsToDisable.push('isicCd');
     fieldsToDisable.push('specialTaxCd');
-    // fieldsToDisable.push('repTeamMemberNo');
-    // fieldsToDisable.push('isuCd');
-    // fieldsToDisable.push('clientTier');
+  }
+
+  if (role == 'REQUESTER') {
+    if (custSubGroup == 'INFSL' || custSubGroup == 'COMME' || custSubGroup == 'SOFTL' || custSubGroup == 'THDPT') {
+      fieldsToDisable.push('salesBusOffCd');
+      fieldsToDisable.push('repTeamMemberName');
+      fieldsToDisable.push('repTeamMemberNo');
+    }
   }
 
   // common to all scenarios
@@ -6137,12 +6101,9 @@ function forceLockScenariosUKI() {
     fieldsToDisable.push('covId');
     fieldsToDisable.push('geoLocationCode');
     fieldsToDisable.push('dunsNo');
+    fieldsToDisable.push('salesBusOffCd');
     if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
       fieldsToDisable.push('ppsceid');
-      /*
-       * fieldsToDisable.push('memLvl'); fieldsToDisable.push('bpRelType');
-       */
-      fieldsToDisable.push('salesBusOffCd');
     }
     fieldsToDisable.push('repTeamMemberNo');
   } else if ((reqType == 'C' || reqType == 'U') && role == 'PROCESSOR') {
@@ -6163,7 +6124,6 @@ function forceLockScenariosUKI() {
   fieldsToDisable.push('collectionCd');
   fieldsToDisable.push('subIndustryCd');
   fieldsToDisable.push('modeOfPayment');
-  // fieldsToDisable.push('locationNumber');
 
   for (var i = 0; i < fieldsToDisable.length; i++) {
     FormManager.readOnly(fieldsToDisable[i]);
@@ -6183,12 +6143,14 @@ function lockRequireFieldsUKI() {
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('clientTier');
     FormManager.readOnly('abbrevNm');
+    FormManager.readOnly('salesBusOffCd');
   }
 
   if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('clientTier');
+    FormManager.readOnly('salesBusOffCd');
   }
 
   if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
