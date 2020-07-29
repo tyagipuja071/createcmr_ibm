@@ -846,8 +846,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
        * _zs01ReqId, ADDR_SEQ : addressSeq, };
        * 
        * var _result = cmr.query('CHECK_IF_MAIN_ZI01', qParams); if (_result !=
-       * 'undefined' && _result != '') { autoSetAbbrevLocUKI(); }
-       *  }
+       * 'undefined' && _result != '') { autoSetAbbrevLocUKI(); } }
        */
     }
   }
@@ -7126,101 +7125,6 @@ function validateCompanyNoForUKI() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function forceLockScenariosUKI() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  /*
-   * if (FormManager.getActualValue('reqType') != 'C') { return; }
-   */
-  var custSubGroup = FormManager.getActualValue('custSubGrp');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-
-  var fieldsToDisable = new Array();
-
-  if (custSubGroup == 'COMME') {
-    fieldsToDisable.push('mailingCondition');
-
-  } else if (custSubGroup == 'BUSPR') {
-    fieldsToDisable.push('custClass');
-
-  } else if (custSubGroup == 'INTER') {
-    fieldsToDisable.push('isicCd');
-    fieldsToDisable.push('specialTaxCd');
-
-  } else if (custSubGroup == 'INTSO') {
-    fieldsToDisable.push('isicCd');
-    fieldsToDisable.push('specialTaxCd');
-
-  } else if (custSubGroup == 'PRICU') {
-    fieldsToDisable.push('isicCd');
-    fieldsToDisable.push('vat');
-
-  } else if (custSubGroup == 'XBP') {
-    fieldsToDisable.push('custClass');
-
-  } else if (custSubGroup == 'XINSO') {
-    fieldsToDisable.push('isicCd');
-    fieldsToDisable.push('specialTaxCd');
-
-  } else if (custSubGroup == 'XINTR') {
-    fieldsToDisable.push('isicCd');
-    fieldsToDisable.push('specialTaxCd');
-  }
-
-  if (role == 'REQUESTER') {
-    if (custSubGroup == 'INFSL' || custSubGroup == 'COMME' || custSubGroup == 'SOFTL' || custSubGroup == 'THDPT') {
-      fieldsToDisable.push('salesBusOffCd');
-      fieldsToDisable.push('repTeamMemberName');
-      fieldsToDisable.push('repTeamMemberNo');
-    }
-  }
-
-  // common to all scenarios
-  if (role == 'REQUESTER') {
-    fieldsToDisable.push('abbrevNm');
-    fieldsToDisable.push('abbrevLocn');
-    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
-    fieldsToDisable.push('isuCd');
-    fieldsToDisable.push('clientTier');
-    fieldsToDisable.push('inacCd');
-    fieldsToDisable.push('cmrNo');
-    fieldsToDisable.push('company');
-    fieldsToDisable.push('enterprise');
-    fieldsToDisable.push('buyingGroupId');
-    fieldsToDisable.push('globalBuyingGroupId');
-    fieldsToDisable.push('covId');
-    fieldsToDisable.push('geoLocationCode');
-    fieldsToDisable.push('dunsNo');
-    if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
-      fieldsToDisable.push('ppsceid');
-      fieldsToDisable.push('salesBusOffCd');
-    }
-    fieldsToDisable.push('repTeamMemberNo');
-  } else if ((reqType == 'C' || reqType == 'U') && role == 'PROCESSOR') {
-    FormManager.enable('isuCd');
-    FormManager.enable('clientTier');
-    FormManager.enable('inacCd');
-    FormManager.enable('enterprise');
-    FormManager.enable('dunsNo');
-    if (custSubGroup == 'XBP' || custSubGroup == 'BUSPR') {
-      FormManager.enable('ppsceid');
-    } else {
-      fieldsToDisable.push('ppsceid');
-    }
-    FormManager.enable('repTeamMemberNo');
-    FormManager.enable('salesBusOffCd');
-  }
-  fieldsToDisable.push('cmrOwner');
-  fieldsToDisable.push('collectionCd');
-  fieldsToDisable.push('subIndustryCd');
-  fieldsToDisable.push('modeOfPayment');
-
-  for (var i = 0; i < fieldsToDisable.length; i++) {
-    FormManager.readOnly(fieldsToDisable[i]);
-  }
-}
-
 function lockRequireFieldsUKI() {
   var reqType = FormManager.getActualValue('reqType').toUpperCase();
   var vat = FormManager.getActualValue('vat');
@@ -7230,11 +7134,29 @@ function lockRequireFieldsUKI() {
   if (cntry == SysLoc.IRELAND) {
     FormManager.readOnly('salesBusOffCd');
   }
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('dunsNo');
+    if (custSubType != 'XBP' && custSubType != 'BUSPR') {
+      FormManager.readOnly('ppsceid');
+    } else {
+      FormManager.enable('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    FormManager.readOnly('salesBusOffCd');
+  }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('specialTaxCd');
-    FormManager.readOnly('clientTier');
-    FormManager.readOnly('abbrevNm');
-    FormManager.readOnly('salesBusOffCd');
   }
 
   if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
@@ -7341,7 +7263,7 @@ function addStreetPoBoxValidatorUKI() {
               ADDR_TYPE : 'ZS01'
             });
             if (res_billNm.ret1 != undefined) {
-              billNm = res_billNm.ret1;
+              billNm = res_billNm.ret1 + res_billNm.ret2;
             }
           }
           if (mailingCount > 0) {
@@ -7351,7 +7273,7 @@ function addStreetPoBoxValidatorUKI() {
               ADDR_TYPE : 'ZP01'
             });
             if (res_mailNm.ret1 != undefined) {
-              mailNm = res_mailNm.ret1;
+              mailNm = res_mailNm.ret1 + res_mailNm.ret2;
             }
           }
 
@@ -9102,6 +9024,26 @@ function requestingLOBCheckFrIFSL() {
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custGrp = FormManager.getActualValue('custGrp');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var reqLob = FormManager.getActualValue('requestingLob');
+        if (cntry == SysLoc.UK || cntry == SysLoc.Ireland) {
+          if (custGrp == 'LOCAL' && custSubGrp == 'DC') {
+            if (reqLob != 'TSS') {
+              return new ValidationResult(null, false, 'Requests with Datacentre Scenario should have Requesting LOB as TSS. ');
+            }
+          }
+        } else {
+          return new ValidationResult(null, true, 'Allow request');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
@@ -9116,8 +9058,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.ISRAEL, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
 
   // UKI Specific
-  GEOHandler.addAfterConfig(forceLockScenariosUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterTemplateLoad(forceLockScenariosUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(addIEClientTierISULogic, [ SysLoc.IRELAND ]);
