@@ -25,6 +25,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -54,7 +55,9 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -84,12 +87,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private static final String[] GREECE_CYPRUS_TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
       "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department","INACType" };
+      "Floor", "Building", "County", "City2", "Department", "INACType" };
 
-  private static final String[] TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
-	      "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-	      "Floor", "Building", "County", "City2", "Department","INACType","SalRepNameNo" };
-  
+  private static final String[] TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
+      "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
+      "County", "City2", "Department", "INACType", "SalRepNameNo" };
+
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
 
@@ -2044,8 +2047,19 @@ public class EMEAHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+      AddrPK pk = new AddrPK();
+      pk.setReqId(admin.getId().getReqId());
+      pk.setAddrType("ZI01");
+      pk.setAddrSeq("00001");
+      Addr addr = entityManager.find(Addr.class, pk);
+      if (data.getCustSubGrp().equalsIgnoreCase("INFSL") && addr != null) {
+        // CMR-4543
+        autoSetAbbreviatedNameUKI(data, addr, admin);
+      }
+    }
     if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
-      doSetInFSLAbbrevName(data);
+      // doSetInFSLAbbrevName(data);
       String postCdLandcntry = getPostalCd_LandedCntry(entityManager, data);
       if (postCdLandcntry != null && postCdLandcntry.contains("@")) {
         String[] postCdLandcntryVal = postCdLandcntry.split("@");
@@ -2322,7 +2336,7 @@ public class EMEAHandler extends BaseSOFHandler {
         if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
           addr.setCustPhone("");
         }
-        
+
         if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
           addr.setTaxOffice("");
         }
@@ -3819,7 +3833,7 @@ public class EMEAHandler extends BaseSOFHandler {
     } else {
       return false;
     }
-    
+
   }
 
   @Override
@@ -3839,7 +3853,7 @@ public class EMEAHandler extends BaseSOFHandler {
       LOG.trace("validateTemplateDupFills for Greece");
       return;
     }
-        
+
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
@@ -4555,6 +4569,37 @@ public class EMEAHandler extends BaseSOFHandler {
     System.out.println("zd01count = " + zd01count);
 
     return zd01count;
+  }
+
+  private void autoSetAbbreviatedNameUKI(Data data, Addr addr, Admin admin) {
+    String installingName = addr.getCustNm1().concat(addr.getCustNm2());
+    String cntryFrmEmpId = "";
+    String abbName = "";
+    Person p = new Person();
+    try {
+      p = BluePagesHelper.getPerson(admin.getRequesterId());
+      if (p != null) {
+        cntryFrmEmpId = p.getEmployeeId().substring(p.getEmployeeId().length() - 3, p.getEmployeeId().length());
+        if (SystemLocation.HUNGARY.equals(cntryFrmEmpId)) {
+          abbName = "IBM UK/".concat(installingName);
+        } else if (SystemLocation.UNITED_KINGDOM.equals(cntryFrmEmpId)) {
+          abbName = "FSL/".concat(installingName);
+        }
+
+        if (abbName != null && abbName.length() > 22) {
+          abbName = abbName.substring(0, 22);
+        }
+
+        data.setAbbrevNm(abbName);
+      } else {
+        LOG.debug("Could not get details from bluepages of this requester.");
+      }
+
+    } catch (CmrException e) {
+      LOG.debug("Could not connect to Bluepages service.");
+      e.printStackTrace();
+    }
+
   }
 
 }

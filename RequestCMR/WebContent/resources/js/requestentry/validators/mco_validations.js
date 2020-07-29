@@ -1347,8 +1347,6 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('dunsNo');
     if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
       fieldsToDisable.push('ppsceid');
-      fieldsToDisable.push('memLvl');
-      fieldsToDisable.push('bpRelType');
       fieldsToDisable.push('salesBusOffCd');
     }
     fieldsToDisable.push('repTeamMemberNo');
@@ -2086,7 +2084,7 @@ function addBilingMailingValidatorSpain() {
     return {
       validate : function() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && [ 'INETR', 'INTSO' ].includes(custSubGrp)) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && [ 'INTER', 'INTSO' ].includes(custSubGrp)) {
           var recordList = null;
           var reqType = FormManager.getActualValue('reqType')
           var role = FormManager.getActualValue('userRole').toUpperCase();
