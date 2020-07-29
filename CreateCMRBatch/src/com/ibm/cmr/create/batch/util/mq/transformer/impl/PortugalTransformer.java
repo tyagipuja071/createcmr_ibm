@@ -164,13 +164,17 @@ public class PortugalTransformer extends MessageTransformer {
       lineNo++;
     }
 
-    if (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType()) && crossBorder) {
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "AddressT", vat);
-    } else if (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType())) {
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "AddressT", vatDigit);
-    } else {
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "AddressT", "");
-    }
+    /*
+     * if (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType()) &&
+     * crossBorder) {
+     * messageHash.put(getAddressKey(addrData.getId().getAddrType()) +
+     * "AddressT", vat); } else if
+     * (MQMsgConstants.ADDR_ZS01.equals(addrData.getId().getAddrType())) {
+     * messageHash.put(getAddressKey(addrData.getId().getAddrType()) +
+     * "AddressT", vatDigit); } else {
+     * messageHash.put(getAddressKey(addrData.getId().getAddrType()) +
+     * "AddressT", ""); }
+     */
 
     if (MQMsgConstants.ADDR_ZP01.equals(addrData.getId().getAddrType())) {
       // send to MailPhone the billing phone number
@@ -353,6 +357,11 @@ public class PortugalTransformer extends MessageTransformer {
     formatDataLines(dummyHandler);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      legacyCust.setDcRepeatAgreement("0"); // CAGXB
+      legacyCust.setLeasingInd("0"); // CIEDC
+
+      // CeDivision
+      legacyCust.setCeDivision("3");
       legacyCust.setLangCd(StringUtils.isEmpty(legacyCust.getLangCd()) ? dummyHandler.messageHash.get("CustomerLanguage") : legacyCust.getLangCd());
 
       // extract the phone from billing as main phone
@@ -370,10 +379,10 @@ public class PortugalTransformer extends MessageTransformer {
       String custSubType = data.getCustSubGrp();
       if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custSubType) || "XBP".equals(custSubType)) {
         legacyCust.setMrcCd("5");
-        legacyCust.setAuthRemarketerInd("YES");
+        legacyCust.setAuthRemarketerInd("1");
       } else {
         legacyCust.setMrcCd("3");
-        legacyCust.setAuthRemarketerInd("1");
+        legacyCust.setAuthRemarketerInd("0");
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -461,8 +470,8 @@ public class PortugalTransformer extends MessageTransformer {
       legacyCust.setSalesRepNo("");
     }
 
-    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     } else {
       legacyCust.setSalesGroupRep("");
     }
@@ -472,9 +481,6 @@ public class PortugalTransformer extends MessageTransformer {
     } else {
       legacyCust.setCollectionCd("");
     }
-
-    // CeDivision
-    legacyCust.setCeDivision("3");
 
     // Type of Customer : CMRTCUST.CCUAI
     legacyCust.setCustType(!StringUtils.isBlank(data.getCrosSubTyp()) ? data.getCrosSubTyp() : "");
@@ -510,11 +516,15 @@ public class PortugalTransformer extends MessageTransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     formatAddressLines(dummyHandler);
-    if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
+    if (MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
       if (!(StringUtils.isBlank(currAddr.getCustPhone())) || !(StringUtils.isEmpty(currAddr.getCustPhone()))) {
-        legacyAddr.setAddrPhone("TF" + currAddr.getCustPhone());
+        legacyAddr.setAddrPhone(currAddr.getCustPhone());
       }
     }
+    if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
+      legacyAddr.setAddrLineT("");
+    }
+
   }
 
   @Override
