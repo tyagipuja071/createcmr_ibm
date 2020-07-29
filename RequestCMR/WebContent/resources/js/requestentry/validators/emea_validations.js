@@ -6059,8 +6059,7 @@ function lockRequireFieldsUKI() {
     FormManager.readOnly('inacCd');
     FormManager.readOnly('dunsNo');
     FormManager.readOnly('soeReqNo');
-    FormManager.readOnly('salesBusOffCd'); // isse SBO should be locked pata
-                                            // nhi kyo lock nhi ho rha
+    FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('repTeamMemberNo');
     if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
       FormManager.readOnly('ppsceid');
