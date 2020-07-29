@@ -838,7 +838,7 @@ public class TurkeyTransformer extends EMEATransformer {
     // }
 
     boolean crossBorder = false;
-    if (!StringUtils.isEmpty(addr.getLandCntry()) && !"ES".equals(addr.getLandCntry())) {
+    if (!StringUtils.isEmpty(addr.getLandCntry()) && !"TR".equals(addr.getLandCntry())) {
       crossBorder = true;
     } else {
       crossBorder = false;
@@ -861,13 +861,12 @@ public class TurkeyTransformer extends EMEATransformer {
     // }
     // }
 
-    formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
+    // formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     // legacyObjects.addAddress(legacyAddr);
   }
 
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
-    boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
     Map<String, String> messageHash = new LinkedHashMap<String, String>();
 
@@ -882,51 +881,19 @@ public class TurkeyTransformer extends EMEATransformer {
     String line3 = "";
     String line4 = "";
     String line5 = "";
-    String line6 = "";
 
-    // fiscal address
-    if (isFAddr) {
-      line1 = legacyAddr.getAddrLine1();
-      line2 = "CL " + legacyAddr.getStreet();
-
-      StringBuilder street = new StringBuilder();
-      line2 = StringUtils.replace(line2, " - ", "-");
-      line2 = StringUtils.replace(line2, "- ", "-");
-      line2 = StringUtils.replace(line2, " -", "-");
-      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
-      for (String part : parts) {
-        if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
-          line3 = part;
-        } else if (!StringUtils.isEmpty(part)) {
-          street.append(street.length() > 0 ? " " : "");
-          street.append(part);
-        }
-      }
-
-      line2 = street.toString();
-      if (StringUtils.isEmpty(legacyAddr.getStreet()) && !StringUtils.isEmpty(legacyAddr.getPoBox())) {
-        line2 = "CLAPTO " + legacyAddr.getPoBox().replaceAll("[^\\d]", "");
-      }
-      line3 = StringUtils.leftPad(line3, 5, '0');
-
-      line4 = legacyAddr.getCity();
-      if (crossBorder) {
-        line5 = "88888";
-      } else {
-        line5 = legacyAddr.getZipCode();
-      }
-    } else {
       line1 = legacyAddr.getAddrLine1();
       line2 = legacyAddr.getAddrLine2();
 
-      if (StringUtils.isEmpty(line2) && crossBorder) {
-        if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
-          line2 = "ATT " + line2;
-        }
-        if (line2.length() > 30) {
-          line2 = line2.substring(0, 30);
-        }
-      }
+    // if (StringUtils.isEmpty(line2) && crossBorder) {
+    // if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT
+    // ") && !line2.toUpperCase().startsWith("ATT:")) {
+    // line2 = "ATT " + line2;
+    // }
+    // if (line2.length() > 30) {
+    // line2 = line2.substring(0, 30);
+    // }
+    // }
 
       if (StringUtils.isEmpty(line2)) {
         line2 = legacyAddr.getStreetNo();
@@ -943,31 +910,24 @@ public class TurkeyTransformer extends EMEATransformer {
       line4 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() : "") + " "
           + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
 
-      if (!crossBorder) {
-        line5 = !StringUtils.isEmpty(legacyAddr.getAddrLine5()) ? legacyAddr.getAddrLine5().trim() : "";
-        if (!StringUtils.isEmpty(line5) && !line5.toUpperCase().startsWith("ATT ") && !line5.toUpperCase().startsWith("ATT:")) {
-          // Defect 1740670: SPAIN - attention person - ATT
-          line5 = "ATT " + line5;
-        }
-        if (line5.length() > 30) {
-          line5 = line5.substring(0, 30);
-        }
-      } else {
+    // if (!crossBorder) {
+    // line5 = !StringUtils.isEmpty(legacyAddr.getAddrLine5()) ?
+    // legacyAddr.getAddrLine5().trim() : "";
+    // if (!StringUtils.isEmpty(line5) && !line5.toUpperCase().startsWith("ATT
+    // ") && !line5.toUpperCase().startsWith("ATT:")) {
+    // // Defect 1740670: SPAIN - attention person - ATT
+    // line5 = "ATT " + line5;
+    // }
+    // if (line5.length() > 30) {
+    // line5 = line5.substring(0, 30);
+    // }
+    // } else {
         if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
           line5 = massUpdtAddr.getLandCntry();
         } else {
           line5 = legacyAddr.getAddrLine5();
         }
-      }
-
-      line6 = "";
-      if ("Y".equalsIgnoreCase(legacyAddr.getIsAddrUseShipping())) {
-        // DTN: Commented because we are not passing phone numbers on
-        // the
-        // template
-        // line6 = legacyAddr.getAddrPhone();
-      }
-    }
+    // }
 
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
         (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : "") };
