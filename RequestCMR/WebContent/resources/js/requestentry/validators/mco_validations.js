@@ -1908,41 +1908,57 @@ function addBilingMailingValidatorSpain() {
     return {
       validate : function() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var billingCount = 0;
+        var mailingCount = 0;
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && [ 'INTER', 'INTSO' ].includes(custSubGrp)) {
-          var recordList = null;
-          var reqType = FormManager.getActualValue('reqType')
-          var role = FormManager.getActualValue('userRole').toUpperCase();
-          var inValidCnt = 0;
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
               recordList = _allAddressData[i];
             }
-            var custNm1 = recordList.custNm1;
-            var custNm2 = recordList.custNm2;
-            var addrType = recordList.addrType;
-            if (typeof (type) == 'object') {
-              type = type[0];
-            }
-            if (typeof (custNm1) == 'object') {
-              custNm1 = custNm1[0];
-            }
-            if (typeof (custNm2) == 'object') {
-              custNm2 = custNm2[0];
-            }
+            addrType = recordList.addrType;
+
             if (typeof (addrType) == 'object') {
               addrType = addrType[0];
-            }
-
-            if (!(custNm1.concat(custNm2).includes("IBM") || custNm1.concat(custNm2).includes('INTERNATIONAL BUSINESS MACHINES')) && (addrType == 'ZP01' || addrType == 'ZS01')) {
-              inValidCnt++;
+              if (addrType == 'ZS01') {
+                billingCount++;
+              }
+              if (addrType == 'ZP01') {
+                mailingCount++
+              }
             }
           }
 
-          if (inValidCnt > 0) {
-            return new ValidationResult(null, false, 'Mailing and Billing addresses should have "IBM" in them.');
+          var billNm = "";
+          var mailNm = "";
+          var reqId = FormManager.getActualValue('reqId');
+          if (billingCount > 0) {
+            // get billing name from db
+            var res_billNm = cmr.query('GET.CUSTNM_ADDR', {
+              REQ_ID : reqId,
+              ADDR_TYPE : 'ZS01'
+            });
+            if (res_billNm.ret1 != undefined) {
+              billNm = res_billNm.ret1.trim() + ' ' + res_billNm.ret2;
+            }
           }
-          return new ValidationResult(null, true);
+          if (mailingCount > 0) {
+            // get billing name from db
+            var res_mailNm = cmr.query('GET.CUSTNM_ADDR', {
+              REQ_ID : reqId,
+              ADDR_TYPE : 'ZP01'
+            });
+            if (res_mailNm.ret1 != undefined) {
+              mailNm = res_mailNm.ret1.trim() + ' ' + res_mailNm.ret2;
+            }
+          }
+
+          if (!(mailNm.includes('IBM') || mailNm.toUpperCase().includes('INTERNATIONAL BUSINESS MACHINES'))
+              && !(billNm.includes('IBM') || billNm.toUpperCase().includes('INTERNATIONAL BUSINESS MACHINES'))) {
+            return new ValidationResult(null, false, 'Mailing / Billing  does not contain IBM in their customer name.');
+          } else {
+            return new ValidationResult(null, true);
+          }
         }
         return new ValidationResult(null, true);
       }
