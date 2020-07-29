@@ -1077,6 +1077,11 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
+    String dataEmbargoCd = data.getEmbargoCd();
+    if (dataEmbargoCd != null) {
+      legacyCust.setEmbargoCd(dataEmbargoCd);
+    }
+
     // if (data.getCustPrefLang() != null) {
 //    if (!StringUtils.isBlank(data.getCustPrefLang())) {
 //      legacyCust.setLangCd(data.getCustPrefLang());
