@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
+import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -86,12 +87,12 @@ public class EMEAHandler extends BaseSOFHandler {
 
   private static final String[] GREECE_CYPRUS_TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
       "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department","INACType" };
+      "Floor", "Building", "County", "City2", "Department", "INACType" };
 
-  private static final String[] TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
-	      "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-	      "Floor", "Building", "County", "City2", "Department","INACType","SalRepNameNo" };
-  
+  private static final String[] TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
+      "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building",
+      "County", "City2", "Department", "INACType", "SalRepNameNo" };
+
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
 
@@ -2335,7 +2336,7 @@ public class EMEAHandler extends BaseSOFHandler {
         if (!StringUtils.isEmpty(addr.getCustPhone()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
           addr.setCustPhone("");
         }
-        
+
         if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
           addr.setTaxOffice("");
         }
@@ -3832,7 +3833,7 @@ public class EMEAHandler extends BaseSOFHandler {
     } else {
       return false;
     }
-    
+
   }
 
   @Override
@@ -3852,7 +3853,7 @@ public class EMEAHandler extends BaseSOFHandler {
       LOG.trace("validateTemplateDupFills for Greece");
       return;
     }
-        
+
     for (String name : countryAddrss) {
       XSSFSheet sheet = book.getSheet(name);
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
@@ -4569,6 +4570,7 @@ public class EMEAHandler extends BaseSOFHandler {
 
     return zd01count;
   }
+
   private void autoSetAbbreviatedNameUKI(Data data, Addr addr, Admin admin) {
     String installingName = addr.getCustNm1().concat(addr.getCustNm2());
     String cntryFrmEmpId = "";
