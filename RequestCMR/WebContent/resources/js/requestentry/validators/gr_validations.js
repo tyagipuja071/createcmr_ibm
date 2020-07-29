@@ -3418,37 +3418,39 @@ function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
 function retainImportValues(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndcForGreece();
   var reqId = FormManager.getActualValue('reqId');
+  
+  if(FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged) {
+    if (scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'CROSS') {
 
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'CROSS')) {
+      var origISU;
+      var origClientTier;
+      var origRepTeam;
+      var origSbo;
+      var origInac;
+      var origEnterprise;
 
-    var origISU;
-    var origClientTier;
-    var origRepTeam;
-    var origSbo;
-    var origInac;
-    var origEnterprise;
+      var result = cmr.query("GET.CMRINFO.IMPORTED_GR", {
+        REQ_ID : reqId
+      });
 
-    var result = cmr.query("GET.CMRINFO.IMPORTED_GR", {
-      REQ_ID : reqId
-    });
+      if (result != null && result != '') {
+        origISU = result.ret1;
+        origClientTier = result.ret2;
+        origRepTeam = result.ret3;
+        origSbo = result.ret4;
+        origInac = result.ret5;
+        origEnterprise = result.ret6;
 
-    if (result != null && result != '') {
-      origISU = result.ret1;
-      origClientTier = result.ret2;
-      origRepTeam = result.ret3;
-      origSbo = result.ret4;
-      origInac = result.ret5;
-      origEnterprise = result.ret6;
-
-      FormManager.setValue('isuCd', origISU);
-      FormManager.setValue('clientTier', origClientTier);
-      FormManager.setValue('repTeamMemberNo', origRepTeam);
-      FormManager.setValue('salesBusOffCd', origSbo);
-      FormManager.setValue('inacCd', origInac);
-      FormManager.setValue('enterprise', origEnterprise);
+        FormManager.setValue('isuCd', origISU);
+        FormManager.setValue('clientTier', origClientTier);
+        FormManager.setValue('repTeamMemberNo', origRepTeam);
+        FormManager.setValue('salesBusOffCd', origSbo);
+        FormManager.setValue('inacCd', origInac);
+        FormManager.setValue('enterprise', origEnterprise);
+      }
+    } else {
+      FormManager.setValue('inacCd', '');
     }
-  } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y') {
-    FormManager.setValue('inacCd', '');
   }
 }
 
