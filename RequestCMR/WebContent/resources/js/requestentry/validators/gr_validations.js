@@ -3486,7 +3486,14 @@ function setFieldsBehaviourGR() {
   if (FormManager.getActualValue('reqType') == 'C') {
     FormManager.addValidator('subIndustryCd', Validators.REQUIRED, [ 'Subindustry' ], 'MAIN_CUST_TAB');
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
-    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+        
+    if(role == 'PROCESSOR') {
+      FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+    } else if(role == 'REQUESTER') {
+      FormManager.resetValidations('repTeamMemberNo');
+      FormManager.resetValidations('salesTeamCd');
+    }
+    
   } else if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.resetValidations('subIndustryCd');
     FormManager.resetValidations('isicCd');
