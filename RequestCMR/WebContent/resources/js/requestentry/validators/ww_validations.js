@@ -717,13 +717,14 @@ function validateExistingCMRNo() {
         var reqType = FormManager.getActualValue('reqType');
         var cmrNo = FormManager.getActualValue('cmrNo');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
         if (reqType == 'C' && cmrNo) {
           var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
             COUNTRY : cntry,
             CMR_NO : cmrNo,
             MANDT : cmr.MANDT
           });
-          if (exists && exists.ret1) {
+          if (exists && exists.ret1 && action != 'PCM') {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
