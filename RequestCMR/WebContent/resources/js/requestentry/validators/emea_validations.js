@@ -6072,7 +6072,14 @@ function lockRequireFieldsUKI() {
     FormManager.readOnly('clientTier');
     FormManager.readOnly('salesBusOffCd');
   }
-
+  // defect 5475
+  if (role == 'REQUESTER') {
+    if (custSubGroup == 'INFSL' || custSubGroup == 'COMME' || custSubGroup == 'SOFTL' || custSubGroup == 'THDPT') {
+      fieldsToDisable.push('salesBusOffCd');
+      fieldsToDisable.push('repTeamMemberName');
+      fieldsToDisable.push('repTeamMemberNo');
+    }
+  }
   if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
     FormManager.readOnly('reqReason');
     if (role == 'REQUESTER') {
