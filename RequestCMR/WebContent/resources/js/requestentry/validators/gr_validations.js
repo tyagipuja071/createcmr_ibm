@@ -3357,6 +3357,31 @@ function setClientTierForCreates(value) {
   }
 }
 
+function addPaymentModeValidator() {
+  console.log("addModeofPaymentValidator..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var modeOfPayment = FormManager.getActualValue('modeOfPayment');
+        
+        var result = false;
+        if (modeOfPayment != '' && modeOfPayment != '5' && modeOfPayment != null) {
+            result = false;
+        } else {
+          result = true;
+        }
+        if (modeOfPayment.length == 0 || modeOfPayment == '') {
+          result = true;
+        }
+        if (!result) {
+          return new ValidationResult(null, false, 'Invalid value for Mode of Payment.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function setISRValuesGR() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'SPAS') {
@@ -3475,6 +3500,9 @@ function setFieldsBehaviourGR() {
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
   FormManager.readOnly('subIndustryCd');
+  if(viewOnlyPage) {
+    FormManager.readOnly('modeOfPayment');    
+  }
 }
 
 function resetSubIndustryCdGR() {
@@ -5727,6 +5755,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.addAfterConfig(addHandlersForSubindustryCd, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(setClientTierForCreates, [ SysLoc.GREECE ]);
-  
+  GEOHandler.registerValidator(addPaymentModeValidator, [ SysLoc.GREECE ], null, true);
 
 });
