@@ -746,46 +746,44 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
 
     if (finalSave || force || copyingToA) {
 
-      if (addressTyp == 'ZS01') { //
+      if (addressTyp == 'ZI01') { //
         autoSetAbbrevLocUKI();
-      } else if (addressTyp == 'ZI01') { //
-        var addressSeq = FormManager.getActualValue('addrSeq');
-        var qParams = {
-          REQ_ID : _zs01ReqId, //
-          ADDR_SEQ : addressSeq,
-        };
-        var _result = cmr.query('CHECK_IF_MAIN_ZI01', qParams);
-        if (_result != 'undefined' && _result != '') {
-          autoSetAbbrevLocUKI();
-        }
-
       }
+      /*
+       * else if (addressTyp == 'ZI01') { // var addressSeq =
+       * FormManager.getActualValue('addrSeq'); var qParams = { REQ_ID :
+       * _zs01ReqId, ADDR_SEQ : addressSeq, };
+       * 
+       * var _result = cmr.query('CHECK_IF_MAIN_ZI01', qParams); if (_result !=
+       * 'undefined' && _result != '') { autoSetAbbrevLocUKI(); }
+       *  }
+       */
     }
   }
-  /*
-   * if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) { var
-   * _abbrevLocn = null; if (_custType == 'SOFTL') { _abbrevLocn = "SOFTLAYER"; }
-   * else if (_custType == 'CROSS') { var landCnty =
-   * FormManager.getActualValue('landCntry'); var qParams = { COUNTRY_CD :
-   * landCnty, }; var _result =
-   * cmr.query('ADDR.GET.LANDCNTRYDESC.BY_COUNTRY_CD', qParams); _abbrevLocn =
-   * _result.ret1; } else if (_custType== 'INTER' || _custType== 'INFSL' ){ var
-   * city1 = FormManager.getActualValue('city1'); _abbrevLocn = city1; }
-   * 
-   * if (_abbrevLocn != null && _abbrevLocn.length > 12) { _abbrevLocn =
-   * _abbrevLocn.substr(0, 12); }
-   * 
-   * FormManager.setValue('abbrevLocn', _abbrevLocn); } if
-   * (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK && _custType==
-   * 'INTER' || _custType== 'INFSL' ) { var postCd =
-   * FormManager.getActualValue('postCd'); var _abbrevLocn = postCd;
-   * 
-   * if (_abbrevLocn != null && _abbrevLocn.length > 12) { _abbrevLocn =
-   * _abbrevLocn.substr(0, 12); }
-   * 
-   * FormManager.setValue('abbrevLocn', _abbrevLocn); }
-   */
 }
+/*
+ * if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) { var
+ * _abbrevLocn = null; if (_custType == 'SOFTL') { _abbrevLocn = "SOFTLAYER"; }
+ * else if (_custType == 'CROSS') { var landCnty =
+ * FormManager.getActualValue('landCntry'); var qParams = { COUNTRY_CD :
+ * landCnty, }; var _result = cmr.query('ADDR.GET.LANDCNTRYDESC.BY_COUNTRY_CD',
+ * qParams); _abbrevLocn = _result.ret1; } else if (_custType== 'INTER' ||
+ * _custType== 'INFSL' ){ var city1 = FormManager.getActualValue('city1');
+ * _abbrevLocn = city1; }
+ * 
+ * if (_abbrevLocn != null && _abbrevLocn.length > 12) { _abbrevLocn =
+ * _abbrevLocn.substr(0, 12); }
+ * 
+ * FormManager.setValue('abbrevLocn', _abbrevLocn); } if
+ * (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK && _custType==
+ * 'INTER' || _custType== 'INFSL' ) { var postCd =
+ * FormManager.getActualValue('postCd'); var _abbrevLocn = postCd;
+ * 
+ * if (_abbrevLocn != null && _abbrevLocn.length > 12) { _abbrevLocn =
+ * _abbrevLocn.substr(0, 12); }
+ * 
+ * FormManager.setValue('abbrevLocn', _abbrevLocn); }
+ */
 
 function autoSetVAT(_custType, custTypeinDB) {
   console.log(">>> Process autoSetVAT ...>> " + _custType);
