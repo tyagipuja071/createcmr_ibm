@@ -355,7 +355,7 @@ dojo.addOnLoad(function(){
   			</cmr:column>
         <cmr:column span="2" containerForField="MembLevel">
           <p>
-            <cmr:label fieldId="memLvl">
+            <cmr:label fieldId="memLvl" exceptForCountry="838">
               <cmr:fieldLabel fieldId="MembLevel" />:
               <cmr:delta text="${rdcdata.memLvl}" oldValue="${reqentry.memLvl}" code="L"/>
             </cmr:label>
@@ -364,7 +364,7 @@ dojo.addOnLoad(function(){
         </cmr:column>
         <cmr:column span="2" containerForField="BPRelationType">
           <p>
-            <cmr:label fieldId="bpRelType">
+            <cmr:label fieldId="bpRelType" exceptForCountry="838">
               <cmr:fieldLabel fieldId="BPRelationType" />:
               <cmr:delta text="${rdcdata.bpRelType}" oldValue="${reqentry.bpRelType}" code="L"/>
             </cmr:label>

@@ -1221,8 +1221,6 @@ function forceLockScenariosSpain() {
     fieldsToDisable.push('dunsNo');
     if (custSubGroup != 'XBP' && custSubGroup != 'BUSPR') {
       fieldsToDisable.push('ppsceid');
-      fieldsToDisable.push('memLvl');
-      fieldsToDisable.push('bpRelType');
       fieldsToDisable.push('salesBusOffCd');
     }
     fieldsToDisable.push('repTeamMemberNo');
