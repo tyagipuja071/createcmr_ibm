@@ -3438,11 +3438,15 @@ function addTRAddressTypeValidator() {
             return new ValidationResult(null, false, 'Sold-to and Local Translation, mismatched fields: ' + mismatchErrMsg);
           }
 
-          if (reqType == 'U' && zs01Copy.importInd[0] == 'Y' && zp01Copy.importInd[0] == 'Y') {
-            if (zs01Copy.updateInd[0] != zp01Copy.updateInd[0]) {
-              return new ValidationResult(null, false, 'If Sold-To is updated, Local Language Translation of Sold-To must be updated and vice versa');
-            }
-          }
+          // if (reqType == 'U' && zs01Copy.importInd[0] == 'Y' &&
+          // zp01Copy.importInd[0]
+          // == 'Y') {
+          // if (zs01Copy.updateInd[0] != zp01Copy.updateInd[0]) {
+          // return new ValidationResult(null, false, 'If Sold-To is updated,
+          // Local
+          // Language Translation of Sold-To must be updated and vice versa');
+          // }
+          // }
 
           return new ValidationResult(null, true);
         }
