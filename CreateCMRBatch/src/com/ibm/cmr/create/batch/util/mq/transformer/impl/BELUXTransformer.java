@@ -332,8 +332,8 @@ public class BELUXTransformer extends MessageTransformer {
      */
   }
 
-  private void setDefaultLuxembourgValues(MQMessageHandler handler, Map<String, String> messageHash, Data cmrData, boolean crossBorder,
-      Addr addrData, boolean update) {
+  private void setDefaultLuxembourgValues(MQMessageHandler handler, Map<String, String> messageHash, Data cmrData, boolean crossBorder, Addr addrData,
+      boolean update) {
     LOG.debug("Handling Data for Luxembourg");
 
     String accTeamNo = !StringUtils.isEmpty(cmrData.getSearchTerm()) ? cmrData.getSearchTerm() : "";
@@ -351,12 +351,16 @@ public class BELUXTransformer extends MessageTransformer {
 
   private String getLandedCntryInZP01(MQMessageHandler handler) {
     List<Addr> addrList = handler.currentAddresses;
+    String landCountry = "";
     if (addrList != null && addrList.size() > 0)
       for (Addr addr : addrList) {
         if (CmrConstants.ADDR_TYPE.ZP01.toString().equalsIgnoreCase(addr.getId().getAddrType()))
           return addr.getLandCntry();
+        else if (CmrConstants.ADDR_TYPE.ZS01.toString().equalsIgnoreCase(addr.getId().getAddrType()))
+          landCountry = addr.getLandCntry();
       }
-    return "";
+
+    return landCountry;
   }
 
   @Override
