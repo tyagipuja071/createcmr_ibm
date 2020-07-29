@@ -755,8 +755,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
        * _zs01ReqId, ADDR_SEQ : addressSeq, };
        * 
        * var _result = cmr.query('CHECK_IF_MAIN_ZI01', qParams); if (_result !=
-       * 'undefined' && _result != '') { autoSetAbbrevLocUKI(); }
-       *  }
+       * 'undefined' && _result != '') { autoSetAbbrevLocUKI(); } }
        */
     }
   }
@@ -7607,6 +7606,26 @@ function requestingLOBCheckFrIFSL() {
         var reqLobsAllowed = [ 'IGF', 'SCT' ];
         if (!reqLobsAllowed.includes(reqLob)) {
           return new ValidationResult(null, false, 'Requests with Internal/FSL Scenario should have Requesting LOB as IGF / Client ID/SC&T.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custGrp = FormManager.getActualValue('custGrp');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var reqLob = FormManager.getActualValue('requestingLob');
+        if (cntry == SysLoc.UK || cntry == SysLoc.Ireland) {
+          if (custGrp == 'LOCAL' && custSubGrp == 'DC') {
+            if (reqLob != 'TSS') {
+              return new ValidationResult(null, false, 'Requests with Datacentre Scenario should have Requesting LOB as TSS. ');
+            }
+          }
+        } else {
+          return new ValidationResult(null, true, 'Allow request');
         }
         return new ValidationResult(null, true);
       }
