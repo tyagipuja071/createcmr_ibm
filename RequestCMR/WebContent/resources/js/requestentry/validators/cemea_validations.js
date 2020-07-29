@@ -1474,14 +1474,25 @@ function setAbbrvNmLoc() {
   var city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
   var abbrvNm = custNm.ret1;
   var abbrevLocn = city.ret1;
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
   if (FormManager.getActualValue('reqType') == 'C') {
-    if (abbrvNm && abbrvNm.length > 30) {
-      abbrvNm = abbrvNm.substring(0, 30);
+    if (abbrvNm && abbrvNm.length > 22) {
+      abbrvNm = abbrvNm.substring(0, 22);
     }
     if (abbrevLocn && abbrevLocn.length > 12) {
       abbrevLocn = abbrevLocn.substring(0, 12);
     }
+
+    // CMR-4606 set up abbrvNm for Russia CIS dup CMR
+    if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+      if (abbrvNm && abbrvNm.length > 18) {
+        abbrvNm = abbrvNm.substring(0, 18).trim() + ' CIS';
+      } else {
+        abbrvNm = abbrvNm + ' CIS';
+      }
+    }
+
   }
 
   if (abbrevLocn != null) {
@@ -3292,15 +3303,15 @@ function validatorsDIGIT() {
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'LocalTax2' ]);
 
 }
-function addEmbargoCdValidatorForCEE(){
+function addEmbargoCdValidatorForCEE() {
 
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var embargoCd = FormManager.getActualValue('embargoCd');
-        if (embargoCd && !(embargoCd == 'E'||embargoCd == 'R'||embargoCd == '')){
-           return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
-       }
+        if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == '')) {
+          return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
+        }
         return new ValidationResult(null, true);
       }
     };
