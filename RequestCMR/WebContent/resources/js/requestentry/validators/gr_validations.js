@@ -3500,6 +3500,9 @@ function setFieldsBehaviourGR() {
   FormManager.resetValidations('sitePartyId');
   FormManager.readOnly('sitePartyId');
   FormManager.readOnly('subIndustryCd');
+  if(viewOnlyPage) {
+    FormManager.readOnly('modeOfPayment');    
+  }
 }
 
 function resetSubIndustryCdGR() {
