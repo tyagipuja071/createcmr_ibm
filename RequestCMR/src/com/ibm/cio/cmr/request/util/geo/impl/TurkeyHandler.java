@@ -282,6 +282,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	            }
 	            if ("862".equals(cmrIssueCd)) {
 	              seqNo = record.getCmrAddrSeq();
+              String legacybilladdrSeq = getBilladdrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
 	              System.out.println("seqNo = " + seqNo);
 	              if ("5".equals(seqNo)) {
 	                seq5Exist = true;
@@ -318,7 +319,8 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        // copyAddrData(installing, installingAddr);
 	                        // installing.setParentCMRNo(mainRecord.getCmrNum());
 	                        installing.setCmrAddrTypeCode("ZP01");
-	                        installing.setCmrAddrSeq("00002");
+                        // installing.setCmrAddrSeq("00002");
+                        installing.setCmrAddrSeq(legacybilladdrSeq);
 	                        installing.setCmrName1Plain(sadr.getName1());
 	                        installing.setCmrName2Plain(sadr.getName2());
 	                        installing.setCmrCity(sadr.getOrt01());
@@ -364,6 +366,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        }
                         // installing.setCmrStreetAddress(mailingAddr.getAddrLine3());
                         installing.setCmrStreetAddress("\u00a0");
+                        installing.setCmrAddrSeq(legacybilladdrSeq);
 	                        installing.setCmrCity(record.getCmrCity());
 	                        installing.setCmrCity2(record.getCmrCity2());
 	                        installing.setCmrCountry(mailingAddr.getAddrLine6());
@@ -2070,6 +2073,8 @@ public class TurkeyHandler extends BaseSOFHandler {
       String zs01updateinit = getZS01UpdateInit(entityManager, data.getId().getReqId(), zs01seq);
       String zi01updateinit = getZI01UpdateInit(entityManager, data.getId().getReqId(), zs01seq);
       String zd01updateinit = getZD01UpdateInit(entityManager, data.getId().getReqId(), zs01seq);
+      String zp01updateinit = getZP01UpdateInit(entityManager, data.getId().getReqId());
+      String sharealladdrseq = getShareAddrSeqInLegacy(entityManager, data.getCmrNo(), data.getCmrIssuingCntry());
 
       if ("Y".equals(zs01updateinit) || "Y".equals(zi01updateinit) || "Y".equals(zd01updateinit)) {
         updateImportIndForTRSharezi01Addr(entityManager, data.getId().getReqId(), zs01seq);
@@ -2085,6 +2090,16 @@ public class TurkeyHandler extends BaseSOFHandler {
         // data.getId().getReqId());
         // updateDPLCheckForTRCopyzd01Addr(entityManager,
         // data.getId().getReqId());
+      }
+      if (!StringUtils.isEmpty(sharealladdrseq)) {
+        if ("Y".equals(zp01updateinit) || "Y".equals(zs01updateinit) || "Y".equals(zi01updateinit) || "Y".equals(zd01updateinit)) {
+          updateImportIndForTRSharezi01Addr(entityManager, data.getId().getReqId(), zs01seq);
+          updateSeqForTRSharezi01Addr(entityManager, data.getId().getReqId(), zs01seq);
+          updateImportIndForTRSharezd01Addr(entityManager, data.getId().getReqId(), zs01seq);
+          updateSeqForTRSharezd01Addr(entityManager, data.getId().getReqId(), zs01seq);
+          updateImportIndToNForTRSharezp01Addr(entityManager, data.getId().getReqId());
+          updateSeq2ForTRSharezp01Addr(entityManager, data.getId().getReqId());
+        }
       }
     }
 
@@ -4692,6 +4707,20 @@ public class TurkeyHandler extends BaseSOFHandler {
     return ZD01UpdateInit;
   }
 
+  public static String getZP01UpdateInit(EntityManager entityManager, long req_id) {
+    String ZP01UpdateInit = "";
+    String sql = ExternalizedQuery.getSql("TR.GET.ZP01UPDATEINIT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      ZP01UpdateInit = result;
+    }
+    LOG.debug("ZS01UpdateInit Addr>" + ZP01UpdateInit);
+    return ZP01UpdateInit;
+  }
+
   private void updateImportIndForTRSharezi01Addr(EntityManager entityManager, long reqId, String seq) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZI01SHARE.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
@@ -4718,6 +4747,60 @@ public class TurkeyHandler extends BaseSOFHandler {
     query.setParameter("REQ_ID", reqId);
     query.setParameter("SEQ", seq);
     query.executeSql();
+  }
+
+  public static String getShareAddrSeqInLegacy(EntityManager entityManager, String cmr_no, String katr6) {
+    String shareAddrSeq = "";
+    String sql = ExternalizedQuery.getSql("TR.GET.SHAREALLADDRSEQINLEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmr_no);
+    query.setParameter("KATR6", katr6);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      shareAddrSeq = result;
+    }
+    LOG.debug("shareAddrSeq Addr>" + shareAddrSeq);
+    return shareAddrSeq;
+  }
+
+  private void updateSeq2ForTRSharezp01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZP01SHARE.SEQ2"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateSeq1ForTRSharezp01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZP01SHARE.SEQ1"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateImportIndToNForTRSharezp01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZP01SHARE.N.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void updateImportIndToYForTRSharezp01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZP01SHARE.Y.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  public static String getBilladdrSeqFromLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
+    String billSeq = "";
+    String sql = ExternalizedQuery.getSql("TR.GET_BILL_SEQ_FROM_LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      billSeq = result;
+    }
+    LOG.debug("gSeq of Legacy" + billSeq);
+    return billSeq;
   }
 
 }
