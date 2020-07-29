@@ -432,8 +432,16 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     // vat
-    if (!StringUtils.isEmpty(data.getVat()) || !StringUtils.isBlank(data.getVat())) {
-      legacyCust.setVat(data.getVat());
+    if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
+      } else {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+      }
+    } else {
+      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+      }
     }
 
     String isuClientTier = (!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd() : "")
