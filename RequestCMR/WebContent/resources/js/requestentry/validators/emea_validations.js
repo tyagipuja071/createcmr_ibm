@@ -7633,6 +7633,26 @@ function autoSetUIFieldsOnScnrioUKI() {
   }
 }
 
+function requestingLOBCheckFrIFSL() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestType = FormManager.getActualValue('reqType');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (requestType != 'C' || custSubGrp != 'INFSL') {
+          return new ValidationResult(null, true);
+        }
+        var reqLob = FormManager.getActualValue('requestingLob');
+        var reqLobsAllowed = [ 'IGF', 'SCT' ];
+        if (!reqLobsAllowed.includes(reqLob)) {
+          return new ValidationResult(null, false, 'Requests with Internal/FSL Scenario should have Requesting LOB as IGF / Client ID/SC&T.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7830,6 +7850,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
+  GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
