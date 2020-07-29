@@ -280,12 +280,38 @@ function addAddressFieldValidators() {
           return new ValidationResult(null, true);
         }
         if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
-          return new ValidationResult(null, false, 'Please fill-out either Street Address or PostBox.');
+          if (cntry == SysLoc.PORTUGAL && (FormManager.getActualValue('addrType') != 'ZP01' 
+            || FormManager.getActualValue('addrType') != 'ZS01')) {
+            return new ValidationResult(null, false, 'Please fill-out Street Address.');
+          } else {
+            return new ValidationResult(null, false, 'Please fill-out either Street Address or PostBox.');
+          }
+
         }
         return new ValidationResult(null, true);
       }
     };
   })(), null, 'frmCMR_addressModal');
+  
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (cntry != SysLoc.PORTUGAL) {
+          return new ValidationResult(null, true);
+        }
+        if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
+          if (FormManager.getActualValue('addrType') != 'ZP01' 
+            || FormManager.getActualValue('addrType') != 'ZS01') {
+            return new ValidationResult(null, false, 'Street Address is mandatory for Installing, Shipping And EPL.');
+          }else {
+            return new ValidationResult(null, false, 'Please fill-out either Street Address or PostBox.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 
   // Name Con't, Address Con't and Attention person
   FormManager.addFormValidator((function() {
