@@ -1500,6 +1500,7 @@ public class JPHandler extends GEOHandler {
         case "AUITS":
         case "AWIGS":
         case "BDRBS":
+        case "BVMDS":
         case "BGICS":
         case "BHISO":
         case "BIJSC":
@@ -1536,6 +1537,7 @@ public class JPHandler extends GEOHandler {
         case "AUITS":
         case "AWIGS":
         case "BDRBS":
+        case "BVMDS":
         case "BGICS":
         case "BIJSC":
         case "BHISO":
@@ -1935,6 +1937,7 @@ public class JPHandler extends GEOHandler {
       case "AUITS":
       case "AWIGS":
       case "BDRBS":
+      case "BVMDS":
       case "BGICS":
       case "BHISO":
       case "BIJSC":
@@ -1971,6 +1974,7 @@ public class JPHandler extends GEOHandler {
       case "AUITS":
       case "AWIGS":
       case "BDRBS":
+      case "BVMDS":
       case "BGICS":
       case "BIJSC":
       case "BHISO":
