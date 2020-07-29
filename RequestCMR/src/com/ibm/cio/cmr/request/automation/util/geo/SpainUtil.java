@@ -300,6 +300,11 @@ public class SpainUtil extends AutomationUtil {
 	      case "Sales Rep":
 	        // noop, for switch handling only
 	        break;
+	      case "Order Block Code":
+	        if ("E".equals(change.getOldData()) || "E".equals(change.getNewData())) {
+	           // noop, for switch handling only
+	        }
+	        break;
 	      default:
 	        ignoredUpdates.add(change.getDataField());
 	        break;
@@ -307,7 +312,6 @@ public class SpainUtil extends AutomationUtil {
 	    }
 	    if (resultCodes.contains("D")) {
 	      output.setOnError(true);
-	      engineData.addRejectionComment("_esVATUpd", "VAT # on the request has characters updated other than the first character", "", "");
 	      validation.setSuccess(false);
 	      validation.setMessage("VAT Updated");
 	    } else if (cmdeReview) {
