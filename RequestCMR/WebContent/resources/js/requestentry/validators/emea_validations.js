@@ -6170,7 +6170,7 @@ function addStreetPoBoxValidatorUKI() {
               ADDR_TYPE : 'ZS01'
             });
             if (res_billNm.ret1 != undefined) {
-              billNm = res_billNm.ret1;
+              billNm = res_billNm.ret1 + res_billNm.ret2;
             }
           }
           if (mailingCount > 0) {
@@ -6180,7 +6180,7 @@ function addStreetPoBoxValidatorUKI() {
               ADDR_TYPE : 'ZP01'
             });
             if (res_mailNm.ret1 != undefined) {
-              mailNm = res_mailNm.ret1;
+              mailNm = res_mailNm.ret1 + res_mailNm.ret2;
             }
           }
 
