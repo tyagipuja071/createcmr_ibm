@@ -73,8 +73,6 @@ function afterTemplateLoadPT() {
   } else {
     FormManager.setValue('abbrevNm', custNm2);
   }
-
-  crossborderScenariosAbbrvLoc();
   crossborderScenariosAbbrvLocOnChange();
 }
 
