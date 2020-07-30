@@ -6178,7 +6178,7 @@ function addStreetPoBoxValidatorUKI() {
         var mailingCount = 0;
         var billingCount = 0;
         var addrType = "";
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('custSubGrp') == 'INTER') {
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {
