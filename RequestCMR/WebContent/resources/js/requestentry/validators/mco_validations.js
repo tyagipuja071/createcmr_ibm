@@ -27,19 +27,51 @@ function afterTemplateLoadPT() {
     return;
   }
 
-  var city1Params = {
+  if (subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
+    var city2Params = {
+      REQ_ID : _reqId,
+      ADDR_TYPE : "ZI01",
+    };
+    var city2Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city2Params);
+    var city1 = city2Result.ret1;
+    if (city1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
+      FormManager.setValue('abbrevLocn', city1);
+    }
+  } else if (subCustGrp != 'INTSO' || subCustGrp != 'THDPT') {
+    var city1Params = {
+      REQ_ID : _reqId,
+      ADDR_TYPE : "ZS01",
+    };
+    var city1Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city1Params);
+    var city1 = city1Result.ret1;
+    if (city1 != '' && subCustGrp != 'SAAPA') {
+      if (city1 && city1.length > 12) {
+        city1 = city1.substring(0, 12);
+      }
+      FormManager.setValue('abbrevLocn', city1);
+    } else if (subCustGrp == 'SAAPA') {
+      FormManager.setValue('abbrevLocn', 'SAAS');
+    }
+  }
+
+  var custNm1Params = {
+    REQ_ID : _reqId,
+    ADDR_TYPE : "ZI01",
+  };
+  var custNm1Result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNm1Params);
+  var custNm1 = custNm1Result.ret1;
+
+  var custNm1Params2 = {
     REQ_ID : _reqId,
     ADDR_TYPE : "ZS01",
   };
-  var city1Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city1Params);
-  var city1 = city1Result.ret1;
-  if (city1 != '' && subCustGrp != 'SAAPA') {
-  	if (city1 && city1.length > 12) {
-      city1 = city1.substring(0, 12);
-    }
-    FormManager.setValue('abbrevLocn', city1);
-  } else if (subCustGrp == 'SAAPA') {
-    FormManager.setValue('abbrevLocn', 'SAAS');
+  var custNm1Result2 = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', custNm1Params2);
+  var custNm2 = custNm1Result2.ret1;
+
+  if (custNm1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
+    FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " " + custNm2.substring(0, 9));
+  } else {
+    FormManager.setValue('abbrevNm', custNm2);
   }
 
   crossborderScenariosAbbrvLoc();
@@ -1874,7 +1906,7 @@ function getOldFieldValues() {
 }
 
 function isuAndCtcBasedOnISIC() {
-  if(FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'XBP'){
+  if (FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'XBP') {
     return;
   }
   var isicCd = FormManager.getActualValue('isicCd');
