@@ -353,18 +353,18 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column span="2" containerForField="MembLevel">
+        <cmr:column span="2" containerForField="MembLevel" exceptForCountry="754,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838">
           <p>
-            <cmr:label fieldId="memLvl" exceptForCountry="838">
+            <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
               <cmr:delta text="${rdcdata.memLvl}" oldValue="${reqentry.memLvl}" code="L"/>
             </cmr:label>
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column span="2" containerForField="BPRelationType">
+        <cmr:column span="2" containerForField="BPRelationType" exceptForCountry="754,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838">
           <p>
-            <cmr:label fieldId="bpRelType" exceptForCountry="838">
+            <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:
               <cmr:delta text="${rdcdata.bpRelType}" oldValue="${reqentry.bpRelType}" code="L"/>
             </cmr:label>
@@ -372,7 +372,7 @@ dojo.addOnLoad(function(){
           </p>
         </cmr:column>
 		</cmr:row>
-    <cmr:view exceptForGEO="MCO2,CN">
+    <cmr:view exceptForGEO="MCO2,CN" exceptForCountry="754,866,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
   		<cmr:row topPad="10" addBackground="true">
         <cmr:column span="2" containerForField="SOENumber">
           <p>
