@@ -1050,7 +1050,10 @@ function setPreferredLang() {
   } else if ('826' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
     FormManager.setValue('custPrefLang', '4');
   } else {
-    FormManager.setValue('custPrefLang', 'E');
+    var preLang = FormManager.getActualValue('custPrefLang');
+    if (preLang == '' || preLang == null || preLang == undefined) {
+      FormManager.setValue('custPrefLang', 'E');
+    }
     FormManager.enable('custPrefLang');
   }
 }
@@ -2307,6 +2310,12 @@ function setVatValidator() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGroup = FormManager.getActualValue('custGrp');
+
+  var excludeCountries = new Set([ '644', '668', '693', '694', '704', '708', '740', '820', '821', '826', '889' ]);
+  var cntryRegion = FormManager.getActualValue('countryUse');
+  if (excludeCountries.has(cntry) || cntryRegion == '707') {
+    return;
+  }
 
   if ((role == 'PROCESSOR' || role == 'REQUESTER') && (cntry == '620') && custGroup == 'LOCAL') {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
@@ -3565,7 +3574,7 @@ function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
   togglePPSCeidCEE();
   setClassificationCodeCEE();
-  disableSBO();
+  // disableSBO();
   setEngineeringBO();
 }
 
