@@ -1120,19 +1120,20 @@ public class CEETransformer extends EMEATransformer {
     }
 
     if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
-      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+      // if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+      if ("821".equals(data.getCmrIssuingCntry())) {
         // legacyCust.setVat(landedCntry +
         // dummyHandler.cmrData.getVat().substring(2));
-        legacyCust.setVat(dummyHandler.cmrData.getVat().substring(2));
-      } else {
-        // legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
         legacyCust.setVat(dummyHandler.cmrData.getVat());
+      } else {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       }
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       }
     }
+
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
