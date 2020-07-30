@@ -16,11 +16,16 @@ function afterConfigPT() {
   FormManager.enable('vat');
 }
 
-function afterTemplateLoadPT(fromAddress, scenario, scenarioChanged) {
+function afterTemplateLoadPT() {
   var _reqId = FormManager.getActualValue('reqId');
   var subCustGrp = FormManager.getActualValue('custSubGrp');
   var addrType = FormManager.getActualValue('addrType');
   var city1 = FormManager.getActualValue('city1');
+  var custGrp = FormManager.getActualValue('custGrp');
+
+  if (custGrp != 'LOCAL') {
+    return;
+  }
 
   var city1Params = {
     REQ_ID : _reqId,
@@ -34,7 +39,8 @@ function afterTemplateLoadPT(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('abbrevLocn', 'SAAS');
   }
 
-  configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged);
+  crossborderScenariosAbbrvLoc();
+  crossborderScenariosAbbrvLocOnChange();
 }
 
 function addHandlersForPT() {
@@ -1865,6 +1871,9 @@ function getOldFieldValues() {
 }
 
 function isuAndCtcBasedOnISIC() {
+  if (FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'XBP') {
+    return;
+  }
   var isicCd = FormManager.getActualValue('isicCd');
   if (isicCd == '7230' || isicCd == '7240' || isicCd == '7290' || isicCd == '7210' || isicCd == '7221' || isicCd == '7229') {
     FormManager.setValue('isuCd', '32');
