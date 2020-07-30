@@ -882,7 +882,7 @@ function set32SBOLogicOnISIC() {
         CLIENT_TIER:tierValue,
         ISIC_CD:isicCdValue
     };
-   var result = cmr.query('UK.GET.SBOSR_FOR_ISIC');
+   var result = cmr.query('UK.GET.SBOSR_FOR_ISIC',qParams);
    if(Object.keys(result).length>0 && result.ret1 && result.ret2){
      var sbo = result.ret1;
      var salesRep = result.ret2;
@@ -2101,7 +2101,7 @@ function addSalesRepLogicUK2018() {
         // Scotland logic
         FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), [ 'SPA116', 'SPA758' ]);
       }
-    } else {
+    } else if(isuCd !=32) {
       // UK logic
       var _sbo = FormManager.getActualValue('salesBusOffCd');
       var salesRepValue = [];
