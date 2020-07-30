@@ -292,22 +292,45 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
   
-  FormManager.addFormValidator((function() {
+
+    FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (cntry != SysLoc.PORTUGAL) {
           return new ValidationResult(null, true);
         }
-        if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
-          if (FormManager.getActualValue('addrType') != 'ZP01' 
-            || FormManager.getActualValue('addrType') != 'ZS01') {
-            return new ValidationResult(null, false, 'Street Address is mandatory for Installing, Shipping And EPL.');
-          }else {
-            return new ValidationResult(null, false, 'Please fill-out either Street Address or PostBox.');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var addrTxtCount = 0;
+          var count = 0;
+
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            if (record.poBox == '' && record.addrTxt == '') {
+              if (type != 'ZS01' || type != 'ZP01') {
+                addrTxtCount++;
+              } else {
+                count++;
+              }
+            }
+            if(addrTxtCount >0){
+              return new ValidationResult(null, false, 'Street Address is mandatory for Installing, Shipping And EPL.');
+            }
+            if(count >0){
+              return new ValidationResult(null, false, 'Please fill-out either Street Address or PostBox.');
+            }
           }
-        }
-        return new ValidationResult(null, true);
+        }return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
