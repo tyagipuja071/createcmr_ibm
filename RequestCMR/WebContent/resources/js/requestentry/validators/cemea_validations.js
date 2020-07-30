@@ -609,7 +609,7 @@ function addGaddrValidatorForCEE() {
         var result = cmr.query('VALIDATOR.GADDRCNTRY', {
           REQID : reqId
         });
-        if (result == null && result.ret1 == '') {
+        if (result == null || result.ret1 == "") {
           return new ValidationResult(null, false, 'Country Name value of the G Address is required.');
         }
 
@@ -3056,7 +3056,7 @@ function validateIsicCEEValidator() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var isic = FormManager.getActualValue('isicCd');
         if ('U' == reqType && ('9500' == isic || '0000' == isic)) {
-          FormManager.enable('isicCd');
+          // FormManager.enable('isicCd');
           return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
         }
         if (('C' == reqType && ('9500' == isic || '0000' == isic))
@@ -3292,15 +3292,15 @@ function validatorsDIGIT() {
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'LocalTax2' ]);
 
 }
-function addEmbargoCdValidatorForCEE(){
+function addEmbargoCdValidatorForCEE() {
 
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var embargoCd = FormManager.getActualValue('embargoCd');
-        if (embargoCd && !(embargoCd == 'E'||embargoCd == 'R'||embargoCd == '')){
-           return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
-       }
+        if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == '')) {
+          return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
+        }
         return new ValidationResult(null, true);
       }
     };
