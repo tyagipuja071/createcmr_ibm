@@ -95,6 +95,16 @@
   <!-- CIS Duplicate CMR -->
   <cmr:view forCountry="821">
   <cmr:row topPad="10">
+  <!--CMR-4606 Add for Russia CIS Dup -->
+    <cmr:column span="2" containerForField="LocalTax3">
+      <p>
+        <cmr:label fieldId="taxCd3">
+          <cmr:fieldLabel fieldId="LocalTax3" />:
+        </cmr:label>
+        <cmr:field fieldId="LocalTax3" id="taxCd3" path="taxCd3" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>
+    
     <cmr:column span="2" containerForField="SalRepNameNo2">
       <p>
         <cmr:label fieldId="dupSalesRepNo">
@@ -103,6 +113,7 @@
         <cmr:field fieldId="SalRepNameNo2" id="dupSalesRepNo" path="dupSalesRepNo" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
+  <!-- Mark for del CMR-4606  
     <cmr:column span="2">
     </cmr:column>
     <cmr:column span="2" containerForField="SalesBusOff2">
@@ -112,7 +123,7 @@
         </cmr:label>
         <cmr:field fieldId="SalesBusOff2" id="dupSalesBoCd" path="dupSalesBoCd" tabId="MAIN_IBM_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column>  -->
   </cmr:row>
   </cmr:view>
 
