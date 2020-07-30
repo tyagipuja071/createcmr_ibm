@@ -16,7 +16,7 @@ function afterConfigPT() {
   FormManager.enable('vat');
 }
 
-function afterTemplateLoadPT() {
+function afterTemplateLoadPT(fromAddress, scenario, scenarioChanged) {
   var _reqId = FormManager.getActualValue('reqId');
   var subCustGrp = FormManager.getActualValue('custSubGrp');
   var addrType = FormManager.getActualValue('addrType');
@@ -34,6 +34,7 @@ function afterTemplateLoadPT() {
     FormManager.setValue('abbrevLocn', 'SAAS');
   }
 
+  configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged);
 }
 
 function addHandlersForPT() {
@@ -279,8 +280,7 @@ function addAddressFieldValidators() {
           return new ValidationResult(null, true);
         }
         if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
-          if (cntry == SysLoc.PORTUGAL && (FormManager.getActualValue('addrType') != 'ZP01' 
-            || FormManager.getActualValue('addrType') != 'ZS01')) {
+          if (cntry == SysLoc.PORTUGAL && (FormManager.getActualValue('addrType') != 'ZP01' || FormManager.getActualValue('addrType') != 'ZS01')) {
             return new ValidationResult(null, false, 'Please fill-out Street Address.');
           } else {
             return new ValidationResult(null, false, 'Please fill-out either Street Address or PostBox.');
@@ -291,9 +291,8 @@ function addAddressFieldValidators() {
       }
     };
   })(), null, 'frmCMR_addressModal');
-  
 
-    FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
@@ -323,14 +322,15 @@ function addAddressFieldValidators() {
                 count++;
               }
             }
-            if(addrTxtCount >0){
+            if (addrTxtCount > 0) {
               return new ValidationResult(null, false, 'Street Address is mandatory for Installing, Shipping And EPL.');
             }
-            if(count >0){
+            if (count > 0) {
               return new ValidationResult(null, false, 'Please fill-out either Street Address or PostBox.');
             }
           }
-        }return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
@@ -1925,6 +1925,15 @@ function addMailingConditionValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
+  if (reqType == 'C' && scenarioChanged) {
+    if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
+      FormManager.resetValidations('vat');
+      FormManager.setValue('vatExempt', true);
+    }
+  }
 }
 
 /* End 1430539 */
