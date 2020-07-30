@@ -1937,7 +1937,7 @@ function addMailingConditionValidator() {
 }
 
 function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
-  if (reqType == 'C' && scenarioChanged) {
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
     if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
       FormManager.resetValidations('vat');
       FormManager.setValue('vatExempt', true);
