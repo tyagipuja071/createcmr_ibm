@@ -412,7 +412,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
 
         <!-- Phone -->
-        <cmr:view exceptForCountry="758,760">
+        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
           <cmr:gridCol width="90px" field="custPhone" header="Phone #" />
         </cmr:view>
         
