@@ -1865,6 +1865,9 @@ function getOldFieldValues() {
 }
 
 function isuAndCtcBasedOnISIC() {
+  if(FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'XBP' || FormManager.getActualValue('custSubGrp') == 'XCRO'  ){
+    return;
+  }
   var isicCd = FormManager.getActualValue('isicCd');
   if (isicCd == '7230' || isicCd == '7240' || isicCd == '7290' || isicCd == '7210' || isicCd == '7221' || isicCd == '7229') {
     FormManager.setValue('isuCd', '32');
