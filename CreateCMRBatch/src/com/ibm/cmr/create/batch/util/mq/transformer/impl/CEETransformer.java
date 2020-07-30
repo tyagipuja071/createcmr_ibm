@@ -1622,15 +1622,24 @@ public class CEETransformer extends EMEATransformer {
     // } else {
     // legacyCustExt.setBankAcctNo("");
     // }
-
-    if (!StringUtils.isBlank(data.getCompany())) {
-      if (data.getCompany().length() > 9) {
-        legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
-      } else {
-        legacyCustExt.setiTaxCode(data.getCompany());
+    Admin admin = cmrObjects.getAdmin();
+    if ("C".equals(admin.getReqType()) && "644".equals(data.getCmrIssuingCntry()) && "LOCAL".equals(data.getCustGrp())
+        && !"Y".equals(data.getVatExempt())) {
+      String vat = data.getVat();
+      if (vat != null && vat.startsWith("BG")) {
+        String itax = vat.replaceAll("BG", "");
+        legacyCustExt.setiTaxCode(itax);
       }
     } else {
-      legacyCustExt.setiTaxCode("");
+      if (!StringUtils.isBlank(data.getCompany())) {
+        if (data.getCompany().length() > 9) {
+          legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
+        } else {
+          legacyCustExt.setiTaxCode(data.getCompany());
+        }
+      } else {
+        legacyCustExt.setiTaxCode("");
+      }
     }
   }
 
