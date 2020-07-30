@@ -1971,6 +1971,15 @@ function addMailingConditionValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
+      FormManager.resetValidations('vat');
+      FormManager.setValue('vatExempt', true);
+    }
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
@@ -2059,5 +2068,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterTemplateLoadPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.registerValidator(validateCMRNumberForISO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
-
+  GEOHandler.addAfterTemplateLoad(configureVATExemptOnScenariosPT, [ SysLoc.PORTUGAL ]);
 });
