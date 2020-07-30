@@ -54,6 +54,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -1735,7 +1736,7 @@ public class GreeceHandler extends BaseSOFHandler {
       address.setVat(currentRecord.getCmrTaxNumber());
 
       if (!StringUtils.isBlank(currentRecord.getCmrName4())) {
-        String attPerson = currentRecord.getCmrName4().replaceFirst("ATT ", "");
+        String attPerson = LegacyCommonUtil.removeATT(currentRecord.getCmrName4());
         attPerson = attPerson.replaceFirst("Υ/Ο ", "");
         address.setCustNm4(attPerson);
       }
@@ -3980,12 +3981,12 @@ public class GreeceHandler extends BaseSOFHandler {
       }
 
       if (!StringUtils.isBlank(record.getCmrIntlName4())) {
-        String attPersonIntl = record.getCmrIntlName4().replaceFirst("ATT ", "");
+        String attPersonIntl = LegacyCommonUtil.removeATT(record.getCmrIntlName4());
         attPersonIntl = attPersonIntl.replaceFirst("Υ/Ο ", "");
         localTransAddr.setCmrName4(attPersonIntl);
       } else if (!StringUtils.isBlank(record.getCmrName4())) {
         if (db2LocalTransAddr.getAddrLine3().startsWith("ATT") || db2LocalTransAddr.getAddrLine3().startsWith("Υ/Ο")) {
-          String attPersonDb2 = db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", "");
+          String attPersonDb2 = LegacyCommonUtil.removeATT(db2LocalTransAddr.getAddrLine3());
           attPersonDb2 = attPersonDb2.replaceFirst("Υ/Ο ", "");
           localTransAddr.setCmrName4(attPersonDb2);
         }
