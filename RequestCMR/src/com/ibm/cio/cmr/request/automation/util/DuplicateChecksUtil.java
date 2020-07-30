@@ -3,13 +3,16 @@
  */
 package com.ibm.cio.cmr.request.automation.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
-import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -98,16 +101,28 @@ public class DuplicateChecksUtil {
       request.setUsRestrictTo(data.getRestrictTo());
       break;
     case SystemLocation.SPAIN:
-    	if(SpainUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())){
-    		if ("ZI01".equals(addr.getId().getAddrType())) {
-    	          request.setCustClass("81");
-    	        } 	
-    	}
-    	if(SpainUtil.SCENARIO_INTERNAL_SO.equals(data.getCustSubGrp())){
-    		if ("ZI01".equals(addr.getId().getAddrType())) {
-    	          request.setCustClass("85");
-    	        } 	
-    	}
+      if(SpainUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
+        if ("ZI01".equals(addr.getId().getAddrType())) {
+                request.setCustClass("81");
+              }
+      }
+      if(SpainUtil.SCENARIO_INTERNAL_SO.equals(data.getCustSubGrp())) {
+        if ("ZI01".equals(addr.getId().getAddrType())) {
+          request.setCustClass("85");
+              }
+      }
+      break;
+    case SystemLocation.UNITED_KINGDOM:
+    case SystemLocation.IRELAND:
+      List<String> scenariosList = new ArrayList<String>();
+      scenariosList.add(UKIUtil.SCENARIO_INTERNAL);
+      scenariosList.add(UKIUtil.SCENARIO_INTERNAL_FSL);
+      scenariosList.add(UKIUtil.SCENARIO_IGF);
+
+      if (scenariosList.contains(data.getCustSubGrp())) {
+        request.setCustClass(data.getCustClass());
+      }
+
     }
 
   }
