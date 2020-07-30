@@ -982,32 +982,7 @@ function autoSetSBO(value, valueInDB) {
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       set32SBOLogicOnISIC();
-    } else if (custSubGrp == 'PRICU' || custSubGrp == 'IBMEM' || custSubGrp == 'XPRIC') {
-      FormManager.setValue('salesBusOffCd', "128");
-      FormManager.setValue('repTeamMemberNo', "SPA128");
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('repTeamMemberNo');
-    } else if (custSubGrp == 'INTER' || custSubGrp == 'XINTR') {
-      FormManager.setValue('salesBusOffCd', "100");
-      FormManager.setValue('repTeamMemberNo', "M01000");
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('repTeamMemberNo');
-    } else if (custSubGrp == 'BUSPR' || custSubGrp == 'XBSPR') {
-      // Defect 1867590 : UKI - Cross-border - sub-scenario specifics are not
-      // working; DTN: Added 100, 104
-      sboValues = [ '014', '114', '214', '314', '414', '514', '614', '100', '104' ];
-      FormManager.enable('salesBusOffCd');
-      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboValues);
-    } else if (custSubGrp == 'CROIN') {
-      FormManager.enable('salesBusOffCd');
-      sboCROIN = [ '1b', '1g', '1e', '11', '12', '13', '14' ];
-      FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboCROIN);
-    } else {
-      FormManager.enable('salesBusOffCd');
-      FormManager.enable('repTeamMemberNo');
-      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-      FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
-    }
+    } 
 
     // 1482148 - add Scotland and Northern Ireland logic
     if (isuCd == '32') {
@@ -1023,9 +998,6 @@ function autoSetSBO(value, valueInDB) {
       }
 
       if (postCd != '' && isNorthernIrelandPostCd(postCd)) {
-        // Mukesh: below line commented-it's value is dependent on ZS01 address
-        // for UK
-        // FormManager.setValue('clientTier', "C");
         set32SBOLogicOnISIC();
       }
     }
@@ -1033,39 +1005,26 @@ function autoSetSBO(value, valueInDB) {
 }
 
 function set32SBOLogicOnISIC() {
-  var arryISICForSBO102 = [ '6511', '6519', '6591', '6592', '6599', '6711', '6712', '6719', '7020', '7705', '7715', '9806', '9819' ];
-  var arryISICForSBO103 = [ '2211', '2212', '2213', '2219', '2221', '2222', '2230', '4010', '4020', '4030', '4100', '4888', '6420', '7413', '7430', '7700', '7709', '7717', '9000', '9111', '9112',
-      '9120', '9191', '9192', '9199', '9211', '9212', '9213', '9214', '9219', '9220', '9232', '9233', '9241', '9249', '9801', '9811', '9821' ];
-  var arryISICForSBO111 = [ '2423', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7706', '7707', '7720', '7721', '8511', '8512', '8519', '8532', '9231', '9807', '9808', '9900' ];
-  var arryISICForSBO122 = [ '1010', '1020', '1030', '1110', '1120', '1200', '1310', '1320', '1410', '1421', '1422', '1429', '1711', '1712', '1722', '1723', '1729', '2010', '2021', '2022', '2023',
-      '2029', '2101', '2102', '2109', '2310', '2320', '2330', '2411', '2412', '2413', '2421', '2422', '2429', '2430', '2511', '2519', '2520', '2610', '2691', '2692', '2693', '2694', '2695', '2696',
-      '2699', '2710', '2720', '2731', '2732', '2811', '2812', '2813', '2891', '2892', '2893', '2899', '2911', '2912', '2913', '2914', '2915', '2919', '2921', '2922', '2923', '2924', '2925', '2926',
-      '2927', '2929', '2930', '3000', '3110', '3120', '3130', '3140', '3150', '3190', '3210', '3220', '3230', '3311', '3312', '3313', '3320', '3330', '3410', '3420', '3430', '3511', '3512', '3520',
-      '3530', '3591', '3592', '3599', '3610', '3691', '3692', '3693', '3694', '3699', '3710', '3720', '4510', '4520', '4530', '4540', '5010', '5040', '5050', '5141', '6030', '7010', '7421', '7708',
-      '7710', '7711', '7713', '7718', '9813', '9816', '9817', '9822' ];
-  var arryISICForSBO128 = [ '0111', '0112', '0113', '0121', '0122', '0130', '0140', '0150', '0200', '0501', '0502', '1511', '1512', '1513', '1514', '1520', '1531', '1532', '1533', '1541', '1542',
-      '1543', '1544', '1549', '1551', '1552', '1553', '1554', '1600', '2424', '4550', '5020', '5110', '5121', '5122', '5131', '5139', '5142', '5143', '5149', '5151', '5152', '5159', '5190', '5260',
-      '5510', '6010', '6021', '6022', '6023', '6110', '6120', '6210', '6220', '6301', '6302', '6303', '6304', '6309', '6411', '6412', '7111', '7112', '7113', '7121', '7122', '7123', '7129', '7130',
-      '7210', '7221', '7229', '7230', '7240', '7250', '7290', '7310', '7411', '7412', '7414', '7422', '7491', '7492', '7493', '7494', '7495', '7499', '7701', '7702', '7703', '7716', '7719', '8520',
-      '8531', '9301', '9302', '9303', '9309', '9500', '9802', '9812', '9820' ];
-  var arryISICForSBO173 = [ '6601', '6602', '6603', '6720', '7712', '9814' ];
-  var arryISICForSBO259 = [ '7320', '7704', '8010', '8021', '8022', '8030', '8090', '9818' ];
-  var arryISICForSBO284 = [ '1721', '1730', '1810', '1820', '1911', '1912', '1920', '5030', '5211', '5219', '5220', '5231', '5232', '5233', '5234', '5239', '5240', '5251', '5252', '5259', '5520',
-      '7714', '9804' ];
 
   var isuCdValue = FormManager.getActualValue('isuCd');
   var isicCdValue = FormManager.getActualValue('isicCd');
   var tierValue = FormManager.getActualValue('clientTier');
 
-  if (isuCdValue == '32' && (tierValue == 'B' || tierValue == 'S' || tierValue == 'T' || tierValue == 'C')) {
-    searchISICArryAndSetSBO(arryISICForSBO102, isicCdValue, "102", "SPA102");
-    searchISICArryAndSetSBO(arryISICForSBO103, isicCdValue, "103", "SPA103");
-    searchISICArryAndSetSBO(arryISICForSBO111, isicCdValue, "111", "SPA111");
-    searchISICArryAndSetSBO(arryISICForSBO122, isicCdValue, "122", "SPA122");
-    searchISICArryAndSetSBO(arryISICForSBO128, isicCdValue, "128", "SPA128");
-    searchISICArryAndSetSBO(arryISICForSBO173, isicCdValue, "173", "SPA173");
-    searchISICArryAndSetSBO(arryISICForSBO259, isicCdValue, "259", "SPA259");
-    searchISICArryAndSetSBO(arryISICForSBO284, isicCdValue, "284", "SPA284");
+  if (isuCdValue == '32' && (tierValue == 'S' || tierValue == 'N')) {
+    var qParams = {
+        ISU_CD:isuCdValue,
+        CLIENT_TIER:tierValue,
+        ISIC_CD:isicCdValue
+    };
+   var result = cmr.query('UK.GET.SBOSR_FOR_ISIC',qParams);
+   if(Object.keys(result).length>0 && result.ret1 && result.ret2){
+     var sbo = result.ret1;
+     var salesRep = result.ret2;
+     FormManager.setValue('salesBusOffCd',sbo);
+     FormManager.setValue('repTeamMemberNo',salesRep);
+     FormManager.readOnly('repTeamMemberNo');
+     FormManager.readOnly('salesBusOffCd');
+   }
   }
 }
 
@@ -2295,7 +2254,7 @@ function addUKClientTierISULogic() {
     }
     var tierValues = null;
     if (value == '32') {
-      tierValues = [ 'B', 'N', 'S', 'T', 'C', 'M' ];
+      tierValues = [ 'N', 'S', 'C'];
     } else if (value == '34') {
       tierValues = [ 'A', 'V', '6' ];
     } else if (value == '21') {
@@ -2437,7 +2396,7 @@ function addSalesRepLogicUK2018() {
         // Scotland logic
         FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), [ 'SPA116', 'SPA758' ]);
       }
-    } else {
+    } else if(isuCd !=32) {
       // UK logic
       var _sbo = FormManager.getActualValue('salesBusOffCd');
       var salesRepValue = [];
@@ -7271,7 +7230,7 @@ function addStreetPoBoxValidatorUKI() {
         var mailingCount = 0;
         var billingCount = 0;
         var addrType = "";
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('custSubGrp') == 'INTER') {
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (recordList == null && _allAddressData != null && _allAddressData[i] != null) {

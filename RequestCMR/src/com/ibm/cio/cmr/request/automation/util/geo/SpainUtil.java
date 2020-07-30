@@ -199,7 +199,7 @@ public class SpainUtil extends AutomationUtil {
       for (DuplicateCMRCheckResponse match : matches) {
         if (StringUtils.isNotBlank(match.getSortl())) {
           String sortl = match.getSortl().length() > 3 ? match.getSortl().substring(0, 3) : match.getSortl();
-          if (!Arrays.asList(sboValuesToCheck).contains(sortl)) {
+          if (Arrays.asList(sboValuesToCheck).contains(sortl)) {
             filteredMatches.add(match);
           }
         }
@@ -313,7 +313,7 @@ public class SpainUtil extends AutomationUtil {
     if (resultCodes.contains("D")) {
       output.setOnError(true);
       validation.setSuccess(false);
-      validation.setMessage("VAT Updated");
+      validation.setMessage("Rejected");
     } else if (cmdeReview) {
       engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
       details.append("Updates to one or more fields cannot be validated.\n");
