@@ -34,6 +34,9 @@ function afterTemplateLoadPT() {
   var city1Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city1Params);
   var city1 = city1Result.ret1;
   if (city1 != '' && subCustGrp != 'SAAPA') {
+  	if (city1 && city1.length > 12) {
+      city1 = city1.substring(0, 12);
+    }
     FormManager.setValue('abbrevLocn', city1);
   } else if (subCustGrp == 'SAAPA') {
     FormManager.setValue('abbrevLocn', 'SAAS');
