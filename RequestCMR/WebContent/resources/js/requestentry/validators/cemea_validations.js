@@ -1174,7 +1174,10 @@ function setPreferredLang() {
   } else if ('826' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
     FormManager.setValue('custPrefLang', '4');
   } else {
-    FormManager.setValue('custPrefLang', 'E');
+    var preLang = FormManager.getActualValue('custPrefLang');
+    if (preLang == '' || preLang == null || preLang == undefined) {
+      FormManager.setValue('custPrefLang', 'E');
+    }
     FormManager.enable('custPrefLang');
   }
 }
@@ -2444,8 +2447,9 @@ function setVatValidator() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGroup = FormManager.getActualValue('custGrp');
 
-  var excludeCountries = new Set([ '707', '821', '826' ]);
-  if (excludeCountries.has(cntry)) {
+  var excludeCountries = new Set([ '644', '668', '693', '694', '704', '708', '740', '820', '821', '826', '889','707' ]);
+  var cntryRegion = FormManager.getActualValue('countryUse');
+  if (excludeCountries.has(cntry) || cntryRegion == '707') {
     return;
   }
 
@@ -3857,7 +3861,7 @@ function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
   togglePPSCeidCEE();
   setClassificationCodeCEE();
-  disableSBO();
+  // disableSBO();
   setEngineeringBO();
 }
 
