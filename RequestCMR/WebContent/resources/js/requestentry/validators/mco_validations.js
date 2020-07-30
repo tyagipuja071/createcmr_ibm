@@ -2075,7 +2075,6 @@ function addMailingConditionValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2351,7 +2350,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(afterTemplateLoadPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.registerValidator(addBilingMailingValidatorSpain, [ SysLoc.SPAIN], null, true);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   

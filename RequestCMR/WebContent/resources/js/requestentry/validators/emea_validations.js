@@ -1012,19 +1012,19 @@ function set32SBOLogicOnISIC() {
 
   if (isuCdValue == '32' && (tierValue == 'S' || tierValue == 'N')) {
     var qParams = {
-        ISU_CD:isuCdValue,
-        CLIENT_TIER:tierValue,
-        ISIC_CD:isicCdValue
+      ISU_CD : isuCdValue,
+      CLIENT_TIER : tierValue,
+      ISIC_CD : isicCdValue
     };
-   var result = cmr.query('UK.GET.SBOSR_FOR_ISIC',qParams);
-   if(Object.keys(result).length>0 && result.ret1 && result.ret2){
-     var sbo = result.ret1;
-     var salesRep = result.ret2;
-     FormManager.setValue('salesBusOffCd',sbo);
-     FormManager.setValue('repTeamMemberNo',salesRep);
-     FormManager.readOnly('repTeamMemberNo');
-     FormManager.readOnly('salesBusOffCd');
-   }
+    var result = cmr.query('UK.GET.SBOSR_FOR_ISIC', qParams);
+    if (Object.keys(result).length > 0 && result.ret1 && result.ret2) {
+      var sbo = result.ret1;
+      var salesRep = result.ret2;
+      FormManager.setValue('salesBusOffCd', sbo);
+      FormManager.setValue('repTeamMemberNo', salesRep);
+      FormManager.readOnly('repTeamMemberNo');
+      FormManager.readOnly('salesBusOffCd');
+    }
   }
 }
 
@@ -2254,7 +2254,7 @@ function addUKClientTierISULogic() {
     }
     var tierValues = null;
     if (value == '32') {
-      tierValues = [ 'N', 'S', 'C'];
+      tierValues = [ 'N', 'S', 'C' ];
     } else if (value == '34') {
       tierValues = [ 'A', 'V', '6' ];
     } else if (value == '21') {
@@ -2396,7 +2396,7 @@ function addSalesRepLogicUK2018() {
         // Scotland logic
         FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), [ 'SPA116', 'SPA758' ]);
       }
-    } else if(isuCd !=32) {
+    } else if (isuCd != 32) {
       // UK logic
       var _sbo = FormManager.getActualValue('salesBusOffCd');
       var salesRepValue = [];
@@ -7178,6 +7178,7 @@ function lockCustClassUKI() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  FormManager.resetValidations('custClass');
   if (reqType == 'C') {
     FormManager.readOnly('custClass');
   }
@@ -9252,6 +9253,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addUKILandedCountryValidtor, [ SysLoc.UK ], null, true);
   GEOHandler.registerValidator(restrictDuplicateAddrUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(validateNumericValueUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
+  GEOHandler.addAfterConfig(lockCustClassUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(lockCustClassUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(lockRequireFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(lockRequireFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(addStreetPoBoxValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
@@ -9307,7 +9310,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterConfig(lockCustClassUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
-  GEOHandler.addAfterTemplateLoad(lockCustClassUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
 
 });
