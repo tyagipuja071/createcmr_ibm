@@ -2069,10 +2069,6 @@ function addMailingConditionValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-  
-  /* End 1430539 */
-
-  // CMR - 5478
 
   FormManager.addFormValidator((function() {
     return {
@@ -2192,9 +2188,6 @@ function setISUCTCOnISIC() {
       FormManager.setValue('clientTier', 'S');
     }
   }
-}
-function addBilingMailingValidatorSpain() {
-
 }
 
 function changeAbbNmSpainOnScenario() {
@@ -2343,7 +2336,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN ], null, true);
-  GEOHandler.registerValidator(addBilingMailingValidatorSpain, [ SysLoc.SPAIN ], null, true);
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
 
   // PT Legacy
@@ -2363,4 +2355,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCMRNumberForISO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN ])
 
+  GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN ])
 });
