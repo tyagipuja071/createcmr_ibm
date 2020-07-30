@@ -181,7 +181,7 @@ public class MCOPtEsHandler extends MCOHandler {
             setFAddressFromLegacy(record);
             converted.add(record);
           }
-          
+
         }
       } else {
         // old SOF import process:
@@ -473,7 +473,9 @@ public class MCOPtEsHandler extends MCOHandler {
       if (cust != null) {
         String customerType = cust.getCustType();
         data.setCrosSubTyp(customerType);
+        data.setSpecialTaxCd(StringUtils.isEmpty(cust.getTaxCd()) ? "" : cust.getTaxCd());
       }
+      data.setTaxCd1("");
     }
 
   }
@@ -1121,7 +1123,7 @@ public class MCOPtEsHandler extends MCOHandler {
     } else {
       return false;
     }
-    
+
   }
-  
+
 }
