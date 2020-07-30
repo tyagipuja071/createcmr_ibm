@@ -123,6 +123,14 @@ function addAfterConfigForSWISS() {
     FormManager.getField('capInd').set('checked', true);
     FormManager.readOnly('capInd');
   }
+  
+  // CMR-4715 -> muboty cannot be blank for update requests
+  if(role == 'REQUESTER' && reqType == 'U'){
+  FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'MUBOTY(SORTL)' ], 'MAIN_IBM_TAB');
+  }
+  else{
+  FormManager.removeValidator('searchTerm', Validators.REQUIRED);  
+  }
 
   // disable copy address
   GEOHandler.disableCopyAddress();
@@ -1696,6 +1704,34 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
           }
         };
       })(), null, 'frmCMR_addressModal');
+}
+
+function setPreferredLangAddr() {
+  // Based on the value of postal code Customer Language field should be
+  // populated on each address:
+  //
+  // 3000 - 6499 and 6999 - 9999 it is D (German)
+  // 6500 - 6999 it is I (Italian)
+  // 0000 - 3000 it is F (French)
+  //
+  // Cross Border it is E (English)
+
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+
+  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
+  var postCd = FormManager.getActualValue('postCd');
+  postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
+
+  if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+    FormManager.setValue('custLangCd', 'D');
+  } else if (postCd >= 6500 && postCd <= 6999) {
+    FormManager.setValue('custLangCd', 'I');
+  } else if (postCd >= 0000 && postCd <= 3000) {
+    FormManager.setValue('custLangCd', 'F');
+  }
 }
 
 dojo.addOnLoad(function() {

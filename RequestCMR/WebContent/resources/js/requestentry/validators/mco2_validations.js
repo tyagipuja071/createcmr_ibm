@@ -13,6 +13,35 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   }
 }
 
+/**
+ * After config handlers
+ */
+var _ISUHandler = null;
+var _CTCHandler = null;
+var _SalesRepHandler = null;
+
+function addHandlersForMCO2() {
+
+  if (_ISUHandler == null) {
+    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setSalesRepValues(value);
+    });
+  }
+
+  if (_CTCHandler == null) {
+    _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+      setSalesRepValues(value);
+    });
+  }
+
+  if (_SalesRepHandler == null) {
+    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
+      setSORTLValues(value);
+    });
+  }
+  
+}
+
 var _addrTypesForCEWA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypeHandler = [];
 function addHandlersForCEWA() {
@@ -716,12 +745,106 @@ function addValidatorStreet() {
   FormManager.removeValidator('addrTxt', Validators.MAXLENGTH);
 }
 
-function setSalesRepValue(){
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  if (custSubGrp != "BUSPR" && custSubGrp != "XBP") {
-    FormManager.setValue('repTeamMemberNo', '016757');
-  } else {
-    FormManager.setValue('repTeamMemberNo', '780780');
+function setSalesRepValues(isuCd,clientTier) {
+  
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (reqType != 'C' && role != 'PROCESSOR') {
+    return;
+  }
+
+  var isuCd = FormManager.getActualValue('isuCd');
+  var clientTier = FormManager.getActualValue('clientTier');
+
+  var salesReps = [];
+  if (isuCd != '') {
+    qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      ISU : '%' + isuCd + '%'
+    };
+    results = cmr.query('GET.MCO2SR.BYISU', qParams);
+  }
+  if (results != null) {
+    for (var i = 0; i < results.length; i++) {
+      salesReps.push(results[i].ret1);
+    }
+    FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
+    if (salesReps.length == 1) {
+      FormManager.setValue('repTeamMemberNo', salesReps[0]);
+    }
+  }
+  
+  if(cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857'){
+    if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
+      FormManager.setValue('repTeamMemberNo', 'DUMMY8');
+      FormManager.setValue('salesBusOffCd', '0080');
+    }
+  } else if (cntry == '698' || cntry == '745') {
+    if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
+      FormManager.setValue('repTeamMemberNo', 'DUMMY6');
+    }
+  }
+
+  /*
+  if ('780' != FormManager.getActualValue('cmrIssuingCntry')) {
+    var custSubGrp = FormManager.getActualValue('custSubGrp');
+    if (custSubGrp != "BUSPR" && custSubGrp != "XBP") {
+      FormManager.setValue('repTeamMemberNo', '016757');
+    } else {
+      FormManager.setValue('repTeamMemberNo', '780780');
+    }
+  }*/
+
+}
+
+function setSORTLValues(repTeamMemberNo){
+  var reqType = FormManager.getActualValue('reqType');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (reqType != 'C' && role != 'PROCESSOR') {
+    return;
+  }
+
+  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
+  
+  var SORTL = [];
+  if (repTeamMemberNo != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      ISU : '%' + isuCd + '%',
+      REP_TEAM_CD : '%' + repTeamMemberNo + '%'
+    };
+    var results = cmr.query('GET.MCO2SBOLIST.BYSR', qParams);
+    if (results != null) {
+      for ( var i = 0; i < results.length; i++) {
+        SORTL.push(results[i].ret1);
+      }
+      if (SORTL != null) {
+        FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), SORTL);
+        if (SORTL.length == 1) {
+          FormManager.setValue('salesBusOffCd', SORTL[0]);
+        }
+      }
+    }
+
+    if(cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857'){
+      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
+        FormManager.setValue('salesBusOffCd', '0080');
+      }
+    } else if (cntry == '698' || cntry == '745') {
+      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
+        FormManager.setValue('salesBusOffCd', '0060');
+      }
+    }
   }
 }
 
@@ -920,7 +1043,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
+  //GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(hideCustName4, GEOHandler.MCO2);
@@ -938,7 +1061,7 @@ dojo.addOnLoad(function() {
   
   GEOHandler.registerValidator(addTinBillingValidator, [ SysLoc.TANZANIA ], null, true);
   
-//  GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2, GEOHandler.REQUESTER,true); 
+  //GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2, GEOHandler.REQUESTER,true); 
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TANZANIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TANZANIA ], null, true);
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
@@ -950,4 +1073,6 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO2, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO2);
+  
+  GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
 });

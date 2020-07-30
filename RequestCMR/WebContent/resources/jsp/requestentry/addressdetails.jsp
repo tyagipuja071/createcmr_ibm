@@ -52,7 +52,7 @@
     </cmr:column>
   </cmr:row>
   <!-- defect : 1444422 for FR -->
-  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS" exceptForCountry="618,866,754,755,862,726,666">
+  <cmr:view forGEO="IERP,CND,MCO1,MCO2,FR,CEMEA,CN,EMEA,SWISS" exceptForCountry="618,866,754,755,726,666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="ierpSitePrtyId_view">
@@ -176,7 +176,7 @@
     </cmr:row>
   </cmr:view>
 
-  <cmr:view forCountry="754,866,755,862,758">
+  <cmr:view forCountry="754,866,755,758">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
@@ -197,8 +197,29 @@
     <input type="hidden" name="custNm3_view" id="custNm3_view">
     <input type="hidden" name="custNm4_view" id="custNm4_view">
   </cmr:view>
+  
+  <cmr:view forCountry="862">
+    <cmr:row>
+      <cmr:column span="1">
+        <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm1_view">-</div>
+      </cmr:column>
+    </cmr:row>
 
-  <cmr:view forCountry="726,666">
+    <cmr:row>
+      <cmr:column span="1">
+        <cmr:label fieldId="custNm2_view">${ui.custNameUKI2}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm2_view">-</div>
+      </cmr:column>
+    </cmr:row>
+    <input type="hidden" name="custNm3_view" id="custNm3_view">
+  </cmr:view>
+
+  <cmr:view forCountry="666">
     <cmr:row>
       <cmr:column span="1">
         <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
@@ -218,6 +239,29 @@
     </cmr:row>
     <input type="hidden" name="custNm3_view" id="custNm3_view">
     <input type="hidden" name="custNm4_view" id="custNm4_view">
+  </cmr:view>
+  
+  <cmr:view forCountry="726">
+    <cmr:row>
+      <cmr:column span="1">
+        <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm1_view">-</div>
+      </cmr:column>
+    </cmr:row>
+
+    <cmr:row>
+      <cmr:column span="1">
+		<cmr:label fieldId="custNm2_view">
+        <span class="lbl-CustomerName2">${ui.custName2}:</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm2_view">-</div>
+      </cmr:column>
+    </cmr:row>
+    <input type="hidden" name="custNm3_view" id="custNm3_view">
   </cmr:view>
 
   <cmr:view forGEO="MCO,MCO1,MCO2">
@@ -473,6 +517,30 @@
         <div id="custNm4_view">-</div>
       </cmr:column>
     </cmr:view>
+    <cmr:view forCountry="726" >
+      <cmr:column span="1">
+        <cmr:label fieldId="custNm4_view">
+          <span class="lbl-CustomerName4">${ui.custName4}</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm4_view">-</div>
+      </cmr:column>
+    </cmr:view>
+    
+    <%if ("U".equals(reqentry.getReqType())){%> 
+    <cmr:view forCountry="862" >
+      <cmr:column span="1">
+        <cmr:label fieldId="custNm4_view">
+          <span class="lbl-CustomerName4">${ui.custName4}</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm4_view">-</div>
+      </cmr:column>
+    </cmr:view>
+    <%}%> 
+    
      <cmr:view forGEO="SWISS">
       <cmr:column span="1">
         <cmr:label fieldId="custLangCd_view">
@@ -854,7 +922,7 @@
   </cmr:row>
 
   <cmr:row addBackground="true">
-    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS">
+    <cmr:view exceptForGEO="CEMEA,CN,JP,SWISS" exceptForCountry="862">
       <cmr:column span="1">
         <cmr:label fieldId="stateProv_view">
           <span class="lbl-StateProv">${ui.stateProve}</span>:</cmr:label>
@@ -1031,7 +1099,7 @@
   </cmr:view>
 
   <cmr:row topPad="10">
-    <cmr:view exceptForGEO="AP" exceptForCountry="758,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,713,740,741,787,820,821,826,889,641,760">
+    <cmr:view exceptForGEO="AP" exceptForCountry="758,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,713,740,741,787,820,821,826,862,889,641,760">
       <cmr:column span="1">
         <cmr:label fieldId="poBox_view">
           <span class="lbl-POBox">${ui.poBox}</span>:</cmr:label>

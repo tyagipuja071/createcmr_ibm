@@ -78,6 +78,13 @@ public class DEHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode()) && "598".equals(tempRec.getCmrAddrSeq())) {
+              tempRec.setCmrAddrTypeCode("ZD02");
+            }
+
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
+              tempRec.setCmrAddrTypeCode("ZP02");
+            }
             recordsToReturn.add(tempRec);
           }
         }
@@ -129,6 +136,25 @@ public class DEHandler extends GEOHandler {
     // {
     address.setPairedAddrSeq(currentRecord.getCmrAddrSeq());
     // }
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    if (!StringUtils.isEmpty(addrType)) {
+      if ("ZD02".equals(addrType)) {
+        return "598";
+      } else if ("ZP02".equals(addrType)) {
+        return "599";
+      }
+    }
+    return super.generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
   }
 
   @Override

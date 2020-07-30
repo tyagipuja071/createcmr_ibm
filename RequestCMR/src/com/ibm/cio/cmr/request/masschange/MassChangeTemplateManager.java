@@ -37,9 +37,32 @@ public class MassChangeTemplateManager {
     configList.put("754", "config.754.xml");
     configList.put("758", "config.758.xml");
     configList.put("618", "config.618.xml");
-    // *abner revert begin
-    // configList.put("862", "config.862.xml");
-    // *abner revert end
+    configList.put("862", "config.862.xml");
+    configList.put("693", "config.693.xml");
+    configList.put("695", "config.695.xml");
+    configList.put("707", "config.707.xml");
+    
+    configList.put("358", "config.358.xml");
+    configList.put("359", "config.359.xml");
+    configList.put("363", "config.363.xml");
+    configList.put("603", "config.603.xml");
+    configList.put("607", "config.607.xml");
+    configList.put("626", "config.626.xml");
+    configList.put("644", "config.644.xml");
+    configList.put("651", "config.651.xml");
+    configList.put("694", "config.694.xml");
+    configList.put("699", "config.699.xml");
+    configList.put("705", "config.705.xml");
+    configList.put("708", "config.708.xml");
+    configList.put("740", "config.740.xml");
+    configList.put("741", "config.741.xml");
+    configList.put("787", "config.787.xml");
+    configList.put("820", "config.820.xml");
+    configList.put("821", "config.821.xml");
+    configList.put("826", "config.826.xml");
+    configList.put("889", "config.889.xml");
+    configList.put("704", "config.704.xml");
+    configList.put("668", "config.668.xml");
     // configList.put("848", "config.SWISS.xml");
   }
 

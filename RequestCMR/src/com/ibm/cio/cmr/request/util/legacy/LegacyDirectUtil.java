@@ -70,8 +70,8 @@ public class LegacyDirectUtil {
   private static final String ADDRESS_USE_COUNTRY_D = "D";
   private static final String ADDRESS_USE_COUNTRY_E = "E";
   private static final String ADDRESS_USE_COUNTRY_F = "F";
-  private static final String ADDRESS_USE_COUNTRY_G = "A";
-  private static final String ADDRESS_USE_COUNTRY_H = "G";
+  private static final String ADDRESS_USE_COUNTRY_G = "G";
+  private static final String ADDRESS_USE_COUNTRY_H = "H";
   public static final String IT_COMPANY_ADDR_TYPE = "ZI01";
   public static final String IT_BILLING_ADDR_TYPE = "ZP01";
   private static final List<String> FIELDS_CLEAR_LIST = new ArrayList<String>();
@@ -85,6 +85,7 @@ public class LegacyDirectUtil {
     FIELDS_CLEAR_LIST.add("ModeOfPayment");
     FIELDS_CLEAR_LIST.add("CrosSubTyp");
     FIELDS_CLEAR_LIST.add("TipoCliente");
+    FIELDS_CLEAR_LIST.add("CommercialFinanced");
 
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }

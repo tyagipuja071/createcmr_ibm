@@ -18,7 +18,19 @@
 
 <cmr:view forGEO="CEMEA">
   <cmr:row topPad="10">
-   <%if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("618")){%>
+   <% if (reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("603")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("607") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("626")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("644") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("651")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("668") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("693")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("694") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("695")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("699") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("704")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("705") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("707")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("708") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("740")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("741") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("787")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("820") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("821")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("826") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("889")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("358") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("359")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("363")){ %>
       <form:hidden path="repTeamMemberNo" id="repTeamMemberNo"/>
     <%} else { %>
     <cmr:column span="2" containerForField="SalRepNameNo">
@@ -41,8 +53,20 @@
       </p>
     </cmr:column>
 
-    <!-- CEEME - show SBO for processors only -->
-    <%if (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") && !"Processor".equalsIgnoreCase(reqentry.getUserRole())){%>
+<!-- CEEME - show SBO for processors only -->
+    <%if (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("603") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("363") 
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("607") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("626")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("644") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("651")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("668") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("693")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("694") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("695")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("699") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("704")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("705") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("707")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("708") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("740")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("741") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("787")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("820") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("821")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("826") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("889")
+&& !reqentry.getCmrIssuingCntry().equalsIgnoreCase("358") && !reqentry.getCmrIssuingCntry().equalsIgnoreCase("359")
+&& (!reqentry.getCmrIssuingCntry().equalsIgnoreCase("618") && !"Processor".equalsIgnoreCase(reqentry.getUserRole()))){%>
       <form:hidden path="salesBusOffCd" id="salesBusOffCd"/>
     <%} else { %>
       <cmr:column span="2" containerForField="SalesBusOff">
@@ -55,7 +79,19 @@
       </cmr:column>      
     <%} %>
   </cmr:row>
-  
+  <cmr:view forCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
+  	<cmr:row topPad="10">
+  		<cmr:column span="2" containerForField="LocalTax2">
+	      <p>
+	        <cmr:label fieldId="taxCd2">
+	          <cmr:fieldLabel fieldId="LocalTax2" />: 
+	            <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
+	        </cmr:label>
+	        <cmr:field fieldId="LocalTax2" id="taxCd2" path="taxCd2" tabId="MAIN_IBM_TAB" />
+	      </p>
+	    </cmr:column>
+  	</cmr:row>
+  </cmr:view>
   <!-- CIS Duplicate CMR -->
   <cmr:view forCountry="821">
   <cmr:row topPad="10">
@@ -94,7 +130,7 @@
           <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
-      <cmr:column span="2" exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,808,823,832,849,850,865">
+      <cmr:column span="2" exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,808,823,832,849,850,865,644,668,693,704,708,740,820,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
         <p>
           <cmr:label fieldId="agreementSignDate">
             <cmr:fieldLabel fieldId="AECISubDate" />: 
