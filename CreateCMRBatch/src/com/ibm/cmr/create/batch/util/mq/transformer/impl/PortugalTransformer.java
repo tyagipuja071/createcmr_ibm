@@ -152,9 +152,11 @@ public class PortugalTransformer extends MessageTransformer {
       line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
     } else if (MQMsgConstants.ADDR_ZS02.equals(addrData.getId().getAddrType())) {
       line6 = "Portugal";
-    } else if (MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType()) && update) {
-      line6 = addrData.getCustPhone();
-    }
+    } /*
+       * else if
+       * (MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType()) &&
+       * update) { line6 = addrData.getCustPhone(); }
+       */
 
     String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
     int lineNo = 1;
@@ -391,7 +393,8 @@ public class PortugalTransformer extends MessageTransformer {
             legacyCust.setTelNoOrVat("TF" + addr.getCustPhone());
             landedCntry = addr.getLandCntry();
             break;
-          }
+          } else
+            legacyCust.setTelNoOrVat("");
         }
       }
 
@@ -505,7 +508,9 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     legacyCust.setDistrictCd(data.getTerritoryCd() != null ? data.getTerritoryCd() : "");
-    legacyCust.setBankBranchNo(data.getCollectionCd() != null ? data.getCollectionCd() : "");
+    // legacyCust.setBankBranchNo(data.getCollectionCd() != null ?
+    // data.getCollectionCd() : "");
+    legacyCust.setBankBranchNo("");
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
