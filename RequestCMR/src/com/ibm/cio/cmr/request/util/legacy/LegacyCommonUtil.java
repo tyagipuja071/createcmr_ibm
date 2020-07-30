@@ -183,4 +183,23 @@ public class LegacyCommonUtil {
     return salesGroupRep;
   }
 
+  public static String removeATT(String addrLine) {
+    addrLine = StringUtils.replace(addrLine, "ATTN:", "");
+    addrLine = StringUtils.replace(addrLine, "ATTN.:", "");
+    addrLine = StringUtils.replace(addrLine, "ATTN :", "");
+    addrLine = StringUtils.replace(addrLine, "ATTN.", "");
+    addrLine = StringUtils.replace(addrLine, "ATTN;", "");
+    addrLine = StringUtils.replace(addrLine, "ATTN", "");
+    addrLine = StringUtils.replace(addrLine, "ATT.:", "");
+    addrLine = StringUtils.replace(addrLine, "ATT :", "");
+    addrLine = StringUtils.replace(addrLine, "ATT.", "");
+    addrLine = StringUtils.replace(addrLine, "ATT:", "");
+    addrLine = StringUtils.replace(addrLine, "ATT ", "");
+    addrLine = StringUtils.replace(addrLine, "ATT;", "");
+    addrLine = StringUtils.replace(addrLine, "ATT.", "");
+    addrLine = StringUtils.replace(addrLine, "ATT", "");
+
+    return addrLine.trim();
+  }
+
 }
