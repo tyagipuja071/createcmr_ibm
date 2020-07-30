@@ -1316,7 +1316,7 @@ function setCountryDuplicateFields(value) {
         FormManager.readOnly('dupClientTierCd');
         FormManager.readOnly('dupEnterpriseNo');
         // FormManager.readOnly('dupSalesRepNo');
-        FormManager.readOnly('LocalTax3', 'taxCd3');
+        FormManager.readOnly('taxCd3');
       }
 
     } else {
