@@ -3900,22 +3900,24 @@ function afterConfigTemplateForHungary() {
 }
 function validatorsDIGIT() {
   FormManager.addValidator('EngineeringBo', Validators.DIGIT, [ 'EngineeringBo' ]);
-  FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'LocalTax2' ]);
+  FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
 
 }
 function addEmbargoCdValidatorForCEE() {
-
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var embargoCd = FormManager.getActualValue('embargoCd');
-        if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == '')) {
-          return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+	  var role = FormManager.getActualValue('userRole');
+    if (role == GEOHandler.ROLE_PROCESSOR) {
+  	  FormManager.addFormValidator((function() {
+  		    return {
+  		      validate : function() {
+  		        var embargoCd = FormManager.getActualValue('embargoCd');
+  		        if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == '')) {
+  		          return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
+  		        }
+  		        return new ValidationResult(null, true);
+  		      }
+  		    };
+  		  })(), 'MAIN_IBM_TAB', 'frmCMR');
+    }
 }
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
@@ -3986,7 +3988,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(addEmbargoCdValidatorForCEE, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addEmbargoCdValidatorForCEE, GEOHandler.CEE);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);

@@ -1129,6 +1129,11 @@ public class CEMEAHandler extends BaseSOFHandler {
     if ("BUSPR".equals(data.getCustSubGrp()) && CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setBpRelType("CA");
     }
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    	if(StringUtils.isNotBlank(data.getEngineeringBo())) {
+    		data.setEngineeringBo(StringUtils.rightPad(data.getEngineeringBo(), 7, "0"));
+    	}
+      }
   }
 
   @Override
