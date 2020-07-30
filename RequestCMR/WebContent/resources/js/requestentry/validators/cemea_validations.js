@@ -5,6 +5,259 @@ var CEMEA_EXCL = new Set([ '620', '767', '805', '823', '677', '680', '832' ]);
 var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ]);
 var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '8010', '8021', '8022', '8030', '8090', '8511',
     '8512', '8519', '8532', '8809', '8813', '8818', '9900' ]);
+var landedCntryMapping = {
+  "XX" : "000",
+  "AD" : "706",
+  "AE" : "677",
+  "AF" : "614",
+  "AG" : "649",
+  "AI" : "649",
+  "AL" : "603",
+  "AM" : "607",
+  "AO" : "791",
+  "AQ" : "610",
+  "AR" : "613",
+  "AS" : "897",
+  "AT" : "618",
+  "AU" : "616",
+  "AW" : "649",
+  "AX" : "702",
+  "AZ" : "358",
+  "BA" : "699",
+  "BB" : "621",
+  "BD" : "615",
+  "BE" : "624",
+  "BF" : "841",
+  "BG" : "644",
+  "BH" : "620",
+  "BI" : "645",
+  "BJ" : "840",
+  "BL" : "000",
+  "BM" : "627",
+  "BN" : "643",
+  "BO" : "629",
+  "BQ" : "791",
+  "BR" : "631",
+  "BS" : "619",
+  "BT" : "744",
+  "BV" : "649",
+  "BW" : "636",
+  "BY" : "626",
+  "BZ" : "649",
+  "CA" : "649",
+  "CC" : "616",
+  "CD" : "662",
+  "CF" : "810",
+  "CG" : "667",
+  "CH" : "848",
+  "CI" : "637",
+  "CK" : "796",
+  "CL" : "655",
+  "CM" : "692",
+  "CN" : "641",
+  "CO" : "661",
+  "CR" : "663",
+  "CS" : "707",
+  "CU" : "897",
+  "CV" : "669",
+  "CW" : "791",
+  "CX" : "616",
+  "CY" : "666",
+  "CZ" : "668",
+  "DE" : "724",
+  "DJ" : "670",
+  "DK" : "678",
+  "DM" : "649",
+  "DO" : "681",
+  "DZ" : "229",
+  "EC" : "683",
+  "EE" : "602",
+  "EG" : "865",
+  "EH" : "706",
+  "ER" : "745",
+  "ES" : "838",
+  "ET" : "698",
+  "FI" : "702",
+  "FJ" : "796",
+  "FK" : "866",
+  "FM" : "897",
+  "FO" : "678",
+  "FR" : "706",
+  "GA" : "656",
+  "GB" : "866",
+  "GD" : "649",
+  "GE" : "651",
+  "GF" : "706",
+  "GG" : "866",
+  "GH" : "725",
+  "GI" : "866",
+  "GL" : "678",
+  "GM" : "753",
+  "GN" : "706",
+  "GP" : "706",
+  "GQ" : "383",
+  "GR" : "726",
+  "GS" : "866",
+  "GT" : "731",
+  "GU" : "897",
+  "GW" : "879",
+  "GY" : "640",
+  "HK" : "738",
+  "HM" : "616",
+  "HN" : "735",
+  "HR" : "704",
+  "HT" : "733",
+  "HU" : "740",
+  "ID" : "749",
+  "IE" : "754",
+  "IL" : "755",
+  "IM" : "866",
+  "IN" : "744",
+  "IO" : "866",
+  "IQ" : "752",
+  "IR" : "750",
+  "IS" : "742",
+  "IT" : "758",
+  "JE" : "000",
+  "JM" : "759",
+  "JO" : "762",
+  "JP" : "760",
+  "KE" : "764",
+  "KG" : "695",
+  "KH" : "852",
+  "KI" : "796",
+  "KM" : "706",
+  "KN" : "649",
+  "KP" : "766",
+  "KR" : "766",
+  "KW" : "767",
+  "KY" : "647",
+  "KZ" : "694",
+  "LA" : "834",
+  "LB" : "768",
+  "LC" : "839",
+  "LI" : "848",
+  "LK" : "652",
+  "LR" : "770",
+  "LS" : "711",
+  "LT" : "638",
+  "LU" : "624",
+  "LV" : "608",
+  "LY" : "772",
+  "MA" : "642",
+  "MC" : "706",
+  "MD" : "787",
+  "ME" : "707",
+  "MF" : "000",
+  "MG" : "706",
+  "MH" : "897",
+  "MK" : "705",
+  "ML" : "382",
+  "MM" : "646",
+  "MN" : "641",
+  "MO" : "736",
+  "MP" : "897",
+  "MQ" : "706",
+  "MR" : "717",
+  "MS" : "649",
+  "MT" : "780",
+  "MU" : "706",
+  "MV" : "834",
+  "MW" : "769",
+  "MX" : "781",
+  "MY" : "778",
+  "MZ" : "782",
+  "NA" : "682",
+  "NC" : "706",
+  "NE" : "880",
+  "NF" : "616",
+  "NG" : "804",
+  "NI" : "799",
+  "NL" : "788",
+  "NO" : "806",
+  "NP" : "744",
+  "NR" : "616",
+  "NU" : "796",
+  "NZ" : "796",
+  "OM" : "805",
+  "PA" : "811",
+  "PE" : "815",
+  "PF" : "706",
+  "PG" : "616",
+  "PH" : "818",
+  "PK" : "808",
+  "PL" : "820",
+  "PM" : "706",
+  "PN" : "866",
+  "PR" : "897",
+  "PS" : "762",
+  "PT" : "822",
+  "PW" : "897",
+  "PY" : "813",
+  "QA" : "823",
+  "RE" : "706",
+  "RO" : "826",
+  "RS" : "707",
+  "RU" : "821",
+  "RW" : "831",
+  "SA" : "832",
+  "SB" : "616",
+  "SC" : "876",
+  "SD" : "842",
+  "SE" : "846",
+  "SG" : "834",
+  "SH" : "866",
+  "SI" : "708",
+  "SJ" : "806",
+  "SK" : "693",
+  "SL" : "833",
+  "SM" : "758",
+  "SN" : "635",
+  "SO" : "835",
+  "SR" : "843",
+  "SS" : "842",
+  "ST" : "827",
+  "SV" : "829",
+  "SX" : "791",
+  "SY" : "850",
+  "SZ" : "853",
+  "TC" : "619",
+  "TD" : "881",
+  "TF" : "706",
+  "TG" : "718",
+  "TH" : "856",
+  "TJ" : "363",
+  "TK" : "796",
+  "TL" : "749",
+  "TM" : "359",
+  "TN" : "729",
+  "TO" : "796",
+  "TR" : "862",
+  "TT" : "859",
+  "TV" : "796",
+  "TW" : "858",
+  "TZ" : "851",
+  "UA" : "889",
+  "UG" : "857",
+  "UM" : "897",
+  "US" : "897",
+  "UY" : "869",
+  "UZ" : "741",
+  "VA" : "758",
+  "VC" : "839",
+  "VE" : "871",
+  "VG" : "649",
+  "VI" : "897",
+  "VN" : "852",
+  "VU" : "706",
+  "WF" : "706",
+  "WS" : "796",
+  "YE" : "849",
+  "YT" : "706",
+  "ZA" : "864",
+  "ZM" : "883",
+  "ZW" : "825"
+}
 function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
@@ -3248,16 +3501,78 @@ function disableSBO() {
   FormManager.readOnly('salesBusOffCd');
 }
 
+function setEngineeringBO() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole');
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  var cmrIssuing = FormManager.getActualValue('cmrIssuingCntry');
+  var cntryRegion = FormManager.getActualValue('countryUse');
+  if (reqType == 'C') {
+    if (cmrIssuing == SysLoc.KYRGYZSTAN && _custType == 'XCE') {
+      var landedCntry = getLandedCountryByAddType('ZS01');
+      if (landedCntry == '') {
+        FormManager.setValue('engineeringBo', '');
+      } else {
+        var landedCntryCode = landedCntryMapping[landedCntry];
+        FormManager.setValue('engineeringBo', landedCntryCode);
+      }
+      FormManager.readOnly('engineeringBo');
+    } else if (cntryRegion == '707ME') {
+      FormManager.setValue('engineeringBo', '713');
+      FormManager.readOnly('engineeringBo');
+    } else {
+      // FormManager.setValue('engineeringBo', '');
+      FormManager.enable('engineeringBo');
+    }
+  } else if (reqType == 'U') {
+    if (role == GEOHandler.ROLE_REQUESTER) {
+      FormManager.readOnly('engineeringBo');
+    } else {
+      FormManager.enable('engineeringBo');
+    }
+  }
+}
+
+function getLandedCountryByAddType(addType) {
+  var landCountry = '';
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+    var record = null;
+    var type = null;
+    for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+      record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+      if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+        record = _allAddressData[i];
+      }
+      type = record.addrType;
+      if (typeof (type) == 'object') {
+        type = type[0];
+      }
+      if (type == addType) {
+        landCountry = record.landCntry;
+        if (typeof (landCountry) == 'object') {
+          landCountry = landCountry[0];
+        }
+      }
+    }
+  }
+  return landCountry;
+}
+
 function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
   togglePPSCeidCEE();
   setClassificationCodeCEE();
   disableSBO();
+  setEngineeringBO();
 }
 
 function afterConfigForCEE() {
   isicCdOnChangeCEE();
   reqReasonOnChange();
+
 }
 
 function afterConfigForSlovakia() {
@@ -3292,15 +3607,15 @@ function validatorsDIGIT() {
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'LocalTax2' ]);
 
 }
-function addEmbargoCdValidatorForCEE(){
+function addEmbargoCdValidatorForCEE() {
 
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var embargoCd = FormManager.getActualValue('embargoCd');
-        if (embargoCd && !(embargoCd == 'E'||embargoCd == 'R'||embargoCd == '')){
-           return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
-       }
+        if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == '')) {
+          return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
+        }
         return new ValidationResult(null, true);
       }
     };
@@ -3431,9 +3746,9 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA_EXCLUDE_CEE);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
   GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
