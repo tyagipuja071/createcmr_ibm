@@ -2,13 +2,17 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -18,12 +22,19 @@ import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
@@ -45,11 +56,14 @@ public class UKIUtil extends AutomationUtil {
   public static final String SCENARIO_CROSS_GOVERNMENT = "XGOVR";
   public static final String SCENARIO_CROSS_IGF = "XIGF";
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_PRIVATE_PERSON, SCENARIO_BUSINESS_PARTNER);
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<ValidationOutput> result, StringBuilder details, ValidationOutput output) {
     Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
     String custNm1 = zs01.getCustNm1();
     String custNm2 = !StringUtils.isBlank(zs01.getCustNm2()) ? " " + zs01.getCustNm2() : "";
@@ -111,6 +125,14 @@ public class UKIUtil extends AutomationUtil {
         return false;
       }
       break;
+    case SCENARIO_IGF:
+    case SCENARIO_CROSS_IGF:
+      boolean requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("UKI.SKIP_SCENARIO"));
+      if (!requesterFromTeam) {
+        details.append("Requester is not allowed to submit the request for IGF Scenario.").append("\n");
+        engineData.addRejectionComment("OTH", "Requester is not allowed to submit the request for IGF Scenario.", "", "");
+        return false;
+      }
     }
     return true;
   }
@@ -121,10 +143,244 @@ public class UKIUtil extends AutomationUtil {
   }
 
   @Override
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+    StringBuilder details = new StringBuilder();
+    boolean cmdeReview = false;
+    Set<String> resultCodes = new HashSet<String>();// D for Reject
+    List<String> ignoredUpdates = new ArrayList<String>();
+    for (UpdatedDataModel change : changes.getDataUpdates()) {
+      switch (change.getDataField()) {
+      case "VAT #":
+        if (!StringUtils.isBlank(change.getNewData()) && !(change.getOldData().equals(change.getNewData()))) {
+          // ADD OR UPDATE
+          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          boolean matchesDnb = false;
+          if (matches != null) {
+            // check against D&B
+            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+          }
+          if (!matchesDnb) {
+            resultCodes.add("R");// Reject
+            details.append("VAT # on the request did not match D&B\n");
+          } else {
+            details.append("VAT # on the request matches D&B\n");
+          }
+        }
+        break;
+      case "INAC/NAC Code":
+      case "Company Number":
+      case "Enterprise Number":
+        cmdeReview = true;
+        break;
+      default:
+        ignoredUpdates.add(change.getDataField());
+        break;
+      }
+    }
+    if (resultCodes.contains("R")) {
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      details.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
+      }
+    }
+    output.setDetails(details.toString());
+    output.setProcessOutput(validation);
+    return true;
+  }
+
+  @Override
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+    List<Addr> addresses = null;
+    StringBuilder checkDetails = new StringBuilder();
+    Set<String> resultCodes = new HashSet<String>();// R - review
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          if ("N".equals(addr.getImportInd())) {
+            // new address
+            if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+              if (addressExists(entityManager, addr)) {
+                LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+                resultCodes.add("R");
+              } else {
+                LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+              }
+            }
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+              if (null == changes.getAddressChange("ZS01", "Customer Name") && null == changes.getAddressChange("ZS01", "Customer Name Con't")) {
+                if (addressExists(entityManager, addr)) {
+                  LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
+                  resultCodes.add("R");
+                } else {
+                  LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                  checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+                }
+              } else {
+                LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
+                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") has Sold-To name changed \n");
+                resultCodes.add("R");
+              }
+            }
+          } else if ("Y".equals(addr.getChangedIndc())) {
+            // update address
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Hardware Master")) {
+              // CMDE Review
+              checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
+                  .append("\n");
+              resultCodes.add("D");
+            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && null == changes.getAddressChange(addrType, "Hardware Master")) {
+              Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+              boolean matchesDnb = false;
+              if (matches != null) {
+                // check against D&B
+                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
+              }
+              if (!matchesDnb) {
+                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                resultCodes.add("R");
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+              } else {
+                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
+              }
+            } else {
+              // proceed
+              LOG.debug("Update to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.\\n");
+              checkDetails.append("Updates to Address (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+            }
+          }
+        }
+      }
+    }
+    if (resultCodes.contains("R")) {
+      output.setOnError(true);
+      engineData.addRejectionComment("_atRejectAddr", "Add or update on the address is rejected", "", "");
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (resultCodes.contains("D")) {
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+      engineData.addNegativeCheckStatus("_atCheckFailed", "Updated to Installing Address cannot be checked automatically.");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
+    details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
+    output.setDetails(details);
+    output.setProcessOutput(validation);
+    return true;
+  }
+
+  @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if (!"C".equals(admin.getReqType())) {
+      details.append("Field Computation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+
+    if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) {
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean hasValidMatches = false;
+      boolean highQualityMatchExists = false;
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
+      hasValidMatches = DnBUtil.hasValidMatches(response);
+      if (response != null && response.getMatched()) {
+        List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        if (hasValidMatches) {
+          // actions to be performed only when matches with high confidence are
+          // found
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+            if (closelyMatches) {
+              engineData.put("ZI01_DNB_MATCH", dnbRecord);
+              highQualityMatchExists = true;
+              details.append("High Quality DnB Match found for Installing address.\n");
+              details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+              LOG.debug("Connecting to D&B details service..");
+              DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+              if (dnbData != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+                details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+                String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+                if (subInd != null) {
+                  overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                  details.append("Subindustry Code  =  " + subInd).append("\n");
+                }
+              }
+              results.setResults("Calculated.");
+              results.setProcessOutput(overrides);
+              break;
+            }
+          }
+        }
+      }
+      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
+        details.append("No high quality matches found for Installing Address, setting ISIC to 7499.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7499");
+        String subInd = RequestUtils.getSubIndustryCd(entityManager, "7499", data.getCmrIssuingCntry());
+        if (subInd != null) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+        }
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        results.setResults("Calculated.");
+        results.setProcessOutput(overrides);
+      }
+    } else {
+      details.append("No specific fields to calculate.");
+      results.setResults("Skipped.");
+      results.setProcessOutput(overrides);
+    }
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
+    return results;
   }
 
   @Override
@@ -168,7 +424,8 @@ public class UKIUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
-    if ((!isCoverageCalculated || ((SCENARIO_THIRD_PARTY.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
+    if ((!isCoverageCalculated
+        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
         && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       details.setLength(0);
       overrides.clearOverrides();
