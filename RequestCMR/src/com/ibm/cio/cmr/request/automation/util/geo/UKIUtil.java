@@ -19,12 +19,17 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
+import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
 public class UKIUtil extends AutomationUtil {
 
@@ -120,8 +125,72 @@ public class UKIUtil extends AutomationUtil {
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if (!"C".equals(admin.getReqType())) {
+      details.append("Field Computation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return results;
+    }
+
+    if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) {
+      Addr zi01 = requestData.getAddress("ZI01");
+      boolean hasValidMatches = false;
+      boolean highQualityMatchExists = false;
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
+      hasValidMatches = DnBUtil.hasValidMatches(response);
+      if (response != null && response.getMatched()) {
+        List<DnBMatchingResponse> dnbMatches = response.getMatches();
+        if (hasValidMatches) {
+          // actions to be performed only when matches with high confidence are
+          // found
+          for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+            if (closelyMatches) {
+              engineData.put("ZI01_DNB_MATCH", dnbRecord);
+              highQualityMatchExists = true;
+              details.append("High Quality DnB Match found for Installing address.\n");
+              details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+              LOG.debug("Connecting to D&B details service..");
+              DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+              if (dnbData != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+                details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+                String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+                if (subInd != null) {
+                  overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                  details.append("Subindustry Code  =  " + subInd).append("\n");
+                }
+              }
+              results.setResults("Calculated.");
+              results.setProcessOutput(overrides);
+              break;
+            }
+          }
+        }
+      }
+      if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
+        details.append("No high quality matches found for Installing Address, setting ISIC to 7499.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7499");
+        String subInd = RequestUtils.getSubIndustryCd(entityManager, "7499", data.getCmrIssuingCntry());
+        if (subInd != null) {
+          overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+        }
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+        results.setResults("Calculated.");
+        results.setProcessOutput(overrides);
+      }
+    } else {
+      details.append("No specific fields to calculate.");
+      results.setResults("Skipped.");
+      results.setProcessOutput(overrides);
+    }
+    results.setDetails(details.toString());
+    LOG.debug(results.getDetails());
+    return results;
   }
 
   @Override
@@ -165,7 +234,8 @@ public class UKIUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
-    if ((!isCoverageCalculated || ((SCENARIO_THIRD_PARTY.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
+    if ((!isCoverageCalculated
+        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
         && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       details.setLength(0);
       overrides.clearOverrides();
