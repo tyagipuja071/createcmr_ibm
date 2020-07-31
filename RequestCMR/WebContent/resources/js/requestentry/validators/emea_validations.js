@@ -901,7 +901,7 @@ function autoSetSBO(value, valueInDB) {
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       set32SBOLogicOnISIC();
-    } 
+    }
 
     // 1482148 - add Scotland and Northern Ireland logic
     if (isuCd == '32') {
@@ -1005,8 +1005,7 @@ function set32SBOLogicOnFieldChange() {
   }
 }
 
-function setClientTierValuesUKI(){
-
+function setClientTierValuesUKI() {
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -1026,28 +1025,28 @@ function setClientTierValuesUKI(){
       ISU : '%' + isuCd + '%'
     };
     var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null && results.length>0) {
+    if (results != null && results.length > 0) {
       for (var i = 0; i < results.length; i++) {
         clientTiers.push(results[i].ret1);
       }
     } else {
-      qParams.ISU='%*%';
-      results = cmr.query('GET.CTCLIST.BYISU',qParams);
-      if (results != null && results.length>0) {
+      qParams.ISU = '%*%';
+      results = cmr.query('GET.CTCLIST.BYISU', qParams);
+      if (results != null && results.length > 0) {
         for (var i = 0; i < results.length; i++) {
           clientTiers.push(results[i].ret1);
         }
       }
     }
-    
-    if (clientTiers != null && clientTiers.length>0) {
+
+    if (clientTiers != null && clientTiers.length > 0) {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
       if (clientTiers.length == 1) {
         FormManager.setValue('clientTier', clientTiers[0]);
       }
     } else {
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-      FormManager.setValue('clientTier','');
+      FormManager.setValue('clientTier', '');
     }
   }
 
@@ -5916,6 +5915,7 @@ function lockRequireFieldsUKI() {
   if (role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('isuCd');
@@ -5940,7 +5940,7 @@ function lockRequireFieldsUKI() {
     }
   } else if (role == 'PROCESSOR') {
     FormManager.enable('abbrevNm');
-    FormManager.enable('abbrevLocn');
+    FormManager.enable('_abbrevLocn');
     FormManager.enable('cmrNo');
     FormManager.enable('cmrOwner');
     FormManager.enable('company');
@@ -5967,19 +5967,24 @@ function lockRequireFieldsUKI() {
   }
   if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
-    FormManager.readOnly('abbrevLocn');
+    FormManager.readOnly('_abbrevLocn');
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
   } else if (role == 'PROCESSOR') {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
   }
-  // defect 5475
   if (role == 'REQUESTER') {
     if (custSubGroup == 'INFSL' || custSubGroup == 'COMME' || custSubGroup == 'SOFTL' || custSubGroup == 'THDPT') {
       fieldsToDisable.push('salesBusOffCd');
+      FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
+      fieldsToDisable.push('soeReqNo');
+      FormManager.removeValidator('soeReqNo', Validators.REQUIRED);
       fieldsToDisable.push('repTeamMemberName');
       fieldsToDisable.push('repTeamMemberNo');
     } else if (custSubGroup == 'INTER') {
       fieldsToDisable.push('dept');
+    } else if (custSubGroup == 'CROSS' || custSubGroup == 'XIGF' || custSubGroup == 'XGOVR') {
+      fieldsToDisable.push('specialTaxCd');
     }
   }
   if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
@@ -6117,7 +6122,7 @@ function addSBOSRLogicIE() {
   if (_isuCd != '' && _clientTier != '') {
     var qParams = {
       _qall : 'Y',
-      ISU_CD :'%' + _isuCd +'%',
+      ISU_CD : '%' + _isuCd + '%',
       CLIENT_TIER : '%' + _clientTier + '%',
     };
     var results = cmr.query('GET.SALESREP.IRELAND', qParams);
