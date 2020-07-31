@@ -21,6 +21,10 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -35,6 +39,7 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.Sadr;
 import com.ibm.cio.cmr.request.entity.UpdatedAddr;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -1819,6 +1824,61 @@ public class CEMEAHandler extends BaseSOFHandler {
     }
     LOG.debug("gLn6 of Legacy" + gLn6);
     return gLn6;
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    XSSFRow row = null;
+    XSSFCell currCell = null;
+
+    String[] countryAddrss = null;
+    if (CEE_COUNTRIES_LIST.contains(country)) {
+      countryAddrss = CEE_MASS_UPDATE_SHEET_NAMES;
+    }
+
+    XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
+    row = sheet.getRow(0);// data field name row
+    int ordBlkIndex = 12;// default index
+    for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+      currCell = row.getCell(cellIndex);
+      String cellVal = validateColValFromCell(currCell);
+      if ("Order block code".equals(cellVal)) {
+        ordBlkIndex = cellIndex;
+        break;
+      }
+    }
+
+    TemplateValidation error = new TemplateValidation("Data");
+    for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+      row = sheet.getRow(rowIndex);
+      if (row == null) {
+        return; // stop immediately when row is blank
+      }
+      currCell = row.getCell(ordBlkIndex);
+      String ordBlk = validateColValFromCell(currCell);
+      if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "R".equals(ordBlk))) {
+        LOG.trace("Order Block Code should only @, E, R. >> ");
+        error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, R. ");
+        validations.add(error);
+      }
+    }
+
+    // for (String name : countryAddrss) {
+    // sheet = book.getSheet(name);
+    // for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+    // String cbCity = ""; // 8
+    // String localCity = ""; // 7
+    //
+    // row = sheet.getRow(rowIndex);
+    // if (row == null) {
+    // return; // stop immediately when row is blank
+    // }
+    // currCell = row.getCell(6);
+    // localCity = validateColValFromCell(currCell);
+    //
+    // TemplateValidation error = new TemplateValidation(name);
+    // }
+    // }
   }
 
   private int getCeeKnvpParvmCount(String kunnr) throws Exception {
