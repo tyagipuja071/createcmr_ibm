@@ -2100,6 +2100,7 @@ public class TurkeyHandler extends BaseSOFHandler {
           updateImportIndToNForTRSharezp01Addr(entityManager, data.getId().getReqId());
           updateSeq2ForTRSharezp01Addr(entityManager, data.getId().getReqId());
           updateChangeIndcForSharezp01Addr(entityManager, data.getId().getReqId());
+          updateChangeIndcForSharezs01Addr(entityManager, data.getId().getReqId());
         }
       }
     }
@@ -4808,6 +4809,12 @@ public class TurkeyHandler extends BaseSOFHandler {
     }
     LOG.debug("gSeq of Legacy" + billSeq);
     return billSeq;
+  }
+
+  private void updateChangeIndcForSharezs01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZS01SHARE.Y.CHANGEINCD"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 
 }
