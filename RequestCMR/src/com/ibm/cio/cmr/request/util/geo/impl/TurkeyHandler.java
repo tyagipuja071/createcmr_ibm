@@ -364,15 +364,23 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        } else {
 	                          installing.setCmrName2Plain("");
 	                        }
-                        // installing.setCmrStreetAddress(mailingAddr.getAddrLine3());
-                        installing.setCmrStreetAddress("\u00a0");
+                        if (!StringUtils.isBlank(mainRecord.getCmrStreetAddress())) {
+                          installing.setCmrStreetAddress(mainRecord.getCmrStreetAddress());
+                        } else {
+                          installing.setCmrStreetAddress("\u00a0");
+                        }
                         installing.setCmrAddrSeq(legacybilladdrSeq);
-	                        installing.setCmrCity(record.getCmrCity());
-	                        installing.setCmrCity2(record.getCmrCity2());
-	                        installing.setCmrCountry(mailingAddr.getAddrLine6());
-	                        installing.setCmrCountryLanded("TR");
-	                        installing.setCmrState(record.getCmrState());
+                        installing.setCmrCity(record.getCmrCity());
+                        installing.setCmrCity2(record.getCmrCity2());
+                        installing.setCmrCountry(mailingAddr.getAddrLine6());
+                        installing.setCmrCountryLanded("TR");
+                        installing.setCmrState(record.getCmrState());
                         installing.setCmrDept(mainRecord.getCmrCity2());
+                        if (!StringUtils.isBlank(mainRecord.getCmrPostalCode())) {
+                          installing.setCmrPostalCode(mainRecord.getCmrPostalCode());
+                        } else {
+                          installing.setCmrPostalCode("");
+                        }
 	                        if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
 	                          installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
 	                        } else {
