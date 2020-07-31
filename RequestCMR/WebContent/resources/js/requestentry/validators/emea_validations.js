@@ -5914,6 +5914,7 @@ function lockRequireFieldsUKI() {
   }
   if (role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     FormManager.readOnly('abbrevLocn');
     FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
     FormManager.readOnly('cmrNo');
@@ -5940,7 +5941,7 @@ function lockRequireFieldsUKI() {
     }
   } else if (role == 'PROCESSOR') {
     FormManager.enable('abbrevNm');
-    FormManager.enable('_abbrevLocn');
+    FormManager.enable('abbrevLocn');
     FormManager.enable('cmrNo');
     FormManager.enable('cmrOwner');
     FormManager.enable('company');
@@ -5967,7 +5968,7 @@ function lockRequireFieldsUKI() {
   }
   if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
-    FormManager.readOnly('_abbrevLocn');
+    FormManager.readOnly('abbrevLocn');
     FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
   } else if (role == 'PROCESSOR') {
     FormManager.enable('abbrevNm');
@@ -5981,10 +5982,13 @@ function lockRequireFieldsUKI() {
       FormManager.removeValidator('soeReqNo', Validators.REQUIRED);
       fieldsToDisable.push('repTeamMemberName');
       fieldsToDisable.push('repTeamMemberNo');
+      fieldsToDisable.push('abbrevNm');
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     } else if (custSubGroup == 'INTER') {
       fieldsToDisable.push('dept');
     } else if (custSubGroup == 'CROSS' || custSubGroup == 'XIGF' || custSubGroup == 'XGOVR') {
       fieldsToDisable.push('specialTaxCd');
+      fieldsToDisable.push('abbrevNm');
     }
   }
   if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
