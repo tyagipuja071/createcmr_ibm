@@ -5973,7 +5973,7 @@ function lockRequireFieldsUKI() {
   } else if (role == 'PROCESSOR') {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
-  }
+  }// defect 5574
   if (role == 'REQUESTER') {
     if (custSubGroup == 'INFSL' || custSubGroup == 'COMME' || custSubGroup == 'SOFTL' || custSubGroup == 'THDPT') {
       fieldsToDisable.push('salesBusOffCd');
