@@ -496,6 +496,9 @@ public class MCOPtEsHandler extends MCOHandler {
     if ("ZD01".equals(address.getId().getAddrType()) && address.getCustPhone() != null) {
       removeTFFromShipingAddr(address);
     }
+    if ("822".equals(currentRecord.getCmrIssuedBy()) && address.getCustPhone() != null) {
+      removeTFFromShipingAddr(address);
+    }
     address.setDept("");
 
     if (!StringUtils.isEmpty(address.getCustPhone())) {
