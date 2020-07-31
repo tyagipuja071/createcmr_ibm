@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,6 +17,8 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cmr.services.client.matching.MatchingResponse;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
 public class UKIUtil extends AutomationUtil {
 
@@ -112,6 +115,31 @@ public class UKIUtil extends AutomationUtil {
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    String scenario = requestData.getData().getCustSubGrp();
+    String[] custClassValuesToCheck = { "43", "45", "46" };
+    if (UKIUtil.SCENARIO_BUSINESS_PARTNER.equals(scenario)) {
+      List<DuplicateCMRCheckResponse> matches = response.getMatches();
+      List<DuplicateCMRCheckResponse> filteredMatches = new ArrayList<DuplicateCMRCheckResponse>();
+      for (DuplicateCMRCheckResponse match : matches) {
+        if (StringUtils.isNotBlank(match.getCustClass())) {
+          String custClass = match.getCustClass();
+          if (Arrays.asList(custClassValuesToCheck).contains(custClass)) {
+            filteredMatches.add(match);
+          }
+        }
+
+      }
+      // set filtered matches in response
+      if (!filteredMatches.isEmpty()) {
+        response.setMatches(filteredMatches);
+      }
+    }
+
   }
 
 }
