@@ -26,16 +26,25 @@
 <cmr:view forGEO="EMEA">
   <cmr:row topPad="10">
     <!-- Story 1126634: SBO and Sales Rep-->
-    <cmr:column span="2" containerForField="SalesBusOff" forCountry="866">
+    <cmr:column span="2" containerForField="SalesBusOffUK" forCountry="866">
       <p>
         <cmr:label fieldId="salesBusOffCd">
           <cmr:fieldLabel fieldId="SalesBusOff" />:
              <!--cmr:delta text="{rdcdata.salesBusOffCd}" oldValue="${reqentry.salesBusOffCd}" id="delta-salesBusOffCd" />-->
         </cmr:label>
-        <cmr:field fieldId="SalesBusOff" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
+        <cmr:field fieldId="SalesBusOffUK" id="salesBusOffCd" path="salesBusOffCd" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="862,666,726">
+    <cmr:column span="2" containerForField="SalRepNameNoUK" forCountry="866">
+      <p>
+        <cmr:label fieldId="repTeamMemberNo">
+          <cmr:fieldLabel fieldId="SalRepNameNo" />:
+           <cmr:delta text="${rdcdata.repTeamMemberNo}" oldValue="${reqentry.repTeamMemberNo}" id="delta-repTeamMemberNo" />
+        </cmr:label>
+        <cmr:field fieldId="SalRepNameNoUK" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>
+    <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="862,666,726,866">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
           <cmr:fieldLabel fieldId="SalRepNameNo" />:

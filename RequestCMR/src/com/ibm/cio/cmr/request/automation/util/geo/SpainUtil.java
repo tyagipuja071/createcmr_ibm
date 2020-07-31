@@ -106,7 +106,14 @@ public class SpainUtil extends AutomationUtil {
       return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+    case SCENARIO_INTERNAL:
+    case SCENARIO_INTERNAL_SO:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
     }
     return true;
 
