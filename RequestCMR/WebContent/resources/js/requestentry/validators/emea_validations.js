@@ -7448,6 +7448,39 @@ function requestingLOBCheckFrIFSL() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addValidatorForCollectionCdUpdateUKI() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var reqId = FormManager.getActualValue('reqId');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (reqType == 'U' && role == 'REQUESTER') {
+          var requestingLOB = FormManager.getActualValue('requestingLob');
+          var collectionCd = FormManager.getActualValue('collectionCd');
+          var result = cmr.query('GETDATARDCVALUESIT', {
+            REQ_ID : reqId
+          });
+          var collCdOld = null;
+          if (result && result.ret1 != null) {
+            collCdOld = result.ret1;
+          }
+          if (collCdOld != null && collCdOld != collectionCd && requestingLOB != 'AR') {
+            return new ValidationResult({
+              id : 'requestingLob',
+              name : 'Requesting LOB'
+            }, false, 'Requesting LOB should be \'Accounts Receivable\' only, if Collection Code is updated.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7643,6 +7676,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.registerValidator(addValidatorForCollectionCdUpdateUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
