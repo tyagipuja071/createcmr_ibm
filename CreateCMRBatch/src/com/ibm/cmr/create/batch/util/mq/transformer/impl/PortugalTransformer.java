@@ -531,7 +531,7 @@ public class PortugalTransformer extends MessageTransformer {
     formatAddressLines(dummyHandler);
     if (MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
       if (!(StringUtils.isBlank(currAddr.getCustPhone())) || !(StringUtils.isEmpty(currAddr.getCustPhone()))) {
-        legacyAddr.setAddrPhone(currAddr.getCustPhone());
+        legacyAddr.setAddrPhone("TF" + currAddr.getCustPhone());
       }
     }
     if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
