@@ -1978,6 +1978,46 @@ function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged)
   }
 }
 
+function addAbbrevNmValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _abbrevNm = FormManager.getActualValue('abbrevNm');
+        var reg = /^[0-9a-zA-Z]*$/;
+        if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
+          return new ValidationResult({
+            id : 'abbrevNm',
+            type : 'text',
+            name : 'abbrevNm'
+          }, false, 'The value for Abbreviated name is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function addAbbrevLocationValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _abbrevLocn = FormManager.getActualValue('abbrevLocn');
+        var reg = /^[0-9a-zA-Z]*$/;
+        if (_abbrevLocn != '' && (_abbrevLocn.length > 0 && !_abbrevLocn.match(reg))) {
+          return new ValidationResult({
+            id : 'abbrevLocn',
+            type : 'text',
+            name : 'abbrevLocn'
+          }, false, 'The value for Abbreviated Location is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
@@ -2067,4 +2107,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.registerValidator(validateCMRNumberForISO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterTemplateLoad(configureVATExemptOnScenariosPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.registerValidator(addAbbrevNmValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
+
 });
