@@ -1848,7 +1848,6 @@ function addMailingConditionValidator() {
   /* End 1430539 */
 
   // CMR - 5478
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2116,7 +2115,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(tempReactEmbargoCDOnChange, [ SysLoc.SPAIN ]);
 
   GEOHandler.registerValidator(addEmbargoCodeValidatorSpain, [ SysLoc.SPAIN ], null, true);
-  GEOHandler.registerValidator(addBilingMailingValidatorSpain, [ SysLoc.SPAIN ], null, true);
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
 
   // PT Legacy
