@@ -19,12 +19,15 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 public class UKIUtil extends AutomationUtil {
 
@@ -218,6 +221,33 @@ public class UKIUtil extends AutomationUtil {
       }
     }
     return null;
+
+  }
+
+  @Override
+  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    String address = "ZS01";
+
+    LOG.debug("Address for the scenario to check: " + scenario);
+    if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) {
+      address = "ZI01";
+    }
+    return address;
+  }
+
+  @Override
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+    if ("C".equals(admin.getReqType()) && (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))) {
+      DnBMatchingResponse dnbRecord = (DnBMatchingResponse) engineData.get("ZI01_DNB_MATCH");
+      if (dnbRecord != null) {
+        request.setDunsNo(dnbRecord.getDunsNo());
+      }
+    }
 
   }
 
