@@ -1834,34 +1834,33 @@ public class CEMEAHandler extends BaseSOFHandler {
     String[] countryAddrss = null;
     if (CEE_COUNTRIES_LIST.contains(country)) {
       countryAddrss = CEE_MASS_UPDATE_SHEET_NAMES;
-    }
 
-    XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
-    row = sheet.getRow(0);// data field name row
-    int ordBlkIndex = 12;// default index
-    for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
-      currCell = row.getCell(cellIndex);
-      String cellVal = validateColValFromCell(currCell);
-      if ("Order block code".equals(cellVal)) {
-        ordBlkIndex = cellIndex;
-        break;
+      XSSFSheet sheet = book.getSheet("Data");// validate Data sheet
+      row = sheet.getRow(0);// data field name row
+      int ordBlkIndex = 12;// default index
+      for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
+        currCell = row.getCell(cellIndex);
+        String cellVal = validateColValFromCell(currCell);
+        if ("Order block code".equals(cellVal)) {
+          ordBlkIndex = cellIndex;
+          break;
+        }
       }
-    }
 
-    TemplateValidation error = new TemplateValidation("Data");
-    for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-      row = sheet.getRow(rowIndex);
-      if (row == null) {
-        return; // stop immediately when row is blank
+      TemplateValidation error = new TemplateValidation("Data");
+      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+        row = sheet.getRow(rowIndex);
+        if (row == null) {
+          return; // stop immediately when row is blank
+        }
+        currCell = row.getCell(ordBlkIndex);
+        String ordBlk = validateColValFromCell(currCell);
+        if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "R".equals(ordBlk))) {
+          LOG.trace("Order Block Code should only @, E, R. >> ");
+          error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, R. ");
+          validations.add(error);
+        }
       }
-      currCell = row.getCell(ordBlkIndex);
-      String ordBlk = validateColValFromCell(currCell);
-      if (StringUtils.isNotBlank(ordBlk) && !("@".equals(ordBlk) || "E".equals(ordBlk) || "R".equals(ordBlk))) {
-        LOG.trace("Order Block Code should only @, E, R. >> ");
-        error.addError(rowIndex, "Order Block Code", "Order Block Code should be only @, E, R. ");
-        validations.add(error);
-      }
-    }
 
     // for (String name : countryAddrss) {
     // sheet = book.getSheet(name);
@@ -1879,6 +1878,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     // TemplateValidation error = new TemplateValidation(name);
     // }
     // }
+    }
   }
 
   private int getCeeKnvpParvmCount(String kunnr) throws Exception {
