@@ -9,14 +9,20 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
@@ -35,6 +41,7 @@ public class UKIUtil extends AutomationUtil {
   public static final String SCENARIO_CROSSBORDER = "CROSS";
   public static final String SCENARIO_CROSS_GOVERNMENT = "XGOVR";
   public static final String SCENARIO_CROSS_IGF = "XIGF";
+  private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_PRIVATE_PERSON, SCENARIO_BUSINESS_PARTNER);
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -142,4 +149,97 @@ public class UKIUtil extends AutomationUtil {
 
   }
 
+  @Override
+  public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
+      AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
+      AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
+
+    // override 32S logic
+    if (!"C".equals(requestData.getAdmin().getReqType())) {
+      details.append("Coverage Calculation skipped for Updates.");
+      results.setResults("Skipped");
+      results.setDetails(details.toString());
+      return true;
+    }
+
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
+
+    if ((!isCoverageCalculated || ((SCENARIO_THIRD_PARTY.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
+        && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
+      details.setLength(0);
+      overrides.clearOverrides();
+      UkiFieldsContainer fields = null;
+      if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
+        fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd());
+      }
+      if (fields != null) {
+        details.append("Coverage calculated successfully using 32S logic.").append("\n");
+        details.append("Sales Rep : " + fields.getSalesRep()).append("\n");
+        details.append("SBO : " + fields.getSbo()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), fields.getSbo());
+        overrides.addOverride(AutomationElementRegistry.GBL_CALC_COV, "DATA", "REP_TEAM_MEMBER_NO", data.getRepTeamMemberNo(), fields.getSalesRep());
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else if (StringUtils.isNotBlank(data.getRepTeamMemberNo()) && StringUtils.isNotBlank(data.getSalesBusOffCd())) {
+        details.append("Coverage could not be calculated using 32S logic. Using values from request").append("\n");
+        details.append("Sales Rep : " + data.getRepTeamMemberNo()).append("\n");
+        details.append("SBO : " + data.getSalesBusOffCd()).append("\n");
+        results.setResults("Calculated");
+        results.setDetails(details.toString());
+      } else {
+        String msg = "Coverage cannot be calculated. No valid 32S mapping found from request data.";
+        details.append(msg);
+        results.setResults("Cannot Calculate");
+        results.setDetails(details.toString());
+        engineData.addNegativeCheckStatus("_ukiCoverage", msg);
+      }
+    }
+    return true;
+
+  }
+
+  private UkiFieldsContainer calculate32SValuesForUK(EntityManager entityManager, String isuCd, String clientTier, String isicCd) {
+    if ("32".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+      UkiFieldsContainer container = new UkiFieldsContainer();
+      String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISU_CD", isuCd);
+      query.setParameter("ISIC_CD", isicCd);
+      query.setParameter("CLIENT_TIER", clientTier);
+      query.setForReadOnly(true);
+      List<Object[]> results = query.getResults();
+      if (results != null && results.size() == 1) {
+        String sbo = (String) results.get(0)[0];
+        String salesRep = (String) results.get(0)[1];
+        container.setSbo(sbo);
+        container.setSalesRep(salesRep);
+        return container;
+      }
+    }
+    return null;
+
+  }
+
+  private class UkiFieldsContainer {
+    private String sbo;
+    private String salesRep;
+
+    public String getSbo() {
+      return sbo;
+    }
+
+    public void setSbo(String sbo) {
+      this.sbo = sbo;
+    }
+
+    public String getSalesRep() {
+      return salesRep;
+    }
+
+    public void setSalesRep(String salesRep) {
+      this.salesRep = salesRep;
+    }
+
+  }
 }
