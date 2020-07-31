@@ -1536,7 +1536,8 @@ public class TurkeyTransformer extends EMEATransformer {
       }
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
 
-        CmrtAddr mailingaddre = legacyObjects.findBySeqNo("00002");
+        // CmrtAddr mailingaddre = legacyObjects.findBySeqNo("00002");
+        CmrtAddr mailingaddre = legacyObjects.findByAddressUseFlag(ADDRESS_USE_BILLING);
         if (mailingaddre != null) {
         if (("Y".equals(currAddr.getIsAddrUseBilling()) || "Y".equals(currAddr.getIsAddrUseMailing()))) {
 
