@@ -1119,18 +1119,34 @@ public class CEETransformer extends EMEATransformer {
       legacyCust.setAbbrevLocn(dummyHandler.messageHash.get("AbbreviatedLocation"));
     }
 
-    if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
-      // if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+    String vat = dummyHandler.cmrData.getVat();
+    if ("C".equals(admin.getReqType()) && zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(vat)) {
       if ("821".equals(data.getCmrIssuingCntry())) {
-        // legacyCust.setVat(landedCntry +
-        // dummyHandler.cmrData.getVat().substring(2));
-        legacyCust.setVat(dummyHandler.cmrData.getVat());
+        if (vat.matches("^[A-Z]{2}.*")) {
+          String prefix = vat.substring(0, 2);
+          legacyCust.setVat(vat.replace(prefix, ""));
+        } else {
+          legacyCust.setVat(vat);
+        }
       } else {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+        if (vat.matches("^[A-Z]{2}.*")) {
+          legacyCust.setVat(vat);
+        } else {
+          String zp01AddrssCntry = null;
+          if (dummyHandler.currentAddresses != null) {
+            for (Addr addr : dummyHandler.currentAddresses) {
+              if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
+                zp01AddrssCntry = addr.getLandCntry();
+                break;
+              }
+            }
+            legacyCust.setVat(zp01AddrssCntry + vat);
+          }
+        }
       }
     } else {
-      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
-        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+      if (!StringUtils.isEmpty(vat)) {
+        legacyCust.setVat(vat);
       }
     }
 
@@ -1397,6 +1413,7 @@ public class CEETransformer extends EMEATransformer {
       query.setParameter("REQ_ID", handler.addrData.getId().getReqId());
       query.setForReadOnly(true);
       addresses = query.getResults(Addr.class);
+      handler.currentAddresses = addresses;
     } else {
       addresses = handler.currentAddresses;
     }
