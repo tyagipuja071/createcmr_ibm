@@ -438,6 +438,16 @@ function AddressDetailsModal_onLoad() {
       }
     }
   }
+  if (FormManager.getActualValue('cmrIssuingCntry') == '862' ){
+    var addrType = details.ret2;
+    if(addrType == 'ZS01'){
+      FormManager.hide('taxOffice_view', 'taxOffice_view');
+      FormManager.show('custPhone_view', 'custPhone_view');
+    }else{
+      FormManager.hide('custPhone_view', 'custPhone_view');
+      FormManager.show('taxOffice_view', 'taxOffice_view');
+    }
+  }
 }
 
 function displayHwMstInstallFlagNew() {
