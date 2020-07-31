@@ -2053,7 +2053,7 @@ public class EMEAHandler extends BaseSOFHandler {
       pk.setAddrType("ZI01");
       pk.setAddrSeq("00001");
       Addr addr = entityManager.find(Addr.class, pk);
-      if (data.getCustSubGrp().equalsIgnoreCase("INFSL") && addr != null) {
+      if (data.getCustSubGrp() != null && data.getCustSubGrp().equalsIgnoreCase("INFSL") && addr != null) {
         // CMR-4543
         autoSetAbbreviatedNameUKI(data, addr, admin);
       }
