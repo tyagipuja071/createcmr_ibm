@@ -1547,6 +1547,8 @@ public class TurkeyTransformer extends EMEATransformer {
           }
           if (!StringUtils.isBlank(mailingaddre.getAddrLine3())) {
             currAddr.setAddrLine3(mailingaddre.getAddrLine3());
+            } else {
+              currAddr.setAddrLine3("");
           }
           if (!StringUtils.isBlank(mailingaddre.getAddrLine4())) {
             currAddr.setAddrLine4(mailingaddre.getAddrLine4());
