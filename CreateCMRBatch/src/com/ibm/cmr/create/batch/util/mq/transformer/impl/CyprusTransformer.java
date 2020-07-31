@@ -195,7 +195,7 @@ public class CyprusTransformer extends EMEATransformer {
     if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
-    
+
   }
 
   @Override
@@ -284,12 +284,12 @@ public class CyprusTransformer extends EMEATransformer {
     String landedCntry = "";
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      legacyCust.setCeDivision("");           // CCEDA
-      legacyCust.setAccAdminBo("");           // RACBO
-      legacyCust.setDcRepeatAgreement("");    // CAGXB
-      legacyCust.setLeasingInd("");           // CIEDC
-      legacyCust.setAuthRemarketerInd("Y");   // CIEXJ
-      
+      legacyCust.setCeDivision(""); // CCEDA
+      legacyCust.setAccAdminBo(""); // RACBO
+      legacyCust.setDcRepeatAgreement(""); // CAGXB
+      legacyCust.setLeasingInd(""); // CIEDC
+      legacyCust.setAuthRemarketerInd("Y"); // CIEXJ
+
       for (Addr addr : cmrObjects.getAddresses()) {
         if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
           legacyCust.setTelNoOrVat(addr.getCustPhone());
@@ -297,7 +297,7 @@ public class CyprusTransformer extends EMEATransformer {
           break;
         }
       }
-      
+
       if (data.getCustSubGrp().equals("BUSPR") || data.getCustSubGrp().equals("CRBUS")) {
         legacyCust.setAuthRemarketerInd("1");
       }
@@ -308,11 +308,11 @@ public class CyprusTransformer extends EMEATransformer {
       } else {
         legacyCust.setMrcCd("3");
       }
-      
+
       legacyCust.setLangCd("");
 
       legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesTeamCd()) ? data.getSalesTeamCd() : ""); // REMXD
-      
+
       String formatSBO = data.getSalesBusOffCd() + "0000";
       legacyCust.setIbo(formatSBO);
       legacyCust.setSbo(formatSBO);
@@ -332,7 +332,7 @@ public class CyprusTransformer extends EMEATransformer {
           break;
         }
       }
-      
+
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
                                                                                             // removal-single
@@ -427,8 +427,8 @@ public class CyprusTransformer extends EMEATransformer {
       } catch (Exception e) {
         e.printStackTrace();
       }
-    } 
-    
+    }
+
     // common data for C/U
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
@@ -458,11 +458,11 @@ public class CyprusTransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
     }
-    
+
     // other fields to be transformed is pending
     legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ? data.getIbmDeptCostCenter() : "");
     legacyCust.setEnterpriseNo(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise() : "");
-    
+
   }
 
   @Override
@@ -660,6 +660,11 @@ public class CyprusTransformer extends EMEATransformer {
   @Override
   public boolean enableTempReactOnUpdates() {
     return true;
+  }
+
+  @Override
+  public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    return false;
   }
 
 }
