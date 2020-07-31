@@ -1983,7 +1983,7 @@ function addAbbrevNmValidatorPT() {
     return {
       validate : function() {
         var _abbrevNm = FormManager.getActualValue('abbrevNm');
-        var reg = /^[0-9a-zA-Z]*$/;
+        var reg = /^[-_ a-zA-Z0-9]+$/;
         if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
           return new ValidationResult({
             id : 'abbrevNm',
@@ -2003,7 +2003,7 @@ function addAbbrevLocationValidatorPT() {
     return {
       validate : function() {
         var _abbrevLocn = FormManager.getActualValue('abbrevLocn');
-        var reg = /^[0-9a-zA-Z]*$/;
+        var reg = /^[-_ a-zA-Z0-9]+$/;
         if (_abbrevLocn != '' && (_abbrevLocn.length > 0 && !_abbrevLocn.match(reg))) {
           return new ValidationResult({
             id : 'abbrevLocn',
