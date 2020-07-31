@@ -2079,6 +2079,19 @@ function addCmrNoValidatorForCEE() {
             if (results.ret1 != null) {
               return new ValidationResult(null, false, 'The CMR Number already exists.');
             }
+            // CMR4606 add cmr exist check for duplicate issued country
+            if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+              var cntryDup = FormManager.getActualValue('dupIssuingCntryCd');
+              var qParamsDup = {
+                CMRNO : cmrNo,
+                CNTRY : cntryDup,
+                MANDT : cmr.MANDT
+              };
+              var resultsD = cmr.query('GET.CMR.CEE', qParamsDup);
+              if (resultsD.ret1 != null) {
+                return new ValidationResult(null, false, 'The CMR Number already exists For the Country of Duplicate CMR.');
+              }
+            }
           }
         }
         return new ValidationResult(null, true);
@@ -3650,11 +3663,14 @@ function addEmbargoCdValidatorForCEE() {
     })(), 'MAIN_IBM_TAB', 'frmCMR');
   }
 }
+
+// CMR-4606
+
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762',
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
-  GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '603', '607', '620', '626', '651', '675', '677', '680', '694', '695', '699', '705', '707', '713', '741', '752', '762', '767', '768', '772',
-      '787', '805', '808', '821', '823', '832', '849', '850', '865', '889' ];
+  GEOHandler.CEMEA_CHECKLIST = [ '358', '359', '363', '607', '620', '626', '651', '675', '677', '680', '694', '695', '713', '741', '752', '762', '767', '768', '772', '787', '805', '808', '821',
+      '823', '832', '849', '850', '865', '889' ];
   GEOHandler.NON_CEE_CHECK = [ '620', '675', '677', '680', '713', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865' ];
   GEOHandler.CEE = [ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ];
   GEOHandler.CEMEA_EXCLUDE_CEE = GEOHandler.CEMEA.filter(function(v) {
