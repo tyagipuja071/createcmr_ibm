@@ -2,6 +2,7 @@
 var _customerTypeHandler = null;
 var _vatExemptHandler = null;
 var _isuCdHandler = null;
+var _isuCdHandlerIE = null;
 var _isicCdHandler = null;
 var _requestingLOBHandler = null;
 var _economicCdHandler = null;
@@ -395,6 +396,14 @@ function afterConfigForUKI() {
   }
   if (_landCntryHandlerUK && _landCntryHandlerUK[0]) {
     _landCntryHandlerUK[0].onChange();
+  }
+  if (_isuCdHandlerIE == null && FormManager.getField('isuCd') && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
+    _isuCdHandlerIE = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      setClientTierValuesUKI();
+    });
+  }
+  if (_isuCdHandlerIE && _isuCdHandlerIE[0]) {
+    _isuCdHandlerIE[0].onChange();
   }
 }
 
@@ -927,7 +936,7 @@ function isNorthernIrelandPostCd(postCd) {
 function set32SBOLogicOnFieldChange() {
   if (_isuCdHandler == null && FormManager.getField('isuCd')) {
     _isuCdHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setClientTierValuesUK();
+      setClientTierValuesUKI();
       autoSetSBO(value, _pagemodel.isuCd);
     });
   }
@@ -952,7 +961,7 @@ function set32SBOLogicOnFieldChange() {
   }
 }
 
-function setClientTierValuesUK(){
+function setClientTierValuesUKI(){
 
 
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -973,19 +982,28 @@ function setClientTierValuesUK(){
       ISU : '%' + isuCd + '%'
     };
     var results = cmr.query('GET.CTCLIST.BYISU', qParams);
-    if (results != null) {
+    if (results != null && results.length>0) {
       for (var i = 0; i < results.length; i++) {
         clientTiers.push(results[i].ret1);
       }
-      if (clientTiers != null && clientTiers.length>0) {
-        FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
-        if (clientTiers.length == 1) {
-          FormManager.setValue('clientTier', clientTiers[0]);
+    } else {
+      qParams.ISU='%*%';
+      results = cmr.query('GET.CTCLIST.BYISU',qParams);
+      if (results != null && results.length>0) {
+        for (var i = 0; i < results.length; i++) {
+          clientTiers.push(results[i].ret1);
         }
-      } else {
-        FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-        FormManager.setValue('clientTier','');
       }
+    }
+    
+    if (clientTiers != null && clientTiers.length>0) {
+      FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
+      if (clientTiers.length == 1) {
+        FormManager.setValue('clientTier', clientTiers[0]);
+      }
+    } else {
+      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+      FormManager.setValue('clientTier','');
     }
   }
 
@@ -1906,44 +1924,6 @@ function addEMEAClientTierISULogic() {
     } else {
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));
     }
-  });
-  if (_ISUHandler && _ISUHandler[0]) {
-    _ISUHandler[0].onChange();
-  }
-}
-
-function addIEClientTierISULogic() {
-  var reqType = null;
-  reqType = FormManager.getActualValue('reqType');
-  if (reqType != 'C') {
-    return;
-  }
-  if (!PageManager.isReadOnly()) {
-    FormManager.enable('clientTier');
-  }
-  _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-    if (!value) {
-      value = FormManager.getActualValue('isuCd');
-    }
-    if (!value) {
-      FormManager.setValue('clientTier', '');
-    }
-    var tierValues = null;
-    if (value == '32') {
-      tierValues = [ 'B', 'C', 'M' ];
-    } else if (value == '34') {
-      tierValues = [ 'A', 'E', 'V', '4', '6' ];
-    } else if (value != '') {
-      tierValues = [ '7', 'Z' ];
-    }
-
-    if (tierValues != null) {
-      FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
-    } else {
-      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-    }
-
-    addSBOSRLogicIE();
   });
   if (_ISUHandler && _ISUHandler[0]) {
     _ISUHandler[0].onChange();
@@ -5944,30 +5924,13 @@ function addSBOSRLogicIE() {
   if (_isuCd != '' && _clientTier != '') {
     var qParams = {
       _qall : 'Y',
-      ISU_CD : _isuCd,
+      ISU_CD :'%' + _isuCd +'%',
       CLIENT_TIER : '%' + _clientTier + '%',
     };
     var results = cmr.query('GET.SALESREP.IRELAND', qParams);
     if (results != null) {
       for (var i = 0; i < results.length; i++) {
         salesRepValue.push(results[i].ret1);
-      }
-
-      if (_isuCd == '21' && _clientTier == '7') {
-        salesRepValue.push('MMIR11');
-      } else if (_isuCd == '4F' && _clientTier == '7') {
-        salesRepValue.push('I72089');
-      } else if (_isuCd == '31' && _clientTier == '7') {
-        salesRepValue.push('I72089');
-      } else if (_isuCd == '18' && _clientTier == '7') {
-        salesRepValue.push('MMIRE2');
-      } else if (_isuCd == '15' && _clientTier == '7') {
-        salesRepValue.push('MMIRE2');
-      } else if (_isuCd == '34' && _clientTier == '6') {
-        salesRepValue.push('MMSN11');
-      } else if (_isuCd == '32' && _clientTier == 'M') {
-        salesRepValue.push('MMIR12');
-        salesRepValue.push('MMSN11');
       }
 
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesRepValue);
@@ -7219,8 +7182,7 @@ dojo.addOnLoad(function() {
   // UKI Specific
   GEOHandler.addAfterConfig(afterConfigForUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(defaultCapIndicatorUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAfterConfig(addIEClientTierISULogic, [ SysLoc.IRELAND ]);
-  GEOHandler.addAfterConfig(setClientTierValuesUK, [ SysLoc.UK ]);
+  GEOHandler.addAfterConfig(setClientTierValuesUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setAbbrevNmLocationLockAndMandatoryUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(addSBOSalesRepLogicIreland, [ SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(addSalesRepLogicUK2018, [ SysLoc.UK ]);
