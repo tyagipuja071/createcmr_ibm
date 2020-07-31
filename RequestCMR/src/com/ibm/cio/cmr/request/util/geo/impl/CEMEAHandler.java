@@ -1817,11 +1817,23 @@ public class CEMEAHandler extends BaseSOFHandler {
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("RCYAA", rcyaa);
     query.setParameter("RCUXA", cmr_no);
-    String result = query.getSingleResult(String.class);
+    List<Object[]> results = query.getResults();
 
-    if (result != null) {
-      gLn6 = result;
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      if (sResult[0] != null) {
+        String addln6 = sResult[0].toString();
+        if (!StringUtils.isBlank(addln6)) {
+          gLn6 = addln6;
+        } else if (sResult[1] != null) {
+          String addln4 = sResult[1].toString();
+          if (!StringUtils.isBlank(addln4)) {
+            gLn6 = addln4;
+          }
+        }
+      }
     }
+
     LOG.debug("gLn6 of Legacy" + gLn6);
     return gLn6;
   }
