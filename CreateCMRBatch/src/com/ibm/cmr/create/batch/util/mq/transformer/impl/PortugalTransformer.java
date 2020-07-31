@@ -42,7 +42,7 @@ public class PortugalTransformer extends MessageTransformer {
   private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02" };
 
   private static final Logger LOG = Logger.getLogger(PortugalTransformer.class);
-
+  private static final String DEFAULT_CLEAR_CHAR = "@";
   public static final String DEFAULT_LANDED_COUNTRY = "PT";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -571,7 +571,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getModeOfPayment())) {
-      if ("@".equals(muData.getModeOfPayment().trim())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getModeOfPayment().trim())) {
         legacyCust.setModeOfPayment("");
       } else {
         legacyCust.setModeOfPayment(muData.getModeOfPayment());
@@ -585,7 +585,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getSpecialTaxCd())) {
-      if ("@".equals(muData.getSpecialTaxCd().trim())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getSpecialTaxCd().trim())) {
         legacyCust.setTaxCd("");
       } else {
         legacyCust.setTaxCd(muData.getSpecialTaxCd());
@@ -598,7 +598,11 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getEnterprise())) {
-      legacyCust.setEnterpriseNo(muData.getEnterprise());
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getEnterprise())) {
+        legacyCust.setEnterpriseNo("");
+      } else {
+        legacyCust.setEnterpriseNo(muData.getEnterprise());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getCustNm2())) {
@@ -606,12 +610,10 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
-      if ("@".equals(muData.getCollectionCd().trim())) {
-        // cust.setCollectionCd("");
-        legacyCust.setDistrictCd("");
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getCollectionCd())) {
+        legacyCust.setCollectionCd("");
       } else {
-        String distCode = getDistrictCodeForMassUpdate(muData.getCollectionCd().trim(), entityManager);
-        legacyCust.setDistrictCd(distCode != null ? distCode : "");
+        legacyCust.setCollectionCd(muData.getCollectionCd());
       }
     }
 
@@ -620,8 +622,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      String newVat = handleVatMassUpdateChanges(muData.getVat(), legacyCust.getVat());
-      legacyCust.setVat(newVat);
+      legacyCust.setVat(muData.getVat());
     }
 
     if (!StringUtils.isBlank(muData.getCustNm1())) {
@@ -630,7 +631,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getInacCd())) {
-      if ("@".equals(muData.getInacCd().trim())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getInacCd().trim())) {
         legacyCust.setInacCd("");
       } else {
         legacyCust.setInacCd(muData.getInacCd());
@@ -638,7 +639,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getMiscBillCd())) {
-      if ("@".equals(muData.getMiscBillCd().trim())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getMiscBillCd().trim())) {
         legacyCust.setEmbargoCd("");
       } else {
         legacyCust.setEmbargoCd(muData.getMiscBillCd());
@@ -646,7 +647,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getOutCityLimit())) {
-      if ("@".equals(muData.getOutCityLimit().trim())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getOutCityLimit().trim())) {
         legacyCust.setMailingCond("");
       } else {
         legacyCust.setMailingCond(muData.getOutCityLimit());
@@ -656,7 +657,6 @@ public class PortugalTransformer extends MessageTransformer {
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
       legacyCust.setImsCd(subInd);
-      // Defect 1776715: Fix for Economic code
       String firstChar = String.valueOf(subInd.charAt(0));
       StringBuilder builder = new StringBuilder();
       builder.append(firstChar);
@@ -915,7 +915,6 @@ public class PortugalTransformer extends MessageTransformer {
     query.setForReadOnly(true);
     distCd = query.getSingleResult(String.class);
     return distCd;
-
   }
 
   @Override
