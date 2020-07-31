@@ -18,8 +18,6 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrPK;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
-import com.ibm.cio.cmr.request.entity.CmrtCustExt;
-import com.ibm.cio.cmr.request.entity.CmrtCustExtPK;
 import com.ibm.cio.cmr.request.entity.CmrtCustPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
@@ -142,8 +140,9 @@ public class CEEProcessService extends LegacyDirectService {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
-
     String cntry = data.getDupIssuingCntryCd();
+    data.setDupSalesBoCd(data.getSalesBusOffCd());
+
     LOG.debug("Issued country. " + cntry + " duplicate issued country used to generated and assigned.");
 
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
@@ -309,32 +308,36 @@ public class CEEProcessService extends LegacyDirectService {
           seqNo++;
         }
       }
+      // Mark as Comment due custExt not used for CIS duplicate countries for
+      // now
+      // CmrtCustExt custExt = null;
+      // CmrtCustExtPK custExtPk = null;
 
-      CmrtCustExt custExt = null;
-      CmrtCustExtPK custExtPk = null;
+      // boolean isCustExt = transformer.hasCmrtCustExt();
+      // if (isCustExt) {
+      // LOG.debug("Mapping default Data values with Legacy CmrtCustExt
+      // table.....");
+      // Initialize the object
+      // custExt = initEmpty(CmrtCustExt.class);
+      // default mapping for ADDR and CMRTCEXT
+      // custExtPk = new CmrtCustExtPK();
+      // custExtPk.setCustomerNo(cmrNo);
+      // custExtPk.setSofCntryCode(cntry);
+      // custExt.setId(custExtPk);
 
-      boolean isCustExt = transformer.hasCmrtCustExt();
-      if (isCustExt) {
-        LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
-        // Initialize the object
-        custExt = initEmpty(CmrtCustExt.class);
-        // default mapping for ADDR and CMRTCEXT
-        custExtPk = new CmrtCustExtPK();
-        custExtPk.setCustomerNo(cmrNo);
-        custExtPk.setSofCntryCode(cntry);
-        custExt.setId(custExtPk);
-
-        if (transformer != null) {
-          transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
-        }
-        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-        legacyObjects.setCustomerExt(custExt);
-      }
+      // if (transformer != null) {
+      // transformer.transformLegacyCustomerExtData(entityManager, dummyHandler,
+      // custExt, cmrObjects);
+      // }
+      // custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+      // custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+      // legacyObjects.setCustomerExt(custExt);
+      // }
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
     }
 
     return legacyObjects;
+
   }
 
   private String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
@@ -489,6 +492,7 @@ public class CEEProcessService extends LegacyDirectService {
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
     String cntry = data.getDupIssuingCntryCd();
+    data.setDupSalesBoCd(data.getSalesBusOffCd());
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
 
     LegacyDirectObjectContainer legacyObjects = LegacyDirectUtil.getLegacyDBValues(entityManager, cntry, cmrNo, false, transformer.hasAddressLinks());
@@ -866,17 +870,20 @@ public class CEEProcessService extends LegacyDirectService {
         }
       }
 
+      // Mark as Comment due custExt not used for CIS duplicate countries for
+      // now
       // Mukesh :Dev for custExt tab
-      boolean isCustExt = transformer.hasCmrtCustExt();
-      if (isCustExt) {
-        CmrtCustExt custExt = legacyObjects.getCustomerExt();
-        if (transformer != null) {
-          transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
-        }
-        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-        legacyObjects.setCustomerExt(custExt);
-      }
+      // boolean isCustExt = transformer.hasCmrtCustExt();
+      // if (isCustExt) {
+      // CmrtCustExt custExt = legacyObjects.getCustomerExt();
+      // if (transformer != null) {
+      // transformer.transformLegacyCustomerExtData(entityManager, dummyHandler,
+      // custExt, cmrObjects);
+      // }
+      // custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+      // custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+      // legacyObjects.setCustomerExt(custExt);
+      // }
       // rebuild the address use table
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
     }

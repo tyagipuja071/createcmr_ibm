@@ -696,7 +696,7 @@ function addCISHandler() {
 var _DupIssuingCntryCdHandler = null;
 var _ISU2Handler = null;
 var _CTC2Handler = null;
-var _SalesRep2Handler = null;
+// var _SalesRep2Handler = null;
 function setCISFieldHandlers() {
   if (_DupIssuingCntryCdHandler == null) {
     _DupIssuingCntryCdHandler = dojo.connect(FormManager.getField('dupIssuingCntryCd'), 'onChange', function(value) {
@@ -716,11 +716,12 @@ function setCISFieldHandlers() {
     });
   }
 
-  if (_SalesRep2Handler == null) {
-    _SalesRep2Handler = dojo.connect(FormManager.getField('dupSalesRepNo'), 'onChange', function(value) {
-      setSBO2(value);
-    });
-  }
+  // if (_SalesRep2Handler == null) {
+  // _SalesRep2Handler = dojo.connect(FormManager.getField('dupSalesRepNo'),
+  // 'onChange', function(value) {
+  // setSBO2(value);
+  // });
+  // }
 }
 
 function setExpediteReason() {
@@ -1340,7 +1341,8 @@ function setClientTier2Values(dupIsuCd) {
  */
 function setDropdownField2Values() {
   var dupIssuingCntryCd = FormManager.getActualValue('dupIssuingCntryCd');
-  FilteringDropdown.loadItems('dupSalesRepNo', 'dupSalesRepNo_spinner', 'lov', 'fieldId=SalRepNameNo&cmrIssuingCntry=' + dupIssuingCntryCd);
+  // FilteringDropdown.loadItems('dupSalesRepNo', 'dupSalesRepNo_spinner',
+  // 'lov', 'fieldId=SalRepNameNo&cmrIssuingCntry=' + dupIssuingCntryCd);
   FilteringDropdown.loadItems('dupEnterpriseNo', 'dupEnterpriseNo_spinner', 'lov', 'fieldId=Enterprise&cmrIssuingCntry=' + dupIssuingCntryCd);
 }
 
@@ -1412,12 +1414,14 @@ function setCountryDuplicateFields(value) {
       FormManager.show('ISU2', 'dupIsuCd');
       FormManager.show('ClientTier2', 'dupClientTierCd');
       FormManager.show('Enterprise2', 'dupEnterpriseNo');
-      FormManager.show('SalRepNameNo2', 'dupSalesRepNo');
-      if (role == GEOHandler.ROLE_PROCESSOR) {
-        FormManager.show('SalesBusOff2', 'dupSalesBoCd');
-      } else {
-        FormManager.hide('SalesBusOff2', 'dupSalesBoCd');
-      }
+      FormManager.show('LocalTax3', 'taxCd3');
+      // Mark as hide for CMR-4606
+      FormManager.hide('SalRepNameNo2', 'dupSalesRepNo');
+      // if (role == GEOHandler.ROLE_PROCESSOR) {
+      // FormManager.show('SalesBusOff2', 'dupSalesBoCd');
+      // } else {
+      // FormManager.hide('SalesBusOff2', 'dupSalesBoCd');
+      // }
 
       setDropdownField2Values();
       if (viewOnlyPage != 'true') {
@@ -1428,13 +1432,15 @@ function setCountryDuplicateFields(value) {
         if (FormManager.getActualValue('reqType') == 'C') {
           checkAndAddValidator('dupIsuCd', Validators.REQUIRED, [ 'ISU Code 2' ]);
           checkAndAddValidator('dupClientTierCd', Validators.REQUIRED, [ 'Client Tier 2' ]);
-          checkAndAddValidator('dupSalesRepNo', Validators.REQUIRED, [ 'Sales Rep 2' ]);
+          // checkAndAddValidator('dupSalesRepNo', Validators.REQUIRED, [ 'Sales
+          // Rep 2' ]);
         }
       } else {
         FormManager.readOnly('dupIsuCd');
         FormManager.readOnly('dupClientTierCd');
         FormManager.readOnly('dupEnterpriseNo');
-        FormManager.readOnly('dupSalesRepNo');
+        // FormManager.readOnly('dupSalesRepNo');
+        FormManager.readOnly('taxCd3');
       }
 
     } else {
@@ -1443,12 +1449,13 @@ function setCountryDuplicateFields(value) {
 
       FormManager.resetValidations('dupIsuCd');
       FormManager.resetValidations('dupClientTierCd');
-      FormManager.resetValidations('dupSalesRepNo');
+      // FormManager.resetValidations('dupSalesRepNo');
       FormManager.hide('ISU2', 'dupIsuCd');
       FormManager.hide('ClientTier2', 'dupClientTierCd');
       FormManager.hide('Enterprise2', 'dupEnterpriseNo');
+      FormManager.hide('LocalTax3', 'taxCd3');
       FormManager.hide('SalRepNameNo2', 'dupSalesRepNo');
-      FormManager.hide('SalesBusOff2', 'dupSalesBoCd');
+      // FormManager.hide('SalesBusOff2', 'dupSalesBoCd');
     }
   }
 }
@@ -1864,14 +1871,25 @@ function setAbbrvNmLoc() {
   var city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
   var abbrvNm = custNm.ret1;
   var abbrevLocn = city.ret1;
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
   if (FormManager.getActualValue('reqType') == 'C') {
-    if (abbrvNm && abbrvNm.length > 30) {
-      abbrvNm = abbrvNm.substring(0, 30);
+    if (abbrvNm && abbrvNm.length > 22) {
+      abbrvNm = abbrvNm.substring(0, 22);
     }
     if (abbrevLocn && abbrevLocn.length > 12) {
       abbrevLocn = abbrevLocn.substring(0, 12);
     }
+
+    // CMR-4606 set up abbrvNm for Russia CIS dup CMR
+    if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+      if (abbrvNm && abbrvNm.length > 18) {
+        abbrvNm = abbrvNm.substring(0, 18).trim() + ' CIS';
+      } else {
+        abbrvNm = abbrvNm + ' CIS';
+      }
+    }
+
   }
 
   if (abbrevLocn != null) {
@@ -3967,8 +3985,8 @@ dojo.addOnLoad(function() {
   // CMR-2101 Austria the func for Austria, setSBO also used by CEE countries
   GEOHandler.addAfterConfig(setSBO, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterConfig(setSBO2, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterTemplateLoad(setSBO2, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setCommercialFinanced, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setCommercialFinanced, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setTelecoverageRep, GEOHandler.CEMEA);
