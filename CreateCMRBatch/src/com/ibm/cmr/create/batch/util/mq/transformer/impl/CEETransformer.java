@@ -1008,12 +1008,12 @@ public class CEETransformer extends EMEATransformer {
           legacyCust.setBankBranchNo("");
         }
       }
-
-      if (!StringUtils.isBlank(data.getCrosSubTyp())) {
-        legacyCust.setCustType(data.getCrosSubTyp());
-      } else {
-        legacyCust.setCustType("");
-      }
+      //
+      // if (!StringUtils.isBlank(data.getCrosSubTyp())) {
+      // legacyCust.setCustType(data.getCrosSubTyp());
+      // } else {
+      // legacyCust.setCustType("");
+      // }
 
       // CMR-2279:ISR set based on SBO
 //      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {

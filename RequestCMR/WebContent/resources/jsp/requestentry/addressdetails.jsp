@@ -1065,7 +1065,7 @@
     </cmr:row>
   </cmr:view>
 
-  <cmr:view forCountry="862,726,666">
+  <cmr:view forCountry="726,666">
     <cmr:row addBackground="true">
       <cmr:column span="1">
         <cmr:label fieldId="vat_view">
@@ -1076,6 +1076,27 @@
       </cmr:column>
     </cmr:row>
   </cmr:view>
+	
+  <cmr:view forCountry="862">
+    <cmr:row addBackground="true">
+      <cmr:column span="1" containerForField="taxOffice_view">
+       <cmr:label fieldId="taxOffice_view">
+        <span class="lbl-TaxOffice">${ui.taxOffice}</span>:</cmr:label>
+       </cmr:column>
+      <cmr:column span="2">
+        <div id="taxOffice_view">-</div>
+      </cmr:column>
+    </cmr:row>
+    <cmr:row addBackground="true">
+      <cmr:column span="1" containerForField="custPhone_view">
+        <cmr:label fieldId="custPhone_view">
+          <span class="lbl-CustPhone">${ui.phone}</span>:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custPhone_view">-</div>
+      </cmr:column>
+    </cmr:row>
+   </cmr:view>
 
   <cmr:row topPad="10">
     <cmr:view exceptForGEO="AP" exceptForCountry="758,358,359,363,603,607,626,644,651,668,693,694,695,699,704,705,707,708,713,740,741,787,820,821,826,862,889,641,760">

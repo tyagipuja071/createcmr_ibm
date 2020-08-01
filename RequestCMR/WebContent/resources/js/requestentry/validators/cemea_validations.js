@@ -2215,6 +2215,19 @@ function addCmrNoValidatorForCEE() {
             if (results.ret1 != null) {
               return new ValidationResult(null, false, 'The CMR Number already exists.');
             }
+            // CMR4606 add cmr exist check for duplicate issued country
+            if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+              var cntryDup = FormManager.getActualValue('dupIssuingCntryCd');
+              var qParamsDup = {
+                CMRNO : cmrNo,
+                CNTRY : cntryDup,
+                MANDT : cmr.MANDT
+              };
+              var resultsD = cmr.query('GET.CMR.CEE', qParamsDup);
+              if (resultsD.ret1 != null) {
+                return new ValidationResult(null, false, 'The CMR Number already exists For the Country of Duplicate CMR.');
+              }
+            }
           }
         }
         return new ValidationResult(null, true);
