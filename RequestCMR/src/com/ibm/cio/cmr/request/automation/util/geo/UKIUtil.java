@@ -373,6 +373,23 @@ public class UKIUtil extends AutomationUtil {
         results.setResults("Calculated.");
         results.setProcessOutput(overrides);
       }
+    } else if (SCENARIO_INTERNAL.equalsIgnoreCase(scenario)) {
+      // check value of Department under '##UKIInternalDepartment' LOV
+      String sql = ExternalizedQuery.getSql("UKI.CHECK_DEPARTMENT");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      String dept = data.getIbmDeptCostCenter();
+      if (StringUtils.isNotBlank(dept)) {
+        query.setParameter("CD", dept);
+        query.setParameter("CNTRY", data.getCmrIssuingCntry());
+        String result = query.getSingleResult(String.class);
+        if (result == null) {
+          engineData.addRejectionComment("OTH", "IBM Department/Cost Center on the request is invalid.", "", "");
+          details.append("IBM Department/Cost Center on the request is invalid.").append("\n");
+        } else {
+          details.append("IBM Department/Cost Center " + dept + " validated successfully.").append("\n");
+          results.setResults("IBM Department/Cost Center " + dept + " validated successfully.");
+        }
+      }
     } else {
       details.append("No specific fields to calculate.");
       results.setResults("Skipped.");
