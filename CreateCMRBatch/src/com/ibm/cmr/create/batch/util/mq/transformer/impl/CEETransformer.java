@@ -1157,11 +1157,14 @@ public class CEETransformer extends EMEATransformer {
     if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
       legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
     }
-    if (!StringUtils.isEmpty(data.getCollectionCd())) {
-      legacyCust.setDistrictCd(data.getCollectionCd().substring(0, 2));
-    }
+
+    // remove DistrictCd
+    // if (!StringUtils.isEmpty(data.getCollectionCd())) {
+    // legacyCust.setDistrictCd(data.getCollectionCd().substring(0, 2));
+    // }
     // legacyCust.setBankBranchNo(data.getIbmDeptCostCenter() != null ?
     // data.getIbmDeptCostCenter() : "");
+
     if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
     } else if (!StringUtils.isEmpty(data.getCustSubGrp())
