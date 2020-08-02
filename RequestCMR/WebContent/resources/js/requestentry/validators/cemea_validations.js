@@ -3607,7 +3607,18 @@ function lockIsicCdCEE() {
   if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
     var isic = FormManager.getActualValue('isicCd');
     if ('9500' == isic || '0000' == isic) {
-      FormManager.readOnly('isicCd');
+      var oldISIC = null;
+      var requestId = FormManager.getActualValue('reqId');
+      qParams = {
+        REQ_ID : requestId,
+      };
+      var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+      var oldISIC = result.ret1;
+      if (oldISIC == '9500' || oldISIC == '0000') {
+        FormManager.readOnly('isicCd');
+      } else {
+        FormManager.enable('isicCd');
+      }
     } else {
       FormManager.enable('isicCd');
     }
