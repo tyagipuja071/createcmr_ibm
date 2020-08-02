@@ -1505,6 +1505,10 @@ public class TurkeyTransformer extends EMEATransformer {
       List<Addr> addrList = cmrObjects.getAddresses();
       List<CmrtAddr> legacyAddrList = legacyObjects.getAddresses();
       String billingseq = getSeqForBilling(entityManager, cmrObjects.getAdmin().getId().getReqId());
+      // String mailseqinlegacy = getMailingAddrSeqInLegacy(entityManager,
+      // cmrObjects.getData().getCmrIssuingCntry(),
+      // cmrObjects.getData().getCmrNo());
+      String billseqinlegacy = getBillingAddrSeqInLegacy(entityManager, cmrObjects.getData().getCmrIssuingCntry(), cmrObjects.getData().getCmrNo());
       boolean isExistMailing = true;
 
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
@@ -1517,9 +1521,9 @@ public class TurkeyTransformer extends EMEATransformer {
       }
 
       for (int i = 0; i < addrList.size(); i++) {
-        Addr addr = addrList.get(i);
-        String addrType = addr.getId().getAddrType();
-        if ("Y".equals(addr.getChangedIndc())) {
+        Addr addrData = addrList.get(i);
+        String addrType = addrData.getId().getAddrType();
+        if ("Y".equals(addrData.getChangedIndc())) {
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
           CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
             // if ("Y".equals(olddataaddr.getIsAddrUseMailing()) &&
@@ -1534,55 +1538,57 @@ public class TurkeyTransformer extends EMEATransformer {
         }
         }
       }
+      
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
 
-        // CmrtAddr mailingaddre = legacyObjects.findBySeqNo("00002");
-        CmrtAddr mailingaddre = legacyObjects.findByAddressUseFlag(ADDRESS_USE_BILLING);
+        CmrtAddr mailingaddre = legacyObjects.findBySeqNo(billseqinlegacy);
+        // CmrtAddr mailingaddre =
+        // legacyObjects.findByAddressUseFlag(ADDRESS_USE_BILLING);
         if (mailingaddre != null) {
-        if (("Y".equals(currAddr.getIsAddrUseBilling()) || "Y".equals(currAddr.getIsAddrUseMailing()))) {
+          if ("Y".equals(currAddr.getIsAddrUseMailing())) {
 
-          currAddr.setAddrLine1(mailingaddre.getAddrLine1());
-          if (!StringUtils.isBlank(mailingaddre.getAddrLine2())) {
-            currAddr.setAddrLine2(mailingaddre.getAddrLine2());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getAddrLine3())) {
-            currAddr.setAddrLine3(mailingaddre.getAddrLine3());
+            currAddr.setAddrLine1(mailingaddre.getAddrLine1());
+            if (!StringUtils.isBlank(mailingaddre.getAddrLine2())) {
+              currAddr.setAddrLine2(mailingaddre.getAddrLine2());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getAddrLine3())) {
+              currAddr.setAddrLine3(mailingaddre.getAddrLine3());
             } else {
               currAddr.setAddrLine3("");
-          }
-          if (!StringUtils.isBlank(mailingaddre.getAddrLine4())) {
-            currAddr.setAddrLine4(mailingaddre.getAddrLine4());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getAddrLine5())) {
-            currAddr.setAddrLine5(mailingaddre.getAddrLine5());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getAddrLine6())) {
-            currAddr.setAddrLine6(mailingaddre.getAddrLine6());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getAddrLineT())) {
-            currAddr.setAddrLineT(mailingaddre.getAddrLineT());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getAddrLineU())) {
-            currAddr.setAddrLineU(mailingaddre.getAddrLineU());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getCity())) {
-            currAddr.setCity(mailingaddre.getCity());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getStreet())) {
-            currAddr.setStreet(mailingaddre.getStreet());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getDistrict())) {
-            currAddr.setDistrict(mailingaddre.getDistrict());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getZipCode())) {
-            currAddr.setZipCode(mailingaddre.getZipCode());
-          }
-          if (!StringUtils.isBlank(mailingaddre.getContact())) {
-            currAddr.setContact(mailingaddre.getContact());
-          }
-          currAddr.setForUpdate(true);
+            }
+            if (!StringUtils.isBlank(mailingaddre.getAddrLine4())) {
+              currAddr.setAddrLine4(mailingaddre.getAddrLine4());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getAddrLine5())) {
+              currAddr.setAddrLine5(mailingaddre.getAddrLine5());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getAddrLine6())) {
+              currAddr.setAddrLine6(mailingaddre.getAddrLine6());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getAddrLineT())) {
+              currAddr.setAddrLineT(mailingaddre.getAddrLineT());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getAddrLineU())) {
+              currAddr.setAddrLineU(mailingaddre.getAddrLineU());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getCity())) {
+              currAddr.setCity(mailingaddre.getCity());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getStreet())) {
+              currAddr.setStreet(mailingaddre.getStreet());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getDistrict())) {
+              currAddr.setDistrict(mailingaddre.getDistrict());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getZipCode())) {
+              currAddr.setZipCode(mailingaddre.getZipCode());
+            }
+            if (!StringUtils.isBlank(mailingaddre.getContact())) {
+              currAddr.setContact(mailingaddre.getContact());
+            }
+            currAddr.setForUpdate(true);
 
-        }
+          }
         }
       }
     }
@@ -1867,6 +1873,36 @@ public class TurkeyTransformer extends EMEATransformer {
   @Override
   public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
     return false;
+  }
+
+  public static String getMailingAddrSeqInLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
+    String shareAddrSeq = "";
+    String sql = ExternalizedQuery.getSql("TR.GET_MAIL_SEQ_FROM_LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      shareAddrSeq = result;
+    }
+    LOG.debug("mailAddrSeq Addr>" + shareAddrSeq);
+    return shareAddrSeq;
+  }
+
+  public static String getBillingAddrSeqInLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
+    String shareAddrSeq = "";
+    String sql = ExternalizedQuery.getSql("TR.GET_BILL_SEQ_FROM_LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      shareAddrSeq = result;
+    }
+    LOG.debug("BillAddrSeq Addr>" + shareAddrSeq);
+    return shareAddrSeq;
   }
 
 }
