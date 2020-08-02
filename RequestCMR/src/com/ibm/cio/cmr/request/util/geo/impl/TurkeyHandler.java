@@ -3966,8 +3966,10 @@ public class TurkeyHandler extends BaseSOFHandler {
 	  
 	  @Override
 	  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
-	    XSSFRow row = null;
+    // XSSFRow row = null;
 	    XSSFCell currCell = null;
+    XSSFSheet soldto = book.getSheet("Sold-To Address");
+    XSSFSheet localLang = book.getSheet("Local Lang Translation Sold-To");
 
 	    String[] countryAddrss = null;
 	    if (country.equals(SystemLocation.TURKEY)) {
@@ -3975,17 +3977,13 @@ public class TurkeyHandler extends BaseSOFHandler {
 	    } else {
 	      countryAddrss = LD_MASS_UPDATE_SHEET_NAMES;
 	    }
-
-	    if (country.equals(SystemLocation.GREECE)) {
-	      validateTemplateDupFillsGreece(validations, book, maxRows, country);
-	      LOG.trace("validateTemplateDupFills for Greece");
-	      return;
-	    }
 	    
 	    for (String name : countryAddrss) {
 	      XSSFSheet sheet = book.getSheet(name);
-	      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-
+      // for (int rowIndex = 1; rowIndex <= 2002; rowIndex++) {
+      if (sheet != null) {
+      for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
 	        String cbCity = ""; // 8
 	        String localCity = ""; // 7
 	        String cbPostal = ""; // 10
@@ -3996,39 +3994,36 @@ public class TurkeyHandler extends BaseSOFHandler {
 	        String attPerson = ""; // 13
 
 	        String district = "";// 12
-	        String taxOffice = ""; // 13
+          String taxOffice = ""; // 14
 	        String name4 = "";// 10
 
-	        row = sheet.getRow(rowIndex);
-	        if (row == null) {
-	          return; // stop immediately when row is blank
-	        }
+        if (row.getRowNum() == 2001) {
+          continue;
+        }
 	        // iterate all the rows and check each column value
-	        currCell = row.getCell(6);
+          currCell = (XSSFCell) row.getCell(6);
 	        localCity = validateColValFromCell(currCell);
-	        currCell = row.getCell(7);
+          currCell = (XSSFCell) row.getCell(7);
 	        cbCity = validateColValFromCell(currCell);
-	        currCell = row.getCell(8);
+          currCell = (XSSFCell) row.getCell(8);
 	        localPostal = validateColValFromCell(currCell);
-	        currCell = row.getCell(9);
+          currCell = (XSSFCell) row.getCell(9);
 	        cbPostal = validateColValFromCell(currCell);
 
 	        TemplateValidation error = new TemplateValidation(name);
 
-	        // CMR-2731 Turkey: Mass Update: country modification
-	        if (SystemLocation.TURKEY.equals(country)) {
-	          currCell = row.getCell(12);
+          currCell = (XSSFCell) row.getCell(12);
 	          district = validateColValFromCell(currCell);
-	          currCell = row.getCell(13);
+          currCell = (XSSFCell) row.getCell(14);
 	          taxOffice = validateColValFromCell(currCell);
-	          currCell = row.getCell(5);
+          currCell = (XSSFCell) row.getCell(5);
 	          streetCont = validateColValFromCell(currCell);
-	          currCell = row.getCell(10);
+          currCell = (XSSFCell) row.getCell(10);
 	          name4 = validateColValFromCell(currCell);
 
 	          if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
 	            LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-	            error.addError(rowIndex, "Local City",
+            error.addError(row.getRowNum(), "Local City",
 	                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
 	            validations.add(error);
 	          }
@@ -4036,14 +4031,15 @@ public class TurkeyHandler extends BaseSOFHandler {
 	          if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
 	            LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
 	                + "If one is populated, the other must be empty. >>");
-	            error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+            error.addError(row.getRowNum(), "Local Postal Code",
+                "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
 	                + "If one is populated, the other must be empty.");
 	            validations.add(error);
 	          }
 
 	          if (!StringUtils.isEmpty(name4) && !StringUtils.isEmpty(streetCont)) {
 	            LOG.trace("Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty. >>");
-	            error.addError(rowIndex, "Name4",
+            error.addError(row.getRowNum(), "Name4",
 	                "Name4 and Street Cont must not be populated at the same time. " + "If one is populated, the other must be empty.");
 	            validations.add(error);
 	          }
@@ -4051,74 +4047,21 @@ public class TurkeyHandler extends BaseSOFHandler {
 	          if ((!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
 	            if ("@".equals(district)) {
 	              LOG.trace("Local address must not be populate District with @. ");
-	              error.addError(rowIndex, "District", "Local address must not be populate District with @. ");
+              error.addError(row.getRowNum(), "District", "Local address must not be populate District with @. ");
 	              validations.add(error);
 	            }
 
 	            if ("@".equals(taxOffice)) {
 	              LOG.trace("Local address must not be populate Tax Office with @. ");
-	              error.addError(rowIndex, "Tax Office", "Local address must not be populate Tax Office with @. ");
+              error.addError(row.getRowNum(), "Tax Office", "Local address must not be populate Tax Office with @. ");
 	              validations.add(error);
 	            }
 	          }
-	        } else {
-	          currCell = row.getCell(5);
-	          streetCont = validateColValFromCell(currCell);
-	          currCell = row.getCell(11);
-	          poBox = validateColValFromCell(currCell);
-	          currCell = row.getCell(12);
-	          attPerson = validateColValFromCell(currCell);
-	          // DTN: Defect 1898300: UKI - mass updates - addresses
-	          /*
-	           * Adding a check that if any of the address lines values that are set
-	           * as either value and both are filled out, it will throw an error
-	           * message that both can not be filled out.
-	           */
-	          if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-	            LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
-	            error.addError(rowIndex, "Local City",
-	                "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
-	            validations.add(error);
-	          }
-
-	          if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-	            LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-	                + "If one is populated, the other must be empty. >>");
-	            error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
-	                + "If one is populated, the other must be empty.");
-	            validations.add(error);
-	          }
-	          if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
-	              && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
-	            // if local
-	            if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-	              LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-	              error.addError(rowIndex, "Street Con't/PO Box",
-	                  "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-	              validations.add(error);
-	            } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
-	              LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-	              error.addError(rowIndex, "PO Box/ATT Person",
-	                  "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
-	              validations.add(error);
-	            } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
-	              LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-	              error.addError(rowIndex, "ATT Person/Street Con't",
-	                  "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
-	              validations.add(error);
-	            }
-	          } else {
-	            // else cross border
-	            if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
-	              LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-	              error.addError(rowIndex, "Street Con't/PO Box",
-	                  "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
-	              validations.add(error);
-	            }
-	          }
-	        }
 	      }
+      }
+      }
 	    }
+    // compareTwoSheets(localLang, soldto, book, validations);
 	  }
 
 	  @Override
@@ -4802,6 +4745,72 @@ public class TurkeyHandler extends BaseSOFHandler {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("TR.ADDR.UPDATE.ZP01SHARE.Y.CHANGEINCD"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
+  }
+
+  private boolean compareTwoSheets(XSSFSheet sheet1, XSSFSheet sheet2, XSSFWorkbook book, List<TemplateValidation> validations) {
+    int firstRow1 = sheet1.getFirstRowNum();
+    int lastRow1 = sheet1.getLastRowNum();
+    boolean equalSheets = true;
+    for (int i = firstRow1 + 1; i <= lastRow1; i++) {
+      XSSFRow row1 = sheet1.getRow(i);
+      XSSFRow row2 = sheet2.getRow(i);
+      if (!compareTwoRows(row1, row2, validations)) {
+        equalSheets = false;
+        if ((row1 == null) || (row2 == null))
+          continue;
+        int rowNos = row1.getRowNum() + 1;
+        TemplateValidation errors = new TemplateValidation("Local Lang-Sold To");
+        LOG.trace("Invalid rows found. Please check your file to proceed.");
+        errors.addError(row1.getRowNum(), "", "Row" + ": " + rowNos + " Invalid rows found. Please check your file to proceed..");
+        validations.add(errors);
+      }
+    }
+    return equalSheets;
+  }
+
+  private boolean compareTwoRows(XSSFRow row1, XSSFRow row2, List<TemplateValidation> validations) {
+    if ((row1 == null) && (row2 == null)) {
+      return true;
+    } else if ((row1 == null) || (row2 == null)) {
+      return false;
+    }
+
+    int firstCell1 = row1.getFirstCellNum();
+    int lastCell1 = row1.getLastCellNum();
+    boolean equalRows = true;
+
+    // Compare all cells in a row
+    for (int i = firstCell1 + 2; i <= lastCell1; i++) {
+      XSSFCell currCell1 = null;
+      String locallang = "";
+      String soldto = "";
+      currCell1 = row1.getCell(i);
+      locallang = validateColValFromCell(currCell1);
+      currCell1 = row2.getCell(i);
+      soldto = validateColValFromCell(currCell1);
+
+      if (row1.getRowNum() == 2001) {
+        continue;
+      }
+      if (i == 14) {
+        continue; // skip tax office
+      }
+
+      TemplateValidation error = new TemplateValidation("Local Lang/Sold To");
+      String msg = "Same fields needs to be filled for both Local Language and Sold to address. Please fix and upload the template again.";
+      int rowNo = row1.getRowNum() + 1;
+      if (!StringUtils.isEmpty(soldto) && StringUtils.isEmpty(locallang)) {
+        LOG.trace(msg);
+        error.addError(row1.getRowNum(), "", "Row" + rowNo + ": " + msg);
+        validations.add(error);
+      }
+      if (StringUtils.isEmpty(soldto) && !StringUtils.isEmpty(locallang)) {
+        LOG.trace(msg);
+        error.addError(row1.getRowNum(), "", "Row" + rowNo + ": " + msg);
+        validations.add(error);
+      }
+    }
+    return equalRows;
   }
 
   public static String getBilladdrSeqFromLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
