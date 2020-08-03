@@ -1957,9 +1957,9 @@ function addTurkishCharValidator() {
 
   // turkish addresses
   var addrToChkForTR = new Set([]);
-
+  var land_cntry = FormManager.getActualValue('landCntry');
   // for LOCAL
-  if (custType == 'LOCAL') {
+  if (custType == 'LOCAL' || land_cntry == 'TR') {
     addrToChkForTR = new Set([ 'ZP01' ]);
   }
 
@@ -1970,6 +1970,7 @@ function addTurkishCharValidator() {
   if (validateTurkish) {
     checkAndAddValidator('custNm1', turkish, [ 'Customer Name' ]);
     checkAndAddValidator('custNm2', turkish, [ 'Customer Name Con\'t' ]);
+    checkAndAddValidator('custNm4', turkish, [ 'Name 4' ]);
     checkAndAddValidator('addrTxt', turkish, [ 'Street Address' ]);
     checkAndAddValidator('addrTxt2', turkish, [ ' Address Con\'t/Occupation' ]);
     checkAndAddValidator('city1', turkish, [ 'City' ]);
@@ -1980,6 +1981,7 @@ function addTurkishCharValidator() {
   } else {
     FormManager.removeValidator('custNm1', turkish);
     FormManager.removeValidator('custNm2', turkish);
+    FormManager.removeValidator('custNm4', turkish);
     FormManager.removeValidator('addrTxt', turkish);
     FormManager.removeValidator('addrTxt2', turkish);
     FormManager.removeValidator('city1', turkish);
@@ -8577,6 +8579,7 @@ function afterConfigForTR() {
   if (_landCntryHandler == null) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       setDistrictMandatoryTR();
+      addTurkishCharValidator();
     });
   }
 }

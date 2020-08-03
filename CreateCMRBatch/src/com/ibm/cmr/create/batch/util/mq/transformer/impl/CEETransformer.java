@@ -905,7 +905,6 @@ public class CEETransformer extends EMEATransformer {
 
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("");
-      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
       legacyCust.setSalesGroupRep("099998");
       legacyCust.setSalesRepNo("099998");
       legacyCust.setDcRepeatAgreement("0");
@@ -1076,6 +1075,10 @@ public class CEETransformer extends EMEATransformer {
         resetOrdBlockToData(entityManager, data);
       }
     }
+    
+    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());      
+    }
 
     String dataEmbargoCd = data.getEmbargoCd();
     if (dataEmbargoCd != null) {
@@ -1209,6 +1212,10 @@ public class CEETransformer extends EMEATransformer {
       }
     }
 
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
+    }
+
     // RABXA :Bank Account Number
     if (SystemLocation.CROATIA.equals(cust.getId().getSofCntryCode())) {
       if (!StringUtils.isBlank(muData.getSearchTerm())) {
@@ -1268,6 +1275,7 @@ public class CEETransformer extends EMEATransformer {
     
     String cebo = "";
     if (!StringUtils.isBlank(muData.getCustNm2())) {
+      cebo = muData.getCustNm2();
       if (SystemLocation.SERBIA.equals(cust.getId().getSofCntryCode()) || SystemLocation.KYRGYZSTAN.equals(cust.getId().getSofCntryCode())) {
         if (cebo.length() < 7) {
           cebo = StringUtils.rightPad(cebo, 7, '0');

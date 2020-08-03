@@ -245,6 +245,10 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="70px" field="custNm3" header="${ui.grid.custNm3}" />
         </cmr:view>
         
+        <cmr:view forCountry="862">
+          <cmr:gridCol width="70px" field="custNm4" header="Name 4" />
+        </cmr:view>
+        
         <!-- Street and Street Con't except BELUX,JP -->
         <cmr:view exceptForGEO="BELUX,JP,AP">
           <cmr:gridCol width="130px" field="addrTxt" header="${ui.grid.addrTxt}" >
