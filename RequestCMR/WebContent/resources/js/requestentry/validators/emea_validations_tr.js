@@ -4311,8 +4311,11 @@ function showClassificationForTRUpd() {
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
     if (FormManager.getActualValue('reqType') == 'U') {
       FormManager.show('CustClass', 'custClass');
-      FormManager.enable('CustClass');
-      FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+      var role = FormManager.getActualValue('userRole').toUpperCase();
+      if(role != 'REQUESTER'){
+        FormManager.enable('CustClass');
+        FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
+      }
     }
   }
 }
@@ -5148,7 +5151,7 @@ function showCommercialFinanced() {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
 // FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [
 // '','R', 'S', 'T' ]);
-    FormManager.show('CustClass', 'custClass');
+// FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER') {
       // FormManager.readOnly('custClass');
@@ -7435,10 +7438,16 @@ function toggleTypeOfCustomerForTR() {
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
   }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   if (reqType == 'U') {
     FormManager.show('TypeOfCustomer', 'crosSubTyp');
   } else {
     FormManager.hide('TypeOfCustomer', 'crosSubTyp');
+  }
+  // Lock type of customer and classification code when update requester
+  if(reqType == 'U' && role == 'REQUESTER'){
+    FormManager.readOnly('crosSubTyp');
+    FormManager.readOnly('custClass');
   }
 }
 
@@ -8680,7 +8689,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
-
+  
+  GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOLogicOnISUChange, [ SysLoc.TURKEY ]);
@@ -8732,7 +8742,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(hideCustPhoneonSummary, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(addHandlerForCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setCustSubTypeBpGRTRCY, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setISRValuesGROnUpdate, [ SysLoc.GREECE ]);
 
   // Cyprus
