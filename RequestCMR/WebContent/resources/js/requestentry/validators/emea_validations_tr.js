@@ -4076,9 +4076,9 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
   }
 }
 
-function setDistrictMandatoryTR(){
+function setDistrictMandatoryTR() {
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
-  if(cntryCd == SysLoc.TURKEY){
+  if (cntryCd == SysLoc.TURKEY) {
     var landCntry = FormManager.getActualValue('landCntry');
     if (landCntry == 'TR') {
       checkAndAddValidator('dept', Validators.REQUIRED, [ 'District' ]);
@@ -8087,7 +8087,7 @@ function addCustNm4ValidatorForTR() {
       validate : function() {
         var custNm4 = FormManager.getActualValue('custNm4');
         var streetCont = FormManager.getActualValue('addrTxt2');
-        
+
         // var reqId = FormManager.getActualValue('reqId');
         // var addressType = FormManager.getActualValue('addrType');
         // var addrSeq = FormManager.getActualValue('addrSeq');
@@ -8238,12 +8238,32 @@ function setSBOValuesForIsuCtc() {
       FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), sboList);
       if (sboList.length == 1) {
         FormManager.setValue('salesBusOffCd', sboList[0]);
+      } else {
+        var oldSbo = null;
+        qParams = {
+          REQ_ID : FormManager.getActualValue('reqId')
+        };
+        oldSbo = cmr.query('GET.SBO.BYREQ', qParams);
+        if (oldSbo != null && oldSbo != "") {
+          if (sboList.indexOf(oldSbo.ret1) >= 0) {
+            FormManager.setValue('salesBusOffCd', oldSbo.ret1);
+          }
+        }
       }
     } else {
       FormManager.setValue('salesBusOffCd', "");
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+
+    var oldSbo = null;
+    qParams = {
+      REQ_ID : FormManager.getActualValue('reqId')
+    };
+    oldSbo = cmr.query('GET.SBO.BYREQ', qParams);
+    if (oldSbo != null && oldSbo != "") {
+      FormManager.setValue('salesBusOffCd', oldSbo.ret1);
+    }
   }
 }
 
