@@ -1136,15 +1136,15 @@ public class CEETransformer extends EMEATransformer {
         if (vat.matches("^[A-Z]{2}.*")) {
           legacyCust.setVat(vat);
         } else {
-          String zp01AddrssCntry = null;
+          String zs01AddrssCntry = null;
           if (dummyHandler.currentAddresses != null) {
             for (Addr addr : dummyHandler.currentAddresses) {
-              if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
-                zp01AddrssCntry = addr.getLandCntry();
+              if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+                zs01AddrssCntry = addr.getLandCntry();
                 break;
               }
             }
-            legacyCust.setVat(zp01AddrssCntry + vat);
+            legacyCust.setVat(zs01AddrssCntry + vat);
           }
         }
       } else {
