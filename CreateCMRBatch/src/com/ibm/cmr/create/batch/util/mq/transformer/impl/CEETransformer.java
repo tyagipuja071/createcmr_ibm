@@ -1123,7 +1123,8 @@ public class CEETransformer extends EMEATransformer {
     }
 
     String vat = dummyHandler.cmrData.getVat();
-    if ("C".equals(admin.getReqType()) && zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(vat)) {
+    // not for internal scenario
+    if ("C".equals(admin.getReqType()) && !StringUtils.isEmpty(vat) && !data.getCustSubGrp().contains("IN")) {
       if ("821".equals(data.getCmrIssuingCntry())) {
         if (vat.matches("^[A-Z]{2}.*")) {
           String prefix = vat.substring(0, 2);
@@ -1131,25 +1132,34 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setVat(vat);
         }
-      } else {
+      } else if ("BG,CZ,SK,HR,SI,HU,PL,RO".contains(data.getCmrIssuingCntry())) {
         if (vat.matches("^[A-Z]{2}.*")) {
           legacyCust.setVat(vat);
         } else {
-          String zp01AddrssCntry = null;
+          String zs01AddrssCntry = null;
           if (dummyHandler.currentAddresses != null) {
             for (Addr addr : dummyHandler.currentAddresses) {
-              if (MQMsgConstants.ADDR_ZP01.equals(addr.getId().getAddrType())) {
-                zp01AddrssCntry = addr.getLandCntry();
+              if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+                zs01AddrssCntry = addr.getLandCntry();
                 break;
               }
             }
-            legacyCust.setVat(zp01AddrssCntry + vat);
+            legacyCust.setVat(zs01AddrssCntry + vat);
           }
         }
+      } else {
+        if (!StringUtils.isEmpty(vat)) {
+          legacyCust.setVat(vat);
+        } else {
+          legacyCust.setVat("");
+        }
+
       }
     } else {
       if (!StringUtils.isEmpty(vat)) {
         legacyCust.setVat(vat);
+      } else {
+        legacyCust.setVat("");
       }
     }
 
