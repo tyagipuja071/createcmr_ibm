@@ -193,7 +193,10 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
           AdminPK pk = new AdminPK();
           pk.setReqId(model.getReqId());
           Admin admin = entityManager.find(Admin.class, pk);
-
+          String sourceType = sourceAddr.getId().getAddrType();
+          if (sourceType.equals("ZS01")) {
+            sourceAddr.setCustPhone(null);
+          }
           if (toCopy.equals("ZS01")) {
             newAddrSeq = "00003";
           }
