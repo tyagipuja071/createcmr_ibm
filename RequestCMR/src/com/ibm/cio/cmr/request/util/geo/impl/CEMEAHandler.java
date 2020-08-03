@@ -1138,7 +1138,18 @@ public class CEMEAHandler extends BaseSOFHandler {
     	if(StringUtils.isNotBlank(data.getEngineeringBo())) {
     		data.setEngineeringBo(StringUtils.rightPad(data.getEngineeringBo(), 7, "0"));
     	}
+    }
+    if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
+      String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+      String zp02updateinit = getZP02UpdateInit(entityManager, data.getId().getReqId());
+      if (StringUtils.isBlank(legacyGaddrSeq)) {
+        changeZP02AddrNew(entityManager, data.getId().getReqId());
       }
+      if("Y".equals(zp02updateinit)){
+        changeZS01AddrUpdate(entityManager, data.getId().getReqId());
+        changeZP01AddrUpdate(entityManager, data.getId().getReqId());
+      }
+    }
   }
 
   @Override
@@ -1920,5 +1931,37 @@ public class CEMEAHandler extends BaseSOFHandler {
       LOG.debug("GET.KNVP.PARVW " + knvpParvmCount + " WHERE KUNNR IS > " + kunnr);
     }
     return knvpParvmCount;
+  }
+
+  private void changeZP02AddrNew(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.CHANGE.ZP02NEW"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  public static String getZP02UpdateInit(EntityManager entityManager, long req_id) {
+    String ZP02UpdateInit = "";
+    String sql = ExternalizedQuery.getSql("CEE.GET.ZP02UPDATEINIT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      ZP02UpdateInit = result;
+    }
+    LOG.debug("ZP02UpdateInit Addr>" + ZP02UpdateInit);
+    return ZP02UpdateInit;
+  }
+
+  private void changeZS01AddrUpdate(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.CHANGE.ZS01UPDATE"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  private void changeZP01AddrUpdate(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.CHANGE.ZS01UPDATE"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 }
