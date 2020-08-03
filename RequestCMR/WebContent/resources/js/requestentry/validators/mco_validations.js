@@ -13,7 +13,8 @@ var _postalCodeHandler = null;
 var _ISICHandler = null;
 
 function afterConfigPT() {
-  FormManager.enable('vat');
+  FormManager.enable('vat'); 
+  FormManager.readOnly('subIndustryCd');
 }
 
 function afterTemplateLoadPT() {
@@ -2056,6 +2057,7 @@ function isuAndCtcBasedOnISIC() {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
   }
+  FormManager.disable('subIndustryCd');
 }
 
 /*
