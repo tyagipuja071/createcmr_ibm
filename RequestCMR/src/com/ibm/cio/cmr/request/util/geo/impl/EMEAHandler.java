@@ -29,7 +29,6 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.controller.DropdownListController;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
@@ -2048,14 +2047,20 @@ public class EMEAHandler extends BaseSOFHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
     if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry()) || SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
-      AddrPK pk = new AddrPK();
-      pk.setReqId(admin.getId().getReqId());
-      pk.setAddrType("ZI01");
-      pk.setAddrSeq("00001");
-      Addr addr = entityManager.find(Addr.class, pk);
-      if (data.getCustSubGrp() != null && data.getCustSubGrp().equalsIgnoreCase("INFSL") && addr != null) {
+      // get Installing Address name from DB
+      String custNm = "";
+      String instllAddrQuery = ExternalizedQuery.getSql("UKI.GET.INSTALLING_ADDR_CUST_NM");
+      PreparedQuery query = new PreparedQuery(entityManager, instllAddrQuery);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      Object[] result = query.getSingleResult();
+      if (result != null) {
+        String name1 = result[0] != null ? result[0].toString() : null;
+        String name2 = result[1] != null ? result[1].toString() : "";
+        custNm = name1 != null ? name1.concat(name2) : "";
+      }
+      if (data.getCustSubGrp() != null && data.getCustSubGrp().equalsIgnoreCase("INFSL") && StringUtils.isNotBlank(custNm)) {
         // CMR-4543
-        autoSetAbbreviatedNameUKI(data, addr, admin);
+        autoSetAbbreviatedNameUKI(data, custNm, admin);
       }
     }
     if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
@@ -4571,8 +4576,7 @@ public class EMEAHandler extends BaseSOFHandler {
     return zd01count;
   }
 
-  private void autoSetAbbreviatedNameUKI(Data data, Addr addr, Admin admin) {
-    String installingName = addr.getCustNm1().concat(addr.getCustNm2());
+  private void autoSetAbbreviatedNameUKI(Data data, String installingName, Admin admin) {
     String cntryFrmEmpId = "";
     String abbName = "";
     Person p = new Person();

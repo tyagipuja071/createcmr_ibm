@@ -455,7 +455,8 @@ function afterConfigForUKI() {
         autoSetAbbrevLocnOnChangeUKI();
         // DTN: Defect 1858294 : UKI: Internal FSL sub-scenario rules for
         // abbreviated name
-        autoSetAbbrevNameUKIInterFSL(_custType);
+        // commented bc. of new Req. CMR - 4542
+        // autoSetAbbrevNameUKIInterFSL(_custType);
         unlockINACForINTERUKI();
         autoSetISUClientTierUK();
         optionalRuleForVatUK();
@@ -485,7 +486,8 @@ function afterConfigForUKI() {
     _lobHandler = dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
       var lob = FormManager.getActualValue('requestingLob');
       if (lob != '') {
-        autoSetAbbrevNameUKIInterFSL(_custType);
+        // commented bc. of new Req. CMR - 4542
+        // autoSetAbbrevNameUKIInterFSL(_custType);
       }
     });
   }
