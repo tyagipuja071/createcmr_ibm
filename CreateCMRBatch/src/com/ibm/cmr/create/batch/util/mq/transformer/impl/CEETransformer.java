@@ -1275,6 +1275,7 @@ public class CEETransformer extends EMEATransformer {
     
     String cebo = "";
     if (!StringUtils.isBlank(muData.getCustNm2())) {
+      cebo = muData.getCustNm2();
       if (SystemLocation.SERBIA.equals(cust.getId().getSofCntryCode()) || SystemLocation.KYRGYZSTAN.equals(cust.getId().getSofCntryCode())) {
         if (cebo.length() < 7) {
           cebo = StringUtils.rightPad(cebo, 7, '0');
