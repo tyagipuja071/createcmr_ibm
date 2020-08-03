@@ -1960,7 +1960,7 @@ public class CEMEAHandler extends BaseSOFHandler {
   }
 
   private void changeZP01AddrUpdate(EntityManager entityManager, long reqId) {
-    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.CHANGE.ZS01UPDATE"));
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.CHANGE.ZP01UPDATE"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }

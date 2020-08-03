@@ -2450,6 +2450,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 	        if (!"TR".equals(addr.getLandCntry()) && ("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
 	          updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	        }
+          if ("ZP01".equals(addr.getId().getAddrType())) {
+            updateSoldToTaxOffice(entityManager, addr, cmrIssuingCntry);
+          }
 	      }
 
 	      if ("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType())) {
@@ -2626,7 +2629,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	        }
 	      }
 
-	      if (!"ZP01".equals(addr.getId().getAddrType())) {
+      if (!"ZP01".equals(addr.getId().getAddrType()) && !"ZS01".equals(addr.getId().getAddrType())) {
 	        addr.setTaxOffice("");
 	      }
 
@@ -2908,6 +2911,32 @@ public class TurkeyHandler extends BaseSOFHandler {
 	      entityManager.flush();
 	    }
 	  }
+
+  private void updateSoldToTaxOffice(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    String addrType = "ZS01";
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDRESS.GET.BYTYPE"));
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("Addr_Type", addrType);
+    Addr addrSource = query.getSingleResult(Addr.class);
+    if (addrSource != null) {
+      String importInd = addrSource.getImportInd();
+      Addr addrCopy = new Addr();
+      AddrPK addrPkCopy = new AddrPK();
+      PropertyUtils.copyProperties(addrCopy, addrSource);
+      PropertyUtils.copyProperties(addrPkCopy, addrSource.getId());
+      addrCopy.setId(addrPkCopy);
+      addrCopy.setTaxOffice(addr.getTaxOffice());
+      if (!"N".equals(importInd)) {
+        entityManager.detach(addrSource);
+        boolean changed = RequestUtils.isUpdated(entityManager, addrCopy, cmrIssuingCntry);
+        addrCopy.setChangedIndc(changed ? "Y" : null);
+      } else {
+        addrCopy.setChangedIndc(null);
+      }
+      entityManager.merge(addrCopy);
+      entityManager.flush();
+    }
+  }
 
 	  private void updateLandCntryGR(EntityManager entityManager, Addr addr) throws Exception {
 	    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.LANDEDCNTRY.GR"));
@@ -3462,6 +3491,7 @@ public class TurkeyHandler extends BaseSOFHandler {
     if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
       fields.add("ADDR_TXT_2");
       fields.add("CUST_PHONE");
+      fields.add("TAX_OFFICE");
     }
 	    return fields;
 	  }
