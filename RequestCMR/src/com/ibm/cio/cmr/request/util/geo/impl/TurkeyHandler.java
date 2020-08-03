@@ -334,7 +334,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        installing.setCmrName4(sadr.getName4());
                         installing.setCmrCountryLanded(sadr.getLand1());
 	                        installing.setCmrCountry(sadr.getSpras());
-	                        installing.setCmrStreetAddressCont(sadr.getStrs2());
+                        installing.setCmrStreetAddressCont(sadr.getStrs2());
 	                        installing.setCmrState(sadr.getRegio());
 	                        installing.setCmrPostalCode(sadr.getPstlz());
 	                        installing.setCmrDept(sadr.getOrt02());
@@ -356,7 +356,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 	                        LOG.debug("Adding installing to the records");
 	                        FindCMRRecordModel installing = new FindCMRRecordModel();
 	                        PropertyUtils.copyProperties(installing, mainRecord);
-	                        copyAddrData(installing, installingAddr);
+                        // copyAddrData(installing, installingAddr);
+                        installing.setCmrAddrTypeCode("ZP01");
+                        installing.setCmrAddrSeq(legacybilladdrSeq);
 	                        // add value
 	                        installing.setCmrName1Plain(mailingAddr.getAddrLine1());
 	                        if (!StringUtils.isBlank(mailingAddr.getAddrLine2())) {
@@ -381,11 +383,7 @@ public class TurkeyHandler extends BaseSOFHandler {
                         } else {
                           installing.setCmrPostalCode("");
                         }
-	                        if (!StringUtils.isBlank(mailingAddr.getAddrLine4())) {
-	                          installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
-	                        } else {
-	                          installing.setCmrStreetAddressCont("");
-	                        }
+                        installing.setCmrStreetAddressCont(mailingAddr.getAddrLine4());
 	                        converted.add(installing);
 	                      }
 	                    }
