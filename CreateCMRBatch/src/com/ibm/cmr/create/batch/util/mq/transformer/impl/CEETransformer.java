@@ -1123,7 +1123,8 @@ public class CEETransformer extends EMEATransformer {
     }
 
     String vat = dummyHandler.cmrData.getVat();
-    if ("C".equals(admin.getReqType()) && zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(vat)) {
+    // not for internal scenario
+    if ("C".equals(admin.getReqType()) && !StringUtils.isEmpty(vat) && !data.getCustSubGrp().contains("IN")) {
       if ("821".equals(data.getCmrIssuingCntry())) {
         if (vat.matches("^[A-Z]{2}.*")) {
           String prefix = vat.substring(0, 2);
@@ -1131,7 +1132,7 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setVat(vat);
         }
-      } else {
+      } else if ("BG,CZ,SK,HR,SI,HU,PL,RO".contains(data.getCmrIssuingCntry())) {
         if (vat.matches("^[A-Z]{2}.*")) {
           legacyCust.setVat(vat);
         } else {
@@ -1146,10 +1147,19 @@ public class CEETransformer extends EMEATransformer {
             legacyCust.setVat(zp01AddrssCntry + vat);
           }
         }
+      } else {
+        if (!StringUtils.isEmpty(vat)) {
+          legacyCust.setVat(vat);
+        } else {
+          legacyCust.setVat("");
+        }
+
       }
     } else {
       if (!StringUtils.isEmpty(vat)) {
         legacyCust.setVat(vat);
+      } else {
+        legacyCust.setVat("");
       }
     }
 
