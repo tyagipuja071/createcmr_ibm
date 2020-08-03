@@ -498,9 +498,6 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
-
-    
-
   }
   if (reqType != 'C') {
     return;
@@ -836,12 +833,6 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (custTypeinDB != null && custTypeinDB == _custType) {
     return
-
-    
-
-        
-
-    
 
   }
 
@@ -3357,10 +3348,10 @@ function addTRAddressTypeValidator() {
           var enErrMsg = '';
           var turkishErrMsg = '';
           var reqType = cmr.currentRequestType;
-          if (reqType == undefined) {
+          if(reqType == undefined){
             reqType = FormManager.getActualValue('reqType');
           }
-          if (reqType == 'U') {
+          if(reqType == 'U'){
             compareFields.push('custNm4');
           }
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
@@ -4119,7 +4110,7 @@ function disableAddrFieldsGRCYTR() {
     FormManager.setValue('custPhone', '');
     FormManager.hide('CustPhone', 'custPhone');
   } else {
-    FormManager.show('CustPhone', 'custPhone');
+	FormManager.show('CustPhone', 'custPhone');
     FormManager.enable('custPhone');
   }
   // Lock land country when 'LOCAL' scenario
@@ -4321,7 +4312,7 @@ function showClassificationForTRUpd() {
     if (FormManager.getActualValue('reqType') == 'U') {
       FormManager.show('CustClass', 'custClass');
       var role = FormManager.getActualValue('userRole').toUpperCase();
-      if (role != 'REQUESTER') {
+      if(role != 'REQUESTER'){
         FormManager.enable('CustClass');
         FormManager.addValidator('custClass', Validators.REQUIRED, [ 'Classification Code' ], 'MAIN_CUST_TAB');
       }
@@ -5158,10 +5149,9 @@ function showCommercialFinanced() {
     FormManager.hide('CommercialFinanced', 'commercialFinanced');
   } else {
     FormManager.show('CommercialFinanced', 'commercialFinanced');
-    // FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'),
-    // [
-    // '','R', 'S', 'T' ]);
-    // FormManager.show('CustClass', 'custClass');
+// FormManager.limitDropdownValues(FormManager.getField('commercialFinanced'), [
+// '','R', 'S', 'T' ]);
+// FormManager.show('CustClass', 'custClass');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if (role == 'REQUESTER') {
       // FormManager.readOnly('custClass');
@@ -5354,9 +5344,9 @@ function addCrossBorderValidatorForIT() {
 }
 
 function addPhoneValidatorEMEA() {
-  if (FormManager.getActualValue('addrType') == 'ZS01') {
-    FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
-  }
+	if(FormManager.getActualValue('addrType') == 'ZS01'){
+		FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);		
+	}
 }
 function addPOBOXValidatorEMEA() {
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO Box' ]);
@@ -7068,20 +7058,20 @@ function autoPopulateAbbNameCopySoldToTR() {
   }
   var custGroup = FormManager.getActualValue('custGrp');
 
-  if (custGroup != undefined && (custGroup == 'CROSS' || "TR" != FormManager.getActualValue("landCntry"))) {
+  if (custGroup != undefined && (custGroup == 'CROSS'|| "TR" != FormManager.getActualValue("landCntry"))) {
 
     var addrType = FormManager.getActualValue('addrType');
     var abbName = FormManager.getActualValue('custNm1');
-
+    
     console.log('addrType = ' + addrType);
     console.log('abbName = ' + abbName);
     if (addrType != '' && addrType == 'ZP01') {
-
-      FormManager.setValue('abbrevNm', abbName);
-    }
+      
+    FormManager.setValue('abbrevNm', abbName);
   }
 }
-
+}
+  
 function autoSetISUClientTierUK() {
   var custSubGroup = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
@@ -7455,7 +7445,7 @@ function toggleTypeOfCustomerForTR() {
     FormManager.hide('TypeOfCustomer', 'crosSubTyp');
   }
   // Lock type of customer and classification code when update requester
-  if (reqType == 'U' && role == 'REQUESTER') {
+  if(reqType == 'U' && role == 'REQUESTER'){
     FormManager.readOnly('crosSubTyp');
     FormManager.readOnly('custClass');
   }
@@ -8719,7 +8709,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAddrFunction(updateAbbrNameWithZS01TR, [ SysLoc.TURKEY ]);
   GEOHandler.addAddrFunction(updateAbbrLocWithZS01TR, [ SysLoc.TURKEY ]);
-
+  
   GEOHandler.addAfterConfig(showClassificationForTRUpd, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
   GEOHandler.addAfterTemplateLoad(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
