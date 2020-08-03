@@ -529,6 +529,11 @@ public class PortugalTransformer extends MessageTransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     formatAddressLines(dummyHandler);
+    if (MQMsgConstants.ADDR_ZS01.equals(currAddr.getId().getAddrType())) {
+      if (!(StringUtils.isBlank(currAddr.getCustPhone())) || !(StringUtils.isEmpty(currAddr.getCustPhone()))) {
+        legacyAddr.setAddrPhone("");
+      }
+    }
     if (MQMsgConstants.ADDR_ZD01.equals(currAddr.getId().getAddrType())) {
       if (!(StringUtils.isBlank(currAddr.getCustPhone())) || !(StringUtils.isEmpty(currAddr.getCustPhone()))) {
         legacyAddr.setAddrPhone("TF" + currAddr.getCustPhone());
