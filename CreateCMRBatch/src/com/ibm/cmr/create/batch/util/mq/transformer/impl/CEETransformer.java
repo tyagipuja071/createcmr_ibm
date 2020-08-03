@@ -905,7 +905,6 @@ public class CEETransformer extends EMEATransformer {
 
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("");
-      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
       legacyCust.setSalesGroupRep("099998");
       legacyCust.setSalesRepNo("099998");
       legacyCust.setDcRepeatAgreement("0");
@@ -1076,6 +1075,10 @@ public class CEETransformer extends EMEATransformer {
         resetOrdBlockToData(entityManager, data);
       }
     }
+    
+    if (!StringUtils.isBlank(data.getSubIndustryCd())) {
+      legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());      
+    }
 
     String dataEmbargoCd = data.getEmbargoCd();
     if (dataEmbargoCd != null) {
@@ -1207,6 +1210,10 @@ public class CEETransformer extends EMEATransformer {
           cust.setBankBranchNo(muData.getNewEntpName1());
         }
       }
+    }
+
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
     }
 
     // RABXA :Bank Account Number
