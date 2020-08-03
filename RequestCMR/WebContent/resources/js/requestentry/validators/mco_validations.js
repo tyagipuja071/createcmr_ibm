@@ -874,7 +874,7 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
     }
     var reqType = FormManager.getActualValue('reqType');
     var addrType = FormManager.getActualValue('addrType');
-    if (reqType == 'C' && addrType == 'ZS01' || copyingToA) {
+    if (reqType == 'C' && addrType == 'ZS01' || copyingToA || reqType == 'U') {
       // generate Abbreviated Name/Location
       var role = FormManager.getActualValue('userRole').toUpperCase();
       var abbrevNm = FormManager.getActualValue('custNm1');
