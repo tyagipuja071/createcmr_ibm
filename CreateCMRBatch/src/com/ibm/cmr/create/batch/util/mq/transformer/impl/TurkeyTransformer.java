@@ -607,7 +607,11 @@ public class TurkeyTransformer extends EMEATransformer {
     // }
 
     if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line3 = addrData.getAddrTxt();
       line4 = addrData.getAddrTxt2();
+    } else {
+      line3 = addrData.getAddrTxt2();
+      line4 = addrData.getAddrTxt();
     }
 
 
