@@ -931,6 +931,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     // Phone
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setPhone1(mainRecord.getCmrCustPhone());
+      data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
     }
     // ICO field
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
