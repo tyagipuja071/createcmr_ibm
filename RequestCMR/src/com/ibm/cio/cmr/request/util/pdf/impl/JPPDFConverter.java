@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.pdf.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -17,6 +18,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
 import com.itextpdf.io.font.FontConstants;
@@ -32,34 +34,34 @@ import com.itextpdf.layout.element.Table;
 public class JPPDFConverter extends DefaultPDFConverter {
   private final PdfFont regularFont;
   private static final Logger LOG = Logger.getLogger(RequestToPDFConverter.class);
+  private PdfFont chineseFont;
 
   public JPPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
     this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    String webConfig = ConfigUtil.getConfigDir();
+    String fontLocation = webConfig + File.separator + "ARIALUNI.TTF";
+    LOG.debug("Japanese Font Location " + fontLocation);
+    try {
+      this.chineseFont = PdfFontFactory.createFont(fontLocation, PdfEncodings.IDENTITY_H, true);
+    } catch (IOException e) {
+      LOG.debug("Error in initializing Japanese font.", e);
+      this.chineseFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    }
   }
 
   @Override
   protected Cell createValueCell(String text, int rowSpan, int colSpan) {
     Cell cell = new Cell(rowSpan, colSpan);
-    ClassLoader classLoader = getClass().getClassLoader();
-    String FONT = null;
-    PdfFont font = null;
     if ((text != null && (!text.isEmpty())) && (textContainingLanguage(text) != null)) {
-      try {
-        if (textContainingLanguage(text).equalsIgnoreCase("JAPANESE")) {
-          LOG.debug(">> classLoader.getResource('ARIALUNI.TTF') >> " + classLoader.getResource("ARIALUNI.TTF"));
-          FONT = classLoader.getResource("ARIALUNI.TTF").getPath();
-          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, true);
-          cell.setFont(font);
-          Paragraph label = new Paragraph();
-          label.setFontSize(7);
-          label.add(text);
-          cell.setFont(font);
-          cell.add(label);
-          return cell;
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
+      if (textContainingLanguage(text).equalsIgnoreCase("JAPANESE")) {
+        cell.setFont(this.chineseFont);
+        Paragraph label = new Paragraph();
+        label.setFontSize(7);
+        label.add(text);
+        cell.setFont(this.chineseFont);
+        cell.add(label);
+        return cell;
       }
     } else {
       cell.setHeight(10);
