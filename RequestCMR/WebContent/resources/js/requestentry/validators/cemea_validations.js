@@ -3306,11 +3306,11 @@ function setClassificationCodeCEE() {
   if ('C' == FormManager.getActualValue('reqType')) {
     var _custType = FormManager.getActualValue('custSubGrp');
     var isicCd = FormManager.getActualValue('isicCd');
-    if (_custType == 'BUSPR' || _custType == 'XBP') {
+    if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'RSBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP') {
       FormManager.setValue('custClass', '46');
-    } else if (_custType == 'INTER' || _custType == 'XINT') {
+    } else if (_custType == 'INTER' || _custType == 'XINT' || _custType == 'MEINT' || _custType == 'RSINT' || _custType == 'CSINT' || _custType == 'RSXIN') {
       FormManager.setValue('custClass', '81');
-    } else if (_custType == 'PRICU') {
+    } else if (_custType == 'PRICU' || _custType == 'CSPC' || _custType == 'MEPC' || _custType == 'RSPC' || _custType == 'RSXPC') {
       FormManager.setValue('custClass', '60');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
