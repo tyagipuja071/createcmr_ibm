@@ -116,7 +116,7 @@ public class GreeceHandler extends BaseSOFHandler {
   protected static final String[] TR_MASS_UPDATE_SHEET_NAMES = { "Installing Address", "Shipping Address", "EPL Address" };
 
   protected static final String[] GR_MASS_UPDATE_SHEET_NAMES = { "Local Lang translation Sold-to", "Sold To Address", "Ship To Address",
-      "Install At Address" };
+      "Install At Address", "Data" };
 
   static {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_KINGDOM, "GB");
@@ -3689,7 +3689,7 @@ public class GreeceHandler extends BaseSOFHandler {
             String poBox = ""; // 12
             String attPerson = ""; // 11
             String poBox1 = ""; // 12
-
+            String phoneNo = ""; // 12
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -3720,6 +3720,15 @@ public class GreeceHandler extends BaseSOFHandler {
               poBox1 = df.formatCellValue(row.getCell(12));
             }
 
+            if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(12);
+              phoneNo = validateColValFromCell(currCell);
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                phoneNo = df.formatCellValue(row.getCell(12));
+              }
+            }
+
             TemplateValidation error = new TemplateValidation(name);
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
               LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
@@ -3732,6 +3741,22 @@ public class GreeceHandler extends BaseSOFHandler {
                   + "If one is populated, the other must be empty. >>");
               error.addError(row.getRowNum(), "Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(cbPostal)) {
+              int maxlengthcomputed = crossCity.length() + cbPostal.length();
+              if (maxlengthcomputed > 32) {
+                LOG.trace("Crossborder city and crossborder postal code should have a maximun of 30 characters.");
+                error.addError(row.getRowNum(), "Crossborder City/Postal",
+                    "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
+                validations.add(error);
+              }
+            }
+
+            if (!StringUtils.isEmpty(localPostal) && !localPostal.matches("-?\\d+(\\.\\d+)?")) {
+              LOG.trace("Local postal code should have numeric values only.");
+              error.addError(row.getRowNum(), "Local Postal Code", "Only numeric values are allowed.");
               validations.add(error);
             }
 
@@ -3759,6 +3784,14 @@ public class GreeceHandler extends BaseSOFHandler {
               if (poBox1.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
+                validations.add(error);
+              }
+            }
+
+            if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (phoneNo.contains("+")) {
+                LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
