@@ -610,7 +610,7 @@ public class TurkeyTransformer extends EMEATransformer {
       line3 = addrData.getAddrTxt();
       line4 = addrData.getAddrTxt2();
     } else {
-      line3 = addrData.getAddrTxt2();
+      line3 = "";
       line4 = addrData.getAddrTxt();
     }
 
@@ -707,7 +707,7 @@ public class TurkeyTransformer extends EMEATransformer {
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
-    //legacyAddr.setAddrLine3(line3);
+    legacyAddr.setAddrLine3(line3);
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
     legacyAddr.setAddrLine6(line6);
