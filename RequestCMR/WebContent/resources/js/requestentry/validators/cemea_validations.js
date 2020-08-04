@@ -2093,6 +2093,11 @@ function addCmrNoValidatorForCEE() {
               }
             }
           }
+          // Cmr Number should not be within range: 500000 - 799999 for non
+          // CEMEX scenarios for 695
+          if (cmrNo != '' && cmrNo != null && cntry == '695' && cmrNo >= 500000 && cmrNo <= 799999 && custSubType != 'XCE') {
+            return new ValidationResult(null, false, 'CMR Number should not be within range: 500000 - 799999 for non CEMEX scenarios');
+          }
         }
         return new ValidationResult(null, true);
       }
@@ -3579,10 +3584,19 @@ function setEngineeringBO() {
       FormManager.enable('engineeringBo');
     }
   } else if (reqType == 'U') {
-    if (role == GEOHandler.ROLE_REQUESTER) {
+    if (cmrIssuing == SysLoc.KYRGYZSTAN) {
       FormManager.readOnly('engineeringBo');
+    } else if (cmrIssuing == SysLoc.SERBIA) {
+      var cebo = FormManager.getActualValue('engineeringBo');
+      if (cebo == '7130000') {
+        FormManager.readOnly('engineeringBo');
+      }
     } else {
-      FormManager.enable('engineeringBo');
+      if (role == GEOHandler.ROLE_REQUESTER) {
+        FormManager.readOnly('engineeringBo');
+      } else {
+        FormManager.enable('engineeringBo');
+      }
     }
   }
 }
