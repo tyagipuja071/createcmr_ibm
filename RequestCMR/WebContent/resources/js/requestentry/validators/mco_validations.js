@@ -13,7 +13,8 @@ var _postalCodeHandler = null;
 var _ISICHandler = null;
 
 function afterConfigPT() {
-  FormManager.enable('vat');
+  FormManager.enable('vat'); 
+  FormManager.readOnly('subIndustryCd');
 }
 
 function afterTemplateLoadPT() {
@@ -873,7 +874,7 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
     }
     var reqType = FormManager.getActualValue('reqType');
     var addrType = FormManager.getActualValue('addrType');
-    if (reqType == 'C' && addrType == 'ZS01' || copyingToA) {
+    if (reqType == 'C' && addrType == 'ZS01' || copyingToA || reqType == 'U') {
       // generate Abbreviated Name/Location
       var role = FormManager.getActualValue('userRole').toUpperCase();
       var abbrevNm = FormManager.getActualValue('custNm1');
@@ -1912,6 +1913,7 @@ function isuAndCtcBasedOnISIC() {
     FormManager.setValue('isuCd', '32');
     FormManager.setValue('clientTier', 'N');
   }
+  FormManager.disable('subIndustryCd');
 }
 
 /*
@@ -1983,7 +1985,7 @@ function addAbbrevNmValidatorPT() {
     return {
       validate : function() {
         var _abbrevNm = FormManager.getActualValue('abbrevNm');
-        var reg = /^[0-9a-zA-Z]*$/;
+        var reg = /^[-_ a-zA-Z0-9]+$/;
         if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
           return new ValidationResult({
             id : 'abbrevNm',
@@ -2003,7 +2005,7 @@ function addAbbrevLocationValidatorPT() {
     return {
       validate : function() {
         var _abbrevLocn = FormManager.getActualValue('abbrevLocn');
-        var reg = /^[0-9a-zA-Z]*$/;
+        var reg = /^[-_ a-zA-Z0-9]+$/;
         if (_abbrevLocn != '' && (_abbrevLocn.length > 0 && !_abbrevLocn.match(reg))) {
           return new ValidationResult({
             id : 'abbrevLocn',

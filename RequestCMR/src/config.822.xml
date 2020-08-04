@@ -61,12 +61,13 @@
           <label>Sales Rep</label>
           <dbColumn>REP_TEAM_MEMBER_NO</dbColumn>
           <width>30</width>
-          <bdsId>SalRepNameNo</bdsId>
+          <lovId>SalRepNameNo</lovId>
           <length>6</length>
         </column>
         <column>
           <label>SBO</label>
           <dbColumn>SALES_BO_CD</dbColumn>
+          <lovId>SalesBusOff</lovId>
           <width>20</width>
         </column>
         <column>
@@ -74,6 +75,7 @@
           <dbColumn>EMBARGO_CD</dbColumn>
           <width>10</width>
           <length>1</length>
+          <lovId>EmbargoCode</lovId>
         </column>
         <column>
           <label>Mode of Payment</label>
