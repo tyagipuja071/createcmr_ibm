@@ -747,11 +747,13 @@ public class MassRequestEntryController extends BaseController {
    */
 
   @RequestMapping(value = "/requestentry/reactivate/cmrNolist")
-  public ModelMap getCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId) throws CmrException {
+  public ModelMap getCMRList(HttpServletRequest request, HttpServletResponse response, @RequestParam("reqId") long reqId,
+      @RequestParam("reqType") String reqType) throws CmrException {
 
     List<DeleteReactivateModel> drModel = new ArrayList<DeleteReactivateModel>();
     ParamContainer params = new ParamContainer();
     params.addParam("reqId", reqId);
+    params.addParam("reqType", reqType);
     try {
       drModel = delReactivateService.process(request, params);
     } catch (Exception e) {

@@ -29,8 +29,13 @@ public class DeleteReactivateService extends BaseSimpleService<List<DeleteReacti
   @Override
   protected List<DeleteReactivateModel> doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     long reqId = (long) params.getParam("reqId");
+    String reqType = (String) params.getParam("reqType");
 
-    String sql = ExternalizedQuery.getSql("DELETE.REACTIVATE.LIST");
+    String sql = "";
+    if ("D".equals(reqType))
+      sql = ExternalizedQuery.getSql("DELETE.LIST");
+    else
+      sql = ExternalizedQuery.getSql("DELETE.REACTIVATE.LIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
     List<DeleteReactivateModel> results = new ArrayList<DeleteReactivateModel>();
