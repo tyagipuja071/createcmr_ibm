@@ -593,6 +593,9 @@ public class GreeceTransformer extends EMEATransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     formatAddressLines(dummyHandler);
+    if ("ZD01".equals(currAddr.getId().getAddrType())) {
+      legacyAddr.setAddrPhone(currAddr.getCustPhone());
+    }
     legacyAddr.setAddrLineT("");
     legacyAddr.setAddrLineU("");
   }
