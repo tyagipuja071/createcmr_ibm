@@ -142,13 +142,13 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column number="true" exactLength="false">
+        <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>5</length>
         </column>
-        <column number="true" exactLength="false">
+        <column>
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
@@ -229,13 +229,13 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column number="true" exactLength="false">
+        <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>5</length>
         </column>
-        <column number="true" exactLength="false">
+        <column>
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
@@ -310,13 +310,13 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column number="true" exactLength="false">
+        <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
           <length>5</length>
         </column>
-        <column number="true" exactLength="false">
+        <column>
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
@@ -390,13 +390,13 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column number="true" exactLength="false">
+        <column exactLength="true">
           <label>Local Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
-          <length>8</length>
+          <length>5</length>
         </column>
-        <column number="true" exactLength="false">
+        <column>
           <label>Cross Border Postal Code</label>
           <dbColumn>POST_CD</dbColumn>
           <width>18</width>
