@@ -662,9 +662,4 @@ public class CyprusTransformer extends EMEATransformer {
     return true;
   }
 
-  @Override
-  public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
-    return false;
-  }
-
 }
