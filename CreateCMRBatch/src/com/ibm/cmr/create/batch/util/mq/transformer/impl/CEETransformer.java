@@ -623,18 +623,37 @@ public class CEETransformer extends EMEATransformer {
 
     // Dept + Postal code + City
     line5 = addrData.getPostCd() + " " + addrData.getCity1();
+    if (SystemLocation.SERBIA.equals(cmrData.getCmrIssuingCntry())) {
+      String cntryUse = cmrData.getCountryUse();
+      if ("ZP02".equals(addrData.getId().getAddrType())) {
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          line6 = addrData.getBldg();
+        } else {
+          line6 = "";
+        }
+      } else if (!StringUtils.isBlank(cntryUse)) {
+        if ("707CS".equals(cntryUse)) {
+          line6 = "Kosovo";
+        } else if ("707ME".equals(cntryUse)) {
+          line6 = "ME";
+        } else {
+          line6 = "RS";
+        }
 
-    if ("ZP02".equals(addrData.getId().getAddrType())) {
-      if (!StringUtils.isBlank(addrData.getBldg())) {
-        line6 = addrData.getBldg();
-      } else {
-        line6 = "";
       }
     } else {
-      if (!StringUtils.isBlank(addrData.getLandCntry())) {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+      if ("ZP02".equals(addrData.getId().getAddrType())) {
+        if (!StringUtils.isBlank(addrData.getBldg())) {
+          line6 = addrData.getBldg();
+        } else {
+          line6 = "";
+        }
       } else {
-        line6 = "";
+        if (!StringUtils.isBlank(addrData.getLandCntry())) {
+          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+        } else {
+          line6 = "";
+        }
       }
     }
     // if (!StringUtils.isBlank(addrData.getLandCntry())) {
