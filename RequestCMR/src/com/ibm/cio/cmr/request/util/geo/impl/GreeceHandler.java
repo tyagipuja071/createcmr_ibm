@@ -3754,9 +3754,9 @@ public class GreeceHandler extends BaseSOFHandler {
               }
             }
 
-            if (!StringUtils.isEmpty(localPostal) && localPostal.length() != 7) {
-              LOG.trace("Local postal code should have exactly 5 characters.");
-              error.addError(row.getRowNum(), "Local Postal", "Local postal code should have exactly 5 characters.");
+            if (!StringUtils.isEmpty(localPostal) && !localPostal.matches("-?\\d+(\\.\\d+)?")) {
+              LOG.trace("Local postal code should have numeric values only.");
+              error.addError(row.getRowNum(), "Local Postal Code", "Only numeric values are allowed.");
               validations.add(error);
             }
 
