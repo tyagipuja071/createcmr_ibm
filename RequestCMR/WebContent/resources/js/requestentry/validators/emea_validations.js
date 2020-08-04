@@ -5916,7 +5916,7 @@ function lockRequireFieldsUKI() {
   if (cntry == SysLoc.IRELAND) {
     FormManager.readOnly('salesBusOffCd');
   }
-  if (role == 'REQUESTER') {
+  if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     FormManager.readOnly('abbrevLocn');
