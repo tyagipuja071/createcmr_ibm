@@ -1532,7 +1532,8 @@ public class TurkeyTransformer extends EMEATransformer {
         String addrType = addrData.getId().getAddrType();
         if ("Y".equals(addrData.getChangedIndc())) {
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-          CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
+            // CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
+            CmrtAddr olddataaddr = legacyObjects.findBySeqNo(billseqinlegacy);
             // if ("Y".equals(olddataaddr.getIsAddrUseMailing()) &&
             // "Y".equals(olddataaddr.getIsAddrUseBilling())) {
             if (!isExistMailing) {
