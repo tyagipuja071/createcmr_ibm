@@ -158,7 +158,7 @@ public class GreeceHandler extends BaseSOFHandler {
       } else {
         // name3 in rdc = Address Con't on SOF
         record.setCmrStreetAddressCont(record.getCmrName3());
-        record.setCmrName3(null);
+        record.setCmrName3(record.getCmrName3());
       }
 
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
@@ -233,8 +233,8 @@ public class GreeceHandler extends BaseSOFHandler {
 
                   // name3 in rdc = Address Con't on SOF
                   addr.setCmrStreetAddressCont(record.getCmrName3());
-                  addr.setCmrName3(null);
-                  addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
+                  addr.setCmrName3(record.getCmrName3());
+                  addr.setCmrName2Plain(record.getCmrName2Plain());
 
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
                     addr.setCmrPOBox(record.getCmrPOBox());
@@ -1729,7 +1729,13 @@ public class GreeceHandler extends BaseSOFHandler {
 
       address.setCustNm1(currentRecord.getCmrName1Plain());
       address.setCustNm2(currentRecord.getCmrName2Plain());
-      address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+
+      if (StringUtils.isNotBlank(currentRecord.getCmrStreetAddressCont())) {
+        address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+      } else if (StringUtils.isNotBlank(currentRecord.getCmrName3())) {
+        address.setAddrTxt2(currentRecord.getCmrName3());
+      }
+
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
       address.setVat(currentRecord.getCmrTaxNumber());
       address.setTaxOffice(currentRecord.getCmrTaxOffice());
@@ -3942,6 +3948,13 @@ public class GreeceHandler extends BaseSOFHandler {
         addr = cloneAddress(record, addrType);
       }
     }
+
+    if (StringUtils.isNotBlank(record.getCmrStreetAddressCont())) {
+      addr.setCmrStreetAddressCont(record.getCmrStreetAddressCont());
+    } else if (StringUtils.isNotBlank(record.getCmrName3())) {
+      addr.setCmrStreetAddressCont(record.getCmrName3());
+    }
+
     return addr;
   }
 
