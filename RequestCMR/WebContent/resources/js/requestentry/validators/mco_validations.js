@@ -958,8 +958,10 @@ function abbrvNmProcessorMandatory() {
         FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'AbbrevName' ], 'MAIN_CUST_TAB');
       } else {
         FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-        FormManager.readOnly('abbrevNm');
-        FormManager.readOnly('abbrevLocn');
+        if(FormManager.getActualValue('reqType') != 'U'){
+          FormManager.readOnly('abbrevNm');
+          FormManager.readOnly('abbrevLocn');
+        }
       }
     }
   }, 1000);
@@ -971,8 +973,10 @@ function abbrvNmProcessorMandatoryOnChange() {
     if (role != 'REQUESTER') {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'AbbrevName' ], 'MAIN_CUST_TAB');
     } else {
-      FormManager.readOnly('abbrevNm');
-      FormManager.readOnly('abbrevLocn');
+      if(FormManager.getActualValue('reqType') != 'U'){
+        FormManager.readOnly('abbrevNm');
+        FormManager.readOnly('abbrevLocn');
+      }
       FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     }
   });
