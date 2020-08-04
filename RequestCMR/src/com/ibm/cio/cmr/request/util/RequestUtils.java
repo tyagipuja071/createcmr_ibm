@@ -548,6 +548,11 @@ public class RequestUtils {
     params.add(rejectReason); // {10}
     params.add(embeddedLink); // {11}
 
+    String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+    country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+
+    email = StringUtils.replace(email, "$COUNTRY$", country);
+
     if (!StringUtils.isBlank(admin.getSourceSystId())) {
       ExternalSystemUtil.addExternalMailParams(entityManager, params, admin);
     }
@@ -566,6 +571,27 @@ public class RequestUtils {
 
     mail.send(host);
 
+  }
+
+  /**
+   * String gets the fully qualified country name
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  private static String getIssuingCountry(EntityManager entityManager, String country) {
+    // TODO move to cmr-queries
+    try {
+      String sql = "select NM from CREQCMR.SUPP_CNTRY where CNTRY_CD = :CNTRY";
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", country);
+      query.setForReadOnly(true);
+      return query.getSingleResult(String.class);
+    } catch (Exception e) {
+      LOG.warn("Error in getting issuing country name", e);
+      return null;
+    }
   }
 
   private static String formatRejectionInfo(String current, WfHist rejection) {
