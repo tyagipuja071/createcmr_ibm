@@ -7446,7 +7446,7 @@ function requestingLOBCheckFrIFSL() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var reqLob = FormManager.getActualValue('requestingLob');
-        if (cntry == SysLoc.UK || cntry == SysLoc.Ireland) {
+        if (cntry == SysLoc.UK || cntry == SysLoc.IRELAND) {
           if (custGrp == 'LOCAL' && custSubGrp == 'DC') {
             if (reqLob != 'TSS') {
               return new ValidationResult(null, false, 'Requests with Datacentre Scenario should have Requesting LOB as TSS. ');
