@@ -3364,10 +3364,31 @@ function validateIsicCEEValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var isic = FormManager.getActualValue('isicCd');
-        if ('U' == reqType && ('9500' == isic || '0000' == isic)) {
-          // FormManager.enable('isicCd');
-          return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
+        var oldISIC = null;
+        var requestId = FormManager.getActualValue('reqId');
+        qParams = {
+          REQ_ID : requestId,
+        };
+        var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+        var oldISIC = result.ret1;
+
+        if ('U' == reqType) {
+          if ('9500' == isic || '0000' == isic) {
+            if (oldISIC != '9500' && oldISIC != '0000') {
+              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
+            } else {
+              return new ValidationResult(null, true);
+            }
+          } else {
+            if (oldISIC == '9500' || oldISIC == '0000') {
+              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
+            } else {
+              // FormManager.enable('isicCd');
+              return new ValidationResult(null, true);
+            }
+          }
         }
+
         if (('C' == reqType && ('9500' == isic || '0000' == isic))
             && !(FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'CSINT'
                 || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'MEINT' || FormManager.getActualValue('custSubGrp') == 'RSINT'
