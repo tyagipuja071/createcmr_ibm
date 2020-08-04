@@ -1311,6 +1311,13 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEngineeringBo(), "EngineeringBo", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2()) && CEE_COUNTRIES_LIST.contains(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "LocalTax2", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getTaxCd2(), "Enterprise", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getTaxCd2(), "Enterprise", cmrCountry));
+      results.add(update);
+    }
 
   }
 
