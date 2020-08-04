@@ -202,7 +202,7 @@
 				</column>
 			</columns>
 		</tab>
-		<tab name="Mail to" type="Address" typeCode="ZD01">
+		<tab name="Mail to" type="Address" typeCode="ZS02">
 			<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
