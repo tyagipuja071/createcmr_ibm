@@ -156,6 +156,12 @@
 					<length>30</length>
 				</column>
 				<column>
+					<label>Att. Person</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
 					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -217,6 +223,12 @@
 				<column>
 					<label>Customer Name 3</label>
 					<dbColumn>CUST_NM3</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Att. Person</label>
+					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
@@ -286,6 +298,12 @@
 					<length>30</length>
 				</column>
 				<column>
+					<label>Att. Person</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
 					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -347,6 +365,12 @@
 				<column>
 					<label>Customer Name 3</label>
 					<dbColumn>CUST_NM3</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Att. Person</label>
+					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
@@ -416,6 +440,12 @@
 					<length>30</length>
 				</column>
 				<column>
+					<label>Att. Person</label>
+					<dbColumn>CUST_NM4</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
 					<label>Street</label>
 					<dbColumn>ADDR_TXT</dbColumn>
 					<width>40</width>
@@ -478,6 +508,12 @@
 				<column>
 					<label>Customer Name 3</label>
 					<dbColumn>CUST_NM3</dbColumn>
+					<width>40</width>
+					<length>30</length>
+				</column>
+				<column>
+					<label>Att. Person</label>
+					<dbColumn>CUST_NM4</dbColumn>
 					<width>40</width>
 					<length>30</length>
 				</column>
