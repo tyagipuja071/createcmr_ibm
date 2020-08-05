@@ -4097,7 +4097,8 @@ public class TurkeyHandler extends BaseSOFHandler {
 	  @Override
 	  public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
 	      UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
-		  if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry) || SystemLocation.TURKEY.equals(cmrCountry)) {
+    if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry)
+        || SystemLocation.TURKEY.equals(cmrCountry) && !"ZS01".equals(addr.getId().getAddrType())) {
 	      if (!equals(addr.getTaxOffice(), addr.getTaxOfficeOld())) {
 	        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
 	        update.setAddrType(addrTypeDesc);

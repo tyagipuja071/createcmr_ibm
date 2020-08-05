@@ -610,7 +610,7 @@ public class TurkeyTransformer extends EMEATransformer {
       line3 = addrData.getAddrTxt();
       line4 = addrData.getAddrTxt2();
     } else {
-      line3 = addrData.getAddrTxt2();
+      line3 = "";
       line4 = addrData.getAddrTxt();
     }
 
@@ -707,7 +707,7 @@ public class TurkeyTransformer extends EMEATransformer {
 
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
-    //legacyAddr.setAddrLine3(line3);
+    legacyAddr.setAddrLine3(line3);
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
     legacyAddr.setAddrLine6(line6);
@@ -1532,7 +1532,8 @@ public class TurkeyTransformer extends EMEATransformer {
         String addrType = addrData.getId().getAddrType();
         if ("Y".equals(addrData.getChangedIndc())) {
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-          CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
+            // CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
+            CmrtAddr olddataaddr = legacyObjects.findBySeqNo(billseqinlegacy);
             // if ("Y".equals(olddataaddr.getIsAddrUseMailing()) &&
             // "Y".equals(olddataaddr.getIsAddrUseBilling())) {
             if (!isExistMailing) {
