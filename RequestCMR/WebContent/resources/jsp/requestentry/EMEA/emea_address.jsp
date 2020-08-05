@@ -276,7 +276,7 @@
     </p>
   </cmr:column>
 
-  <cmr:column span="2" containerForField="TaxOffice" forCountry="726,666,862">
+  <cmr:column span="2" containerForField="TaxOffice" forCountry="726,666">
     <p>
       <cmr:label fieldId="taxOffice">
         <cmr:fieldLabel fieldId="TaxOffice" />:
@@ -287,6 +287,16 @@
 
   <form:hidden path="poBoxPostCd" forCountry="758"/>
   <form:hidden path="transportZone" forCountry="838,758,866,754"/>
+</cmr:row>
+<cmr:row>
+	<cmr:column span="2" containerForField="TaxOffice" forCountry="862">
+    <p>
+      <cmr:label fieldId="taxOffice">
+        <cmr:fieldLabel fieldId="TaxOffice" />:
+      </cmr:label>
+      <cmr:field fieldId="TaxOffice" id="taxOffice" path="taxOffice" />
+    </p>
+  </cmr:column>
 </cmr:row>
 <%--Story 1377871: For Postal Address  :Mukesh
 <cmr:view forCountry="758">
