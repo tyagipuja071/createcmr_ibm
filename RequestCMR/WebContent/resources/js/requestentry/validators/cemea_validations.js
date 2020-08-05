@@ -613,6 +613,70 @@ function setExpediteReason() {
     FormManager.readOnly('expediteReason');
   }
 }
+function addPrefixVat() {
+  var scenario = FormManager.getActualValue('custGrp');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var issu_cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
+  var vat = FormManager.getActualValue('vat');
+  var vatExempt = dijit.byId('vatExempt').get('checked');
+
+  if ('C' == reqType && custSubGrp != null && !custSubGrp.includes('IN') && 'LOCAL' == scenario && vatExempt != true) {
+    if ('821' == issu_cntry) {
+      if (vat != null && new RegExp("^[A-Za-z]{2}.*").test(vat)) {
+        var prefix = vat.substring(0, 2);
+        FormManager.setValue('vat', vat.replace(prefix, ''));
+      }
+    } else if (('644,668,693,704,708,740,820,826').indexOf(issu_cntry) > 0) {
+      var prefix = '';
+      switch (issu_cntry) {
+      case '644':
+        prefix = 'BG';
+        break;
+      case '668':
+        prefix = 'CZ';
+        break;
+      case '693':
+        prefix = 'SK';
+        break;
+      case '704':
+        prefix = 'HR';
+        break;
+      case '708':
+        prefix = 'SI';
+        break;
+      case '740':
+        prefix = 'HU';
+        break;
+      case '820':
+        prefix = 'PL';
+        break;
+      case '826':
+        prefix = 'RO';
+        break;
+      default:
+        prefix = '';
+        break;
+      }
+      var addrType = 'ZP01';
+      if ('LOCAL' == scenario) {
+        addrType = 'ZS01';
+      }
+      var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+        REQID : FormManager.getActualValue('reqId'),
+        TYPE : addrType
+      });
+      if (ret && ret.ret1 && ret.ret1 != '') {
+        prefix = ret.ret1;
+      }
+      if (vat != null && new RegExp("^[A-Za-z]{2}.*").test(vat)) {
+        FormManager.setValue('vat', vat);
+      } else {
+        FormManager.setValue('vat', prefix + vat);
+      }
+    }
+  }
+}
 
 function addAddressTypeValidator() {
   console.log("addAddressTypeValidator for CEMEA..........");
@@ -2428,8 +2492,10 @@ function addCEMEAChecklistValidator() {
           }
           // add check for checklist on DB
           var reqId = FormManager.getActualValue('reqId');
-          var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {REQID : reqId});
-          if (!record || !record.sectionA1){
+          var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+            REQID : reqId
+          });
+          if (!record || !record.sectionA1) {
             return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
           }
         }
@@ -3892,4 +3958,9 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
+
+  GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
+  GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
+
 });
