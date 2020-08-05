@@ -847,7 +847,7 @@ public class MCOPtEsHandler extends MCOHandler {
   public void doFilterAddresses(List<AddressModel> results) {
     List<AddressModel> addrsToRemove = new ArrayList<AddressModel>();
     for (AddressModel addrModel : results) {
-      if (CmrConstants.ADDR_TYPE.ZP02.toString().equalsIgnoreCase(addrModel.getAddrType()) && "838".equals(addrModel.getCmrIssuingCntry())) {
+      if (CmrConstants.ADDR_TYPE.ZP02.toString().equalsIgnoreCase(addrModel.getAddrType())) {
         addrsToRemove.add(addrModel);
       }
     }
