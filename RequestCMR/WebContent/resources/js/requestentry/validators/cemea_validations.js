@@ -1370,8 +1370,9 @@ function setCountryDuplicateFields(value) {
         setCISFieldHandlers();
 
         if (FormManager.getActualValue('reqType') == 'C') {
-          checkAndAddValidator('dupIsuCd', Validators.REQUIRED, [ 'ISU Code 2' ]);
-          checkAndAddValidator('dupClientTierCd', Validators.REQUIRED, [ 'Client Tier 2' ]);
+          // CMR-4606 show alert message on tab
+          checkAndAddValidator('dupIsuCd', Validators.REQUIRED, [ 'ISU Code 2' ], 'MAIN_IBM_TAB');
+          checkAndAddValidator('dupClientTierCd', Validators.REQUIRED, [ 'Client Tier 2', 'MAIN_IBM_TAB' ]);
           // checkAndAddValidator('dupSalesRepNo', Validators.REQUIRED, [ 'Sales
           // Rep 2' ]);
         }
@@ -1626,6 +1627,42 @@ function setSBO2(dupSalesRepNo) {
     FormManager.setValue('dupSalesBoCd', '');
   }
 }
+
+// CMR-4606 add cmr exist check for duplicate issued country
+function dupCMRExistCheckForRuCIS() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getField('cmrNo').value;
+        if (FormManager.getActualValue('reqType') != 'U') {
+          return new ValidationResult(null, true);
+        } else {
+          if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+            var cntryDup = FormManager.getActualValue('dupIssuingCntryCd');
+            var qParamsDup = {
+              CMRNO : cmrNo,
+              MANDT : cmr.MANDT
+            };
+            var resultsD = cmr.query('GET.CIS.DUP.CNTRY.BYCMR', qParamsDup);
+            if (resultsD.ret1 != null) {
+              var existDupcntry = resultsD.ret1;
+              if (cntryDup == existDupcntry) {
+                return new ValidationResult(null, true);
+              } else {
+                return new ValidationResult(null, false, 'The choosed duplicate country is not exist in the CMR,the exist dup Country is:' + existDupcntry);
+              }
+            } else {
+              return new ValidationResult(null, false, 'This CMR Number for Russia do not have duplicate CMR country.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}// End of dupCMRExistCheckForRuCIS() CMR-4606
 
 /**
  * CEEME - show CoF field for Update req and LOB=IGF and reason=COPT
@@ -3940,6 +3977,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
+  // CMR-4606 DupCMR exist
+  GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, GEOHandler.CEE, null, true);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
