@@ -81,7 +81,7 @@
           ${summary.data.legacyCurrencyCd}
         </cmr:column>
       </cmr:view>
-      <cmr:view exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,808,823,832,849,850,865,618">
+      <cmr:view exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,808,823,832,849,850,865,618,758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,826,889,358,359,363">
         <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="AECISubDate" />: </label>
         </cmr:column>
