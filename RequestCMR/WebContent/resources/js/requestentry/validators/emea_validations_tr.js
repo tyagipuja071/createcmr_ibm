@@ -4052,7 +4052,7 @@ function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) 
         }
 
         FormManager.setValue('abbrevNm', abbrevNm);
-        FormManager.setValue('abbrevLocn', abbrevLocn);
+// FormManager.setValue('abbrevLocn', abbrevLocn);
       }
     }
   }

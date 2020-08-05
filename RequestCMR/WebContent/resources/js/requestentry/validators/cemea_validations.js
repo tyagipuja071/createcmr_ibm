@@ -3934,6 +3934,10 @@ function getLandedCountryByAddType(addType) {
   return landCountry;
 }
 
+function hideDisableAutoProcessingCheckBox() {
+  FormManager.hide('DisableAutoProcessing', 'disableAutoProc');
+}
+
 function afterConfigTemplateLoadForCEE() {
   filterCmrnoForCEE();
   togglePPSCeidCEE();
@@ -3945,6 +3949,7 @@ function afterConfigTemplateLoadForCEE() {
 function afterConfigForCEE() {
   isicCdOnChangeCEE();
   reqReasonOnChange();
+  hideDisableAutoProcessingCheckBox();
 
 }
 
