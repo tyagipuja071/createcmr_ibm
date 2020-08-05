@@ -213,9 +213,7 @@ public class SpainUtil extends AutomationUtil {
 
       }
       // set filtered matches in response
-      if (!filteredMatches.isEmpty()) {
-        response.setMatches(filteredMatches);
-      }
+      response.setMatches(filteredMatches);
     }
 
   }
