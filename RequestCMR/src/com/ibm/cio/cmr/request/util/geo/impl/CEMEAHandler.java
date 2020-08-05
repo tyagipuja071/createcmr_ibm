@@ -122,13 +122,12 @@ public class CEMEAHandler extends BaseSOFHandler {
   public static final List<String> CEMEA_CHECKLIST = Arrays.asList("358", "359", "363", "603", "607", "620", "626", "651", "675", "677", "680", "694",
       "695", "699", "705", "707", "713", "741", "752", "762", "767", "768", "772", "787", "805", "808", "821", "823", "832", "849", "850", "865",
       "889");
-	private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA,
-			SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA, SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN,
-			SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA, SystemLocation.BELARUS,
-			SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN,
-			SystemLocation.BOSNIA_AND_HERZEGOVINA, SystemLocation.MACEDONIA, SystemLocation.SLOVENIA,
-			SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA, SystemLocation.POLAND,
-      SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA, SystemLocation.CZECH_REPUBLIC);
+  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA,
+      SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN, SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA,
+      SystemLocation.BELARUS, SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN, SystemLocation.BOSNIA_AND_HERZEGOVINA,
+      SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
+      SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA,
+      SystemLocation.CZECH_REPUBLIC);
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
@@ -143,12 +142,12 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   private static final List<String> CIS_DUPLICATE_COUNTRIES = Arrays.asList("607", "358", "626", "651", "694", "695", "787", "363", "359", "889",
       "741");
-  
+
   private static final List<String> CEE_COUNTRIES_LIST = Arrays.asList("358", "359", "363", "603", "607", "626", "644", "651", "668", "693", "694",
       "695", "699", "704", "705", "707", "708", "740", "741", "787", "820", "821", "826", "889");
 
   protected static final String[] CEE_MASS_UPDATE_SHEET_NAMES = { "Address in Local language", "Sold To", "Mail to", "Bill To", "Ship To",
-  "Install At" };
+      "Install At" };
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
@@ -219,7 +218,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
                   int parvmCount = getCeeKnvpParvmCount(addr.getCmrSapNumber());
                   if ("0".equals(stkzn) || parvmCount > 0) {
-                  addr.setCmrAddrTypeCode("ZS02");
+                    addr.setCmrAddrTypeCode("ZS02");
                   }
                 }
                 converted.add(addr);
@@ -321,8 +320,8 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-            
-            String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum()); 
+
+            String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
             int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
                 record.getCmrNum());
             String maxSeqs = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
@@ -331,7 +330,7 @@ public class CEMEAHandler extends BaseSOFHandler {
             String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
             String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
             String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-            
+
             // add share ZP01
             if (isShareZP01 != null) {
               FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
@@ -380,7 +379,7 @@ public class CEMEAHandler extends BaseSOFHandler {
               sharezi01.setCmrDept(mainRecord.getCmrCity2());
               converted.add(sharezi01);
             }
-            
+
           }
         }
       } else {
@@ -393,17 +392,16 @@ public class CEMEAHandler extends BaseSOFHandler {
         if (source.getItems() != null) {
           for (FindCMRRecordModel record : source.getItems()) {
 
-            if ((!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()))
-              && (!"618".equals(reqEntry.getCmrIssuingCntry()))) {
+            if ((!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) && (!"618".equals(reqEntry.getCmrIssuingCntry()))) {
               LOG.trace("Non Sold-to will be ignored. Will get from SOF");
               this.rdcShippingRecords.add(record);
               continue;
             }
 
-          if ("618".equals(reqEntry.getCmrIssuingCntry()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
-              && StringUtils.isAlpha(record.getCmrAddrSeq())) {
-            record.setCmrAddrSeq("1");
-          }
+            if ("618".equals(reqEntry.getCmrIssuingCntry()) && CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())
+                && StringUtils.isAlpha(record.getCmrAddrSeq())) {
+              record.setCmrAddrSeq("1");
+            }
 
             if (!StringUtils.isBlank(record.getCmrPOBox())) {
               if (!record.getCmrPOBox().startsWith("PO")) {
@@ -432,25 +430,23 @@ public class CEMEAHandler extends BaseSOFHandler {
               record.setCmrAddrTypeCode("ZS02");
             }
 
-          if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
-              && "598".equals(record.getCmrAddrSeq())) {
-            record.setCmrAddrTypeCode("ZD02");
-          }
-
-          if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
-              && "599".equals(record.getCmrAddrSeq())) {
-            record.setCmrAddrTypeCode("ZP02");
-          }
-
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
+            if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode()))
                 && "598".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZD02");
             }
 
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
+            if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
                 && "599".equals(record.getCmrAddrSeq())) {
+              record.setCmrAddrTypeCode("ZP02");
+            }
+
+            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && "598".equals(record.getCmrAddrSeq())) {
+              record.setCmrAddrTypeCode("ZD02");
+            }
+
+            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode())) && "599".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZP03");
             }
 
@@ -472,7 +468,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 
           FindCMRRecordModel record = null;
 
-        if ("618".equals(reqEntry.getCmrIssuingCntry())) {
+          if ("618".equals(reqEntry.getCmrIssuingCntry())) {
             return;
           }
 
@@ -1067,7 +1063,7 @@ public class CEMEAHandler extends BaseSOFHandler {
 
     // Type of Customer
     data.setBpAcctTyp(this.currentImportValues.get("BpAcctTyp"));
-    
+
     if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setEngineeringBo("");
     }
@@ -1083,26 +1079,34 @@ public class CEMEAHandler extends BaseSOFHandler {
     LOG.debug("dupCmrNo: " + dupCmrNo);
 
     if (checks) {
-    if (this.currentImportValues != null && !this.currentImportValues.isEmpty()) {
-      String abbrevNm = this.currentImportValues.get("CompanyName");
-      if (!StringUtils.isEmpty(abbrevNm) && abbrevNm.endsWith(" CIS")) {
-        data.setDupEnterpriseNo(this.currentImportValues.get("EnterpriseNo"));
-          LOG.debug("EnterpriseNo2: " + data.getDupEnterpriseNo());
-        data.setDupSalesRepNo(this.currentImportValues.get("SR"));
+      if (this.currentImportValues != null && !this.currentImportValues.isEmpty()) {
+        String abbrevNm = this.currentImportValues.get("CompanyName");
+        if (!StringUtils.isEmpty(abbrevNm) && abbrevNm.endsWith(" CIS")) {
+          // 4606 Russia CIS Duplicate CMR
+          Map<String, Object> dupRecordV = getDupCMRFieldValue(dupCntry, dupCmrNo);
+          data.setDupEnterpriseNo(dupRecordV.get("ZZKV_NODE1").toString());
+          LOG.debug("CompanyNo2: " + data.getDupEnterpriseNo());
+          data.setDupSalesRepNo(this.currentImportValues.get("SR"));
           LOG.debug("SalRepNameNo2: " + data.getDupSalesRepNo());
-        data.setDupSalesBoCd(this.currentImportValues.get("SBO"));
+          data.setDupSalesBoCd(this.currentImportValues.get("SBO"));
           LOG.debug("SalesBusOff2: " + data.getDupSalesBoCd());
+          data.setTaxCd3(dupRecordV.get("ZZKV_NODE2").toString());
+          LOG.debug("SalesEnterpriseNo2: " + data.getTaxCd3());
+          data.setDupIsuCd(dupRecordV.get("BRSCH").toString());
+          LOG.debug("ISU2: " + data.getIsuCd());
+          data.setDupClientTierCd(dupRecordV.get("KATR3").toString());
+          LOG.debug("ClientTier2: " + data.getDupClientTierCd());
 
-        String isuCtc = this.currentImportValues.get("ISU");
-        if (!StringUtils.isEmpty(isuCtc) && isuCtc.length() > 2) {
-          data.setDupIsuCd(isuCtc.substring(0, 2));
-            LOG.debug("ISU2: " + data.getIsuCd());
-          data.setDupClientTierCd(isuCtc.substring(2, 3));
-            LOG.debug("ClientTier2: " + data.getDupClientTierCd());
+          // String isuCtc = this.currentImportValues.get("ISU");
+          // if (!StringUtils.isEmpty(isuCtc) && isuCtc.length() > 2) {
+          // data.setDupIsuCd(isuCtc.substring(0, 2));
+          // LOG.debug("ISU2: " + data.getIsuCd());
+          // data.setDupClientTierCd(isuCtc.substring(2, 3));
+          // LOG.debug("ClientTier2: " + data.getDupClientTierCd());
+          // }
+          return true;
         }
-        return true;
-        }
-    }
+      }
     }
     return false;
   }
@@ -1199,9 +1203,9 @@ public class CEMEAHandler extends BaseSOFHandler {
       data.setBpRelType("CA");
     }
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
-    	if(StringUtils.isNotBlank(data.getEngineeringBo())) {
-    		data.setEngineeringBo(StringUtils.rightPad(data.getEngineeringBo(), 7, "0"));
-    	}
+      if (StringUtils.isNotBlank(data.getEngineeringBo())) {
+        data.setEngineeringBo(StringUtils.rightPad(data.getEngineeringBo(), 7, "0"));
+      }
     }
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
@@ -1209,7 +1213,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       if (StringUtils.isBlank(legacyGaddrSeq)) {
         changeZP02AddrNew(entityManager, data.getId().getReqId());
       }
-      if("Y".equals(zp02updateinit)){
+      if ("Y".equals(zp02updateinit)) {
         changeZS01AddrUpdate(entityManager, data.getId().getReqId());
         changeZP01AddrUpdate(entityManager, data.getId().getReqId());
       }
@@ -1515,13 +1519,12 @@ public class CEMEAHandler extends BaseSOFHandler {
      */
     if ("618".equals(issuingCountry)) {
       return true;
-    } else if (CEE_COUNTRY_LIST.contains(issuingCountry)){
+    } else if (CEE_COUNTRY_LIST.contains(issuingCountry)) {
       return true;
-    } 
+    }
     return false;
   }
 
-  
   public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
@@ -1979,22 +1982,22 @@ public class CEMEAHandler extends BaseSOFHandler {
         }
       }
 
-    // for (String name : countryAddrss) {
-    // sheet = book.getSheet(name);
-    // for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-    // String cbCity = ""; // 8
-    // String localCity = ""; // 7
-    //
-    // row = sheet.getRow(rowIndex);
-    // if (row == null) {
-    // return; // stop immediately when row is blank
-    // }
-    // currCell = row.getCell(6);
-    // localCity = validateColValFromCell(currCell);
-    //
-    // TemplateValidation error = new TemplateValidation(name);
-    // }
-    // }
+      // for (String name : countryAddrss) {
+      // sheet = book.getSheet(name);
+      // for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+      // String cbCity = ""; // 8
+      // String localCity = ""; // 7
+      //
+      // row = sheet.getRow(rowIndex);
+      // if (row == null) {
+      // return; // stop immediately when row is blank
+      // }
+      // currCell = row.getCell(6);
+      // localCity = validateColValFromCell(currCell);
+      //
+      // TemplateValidation error = new TemplateValidation(name);
+      // }
+      // }
     }
   }
 
@@ -2156,6 +2159,36 @@ public class CEMEAHandler extends BaseSOFHandler {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZI01SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
+  }
+
+  // 4606
+  public static Map<String, Object> getDupCMRFieldValue(String katr6, String cmrNo) throws Exception {
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("CEE.GET_DUPCMR_FIELD_VALUE");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + katr6 + "'");
+    sql = StringUtils.replace(sql, ":CMRNO", "'" + cmrNo + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+    Map<String, Object> dupRecord = null;
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("MANDT");
+    query.addField("KATR6");
+    query.addField("CMRNO");
+    query.addField("KATR3");
+    query.addField("BRSCH");
+    query.addField("ZZKV_NODE1");
+    query.addField("ZZKV_NODE2");
+    LOG.debug("Check Dup CMR .. Getting existing SPRAS value from RDc DB.." + "KATR6 =" + katr6);
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      dupRecord = records.get(0);
+    }
+    return dupRecord;
   }
 
 }
