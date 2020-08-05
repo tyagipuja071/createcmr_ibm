@@ -954,7 +954,7 @@ function abbrvNmProcessorMandatory() {
     var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
     if (viewOnlyPage != 'true') {
-      if (role != 'REQUESTER') {
+      if (role != 'REQUESTER' && FormManager.getActualValue('reqType') != 'U') {
         FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'AbbrevName' ], 'MAIN_CUST_TAB');
       } else {
         FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
@@ -970,7 +970,7 @@ function abbrvNmProcessorMandatory() {
 function abbrvNmProcessorMandatoryOnChange() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   dojo.connect(FormManager.getField('abbrevNm'), 'onChange', function(value) {
-    if (role != 'REQUESTER') {
+    if (role != 'REQUESTER' && FormManager.getActualValue('reqType') != 'U') {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'AbbrevName' ], 'MAIN_CUST_TAB');
     } else {
       if(FormManager.getActualValue('reqType') != 'U'){
