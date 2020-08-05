@@ -142,6 +142,7 @@ public class NPSService extends BaseBatchService {
           LOG.warn("Request " + admin.getId().getReqId() + " does not need an NPS notif. Skipping.");
           admin.setWaitRevInd("Y");
         }
+        entityManager.merge(admin);
         partialCommit(entityManager);
 
         entityManager.detach(admin);
