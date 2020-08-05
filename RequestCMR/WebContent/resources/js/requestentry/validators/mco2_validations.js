@@ -33,12 +33,6 @@ function addHandlersForMCO2() {
       setSalesRepValues(value);
     });
   }
-
-  if (_SalesRepHandler == null) {
-    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      setSORTLValues(value);
-    });
-  }
   
 }
 
@@ -750,32 +744,32 @@ function setSalesRepValues(isuCd,clientTier) {
   var reqType = FormManager.getActualValue('reqType');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (reqType != 'C' && role != 'PROCESSOR') {
-    return;
-  }
-
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
-
+  
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
+    return;
+  }
   var salesReps = [];
   if (isuCd != '') {
-    qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%'
-    };
-    results = cmr.query('GET.MCO2SR.BYISU', qParams);
-  }
+    var qParams = {
+    _qall : 'Y',
+    ISSUING_CNTRY : cntry,
+    ISU : '%' + isuCd + '%',
+  };
+  results = cmr.query('GET.MCO2SR.BYISU', qParams);
   if (results != null) {
-    for (var i = 0; i < results.length; i++) {
+    for ( var i = 0; i < results.length; i++) {
       salesReps.push(results[i].ret1);
     }
-    FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
-    if (salesReps.length == 1) {
-      FormManager.setValue('repTeamMemberNo', salesReps[0]);
+    if (salesReps != null) {
+      FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
+      if (salesReps.length == 1) {
+        FormManager.setValue('repTeamMemberNo', salesReps[0]);
+      }
+      if (salesReps.length == 0) {
+        FormManager.setValue('repTeamMemberNo', '');
+      }
     }
   }
   
@@ -783,10 +777,15 @@ function setSalesRepValues(isuCd,clientTier) {
     if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
       FormManager.setValue('repTeamMemberNo', 'DUMMY8');
       FormManager.setValue('salesBusOffCd', '0080');
+    } else {
+      FormManager.setValue('salesBusOffCd', '0010');
     }
   } else if (cntry == '698' || cntry == '745') {
     if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
       FormManager.setValue('repTeamMemberNo', 'DUMMY6');
+      FormManager.setValue('salesBusOffCd', '0060');
+    } else {
+      FormManager.setValue('salesBusOffCd', '0010');
     }
   }
 
@@ -799,55 +798,9 @@ function setSalesRepValues(isuCd,clientTier) {
       FormManager.setValue('repTeamMemberNo', '780780');
     }
   }*/
-
-}
-
-function setSORTLValues(repTeamMemberNo){
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if (reqType != 'C' && role != 'PROCESSOR') {
-    return;
-  }
-
-  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
   
-  var SORTL = [];
-  if (repTeamMemberNo != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%',
-      REP_TEAM_CD : '%' + repTeamMemberNo + '%'
-    };
-    var results = cmr.query('GET.MCO2SBOLIST.BYSR', qParams);
-    if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
-        SORTL.push(results[i].ret1);
-      }
-      if (SORTL != null) {
-        FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), SORTL);
-        if (SORTL.length == 1) {
-          FormManager.setValue('salesBusOffCd', SORTL[0]);
-        }
-      }
-    }
-
-    if(cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857'){
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
-        FormManager.setValue('salesBusOffCd', '0080');
-      }
-    } else if (cntry == '698' || cntry == '745') {
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')){
-        FormManager.setValue('salesBusOffCd', '0060');
-      }
-    }
   }
 }
-
 
 
 var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01','ZS02'];

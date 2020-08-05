@@ -1,6 +1,8 @@
 package com.ibm.cio.cmr.request.automation.util.geo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -8,14 +10,20 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class SingaporeUtil extends AutomationUtil {
@@ -23,6 +31,9 @@ public class SingaporeUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(SingaporeUtil.class);
 
   private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
+
+  private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
+      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIPPING);
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -160,5 +171,157 @@ public class SingaporeUtil extends AutomationUtil {
         engineData.put("SCENARIO_EXCEPTIONS", exc);
       }
     }
+  }
+
+  @Override
+  public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    Admin admin = requestData.getAdmin();
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+    StringBuilder details = new StringBuilder();
+    boolean cmdeReview = false;
+    List<String> ignoredUpdates = new ArrayList<String>();
+    for (UpdatedDataModel change : changes.getDataUpdates()) {
+      switch (change.getDataField()) {
+      case "ISIC":
+      case "Market Responsibility Code (MRC)":
+      case "Cluster":
+      case "GB segment":
+      case "ISU Code":
+      case "INAC/NAC Code":
+      case "Sales Rep No":
+      case "AR Code":
+        cmdeReview = true;
+        break;
+      default:
+        ignoredUpdates.add(change.getDataField());
+        break;
+      }
+    }
+    if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      details.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
+      }
+    }
+    output.setDetails(details.toString());
+    output.setProcessOutput(validation);
+    return true;
+  }
+
+  @Override
+  public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
+      RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
+    List<Addr> addresses = null;
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    StringBuilder checkDetails = new StringBuilder();
+    List<DnBMatchingResponse> matches = new ArrayList<DnBMatchingResponse>();
+    boolean matchesDnb = false;
+    boolean cmdeReview = false;
+    for (String addrType : RELEVANT_ADDRESSES) {
+      if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+        Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+        matches = getMatches(requestData, engineData, soldTo, false);
+        if (matches != null) {
+          // check against D&B
+          matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+        }
+      }
+      if (changes.isAddressChanged(addrType)) {
+        if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+          addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+        } else {
+          addresses = requestData.getAddresses(addrType);
+        }
+        for (Addr addr : addresses) {
+          if (CmrConstants.RDC_SOLD_TO.equals(addrType) && ("Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()))) {
+            if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+              if (!matchesDnb) {
+                // CMDE Review
+                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.").append("\n");
+                cmdeReview = true;
+                break;
+              } else {
+                // proceed
+                checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
+              }
+            } else {
+              // CMDE Review
+              checkDetails.append("Customer Name Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
+                  .append("\n");
+              cmdeReview = true;
+              break;
+            }
+          }
+
+          if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && ("Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()))) {
+            if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
+              if (addressEquals(requestData.getAddress("ZS01"), requestData.getAddress(addrType))) {
+                // proceed
+                if (!matchesDnb) {
+                  // CMDE Review
+                  checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.")
+                      .append("\n");
+                  cmdeReview = true;
+                  break;
+                } else {
+                  // proceed
+                  checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else {
+                // CMDE Review
+                checkDetails.append("Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match Sold To Address. ")
+                    .append("\n");
+                cmdeReview = true;
+                break;
+              }
+            } else {
+              // CMDE Review
+              checkDetails.append("Customer name Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified. ")
+                  .append("\n");
+              cmdeReview = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esCheckFailed", "Updated elements cannot be checked automatically.");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    String details = (output.getDetails() != null && output.getDetails().length() > 0) ? output.getDetails() : "";
+    details += checkDetails.length() > 0 ? "\n" + checkDetails.toString() : "";
+    output.setDetails(details);
+    output.setProcessOutput(validation);
+    return true;
   }
 }

@@ -16,6 +16,7 @@ import javax.persistence.TemporalType;
 
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogDetails;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.entity.listeners.NoLog;
 import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
 
 /**
@@ -183,6 +184,7 @@ public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Se
 
   @Column(name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
+  @NoLog
   private Date createTs;
 
   @Column(name = "CREATE_BY")
@@ -190,6 +192,7 @@ public class ProlifChecklist extends BaseEntity<ProlifChecklistPK> implements Se
 
   @Column(name = "LAST_UPDT_TS")
   @Temporal(TemporalType.TIMESTAMP)
+  @NoLog
   private Date lastUpdtTs;
 
   @Column(name = "LAST_UPDT_BY")
