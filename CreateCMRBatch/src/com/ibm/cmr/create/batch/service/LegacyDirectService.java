@@ -71,7 +71,6 @@ import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.impl.SOFMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.TransformerManager;
-import com.ibm.cmr.create.batch.util.mq.transformer.impl.CEETransformer;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.GenerateCMRNoClient;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
@@ -358,7 +357,7 @@ public class LegacyDirectService extends TransConnService {
       }
       // Add to build duplicate CMR data for Russia -CMR4606
       Data data = cmrObjects.getData();
-      if ("821".equals(data.getCmrIssuingCntry()) && ("Y".equals(data.getDupCmrIndc()) || data.getDupIssuingCntryCd() != null)) {
+      if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
         CEEProcessService theService = new CEEProcessService();
         theService.processDupCreate(entityManager, admin, cmrObjects);
       }
@@ -434,7 +433,7 @@ public class LegacyDirectService extends TransConnService {
 
           // Add to update duplicate CMR data for Russia CMR-4606
           Data data = cmrObjects.getData();
-          if ("821".equals(data.getCmrIssuingCntry()) && ("Y".equals(data.getDupCmrIndc()) || data.getDupIssuingCntryCd() != null)) {
+          if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
             CEEProcessService theService = new CEEProcessService();
             theService.processDupUpdate(entityManager, admin, data, cmrObjects);
           }
@@ -473,7 +472,7 @@ public class LegacyDirectService extends TransConnService {
 
             // Add to update duplicate CMR data for Russia CMR-4606
             Data data = cmrObjects.getData();
-            if ("821".equals(data.getCmrIssuingCntry()) && ("Y".equals(data.getDupCmrIndc()) || data.getDupIssuingCntryCd() != null)) {
+            if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
               CEEProcessService theService = new CEEProcessService();
               theService.processDupUpdate(entityManager, admin, data, cmrObjects);
             }

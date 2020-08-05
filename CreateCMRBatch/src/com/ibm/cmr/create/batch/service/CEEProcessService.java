@@ -55,35 +55,36 @@ public class CEEProcessService extends LegacyDirectService {
 
   protected void processDupCreate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Create duplicate CMR processing of Request " + admin.getId().getReqId());
-
     Data data = cmrObjects.getData();
-    // finally persist all data
-    CmrtCust legacyCust = initEmpty(CmrtCust.class);
-    LegacyDirectObjectContainer legacyDupObjects = mapRequestDataForDupCreate(entityManager, cmrObjects);
-    legacyCust = legacyDupObjects.getCustomer();
-    if (legacyCust == null) {
-      throw new Exception("Customer record cannot be created.");
-    }
-
-    LOG.info("Creating Legacy duplicate CMR Records for Request ID " + admin.getId().getReqId());
-    LOG.info(" - SOF Duplicate Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
-
-    LOG.debug("CMR No. " + data.getCmrNo() + " generated and assigned.");
-
-    // default mapping for DATA and CMRTCUST
-    LOG.debug("Mapping default Data values..");
-
-    createEntity(legacyCust, entityManager);
-    if (legacyDupObjects.getCustomerExt() != null) {
-      createEntity(legacyDupObjects.getCustomerExt(), entityManager);
-    }
-    for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
-      if (legacyAddr.isForCreate()) {
-        createEntity(legacyAddr, entityManager);
+    if ("821".equals(data.getCmrIssuingCntry())) {
+      // finally persist all data
+      CmrtCust legacyCust = initEmpty(CmrtCust.class);
+      LegacyDirectObjectContainer legacyDupObjects = mapRequestDataForDupCreate(entityManager, cmrObjects);
+      legacyCust = legacyDupObjects.getCustomer();
+      if (legacyCust == null) {
+        throw new Exception("Customer record cannot be created.");
       }
-    }
-    partialCommit(entityManager);
 
+      LOG.info("Creating Legacy duplicate CMR Records for Request ID " + admin.getId().getReqId());
+      LOG.info(" - SOF Duplicate Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
+
+      LOG.debug("CMR No. " + data.getCmrNo() + " generated and assigned.");
+
+      // default mapping for DATA and CMRTCUST
+      LOG.debug("Mapping default Data values..");
+
+      createEntity(legacyCust, entityManager);
+      if (legacyDupObjects.getCustomerExt() != null) {
+        createEntity(legacyDupObjects.getCustomerExt(), entityManager);
+      }
+      for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
+        if (legacyAddr.isForCreate()) {
+          createEntity(legacyAddr, entityManager);
+        }
+      }
+      partialCommit(entityManager);
+
+    }
   }
 
   /**
@@ -98,28 +99,31 @@ public class CEEProcessService extends LegacyDirectService {
   protected void processDupUpdate(EntityManager entityManager, Admin admin, Data data, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Update processing of Request " + admin.getId().getReqId());
     if (admin.getRdcProcessingStatus() != null) {
-      LegacyDirectObjectContainer legacyDupObjects = mapRequestDupDataForUpdate(entityManager, cmrObjects);
+      // Add to limited this process just used for RU for now
+      if ("821".equals(data.getCmrIssuingCntry())) {
+        LegacyDirectObjectContainer legacyDupObjects = mapRequestDupDataForUpdate(entityManager, cmrObjects);
 
-      CmrtCust legacyCust = legacyDupObjects.getCustomer();
+        CmrtCust legacyCust = legacyDupObjects.getCustomer();
 
-      if (legacyCust == null) {
-        throw new Exception("Customer record cannot be updated.");
-      }
+        if (legacyCust == null) {
+          throw new Exception("Customer record cannot be updated.");
+        }
 
-      LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
-      LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
+        LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
+        LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
 
-      updateEntity(legacyCust, entityManager);
+        updateEntity(legacyCust, entityManager);
 
-      if (legacyDupObjects.getCustomerExt() != null) {
-        updateEntity(legacyDupObjects.getCustomerExt(), entityManager);
-      }
-      for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
-        if (legacyAddr.isForUpdate()) {
-          legacyAddr.setUpdateTs(SystemUtil.getCurrentTimestamp());
-          updateEntity(legacyAddr, entityManager);
-        } else if (legacyAddr.isForCreate()) {
-          createEntity(legacyAddr, entityManager);
+        if (legacyDupObjects.getCustomerExt() != null) {
+          updateEntity(legacyDupObjects.getCustomerExt(), entityManager);
+        }
+        for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
+          if (legacyAddr.isForUpdate()) {
+            legacyAddr.setUpdateTs(SystemUtil.getCurrentTimestamp());
+            updateEntity(legacyAddr, entityManager);
+          } else if (legacyAddr.isForCreate()) {
+            createEntity(legacyAddr, entityManager);
+          }
         }
       }
     }
@@ -142,6 +146,7 @@ public class CEEProcessService extends LegacyDirectService {
     String cmrNo = data.getCmrNo();
     String cntry = data.getDupIssuingCntryCd();
     data.setDupSalesBoCd(data.getSalesBusOffCd());
+    data.setDupSalesRepNo(data.getSalesBusOffCd());
 
     LOG.debug("Issued country. " + cntry + " duplicate issued country used to generated and assigned.");
 
@@ -491,8 +496,20 @@ public class CEEProcessService extends LegacyDirectService {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
+    String cntryBK = data.getCmrIssuingCntry();
     String cntry = data.getDupIssuingCntryCd();
+    String isuCd = data.getIsuCd();
+    String clientTBK = data.getClientTier();
+    String companyBK = data.getEnterprise();
+    String enterpriseBK = data.getTaxCd2();
     data.setDupSalesBoCd(data.getSalesBusOffCd());
+    data.setDupSalesRepNo(data.getSalesBusOffCd());
+    data.setCmrIssuingCntry(cntry);
+    data.setIsuCd(data.getDupIsuCd());
+    data.setClientTier(data.getDupClientTierCd());
+    data.setEnterprise(data.getDupEnterpriseNo());
+    data.setTaxCd2(data.getTaxCd3());
+
     MessageTransformer transformer = TransformerManager.getTransformer(cntry);
 
     LegacyDirectObjectContainer legacyObjects = LegacyDirectUtil.getLegacyDBValues(entityManager, cntry, cmrNo, false, transformer.hasAddressLinks());
@@ -641,16 +658,10 @@ public class CEEProcessService extends LegacyDirectService {
     Queue<Integer> availableSequences = new LinkedList<Integer>();
     availableSequences = getAvailableSequences(entityManager, cntry, cmrNo);
     for (Addr addr : cmrObjects.getAddresses()) {
-      if (!SystemLocation.ITALY.equals(data.getCmrIssuingCntry())) {
-        if (availableSequences.contains(Integer.parseInt(addr.getId().getAddrSeq()))) {
-          availableSequences.remove(Integer.parseInt(addr.getId().getAddrSeq()));
-          LOG.debug("Removing seq=" + addr.getId().getAddrSeq() + " from available sequences as it already exists on request");
-        }
-      } else {
-        if (availableSequences.contains(addr.getId().getAddrSeq())) {
-          availableSequences.remove(Integer.parseInt(addr.getId().getAddrSeq()));
-          LOG.debug("Removing seq=" + addr.getId().getAddrSeq() + " from available sequences as it already exists on request");
-        }
+
+      if (availableSequences.contains(Integer.parseInt(addr.getId().getAddrSeq()))) {
+        availableSequences.remove(Integer.parseInt(addr.getId().getAddrSeq()));
+        LOG.debug("Removing seq=" + addr.getId().getAddrSeq() + " from available sequences as it already exists on request");
       }
     }
 
@@ -885,6 +896,15 @@ public class CEEProcessService extends LegacyDirectService {
       // legacyObjects.setCustomerExt(custExt);
       // }
       // rebuild the address use table
+
+      data.setDupSalesBoCd(data.getSalesBusOffCd());
+      data.setDupSalesRepNo(data.getSalesBusOffCd());
+      data.setCmrIssuingCntry(cntryBK);
+      data.setIsuCd(isuCd);
+      data.setClientTier(clientTBK);
+      data.setEnterprise(companyBK);
+      data.setTaxCd2(enterpriseBK);
+
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
     }
 
