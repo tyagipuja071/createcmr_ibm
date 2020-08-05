@@ -292,7 +292,12 @@ public class CEMEAHandler extends BaseSOFHandler {
                       } else {
                         installing.setCmrName2Plain("");
                       }
-                      installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                      // installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                      if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
+                        installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                      } else {
+                        installing.setCmrStreetAddress(gAddr.getAddrLine4());
+                      }
                       installing.setCmrCity(record.getCmrCity());
                       installing.setCmrCity2(record.getCmrCity2());
                       installing.setCmrCountry(gAddr.getAddrLine6());
@@ -300,10 +305,10 @@ public class CEMEAHandler extends BaseSOFHandler {
                       installing.setCmrPostalCode(record.getCmrPostalCode());
                       installing.setCmrState(record.getCmrState());
                       installing.setCmrBldg(legacyGaddrLN6);
-                      if (!StringUtils.isBlank(gAddr.getAddrLine4())) {
-                        installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                      } else {
+                      if (StringUtils.isBlank(gAddr.getAddrLine3())) {
                         installing.setCmrStreetAddressCont("");
+                      } else {
+                        installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
                       }
                       converted.add(installing);
                     }
@@ -322,8 +327,7 @@ public class CEMEAHandler extends BaseSOFHandler {
             // }
 
             String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-            int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
-                record.getCmrNum());
+            int maxintSeq = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
             String maxSeqs = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
             // check if share seq address
             String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
@@ -1806,6 +1810,29 @@ public class CEMEAHandler extends BaseSOFHandler {
     query.setParameter("MANDT", mandt);
     query.setParameter("KATR6", katr6);
     query.setParameter("ZZKV_CUSNO", cmrNo);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      maxAddrSeq = (String) (result != null && result.length > 0 ? result[0] : "0");
+      if (StringUtils.isEmpty(maxAddrSeq)) {
+        maxAddrSeq = "0";
+      }
+      addrSeq = Integer.parseInt(maxAddrSeq);
+      addrSeq = ++addrSeq;
+      System.out.println("maxseq = " + addrSeq);
+    }
+
+    return addrSeq;
+  }
+
+  private int getMaxSequenceOnLegacyAddr(EntityManager entityManager, String rcyaa, String cmrNo) {
+    String maxAddrSeq = null;
+    int addrSeq = 0;
+    String sql = ExternalizedQuery.getSql("CEE.GETADDRSEQ.MAX.FROM.LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmrNo);
 
     List<Object[]> results = query.getResults();
     if (results != null && results.size() > 0) {
