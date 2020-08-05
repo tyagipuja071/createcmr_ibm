@@ -1372,7 +1372,7 @@ function setCountryDuplicateFields(value) {
         if (FormManager.getActualValue('reqType') == 'C') {
           // CMR-4606 show alert message on tab
           checkAndAddValidator('dupIsuCd', Validators.REQUIRED, [ 'ISU Code 2' ], 'MAIN_IBM_TAB');
-          checkAndAddValidator('dupClientTierCd', Validators.REQUIRED, [ 'Client Tier 2', 'MAIN_IBM_TAB' ]);
+          checkAndAddValidator('dupClientTierCd', Validators.REQUIRED, [ 'Client Tier 2' ], 'MAIN_IBM_TAB');
           // checkAndAddValidator('dupSalesRepNo', Validators.REQUIRED, [ 'Sales
           // Rep 2' ]);
         }
