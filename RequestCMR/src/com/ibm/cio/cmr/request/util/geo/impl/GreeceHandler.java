@@ -1718,7 +1718,10 @@ public class GreeceHandler extends BaseSOFHandler {
         data.setRepTeamMemberNo(repTeamMmberNo);
       }
 
-      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+      if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+        data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+        data.setSalesTeamCd(legacyObjects.getCustomer().getSalesGroupRep());
+      }
     }
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
