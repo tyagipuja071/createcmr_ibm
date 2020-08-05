@@ -387,8 +387,20 @@
           <br>
         </cmr:row>
       </cmr:view>
-           
-    </cmr:view>
+   </cmr:view>
+   <cmr:view forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+    <cmr:row>
+      <cmr:column span="1">
+       	<cmr:label fieldId="custNm4_view">
+         <span class="lbl-CustomerName4">${ui.attnPerson}</span>
+      	</cmr:label>:
+     </cmr:column>
+     <cmr:column span="2">
+      <div id="custNm4_view">-</div>
+      </cmr:column>
+   	  </cmr:row>
+  </cmr:view>     
+
      <cmr:view forGEO="SWISS">
         <cmr:row>
           <cmr:column span="1">

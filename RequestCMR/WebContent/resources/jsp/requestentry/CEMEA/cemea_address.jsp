@@ -82,6 +82,19 @@
   </cmr:column>
 </cmr:row>
 
+<cmr:row addBackground="true">
+  <cmr:column span="4" forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+    <cmr:label fieldId="custNm4">
+      <cmr:fieldLabel fieldId="CustomerName4" />: 
+      <cmr:view>
+        <cmr:info text="${ui.attnPerson}" />
+      </cmr:view>
+    </cmr:label>
+    <cmr:delta text="-" id="delta-custNm4" />
+    <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4" size="400" />
+  </cmr:column>
+</cmr:row>
+
 <cmr:row addBackground="true">  
   &nbsp;
 </cmr:row>
