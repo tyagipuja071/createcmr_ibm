@@ -1151,7 +1151,7 @@ public class CEETransformer extends EMEATransformer {
         } else {
           legacyCust.setVat(vat);
         }
-      } else if ("BG,CZ,SK,HR,SI,HU,PL,RO".contains(data.getCmrIssuingCntry())) {
+      } else if (("644,668,693,704,708,740,820,826").contains(data.getCmrIssuingCntry())) {
         if (vat.matches("^[A-Z]{2}.*")) {
           legacyCust.setVat(vat);
         } else {
