@@ -2392,7 +2392,8 @@ public class TurkeyHandler extends BaseSOFHandler {
 	    case SystemLocation.TURKEY:
 	      if (data != null && admin.getReqType().equals("C")) {
 	        
-	        if ("ZS01".equals(addr.getId().getAddrType())) {
+        if ("ZS01".equals(addr.getId().getAddrType()) || ("ZP01".equals(addr.getId().getAddrType())
+            && (CmrConstants.CUSTGRP_CROSS.equals(data.getCustGrp()) || !"TR".equals(addr.getLandCntry())))) {
 	          LOG.debug("Computing Abbreviated Name/Location for address of TURKEY. Request " + addr.getId().getReqId());
 	          data.setAbbrevNm(addr.getCustNm1());
 	          if (data.getAbbrevNm() != null && data.getAbbrevNm().length() > 22) {
@@ -2428,7 +2429,8 @@ public class TurkeyHandler extends BaseSOFHandler {
 	          } else if ("ZP01".equals(addr.getId().getAddrType())) {
 	            if (getAddressByType(entityManager, "ZS01", data.getId().getReqId()) == null) {
               saveAddrCopyForTR(entityManager, addr, "ZS01", admin.getReqType());
-              updateAabbNameCopyLoacl(entityManager, addr.getCustNm1(), addr.getId().getReqId());
+              // updateAabbNameCopyLoacl(entityManager, addr.getCustNm1(),
+              // addr.getId().getReqId());
 	            } else {
 	              updateSoldToAndTranslation(entityManager, addr, cmrIssuingCntry);
 	            }
