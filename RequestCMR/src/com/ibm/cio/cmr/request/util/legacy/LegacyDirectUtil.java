@@ -27,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -41,6 +42,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -81,11 +83,11 @@ public class LegacyDirectUtil {
   static {
     FIELDS_CLEAR_LIST.add("CollectionCd");
     FIELDS_CLEAR_LIST.add("SpecialTaxCd");
-    FIELDS_CLEAR_LIST.add("LandedCountry");
     FIELDS_CLEAR_LIST.add("ModeOfPayment");
     FIELDS_CLEAR_LIST.add("CrosSubTyp");
     FIELDS_CLEAR_LIST.add("TipoCliente");
-
+    FIELDS_CLEAR_LIST.add("EmbargoCode");
+    FIELDS_CLEAR_LIST.add("Enterprise");
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }
 
@@ -1344,8 +1346,9 @@ public class LegacyDirectUtil {
 
     return isFisCodeUsed;
   }
-  public static List<CmrtAddr> checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
-    
+  public static boolean checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
+    int addrSize = 0;
+    boolean flage = true;
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("COUNTRY", country);
@@ -1353,9 +1356,54 @@ public class LegacyDirectUtil {
     query.setForReadOnly(true);
     List<CmrtAddr> addresses = query.getResults(CmrtAddr.class);
     if (addresses != null) {
-      LOG.debug(">> checkLDAddress for CMR# " + cmrNo + " > " + addresses.size());
+      addrSize = addresses.size();
+      LOG.debug(">> checkLDAddress for CMR# " + cmrNo + " address size> " + addresses.size());
     }
-    return addresses;
+    
+    if(addrSize == 1){
+      //Checking billing and company in CMRTCEXT
+      sql = ExternalizedQuery.getSql("LEGACYD.CMRTCEXT_CHECK_COMPANY");
+      query = new PreparedQuery(entityManager, sql);
+      query.setParameter("COUNTRY", country);
+      query.setParameter("CMR_NO", cmrNo);
+      query.setForReadOnly(true);
+      List<Object[]> results = query.getResults();
+
+      if (results != null && !results.isEmpty()) {
+        Object[] sResult = results.get(0);
+        LOG.debug("Checking billing and company in CMRTCEXT:"+sResult[0].toString()); 
+        flage = false;
+      }
+    }
+   
+    return flage;
+  }
+  
+  public static boolean checkFieldsUpdated(EntityManager entityManager, String cmrIssuingCntry, Admin admin, long reqId) throws Exception {
+    RequestChangeContainer changes = new RequestChangeContainer(entityManager, cmrIssuingCntry, admin, reqId);
+    if (changes != null && changes.hasDataChanges()) {
+      for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
+        if (updatedDataModel != null) {
+          String field = updatedDataModel.getDataField();
+          switch (field) {
+          case "Abbreviated Name":
+          case "ISIC":
+          case "Subindustry":
+          case "INAC/NAC Code":
+          case "Client Tier":
+          case "SBO":
+          case "ISU Code":
+          case "ISR":
+          case "Collection Code":
+          case "Abbreviated Location":
+            return true;
+          default:
+            return false;
+          }
+        }
+      }
+    }
+    return false;
   }
     
 }
