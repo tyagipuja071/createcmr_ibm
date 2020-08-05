@@ -23,7 +23,7 @@
 	<form:hidden path="orgNo" />
 	<form:hidden path="sourceCd" />
 	<form:hidden path="mrcCd" />
-	<cmr:view exceptForCountry="758">
+	<cmr:view exceptForCountry="758,726">
 		<form:hidden path="sitePartyId" />
 	</cmr:view>
 	<form:hidden path="searchTerm" />
@@ -124,7 +124,9 @@
 			<cmr:column span="2" containerForField="ModeOfPayment">
 				<p>
 					<cmr:label fieldId="modeOfPayment">
-						<cmr:fieldLabel fieldId="ModeOfPayment" />: 
+						<cmr:fieldLabel fieldId="ModeOfPayment" />:
+						<cmr:delta text="${rdcdata.modeOfPayment}"
+						oldValue="${reqentry.paymentMode}" /> 
           			</cmr:label>
 					<cmr:field path="paymentMode" id="modeOfPayment"
 						fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
@@ -133,7 +135,21 @@
 		</cmr:view>
 		
 	</cmr:row>
+	<cmr:view forCountry="726">
+		<cmr:row addBackground="true">
 
+			<cmr:column span="2" containerForField="CrosSubTyp">
+				<p>
+					<cmr:label fieldId="crosSubTyp">
+						<cmr:fieldLabel fieldId="CrosSubTyp" />:
+					</cmr:label>
+					<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="CrosSubTyp"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+		</cmr:row>
+	</cmr:view>
+	
 	<cmr:view forCountry="XXXX">
 		<cmr:row addBackground="false">
 			<cmr:column span="2" containerForField="OrgNo">
