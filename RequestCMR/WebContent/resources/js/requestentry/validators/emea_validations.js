@@ -1570,6 +1570,9 @@ function updateEnterpriseNo() {
       newValue += salesRepArr[0];
       FormManager.setValue('enterprise', newValue);
       FormManager.setValue('salesBusOffCd', newValue.substring(0, 3));
+    } else if (FormManager.getActualValue('repTeamMemberNo') == '265500') {
+      FormManager.setValue('enterprise', '007010');
+      FormManager.setValue('salesBusOffCd', '007');
     } else {
       FormManager.setValue('enterprise', FormManager.getActualValue('repTeamMemberNo'));
       FormManager.setValue('salesBusOffCd', FormManager.getActualValue('repTeamMemberNo').length > 2 ? FormManager.getActualValue('repTeamMemberNo').substring(0, 3) : FormManager
@@ -7403,7 +7406,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(setFieldsBehaviourGR,[SysLoc.GREECE]);
   // GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR,[SysLoc.GREECE]);
   // GEOHandler.addAfterConfig(resetSubIndustryCdGR,[SysLoc.GREECE]);
-  
   // CYPRUS Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
