@@ -5054,17 +5054,17 @@ function autoSetAbbrevLocnOnChangeTR() {
 function updateAbbrLocWithZS01TR() {
   var _abbrevLocn = null;
   var addrType = FormManager.getActualValue('addrType');
-  if ("ZS01" != addrType) {
+  var reqType = FormManager.getActualValue('reqType');
+  var isCross = true;
+  if ("TR" == FormManager.getActualValue("landCntry")) {
+    isCross = false;
+  }
+  if (("ZS01" != addrType && "ZP01" != addrType) || (!isCross && "ZP01" == addrType)) {
     return;
   }
   var _zs01ReqId = FormManager.getActualValue('reqId');
   var newAddrCity = FormManager.getActualValue("city1");
   var newAddrLand = FormManager.getActualValue("landCntry");
-  var isCross = true;
-  if ("TR" == FormManager.getActualValue("landCntry")) {
-    isCross = false;
-  }
-
   var qParams = {
     REQ_ID : _zs01ReqId,
     ADDR_TYPE : "ZS01",
