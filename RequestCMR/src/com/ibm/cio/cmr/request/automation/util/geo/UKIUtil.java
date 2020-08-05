@@ -418,9 +418,7 @@ public class UKIUtil extends AutomationUtil {
 
       }
       // set filtered matches in response
-      if (!filteredMatches.isEmpty()) {
-        response.setMatches(filteredMatches);
-      }
+      response.setMatches(filteredMatches);
     }
 
   }

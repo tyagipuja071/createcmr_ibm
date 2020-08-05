@@ -433,7 +433,7 @@ function setISUCTCOnISIC() {
   var clientTier = FormManager.getActualValue('clientTier');
   var isic = FormManager.getActualValue('isicCd');
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229', '7250', '7123', '9802' ]);
-  if (!(custSubGrp == 'INTER' || custSubGrp == 'INFSL' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR')) {
+  if (!(custSubGrp == 'INTER' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR')) {
     if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
       FormManager.setValue('clientTier', 'N');
     } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
@@ -1332,7 +1332,8 @@ function showDeptNoForInternalsOnlyUKI() {
     console.log(">>custSubGrp >>" + custSubGrp);
     console.log(">>SHOWING ibmDeptCostCenter >>");
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
-    FormManager.addValidator('ibmDeptCostCenter', Validators.NUMBER, [ 'Department number' ], 'MAIN_IBM_TAB');
+    // FormManager.addValidator('ibmDeptCostCenter', Validators.NUMBER, [
+    // 'Department number' ], 'MAIN_IBM_TAB');
   } else if (custSubGrp != 'INTER' && custSubGrp != 'XINTR') {
     // FormManager.clearValue('ibmDeptCostCenter');
     console.log(">>custSubGrp >>" + custSubGrp);
@@ -7407,6 +7408,15 @@ function autoSetAbbrNameUKI() {
           FormManager.setValue('abbrevNm', installingCustNm + ' c/o ' + billingCustNm);
         }
       }
+    }
+  } else if (('INFSL' == custSubGrp) && (SysLoc.IRELAND == cmrCntry || SysLoc.UK == cmrCntry)) {
+    var qParams = {
+      REQ_ID : FormManager.getActualValue('reqId'),
+    };
+
+    var result = cmr.query('UKI.GET_ABBNAME_DATA', qParams);
+    if (result.ret1 != undefined && result.ret1 != '') {
+      FormManager.setValue('abbrevNm', result.ret1);
     }
   }
 }
