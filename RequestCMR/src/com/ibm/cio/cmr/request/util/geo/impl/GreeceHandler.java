@@ -243,7 +243,11 @@ public class GreeceHandler extends BaseSOFHandler {
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
                   }
-                  converted.add(addr);
+
+                  if (!("ZP01".equals(addrType))) {
+                    converted.add(addr);
+                  }
+
                   if ("ZS01".equals(addrType)) {
                     FindCMRRecordModel zp01Addr = mapLocalLanguageTranslationOfSoldTo(entityManager, record, cmrIssueCd);
 
@@ -261,8 +265,9 @@ public class GreeceHandler extends BaseSOFHandler {
                 }
               }
             } else if ("726".equals(cmrIssueCd) && isNewCmrRecordsGR) {
-              // if (isNewCmrRecordsGR) {
-              converted.add(handleNewCmrRecordsGR(record));
+              if (!CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode())) {
+                converted.add(handleNewCmrRecordsGR(record));
+              }
               if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
                 converted.add(mapLocalLanguageTranslationOfSoldTo(entityManager, record, cmrIssueCd));
               }
