@@ -203,6 +203,10 @@ function setVATOnScenario() {
       FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
 
+    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
+      // RC: Temporary fix for story CMR-5134, until TAX exempt is implemented
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
     } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO'
         || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
       if (countyCd == 'FR' || countyCd == 'AD') {
@@ -2127,20 +2131,47 @@ function addIBMAbbrevNmValidator() {
         var role = _pagemodel.userRole;
         var abbrevNm = FormManager.getActualValue('abbrevNm');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (role == 'Processor' && (abbrevNm.toUpperCase().indexOf("IBM") != -1) && !(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO')) {
+        if (abbrevNm.toUpperCase().indexOf("IBM") != -1 && !(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO')) {
           var ibmIndex = abbrevNm.toUpperCase().indexOf("IBM");
           var ibm = abbrevNm.substring(ibmIndex, ibmIndex + 3);
+          FormManager.enable('abbrevNm');
+          FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
           return new ValidationResult({
             id : 'abbrevNm',
             type : 'text',
             name : 'Abbreviated Name (TELX1)'
           }, false, 'Abbreviated Name (TELX1) should not contain "' + ibm + '" when scenario sub-type is other than Internal or Internal SO/FM');
+        } else if (abbrevNm.toUpperCase().indexOf("IBM") == -1 && (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO')) {
+          FormManager.enable('abbrevNm');
+          FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+          return new ValidationResult({
+            id : 'abbrevNm',
+            type : 'text',
+            name : 'Abbreviated Name (TELX1)'
+          }, false, 'Abbreviated Name (TELX1) should contain "IBM" when scenario sub-type is Internal or Internal SO/FM');
         } else {
           return new ValidationResult(null, true);
         }
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function unlockAbbrevNmForInternalScenario() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (reqType == 'C') {
+    if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO') {
+      FormManager.enable('abbrevNm');
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.readOnly('abbrevNm');
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    }
+  }
 }
 
 function setAbbrNmOnIbmDeptChng() {
@@ -2219,5 +2250,6 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, [ '706' ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addSoldToAddressValidator, '706');
+  GEOHandler.addAfterTemplateLoad(unlockAbbrevNmForInternalScenario, '706');
 
 });
