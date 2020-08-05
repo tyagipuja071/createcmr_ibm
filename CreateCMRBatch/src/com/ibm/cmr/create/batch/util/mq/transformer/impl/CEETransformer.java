@@ -1143,44 +1143,49 @@ public class CEETransformer extends EMEATransformer {
 
     String vat = dummyHandler.cmrData.getVat();
     // not for internal scenario
-    if ("C".equals(admin.getReqType()) && !StringUtils.isEmpty(vat) && !data.getCustSubGrp().contains("IN")) {
-      if ("821".equals(data.getCmrIssuingCntry())) {
-        if (vat.matches("^[A-Z]{2}.*")) {
-          String prefix = vat.substring(0, 2);
-          legacyCust.setVat(vat.replace(prefix, ""));
-        } else {
-          legacyCust.setVat(vat);
-        }
-      } else if (("644,668,693,704,708,740,820,826").contains(data.getCmrIssuingCntry())) {
-        if (vat.matches("^[A-Z]{2}.*")) {
-          legacyCust.setVat(vat);
-        } else {
-          String zs01AddrssCntry = null;
-          if (dummyHandler.currentAddresses != null) {
-            for (Addr addr : dummyHandler.currentAddresses) {
-              if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-                zs01AddrssCntry = addr.getLandCntry();
-                break;
-              }
-            }
-            legacyCust.setVat(zs01AddrssCntry + vat);
-          }
-        }
-      } else {
-        if (!StringUtils.isEmpty(vat)) {
-          legacyCust.setVat(vat);
-        } else {
-          legacyCust.setVat("");
-        }
-
-      }
-    } else {
+    // if ("C".equals(admin.getReqType()) && !StringUtils.isEmpty(vat) &&
+    // !data.getCustSubGrp().contains("IN") &&
+    // !data.getCustSubGrp().contains("BP")
+    // && !data.getVatExempt().equals("Y")) {
+    // if ("821".equals(data.getCmrIssuingCntry())) {
+    // if (vat.matches("^[A-Z]{2}.*")) {
+    // String prefix = vat.substring(0, 2);
+    // legacyCust.setVat(vat.replace(prefix, ""));
+    // } else {
+    // legacyCust.setVat(vat);
+    // }
+    // } else if
+    // (("644,668,693,704,708,740,820,826").contains(data.getCmrIssuingCntry()))
+    // {
+    // if (vat.matches("^[A-Z]{2}.*")) {
+    // legacyCust.setVat(vat);
+    // } else {
+    // String zs01AddrssCntry = null;
+    // if (dummyHandler.currentAddresses != null) {
+    // for (Addr addr : dummyHandler.currentAddresses) {
+    // if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+    // zs01AddrssCntry = addr.getLandCntry();
+    // break;
+    // }
+    // }
+    // legacyCust.setVat(zs01AddrssCntry + vat);
+    // }
+    // }
+    // } else {
+    // if (!StringUtils.isEmpty(vat)) {
+    // legacyCust.setVat(vat);
+    // } else {
+    // legacyCust.setVat("");
+    // }
+    //
+    // }
+    // } else {
       if (!StringUtils.isEmpty(vat)) {
         legacyCust.setVat(vat);
       } else {
         legacyCust.setVat("");
       }
-    }
+    // }
 
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
       legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
