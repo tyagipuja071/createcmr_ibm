@@ -629,7 +629,9 @@ function setMubotyOnPostalCodeIMS(postCd, subIndustryCd, clientTier) {
 
   if (result != null && Object.keys(result).length > 0 && result.ret1) {
     FormManager.setValue('searchTerm', result.ret1);
-    FormManager.readOnly('searchTerm');
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('searchTerm');
+    }
   } else {
     FormManager.clearValue('searchTerm');
     FormManager.enable('searchTerm');
