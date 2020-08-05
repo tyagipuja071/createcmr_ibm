@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.pdf.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import com.ibm.cio.cmr.request.entity.IntlAddr;
 import com.ibm.cio.cmr.request.entity.ProlifChecklist;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.approval.ChecklistItem;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil;
 import com.ibm.cio.cmr.request.util.approval.ChecklistUtil.ChecklistResponse;
@@ -41,10 +43,20 @@ import com.itextpdf.layout.element.Table;
 public class CNPDFConverter extends DefaultPDFConverter {
   private final PdfFont regularFont;
   private static final Logger LOG = Logger.getLogger(RequestToPDFConverter.class);
+  private PdfFont chineseFont;
 
   public CNPDFConverter(String cmrIssuingCntry) throws IOException {
     super(cmrIssuingCntry);
     this.regularFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    String webConfig = ConfigUtil.getConfigDir();
+    String fontLocation = webConfig + File.separator + "ARIALUNI.TTF";
+    LOG.debug("Chinese Font Location " + fontLocation);
+    try {
+      this.chineseFont = PdfFontFactory.createFont(fontLocation, PdfEncodings.IDENTITY_H, true);
+    } catch (IOException e) {
+      LOG.debug("Error in initializing Chinese font.", e);
+      this.chineseFont = PdfFontFactory.createFont(FontConstants.HELVETICA);
+    }
 
   }
 
@@ -128,25 +140,15 @@ public class CNPDFConverter extends DefaultPDFConverter {
   @Override
   protected Cell createValueCell(String text, int rowSpan, int colSpan) {
     Cell cell = new Cell(rowSpan, colSpan);
-    ClassLoader classLoader = getClass().getClassLoader();
-    String FONT = null;
-    PdfFont font = null;
     if ((text != null && (!text.isEmpty())) && (textContainingLanguage(text) != null)) {
-      try {
-        if (textContainingLanguage(text).equalsIgnoreCase("CHINESE")) {
-          LOG.debug(">> classLoader.getResource('ARIALUNI.TTF') >> " + classLoader.getResource("ARIALUNI.TTF"));
-          FONT = classLoader.getResource("ARIALUNI.TTF").getPath();
-          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, true);
-          cell.setFont(font);
-          Paragraph label = new Paragraph();
-          label.setFontSize(7);
-          label.add(text);
-          cell.setFont(font);
-          cell.add(label);
-          return cell;
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
+      if (textContainingLanguage(text).equalsIgnoreCase("CHINESE")) {
+        cell.setFont(this.chineseFont);
+        Paragraph label = new Paragraph();
+        label.setFontSize(7);
+        label.add(text);
+        cell.setFont(this.chineseFont);
+        cell.add(label);
+        return cell;
       }
     } else {
       cell.setHeight(10);
@@ -258,25 +260,15 @@ public class CNPDFConverter extends DefaultPDFConverter {
 
   private Cell createValueCellExtended(String text, int rowSpan, int colSpan, int padding) {
     Cell cell = new Cell(rowSpan, colSpan);
-    ClassLoader classLoader = getClass().getClassLoader();
-    String FONT = null;
-    PdfFont font = null;
     if ((text != null && (!text.isEmpty())) && (textContainingLanguage(text) != null)) {
-      try {
-        if (textContainingLanguage(text).equalsIgnoreCase("CHINESE")) {
-          LOG.debug(">> classLoader.getResource('ARIALUNI.TTF') >> " + classLoader.getResource("ARIALUNI.TTF"));
-          FONT = classLoader.getResource("ARIALUNI.TTF").getPath();
-          font = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H, true);
-          cell.setFont(font);
-          Paragraph label = new Paragraph();
-          label.setFontSize(7);
-          label.add(text);
-          cell.setFont(font);
-          cell.add(label);
-          return cell;
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
+      if (textContainingLanguage(text).equalsIgnoreCase("CHINESE")) {
+        cell.setFont(this.chineseFont);
+        Paragraph label = new Paragraph();
+        label.setFontSize(7);
+        label.add(text);
+        cell.setFont(this.chineseFont);
+        cell.add(label);
+        return cell;
       }
     } else {
       cell.setHeight(10 * padding);
