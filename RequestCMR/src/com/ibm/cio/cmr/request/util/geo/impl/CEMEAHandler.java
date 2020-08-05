@@ -1265,6 +1265,9 @@ public class CEMEAHandler extends BaseSOFHandler {
       if (isShareZI01 != null) {
         updateImportIndToNForSharezi01Addr(entityManager, data.getId().getReqId());
       }
+      if (isShareZP01 != null || isShareZS02 != null || isShareZD01 != null || isShareZI01 != null) {
+        updateChangeindToYForSharezs01Addr(entityManager, data.getId().getReqId());
+      }
     }
 
   }
@@ -2157,6 +2160,12 @@ public class CEMEAHandler extends BaseSOFHandler {
 
   public void updateImportIndToNForSharezi01Addr(EntityManager entityManager, long reqId) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZI01SHARE.N.IMPORTIND"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
+  }
+
+  public void updateChangeindToYForSharezs01Addr(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZS01SHARE.Y.CHANGEINCD"));
     query.setParameter("REQ_ID", reqId);
     query.executeSql();
   }
