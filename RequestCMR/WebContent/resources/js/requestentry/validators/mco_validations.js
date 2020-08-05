@@ -472,13 +472,13 @@ function setEnterpriseValues(clientTier) {
   // For Spain, domestic with 32B, 32S, 32T & 217 ISUs, set enterprise based on
   // LocNo
   var isuCtc = isuCd + clientTier;
-  if (custGroup != 'CROSS') {
-    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
-      // FormManager.readOnly('enterprise');
-      setSBOAndEBO();
-      return;
-    }
+  // if (custGroup != 'CROSS') {
+  if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
+    // FormManager.readOnly('enterprise');
+    setSBOAndEBO();
+    return;
   }
+  // }
 
   var enterprises = [];
   if (isuCd != '' && clientTier != '') {
@@ -527,9 +527,9 @@ function setSBOAndEBO() {
     if (FormManager.getActualValue('reqType') != 'C') {
       return;
     }
-    if (FormManager.getActualValue('custGrp') == 'CROSS') {
-      return;
-    }
+    // if (FormManager.getActualValue('custGrp') == 'CROSS') {
+    // return;
+    // }
     var custSubGroup = FormManager.getActualValue('custSubGrp');
     var locationNumber = FormManager.getActualValue('locationNumber');
     var isuCd = FormManager.getActualValue('isuCd');
@@ -1964,7 +1964,6 @@ function setISUCTCOnISIC() {
     }
   }
 }
-
 
 function changeAbbNmSpainOnScenario() {
   var reqType = null;
