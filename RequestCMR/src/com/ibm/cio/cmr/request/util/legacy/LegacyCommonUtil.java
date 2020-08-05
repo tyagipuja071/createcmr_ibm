@@ -202,4 +202,18 @@ public class LegacyCommonUtil {
     return addrLine.trim();
   }
 
+  public static boolean isCdFoundInLov(EntityManager entityManager, String cntry, String fieldId, String cd) {
+    String sql = ExternalizedQuery.getSql("COUNT.LOVBYCD");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setParameter("FIELD_ID", fieldId);
+    query.setParameter("CD", cd);
+    int count = query.getSingleResult(Integer.class);
+
+    if (count > 0) {
+      return true;
+    }
+    return false;
+  }
+
 }
