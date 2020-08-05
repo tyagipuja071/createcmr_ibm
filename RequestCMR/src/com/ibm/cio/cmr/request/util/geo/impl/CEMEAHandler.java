@@ -213,6 +213,7 @@ public class CEMEAHandler extends BaseSOFHandler {
               if (!StringUtils.isEmpty(addrType)) {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
+                addr.setCmrName4(record.getCmrName4());
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
@@ -314,6 +315,65 @@ public class CEMEAHandler extends BaseSOFHandler {
                     }
                   }
                 }
+                // add new here
+                String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                String maxSeqs = StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0');
+                // check if share seq address
+                String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
+                String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
+                String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
+                String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
+
+                // add share ZP01
+                if (isShareZP01 != null) {
+                  FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
+                  PropertyUtils.copyProperties(sharezp01, mainRecord);
+                  sharezp01.setCmrAddrTypeCode("ZP01");
+                  sharezp01.setCmrAddrSeq(maxSeqs);
+                  maxintSeqadd++;
+                  sharezp01.setParentCMRNo("");
+                  sharezp01.setCmrSapNumber(mainRecord.getCmrSapNumber());
+                  sharezp01.setCmrDept(mainRecord.getCmrCity2());
+                  converted.add(sharezp01);
+                }
+                // add share ZS02
+                if (isShareZS02 != null) {
+                  FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
+                  PropertyUtils.copyProperties(sharezs02, mainRecord);
+                  sharezs02.setCmrAddrTypeCode("ZS02");
+                  sharezs02.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0'));
+                  maxintSeqadd++;
+                  sharezs02.setParentCMRNo("");
+                  sharezs02.setCmrSapNumber(mainRecord.getCmrSapNumber());
+                  sharezs02.setCmrDept(mainRecord.getCmrCity2());
+                  converted.add(sharezs02);
+                }
+                // add share ZD01
+                if (isShareZD01 != null) {
+                  FindCMRRecordModel sharezd01 = new FindCMRRecordModel();
+                  PropertyUtils.copyProperties(sharezd01, mainRecord);
+                  sharezd01.setCmrAddrTypeCode("ZD01");
+                  sharezd01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0'));
+                  maxintSeqadd++;
+                  sharezd01.setParentCMRNo("");
+                  sharezd01.setCmrSapNumber(mainRecord.getCmrSapNumber());
+                  sharezd01.setCmrDept(mainRecord.getCmrCity2());
+                  converted.add(sharezd01);
+                }
+                // add share ZI01
+                if (isShareZI01 != null) {
+                  FindCMRRecordModel sharezi01 = new FindCMRRecordModel();
+                  PropertyUtils.copyProperties(sharezi01, mainRecord);
+                  sharezi01.setCmrAddrTypeCode("ZI01");
+                  sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0'));
+                  maxintSeqadd++;
+                  sharezi01.setParentCMRNo("");
+                  sharezi01.setCmrSapNumber(mainRecord.getCmrSapNumber());
+                  sharezi01.setCmrDept(mainRecord.getCmrCity2());
+                  converted.add(sharezi01);
+                }
+
               }
             }
 
@@ -325,64 +385,6 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-
-            String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-            int maxintSeq = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-            String maxSeqs = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
-            // check if share seq address
-            String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-            String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-            String isShareZD01 = isShareZD01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-            String isShareZI01 = isShareZI01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
-
-            // add share ZP01
-            if (isShareZP01 != null) {
-              FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
-              PropertyUtils.copyProperties(sharezp01, mainRecord);
-              sharezp01.setCmrAddrTypeCode("ZP01");
-              sharezp01.setCmrAddrSeq(maxSeqs);
-              maxintSeq++;
-              sharezp01.setParentCMRNo("");
-              sharezp01.setCmrSapNumber(mainRecord.getCmrSapNumber());
-              sharezp01.setCmrDept(mainRecord.getCmrCity2());
-              converted.add(sharezp01);
-            }
-            // add share ZS02
-            if (isShareZS02 != null) {
-              FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
-              PropertyUtils.copyProperties(sharezs02, mainRecord);
-              sharezs02.setCmrAddrTypeCode("ZS02");
-              sharezs02.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0'));
-              maxintSeq++;
-              sharezs02.setParentCMRNo("");
-              sharezs02.setCmrSapNumber(mainRecord.getCmrSapNumber());
-              sharezs02.setCmrDept(mainRecord.getCmrCity2());
-              converted.add(sharezs02);
-            }
-            // add share ZD01
-            if (isShareZD01 != null) {
-              FindCMRRecordModel sharezd01 = new FindCMRRecordModel();
-              PropertyUtils.copyProperties(sharezd01, mainRecord);
-              sharezd01.setCmrAddrTypeCode("ZD01");
-              sharezd01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0'));
-              maxintSeq++;
-              sharezd01.setParentCMRNo("");
-              sharezd01.setCmrSapNumber(mainRecord.getCmrSapNumber());
-              sharezd01.setCmrDept(mainRecord.getCmrCity2());
-              converted.add(sharezd01);
-            }
-            // add share ZI01
-            if (isShareZI01 != null) {
-              FindCMRRecordModel sharezi01 = new FindCMRRecordModel();
-              PropertyUtils.copyProperties(sharezi01, mainRecord);
-              sharezi01.setCmrAddrTypeCode("ZI01");
-              sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0'));
-              maxintSeq++;
-              sharezi01.setParentCMRNo("");
-              sharezi01.setCmrSapNumber(mainRecord.getCmrSapNumber());
-              sharezi01.setCmrDept(mainRecord.getCmrCity2());
-              converted.add(sharezi01);
-            }
 
           }
         }
@@ -1258,16 +1260,20 @@ public class CEMEAHandler extends BaseSOFHandler {
       String isShareZI01 = isShareZI01(entityManager, data.getCmrIssuingCntry(), data.getCmrNo(), soldtoseq);
 
       if (isShareZP01 != null) {
-        updateImportIndToNForSharezp01Addr(entityManager, data.getId().getReqId());
+        updateImportIndToNForSharezp01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+            data.getCmrNo());
       }
       if (isShareZS02 != null) {
-        updateImportIndToNForSharezs02Addr(entityManager, data.getId().getReqId());
+        updateImportIndToNForSharezs02Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+            data.getCmrNo());
       }
       if (isShareZD01 != null) {
-        updateImportIndToNForSharezd01Addr(entityManager, data.getId().getReqId());
+        updateImportIndToNForSharezd01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+            data.getCmrNo());
       }
       if (isShareZI01 != null) {
-        updateImportIndToNForSharezi01Addr(entityManager, data.getId().getReqId());
+        updateImportIndToNForSharezi01Addr(entityManager, data.getId().getReqId(), SystemConfiguration.getValue("MANDT"), data.getCmrIssuingCntry(),
+            data.getCmrNo());
       }
       if (isShareZP01 != null || isShareZS02 != null || isShareZD01 != null || isShareZI01 != null) {
         updateChangeindToYForSharezs01Addr(entityManager, data.getId().getReqId());
@@ -2167,27 +2173,39 @@ public class CEMEAHandler extends BaseSOFHandler {
     return zi01Seq;
   }
 
-  public void updateImportIndToNForSharezp01Addr(EntityManager entityManager, long reqId) {
+  public void updateImportIndToNForSharezp01Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZP01SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
     query.executeSql();
   }
 
-  public void updateImportIndToNForSharezs02Addr(EntityManager entityManager, long reqId) {
+  public void updateImportIndToNForSharezs02Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZS02SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
     query.executeSql();
   }
 
-  public void updateImportIndToNForSharezd01Addr(EntityManager entityManager, long reqId) {
+  public void updateImportIndToNForSharezd01Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZD01SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
     query.executeSql();
   }
 
-  public void updateImportIndToNForSharezi01Addr(EntityManager entityManager, long reqId) {
+  public void updateImportIndToNForSharezi01Addr(EntityManager entityManager, long reqId, String mandt, String katr6, String cmrNo) {
     PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("CEE.ADDR.UPDATE.ZI01SHARE.N.IMPORTIND"));
     query.setParameter("REQ_ID", reqId);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("ZZKV_CUSNO", cmrNo);
     query.executeSql();
   }
 
