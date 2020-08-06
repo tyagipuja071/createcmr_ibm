@@ -4350,6 +4350,7 @@ public class TurkeyHandler extends BaseSOFHandler {
 	      if(reqType.equals("U")){
 	        seqZP01 = "00002";
 	      }
+      addrCopy.setCustPhone(null);
 	      addrCopy.getId().setAddrSeq(seqZP01);
 	    }
 
