@@ -515,14 +515,14 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
       var custSubGrp = FormManager.getActualValue('custSubGrp');
       if (landCntry != 'undefined' && landCntry == 'IM') {
         FormManager.setValue('specialTaxCd', 'Bl');
-        FormManager.enable('specialTaxCd');
+        // FormManager.enable('specialTaxCd');
       } else {
         if (custSubGrp != null && custSubGrp == 'XINTR') {
           FormManager.setValue('specialTaxCd', 'XX');
           FormManager.readOnly('specialTaxCd');
         } else {
           FormManager.setValue('specialTaxCd', '32');
-          FormManager.enable('specialTaxCd');
+          // FormManager.enable('specialTaxCd');
         }
       }
     }
@@ -5979,6 +5979,16 @@ function lockRequireFieldsUKI() {
       FormManager.readOnly('salesBusOffCd');
     }
   }
+  if (reqType == 'U' || reqType == 'X' && role == 'REQUESTER') {
+    FormManager.readOnly('abbrevNm');
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    FormManager.readOnly('abbrevLocn');
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+  } else if (role == 'PROCESSOR') {
+    FormManager.enable('abbrevNm');
+    FormManager.enable('abbrevLocn');
+  }
+
   if ((reqType == 'U' || reqType == 'X') && FormManager.getActualValue('ordBlk') == '93') {
     FormManager.readOnly('reqReason');
     if (role == 'REQUESTER') {
