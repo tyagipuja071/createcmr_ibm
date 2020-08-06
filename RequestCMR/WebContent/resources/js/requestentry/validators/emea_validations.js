@@ -852,7 +852,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
       if (addressTyp == 'ZI01') {
         autoSetAbbrevLocUKI();
       }
-      
+
     }
   }
 }
@@ -7086,6 +7086,16 @@ function lockRequireFieldsUKI() {
       }
     }
   }
+
+  if (reqType == 'U' && role == 'REQUESTER') {
+    FormManager.readOnly('abbrevNm');
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    FormManager.readOnly('abbrevLocn');
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+  } else if (role == 'PROCESSOR') {
+    FormManager.enable('abbrevNm');
+    FormManager.enable('abbrevLocn');
+  }
 }
 function lockCustClassUKI() {
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -8892,9 +8902,14 @@ function autoSetUIFieldsOnScnrioUKI() {
     if (dijit.byId('vatExempt').get('checked')) {
       FormManager.getField('vatExempt').set('checked', false);
     }
+  } else if (custSubGrp == 'INFSL') {
+    FormManager.readOnly('collectionCd');
+    FormManager.setValue('collectionCd', '69');
+    FormManager.readOnly('custClass');
+    FormManager.setValue('custClass', '33');
   }
-}
 
+}
 function requestingLOBCheckFrIFSL() {
   FormManager.addFormValidator((function() {
     return {
