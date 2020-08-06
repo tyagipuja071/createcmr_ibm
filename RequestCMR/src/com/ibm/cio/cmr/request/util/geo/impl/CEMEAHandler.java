@@ -1251,6 +1251,18 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
 
+    for (Addr addr : addresses) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        String adrnr = getaddAddressAdrnr(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), addr.getSapNo(),
+            addr.getId().getAddrType(), addr.getId().getAddrSeq());
+        String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+        if (StringUtils.isBlank(adrnr) && !StringUtils.isBlank(legacyGaddrSeq)) {
+          changeZS01AddrUpdate(entityManager, data.getId().getReqId());
+          changeZP01AddrUpdate(entityManager, data.getId().getReqId());
+        }
+      }
+    }
+
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       // check if share seq address
