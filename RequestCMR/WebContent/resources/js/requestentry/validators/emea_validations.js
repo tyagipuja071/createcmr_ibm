@@ -7402,9 +7402,14 @@ function autoSetUIFieldsOnScnrioUKI() {
     if (dijit.byId('vatExempt').get('checked')) {
       FormManager.getField('vatExempt').set('checked', false);
     }
+  } else if (custSubGrp == 'INFSL') {
+    FormManager.readOnly('collectionCd');
+    FormManager.setValue('collectionCd', '69');
+    FormManager.readOnly('custClass');
+    FormManager.setValue('custClass', '33');
   }
-}
 
+}
 function requestingLOBCheckFrIFSL() {
   FormManager.addFormValidator((function() {
     return {
