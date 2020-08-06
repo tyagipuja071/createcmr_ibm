@@ -216,6 +216,15 @@ public class DnBUtil {
           vatValid = validateVAT(country, country + vat);
           if (vatValid) {
             vat = country + vat;
+          } else {
+            String countrySpeficPrefix = geoHandler.getCountrySpecificVatPrefix();
+            // validate for a third time
+            if (countrySpeficPrefix != null) {
+              vatValid = validateVAT(country, countrySpeficPrefix + vat);
+              if (vatValid) {
+                vat = countrySpeficPrefix + vat;
+              }
+            }
           }
         }
         cmrRecord.setCmrVat(vat);
