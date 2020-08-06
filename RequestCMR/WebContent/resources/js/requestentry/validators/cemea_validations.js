@@ -3959,8 +3959,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIsicCdCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(lockIsicCdCEE, GEOHandler.CEE);
 
-  GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
-  GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
+  // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
+  // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
+  // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
 
 });
