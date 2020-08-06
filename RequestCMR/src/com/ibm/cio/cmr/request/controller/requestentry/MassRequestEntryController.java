@@ -639,8 +639,22 @@ public class MassRequestEntryController extends BaseController {
             }
             File file = new File(docLink);
             if (!file.exists()) {
-              LOG.error("Mass file: " + docLink + " does not exist.");
-              throw new CmrException(MessageUtil.ERROR_FILE_DL_ERROR);
+              String name = file.getName();
+              File parent = file.getParentFile();
+              String reqIdDir = parent.getName();
+
+              // 2020 prod
+              file = new File("/gsa/nhbgsa/projects/c/cmma2020/prod/masschange" + File.separator + reqIdDir + File.separator + name);
+              LOG.debug(" - Checking historical location: " + file.getAbsolutePath());
+              if (!file.exists()) {
+                // 2018
+                file = new File("/gsa/nhbgsa/projects/c/cmma2018/prod/masschange" + File.separator + reqIdDir + File.separator + name);
+                LOG.debug(" - Checking historical location: " + file.getAbsolutePath());
+                if (!file.exists()) {
+                  LOG.error("Mass file: " + docLink + "does not exist.");
+                  throw new CmrException(MessageUtil.ERROR_FILE_DL_ERROR);
+                }
+              }
             }
             // download the mass file
             FileInputStream fis = new FileInputStream(file);
@@ -674,8 +688,22 @@ public class MassRequestEntryController extends BaseController {
             String fileName = docLink + ".zip";
             File file = new File(fileName);
             if (!file.exists()) {
-              LOG.error("Mass file: " + fileName + "does not exist.");
-              throw new CmrException(MessageUtil.ERROR_FILE_DL_ERROR);
+              String name = file.getName();
+              File parent = file.getParentFile();
+              String reqIdDir = parent.getName();
+
+              // 2020 prod
+              file = new File("/gsa/nhbgsa/projects/c/cmma2020/prod/masschange" + File.separator + reqIdDir + File.separator + name);
+              LOG.debug(" - Checking historical location: " + file.getAbsolutePath());
+              if (!file.exists()) {
+                // 2018
+                file = new File("/gsa/nhbgsa/projects/c/cmma2018/prod/masschange" + File.separator + reqIdDir + File.separator + name);
+                LOG.debug(" - Checking historical location: " + file.getAbsolutePath());
+                if (!file.exists()) {
+                  LOG.error("Mass file: " + fileName + "does not exist.");
+                  throw new CmrException(MessageUtil.ERROR_FILE_DL_ERROR);
+                }
+              }
             }
             ZipFile zip = new ZipFile(file);
             try {
