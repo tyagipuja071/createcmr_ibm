@@ -215,15 +215,10 @@ public class GreeceHandler extends BaseSOFHandler {
           List<String> sofUses = null;
           FindCMRRecordModel addr = null;
 
-          boolean isNewCmrRecordsGR = false;
-          if ("726".equals(cmrIssueCd)) {
-            isNewCmrRecordsGR = checkIfNewCmrRecords(source.getItems());
-          }
-
           // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
             seqNo = record.getCmrAddrSeq();
-            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo) && ("726".equals(cmrIssueCd) && !isNewCmrRecordsGR)) {
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
               sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
               for (String sofUse : sofUses) {
                 addrType = getAddressTypeByUseGR(sofUse);
@@ -259,42 +254,14 @@ public class GreeceHandler extends BaseSOFHandler {
                       }
                     }
 
-                    zp01Addr.setCmrPostalCode(mainRecord.getCmrPostalCode());
+                    if (StringUtils.isBlank(zp01Addr.getCmrPostalCode())) {
+                      zp01Addr.setCmrPostalCode(mainRecord.getCmrPostalCode());
+                    }
+
                     converted.add(zp01Addr);
                   }
                 }
               }
-            } else if ("726".equals(cmrIssueCd) && isNewCmrRecordsGR) {
-              if (!CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode())) {
-                converted.add(handleNewCmrRecordsGR(record));
-              }
-              if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
-                converted.add(mapLocalLanguageTranslationOfSoldTo(entityManager, record, cmrIssueCd));
-              }
-            }
-          }
-
-          if (SystemLocation.UNITED_KINGDOM.equals(mainRecord.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(mainRecord.getCmrIssuedBy())) {
-            boolean needToImportMailing = checkIZP01ExistsOnRDCUKI(entityManager, mainRecord.getCmrIssuedBy(), mainRecord.getCmrNum());
-            // add unmapped addresses
-            if (needToImportMailing == false) {
-              FindCMRRecordModel record = new FindCMRRecordModel();
-              if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, mainRecord.getCmrIssuedBy())) {
-                record.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZP01.toString());
-                record.setCmrIssuedBy(mainRecord.getCmrIssuedBy());
-                setMailingAddressFromLegacy(entityManager, mainRecord.getCmrIssuedBy(), "Mailing", record);
-              } else {
-                record = createAddress(entityManager, mainRecord.getCmrIssuedBy(), CmrConstants.ADDR_TYPE.ZP01.toString(), "Mailing",
-                    new HashMap<String, FindCMRRecordModel>());
-                if (record == null) {
-                  record = new FindCMRRecordModel();
-                  // record.setCmrAddrSeq("6");
-                  record.setCmrAddrTypeCode(CmrConstants.ADDR_TYPE.ZP01.toString());
-                  record.setCmrIssuedBy(mainRecord.getCmrIssuedBy());
-                  setMailingAddressFromLegacy(entityManager, mainRecord.getCmrIssuedBy(), "Mailing", record);
-                }
-              }
-              converted.add(record);
             }
           }
         }
@@ -3854,38 +3821,6 @@ public class GreeceHandler extends BaseSOFHandler {
       return addrList.get(0);
     }
     return null;
-  }
-
-  private boolean checkIfNewCmrRecords(List<FindCMRRecordModel> items) {
-
-    int rdcRecordsCount = items.size();
-    int legacyRecordsCount = legacyObjects.getAddresses().size();
-
-    // for new rdc records it is all db2 addr records except mailing and billing
-    // legacy has 5 records min for new cmr for greece
-    if (rdcRecordsCount < 3 || legacyRecordsCount < 5) {
-      return false;
-    }
-    return true;
-  }
-
-  private FindCMRRecordModel handleNewCmrRecordsGR(FindCMRRecordModel record) throws Exception {
-    FindCMRRecordModel addr = null;
-    String seqNo = record.getCmrAddrSeq();
-    if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
-      String addrType = record.getCmrAddrTypeCode();
-      if (!StringUtils.isEmpty(addrType)) {
-        addr = cloneAddress(record, addrType);
-      }
-    }
-
-    if (StringUtils.isNotBlank(record.getCmrStreetAddressCont())) {
-      addr.setCmrStreetAddressCont(record.getCmrStreetAddressCont());
-    } else if (StringUtils.isNotBlank(record.getCmrName3())) {
-      addr.setCmrStreetAddressCont(record.getCmrName3());
-    }
-
-    return addr;
   }
 
   private String getAddressTypeByUseGR(String addressUse) {
