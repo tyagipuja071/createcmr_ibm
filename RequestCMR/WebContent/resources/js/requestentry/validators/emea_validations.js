@@ -740,7 +740,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
   var _zs01ReqId = FormManager.getActualValue('reqId');
   var abbrevLocnDB = null;
   var qParams = {
-    REQ_ID : _zs01ReqId, //
+    REQ_ID : _zs01ReqId,
   };
   var res = cmr.query('GET_ABBREV_LOCN_DB', qParams);
   abbrevLocnDB = res.ret1;
@@ -758,17 +758,10 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
 
     if (finalSave || force || copyingToA) {
 
-      if (addressTyp == 'ZI01') { //
+      if (addressTyp == 'ZI01') {
         autoSetAbbrevLocUKI();
       }
-      /*
-       * else if (addressTyp == 'ZI01') { // var addressSeq =
-       * FormManager.getActualValue('addrSeq'); var qParams = { REQ_ID :
-       * _zs01ReqId, ADDR_SEQ : addressSeq, };
-       * 
-       * var _result = cmr.query('CHECK_IF_MAIN_ZI01', qParams); if (_result !=
-       * 'undefined' && _result != '') { autoSetAbbrevLocUKI(); } }
-       */
+      
     }
   }
 }
@@ -6251,10 +6244,8 @@ function autoSetAbbrevLocUKI() {
   var _addrType = null;
   var _result = null;
   if (_custGrp == 'CROSS') {
-    if (_custType == 'XINTR') {
+    if (_custType == 'XINTR' || _custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS') {
       _addrType = 'ZI01';
-    } else if (_custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS') {
-      _addrType = 'ZS01';
     }
     var qParams = {
       REQ_ID : _zs01ReqId,
@@ -6274,14 +6265,9 @@ function autoSetAbbrevLocUKI() {
       _abbrevLocn = "SOFTLAYER";
     } else {
       var _zs01ReqId = FormManager.getActualValue('reqId');
-      var _addrType = null;
-      if (_custType == 'INTER' || _custType == 'INFSL' || (_custType == 'THDPT' && FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND)) {
-        _addrType = 'ZI01';
-      } else {
-        _addrType = 'ZS01';
-      }
+      var _addrType = 'ZI01';
       var qParams = {
-        REQ_ID : _zs01ReqId, //
+        REQ_ID : _zs01ReqId,
         ADDR_TYPE : _addrType,
       };
 
