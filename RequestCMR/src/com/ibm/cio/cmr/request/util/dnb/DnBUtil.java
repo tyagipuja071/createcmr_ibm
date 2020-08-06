@@ -217,6 +217,13 @@ public class DnBUtil {
           if (vatValid) {
             vat = country + vat;
           }
+
+          if (SystemLocation.GREECE.equals(issuingCntry) && "GR".equals(country)) {
+            vatValid = validateVAT(country, "EL" + vat);
+            if (vatValid) {
+              vat = "EL" + vat;
+            }
+          }
         }
         cmrRecord.setCmrVat(vat);
       }
