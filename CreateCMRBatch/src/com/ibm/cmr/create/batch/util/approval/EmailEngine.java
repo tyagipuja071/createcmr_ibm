@@ -8,7 +8,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -71,6 +73,8 @@ public class EmailEngine {
   private VelocityEngine engine;
   private VelocityContext requestContext;
   private String dataFieldsTemplate;
+
+  private static Map<String, String> countryNames = new HashMap<>();
 
   /**
    * Creates an instance of the {@link EmailEngine}
@@ -300,6 +304,10 @@ public class EmailEngine {
         mailContent = parts[1];
       }
     }
+    if (this.data != null && this.data.getCmrIssuingCntry() != null) {
+      String country = this.data.getCmrIssuingCntry() + " - " + getIssuingCountry(entityManager, this.data.getCmrIssuingCntry());
+      subject += " [" + country + "]";
+    }
     approvalContext.put("requester", requester);
     approvalContext.put("description", mailContent);
     approvalContext.put("request", request);
@@ -496,6 +504,32 @@ public class EmailEngine {
       this.requestContext.put("checklistitems", ChecklistUtil.getItems(checklist, this.data.getCmrIssuingCntry(), ChecklistResponse.Yes));
     }
 
+  }
+
+  /**
+   * String gets the fully qualified country name
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  private String getIssuingCountry(EntityManager entityManager, String country) {
+    String name = countryNames.get(country);
+    if (!StringUtils.isBlank(name)) {
+      return name;
+    }
+    try {
+      String sql = "select NM from CREQCMR.SUPP_CNTRY where CNTRY_CD = :CNTRY";
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", country);
+      query.setForReadOnly(true);
+      name = query.getSingleResult(String.class);
+      countryNames.put(country, name);
+      return name;
+    } catch (Exception e) {
+      LOG.warn("Error in getting issuing country name", e);
+      return null;
+    }
   }
 
   private DefaultApprovals getDefaultApproval(EntityManager entityManager, long defaultApprovalId) {
