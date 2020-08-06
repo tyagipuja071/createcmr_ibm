@@ -5994,7 +5994,7 @@ function lockRequireFieldsUKI() {
     }
   }
 
-  if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
+  if (reqType == 'U' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     FormManager.readOnly('abbrevLocn');
