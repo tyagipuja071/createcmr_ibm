@@ -182,7 +182,7 @@
           <label>Phone #</label>
           <dbColumn>CUST_PHONE</dbColumn>
           <width>18</width>
-          <length>10</length>
+          <length>14</length>
         </column>
       </columns>
     </tab>
@@ -422,7 +422,7 @@
           <label>Phone #</label>
           <dbColumn>CUST_PHONE</dbColumn>
           <width>18</width>
-          <length>10</length>
+          <length>14</length>
         </column>
       </columns>
     </tab>
