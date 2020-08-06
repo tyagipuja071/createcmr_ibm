@@ -635,7 +635,7 @@ public class CEETransformer extends EMEATransformer {
         if ("707CS".equals(cntryUse)) {
           line6 = "Kosovo";
         } else if ("707ME".equals(cntryUse)) {
-          line6 = "Monetengro";
+          line6 = "Montenegro";
         } else {
           line6 = "Serbia";
         }
