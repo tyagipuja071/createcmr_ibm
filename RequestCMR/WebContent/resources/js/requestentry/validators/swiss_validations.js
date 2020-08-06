@@ -347,6 +347,7 @@ function addHandlersForSWISS() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
+      setMubotyOnPostalCodeIMS(value);
     });
   }
 
@@ -782,7 +783,7 @@ function setFieldsMandtStatus() {
   }
   // CMR-4715 -> muboty cannot be blank for update requests
   if (reqType == 'C' || (reqType == 'U' && role == 'REQUESTER')) {
-    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'MUBOTY' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('searchTerm', Validators.REQUIRED, [ 'SORTL' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('searchTerm', Validators.REQUIRED);
     FormManager.enable('isuCd');
