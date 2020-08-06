@@ -614,6 +614,10 @@ public class TurkeyTransformer extends EMEATransformer {
       line4 = addrData.getAddrTxt();
     }
 
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
+      line3 = addrData.getCustNm4();
+    }
+
 
     // Dept + Postal code + City
     if (!StringUtils.isEmpty(addrData.getDept())) {
@@ -1558,7 +1562,10 @@ public class TurkeyTransformer extends EMEATransformer {
             currAddr.setAddrLine1(mailingaddre.getAddrLine1());
             if (!StringUtils.isBlank(mailingaddre.getAddrLine2())) {
               currAddr.setAddrLine2(mailingaddre.getAddrLine2());
+            } else {
+              currAddr.setAddrLine2("");
             }
+
             if (!StringUtils.isBlank(mailingaddre.getAddrLine3())) {
               currAddr.setAddrLine3(mailingaddre.getAddrLine3());
             } else {
