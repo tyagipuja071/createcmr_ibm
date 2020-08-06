@@ -586,6 +586,7 @@ public class TurkeyTransformer extends EMEATransformer {
     String addrType = addrData.getId().getAddrType();
     String phone = "";
     String addrLineT = "";
+    String contact = "";
 
     LOG.trace("Handling " + (update ? "update" : "create") + " request.");
 
@@ -616,6 +617,7 @@ public class TurkeyTransformer extends EMEATransformer {
 
     if (!StringUtils.isBlank(addrData.getCustNm4())) {
       line3 = addrData.getCustNm4();
+      contact = addrData.getCustNm4();
     }
 
 
@@ -718,7 +720,7 @@ public class TurkeyTransformer extends EMEATransformer {
 //    legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
-    legacyAddr.setContact("");
+    legacyAddr.setContact(contact);
     legacyAddr.setAddrLineU("");
 
   }
