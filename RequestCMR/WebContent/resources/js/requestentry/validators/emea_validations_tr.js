@@ -4878,6 +4878,8 @@ function addTRAddressTypeValidator() {
           var custType = FormManager.getActualValue('custGrp');
           var compareFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'stateProv', 'postCd', 'dept', 'poBox', 'landCntry' ];
           var compareFieldsLocal = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'stateProv', 'postCd', 'dept', 'poBox', 'taxOffice' ];
+          var compareFieldsNonLocal = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'stateProv', 'postCd', 'dept', 'poBox' ];
+          var compareFieldsValue = null;
           var enErrMsg = '';
           var turkishErrMsg = '';
           var reqType = cmr.currentRequestType;
@@ -4909,8 +4911,13 @@ function addTRAddressTypeValidator() {
             // 2: For ZP01, create request => scenario is CROSS,
             // update request=> land country is not TR
             if (type != 'ZP01' || (type == 'ZP01' && (custType == 'CROSS' || (reqType == 'U' && record['landCntry'][0] != 'TR')))) {
-              for (var j = 0; j < compareFieldsLocal.length; j++) {
-                var value = record[compareFieldsLocal[j]];
+              if(type == 'ZP01'){
+                compareFieldsValue = compareFieldsLocal;
+              }else{
+                compareFieldsValue = compareFieldsNonLocal;
+              }
+              for (var j = 0; j < compareFieldsValue.length; j++) {
+                var value = record[compareFieldsValue[j]];
                 if (typeof (value) == 'object') {
                   value = value[0];
                 }
