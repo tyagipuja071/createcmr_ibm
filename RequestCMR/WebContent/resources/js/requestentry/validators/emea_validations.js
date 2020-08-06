@@ -515,14 +515,14 @@ function autoSetSpecialTaxCdByScenario(_custType, custTypeinDB) {
       var custSubGrp = FormManager.getActualValue('custSubGrp');
       if (landCntry != 'undefined' && landCntry == 'IM') {
         FormManager.setValue('specialTaxCd', 'Bl');
-        FormManager.enable('specialTaxCd');
+        // FormManager.enable('specialTaxCd');
       } else {
         if (custSubGrp != null && custSubGrp == 'XINTR') {
           FormManager.setValue('specialTaxCd', 'XX');
           FormManager.readOnly('specialTaxCd');
         } else {
           FormManager.setValue('specialTaxCd', '32');
-          FormManager.enable('specialTaxCd');
+          // FormManager.enable('specialTaxCd');
         }
       }
     }
