@@ -3917,4 +3917,9 @@ public class GreeceHandler extends BaseSOFHandler {
     return localTransAddr;
   }
 
+  @Override
+  public String getCountrySpecificVatPrefix() {
+    return "EL";
+  }
+
 }

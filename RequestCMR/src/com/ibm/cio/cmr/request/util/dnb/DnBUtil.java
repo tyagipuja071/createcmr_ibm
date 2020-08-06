@@ -216,12 +216,14 @@ public class DnBUtil {
           vatValid = validateVAT(country, country + vat);
           if (vatValid) {
             vat = country + vat;
-          }
-
-          if (SystemLocation.GREECE.equals(issuingCntry) && "GR".equals(country)) {
-            vatValid = validateVAT(country, "EL" + vat);
-            if (vatValid) {
-              vat = "EL" + vat;
+          } else {
+            String countrySpeficPrefix = geoHandler.getCountrySpecificVatPrefix();
+            // validate for a third time
+            if (countrySpeficPrefix != null) {
+              vatValid = validateVAT(country, countrySpeficPrefix + vat);
+              if (vatValid) {
+                vat = countrySpeficPrefix + vat;
+              }
             }
           }
         }
