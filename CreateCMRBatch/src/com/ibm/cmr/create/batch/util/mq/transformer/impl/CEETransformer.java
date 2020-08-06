@@ -1615,7 +1615,7 @@ public class CEETransformer extends EMEATransformer {
     
     Data data = cmrObjects.getData();
     CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
-    if ("821".equals(legacyCustExt.getId().getSofCntryCode())) {
+    if ("821".equals(data.getCmrIssuingCntry()) && legacyCustExt != null) {
       String acei = data.getAgreementSignDate();
       if (!StringUtils.isBlank(acei) && acei.length() == 6) {
         SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
