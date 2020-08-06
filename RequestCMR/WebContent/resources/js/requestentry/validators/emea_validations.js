@@ -761,7 +761,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
       if (addressTyp == 'ZI01') {
         autoSetAbbrevLocUKI();
       }
-      
+
     }
   }
 }
@@ -5992,6 +5992,16 @@ function lockRequireFieldsUKI() {
         FormManager.readOnly('vat');
       }
     }
+  }
+
+  if ((reqType == 'U' || reqType == 'X') && role == 'REQUESTER') {
+    FormManager.readOnly('abbrevNm');
+    FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    FormManager.readOnly('abbrevLocn');
+    FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
+  } else if (role == 'PROCESSOR') {
+    FormManager.enable('abbrevNm');
+    FormManager.enable('abbrevLocn');
   }
 }
 function lockCustClassUKI() {
