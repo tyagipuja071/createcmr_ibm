@@ -22,6 +22,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
@@ -71,6 +73,11 @@ public class EUVatValidationElement extends ValidatingElement implements Company
           validation.setMessage("Skipped.");
           output.setDetails("Landed Country does not belong to the European Union. Skipping VAT Validation.");
           LOG.debug("Landed Country does not belong to the European Union. Skipping VAT Validation.");
+        } else if ("U".equals(admin.getReqType()) && !isVatChanged(entityManager, requestData)) {
+          validation.setSuccess(true);
+          validation.setMessage("Vat not updated");
+          output.setDetails("Skipping VAT validation as VAT was not updated on the request.");
+          LOG.debug("VAT not updated.");
         } else if (StringUtils.isBlank(data.getVat())) {
           validation.setSuccess(true);
           validation.setMessage("Vat not found");
@@ -171,6 +178,22 @@ public class EUVatValidationElement extends ValidatingElement implements Company
     TypeReference<AutomationResponse<VatLayerResponse>> ref = new TypeReference<AutomationResponse<VatLayerResponse>>() {
     };
     return mapper.readValue(json, ref);
+  }
+
+  private boolean isVatChanged(EntityManager entityManager, RequestData requestData) {
+    boolean isVATChanged = false;
+    String vatImported = "";
+    String vatCurrent = !StringUtils.isEmpty(requestData.getData().getVat()) ? requestData.getData().getVat() : "";
+    String sql = ExternalizedQuery.getSql("AUTO.GET_EXISTING_VAT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", requestData.getAdmin().getId().getReqId());
+    query.setForReadOnly(true);
+    vatImported = query.getSingleResult(String.class);
+    vatImported = !StringUtils.isEmpty(vatImported) ? vatImported : "";
+    if (!vatCurrent.trim().equalsIgnoreCase(vatImported.trim())) {
+      isVATChanged = true;
+    }
+    return isVATChanged;
   }
 
   @Override

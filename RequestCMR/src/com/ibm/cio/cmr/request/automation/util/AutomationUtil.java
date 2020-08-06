@@ -22,11 +22,14 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.geo.AustraliaUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.AustriaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -91,6 +94,10 @@ public abstract class AutomationUtil {
 
       put(SystemLocation.SWITZERLAND, SwitzerlandUtil.class);
       put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
+      put(SystemLocation.AUSTRIA, AustriaUtil.class);
+      put(SystemLocation.SPAIN, SpainUtil.class);
+      put(SystemLocation.UNITED_KINGDOM, UKIUtil.class);
+      put(SystemLocation.IRELAND, UKIUtil.class);
 
     }
   };
@@ -179,6 +186,21 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
+
+  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    return "ZS01";
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong>
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   */
+
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
@@ -359,8 +381,9 @@ public abstract class AutomationUtil {
    * @param entityManager
    * @param request
    * @param requestData
+   * @param engineData
    */
-  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     // NOOP
   }
 
@@ -474,6 +497,64 @@ public abstract class AutomationUtil {
       boolean checkBluepages) {
 
     if (hasLegalEndings(name)) {
+      engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
+      details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
+      return false;
+    }
+
+    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
+    PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+
+    switch (checkStatus) {
+    case BluepagesError:
+      engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
+      break;
+    case DuplicateCMR:
+      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
+      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
+          checkResult.getCmrNo(), "");
+      return false;
+    case DuplicateCheckError:
+      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      break;
+    case NoIBMRecord:
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+      details.append("Employee details not found in IBM BluePages.").append("\n");
+      break;
+    case Passed:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      break;
+    case PassedBoth:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      details.append("Name validated against IBM BluePages successfully.").append("\n");
+      break;
+    }
+    return true;
+  }
+
+  /**
+   * Overloaded method does the private person and IBM employee checks
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param result
+   * @param details
+   * @param output
+   * @return
+   */
+  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
+      boolean checkBluepages, RequestData reqData) {
+    boolean legalEndingExists = false;
+    for (Addr addr : reqData.getAddresses()) {
+      String customerName = getCustomerFullName(addr);
+      if (hasLegalEndings(customerName)) {
+        legalEndingExists = true;
+        break;
+      }
+    }
+    if (legalEndingExists) {
       engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
       details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
       return false;
@@ -642,7 +723,7 @@ public abstract class AutomationUtil {
     client.setRequestMethod(Method.Get);
     client.setReadTimeout(1000 * 60 * 5);
     PPSRequest request = new PPSRequest();
-    request.setCeid(ppsCeId);
+    request.setCeid(ppsCeId.toLowerCase());
     PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
     if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
       return false;
@@ -823,6 +904,9 @@ public abstract class AutomationUtil {
   public static String getCleanString(String str) {
     if (StringUtils.isNotBlank(str)) {
       str = str.trim().replaceAll("[^a-zA-Z0-9\\s\\-]", " ").toUpperCase();
+      if (str.length() > 0) {
+        str = str.trim();
+      }
       return str;
     }
     return "";
@@ -936,6 +1020,21 @@ public abstract class AutomationUtil {
     }
   }
 
+  /**
+   * Filter Duplicate CMR Matches on the basis of some country specific
+   * criteria. Note: Update the matches in response with the filtered list.
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param response
+   */
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    LOG.debug("No Country Specific Filter for Duplicate CMR Checks Defined.");
+    // NOOP
+  }
+
   public boolean addressEquals(Addr addr1, Addr addr2) {
     String addr1Details = null;
     String addr2Details = null;
@@ -959,4 +1058,11 @@ public abstract class AutomationUtil {
 
   }
 
+  protected String getCustomerFullName(Addr addr) {
+    String custNm1 = addr.getCustNm1();
+    String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
+    String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
+    String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
+    return custNm1 + custNm2 + custNm3 + custNm4;
+  }
 }

@@ -48,7 +48,6 @@ import com.ibm.cio.cmr.utils.coverage.objects.CoverageInput;
 import com.ibm.cio.cmr.utils.coverage.rules.Condition;
 import com.ibm.cio.cmr.utils.coverage.rules.Coverage;
 import com.ibm.cio.cmr.utils.coverage.rules.Rule;
-import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 /**
  * @author JeffZAMORA
@@ -61,8 +60,7 @@ public class CalculateCoverageElement extends OverridingElement {
   private static CoverageRules coverageRules;
   private Map<String, String> covDescriptions = new HashMap<String, String>();
   private boolean noInit = false;
-  public static final String BG_CALC = "BG_CALC";
-  public static final String BG_ODM = "BG_ODM";
+  public static final String COV_BG = "COV_BG";
   public static final String BG_NONE = "BG_NONE";
   public static final String COV_REQ = "COV_REQ";
   public static final String COV_VAT = "COV_VAT";
@@ -70,6 +68,9 @@ public class CalculateCoverageElement extends OverridingElement {
   public static final String NONE = "NONE";
   public static final String FINAL = "Final";
   public static final String BASE = "Base";
+  private static final String QUERY_BG = "AUTO.COV.GET_COV_FROM_BG";
+  private static final String QUERY_VAT = "AUTO.COV.GET_COV_FROM_VAT";
+  public String addrToUse;
 
   /**
    * @param requestTypes
@@ -128,13 +129,20 @@ public class CalculateCoverageElement extends OverridingElement {
 
       Admin admin = requestData.getAdmin();
       Data data = requestData.getData();
+      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+      if (countryUtil != null) {
+        addrToUse = countryUtil.getAddressTypeForGbgCovCalcs(entityManager, requestData, engineData);
+      } else {
+        addrToUse = "ZS01";
+      }
       long reqId = admin.getId().getReqId();
+      Addr addr = requestData.getAddress(addrToUse);
+
       AutomationResult<OverrideOutput> result = buildResult(reqId);
       OverrideOutput output = new OverrideOutput(false);
       CoverageContainer calculatedCoverageContainer = new CoverageContainer();
       boolean coverageNotFound = false;
       boolean isCoverageCalculated = false;
-      // String negativeCheck = "";
       List<CoverageContainer> coverages = null;
       boolean withCmrData = false;
       StringBuilder details = new StringBuilder();
@@ -162,21 +170,11 @@ public class CalculateCoverageElement extends OverridingElement {
         return result;
       }
 
-      GBGResponse computedGbg = (GBGResponse) engineData.get(AutomationEngineData.GBG_MATCH);
-      String gbgId = null;
-      String bgId = null;
+      String bgId = data.getBgId();
+      String gbgId = data.getGbgId();
       String covFrom = "XXX";
-      if (computedGbg != null) {
-        bgId = computedGbg.getBgId();
-        gbgId = computedGbg.getGbgId();
-        covFrom = BG_CALC;
-      } else if (!StringUtils.isBlank(data.getBgId())) {
-        bgId = data.getBgId();
-        gbgId = data.getGbgId();
-        covFrom = BG_ODM;
-      }
       if (bgId != null && !"BGNONE".equals(bgId.trim())) {
-        coverages = computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_BG", bgId, data.getCmrIssuingCntry(), false);
+        coverages = computeCoverageFromRDCQuery(entityManager, QUERY_BG, bgId, data.getCmrIssuingCntry(), false);
         if (coverages != null && !coverages.isEmpty()) {
           CoverageContainer preferredCoverage = coverages.get(0);
           if (preferredCoverage.getFinalCoverageRules() == null) {
@@ -190,7 +188,7 @@ public class CalculateCoverageElement extends OverridingElement {
         }
 
         if (coverages == null || coverages.isEmpty()) {
-          CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), gbgId, bgId);
+          CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, addr, gbgId, bgId);
           List<Coverage> currCoverage = coverageRules.findCoverage(inputBG);
           if (currCoverage != null && !currCoverage.isEmpty()) {
             CoverageContainer cont = new CoverageContainer();
@@ -205,10 +203,11 @@ public class CalculateCoverageElement extends OverridingElement {
         } else {
           withCmrData = true;
         }
+        covFrom = COV_BG;
       } else if (StringUtils.isNotEmpty(data.getVat())) {
-        coverages = computeCoverageFromRDCQuery(entityManager, "AUTO.COV.GET_COV_FROM_VAT", data.getVat(), data.getCmrIssuingCntry());
+        coverages = computeCoverageFromRDCQuery(entityManager, QUERY_VAT, data.getVat(), data.getCmrIssuingCntry());
         if (coverages == null || coverages.isEmpty()) {
-          CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), gbgId, bgId);
+          CoverageInput inputBG = extractCoverageInput(entityManager, requestData, data, addr, gbgId, bgId);
           List<Coverage> currCoverage = coverageRules.findCoverage(inputBG);
           if (currCoverage != null && !currCoverage.isEmpty()) {
             CoverageContainer cont = new CoverageContainer();
@@ -238,44 +237,13 @@ public class CalculateCoverageElement extends OverridingElement {
       }
       // get default coverage
       String defaultCoverage = getDefaultCoverage(data.getCmrIssuingCntry());
-      boolean showCurrentCoverage = false;
       CoverageInput input = null;
-      List<Coverage> currCoverage = new ArrayList<>();
-
-      // for now don't show, CMDE doesn't want it shown
-      if (showCurrentCoverage) {
-        // get coverage based on current request data
-        input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), data.getGbgId(), data.getBgId());
-        currCoverage = coverageRules.findCoverage(input);
-        if (!currCoverage.isEmpty()) {
-          details.append("\nCoverage IDs computed based on current data:").append("\n");
-          for (Coverage cov : currCoverage) {
-            String desc = getCoverageDescription(entityManager, cov.getType() + cov.getId());
-            if (StringUtils.isBlank(desc)) {
-              desc = "-no description available-";
-            }
-            details.append(" - " + cov.getLevel() + ": " + cov.getType() + cov.getId() + " (" + desc + ")\n");
-            if (StringUtils.isBlank(calculatedCoverageContainer.getFinalCoverage())) {
-              calculatedCoverageContainer.setFinalCoverage(cov.getType() + cov.getId());
-            } else if (StringUtils.isBlank(calculatedCoverageContainer.getBaseCoverage())) {
-              calculatedCoverageContainer.setBaseCoverage(cov.getType() + cov.getId());
-            }
-          }
-        }
-
-      }
-
       // coverage id calculation from BG/VAT
-      input = extractCoverageInput(entityManager, requestData, data, requestData.getAddress("ZS01"), gbgId, bgId);
+      input = extractCoverageInput(entityManager, requestData, data, addr, gbgId, bgId);
       if (coverages != null && !coverages.isEmpty()) {
         switch (covFrom) {
-        case BG_CALC:
-          details.append("\nCoverages from Calculated Buying Group ID " + bgId + " (" + gbgId + ")" + (withCmrData ? "[from current CMRs]" : ""))
-              .append("\n");
-          break;
-        case BG_ODM:
-          details.append("\nCoverages from ODM Projected Buying Group ID " + bgId + " (" + gbgId + ")" + (withCmrData ? "[from current CMRs]" : ""))
-              .append("\n");
+        case COV_BG:
+          details.append("\nCoverages from Buying Group ID " + bgId + " (" + gbgId + ")" + (withCmrData ? "[from current CMRs]" : "")).append("\n");
           break;
         case COV_VAT:
           details.append("\nCoverages from CMR VAT data for VAT Number " + data.getVat() + (withCmrData ? " [from current CMRs]" : "")).append("\n");
@@ -289,19 +257,8 @@ public class CalculateCoverageElement extends OverridingElement {
         boolean logNegativeCheck = true;
         for (CoverageContainer container : coverages) {
           LOG.debug("Logging Final Coverage ID: " + container.getFinalCoverage());
-          logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, FINAL, computedGbg, covFrom, logNegativeCheck);
+          logCoverage(entityManager, engineData, requestData, coverageIds, details, output, input, container, FINAL, covFrom, logNegativeCheck);
           logNegativeCheck = false;
-
-          boolean logBaseCoverage = false;
-
-          if (logBaseCoverage && StringUtils.isBlank(container.getFinalCoverage())) {
-            // don't log base for now
-            if (container.getBaseCoverage() != null) {
-              LOG.debug("Logging Base Coverage ID: " + container.getBaseCoverage());
-              logCoverage(entityManager, engineData, requestData, coverageIds, details, output, container, BASE, computedGbg, covFrom, false);
-            }
-          }
-
           // Save the first calculated coverage ID in the engine data to allow
           // next elements to use it
           if (!isCoverageCalculated
@@ -313,13 +270,9 @@ public class CalculateCoverageElement extends OverridingElement {
                 isCoverageCalculated = true;
               } else if (finalCoverage.equals(calculatedCoverageContainer.getFinalCoverage())) {
                 result.setResults("Review Needed");
-                // negativeCheck = "Calculated Coverage is same as the coverage
-                // calculated using Request Data.";
                 details.append("\nCalculated Coverage is same as the coverage calculated using Request Data.").append("\n");
               } else if (finalCoverage.equals(defaultCoverage)) {
                 result.setResults("Default Coverage");
-                // negativeCheck = "Calculated Coverage is same as the Default
-                // Coverage.";
                 details.append("\nCalculated Coverage is same as the Default Coverage.").append("\n");
               }
             }
@@ -329,18 +282,6 @@ public class CalculateCoverageElement extends OverridingElement {
         }
       } else if (BG_NONE.equals(covFrom)) {
         LOG.debug("No Calculated BG Found. Projected BG='BGNONE'. Skipping Regular Coverage Calculation.");
-      } else if (!currCoverage.isEmpty()) {
-        if (calculatedCoverageContainer.getFinalCoverage().equals(defaultCoverage)) {
-          result.setResults("Default Coverage");
-          details.append("\nCoverage calculated based on request data is same as the Default Coverage. No projected Buying Group found.")
-              .append("\n");
-        } else {
-          result.setResults("Calculated");
-          details.append("\nCoverage calculated based only on request data. No projected Buying Group found.").append("\n");
-          isCoverageCalculated = true;
-          covFrom = COV_REQ;
-        }
-      } else if (BG_NONE.equals(covFrom)) {
         result.setResults("Skipped");
       } else {
         result.setResults("Cannot Calculate");
@@ -352,7 +293,6 @@ public class CalculateCoverageElement extends OverridingElement {
       // if it is the first calculated coverage, use it to do country
       // specific coverage calculations
       boolean hasCountryCheck = false;
-      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
       if (countryUtil != null) {
         // hook to perform calculations and update results
         hasCountryCheck = countryUtil.performCountrySpecificCoverageCalculations(this, entityManager, result, details, output, requestData,
@@ -361,18 +301,11 @@ public class CalculateCoverageElement extends OverridingElement {
 
       if (!hasCountryCheck) {
         if ("NONE".equals(covFrom)) {
-          // result.setOnError(true);
           if (coverageNotFound) {
             details.append("Coverage ID " + data.getCovId() + " not found in the coverage rules.");
-            // engineData.addRejectionComment("Coverage ID " + data.getCovId() +
-            // " not found in the coverage rules.");
           } else {
             result.setResults("Skipped");
             details.append("No projected Buying Group or ODM Coverage found, coverage adjustments will be skipped.");
-            // engineData
-            // .addRejectionComment("Coverage cannot be calculated. Missing
-            // calculated or projected Buying Group, and ODM determined
-            // Coverage");
           }
         } else if (!isCoverageCalculated && !BG_NONE.equals(covFrom)) {
           details.setLength(0);
@@ -387,7 +320,6 @@ public class CalculateCoverageElement extends OverridingElement {
 
       result.setDetails(details.toString());
       result.setProcessOutput(output);
-      // Map<FieldResultKey, FieldResult> keys = output.getData();
       return result;
     } catch (
 
@@ -419,20 +351,21 @@ public class CalculateCoverageElement extends OverridingElement {
 
   /**
    * Logs the coverage information to the request and results
-   *
+   * 
    * @param entityManager
    * @param engineData
    * @param requestData
    * @param coverageIds
    * @param details
    * @param output
+   * @param input
    * @param coverageContainer
    * @param currCovLevel
    * @param covFrom
    * @param logNegativeCheck
    */
   public void logCoverage(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData, List<String> coverageIds,
-      StringBuilder details, OverrideOutput output, CoverageContainer coverageContainer, String currCovLevel, GBGResponse gbg, String covFrom,
+      StringBuilder details, OverrideOutput output, CoverageInput input, CoverageContainer coverageContainer, String currCovLevel, String covFrom,
       boolean logNegativeCheck) {
     coverageIds = coverageIds != null ? coverageIds : new ArrayList<String>();
     covFrom = covFrom != null ? covFrom : "";
@@ -448,184 +381,140 @@ public class CalculateCoverageElement extends OverridingElement {
       currCovRules = coverageContainer.getBaseCoverageRules();
     }
 
-    if (!coverageIds.contains(currCovId)) {
-      // GEOHandler handler = RequestUtils.getGEOHandler(cmrIssuingCntry);
+    if (!coverageIds.contains(currCovId) && currCovRules != null && !currCovRules.isEmpty()) {
       // create overrides for first logged/manually logged coverage only
+      Rule rule = currCovRules.get(0);
       boolean createOverrides = coverageIds.isEmpty() && !COV_ODM.equals(covFrom);
-      if (currCovRules != null && !currCovRules.isEmpty()) {
-        details.append("\nCoverage ID = " + currCovId).append(" (" + currCovLevel + ")").append("\n");
-        details.append("Coverage Name = " + getCoverageDescription(entityManager, currCovId)).append("\n");
-        details.append("Overrides for " + currCovId + ":").append("\n");
-        Rule rule = currCovRules.get(0);
-        Map<String, String> notDeterminedFields = new HashMap<String, String>();
-        for (Condition condition : rule.getRuleConditions()) {
-          if (!"COVERAGE".equals(condition.getField()) && !"coverageID".equals(condition.getField())) {
-            String field = CoverageRulesFieldMap.getLabel(cmrIssuingCntry, condition.getField());
-            String dbField = CoverageRulesFieldMap.getDBField(cmrIssuingCntry, condition.getField());
-            if (!StringUtils.isBlank(dbField)) {
-              boolean addr = dbField.startsWith("ADDR");
-              if (addr) {
-                dbField = dbField.substring(4);
-              }
-              String val = condition.getFirstUsableValue();
-              String fieldValue = "";
-              if (addr) {
-                fieldValue = getColumnValueFromAddr(requestData.getAddress("ZS01"), dbField);
-              } else {
-                fieldValue = getColumnValueFromData(requestData.getData(), dbField);
-              }
-              if (val != null && !val.startsWith("!")) {
-                String operation = condition.getOperation().toString();
-                switch (operation) {
-                case "StartsOrEndsWith":
-                case "Equals":
-                  details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
-                  if (createOverrides) {
-                    output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
-                  }
-                  break;
-                case "StartsWith":
-                  if (StringUtils.isNotBlank(fieldValue) && fieldValue.startsWith(val)) {
-                    details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
-                  } else {
-                    notDeterminedFields.put(field, val);
-                    // if we need to create an override check in lov for the
-                    // values
-                    // String uiField = null;
-                    // if (handler != null) {
-                    // Map<String, String> uiFieldMap =
-                    // handler.getUIFieldIdMap();
-                    // if (uiFieldMap != null && !uiFieldMap.isEmpty()) {
-                    // String tempDbField = WordUtils.capitalizeFully(dbField,
-                    // new char[] { '_' }).replaceAll("_", "");
-                    // tempDbField = tempDbField.substring(0, 1).toLowerCase()
-                    // + (tempDbField.length() > 1 ? tempDbField.substring(1)
-                    // : "");
-                    // for (String key : uiFieldMap.keySet()) {
-                    // if (tempDbField.equals(uiFieldMap.get(key))) {
-                    // uiField = key;
-                    // break;
-                    // }
-                    // }
-                    // }
-                    // }
-                    //
-                    // if (StringUtils.isNotEmpty(uiField)) {
-                    // String sql =
-                    // ExternalizedQuery.getSql("AUTOMATION.GET_LOV_STARTSWITH");
-                    // PreparedQuery query = new PreparedQuery(entityManager,
-                    // sql);
-                    // query.setParameter("FIELD_ID", uiField);
-                    // query.setParameter("CMR_ISSUING_CNTRY",
-                    // cmrIssuingCntry);
-                    // query.setParameter("CD", val + "%");
-                    // query.setForReadOnly(true);
-                    // String value = query.getSingleResult(String.class);
-                    // if (StringUtils.isNotBlank(value)) {
-                    // details.append(" - " + (addr ? "[Main Addr] " : "") +
-                    // field + " = " + val + "\n");
-                    // if (createOverrides) {
-                    // output.addOverride(getProcessCode(), addr ? "ZS01" :
-                    // "DATA", dbField, "", val);
-                    // }
-                    // } else {
-                    // notDeterminedFields.put(field, val);
-                    // }
-                    // } else {
-                    // notDeterminedFields.put(field, val);
-                    // }
-                  }
-                  break;
-                case "In":
-                  if (containsValue(condition, fieldValue)) {
-                    // no override using first value, the list already
-                    // contains current value
-                    details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + fieldValue + "\n");
-                    break;
-                  } else {
-                    if (condition.getValues() != null) {
-                      details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + condition.getValues() + " [" + fieldValue + "]\n");
-                    } else {
-                      details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
-                    }
-
-                    if (createOverrides) {
-                      output.addOverride(getProcessCode(), addr ? "ZS01" : "DATA", dbField, "", val);
-                    }
-                  }
-                  break;
-                default:
-                  notDeterminedFields.put(field, val);
-                  break;
+      List<Rule> matchedRules = coverageRules.matchWithCoverage(input, currCovId);
+      if (matchedRules != null && !matchedRules.isEmpty()) {
+        rule = matchedRules.get(0);
+      }
+      details.append("\nCoverage ID = " + currCovId).append(" (" + currCovLevel + ")").append("\n");
+      details.append("Coverage Name = " + getCoverageDescription(entityManager, currCovId)).append("\n");
+      details.append("Overrides for " + currCovId + ":").append("\n");
+      Map<String, String> notDeterminedFields = new HashMap<String, String>();
+      for (Condition condition : rule.getRuleConditions()) {
+        if (!"COVERAGE".equals(condition.getField()) && !"coverageID".equals(condition.getField())) {
+          String field = CoverageRulesFieldMap.getLabel(cmrIssuingCntry, condition.getField());
+          String dbField = CoverageRulesFieldMap.getDBField(cmrIssuingCntry, condition.getField());
+          if (!StringUtils.isBlank(dbField)) {
+            boolean addr = dbField.startsWith("ADDR");
+            if (addr) {
+              dbField = dbField.substring(4);
+            }
+            String val = condition.getFirstUsableValue();
+            String fieldValue = "";
+            if (addr) {
+              fieldValue = getColumnValueFromAddr(requestData.getAddress(addrToUse), dbField);
+            } else {
+              fieldValue = getColumnValueFromData(requestData.getData(), dbField);
+            }
+            if (val != null && !val.startsWith("!")) {
+              val = val.trim();
+              String operation = condition.getOperation().toString();
+              switch (operation) {
+              case "StartsOrEndsWith":
+              case "Equals":
+                details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + val + "\n");
+                if (createOverrides && StringUtils.isNotBlank(fieldValue) && fieldValue.trim().equals(val)) {
+                  output.addOverride(getProcessCode(), addr ? addrToUse : "DATA", dbField, "", val);
                 }
-              } else if (val != null && val.startsWith("!")) {
-                String value = val.substring(1);
-                if (StringUtils.isNotBlank(fieldValue) && !fieldValue.startsWith(value)) {
-                  details.append(" - " + (addr ? "[Main Addr] " : "") + field + " = " + val + "\n");
+                break;
+              case "StartsWith":
+                if (StringUtils.isNotBlank(fieldValue) && fieldValue.startsWith(val)) {
+                  details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + val + "\n");
                 } else {
                   notDeterminedFields.put(field, val);
                 }
+                break;
+              case "In":
+                if (containsValue(condition, fieldValue)) {
+                  // no override using first value, the list already
+                  // contains current value
+                  details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + fieldValue + "\n");
+                  break;
+                } else {
+                  // TODO review this logic
+                  if (condition.getValues() != null) {
+                    details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + condition.getValues() + " [" + fieldValue + "]\n");
+                  } else {
+                    details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + val + "\n");
+                  }
+
+                  if (createOverrides) {
+                    output.addOverride(getProcessCode(), addr ? addrToUse : "DATA", dbField, "", val);
+                  }
+                }
+                break;
+              default:
+                notDeterminedFields.put(field, val);
+                break;
+              }
+            } else if (val != null && val.startsWith("!")) {
+              String value = val.substring(1);
+              if (StringUtils.isNotBlank(fieldValue) && !fieldValue.startsWith(value)) {
+                details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + val + "\n");
               } else {
                 notDeterminedFields.put(field, val);
               }
+            } else {
+              notDeterminedFields.put(field, val);
             }
           }
         }
-        if (!notDeterminedFields.isEmpty()) {
-          details.append("\nOverrides for following fields could not be determined:").append("\n");
-          for (String key : notDeterminedFields.keySet()) {
-            String val = notDeterminedFields.get(key);
-            details.append(" - " + key + " = " + (StringUtils.isNotBlank(val) ? val : "- no value defined -") + "\n");
-            if (logNegativeCheck) {
-              engineData.addNegativeCheckStatus(key, "The override value could not be determined for '" + key + "' during coverage calculation.");
-            }
-          }
-        }
-
-        if (StringUtils.isNotBlank(coverageContainer.getIsuCd())) {
-          details.append("\nOverrides based on CMR data:").append("\n");
-          details.append(" - ISU Code = " + coverageContainer.getIsuCd()).append("\n");
-          details.append(" - Client Tier = " + coverageContainer.getClientTierCd()).append("\n");
-          if (createOverrides) {
-            output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
-            output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
-                StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
-          }
-        }
-
-        // Check if BG ID calculated
-        if (gbg != null && createOverrides && output.getData() != null && !output.getData().isEmpty()) {
-          FieldResultKey bgKey = new FieldResultKey("DATA", "BG_ID");
-          FieldResult bgResult = output.getData().get(bgKey);
-          if (bgResult != null && StringUtils.isNotBlank(data.getBgId()) && !"BGNONE".equals(data.getBgId().trim())
-              && !data.getBgId().equals(bgResult.getNewValue())) {
-            // calculated buying group is different from coverage buying group.
-            details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
-            engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
-            output.getData().remove(bgKey);
-          }
-          FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
-          FieldResult gbgResult = output.getData().get(gbgKey);
-          if (gbgResult != null && StringUtils.isNotBlank(data.getGbgId()) && !"BGNONE".equals(data.getGbgId().trim())
-              && !data.getGbgId().equals(gbgResult.getNewValue())) {
-            // calculated global buying group is different from coverage global
-            // buying group.
-            details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
-            engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
-            output.getData().remove(gbgKey);
-          }
-        }
-
-        if (COV_ODM.equals(covFrom)) {
-          // no overrides if COV_ODM
-          details.append("Current request data already fall into the projected ODM coverage.\n");
-        }
-
-        // Add to list if rules found.
-        coverageIds.add(currCovId);
       }
-    }
+      if (!notDeterminedFields.isEmpty()) {
+        details.append("\nOverrides for following fields could not be determined:").append("\n");
+        for (String key : notDeterminedFields.keySet()) {
+          String val = notDeterminedFields.get(key);
+          details.append(" - " + key + " = " + (StringUtils.isNotBlank(val) ? val : "- no value defined -") + "\n");
+          if (logNegativeCheck) {
+            engineData.addNegativeCheckStatus(key, "The override value could not be determined for '" + key + "' during coverage calculation.");
+          }
+        }
+      }
+      if (StringUtils.isNotBlank(coverageContainer.getIsuCd())) {
+        details.append("\nOverrides based on CMR data:").append("\n");
+        details.append(" - ISU Code = " + coverageContainer.getIsuCd()).append("\n");
+        details.append(" - Client Tier = " + coverageContainer.getClientTierCd()).append("\n");
+        if (createOverrides) {
+          output.addOverride(getProcessCode(), "DATA", "ISU_CD", requestData.getData().getIsuCd(), coverageContainer.getIsuCd());
+          output.addOverride(getProcessCode(), "DATA", "CLIENT_TIER", requestData.getData().getClientTier(),
+              StringUtils.isNotBlank(coverageContainer.getClientTierCd()) ? coverageContainer.getClientTierCd() : "");
+        }
+      }
 
+      // Check if BG ID calculated
+      if (createOverrides && output.getData() != null && !output.getData().isEmpty()) {
+        FieldResultKey bgKey = new FieldResultKey("DATA", "BG_ID");
+        FieldResult bgResult = output.getData().get(bgKey);
+        if (bgResult != null && StringUtils.isNotBlank(data.getBgId()) && !"BGNONE".equals(data.getBgId().trim())
+            && !data.getBgId().equals(bgResult.getNewValue())) {
+          // calculated buying group is different from coverage buying group.
+          details.append("Buying Group ID under coverage overrides is different from the one on request.\n");
+          engineData.addNegativeCheckStatus("BG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          output.getData().remove(bgKey);
+        }
+        FieldResultKey gbgKey = new FieldResultKey("DATA", "GBG_ID");
+        FieldResult gbgResult = output.getData().get(gbgKey);
+        if (gbgResult != null && StringUtils.isNotBlank(data.getGbgId()) && !"BGNONE".equals(data.getGbgId().trim())
+            && !data.getGbgId().equals(gbgResult.getNewValue())) {
+          // calculated global buying group is different from coverage global
+          // buying group.
+          details.append("Global Buying Group ID under coverage overrides is different from the one on request.\n");
+          engineData.addNegativeCheckStatus("GBG_DIFFERENT", "Buying Group ID under coverage overrides is different from the one on request.");
+          output.getData().remove(gbgKey);
+        }
+      }
+
+      if (COV_ODM.equals(covFrom)) {
+        // no overrides if COV_ODM
+        details.append("Current request data already fall into the projected ODM coverage.\n");
+      }
+
+      // Add to list if rules found.
+      coverageIds.add(currCovId);
+    }
   }
 
   /**

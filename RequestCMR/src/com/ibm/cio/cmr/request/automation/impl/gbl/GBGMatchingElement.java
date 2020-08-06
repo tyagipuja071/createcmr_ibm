@@ -62,9 +62,16 @@ public class GBGMatchingElement extends MatchingElement {
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
 
-    Addr currentAddress = requestData.getAddress("ZS01");
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String address = "";
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    if (countryUtil != null) {
+      address = countryUtil.getAddressTypeForGbgCovCalcs(entityManager, requestData, engineData);
+    } else {
+      address = "ZS01";
+    }
+    Addr currentAddress = requestData.getAddress(address);
     GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     AutomationUtil automationUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
 
@@ -84,8 +91,12 @@ public class GBGMatchingElement extends MatchingElement {
         result.setDetails(details.toString());
         result.setResults("Skipped");
         result.setProcessOutput(output);
-        return result;
+      } else {
+        result.setDetails("GBG Matching skipped due to previous element execution results.");
+        result.setResults("Skipped");
+        result.setProcessOutput(output);
       }
+      return result;
     }
 
     // boolean continueCheck = true;
@@ -126,7 +137,7 @@ public class GBGMatchingElement extends MatchingElement {
       }
 
       if (automationUtil != null) {
-        automationUtil.tweakGBGFinderRequest(entityManager, request, requestData);
+        automationUtil.tweakGBGFinderRequest(entityManager, request, requestData, engineData);
       }
 
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),

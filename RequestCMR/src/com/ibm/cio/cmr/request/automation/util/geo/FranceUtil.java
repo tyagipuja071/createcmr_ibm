@@ -346,13 +346,16 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-        if (admin.getSourceSystId() != null) {
-          if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
-          } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-          }
-        }
+        // if (admin.getSourceSystId() != null) {
+        // // if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+        // // engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review
+        // // is required for MARKETPLACE requests.");
+        // // } else
+        // if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+        // engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is
+        // required for BP Portal requests.");
+        // }
+        // }
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
@@ -375,7 +378,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   @Override
-  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     String siret = requestData.getData().getTaxCd1();
     if (!StringUtils.isBlank(siret) && siret.length() > 9) {
       request.setOrgId(siret.substring(0, 9)); // SIREN
@@ -392,8 +395,7 @@ public class FranceUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     Addr zs01 = requestData.getAddress("ZS01");
     details.append("\n");
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)
-        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       // If calculated using buying group then skip any other calculation
       FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboValue = "";
@@ -435,8 +437,8 @@ public class FranceUtil extends AutomationUtil {
           CoverageContainer coverage = coverages.get(0);
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, container, CalculateCoverageElement.FINAL, null,
-              null, true);
+          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
+              CalculateCoverageElement.COV_REQ, true);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {

@@ -285,8 +285,15 @@ public class DupCMRCheckElement extends DuplicateCheckElement {
       }
     }
 
+    if (response.getSuccess() && response.getMatches().size() > 0) {
+      AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+      if (countryUtil != null) {
+        countryUtil.filterDuplicateCMRMatches(entityManager, requestData, engineData, response);
+      }
+    }
+
     // reverify
-    if (response.getMatches().size() == 0) {
+    if (response.getSuccess() && response.getMatches().size() == 0) {
       response.setMatched(false);
       response.setMessage("No matches found for the given search criteria.");
     }

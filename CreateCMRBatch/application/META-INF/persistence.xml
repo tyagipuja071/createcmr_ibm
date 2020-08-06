@@ -131,6 +131,11 @@
     <class>com.ibm.cio.cmr.request.entity.ScenarioExceptionsPK</class>
     <class>com.ibm.cio.cmr.request.entity.TgmeCodes</class>
     <class>com.ibm.cio.cmr.request.entity.TgmeCodesPK</class>
+    
+    <class>com.ibm.cio.cmr.request.entity.ReservedCMRNos</class>
+    <class>com.ibm.cio.cmr.request.entity.ReservedCMRNosPK</class> 
+	<class>com.ibm.cio.cmr.request.entity.Kna1</class>
+    <class>com.ibm.cio.cmr.request.entity.Kna1PK</class> 
 
     <properties>
 
