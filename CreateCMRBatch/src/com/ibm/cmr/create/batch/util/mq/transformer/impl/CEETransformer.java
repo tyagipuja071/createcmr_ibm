@@ -1612,6 +1612,25 @@ public class CEETransformer extends EMEATransformer {
       }
 
     }
+    
+    Data data = cmrObjects.getData();
+    CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
+    if ("821".equals(legacyCustExt.getId().getSofCntryCode())) {
+      String acei = data.getAgreementSignDate();
+      if (!StringUtils.isBlank(acei) && acei.length() == 6) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
+        String month = acei.substring(0, 2);
+        String day = acei.substring(2, 4);
+        String year = acei.substring(4, 6);
+
+        try {
+          Date date = sdf.parse(year + "-" + month + "-" + day);
+          legacyCustExt.setAeciSubDt(date);
+        } catch (java.text.ParseException e) {
+          e.printStackTrace();
+        }
+      }
+    }
 
     String reqType = cmrObjects.getAdmin().getReqType();
     long requestId = cmrObjects.getAdmin().getId().getReqId();
@@ -1667,35 +1686,6 @@ public class CEETransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
 
     Data data = cmrObjects.getData();
-    if ("821".equals(data.getCmrIssuingCntry())) {
-      String acei = data.getAgreementSignDate();
-      if (!StringUtils.isBlank(acei) && acei.length() == 6) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String month = acei.substring(0, 2);
-        String day = acei.substring(2, 4);
-        String year = acei.substring(4, 6);
-
-        // try {
-        // Date date = sdf.parse("20" + year + "-" + month + "-" + day);
-        // legacyCustExt.setAeciSubDt(date);
-        // } catch (ParseException e) {
-        // e.printStackTrace();
-        // }
-
-        // Date date = Timestamp.valueOf("20" + year + "-" + month + "-" + day +
-        // " 00:00:00");
-        // legacyCustExt.setAeciSubDt(date);
-
-        // SimpleDateFormat sdf2 = new SimpleDateFormat("MMddyy");
-        // try {
-        // Date actualDate = sdf2.parse(acei);
-        // legacyCustExt.setAeciSubDt(actualDate);
-        // } catch (ParseException e) {
-        // e.printStackTrace();
-        // }
-
-      }
-    }
     // if (!StringUtils.isBlank(data.getTaxCd1())) {
     // legacyCustExt.setBankAcctNo(data.getTaxCd1());
     // } else {
