@@ -2459,7 +2459,7 @@ public class TurkeyHandler extends BaseSOFHandler {
           }
 	      }
 
-	      if ("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType())) {
+      if ("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()) || "ZI01".equals(addr.getId().getAddrType())) {
 	        // change turkish chars upon copying from mailing
 
 	        char[] problematicCharList = new char[12];
