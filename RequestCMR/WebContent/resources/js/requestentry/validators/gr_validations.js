@@ -3623,13 +3623,21 @@ function setEnterprise(value) {
 
       var subindustry = FormManager.getActualValue('subIndustryCd');
       var isicBasedChange = /^(A|B|C|E|G|J|M|P|T|X)/.test(subindustry);
-
-      if (isu == '32' && ctc == 'S' && isicBasedChange && repTeam == '') {
-        FormManager.setValue('enterprise', '822806');
-        FormManager.setValue('repTeamMemberNo', '049050');
-      } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange && repTeam == '') {
-        FormManager.setValue('enterprise', '822830');
-        FormManager.setValue('repTeamMemberNo', '041008');
+      
+      if (isu == '32' && ctc == 'S' && isicBasedChange) {
+         if(repTeam == '041008' && FormManager.getActualValue('enterprise') != '' ) {
+          FormManager.setValue('enterprise', '');
+        } else {
+          FormManager.setValue('enterprise', '822806');
+          FormManager.setValue('repTeamMemberNo', '049050');
+        }        
+      } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange) {
+        if(repTeam == '049050' && FormManager.getActualValue('enterprise') != '' ) {
+          FormManager.setValue('enterprise', '');
+        } else {        
+          FormManager.setValue('enterprise', '822830');
+          FormManager.setValue('repTeamMemberNo', '041008');        
+        }
       } else if (isu == '32' && ctc == 'S' && isicBasedChange && repTeam == '049050') {
         FormManager.setValue('enterprise', '822806');
       } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange && repTeam == '041008') {
