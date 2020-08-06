@@ -347,6 +347,7 @@ function addHandlersForSWISS() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
+      setMubotyOnPostalCodeIMS(value);
     });
   }
 
