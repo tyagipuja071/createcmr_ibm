@@ -3777,7 +3777,7 @@ span.ibm-thumbnail span.ibm-video-play {
 
 #ibm-top .ibm-columns .ibm-columns {
 	padding: 0;
-	margin: 0 -10px;
+	/*margin: 0 -10px;*/
 	width: auto
 }
 
@@ -3796,7 +3796,7 @@ span.ibm-thumbnail span.ibm-video-play {
 
 [class*="ibm-col-"] {
 	float: left;
-	margin: 0 10px;
+	/*margin: 0 10px;*/
 	min-height: 1px
 }
 
@@ -3850,6 +3850,7 @@ span.ibm-thumbnail span.ibm-video-play {
 }
 
 .ibm-col-1-1 {
+	width:100%;
 }
 
 .ibm-default #ibm-content .ibm-col-1-1, .ibm-default #ibm-content .ibm-col-5-3,
