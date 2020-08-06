@@ -635,9 +635,9 @@ public class CEETransformer extends EMEATransformer {
         if ("707CS".equals(cntryUse)) {
           line6 = "Kosovo";
         } else if ("707ME".equals(cntryUse)) {
-          line6 = "ME";
+          line6 = "Monetengro";
         } else {
-          line6 = "RS";
+          line6 = "Serbia";
         }
 
       }
@@ -1667,18 +1667,35 @@ public class CEETransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
 
     Data data = cmrObjects.getData();
+    if ("821".equals(data.getCmrIssuingCntry())) {
+      String acei = data.getAgreementSignDate();
+      if (!StringUtils.isBlank(acei) && acei.length() == 6) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String month = acei.substring(0, 2);
+        String day = acei.substring(2, 4);
+        String year = acei.substring(4, 6);
 
-//    String acei = data.getAgreementSignDate();
-//    if (!StringUtils.isBlank(acei) && acei.length() == 6) {
-//      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//      Date date;
-//        String year = acei.substring(0, 2);
-//        String month = acei.substring(2, 4);
-//        String day = acei.substring(4, 6);
-////        date = sdf.parse("20" + year + "-" + month + "-" + day);
-//        date = Timestamp.valueOf("20" + year + "-" + month + "-" + day + " 00:00:00");
-//        legacyCustExt.setAeciSubDt(date);
-//    }
+        // try {
+        // Date date = sdf.parse("20" + year + "-" + month + "-" + day);
+        // legacyCustExt.setAeciSubDt(date);
+        // } catch (ParseException e) {
+        // e.printStackTrace();
+        // }
+
+        // Date date = Timestamp.valueOf("20" + year + "-" + month + "-" + day +
+        // " 00:00:00");
+        // legacyCustExt.setAeciSubDt(date);
+
+        // SimpleDateFormat sdf2 = new SimpleDateFormat("MMddyy");
+        // try {
+        // Date actualDate = sdf2.parse(acei);
+        // legacyCustExt.setAeciSubDt(actualDate);
+        // } catch (ParseException e) {
+        // e.printStackTrace();
+        // }
+
+      }
+    }
     // if (!StringUtils.isBlank(data.getTaxCd1())) {
     // legacyCustExt.setBankAcctNo(data.getTaxCd1());
     // } else {
