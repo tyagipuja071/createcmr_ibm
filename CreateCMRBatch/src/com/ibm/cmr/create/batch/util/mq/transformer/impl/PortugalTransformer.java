@@ -616,8 +616,10 @@ public class PortugalTransformer extends MessageTransformer {
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getCollectionCd())) {
+        legacyCust.setDistrictCd("");
         legacyCust.setCollectionCd("");
       } else {
+        legacyCust.setDistrictCd(muData.getCollectionCd());
         legacyCust.setCollectionCd(muData.getCollectionCd());
       }
     }
@@ -627,7 +629,11 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getVat())) {
-      legacyCust.setVat(muData.getVat());
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getVat().trim())) {
+        legacyCust.setVat("");
+      } else {
+        legacyCust.setVat(muData.getVat());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getCustNm1())) {
@@ -909,17 +915,14 @@ public class PortugalTransformer extends MessageTransformer {
     return true;
   }
 
-  private String getDistrictCodeForMassUpdate(String collectionCd, EntityManager entityManager) {
-    String distCd = null;
-    if (entityManager == null) {
-      return null;
-    }
-    String sql = ExternalizedQuery.getSql("GET_DISTRICT_CODE_PT");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("CD", collectionCd);
-    query.setForReadOnly(true);
-    distCd = query.getSingleResult(String.class);
-    return distCd;
-  }
+  /*
+   * private String getDistrictCodeForMassUpdate(String collectionCd,
+   * EntityManager entityManager) { String distCd = null; if (entityManager ==
+   * null) { return null; } String sql =
+   * ExternalizedQuery.getSql("GET_DISTRICT_CODE_PT"); PreparedQuery query = new
+   * PreparedQuery(entityManager, sql); query.setParameter("CD", collectionCd);
+   * query.setForReadOnly(true); distCd = query.getSingleResult(String.class);
+   * return distCd; }
+   */
 
 }
