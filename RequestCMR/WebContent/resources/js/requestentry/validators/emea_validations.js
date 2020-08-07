@@ -849,7 +849,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
 
     if (finalSave || force || copyingToA) {
 
-      if (addressTyp == 'ZI01') {
+      if ((addressTyp == 'ZI01') || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
         autoSetAbbrevLocUKI();
       }
 
@@ -983,8 +983,8 @@ function autoSetSBO(value, valueInDB) {
       return;
     } else if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
         || custSubGrp == 'CROSS') {
-      FormManager.enable('salesBusOffCd');
-      FormManager.enable('repTeamMemberNo');
+      // FormManager.enable('salesBusOffCd');
+      // FormManager.enable('repTeamMemberNo');
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       set32SBOLogicOnISIC();
@@ -7059,12 +7059,6 @@ function lockRequireFieldsUKI() {
     FormManager.enable('ppsceid');
   }
 
-  if (role == 'REQUESTER') {
-    if (custSubGroup == 'IGF' || custSubGroup == 'SOFTL' || custSubGroup == 'COMME' || custSubGroup == 'THDPT' || custSubGroup == 'XIGF' || custSubGroup == 'CROSS') {
-      FormManager.readOnly('soeReqNo');
-      FormManager.readOnly('salesBusOffCd');
-    }
-  }
   if (reqType == 'U' || reqType == 'X' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
@@ -7347,7 +7341,9 @@ function autoSetAbbrevLocUKI() {
   var _addrType = null;
   var _result = null;
   if (_custGrp == 'CROSS') {
-    if (_custType == 'XINTR' || _custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS') {
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
+      _addrType = 'ZS01';
+    } else if (_custType == 'XINTR' || _custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS') {
       _addrType = 'ZI01';
     }
     var qParams = {
@@ -7355,13 +7351,7 @@ function autoSetAbbrevLocUKI() {
       ADDR_TYPE : _addrType,
     };
 
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
-      _result = cmr.query('ADDR.GET.CITY1.BY_REQID_ADDRTYP', qParams);
-    } else {
-      _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
-    }
-
-    // _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
+    _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
     _abbrevLocn = _result.ret1;
   } else {
     if (_custType == 'SOFTL') {
