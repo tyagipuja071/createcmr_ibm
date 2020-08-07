@@ -1,5 +1,7 @@
 package com.ibm.cmr.create.batch.service;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,6 +14,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -56,7 +60,7 @@ public class CEEProcessService extends LegacyDirectService {
   protected void processDupCreate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Create duplicate CMR processing of Request " + admin.getId().getReqId());
     Data data = cmrObjects.getData();
-    if ("821".equals(data.getCmrIssuingCntry())) {
+    if ("821".equals(data.getCmrIssuingCntry().trim())) {
       // finally persist all data
       CmrtCust legacyCust = initEmpty(CmrtCust.class);
       LegacyDirectObjectContainer legacyDupObjects = mapRequestDataForDupCreate(entityManager, cmrObjects);
@@ -98,32 +102,30 @@ public class CEEProcessService extends LegacyDirectService {
    */
   protected void processDupUpdate(EntityManager entityManager, Admin admin, Data data, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Update processing of Request " + admin.getId().getReqId());
-    if (admin.getRdcProcessingStatus() != null) {
-      // Add to limited this process just used for RU for now
-      if ("821".equals(data.getCmrIssuingCntry())) {
-        LegacyDirectObjectContainer legacyDupObjects = mapRequestDupDataForUpdate(entityManager, cmrObjects);
+    // Add to limited this process just used for RU for now
+    if ("821".equals(data.getCmrIssuingCntry().trim())) {
+      LegacyDirectObjectContainer legacyDupObjects = mapRequestDupDataForUpdate(entityManager, cmrObjects);
 
-        CmrtCust legacyCust = legacyDupObjects.getCustomer();
+      CmrtCust legacyCust = legacyDupObjects.getCustomer();
 
-        if (legacyCust == null) {
-          throw new Exception("Customer record cannot be updated.");
-        }
+      if (legacyCust == null) {
+        throw new Exception("Customer record cannot be updated.");
+      }
 
-        LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
-        LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
+      LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
+      LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
 
-        updateEntity(legacyCust, entityManager);
+      updateEntity(legacyCust, entityManager);
 
-        if (legacyDupObjects.getCustomerExt() != null) {
-          updateEntity(legacyDupObjects.getCustomerExt(), entityManager);
-        }
-        for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
-          if (legacyAddr.isForUpdate()) {
-            legacyAddr.setUpdateTs(SystemUtil.getCurrentTimestamp());
-            updateEntity(legacyAddr, entityManager);
-          } else if (legacyAddr.isForCreate()) {
-            createEntity(legacyAddr, entityManager);
-          }
+      if (legacyDupObjects.getCustomerExt() != null) {
+        updateEntity(legacyDupObjects.getCustomerExt(), entityManager);
+      }
+      for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
+        if (legacyAddr.isForUpdate()) {
+          legacyAddr.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          updateEntity(legacyAddr, entityManager);
+        } else if (legacyAddr.isForCreate()) {
+          createEntity(legacyAddr, entityManager);
         }
       }
     }
@@ -182,9 +184,7 @@ public class CEEProcessService extends LegacyDirectService {
     cust.setSalesRepNo(data.getRepTeamMemberNo());
     cust.setSalesGroupRep(data.getSalesTeamCd());
     // set up Enterprise number of Duplicate
-    if (!StringUtils.isEmpty(data.getDupEnterpriseNo())) {
-      cust.setEnterpriseNo(data.getDupEnterpriseNo());
-    }
+    cust.setEnterpriseNo((!StringUtils.isEmpty(data.getDupEnterpriseNo()) ? data.getDupEnterpriseNo() : ""));
     cust.setCeBo(data.getEngineeringBo());
     // set up Ibo and Sbo use DUP_SALES_BO_CD
     cust.setIbo((!StringUtils.isEmpty(data.getDupSalesBoCd()) ? data.getDupSalesBoCd() : ""));
@@ -563,9 +563,8 @@ public class CEEProcessService extends LegacyDirectService {
       cust.setSalesGroupRep(data.getSalesTeamCd());
     }
     // Keep using duplicate EnterpriseNo
-    if (!StringUtils.isBlank(data.getDupEnterpriseNo())) {
-      cust.setEnterpriseNo(data.getDupEnterpriseNo());
-    }
+    cust.setEnterpriseNo((!StringUtils.isEmpty(data.getDupEnterpriseNo()) ? data.getDupEnterpriseNo() : ""));
+
     if (!StringUtils.isBlank(data.getEngineeringBo())) {
       cust.setCeBo(data.getEngineeringBo());
     }
@@ -959,5 +958,57 @@ public class CEEProcessService extends LegacyDirectService {
     List<String> rdcSequences = query.getResults(String.class);
     LOG.debug("RDC sequences =" + rdcSequences);
     return rdcSequences;
+  }
+
+  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, String isuCntry, LegacyDirectObjectContainer legacyObjects)
+      throws CmrException, SQLException {
+    LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
+    admin.setLockBy(null);
+    admin.setLockByNm(null);
+    admin.setLockInd("N");
+
+    String message = "Process Dup Records For " + isuCntry + " successfully on the Legacy Database. CMR No. " + cmrNo + " + "
+        + (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) ? " assigned." : " updated.");
+
+    // add the sequences generated
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      StringBuilder seqCmt = new StringBuilder();
+      for (CmrtAddr addr : legacyObjects.getAddresses()) {
+        int cnt = 0;
+        List<String> uses = new ArrayList<String>();
+        uses = legacyObjects.getUsesBySequenceNo(addr.getId().getAddrNo());
+        for (String use : uses) {
+          seqCmt.append(cnt > 0 ? ", " : "");
+          seqCmt.append(LegacyDirectUtil.USES.get(use));
+          cnt++;
+        }
+        seqCmt.append(": ").append(addr.getId().getAddrNo()).append("\n");
+      }
+      if (seqCmt.toString().trim().length() > 0) {
+        message += "\nSequences Generated:\n" + seqCmt.toString();
+      }
+      message = message.trim();
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      StringBuilder seqCmt = new StringBuilder();
+      for (CmrtAddr addr : legacyObjects.getAddresses()) {
+        if (addr.isForCreate()) {
+          int cnt = 0;
+          List<String> uses = new ArrayList<String>();
+          uses = legacyObjects.getUsesBySequenceNo(addr.getId().getAddrNo());
+          for (String use : uses) {
+            seqCmt.append(cnt > 0 ? ", " : "");
+            seqCmt.append(LegacyDirectUtil.USES.get(use));
+            cnt++;
+          }
+          seqCmt.append(": ").append(addr.getId().getAddrNo()).append("\n");
+        }
+      }
+      if (seqCmt.toString().trim().length() > 0) {
+        message += "\nSequences Generated:\n" + seqCmt.toString();
+      }
+      message = message.trim();
+    }
+    createComment(entityManager, message, admin.getId().getReqId());
+    partialCommit(entityManager);
   }
 }
