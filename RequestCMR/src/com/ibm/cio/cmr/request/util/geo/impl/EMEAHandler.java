@@ -1896,7 +1896,7 @@ public class EMEAHandler extends BaseSOFHandler {
         String name2 = result[1] != null ? result[1].toString() : "";
         custNm = name1 != null ? name1.concat(name2) : "";
       }
-      if ((data.getCustSubGrp() == null || "INFSL".equalsIgnoreCase(data.getCustSubGrp())) && StringUtils.isNotBlank(custNm)) {
+      if ("INFSL".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isNotBlank(custNm)) {
         // CMR-4543
         autoSetAbbreviatedNameUKIIFSL(data, custNm, admin);
       }
