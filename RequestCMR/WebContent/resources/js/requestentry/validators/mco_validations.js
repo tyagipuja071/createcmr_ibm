@@ -1986,14 +1986,11 @@ function changeAbbNmSpainOnScenario() {
       abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
       if (abbName.length > 22)
         abbName = abbName.substring(0, 22);
-      FormManager.setValue('abbrevNm', abbName);
     } else if ([ 'IGSGS', 'GOVIG', 'XIGS', 'THDIG' ].includes(custSubGrp) && installingAddrName.ret1 != undefined && !abbName.includes('IGS')) {
       abbName = installingAddrName.ret1.length >= 18 ? installingAddrName.ret1.substring(0, 18).concat(' IGS') : installingAddrName.ret1.concat(' IGS');
-      FormManager.setValue('abbrevNm', abbName);
-
     }
+    FormManager.setValue('abbrevNm', abbName);
   }
-
 }
 function addValidatorForCollectionCdUpdateSpain() {
   FormManager.addFormValidator((function() {
