@@ -4098,7 +4098,7 @@ public class TurkeyHandler extends BaseSOFHandler {
       }
       }
 	    }
-    compareTwoSheets(localLang, soldto, book, validations);
+    // compareTwoSheets(localLang, soldto, book, validations);
 	  }
 
 	  @Override
