@@ -698,6 +698,8 @@ function changeAbbrevNmLocnSpain(cntry, addressMode, saving, finalSave, force) {
       var abbrevLocn = FormManager.getActualValue('city1');
       if ([ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbrevNm.includes('IBM/')) {
         abbrevNm = "IBM/".concat(abbrevNm);
+      } else if ([ 'IGSGS', 'GOVIG', 'XIGS', 'THDIG' ].includes(custSubGrp) && !abbrevNm.includes('IGS')) {
+        abbrevNm = abbrevNm.length >= 18 ? abbrevNm.substring(0, 18).concat(' IGS') : abbrevNm.concat(' IGS');
       }
       if (abbrevNm && abbrevNm.length > 22) {
         abbrevNm = abbrevNm.substring(0, 22);
@@ -1974,19 +1976,25 @@ function changeAbbNmSpainOnScenario() {
   var reqId = FormManager.getActualValue('reqId');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var abbName = FormManager.getActualValue('abbrevNm');
-  if (reqType == 'C' && role == 'REQUESTER' && [ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbName.includes('IBM/')) {
+  if (reqType == 'C' && role == 'REQUESTER') {
     var reqParam = {
       REQ_ID : reqId,
       ADDR_TYPE : 'ZI01'
     };
     var installingAddrName = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', reqParam);
-    abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
-    if (abbName.length > 22)
-      abbName = abbName.substring(0, 22);
-    FormManager.setValue('abbrevNm', abbName);
-  }
-}
+    if ([ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbName.includes('IBM/')) {
+      abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
+      if (abbName.length > 22)
+        abbName = abbName.substring(0, 22);
+      FormManager.setValue('abbrevNm', abbName);
+    } else if ([ 'IGSGS', 'GOVIG', 'XIGS', 'THDIG' ].includes(custSubGrp) && installingAddrName.ret1 != undefined && !abbName.includes('IGS')) {
+      abbName = installingAddrName.ret1.length >= 18 ? installingAddrName.ret1.substring(0, 18).concat(' IGS') : installingAddrName.ret1.concat(' IGS');
+      FormManager.setValue('abbrevNm', abbName);
 
+    }
+  }
+
+}
 function addValidatorForCollectionCdUpdateSpain() {
   FormManager.addFormValidator((function() {
     return {
