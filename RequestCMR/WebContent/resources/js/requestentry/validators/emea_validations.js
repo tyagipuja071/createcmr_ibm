@@ -883,7 +883,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
 function autoSetVAT(_custType, custTypeinDB) {
   console.log(">>> Process autoSetVAT ...>> " + _custType);
   console.log(">>> Process autoSetVAT 2...>> " + custTypeinDB);
-
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   if (PageManager.isReadOnly()) {
     return;
   }
@@ -909,7 +909,14 @@ function autoSetVAT(_custType, custTypeinDB) {
     FormManager.enable('vat');
     FormManager.enable('vatExempt');
   }
-
+  if (cntry == SysLoc.UK || cntry == SysLoc.IRELAND) {
+    if (_custType == 'INTER') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      FormManager.setValue('vatExempt', false);
+      FormManager.enable('vat');
+      FormManager.enable('vatExempt');
+    }
+  }
   if (_custType == 'PRICU' || _custType == 'IBMEM') {
     FormManager.resetValidations('vat');
     FormManager.readOnly('vat');
