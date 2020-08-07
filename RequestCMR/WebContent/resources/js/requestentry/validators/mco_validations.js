@@ -828,7 +828,12 @@ function setVatValidatorPTES() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked')) {
+    reqParam = {
+      REQ_ID : FormManager.getActualValue('reqId'),
+    };
+    var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
+    var zs01LandCntry = results.ret2;
+    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US') {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
@@ -912,6 +917,8 @@ function changeAbbrevNmLocnSpain(cntry, addressMode, saving, finalSave, force) {
       var abbrevLocn = FormManager.getActualValue('city1');
       if ([ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbrevNm.includes('IBM/')) {
         abbrevNm = "IBM/".concat(abbrevNm);
+      } else if ([ 'IGSGS', 'GOVIG', 'XIGS', 'THDIG' ].includes(custSubGrp) && !abbrevNm.includes('IGS')) {
+        abbrevNm = abbrevNm.length >= 18 ? abbrevNm.substring(0, 18).concat(' IGS') : abbrevNm.concat(' IGS');
       }
       if (abbrevNm && abbrevNm.length > 22) {
         abbrevNm = abbrevNm.substring(0, 22);
@@ -1957,14 +1964,25 @@ function lockRequireFieldsSpain() {
 
   if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93') {
     FormManager.readOnly('reqReason');
-
-    if (role == 'REQUESTER') {
-      if (vat == '' || vat == 'undefined') {
-        FormManager.enable('vat');
+  }
+  if (role == 'REQUESTER') {
+    if (vat == '' || vat == 'undefined') {
+      FormManager.enable('vat');
+      var result = cmr.query('VAT.GET_ZS01_CNTRY', {
+        REQID : FormManager.getActualValue('reqId'),
+        TYPE : 'ZS01'
+      });
+      var zs01Cntry = '';
+      if (result && result.ret1 && result.ret1 != '') {
+        zs01Cntry = result.ret1;
+      }
+      if (zs01Cntry != 'US') {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       } else {
-        FormManager.readOnly('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
       }
+    } else {
+      FormManager.readOnly('vat');
     }
   }
   if (reqType == 'C' && role == 'REQUESTER') {
@@ -2246,19 +2264,22 @@ function changeAbbNmSpainOnScenario() {
   var reqId = FormManager.getActualValue('reqId');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var abbName = FormManager.getActualValue('abbrevNm');
-  if (reqType == 'C' && role == 'REQUESTER' && [ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbName.includes('IBM/')) {
+  if (reqType == 'C' && role == 'REQUESTER') {
     var reqParam = {
       REQ_ID : reqId,
       ADDR_TYPE : 'ZI01'
     };
     var installingAddrName = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_MCO', reqParam);
-    abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
-    if (abbName.length > 22)
-      abbName = abbName.substring(0, 22);
+    if ([ 'INTER', 'INTSO' ].includes(custSubGrp) && !abbName.includes('IBM/')) {
+      abbName = installingAddrName.ret1 != undefined ? 'IBM/'.concat(installingAddrName.ret1) : abbName;
+      if (abbName.length > 22)
+        abbName = abbName.substring(0, 22);
+    } else if ([ 'IGSGS', 'GOVIG', 'XIGS', 'THDIG' ].includes(custSubGrp) && installingAddrName.ret1 != undefined && !abbName.includes('IGS')) {
+      abbName = installingAddrName.ret1.length >= 18 ? installingAddrName.ret1.substring(0, 18).concat(' IGS') : installingAddrName.ret1.concat(' IGS');
+    }
     FormManager.setValue('abbrevNm', abbName);
   }
 }
-
 function addValidatorForCollectionCdUpdateSpain() {
   FormManager.addFormValidator((function() {
     return {
