@@ -1950,6 +1950,9 @@ public class TurkeyHandler extends BaseSOFHandler {
 	        address.setDept(currentRecord.getCmrDept());
 	        address.setAddrTxt2(currentRecord.getCmrName3());
 	        address.setCustNm4(currentRecord.getCmrName4());
+        if (!StringUtils.isEmpty(address.getCustPhone()) && !"ZS01".equals(address.getId().getAddrType())) {
+          address.setCustPhone(null);
+        }
 	      }
 
 	      if (SystemLocation.GREECE.equals(country)) {

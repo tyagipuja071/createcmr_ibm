@@ -438,14 +438,15 @@ function AddressDetailsModal_onLoad() {
       }
     }
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == '862' ){
+  if (FormManager.getActualValue('cmrIssuingCntry') == '862') {
     var addrType = details.ret2;
-    if(addrType == 'ZS01'){
+    if (addrType == 'ZS01') {
       FormManager.hide('taxOffice_view', 'taxOffice_view');
       FormManager.show('custPhone_view', 'custPhone_view');
-    }else{
+    } else {
       FormManager.hide('custPhone_view', 'custPhone_view');
       FormManager.show('taxOffice_view', 'taxOffice_view');
+      _assignDetailsValue('#AddressDetailsModal #custPhone_view', '');
     }
   }
 }
@@ -1509,12 +1510,12 @@ function continueEditDnbAddress() {
   cmr.showModal('addEditAddressModal');
   // CMR-2383
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
-	if (addrType == 'ZS01' || addrType == 'ZD01' || addrType == 'ZI01') {
-	  FormManager.disable('taxOffice');
-	  dojo.byId('ast-taxOffice').style.display = 'none';
-	} else if (addrType == 'ZP01' ) {
-	  dojo.byId('ast-taxOffice').style.display = 'inline-block';
-	}
+    if (addrType == 'ZS01' || addrType == 'ZD01' || addrType == 'ZI01') {
+      FormManager.disable('taxOffice');
+      dojo.byId('ast-taxOffice').style.display = 'none';
+    } else if (addrType == 'ZP01') {
+      dojo.byId('ast-taxOffice').style.display = 'inline-block';
+    }
   }
 }
 
