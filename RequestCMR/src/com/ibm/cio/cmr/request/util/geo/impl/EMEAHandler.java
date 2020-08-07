@@ -2820,6 +2820,7 @@ public class EMEAHandler extends BaseSOFHandler {
           }
         } else if ("INFSL".equalsIgnoreCase(data.getCustSubGrp())) {
           autoSetAbbreviatedNameUKIIFSL(data, abbrevNmValue, admin);
+          abbrevNmValue = data.getAbbrevNm();
         }
         data.setAbbrevNm(abbrevNmValue);
       }
