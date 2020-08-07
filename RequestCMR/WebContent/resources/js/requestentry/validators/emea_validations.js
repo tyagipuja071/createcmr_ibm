@@ -295,89 +295,90 @@ function disableTaxOfficeTR() {
     }
   }
 }
-
-function autoSetAbbrevNameUKIInterFSL(custType) {
-  if (typeof (_pagemodel) != 'undefined') {
-    reqType = FormManager.getActualValue('reqType');
-    role = _pagemodel.userRole;
-  }
-  if (reqType != 'C') {
-    return;
-  }
-  var lob = FormManager.getActualValue('requestingLob');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var abbrevNm = '';
-  var tmInstallName1 = '';
-
-  var qParams = {
-    REQ_ID : FormManager.getActualValue('reqId'),
-  };
-
-  var result = cmr.query('UKI.GET_TOP_INSTALL_1', qParams);
-  tmInstallName1 = result.ret4;
-
-  var resultName = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
-  var abbrevNmDBVal = resultName.ret1;
-
-  if (('INFSL' == custType || 'XINFS' == custType) && (SysLoc.IRELAND == cntry || SysLoc.UK == cntry)) {
-    if (SysLoc.UK == cntry) {
-      if ('IGF' == lob) {
-
-        if (tmInstallName1.length > 10) {
-          tmInstallName1 = tmInstallName1.substring(0, 10);
-        }
-
-        abbrevNm = 'IBM UK' + '/' + tmInstallName1 + ' ZG33';
-      } else {
-
-        if (tmInstallName1.length > 13) {
-          tmInstallName1 = tmInstallName1.substring(0, 13);
-        }
-
-        abbrevNm = 'FSL' + '/' + tmInstallName1 + ' ZG33';
-      }
-    }
-    if (SysLoc.IRELAND == cntry) {
-      if ('IGF' == lob) {
-
-        if (tmInstallName1.length > 10) {
-          tmInstallName1 = tmInstallName1.substring(0, 10);
-        }
-
-        abbrevNm = 'IBM UK' + '/' + tmInstallName1 + ' ZG35';
-      } else {
-
-        if (tmInstallName1.length > 13) {
-          tmInstallName1 = tmInstallName1.substring(0, 13);
-        }
-
-        abbrevNm = 'FSL' + '/' + tmInstallName1 + ' ZG35';
-      }
-    }
-
-    FormManager.setValue('abbrevNm', abbrevNm);
-    FormManager.readOnly('abbrevNm');
-  } else if (('INTER' == custType || 'XINTR' == custType) && (SysLoc.IRELAND == cntry || SysLoc.UK == cntry)) {
-    var dept = FormManager.getActualValue('ibmDeptCostCenter');
-
-    if (tmInstallName1.length > 10) {
-      tmInstallName1 = tmInstallName1.substring(0, 10);
-    }
-
-    abbrevNm = 'IBM/' + dept + '/' + tmInstallName1;
-    FormManager.setValue('abbrevNm', abbrevNm);
-    FormManager.readOnly('abbrevNm');
-
-  } else {
-    if (abbrevNmDBVal == '') {
-      FormManager.setValue('abbrevNm', '');
-    } else {
-      FormManager.setValue('abbrevNm', abbrevNmDBVal);
-    }
-    // FormManager.setValue('abbrevNm', '');
-    FormManager.enable('abbrevNm');
-  }
-}
+// function autoSetAbbrevNameUKIInterFSL(custType) {
+// if (typeof (_pagemodel) != 'undefined') {
+// reqType = FormManager.getActualValue('reqType');
+// role = _pagemodel.userRole;
+// }
+// if (reqType != 'C') {
+// return;
+// }
+// var lob = FormManager.getActualValue('requestingLob');
+// var cntry = FormManager.getActualValue('cmrIssuingCntry');
+// var abbrevNm = '';
+// var tmInstallName1 = '';
+//
+// var qParams = {
+// REQ_ID : FormManager.getActualValue('reqId'),
+// };
+//
+// var result = cmr.query('UKI.GET_TOP_INSTALL_1', qParams);
+// tmInstallName1 = result.ret4;
+//
+// var resultName = cmr.query('DATA.GET.ABBREV_NM.BY_REQID', qParams);
+// var abbrevNmDBVal = resultName.ret1;
+//
+// if (('INFSL' == custType || 'XINFS' == custType) && (SysLoc.IRELAND == cntry
+// || SysLoc.UK == cntry)) {
+// if (SysLoc.UK == cntry) {
+// if ('IGF' == lob) {
+//
+// if (tmInstallName1.length > 10) {
+// tmInstallName1 = tmInstallName1.substring(0, 10);
+// }
+//
+// abbrevNm = 'IBM UK' + '/' + tmInstallName1 + ' ZG33';
+// } else {
+//
+// if (tmInstallName1.length > 13) {
+// tmInstallName1 = tmInstallName1.substring(0, 13);
+// }
+//
+// abbrevNm = 'FSL' + '/' + tmInstallName1 + ' ZG33';
+// }
+// }
+// if (SysLoc.IRELAND == cntry) {
+// if ('IGF' == lob) {
+//
+// if (tmInstallName1.length > 10) {
+// tmInstallName1 = tmInstallName1.substring(0, 10);
+// }
+//
+// abbrevNm = 'IBM UK' + '/' + tmInstallName1 + ' ZG35';
+// } else {
+//
+// if (tmInstallName1.length > 13) {
+// tmInstallName1 = tmInstallName1.substring(0, 13);
+// }
+//
+// abbrevNm = 'FSL' + '/' + tmInstallName1 + ' ZG35';
+// }
+// }
+//
+// FormManager.setValue('abbrevNm', abbrevNm);
+// FormManager.readOnly('abbrevNm');
+// } else if (('INTER' == custType || 'XINTR' == custType) && (SysLoc.IRELAND ==
+// cntry || SysLoc.UK == cntry)) {
+// var dept = FormManager.getActualValue('ibmDeptCostCenter');
+//
+// if (tmInstallName1.length > 10) {
+// tmInstallName1 = tmInstallName1.substring(0, 10);
+// }
+//
+// abbrevNm = 'IBM/' + dept + '/' + tmInstallName1;
+// FormManager.setValue('abbrevNm', abbrevNm);
+// FormManager.readOnly('abbrevNm');
+//
+// } else {
+// if (abbrevNmDBVal == '') {
+// FormManager.setValue('abbrevNm', '');
+// } else {
+// FormManager.setValue('abbrevNm', abbrevNmDBVal);
+// }
+// // FormManager.setValue('abbrevNm', '');
+// FormManager.enable('abbrevNm');
+// }
+// }
 
 function autoSetAbbrevNmFrmDept() {
   console.log('>>> Running autoSetAbbrevNmFrmDept');
@@ -405,8 +406,8 @@ function autoSetAbbrevNmFrmDept() {
   if (('XINTR' == custType || 'INTER' == custType) && (SysLoc.IRELAND == cntry || SysLoc.UK == cntry)) {
     var dept = FormManager.getActualValue('ibmDeptCostCenter');
 
-    if (tmInstallName1.length > 10) {
-      tmInstallName1 = tmInstallName1.substring(0, 10);
+    if (tmInstallName1.length > 11) {
+      tmInstallName1 = tmInstallName1.substring(0, 11);
     }
     if (!abbrevNm.includes('IBM/')) {
       abbrevNm = 'IBM/' + dept + '/' + tmInstallName1;
@@ -8862,7 +8863,7 @@ function autoSetAbbrNameUKI() {
     if (result.ret1 != undefined) {
       installingCustNm = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
       if (installingCustNm.match('^VR[0-9]{3}')) {
-        FormManager.setValue('abbrevNm', installingCustNm);
+        FormManager.setValue('abbrevNm', installingCustNm.substring(0, 22));
       } else {
         var result2 = cmr.query('GET.CUSTNM1_ADDR_UKI', {
           REQ_ID : reqId,
@@ -8873,7 +8874,7 @@ function autoSetAbbrNameUKI() {
         }
         billingCustNm = result2.ret1 != undefined ? result2.ret1 : '';
         if (billingCustNm != '' && !abbName.includes('c/o')) {
-          FormManager.setValue('abbrevNm', installingCustNm + ' c/o ' + billingCustNm);
+          FormManager.setValue('abbrevNm', (installingCustNm + ' c/o ' + billingCustNm).substring(0, 22));
         }
       }
     }
