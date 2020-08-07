@@ -758,7 +758,7 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
 
     if (finalSave || force || copyingToA) {
 
-      if (addressTyp == 'ZI01') {
+      if ((addressTyp == 'ZI01') || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
         autoSetAbbrevLocUKI();
       }
 
@@ -6254,7 +6254,9 @@ function autoSetAbbrevLocUKI() {
   var _addrType = null;
   var _result = null;
   if (_custGrp == 'CROSS') {
-    if (_custType == 'XINTR' || _custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS') {
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
+      _addrType = 'ZS01';
+    } else if (_custType == 'XINTR' || _custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS') {
       _addrType = 'ZI01';
     }
     var qParams = {
@@ -6262,13 +6264,7 @@ function autoSetAbbrevLocUKI() {
       ADDR_TYPE : _addrType,
     };
 
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
-      _result = cmr.query('ADDR.GET.CITY1.BY_REQID_ADDRTYP', qParams);
-    } else {
-      _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
-    }
-
-    // _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
+    _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
     _abbrevLocn = _result.ret1;
   } else {
     if (_custType == 'SOFTL') {
