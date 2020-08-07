@@ -892,8 +892,8 @@ function autoSetSBO(value, valueInDB) {
       return;
     } else if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
         || custSubGrp == 'CROSS') {
-      FormManager.enable('salesBusOffCd');
-      FormManager.enable('repTeamMemberNo');
+      // FormManager.enable('salesBusOffCd');
+      // FormManager.enable('repTeamMemberNo');
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       set32SBOLogicOnISIC();
@@ -5966,12 +5966,6 @@ function lockRequireFieldsUKI() {
     FormManager.enable('ppsceid');
   }
 
-  if (role == 'REQUESTER') {
-    if (custSubGroup == 'IGF' || custSubGroup == 'SOFTL' || custSubGroup == 'COMME' || custSubGroup == 'THDPT' || custSubGroup == 'XIGF' || custSubGroup == 'CROSS') {
-      FormManager.readOnly('soeReqNo');
-      FormManager.readOnly('salesBusOffCd');
-    }
-  }
   if (reqType == 'U' || reqType == 'X' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
