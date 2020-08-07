@@ -1680,15 +1680,14 @@ public class GreeceHandler extends BaseSOFHandler {
       data.setBpRelType(mainRecord.getCmrBPRelType());
       data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
 
-      if (!StringUtils.isEmpty(mainRecord.getCmrSortl())) {
-        String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
-        data.setRepTeamMemberNo(repTeamMmberNo);
-      }
-
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
-        data.setSalesTeamCd(legacyObjects.getCustomer().getSalesGroupRep());
       }
+    }
+
+    if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+      data.setSalesTeamCd(legacyObjects.getCustomer().getSalesGroupRep());
+      data.setRepTeamMemberNo(legacyObjects.getCustomer().getSalesRepNo());
     }
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
