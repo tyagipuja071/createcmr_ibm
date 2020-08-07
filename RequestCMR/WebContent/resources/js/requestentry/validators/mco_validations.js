@@ -614,7 +614,12 @@ function setVatValidatorPTES() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
-    if (!dijit.byId('vatExempt').get('checked')) {
+    reqParam = {
+      REQ_ID : FormManager.getActualValue('reqId'),
+    };
+    var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
+    var zs01LandCntry = results.ret2;
+    if (!dijit.byId('vatExempt').get('checked') && zs01LandCntry != 'US') {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
@@ -1738,14 +1743,25 @@ function lockRequireFieldsSpain() {
 
   if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93') {
     FormManager.readOnly('reqReason');
-
-    if (role == 'REQUESTER') {
-      if (vat == '' || vat == 'undefined') {
-        FormManager.enable('vat');
+  }
+  if (role == 'REQUESTER') {
+    if (vat == '' || vat == 'undefined') {
+      FormManager.enable('vat');
+      var result = cmr.query('VAT.GET_ZS01_CNTRY', {
+        REQID : FormManager.getActualValue('reqId'),
+        TYPE : 'ZS01'
+      });
+      var zs01Cntry = '';
+      if (result && result.ret1 && result.ret1 != '') {
+        zs01Cntry = result.ret1;
+      }
+      if (zs01Cntry != 'US') {
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       } else {
-        FormManager.readOnly('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
       }
+    } else {
+      FormManager.readOnly('vat');
     }
   }
   if (reqType == 'C' && role == 'REQUESTER') {
