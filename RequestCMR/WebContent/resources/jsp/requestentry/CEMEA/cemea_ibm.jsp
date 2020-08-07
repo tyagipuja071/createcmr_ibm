@@ -144,7 +144,10 @@
       <cmr:column span="2" exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,808,823,832,849,850,865,644,668,693,704,708,740,820,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
         <p>
           <cmr:label fieldId="agreementSignDate">
-            <cmr:fieldLabel fieldId="AECISubDate" />: 
+            <cmr:fieldLabel fieldId="AECISubDate" />:
+           	  <cmr:view forCountry="821">
+		        <cmr:info text="${ui.info.aeciSubDateRussia}" />
+		      </cmr:view> 
           </cmr:label>
           <cmr:field path="agreementSignDate" id="agreementSignDate" fieldId="AECISubDate" tabId="MAIN_IBM_TAB" />
         </p>
