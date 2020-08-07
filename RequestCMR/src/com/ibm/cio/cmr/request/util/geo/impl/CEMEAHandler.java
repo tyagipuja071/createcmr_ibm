@@ -1061,7 +1061,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
       CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
       if (cmrtExt != null) {
-        SimpleDateFormat sdf = new SimpleDateFormat("ddMMyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("MMddyy");
         String aECISUBDateString = sdf.format(cmrtExt.getAeciSubDt());
         data.setAgreementSignDate(aECISUBDateString);
       }
