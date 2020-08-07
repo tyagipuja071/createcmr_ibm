@@ -230,7 +230,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                     addr.getCmrAddrSeq());
                 int maxintSeq = getMaxSequenceOnAddr(entityManager, SystemConfiguration.getValue("MANDT"), reqEntry.getCmrIssuingCntry(),
                     record.getCmrNum());
-                String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeq), 5, '0');
+                int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
                 String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String gAddrSeq = "";
@@ -238,6 +239,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                   gAddrSeq = legacyGaddrSeq;
                 } else {
                   gAddrSeq = maxSeq;
+                  maxintSeqLegacy++;
                 }
                 if (!StringUtils.isBlank(adrnr)) {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
@@ -317,8 +319,11 @@ public class CEMEAHandler extends BaseSOFHandler {
                 }
                 // add new here
                 String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
-                String maxSeqs = StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0');
+                // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
+                // reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                // String maxSeqs =
+                // StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
+
                 // check if share seq address
                 String isShareZP01 = isShareZP01(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
                 String isShareZS02 = isShareZS02(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum(), soldtoseq);
@@ -330,8 +335,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                   FindCMRRecordModel sharezp01 = new FindCMRRecordModel();
                   PropertyUtils.copyProperties(sharezp01, mainRecord);
                   sharezp01.setCmrAddrTypeCode("ZP01");
-                  sharezp01.setCmrAddrSeq(maxSeqs);
-                  maxintSeqadd++;
+                  sharezp01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                  maxintSeqLegacy++;
                   sharezp01.setParentCMRNo("");
                   sharezp01.setCmrSapNumber(mainRecord.getCmrSapNumber());
                   sharezp01.setCmrDept(mainRecord.getCmrCity2());
@@ -342,8 +347,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                   FindCMRRecordModel sharezs02 = new FindCMRRecordModel();
                   PropertyUtils.copyProperties(sharezs02, mainRecord);
                   sharezs02.setCmrAddrTypeCode("ZS02");
-                  sharezs02.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0'));
-                  maxintSeqadd++;
+                  sharezs02.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                  maxintSeqLegacy++;
                   sharezs02.setParentCMRNo("");
                   sharezs02.setCmrSapNumber(mainRecord.getCmrSapNumber());
                   sharezs02.setCmrDept(mainRecord.getCmrCity2());
@@ -354,8 +359,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                   FindCMRRecordModel sharezd01 = new FindCMRRecordModel();
                   PropertyUtils.copyProperties(sharezd01, mainRecord);
                   sharezd01.setCmrAddrTypeCode("ZD01");
-                  sharezd01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0'));
-                  maxintSeqadd++;
+                  sharezd01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                  maxintSeqLegacy++;
                   sharezd01.setParentCMRNo("");
                   sharezd01.setCmrSapNumber(mainRecord.getCmrSapNumber());
                   sharezd01.setCmrDept(mainRecord.getCmrCity2());
@@ -366,8 +371,8 @@ public class CEMEAHandler extends BaseSOFHandler {
                   FindCMRRecordModel sharezi01 = new FindCMRRecordModel();
                   PropertyUtils.copyProperties(sharezi01, mainRecord);
                   sharezi01.setCmrAddrTypeCode("ZI01");
-                  sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqadd), 5, '0'));
-                  maxintSeqadd++;
+                  sharezi01.setCmrAddrSeq(StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0'));
+                  maxintSeqLegacy++;
                   sharezi01.setParentCMRNo("");
                   sharezi01.setCmrSapNumber(mainRecord.getCmrSapNumber());
                   sharezi01.setCmrDept(mainRecord.getCmrCity2());
