@@ -2818,14 +2818,14 @@ public class EMEAHandler extends BaseSOFHandler {
               abbrevNmValue = abbrevNmValue + " OEM";
             }
           }
-        } else if (data.getCustSubGrp() == null || "INFSL".equalsIgnoreCase(data.getCustSubGrp())) {
+        } else if ("INFSL".equalsIgnoreCase(data.getCustSubGrp())) {
           autoSetAbbreviatedNameUKIIFSL(data, abbrevNmValue, admin);
         }
         data.setAbbrevNm(abbrevNmValue);
       }
     } else if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
       if (admin.getReqType().equalsIgnoreCase("C")) {
-        if (data.getCustSubGrp() == null || "INFSL".equalsIgnoreCase(data.getCustSubGrp())) {
+        if ("INFSL".equalsIgnoreCase(data.getCustSubGrp())) {
           autoSetAbbreviatedNameUKIIFSL(data, abbrevNmValue, admin);
         } else {
           data.setAbbrevNm(abbrevNmValue);
@@ -3674,6 +3674,8 @@ public class EMEAHandler extends BaseSOFHandler {
           abbName = "IBM UK/".concat(installingName);
         } else if (SystemLocation.UNITED_KINGDOM.equals(cntryFrmEmpId) || SystemLocation.IRELAND.equals(cntryFrmEmpId)) {
           abbName = "FSL/".concat(installingName);
+        } else {
+          abbName = installingName;
         }
 
         if (abbName != null && abbName.length() > 22) {
