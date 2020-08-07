@@ -2059,9 +2059,9 @@ public class EMEAHandler extends BaseSOFHandler {
         String name2 = result[1] != null ? result[1].toString() : "";
         custNm = name1 != null ? name1.concat(name2) : "";
       }
-      if ((data.getCustSubGrp() == null || "INFSL".equalsIgnoreCase(data.getCustSubGrp())) && StringUtils.isNotBlank(custNm)) {
+      if ("INFSL".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isNotBlank(custNm)) {
         // CMR-4543
-        autoSetAbbreviatedNameUKI(data, custNm, admin);
+        autoSetAbbreviatedNameUKIIFSL(data, custNm, admin);
       }
     }
     if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
@@ -3167,12 +3167,19 @@ public class EMEAHandler extends BaseSOFHandler {
               abbrevNmValue = abbrevNmValue + " OEM";
             }
           }
+        } else if ("INFSL".equalsIgnoreCase(data.getCustSubGrp())) {
+          autoSetAbbreviatedNameUKIIFSL(data, abbrevNmValue, admin);
+          abbrevNmValue = data.getAbbrevNm();
         }
         data.setAbbrevNm(abbrevNmValue);
       }
     } else if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
       if (admin.getReqType().equalsIgnoreCase("C")) {
-        data.setAbbrevNm(abbrevNmValue);
+        if ("INFSL".equalsIgnoreCase(data.getCustSubGrp())) {
+          autoSetAbbreviatedNameUKIIFSL(data, abbrevNmValue, admin);
+        } else {
+          data.setAbbrevNm(abbrevNmValue);
+        }
       }
     } else if (SystemLocation.GREECE.equals(data.getCmrIssuingCntry()) || SystemLocation.CYPRUS.equals(data.getCmrIssuingCntry())
         || SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
@@ -4577,18 +4584,20 @@ public class EMEAHandler extends BaseSOFHandler {
     return zd01count;
   }
 
-  private void autoSetAbbreviatedNameUKI(Data data, String installingName, Admin admin) {
+  private void autoSetAbbreviatedNameUKIIFSL(Data data, String installingName, Admin admin) {
     String cntryFrmEmpId = "";
     String abbName = "";
     Person p = new Person();
     try {
       p = BluePagesHelper.getPerson(admin.getRequesterId());
-      if (p != null) {
+      if (p != null && StringUtils.isNotBlank(installingName)) {
         cntryFrmEmpId = p.getEmployeeId().substring(p.getEmployeeId().length() - 3, p.getEmployeeId().length());
         if (SystemLocation.HUNGARY.equals(cntryFrmEmpId)) {
           abbName = "IBM UK/".concat(installingName);
-        } else if (SystemLocation.UNITED_KINGDOM.equals(cntryFrmEmpId)) {
+        } else if (SystemLocation.UNITED_KINGDOM.equals(cntryFrmEmpId) || SystemLocation.IRELAND.equals(cntryFrmEmpId)) {
           abbName = "FSL/".concat(installingName);
+        } else {
+          abbName = installingName;
         }
 
         if (abbName != null && abbName.length() > 22) {
