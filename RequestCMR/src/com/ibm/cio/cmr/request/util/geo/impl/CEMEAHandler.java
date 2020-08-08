@@ -1387,7 +1387,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCreditCd(), "CreditCd", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getDupSalesRepNo(), newData.getDupSalesRepNo())) {
+    if (!SystemLocation.RUSSIAN_FEDERATION.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getDupSalesRepNo(), newData.getDupSalesRepNo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo2", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getDupSalesRepNo(), "SalRepNameNo2", cmrCountry));
@@ -1401,7 +1402,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getDupEnterpriseNo(), "Enterprise2", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getDupSalesBoCd(), newData.getDupSalesBoCd())) {
+    if (!SystemLocation.RUSSIAN_FEDERATION.equals(cmrCountry) && RequestSummaryService.TYPE_IBM.equals(type)
+        && !equals(oldData.getDupSalesBoCd(), newData.getDupSalesBoCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff2", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getDupSalesBoCd(), "SalesBusOff2", cmrCountry));

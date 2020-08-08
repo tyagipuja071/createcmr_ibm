@@ -4086,7 +4086,10 @@ function afterConfigTemplateForHungary() {
 function validatorsDIGIT() {
   FormManager.addValidator('EngineeringBo', Validators.DIGIT, [ 'EngineeringBo' ]);
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
-
+  // CMR-4606
+  if (dijit.byId('cisServiceCustIndc').get('checked')) {
+    FormManager.addValidator('taxCd3', Validators.DIGIT, [ 'Dup Enterprise Number' ]);
+  }
 }
 function addEmbargoCdValidatorForCEE() {
   var role = FormManager.getActualValue('userRole');
