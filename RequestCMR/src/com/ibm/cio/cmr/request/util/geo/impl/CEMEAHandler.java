@@ -1221,10 +1221,15 @@ public class CEMEAHandler extends BaseSOFHandler {
     if (CEE_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       String zp02updateinit = getZP02UpdateInit(entityManager, data.getId().getReqId());
+      String zp02importinit = getZP02importInit(entityManager, data.getId().getReqId());
       if (StringUtils.isBlank(legacyGaddrSeq)) {
         changeZP02AddrNew(entityManager, data.getId().getReqId());
       }
       if ("Y".equals(zp02updateinit)) {
+        changeZS01AddrUpdate(entityManager, data.getId().getReqId());
+        changeZP01AddrUpdate(entityManager, data.getId().getReqId());
+      }
+      if ("N".equals(zp02importinit)) {
         changeZS01AddrUpdate(entityManager, data.getId().getReqId());
         changeZP01AddrUpdate(entityManager, data.getId().getReqId());
       }
@@ -2262,6 +2267,20 @@ public class CEMEAHandler extends BaseSOFHandler {
       dupRecord = records.get(0);
     }
     return dupRecord;
+  }
+
+  public static String getZP02importInit(EntityManager entityManager, long req_id) {
+    String ZP02ImportInit = null;
+    String sql = ExternalizedQuery.getSql("CEE.GET.ZP02IMPORTINIT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", req_id);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      ZP02ImportInit = result;
+    }
+    LOG.debug("ZP02ImportInit " + ZP02ImportInit);
+    return ZP02ImportInit;
   }
 
 }
