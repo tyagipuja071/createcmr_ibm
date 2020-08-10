@@ -487,6 +487,7 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       int nextSeq = getNextSoldToSeq(entityManager, reqId);
       addrSeq = nextSeq + "";
     }
+
     LOG.debug("Assigning address sequence " + addrSeq);
     addrPk.setAddrSeq(addrSeq);
     addr.setId(addrPk);

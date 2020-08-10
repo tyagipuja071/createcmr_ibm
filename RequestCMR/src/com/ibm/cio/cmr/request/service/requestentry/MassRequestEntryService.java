@@ -5493,6 +5493,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         muModel.setCustClass(tempVal);
         break;
       case "CURRENCY_CD":
+        // Turkey use this represent Type of Customer
         muModel.setCurrencyCd(tempVal);
         break;
       case "OUT_CITY_LIMIT":
@@ -5524,8 +5525,16 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "RESTRICT_TO":
         muModel.setRestrictTo(tempVal);
+        break;
       case "CUST_NM3":
         muModel.setCustNm3(tempVal);
+        break;
+      case "SUB_INDUSTRY_CD":
+        muModel.setSubIndustryCd(tempVal);
+        break;
+      case "SVC_AR_OFFICE":
+        muModel.setSvcArOffice(tempVal);
+        break;
       default:
         LOG.debug("Default condition was executed [nothing was saved] for DB column >> " + col.getLabel());
         break;

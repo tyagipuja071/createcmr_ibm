@@ -48,7 +48,7 @@
     </cmr:view>
 
     <!-- OIB field for Croatia -->
-    <cmr:view forCountry="704">
+    <cmr:view forCountry="704,668">
       <cmr:column span="2" containerForField="LocalTax1">
         <p>
           <cmr:label fieldId="taxCd1">
@@ -111,7 +111,7 @@
         <cmr:field path="ordBlk" id="ordBlk" fieldId="OrdBlk" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="CustClass" forCountry="618">
+    <cmr:column span="2" containerForField="CustClass" forCountry="618,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
         <p>
           <cmr:label fieldId="custClass">
             <cmr:fieldLabel fieldId="CustClass" />:

@@ -803,7 +803,8 @@ dojo.addOnLoad(function() {
   // exclude for JP
   // GEOHandler.registerWWValidator(addDPLCheckValidator,GEOHandler.ROLE_PROCESSOR);
   GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ], GEOHandler.ROLE_PROCESSOR, true, true);
-  GEOHandler.registerValidator(addDPLCheckValidator, [ '726' ], GEOHandler.ROLE_PROCESSOR, true, true);
+  GEOHandler.registerValidator(addDPLCheckValidator, [ '862', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821',
+      '826', '889', '358', '359', '363', '726' ], GEOHandler.ROLE_PROCESSOR, true, true);
 
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,

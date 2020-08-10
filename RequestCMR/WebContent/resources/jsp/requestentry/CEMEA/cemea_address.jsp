@@ -50,7 +50,9 @@
         <cmr:info text="${ui.info.custNm2CEMEA}" />
       </cmr:view>
       <cmr:view forCountry="740">
-        <cmr:info text="${ui.info.custNm2HU}" />
+      	<a id = 'custNm2HUInfoBubble'>
+        	<cmr:info text="${ui.info.custNm2HU}" />
+        </a>
       </cmr:view>
       <cmr:view forCountry="618">
         <cmr:info text="${ui.info.nameAustria}" />
@@ -68,15 +70,28 @@
       <cmr:view exceptForCountry="618,740">
         <cmr:info text="${ui.info.custNm3CEMEA}" />
       </cmr:view>
-      <cmr:view forCountry="740">
+      <!--<cmr:view forCountry="740">
         <cmr:info text="${ui.info.custNm3HU}" />
-      </cmr:view>
+      </cmr:view>-->
       <cmr:view forCountry="618">
         <cmr:info text="${ui.info.nameAustria}" />
       </cmr:view>
     </cmr:label>
     <cmr:delta text="-" id="delta-custNm3" />
     <cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3" size="400" />
+  </cmr:column>
+</cmr:row>
+
+<cmr:row addBackground="true">
+  <cmr:column span="4" forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+    <cmr:label fieldId="custNm4">
+      <cmr:fieldLabel fieldId="CustomerName4" />: 
+      <cmr:view>
+        <cmr:info text="${ui.attnPerson}" />
+      </cmr:view>
+    </cmr:label>
+    <cmr:delta text="-" id="delta-custNm4" />
+    <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4" size="400" />
   </cmr:column>
 </cmr:row>
 
@@ -99,8 +114,10 @@
       <cmr:label fieldId="city1">
         <cmr:fieldLabel fieldId="City1" />:
              <cmr:delta text="-" id="delta-city1" />
-             <cmr:view exceptForCountry="618">
-             	<cmr:info text="${ui.info.cityCEMEA}" />
+             <cmr:view forCountry="826">
+             	<a id = 'cityRomaniaInfoBubble'>
+        			<cmr:info text="${ui.info.cityCEMEA}" />
+        	 	</a>
              </cmr:view>
       </cmr:label>
       <cmr:field fieldId="City1" id="city1" path="city1" />
