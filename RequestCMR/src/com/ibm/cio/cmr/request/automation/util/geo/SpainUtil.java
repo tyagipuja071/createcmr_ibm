@@ -91,7 +91,7 @@ public class SpainUtil extends AutomationUtil {
     if ("C".equals(requestData.getAdmin().getReqType())) {
       if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_IGS_GSE.equals(scenario) || SCENARIO_CROSSBORDER.equals(scenario)
           || SCENARIO_CROSSBORDER_IGS.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_GOVERNMENT_IGS.equals(scenario))
-          && StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZI01))) {
+          && !StringUtils.equals(getCleanString(customerName), getCleanString(customerNameZI01))) {
         engineData.addRejectionComment("SCENARIO_CHECK",
             "Customer names on billing and installing address are not identical, 3rd Party should be selected.", "", "");
         details.append("Customer names on billing and installing address are not identical, 3rd Party should be selected.");
@@ -108,7 +108,14 @@ public class SpainUtil extends AutomationUtil {
       return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
+    case SCENARIO_INTERNAL:
+    case SCENARIO_INTERNAL_SO:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      break;
     }
     return true;
 
@@ -201,16 +208,14 @@ public class SpainUtil extends AutomationUtil {
       for (DuplicateCMRCheckResponse match : matches) {
         if (StringUtils.isNotBlank(match.getSortl())) {
           String sortl = match.getSortl().length() > 3 ? match.getSortl().substring(0, 3) : match.getSortl();
-          if (!Arrays.asList(sboValuesToCheck).contains(sortl)) {
+          if (Arrays.asList(sboValuesToCheck).contains(sortl)) {
             filteredMatches.add(match);
           }
         }
 
       }
       // set filtered matches in response
-      if (!filteredMatches.isEmpty()) {
-        response.setMatches(filteredMatches);
-      }
+      response.setMatches(filteredMatches);
     }
 
   }

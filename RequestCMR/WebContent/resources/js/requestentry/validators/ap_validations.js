@@ -110,22 +110,6 @@ function addAfterConfigAP() {
         FormManager.enable('clientTier');
     }
   }
-  if(role == 'REQUESTER' && reqType == 'U' ){
-	    if(cntry == SysLoc.SINGAPORE) {
-	      FormManager.removeValidator('isicCd', Validators.REQUIRED);
-	      FormManager.readOnly('isicCd');
-	      FormManager.readOnly('mrcCd');
-	      FormManager.removeValidator('apCustClusterId', Validators.REQUIRED);
-	      FormManager.readOnly('apCustClusterId');
-	      FormManager.removeValidator('clientTier', Validators.REQUIRED);
-	      FormManager.readOnly('clientTier');
-	      FormManager.readOnly('isuCd');
-	      FormManager.readOnly('inacCd');
-	      FormManager.removeValidator('repTeamMemberName', Validators.REQUIRED);
-	      FormManager.readOnly('repTeamMemberName');
-	      FormManager.readOnly('collectionCd');
-	    }
-   }
 }
 
 /* SG defect : 1795335 */
