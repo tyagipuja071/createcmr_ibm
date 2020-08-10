@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -58,6 +59,7 @@ public class UKIUtil extends AutomationUtil {
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_PRIVATE_PERSON, SCENARIO_BUSINESS_PARTNER);
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Hardware Master");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -176,8 +178,25 @@ public class UKIUtil extends AutomationUtil {
         break;
       case "INAC/NAC Code":
       case "Company Number":
-      case "Enterprise Number":
         cmdeReview = true;
+        break;
+      case "Tax Code":
+        // noop, for switch handling only
+        break;
+      case "ISU Code":
+        // noop, for switch handling only
+        break;
+      case "Client Tier":
+        // noop, for switch handling only
+        break;
+      case "Sales Rep No":
+        // noop, for switch handling only
+        break;
+      case "Order Block Code":
+        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData()) || "88".equals(change.getOldData())
+            || "88".equals(change.getNewData())) {
+          // noop, for switch handling only
+        }
         break;
       default:
         ignoredUpdates.add(change.getDataField());
@@ -257,31 +276,42 @@ public class UKIUtil extends AutomationUtil {
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
-            if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Hardware Master")) {
-              // CMDE Review
-              checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
-                  .append("\n");
-              resultCodes.add("D");
-            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && null == changes.getAddressChange(addrType, "Hardware Master")) {
-              Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-              boolean matchesDnb = false;
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb) {
-                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                // CMDE Review
+                checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
+                    .append("\n");
+                resultCodes.add("D");
               } else {
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                for (DnBMatchingResponse dnb : matches) {
-                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
+              }
+
+            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
                 }
+                if (!matchesDnb) {
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  resultCodes.add("R");
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                } else {
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
               }
             } else {
               // proceed
@@ -310,6 +340,26 @@ public class UKIUtil extends AutomationUtil {
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
+  }
+
+  /**
+   * Checks if relevant fields were updated
+   * 
+   * @param changes
+   * @param addr
+   * @return
+   */
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
