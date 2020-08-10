@@ -58,7 +58,7 @@
 					<lovId>CollectionCd</lovId>
 				</column>
 
-				<column>
+				<column exactLength="true">
 					<label>Enterprise Number</label>
 					<dbColumn>ENTERPRISE</dbColumn>
 					<width>30</width>
