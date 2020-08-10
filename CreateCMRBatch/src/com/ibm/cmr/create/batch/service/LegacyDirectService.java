@@ -2683,10 +2683,11 @@ public class LegacyDirectService extends TransConnService {
             for (Addr addr : addresses) {
               entityManager.detach(addr);
 
-              if (!"ZS01".equals(addr.getId().getAddrType())) {
-                LOG.warn("Address Type: " + addr.getId().getAddrType() + "  Skipping all address except ZS01 address.");
-                continue;
-              }
+              /*
+               * if (!"ZS01".equals(addr.getId().getAddrType())) {
+               * LOG.warn("Address Type: " + addr.getId().getAddrType() +
+               * "  Skipping all address except ZS01 address."); continue; }
+               */
 
               request.setSapNo(addr.getSapNo());
 
