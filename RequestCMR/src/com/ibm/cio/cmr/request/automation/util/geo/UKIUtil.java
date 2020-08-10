@@ -194,7 +194,7 @@ public class UKIUtil extends AutomationUtil {
       case "Order Block Code":
         if ("94".equals(change.getOldData()) || "94".equals(change.getNewData()) || "88".equals(change.getOldData())
             || "88".equals(change.getNewData())) {
-          cmdeReview = true;
+          // noop, for switch handling only
         }
         break;
       default:
