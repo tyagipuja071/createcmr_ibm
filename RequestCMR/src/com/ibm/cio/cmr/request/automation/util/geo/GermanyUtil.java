@@ -40,14 +40,10 @@ import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
-import com.ibm.cmr.services.client.PPSServiceClient;
-import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.pps.PPSRequest;
-import com.ibm.cmr.services.client.pps.PPSResponse;
 
 /**
  * 
@@ -97,18 +93,17 @@ public class GermanyUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
     // cmr-2067 fix
     engineData.setMatchDepartment(true);
-    if (admin.getSourceSystId() != null) {
-      if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-        details.append("Processor review is required for MARKETPLACE requests.").append("\n");
-        engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
-        skipAllChecks(engineData);
-      } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-        // BP skip checks - remove after BP is enabled
-        details.append("Processor review is required for BP Portal requests.").append("\n");
-        engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-        skipAllChecks(engineData); // remove after BP is enabled
-      }
-    } else if (StringUtils.isNotBlank(scenario)) {
+    // if (admin.getSourceSystId() != null &&
+    // "CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+    // // BP skip checks - remove after BP is enabled
+    // details.append("Processor review is required for BP Portal
+    // requests.").append("\n");
+    // engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is
+    // required for BP Portal requests.");
+    // skipAllChecks(engineData); // remove after BP is enabled
+    // } else
+    if (StringUtils.isNotBlank(scenario)) {
+
       switch (scenario) {
       case "PRIPE":
       case "IBMEM":
@@ -233,14 +228,7 @@ public class GermanyUtil extends AutomationUtil {
       case "BUSPR":
         if (StringUtils.isNotBlank(data.getPpsceid())) {
           try {
-            PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-                PPSServiceClient.class);
-            client.setRequestMethod(Method.Get);
-            client.setReadTimeout(1000 * 60 * 5);
-            PPSRequest request = new PPSRequest();
-            request.setCeid(data.getPpsceid());
-            PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-            if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+            if (!checkPPSCEID(data.getPpsceid())) {
               engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
               details.append("PPS CE ID on the request is invalid.").append("\n");
               valid = false;

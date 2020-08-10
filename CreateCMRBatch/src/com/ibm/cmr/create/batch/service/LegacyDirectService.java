@@ -60,6 +60,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
@@ -1473,6 +1474,9 @@ public class LegacyDirectService extends TransConnService {
       // call the specific transformer to change data as needed
       dummyQueue.setReqStatus(MQMsgConstants.REQ_STATUS_NEW);
       transformer.transformLegacyCustomerData(entityManager, dummyHandler, cust, cmrObjects);
+      if (transformer.enableTempReactOnUpdates()) {
+        LegacyCommonUtil.processDB2TemporaryReactChanges(admin, cust, data, entityManager);
+      }
     }
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
@@ -1752,12 +1756,14 @@ public class LegacyDirectService extends TransConnService {
       boolean isCustExt = transformer.hasCmrtCustExt();
       if (isCustExt) {
         CmrtCustExt custExt = legacyObjects.getCustomerExt();
-        if (transformer != null) {
-          transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+        if (custExt != null) {
+          if (transformer != null) {
+            transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+          }
+          custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+          legacyObjects.setCustomerExt(custExt);
         }
-        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-        legacyObjects.setCustomerExt(custExt);
       }
 
       // rebuild the address use table
@@ -2871,6 +2877,8 @@ public class LegacyDirectService extends TransConnService {
         String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
         boolean isDataUpdated = false;
+        boolean isExceptionOccured = false;
+        Set<String> rdcProcessedSequences = new HashSet<String>();
         isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
         MessageTransformer transformer = TransformerManager.getTransformer(data.getCmrIssuingCntry());
 
@@ -2889,6 +2897,11 @@ public class LegacyDirectService extends TransConnService {
           entityManager.detach(addr);
           if (usedSequences.contains(addr.getId().getAddrSeq())) {
             LOG.warn("Sequence " + addr.getId().getAddrSeq() + " already sent in a previous request. Skipping.");
+            continue;
+          }
+
+          if (isExceptionOccured && rdcProcessedSequences.contains(addr.getId().getAddrSeq())) {
+            LOG.warn("New kunnr for Sequence " + addr.getId().getAddrSeq() + " already created in RDc. Skipping.");
             continue;
           }
 
@@ -2988,13 +3001,20 @@ public class LegacyDirectService extends TransConnService {
             try {
               updateEntity(addrNew, entityManager);
             } catch (Exception e) {
-              try {
-                LOG.info("Exception in LegacyDirect due to optimistic lock for KUNNR=" + addrNew.getSapNo());
-                Thread.sleep(60 * 1000);// 1 minute sleep time
-              } catch (InterruptedException ex) {
-                LOG.debug("Exception in LegacyDirect sleep method for KUNNR=" + addrNew.getSapNo());
+              // try {
+              LOG.info("Exception in LegacyDirect due to optimistic lock for KUNNR=" + addrNew.getSapNo() + "===" + addr.getSapNo());
+              if (addr.getSapNo() == null && addrNew.getSapNo() != null) {
+                LOG.info("Kunnr created for new address in RDc with Seq no=" + addrNew.getId().getAddrSeq());
+                isExceptionOccured = true;
+                rdcProcessedSequences.add(addrNew.getId().getAddrSeq());
               }
-              updateEntity(addrNew, entityManager);
+
+              // Thread.sleep(60 * 1000);// 1 minute sleep time
+              // } catch (InterruptedException ex) {
+              // LOG.debug("Exception in LegacyDirect sleep method for KUNNR=" +
+              // addrNew.getSapNo());
+              // }
+              // updateEntity(addrNew, entityManager);
             }
             // updateEntity(addrNew, entityManager);
 
@@ -3669,6 +3689,7 @@ public class LegacyDirectService extends TransConnService {
           untagAddrUseForSequence(use, address);
           taggedUse = StringUtils.replace(taggedUse, use, "");
           address.setAddressUse(taggedUse);
+          address.setForUpdate(true);
         }
       }
       LOG.trace("Untagged Address Use: " + address.getAddressUse());

@@ -39,7 +39,18 @@
   <br>
   <br>
 </cmr:row>
-
+<cmr:view forCountry="726">
+  <cmr:row>
+      <cmr:column span="2">
+      <p>
+	<cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
+        <cmr:fieldLabel fieldId="SitePartyID" />:</cmr:label>
+      <cmr:delta text="-" id="delta-ierpSitePrtyId" />
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+      </p>
+    </cmr:column>
+  </cmr:row>
+</cmr:view>
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm1">
