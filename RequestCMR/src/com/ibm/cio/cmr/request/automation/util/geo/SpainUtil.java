@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -65,6 +66,7 @@ public class SpainUtil extends AutomationUtil {
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #");
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_INTERNAL_SO, SCENARIO_BUSINESS_PARTNER,
       SCENARIO_CROSSBORDER_BP);
 
@@ -216,123 +218,123 @@ public class SpainUtil extends AutomationUtil {
   @Override
   public boolean runUpdateChecksForData(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
-	    Admin admin = requestData.getAdmin();
-	    Data data = requestData.getData();
-	    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
-	      return true;
-	    }
-	    StringBuilder details = new StringBuilder();
-	    boolean cmdeReview = false;
-	    Set<String> resultCodes = new HashSet<String>();// D for Reject
-	    List<String> ignoredUpdates = new ArrayList<String>();
-	    for (UpdatedDataModel change : changes.getDataUpdates()) {
-	      boolean requesterFromTeam = false;
-	      switch (change.getDataField()) {
-	      case "VAT #":
-	        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
-	          // ADD
-	          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-	          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-	          boolean matchesDnb = false;
-	          if (matches != null) {
-	            // check against D&B
-	            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
-	          }
-	          if (!matchesDnb) {
-	            cmdeReview = true;
-	            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
-	            details.append("VAT # on the request did not match D&B\n");
-	          } else {
-	            details.append("VAT # on the request matches D&B\n");
-	          }
-	        }
-	        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-	            && !(change.getOldData().equals(change.getNewData()))) {
-	          // UPDATE
-	          String oldData = change.getOldData().substring(3, 11);
-	          String newData = change.getNewData().substring(3, 11);
-	          if (!(oldData.equals(newData))) {
-	            resultCodes.add("D");// Reject
-	            details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
-	          } else {
-	            details.append("VAT # on the request differs only in the first Character\n");
-	          }
-	        }
-	        break;
-	      case "SBO":
-	        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
-	            && !(change.getOldData().equals(change.getNewData()))) {
-	          requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
-	          if ("9".equals(change.getNewData().substring(1, 2)) && !requesterFromTeam) {
-	            resultCodes.add("D");// Reject
-	            details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
-	          }
-	          if (!"9".equals(change.getNewData().substring(1, 2))) {
-	            cmdeReview = true;
-	          }
-	        }
-	        break;
-	      case "INAC/NAC Code":
-	      case "ISIC":
-	      case "Currency Code":
-	        cmdeReview = true;
-	        break;
-	      case "Mode Of Payment":
-	      case "Mailing Condition":
-	        requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
-	        if (!requesterFromTeam) {
-	          resultCodes.add("D");// Reject
-	          details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
-	        }
-	        break;
-	      case "Tax Code":
-	        // noop, for switch handling only
-	        break;
-	      case "ISU Code":
-	        // noop, for switch handling only
-	        break;
-	      case "Client Tier Code":
-	        // noop, for switch handling only
-	        break;
-	      case "Enterprise Number":
-	        // noop, for switch handling only
-	        break;
-	      case "Sales Rep":
-	        // noop, for switch handling only
-	        break;
-	      case "Order Block Code":
-	        if ("E".equals(change.getOldData()) || "E".equals(change.getNewData())) {
-	           // noop, for switch handling only
-	        }
-	        break;
-	      default:
-	        ignoredUpdates.add(change.getDataField());
-	        break;
-	      }
-	    }
-	    if (resultCodes.contains("D")) {
-	      output.setOnError(true);
-	      validation.setSuccess(false);
-	      validation.setMessage("VAT Updated");
-	    } else if (cmdeReview) {
-	      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
-	      details.append("Updates to one or more fields cannot be validated.\n");
-	      validation.setSuccess(false);
-	      validation.setMessage("Not Validated");
-	    } else {
-	      validation.setSuccess(true);
-	      validation.setMessage("Successful");
-	    }
-	    if (!ignoredUpdates.isEmpty()) {
-	      details.append("Updates to the following fields skipped validation:\n");
-	      for (String field : ignoredUpdates) {
-	        details.append(" - " + field + "\n");
-	      }
-	    }
-	    output.setDetails(details.toString());
-	    output.setProcessOutput(validation);
-	    return true;
-	  }
+    Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+    if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
+      return true;
+    }
+    StringBuilder details = new StringBuilder();
+    boolean cmdeReview = false;
+    Set<String> resultCodes = new HashSet<String>();// D for Reject
+    List<String> ignoredUpdates = new ArrayList<String>();
+    for (UpdatedDataModel change : changes.getDataUpdates()) {
+      boolean requesterFromTeam = false;
+      switch (change.getDataField()) {
+      case "VAT #":
+        if (StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())) {
+          // ADD
+          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+          List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+          boolean matchesDnb = false;
+          if (matches != null) {
+            // check against D&B
+            matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+          }
+          if (!matchesDnb) {
+            cmdeReview = true;
+            engineData.addNegativeCheckStatus("_esVATCheckFailed", "VAT # on the request did not match D&B");
+            details.append("VAT # on the request did not match D&B\n");
+          } else {
+            details.append("VAT # on the request matches D&B\n");
+          }
+        }
+        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+            && !(change.getOldData().equals(change.getNewData()))) {
+          // UPDATE
+          String oldData = change.getOldData().substring(3, 11);
+          String newData = change.getNewData().substring(3, 11);
+          if (!(oldData.equals(newData))) {
+            resultCodes.add("D");// Reject
+            details.append("VAT # on the request has characters updated other than the first character. Create New CMR. \n");
+          } else {
+            details.append("VAT # on the request differs only in the first Character\n");
+          }
+        }
+        break;
+      case "SBO":
+        if (!StringUtils.isBlank(change.getOldData()) && !StringUtils.isBlank(change.getNewData())
+            && !(change.getOldData().equals(change.getNewData()))) {
+          requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
+          if ("9".equals(change.getNewData().substring(1, 2)) && !requesterFromTeam) {
+            resultCodes.add("D");// Reject
+            details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
+          }
+          if (!"9".equals(change.getNewData().substring(1, 2))) {
+            cmdeReview = true;
+          }
+        }
+        break;
+      case "INAC/NAC Code":
+      case "ISIC":
+      case "Currency Code":
+        cmdeReview = true;
+        break;
+      case "Mode Of Payment":
+      case "Mailing Condition":
+        requesterFromTeam = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), SystemParameters.getList("ES.SKIP_UPDATE_CHECK"));
+        if (!requesterFromTeam) {
+          resultCodes.add("D");// Reject
+          details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
+        }
+        break;
+      case "Tax Code":
+        // noop, for switch handling only
+        break;
+      case "ISU Code":
+        // noop, for switch handling only
+        break;
+      case "Client Tier Code":
+        // noop, for switch handling only
+        break;
+      case "Enterprise Number":
+        // noop, for switch handling only
+        break;
+      case "Sales Rep":
+        // noop, for switch handling only
+        break;
+      case "Order Block Code":
+        if ("E".equals(change.getOldData()) || "E".equals(change.getNewData())) {
+          // noop, for switch handling only
+        }
+        break;
+      default:
+        ignoredUpdates.add(change.getDataField());
+        break;
+      }
+    }
+    if (resultCodes.contains("D")) {
+      output.setOnError(true);
+      validation.setSuccess(false);
+      validation.setMessage("Rejected");
+    } else if (cmdeReview) {
+      engineData.addNegativeCheckStatus("_esDataCheckFailed", "Updates to one or more fields cannot be validated.");
+      details.append("Updates to one or more fields cannot be validated.\n");
+      validation.setSuccess(false);
+      validation.setMessage("Not Validated");
+    } else {
+      validation.setSuccess(true);
+      validation.setMessage("Successful");
+    }
+    if (!ignoredUpdates.isEmpty()) {
+      details.append("Updates to the following fields skipped validation:\n");
+      for (String field : ignoredUpdates) {
+        details.append(" - " + field + "\n");
+      }
+    }
+    output.setDetails(details.toString());
+    output.setProcessOutput(validation);
+    return true;
+  }
 
   @Override
   public boolean runUpdateChecksForAddress(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
@@ -377,30 +379,40 @@ public class SpainUtil extends AutomationUtil {
               LOG.debug("Update to InstallAt and Mailing " + addrType + "(" + addr.getId().getAddrSeq() + ")");
               checkDetails.append("Updates to InstallAt and Mailing (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
             } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && null == changes.getDataChange("VAT #")) {
-              Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
-              boolean matchesDnb = false;
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb) {
-                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
-              } else {
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                for (DnBMatchingResponse dnb : matches) {
-                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, false);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
                 }
+                if (!matchesDnb) {
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  resultCodes.add("R");
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                } else {
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
               }
             } else {
-              checkDetails.append("Updates to Updated Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
-                  .append("\n");
-              resultCodes.add("R");
+              if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+                LOG.debug("Update to Shipping and EPL " + addrType + "(" + addr.getId().getAddrSeq() + ")");
+                checkDetails.append("Updates to Shipping and EPL (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
+              } else {
+                checkDetails.append("Updates to Updated Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
+                    .append("\n");
+                resultCodes.add("R");
+              }
             }
           }
         }
@@ -419,6 +431,19 @@ public class SpainUtil extends AutomationUtil {
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
+  }
+
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
