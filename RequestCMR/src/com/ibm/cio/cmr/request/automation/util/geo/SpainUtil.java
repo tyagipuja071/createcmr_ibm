@@ -406,6 +406,7 @@ public class SpainUtil extends AutomationUtil {
               }
             } else {
               if (CmrConstants.RDC_SHIP_TO.equals(addrType) || CmrConstants.RDC_SECONDARY_SOLD_TO.equals(addrType)) {
+                // proceed
                 LOG.debug("Update to Shipping and EPL " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                 checkDetails.append("Updates to Shipping and EPL (" + addr.getId().getAddrSeq() + ") skipped in the checks.\n");
               } else {
