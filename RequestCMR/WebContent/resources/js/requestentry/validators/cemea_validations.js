@@ -384,6 +384,14 @@ function afterConfigForCEMEA() {
   if (cntryRegion && cntryRegion != '' && cntryRegion.length > 3 && FormManager.getActualValue('cmrIssuingCntry') != SysLoc.SERBIA) {
     landCntry = cntryRegion.substring(3, 5);
   }
+  // Set 707 landed country base on sub region
+  if (cntryRegion == '707ME') {
+    landCntry = 'ME';
+  } else if (cntryRegion == '707CS') {
+    landCntry = 'RS';
+  } else if (cntryRegion == '707') {
+    landCntry = 'RS';
+  }
   if (landCntry != '') {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
@@ -3984,6 +3992,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, GEOHandler.CEE, null, true);
   GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
+  GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
