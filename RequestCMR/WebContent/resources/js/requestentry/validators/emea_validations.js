@@ -353,14 +353,14 @@ function afterConfigForUKI() {
 
   // CMR - 5715
   if (reqType == 'U' && role.toUpperCase() == 'REQUESTER') {
-    FormManager.resetValidations('taxCd1');
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
     if (companyNum != null & companyNum != '' && companyNum != undefined) {
       FormManager.readOnly('taxCd1');
     } else {
       FormManager.enable('taxCd1');
     }
   } else if (reqType == 'U' && role.toUpperCase() == 'PROCESSOR') {
-    FormManager.resetValidations('taxCd1');
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
     FormManager.enable('taxCd1');
   }
 
