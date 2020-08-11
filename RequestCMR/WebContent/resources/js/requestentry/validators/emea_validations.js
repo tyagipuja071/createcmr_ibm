@@ -331,13 +331,13 @@ function afterConfigForUKI() {
   console.log(" --->>> Process afterConfigForUKI. <<<--- ");
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
-  var companyNum = FormManager.getActualValue('taxCd1');
+  var issuingCntry = FormManager.getActualValue('reqType');
+  var companyNum = FormManager.getActualValue('cmrIssuingCntry');
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
   }
   cmr.hideNode('deptInfo');
-  FormManager.addValidator('taxCd1', Validators.DIGIT, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
   // autoSetAbbrevLocnHandler();
   if (reqType == 'U' || reqType == 'X') {
     FormManager.resetValidations('collectionCd');
@@ -7517,9 +7517,9 @@ function addValidatorForCompanyRegNum() {
         var companyNum = FormManager.getActualValue('taxCd1');
         var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         if (companyNum != null && companyNum != undefined && companyNum != '') {
-          if (issuingCntry == SysLoc.IRELAND && companyNum.length != 6) {
+          if (issuingCntry == SysLoc.IRELAND && (companyNum.length != 6 || !companyNum.match("^[0-9]+$"))) {
             return new ValidationResult(null, false, 'Company Registartion Number should be of 6 digits.');
-          } else if (issuingCntry == SysLoc.UNITED_KINGDOM && companyNum.length != 8) {
+          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8 || !companyNum.match("^[0-9]+$"))) {
             return new ValidationResult(null, false, 'Company Registartion Number should be of 8 digits.');
           } else {
             return new ValidationResult(null, true);
