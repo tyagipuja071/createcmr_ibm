@@ -570,11 +570,7 @@ function addHandlersForPTES() {
 
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      if (dijit.byId('vatExempt').get('checked') && FormManager.getActualValue('custSubGrp') == 'PRICU') {
-        FormManager.readOnly('vatExempt');
-      } else {
-        FormManager.enable('vatExempt');
-      }
+      autoSetVatExemptFrPriCust();
       setVatValidatorPTES();
     });
   }
@@ -1965,29 +1961,23 @@ function lockRequireFieldsSpain() {
   if (reqType == 'U' && FormManager.getActualValue('ordBlk') == '93') {
     FormManager.readOnly('reqReason');
   }
-  if (role == 'REQUESTER') {
-    if (vat == '' || vat == 'undefined') {
-      FormManager.enable('vat');
-      var result = cmr.query('VAT.GET_ZS01_CNTRY', {
-        REQID : FormManager.getActualValue('reqId'),
-        TYPE : 'ZS01'
-      });
-      var zs01Cntry = '';
-      if (result && result.ret1 && result.ret1 != '') {
-        zs01Cntry = result.ret1;
-      }
-      if (zs01Cntry != 'US') {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-      }
-    } else {
-      FormManager.readOnly('vat');
-    }
-  }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('specialTaxCd');
     FormManager.readOnly('legacyCurrencyCd');
+    var result = cmr.query('VAT.GET_ZS01_CNTRY', {
+      REQID : FormManager.getActualValue('reqId'),
+      TYPE : 'ZS01'
+    });
+    var zs01Cntry = '';
+    if (result && result.ret1 && result.ret1 != '') {
+      zs01Cntry = result.ret1;
+    }
+    if (zs01Cntry != 'US') {
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    }
+
   }
   // Story 1681921: SPAIN - mailing condition & collection code fields
   if (reqType == 'C' && role == 'PROCESSOR') {
@@ -2318,10 +2308,15 @@ function addValidatorForCollectionCdUpdateSpain() {
 }
 
 function autoSetVatExemptFrPriCust() {
-  if (dijit.byId('vatExempt').get('checked') && FormManager.getActualValue('custSubGrp') == 'PRICU') {
-    FormManager.readOnly('vatExempt');
+  if (dijit.byId('vatExempt').get('checked')) {
+    if (FormManager.getActualValue('custSubGrp') == 'PRICU') {
+      FormManager.readOnly('vatExempt');
+    }
+    FormManager.readOnly('vat');
+    FormManager.setValue('vat', '');
   } else {
     FormManager.enable('vatExempt');
+    FormManager.enable('vat');
   }
 }
 
