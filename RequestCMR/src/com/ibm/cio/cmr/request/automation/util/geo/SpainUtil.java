@@ -181,6 +181,13 @@ public class SpainUtil extends AutomationUtil {
         results.setResults("Calculated.");
         results.setProcessOutput(overrides);
       }
+    } else if (SCENARIO_INTERNAL.equals(scenario) || SCENARIO_INTERNAL_SO.equals(scenario)) {
+      details.append("Ensuring ISIC is set to '0000' for " + (SCENARIO_INTERNAL.equals(scenario) ? "Internal" : "Internal SO") + "scenario.");
+      overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "0000");
+      String subInd = RequestUtils.getSubIndustryCd(entityManager, "0000", data.getCmrIssuingCntry());
+      if (subInd != null) {
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+      }
     } else {
       details.append("No specific fields to calculate.");
       results.setResults("Skipped.");
