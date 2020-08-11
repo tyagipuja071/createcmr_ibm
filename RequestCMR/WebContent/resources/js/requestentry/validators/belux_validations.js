@@ -259,7 +259,7 @@ function addHandlersForBELUX() {
 
   if (_AccountTeamHandler == null) {
     _AccountTeamHandler = dojo.connect(FormManager.getField('searchTerm'), 'onChange', function(value) {
-      setINACValues(value);
+      //setINACValues(value);
       setEconomicCodeValues(value);
       setSBO();
 
@@ -1134,7 +1134,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setINACfrLux, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setPreferredLanguage, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setPreferredLanguage, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.BELUX);
+  //GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.BELUX);
