@@ -38,6 +38,15 @@
 	</cmr:view>
 
 	<cmr:row addBackground="false">
+	<cmr:column span="2" containerForField="LocalTax1" forCountry="754,866">
+			<p>
+				<label for="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />:
+					<cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
+				</label>
+				<cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1"
+					tabId="MAIN_CUST_TAB" />
+			</p>
+		</cmr:column>
 		<cmr:column span="2" containerForField="SpecialTaxCd"
 			exceptForCountry="666,726,862">
 			<p>
