@@ -378,37 +378,32 @@ public class UKIUtil extends AutomationUtil {
 
     if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) {
       Addr zi01 = requestData.getAddress("ZI01");
-      boolean hasValidMatches = false;
       boolean highQualityMatchExists = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
-      hasValidMatches = DnBUtil.hasValidMatches(response);
-      if (response != null && response.getMatched()) {
-        List<DnBMatchingResponse> dnbMatches = response.getMatches();
-        if (hasValidMatches) {
-          // actions to be performed only when matches with high confidence are
-          // found
-          for (DnBMatchingResponse dnbRecord : dnbMatches) {
-            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
-            if (closelyMatches) {
-              engineData.put("ZI01_DNB_MATCH", dnbRecord);
-              highQualityMatchExists = true;
-              details.append("High Quality DnB Match found for Installing address.\n");
-              details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
-              LOG.debug("Connecting to D&B details service..");
-              DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
-              if (dnbData != null) {
-                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
-                details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
-                String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
-                if (subInd != null) {
-                  overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
-                  details.append("Subindustry Code  =  " + subInd).append("\n");
-                }
+      List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
+      if (response != null && response.size() > 0) {
+        // actions to be performed only when matches with high confidence are
+        // found
+        for (DnBMatchingResponse dnbRecord : response) {
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+          if (closelyMatches) {
+            engineData.put("ZI01_DNB_MATCH", dnbRecord);
+            highQualityMatchExists = true;
+            details.append("High Quality DnB Match found for Installing address.\n");
+            details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+            LOG.debug("Connecting to D&B details service..");
+            DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+            if (dnbData != null) {
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+              details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+              String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+              if (subInd != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                details.append("Subindustry Code  =  " + subInd).append("\n");
               }
-              results.setResults("Calculated.");
-              results.setProcessOutput(overrides);
-              break;
             }
+            results.setResults("Calculated.");
+            results.setProcessOutput(overrides);
+            break;
           }
         }
       }
@@ -594,4 +589,20 @@ public class UKIUtil extends AutomationUtil {
     }
 
   }
+
+  @Override
+  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr, Boolean isOrgIdMatchOnly) {
+    GBGFinderRequest request = super.createRequest(admin, data, addr, isOrgIdMatchOnly);
+    if (SCENARIO_THIRD_PARTY.equals(data.getCustSubGrp()) || SCENARIO_INTERNAL_FSL.equals(data.getCustSubGrp())) {
+      String custNmTrimmed = getCustomerFullName(addr);
+      if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}\\.+$") || custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}/.+$")) {
+        custNmTrimmed = custNmTrimmed.substring(6);
+      } else if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}.+$")) {
+        custNmTrimmed = custNmTrimmed.substring(5);
+      }
+      request.setCustomerName(custNmTrimmed);
+    }
+    return request;
+  }
+
 }
