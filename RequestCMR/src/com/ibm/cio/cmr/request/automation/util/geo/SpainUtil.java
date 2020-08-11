@@ -96,7 +96,7 @@ public class SpainUtil extends AutomationUtil {
             "Customer names on billing and installing address are not identical, 3rd Party should be selected.", "", "");
         details.append("Customer names on billing and installing address are not identical, 3rd Party should be selected.");
         return false;
-      } else if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario) && addressEquals(soldTo, installAt)) {
+      } else if ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_THIRD_PARTY_IG.equals(scenario)) && addressEquals(soldTo, installAt)) {
         engineData.addRejectionComment("SCENARIO_CHECK", "Billing and installing address should be different.", "", "");
         details.append("For 3rd Party Billing and installing address should be different");
         return false;
