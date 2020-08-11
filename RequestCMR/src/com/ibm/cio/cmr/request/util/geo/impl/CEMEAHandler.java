@@ -1072,6 +1072,11 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
 
+    if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry())
+        && ("010101".equals(data.getAgreementSignDate()) || "123101".equals(data.getAgreementSignDate()))) {
+      data.setAgreementSignDate("");
+    }
+
     // Type of Customer
     data.setBpAcctTyp(this.currentImportValues.get("BpAcctTyp"));
 
