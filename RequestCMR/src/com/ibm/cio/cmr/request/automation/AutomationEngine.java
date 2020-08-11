@@ -40,7 +40,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
@@ -664,15 +663,7 @@ public class AutomationEngine {
     entityManager.persist(hist);
     entityManager.flush();
 
-    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
-    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
-    boolean skip = false;
-
-    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
-      skip = true;
-    }
-
-    if (sendMail && (skip == false)) {
+    if (sendMail) {
       RequestUtils.sendEmailNotifications(entityManager, admin, hist);
     }
 
