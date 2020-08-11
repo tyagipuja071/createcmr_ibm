@@ -1316,32 +1316,37 @@ function setVatRequired(value) {
           if (result && result.ret1 && result.ret1 != '') {
             cntryUsed = result.ret1;
           }
-          var addrType = 'ZP01';
-          var zs01Cntry = '';
-
-          var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-            REQID : FormManager.getActualValue('reqId'),
-            TYPE : addrType ? addrType : 'ZP01'
-          });
-          if (ret && ret.ret1 && ret.ret1 != '') {
-            zs01Cntry = ret.ret1;
+          if (cntryUsed == '707ME' || cntryUsed == '707CS') {
+            return;
           }
 
-          if (cntryUsed != null && cntryUsed.length > 0 && zs01Cntry != null && zs01Cntry == 'CS') {
-            switch (cntryUsed) {
-            case '707ME':
-              return;
-              break;
-            case '707CS':
-              return;
-              break;
-            default:
-              cemeaCustomVATMandatory();
-              break;
-            }
-          } else {
-            cemeaCustomVATMandatory();
-          }
+          // var addrType = 'ZP01';
+          // var zs01Cntry = '';
+
+          // var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+          // REQID : FormManager.getActualValue('reqId'),
+          // TYPE : addrType ? addrType : 'ZP01'
+          // });
+          // if (ret && ret.ret1 && ret.ret1 != '') {
+          // zs01Cntry = ret.ret1;
+          // }
+
+          // if (cntryUsed != null && cntryUsed.length > 0 && zs01Cntry != null
+          // && zs01Cntry == 'CS') {
+          // switch (cntryUsed) {
+          // case '707ME':
+          // return;
+          // break;
+          // case '707CS':
+          // return;
+          // break;
+          // default:
+          // cemeaCustomVATMandatory();
+          // break;
+          // }
+          // } else {
+          // cemeaCustomVATMandatory();
+          // }
 
         }
         cemeaCustomVATMandatory();
@@ -2456,7 +2461,7 @@ function setVatValidator() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGroup = FormManager.getActualValue('custGrp');
 
-  var excludeCountries = new Set([ '644', '668', '693', '694', '704', '708', '740', '820', '821', '826', '889' ]);
+  var excludeCountries = new Set([ '644', '668', '693', '694', '704', '708', '740', '820', '821', '826', '889', '707' ]);
   var cntryRegion = FormManager.getActualValue('countryUse');
   if (excludeCountries.has(cntry) || cntryRegion == '707') {
     return;
