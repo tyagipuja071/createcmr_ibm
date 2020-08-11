@@ -456,7 +456,11 @@ public class CyprusTransformer extends EMEATransformer {
     }
 
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("ModeOfPayment"))) {
-      legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
+      if (dummyHandler.messageHash.get("ModeOfPayment").equals("X")) {
+        legacyCust.setModeOfPayment(" ");
+      } else {
+        legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
+      }
     }
 
     legacyCust.setCeBo("");
