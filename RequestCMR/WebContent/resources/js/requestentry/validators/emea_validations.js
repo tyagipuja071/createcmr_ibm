@@ -329,13 +329,18 @@ function autoSetAbbrevNmFrmDept() {
 
 function afterConfigForUKI() {
   console.log(" --->>> Process afterConfigForUKI. <<<--- ");
+  var reqType = FormManager.getActualValue('reqType');
+  var role = null;
+  var issuingCntry = FormManager.getActualValue('reqType');
+  var companyNum = FormManager.getActualValue('cmrIssuingCntry');
+  if (typeof (_pagemodel) != 'undefined') {
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
+  }
   cmr.hideNode('deptInfo');
-  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   // autoSetAbbrevLocnHandler();
-  if (issuingCntry == SysLoc.UK || issuingCntry == SysLoc.IRELAND) {
-    if (FormManager.getActualValue('reqType') == 'U' || FormManager.getActualValue('reqType') == 'X') {
-      FormManager.resetValidations('collectionCd');
-    }
+  if (reqType == 'U' || reqType == 'X') {
+    FormManager.resetValidations('collectionCd');
   }
 
   optionalRuleForVatUK();
@@ -344,6 +349,19 @@ function afterConfigForUKI() {
     _internalDeptHandler = dojo.connect(FormManager.getField('ibmDeptCostCenter'), 'onChange', function(value) {
       autoSetAbbrevNmFrmDept();
     });
+  }
+
+  // CMR - 5715
+  if (reqType == 'U' && role.toUpperCase() == 'REQUESTER') {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    if (companyNum != null & companyNum != '' && companyNum != undefined) {
+      FormManager.readOnly('taxCd1');
+    } else {
+      FormManager.enable('taxCd1');
+    }
+  } else if (reqType == 'U' && role.toUpperCase() == 'PROCESSOR') {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    FormManager.enable('taxCd1');
   }
 
   autoSetAbbrNameUKI();
@@ -7492,6 +7510,28 @@ function addValidatorForCollectionCdUpdateUKI() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addValidatorForCompanyRegNum() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var companyNum = FormManager.getActualValue('taxCd1');
+        var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (companyNum != null && companyNum != undefined && companyNum != '') {
+          if (issuingCntry == SysLoc.IRELAND && (companyNum.length != 6 || !companyNum.match("^[0-9]+$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 6 digits.');
+          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8 || !companyNum.match("^[0-9]+$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 8 digits.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -7688,6 +7728,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addValidatorForCompanyRegNum, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
