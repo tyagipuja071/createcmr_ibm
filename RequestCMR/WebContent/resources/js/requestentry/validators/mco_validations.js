@@ -1969,16 +1969,20 @@ function setFieldsCharForScenarios() {
 }
 
 function setISUCTCOnISIC() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isic = FormManager.getActualValue('isicCd');
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
-  if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XINTR' || custSubGrp == 'XINSO' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
-    if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
-      FormManager.setValue('clientTier', 'N');
-    } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
-      FormManager.setValue('clientTier', 'S');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XINTR' || custSubGrp == 'XINSO' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
+      if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
+        FormManager.setValue('clientTier', 'N');
+      } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
+        FormManager.setValue('clientTier', 'S');
+      }
     }
   }
 }
