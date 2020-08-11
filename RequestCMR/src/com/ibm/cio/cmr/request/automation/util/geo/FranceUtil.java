@@ -42,6 +42,7 @@ import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.PPSServiceClient;
@@ -797,6 +798,8 @@ public class FranceUtil extends AutomationUtil {
         case "iERP Site Party ID":
           // SKIP THESE FIELDS
           break;
+        case "Abbreviated Name (TELX1)":
+          break;
         default:
           // Set Negative check status for any other fields updated.
           failedChecks.put(field, field + " updated.");
@@ -837,6 +840,7 @@ public class FranceUtil extends AutomationUtil {
     Addr billing = requestData.getAddress("ZP01");
     Addr installing = requestData.getAddress("ZS01");
     Addr payment = requestData.getAddress("ZP02");
+    boolean reject = false;
     StringBuilder detail = new StringBuilder();
     Map<String, String> failedChecks = new HashMap<String, String>();
     DataRdc rdc = getDataRdc(entityManager, admin);
@@ -901,11 +905,37 @@ public class FranceUtil extends AutomationUtil {
             validation.setMessage("Validated");
             hasNegativeCheck = false;
             break;
-          }
+          } else if ((!isOnlyFieldUpdated(changes)) && (changes.isAddressChanged("ZS01"))) {
 
-          else if (!isOnlyFieldUpdated(changes)) {
+            LOG.debug("Installing changed -> " + changes.isAddressChanged("ZS01"));
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installing, false);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              // check against D&B
+              matchesDnb = ifaddressCloselyMatchesDnb(matches, installing, admin, data.getCmrIssuingCntry());
+            }
+            if (!matchesDnb) {
+              LOG.debug("Installing does not match D&B.");
+              detail.append("Installing address does not match D&B.");
+              hasNegativeCheck = true;
+            }
+
+            else {
+              String country = requestData.getAddress("ZS01").getLandCntry();
+              for (DnBMatchingResponse dnb : matches) {
+                String siret = DnBUtil.getTaxCode1(country, dnb.getOrgIdDetails());
+                if (data.getTaxCd1().equalsIgnoreCase(siret)) {
+                  detail.append("Installing address update \n D&B matching finds SIRET on the request matching.\n");
+                  reject = false;
+                  hasNegativeCheck = false;
+                  break;
+                }
+                reject = true;
+              }
+            }
+          } else if (!isOnlyFieldUpdated(changes) && (changes.isAddressChanged("ZP02"))) {
             hasNegativeCheck = true;
-            failedChecks.put("ADDR_FIELDS_UPDTD", "Installing / Payment addresses cannot be modified.");
+            failedChecks.put("ADDR_FIELDS_UPDTD", "Payment addresses cannot be modified.");
           }
 
         }
@@ -925,6 +955,12 @@ public class FranceUtil extends AutomationUtil {
       validation.setMessage("Review needed.");
       validation.setSuccess(false);
       output.setDetails(details.toString());
+      output.setDetails(detail.toString());
+    } else if (reject) {
+      output.setOnError(true);
+      engineData.addRejectionComment("INSTALLIN_UPDTD", "D&B matching doesn't find SIRET on the request matching", "", "");
+      validation.setSuccess(false);
+      validation.setMessage("Not verified");
     } else {
       validation.setSuccess(true);
       detail.append("Updates to relevant addresses found but have been marked as Verified.");
