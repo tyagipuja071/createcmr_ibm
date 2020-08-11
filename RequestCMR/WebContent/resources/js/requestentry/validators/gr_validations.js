@@ -1796,12 +1796,14 @@ function isicScenarioHandler(value) {
     if (isicUnderB.has(value)) {
       if (custSubGrp == "COMME" || custSubGrp == "GOVRN" || custSubGrp == "CROSS") {
         FormManager.setValue('isuCd', '32');
+        setClientTierAndISR('32');
         FormManager.setValue('clientTier', 'N');
       }
     } else {
       var scen32S = ['COMME', 'PRICU', 'GOVRN', 'CROSS', 'SPAS'];
       if(scen32S.includes(custSubGrp)) {
         FormManager.setValue('isuCd', '32');
+        setClientTierAndISR('32');
         FormManager.setValue('clientTier', 'S');
       }
     }
