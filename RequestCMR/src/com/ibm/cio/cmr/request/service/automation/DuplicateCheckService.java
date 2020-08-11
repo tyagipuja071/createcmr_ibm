@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -126,7 +127,7 @@ public class DuplicateCheckService extends BaseSimpleService<DuplicateCheckModel
     else if (dupChkModel != null && "CHECK_FR_BLGRP".equals(dupChkModel.getAction()) && "BUSPR".equals(dupChkModel.getSubscenario())) {
       LOG.debug("Executing check for BR_BP_BLUEGROUP, for  business partner ..");
       AppUser user = AppUser.getUser(request);
-      boolean isUserInBP_GRP = BluePagesHelper.isUserInBRBPBlueGroup(user.getIntranetId());
+      boolean isUserInBP_GRP = BluePagesHelper.isBluePagesHeirarchyManager(user.getIntranetId(), SystemParameters.getString("BR.BP_MANAGER"));
       if (isUserInBP_GRP) {
         dupChkModel.setSuccess(true);
       } else {
