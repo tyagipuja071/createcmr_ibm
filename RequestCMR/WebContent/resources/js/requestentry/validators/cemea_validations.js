@@ -2232,6 +2232,7 @@ function cmrNoEnableForCEE() {
 }
 
 function setEnterprise2Values(dupClientTierCd) {
+  // CMR-4606
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -3997,8 +3998,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, GEOHandler.CEE, null, true);
   GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
