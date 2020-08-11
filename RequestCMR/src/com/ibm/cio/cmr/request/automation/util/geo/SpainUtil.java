@@ -188,6 +188,8 @@ public class SpainUtil extends AutomationUtil {
       if (subInd != null) {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
       }
+      results.setResults("Calculated.");
+      results.setProcessOutput(overrides);
     } else {
       details.append("No specific fields to calculate.");
       results.setResults("Skipped.");
