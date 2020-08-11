@@ -72,9 +72,9 @@ public class EMEAHandler extends BaseSOFHandler {
   private final String[] NAC_VALUES = { "0915", "0918", "0977", "0988", "0992", "1071", "1076", "1082", "1090", "1140", "1206", "1265", "1828",
       "1960", "2159", "2232", "3680", "4110", "5586", "5782", "6909", "7221", "8820" };
 
-  private static final String[] UKI_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "Company", "CustClassCode", "LocalTax1",
-      "LocalTax2", "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2" };
+  private static final String[] UKI_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "CustClassCode", "LocalTax1", "LocalTax2",
+      "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
+      "Building", "County", "City2" };
   private static final String[] ISRAEL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
       "LocalTax2", "SearchTerm", "SitePartyID", "StreetAddress2", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "CustomerName2" };
