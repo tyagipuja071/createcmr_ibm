@@ -3387,7 +3387,7 @@ function setISRValuesGR() {
   if (custSubGrp == 'SPAS') {
     FormManager.setValue('abbrevLocn', 'SAAS');
   } else if (custSubGrp == 'INTER' || custSubGrp == 'XINTR') {
-    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.setValue('repTeamMemberNo', 'W00000');
   } else if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && _isScenarioChanged && FormManager.getActualValue('repTeamMemberNo') == '') {
     FormManager.setValue('repTeamMemberNo', '200005');
   }
