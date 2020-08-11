@@ -3383,7 +3383,7 @@ function togglePPSCeidCEE() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var cmrNo = FormManager.getActualValue('cmrNo');
-  if (_custType == 'BUSPR' || _custType == 'XBP') {
+  if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP' || _custType == 'RSBP') {
     FormManager.show('PPSCEID', 'ppsceid');
     FormManager.enable('ppsceid');
     FormManager.resetValidations('ppsceid');
