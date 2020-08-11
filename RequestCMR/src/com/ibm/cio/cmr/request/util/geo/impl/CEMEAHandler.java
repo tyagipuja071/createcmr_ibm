@@ -1072,7 +1072,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       }
     }
 
-    if ("010101".equals(data.getAgreementSignDate()) || "123101".equals(data.getAgreementSignDate())) {
+    if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry())
+        && ("010101".equals(data.getAgreementSignDate()) || "123101".equals(data.getAgreementSignDate()))) {
       data.setAgreementSignDate("");
     }
 
