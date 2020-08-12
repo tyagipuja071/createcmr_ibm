@@ -1280,6 +1280,7 @@ public class TurkeyTransformer extends EMEATransformer {
       String sbo = StringUtils.rightPad(muData.getCustNm1(), 7, '0');
       cust.setSbo(sbo);
       cust.setIbo(sbo);
+      cust.setCeBo(sbo);
     }
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@".equals(muData.getInacCd())) {
