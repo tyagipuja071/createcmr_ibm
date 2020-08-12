@@ -1484,6 +1484,14 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(addr.getDeptOld());
       results.add(update);
     }
+    if (CEE_COUNTRY_LIST.contains(cmrCountry)) {
+      for (UpdatedNameAddrModel model : results) {
+        if (model.getDataField() != null && model.getDataField().equals(PageManager.getLabel(cmrCountry, "CustPhone", "-"))) {
+          results.remove(model);
+          break;
+        }
+      }
+    }
   }
 
   @Override
