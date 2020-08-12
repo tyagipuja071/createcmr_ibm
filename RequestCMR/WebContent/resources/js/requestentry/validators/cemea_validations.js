@@ -1647,7 +1647,7 @@ function dupCMRExistCheckForRuCIS() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var cmrNo = FormManager.getField('cmrNo').value;
+        var cmrNo = FormManager.getActualValue('cmrNo');
         if (FormManager.getActualValue('reqType') != 'U') {
           return new ValidationResult(null, true);
         } else {
@@ -2152,7 +2152,7 @@ function addCmrNoValidatorForCEE() {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubType = FormManager.getActualValue('custSubGrp');
-        var cmrNo = FormManager.getField('cmrNo').value;
+        var cmrNo = FormManager.getActualValue('cmrNo');
         if (FormManager.getActualValue('reqType') == 'U') {
           return new ValidationResult(null, true);
         }
