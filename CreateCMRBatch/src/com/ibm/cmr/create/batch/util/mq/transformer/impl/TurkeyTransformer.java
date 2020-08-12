@@ -1538,26 +1538,33 @@ public class TurkeyTransformer extends EMEATransformer {
         String addrType = addrData.getId().getAddrType();
         if ("Y".equals(addrData.getChangedIndc())) {
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-            // CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
-            CmrtAddr olddataaddr = legacyObjects.findBySeqNo(billseqinlegacy);
-            // if ("Y".equals(olddataaddr.getIsAddrUseMailing()) &&
-            // "Y".equals(olddataaddr.getIsAddrUseBilling())) {
-            if (!isExistMailing) {
-            // copy billing from mailing
-            copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
-              // olddataaddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
-              // olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
-              // olddataaddr.setForUpdate(true);
-          }
+//            CmrtAddr olddataaddr = legacyObjects.findBySeqNo(billseqinlegacy);
+//            if (!isExistMailing) {
+//            // copy billing from mailing
+//            copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+//        }
+          for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
+            if ("Y".equals(currAddr.getIsAddrUseBilling())) {
+              CmrtAddr olddataaddr =  currAddr;           
+              if (!isExistMailing) {
+                // copy billing from mailing
+                copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+                  break;
+            }
+          }        
         }
         }
+      }
       }
       
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
 
+        if ("00001".equals(billseqinlegacy)) {
+          break;
+        }
+
         CmrtAddr mailingaddre = legacyObjects.findBySeqNo(billseqinlegacy);
-        // CmrtAddr mailingaddre =
-        // legacyObjects.findByAddressUseFlag(ADDRESS_USE_BILLING);
+
         if (mailingaddre != null) {
           if ("Y".equals(currAddr.getIsAddrUseMailing())) {
 
