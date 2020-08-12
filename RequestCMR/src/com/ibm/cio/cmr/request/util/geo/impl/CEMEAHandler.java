@@ -1059,8 +1059,9 @@ public class CEMEAHandler extends BaseSOFHandler {
       // Not ticked - check and load CIS duplicate fields
       for (String dupCntry : CIS_DUPLICATE_COUNTRIES) {
         if (loadDuplicateCMR(data, dupCntry, mainRecord.getCmrNum())) {
-          data.setCisServiceCustIndc("Y");
-          data.setDupIssuingCntryCd(dupCntry);
+          // CMR-4606
+          // data.setCisServiceCustIndc("Y");
+          // data.setDupIssuingCntryCd(dupCntry);
           break;
         }
       }
@@ -1112,7 +1113,7 @@ public class CEMEAHandler extends BaseSOFHandler {
           LOG.debug("ISU2: " + data.getIsuCd());
           data.setDupClientTierCd(dupRecordV.get("KATR3").toString());
           LOG.debug("ClientTier2: " + data.getDupClientTierCd());
-
+          data.setDupIssuingCntryCd(dupCntry);
           // String isuCtc = this.currentImportValues.get("ISU");
           // if (!StringUtils.isEmpty(isuCtc) && isuCtc.length() > 2) {
           // data.setDupIsuCd(isuCtc.substring(0, 2));
