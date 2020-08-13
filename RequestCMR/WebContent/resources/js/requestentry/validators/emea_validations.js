@@ -367,32 +367,27 @@ function afterConfigForUKI() {
     });
   }
 
-  // CMR - 5715
-  if (reqType == 'U') {
-    FormManager.enable('taxCd1');
-    if (role.toUpperCase() == 'REQUESTER') {
-      if (isicCd != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-      }
-    } else if (role.toUpperCase() == 'PROCESSOR') {
-      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-    }
-  }
-
   if (_isicCdCRNHandler == null) {
     _isicCdCRNHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
       var isicVal = FormManager.getActualValue('isicCd');
-      if (role.toUpperCase() == 'REQUESTER') {
-        if (isicVal != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
-          FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
-        } else {
+      if (reqType == 'U') {
+        if (role.toUpperCase() == 'REQUESTER') {
+          if (isicVal != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
+            FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+          } else {
+            FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+          }
+        } else if (role.toUpperCase() == 'PROCESSOR') {
           FormManager.removeValidator('taxCd1', Validators.REQUIRED);
         }
       }
     });
   }
+
+  if (_isicCdCRNHandler && _isicCdCRNHandler[0]) {
+    _isicCdCRNHandler[0].onChange();
+  }
+
   autoSetAbbrNameUKI();
   if (_customerTypeHandler == null) {
     var _custType = null;
