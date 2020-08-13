@@ -724,7 +724,7 @@ public abstract class AutomationUtil {
     PPSRequest request = new PPSRequest();
     request.setCeid(ppsCeId.toLowerCase());
     PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-    if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+    if (!ppsResponse.isSuccess()) {
       return false;
     } else {
       return true;

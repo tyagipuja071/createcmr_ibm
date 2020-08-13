@@ -3,7 +3,6 @@
  */
 package com.ibm.cio.cmr.request.automation.util.geo;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,10 +12,8 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -29,13 +26,13 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CoverageContainer;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
-import com.ibm.cio.cmr.request.automation.util.geo.mappings.ChMubotyMapping;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
-import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 
@@ -62,35 +59,39 @@ public class SwitzerlandUtil extends AutomationUtil {
 
   private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Att. Person", "Phone #", "FAX", "Customer Name 4");
 
-  private static List<ChMubotyMapping> mubotyMappings = new ArrayList<ChMubotyMapping>();
-
-  @SuppressWarnings("unchecked")
-  public SwitzerlandUtil() {
-    if (SwitzerlandUtil.mubotyMappings.isEmpty()) {
-      Digester digester = new Digester();
-      digester.setValidating(false);
-      digester.addObjectCreate("mappings", ArrayList.class);
-
-      digester.addObjectCreate("mappings/mapping", ChMubotyMapping.class);
-
-      digester.addBeanPropertySetter("mappings/mapping/ims", "ims");
-      digester.addBeanPropertySetter("mappings/mapping/postalCdMin", "postalCdMin");
-      digester.addBeanPropertySetter("mappings/mapping/postalCdMax", "postalCdMax");
-      digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
-      digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
-      digester.addBeanPropertySetter("mappings/mapping/muboty", "muboty");
-      digester.addSetNext("mappings/mapping", "add");
-      try {
-        InputStream is = ConfigUtil.getResourceStream("ch-muboty-mapping.xml");
-        SwitzerlandUtil.mubotyMappings = (ArrayList<ChMubotyMapping>) digester.parse(is);
-        // test
-        ChMubotyMapping mapping = getMubotyFromMapping("C", "1000", "32", "S");
-        LOG.debug(new ObjectMapper().writeValueAsString(mapping));
-      } catch (Exception e) {
-        LOG.error("Error occured while digesting xml.", e);
-      }
-    }
-  }
+  // private static List<ChMubotyMapping> mubotyMappings = new
+  // ArrayList<ChMubotyMapping>();
+  //
+  // @SuppressWarnings("unchecked")
+  // public SwitzerlandUtil() {
+  // if (SwitzerlandUtil.mubotyMappings.isEmpty()) {
+  // Digester digester = new Digester();
+  // digester.setValidating(false);
+  // digester.addObjectCreate("mappings", ArrayList.class);
+  //
+  // digester.addObjectCreate("mappings/mapping", ChMubotyMapping.class);
+  //
+  // digester.addBeanPropertySetter("mappings/mapping/ims", "ims");
+  // digester.addBeanPropertySetter("mappings/mapping/postalCdMin",
+  // "postalCdMin");
+  // digester.addBeanPropertySetter("mappings/mapping/postalCdMax",
+  // "postalCdMax");
+  // digester.addBeanPropertySetter("mappings/mapping/isu", "isu");
+  // digester.addBeanPropertySetter("mappings/mapping/ctc", "ctc");
+  // digester.addBeanPropertySetter("mappings/mapping/muboty", "muboty");
+  // digester.addSetNext("mappings/mapping", "add");
+  // try {
+  // InputStream is = ConfigUtil.getResourceStream("ch-muboty-mapping.xml");
+  // SwitzerlandUtil.mubotyMappings = (ArrayList<ChMubotyMapping>)
+  // digester.parse(is);
+  // // test
+  // ChMubotyMapping mapping = getMubotyFromMapping("C", "1000", "32", "S");
+  // LOG.debug(new ObjectMapper().writeValueAsString(mapping));
+  // } catch (Exception e) {
+  // LOG.error("Error occured while digesting xml.", e);
+  // }
+  // }
+  // }
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -391,42 +392,45 @@ public class SwitzerlandUtil extends AutomationUtil {
     LOG.info("Starting coverage calculations for Request ID " + requestData.getData().getId().getReqId());
     String actualScenario = scenario.substring(2);
 
-    ChMubotyMapping muboty = null;
+    // ChMubotyMapping muboty = null;
+    String sortl = null;
     switch (actualScenario) {
     case SCENARIO_COMMERCIAL:
       if (!isCoverageCalculated) {
-        muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+        sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       }
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
     case SCENARIO_IBM_EMPLOYEE:
-      muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+      sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
       break;
     default:
       if ("32".equals(data.getIsuCd()) && ("S".equals(data.getClientTier()) || "N".equals(data.getClientTier())) && !isCoverageCalculated) {
         if (SCENARIO_CROSS_BORDER.equals(scenario)) {
           // verified all logic is based on 3000-9999 condition for crossborders
-          muboty = getMubotyFromMapping(data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
+          sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), "3000", data.getIsuCd(), data.getClientTier());
+
         } else {
-          muboty = getMubotyFromMapping(data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+          sortl = getSortlForISUCTC(entityManager, data.getSubIndustryCd(), soldTo.getPostCd(), data.getIsuCd(), data.getClientTier());
+
         }
       }
     }
 
-    if (muboty != null) {
-      details.append("Setting MUBOTY to " + muboty.getMuboty() + " based on Postal Code rules.");
-      overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), muboty.getMuboty());
+    if (sortl != null) {
+      details.append("Setting SORTL to " + sortl + " based on Postal Code rules.");
+      overrides.addOverride(covElement.getProcessCode(), "DATA", "SEARCH_TERM", data.getSearchTerm(), sortl);
       engineData.addPositiveCheckStatus(AutomationEngineData.COVERAGE_CALCULATED);
       results.setResults("Calculated");
     } else if (!isCoverageCalculated) {
-      String sortl = data.getSearchTerm();
-      if (!StringUtils.isBlank(sortl)) {
-        String msg = "No valid MUBOTY mapping from request data. Using MUBOTY " + sortl + " from request.";
+      String searchTerm = data.getSearchTerm();
+      if (!StringUtils.isBlank(searchTerm)) {
+        String msg = "No valid SORTL mapping from request data. Using SORTL " + searchTerm + " from request.";
         details.append(msg);
         results.setResults("Calculated");
         results.setDetails(details.toString());
       } else {
-        String msg = "Coverage cannot be calculated. No valid MUBOTY mapping from request data.";
+        String msg = "Coverage cannot be calculated. No valid SORTL mapping from request data.";
         details.append(msg);
         results.setResults("Cannot Calculate");
         results.setDetails(details.toString());
@@ -457,24 +461,65 @@ public class SwitzerlandUtil extends AutomationUtil {
     return false;
   }
 
-  public ChMubotyMapping getMubotyFromMapping(String subIndustryCd, String postCd, String isuCd, String clientTier) {
-    if (!mubotyMappings.isEmpty()) {
-      int postalCd = Integer.parseInt(postCd);
+  // public ChMubotyMapping getMubotyFromMapping(String subIndustryCd, String
+  // postCd, String isuCd, String clientTier) {
+  // if (!mubotyMappings.isEmpty()) {
+  // int postalCd = Integer.parseInt(postCd);
+  // if (StringUtils.isNotBlank(subIndustryCd) && subIndustryCd.length() > 1) {
+  // subIndustryCd = subIndustryCd.substring(0, 1);
+  // }
+  // for (ChMubotyMapping mapping : mubotyMappings) {
+  // List<String> subIndustryCds = Arrays.asList(mapping.getIms().split(","));
+  // if (StringUtils.isNotBlank(subIndustryCd) &&
+  // subIndustryCds.contains(subIndustryCd) && isuCd.equals(mapping.getIsu())
+  // && clientTier.equals(mapping.getCtc())) {
+  // if (StringUtils.isNotBlank(mapping.getPostalCdMin()) &&
+  // StringUtils.isNotBlank(mapping.getPostalCdMax())) {
+  // int start = Integer.parseInt(mapping.getPostalCdMin());
+  // int end = Integer.parseInt(mapping.getPostalCdMax());
+  // if (postalCd >= start && postalCd <= end) {
+  // return mapping;
+  // }
+  // }
+  // }
+  // }
+  // }
+  // return null;
+  // }
+
+  public String getSortlForISUCTC(EntityManager entityManager, String subIndustryCd, String postCd, String isuCd, String clientTier) {
+    if (StringUtils.isNotBlank(isuCd) && StringUtils.isNotBlank(clientTier)) {
+
       if (StringUtils.isNotBlank(subIndustryCd) && subIndustryCd.length() > 1) {
         subIndustryCd = subIndustryCd.substring(0, 1);
+      } else {
+        subIndustryCd = "";
       }
-      for (ChMubotyMapping mapping : mubotyMappings) {
-        List<String> subIndustryCds = Arrays.asList(mapping.getIms().split(","));
-        if (StringUtils.isNotBlank(subIndustryCd) && subIndustryCds.contains(subIndustryCd) && isuCd.equals(mapping.getIsu())
-            && clientTier.equals(mapping.getCtc())) {
-          if (StringUtils.isNotBlank(mapping.getPostalCdMin()) && StringUtils.isNotBlank(mapping.getPostalCdMax())) {
-            int start = Integer.parseInt(mapping.getPostalCdMin());
-            int end = Integer.parseInt(mapping.getPostalCdMax());
-            if (postalCd >= start && postalCd <= end) {
-              return mapping;
-            }
-          }
+
+      if (StringUtils.isNotBlank(postCd) && "32".equals(isuCd) && StringUtils.isNumeric(postCd)) {
+        int postalCode = Integer.parseInt(postCd);
+        if (postalCode >= 3000) {
+          // postCd=2 represents the 2nd range which is 3000 to 9999
+          postCd = "2";
+        } else {
+          // postCd=1 represents the 1st range which is 1000 to 2999
+          postCd = "1";
         }
+      } else {
+        postCd = "";
+      }
+
+      String sql = ExternalizedQuery.getSql("QUERY.SWISS.GET.SORTL_BY_ISUCTCIMS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISU_CD", "%" + isuCd + "%");
+      query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
+      query.setParameter("IMS", "%" + subIndustryCd + "%");
+      query.setParameter("POST_CD_RANGE", postCd);
+      query.setForReadOnly(true);
+      List<Object[]> result = query.getResults();
+      if (result != null && result.size() == 1) {
+        String sortl = (String) result.get(0)[0];
+        return sortl;
       }
     }
     return null;
