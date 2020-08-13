@@ -978,6 +978,10 @@ public class CEETransformer extends EMEATransformer {
             }
           }
 
+      if ("707ME".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("713");
+      }
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -987,6 +991,10 @@ public class CEETransformer extends EMEATransformer {
           landedCntry = addr.getLandCntry();
           break;
         }
+      }
+
+      if ("707ME".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("713");
       }
 
       if (!StringUtils.isBlank(data.getEnterprise())) {
