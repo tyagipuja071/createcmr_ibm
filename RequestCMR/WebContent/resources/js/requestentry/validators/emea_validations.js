@@ -327,12 +327,27 @@ function autoSetAbbrevNmFrmDept() {
   }
 }
 
+function getZS01LandCntry() {
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID : reqId,
+    };
+  }
+  var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
+  var landCntry = results.ret2 != undefined ? results.ret2 : '';
+  return landCntry;
+}
+
 function afterConfigForUKI() {
   console.log(" --->>> Process afterConfigForUKI. <<<--- ");
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
-  var issuingCntry = FormManager.getActualValue('reqType');
-  var companyNum = FormManager.getActualValue('cmrIssuingCntry');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var companyNum = FormManager.getActualValue('taxCd1');
+  var isicCd = FormManager.getActualValue('isicCd');
+  var zs01LandCntry = getZS01LandCntry();
+
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
@@ -352,18 +367,18 @@ function afterConfigForUKI() {
   }
 
   // CMR - 5715
-  if (reqType == 'U' && role.toUpperCase() == 'REQUESTER') {
-    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-    if (companyNum != null & companyNum != '' && companyNum != undefined) {
-      FormManager.readOnly('taxCd1');
-    } else {
-      FormManager.enable('taxCd1');
-    }
-  } else if (reqType == 'U' && role.toUpperCase() == 'PROCESSOR') {
-    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+  if (reqType == 'U') {
     FormManager.enable('taxCd1');
+    if (role.toUpperCase() == 'REQUESTER') {
+      if (isicCd != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
+        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+      } else {
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      }
+    } else if (role.toUpperCase() == 'PROCESSOR') {
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    }
   }
-
   autoSetAbbrNameUKI();
   if (_customerTypeHandler == null) {
     var _custType = null;
