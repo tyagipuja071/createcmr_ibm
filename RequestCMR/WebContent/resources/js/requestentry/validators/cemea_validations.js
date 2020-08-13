@@ -1647,7 +1647,7 @@ function dupCMRExistCheckForRuCIS() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var cmrNo = FormManager.getField('cmrNo').value;
+        var cmrNo = FormManager.getActualValue('cmrNo');
         if (FormManager.getActualValue('reqType') != 'U') {
           return new ValidationResult(null, true);
         } else {
@@ -2152,7 +2152,7 @@ function addCmrNoValidatorForCEE() {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubType = FormManager.getActualValue('custSubGrp');
-        var cmrNo = FormManager.getField('cmrNo').value;
+        var cmrNo = FormManager.getActualValue('cmrNo');
         if (FormManager.getActualValue('reqType') == 'U') {
           return new ValidationResult(null, true);
         }
@@ -2232,6 +2232,7 @@ function cmrNoEnableForCEE() {
 }
 
 function setEnterprise2Values(dupClientTierCd) {
+  // CMR-4606
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -3818,11 +3819,17 @@ function afterConfigTemplateForHungary() {
 function validatorsDIGIT() {
   FormManager.addValidator('EngineeringBo', Validators.DIGIT, [ 'EngineeringBo' ]);
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
-  // CMR-4606
-  if (FormManager.getActualValue('cmrIssuingCntry') == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
-    FormManager.addValidator('taxCd3', Validators.DIGIT, [ 'Dup Enterprise Number' ]);
+}
+
+// CMR-4606
+function validatorsDIGITForDupField() {
+  if (dijit.byId('cisServiceCustIndc') != undefined) {
+    if (dijit.byId('cisServiceCustIndc').get('checked')) {
+      FormManager.addValidator('taxCd3', Validators.DIGIT, [ 'Dup Enterprise Number' ]);
+    }
   }
 }
+
 function addEmbargoCdValidatorForCEE() {
   var role = FormManager.getActualValue('userRole');
   if (role == GEOHandler.ROLE_PROCESSOR) {
@@ -3839,6 +3846,37 @@ function addEmbargoCdValidatorForCEE() {
     })(), 'MAIN_IBM_TAB', 'frmCMR');
   }
 }
+// CMR-4606
+function checkGAddressExist() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (FormManager.getActualValue('reqType') != 'U') {
+          return new ValidationResult(null, true);
+        } else {
+          if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+            var cntryDup = FormManager.getActualValue('dupIssuingCntryCd');
+            var qParamsDup = {
+              RCYAA : cntryDup,
+              RCUXA : cmrNo
+            };
+            var resultD = cmr.query('GET_G_SEQ_FROM_LEGACY', qParamsDup);
+            if (resultD && resultD.ret1 && resultD.ret1 != '') {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, false, 'The Dup Country Missing a G address,please update it independent.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752', '762',
       '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889', '618' ];
@@ -3994,11 +4032,13 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
   // CMR-4606 DupCMR exist
-  GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, GEOHandler.CEE, null, true);
+  GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
+  GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
+  GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);

@@ -1059,7 +1059,7 @@ public class TurkeyTransformer extends EMEATransformer {
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
-        if (!StringUtils.isBlank(rdcEmbargoCd) && "E".equals(rdcEmbargoCd)) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && "Y".equals(rdcEmbargoCd)) {
           if (StringUtils.isBlank(data.getEmbargoCd())) {
             legacyCust.setEmbargoCd("");
           }
@@ -1071,7 +1071,7 @@ public class TurkeyTransformer extends EMEATransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd("");
         blankOrdBlockFromData(entityManager, data);
       }
@@ -1079,7 +1079,7 @@ public class TurkeyTransformer extends EMEATransformer {
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
-          && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
@@ -1280,6 +1280,7 @@ public class TurkeyTransformer extends EMEATransformer {
       String sbo = StringUtils.rightPad(muData.getCustNm1(), 7, '0');
       cust.setSbo(sbo);
       cust.setIbo(sbo);
+      cust.setCeBo(sbo);
     }
     if (!StringUtils.isBlank(muData.getInacCd())) {
       if ("@".equals(muData.getInacCd())) {
@@ -1538,26 +1539,33 @@ public class TurkeyTransformer extends EMEATransformer {
         String addrType = addrData.getId().getAddrType();
         if ("Y".equals(addrData.getChangedIndc())) {
         if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-            // CmrtAddr olddataaddr = legacyObjects.findBySeqNo("00002");
-            CmrtAddr olddataaddr = legacyObjects.findBySeqNo(billseqinlegacy);
-            // if ("Y".equals(olddataaddr.getIsAddrUseMailing()) &&
-            // "Y".equals(olddataaddr.getIsAddrUseBilling())) {
-            if (!isExistMailing) {
-            // copy billing from mailing
-            copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
-              // olddataaddr.setIsAddrUseMailing(ADDRESS_USE_EXISTS);
-              // olddataaddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
-              // olddataaddr.setForUpdate(true);
-          }
+//            CmrtAddr olddataaddr = legacyObjects.findBySeqNo(billseqinlegacy);
+//            if (!isExistMailing) {
+//            // copy billing from mailing
+//            copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+//        }
+          for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
+            if ("Y".equals(currAddr.getIsAddrUseBilling())) {
+              CmrtAddr olddataaddr =  currAddr;           
+              if (!isExistMailing) {
+                // copy billing from mailing
+                copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+                  break;
+            }
+          }        
         }
         }
+      }
       }
       
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
 
+        if ("00001".equals(billseqinlegacy)) {
+          break;
+        }
+
         CmrtAddr mailingaddre = legacyObjects.findBySeqNo(billseqinlegacy);
-        // CmrtAddr mailingaddre =
-        // legacyObjects.findByAddressUseFlag(ADDRESS_USE_BILLING);
+
         if (mailingaddre != null) {
           if ("Y".equals(currAddr.getIsAddrUseMailing())) {
 

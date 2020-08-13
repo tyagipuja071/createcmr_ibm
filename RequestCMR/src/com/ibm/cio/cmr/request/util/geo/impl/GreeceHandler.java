@@ -3596,30 +3596,35 @@ public class GreeceHandler extends BaseSOFHandler {
               continue;
             }
 
-            // iterate all the rows and check each column value
-            currCell = (XSSFCell) row.getCell(0);
-            cmrNo = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(1);
-            seqNo = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(6);
-            localCity = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(7);
-            crossCity = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(8);
-            localPostal = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(9);
-            cbPostal = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(4);
-            street = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(5);
-            addressCont = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(11);
-            attPerson = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(12);
-            poBox = validateColValFromCell(currCell);
-            if (currCell != null) {
-              DataFormatter df = new DataFormatter();
-              poBox1 = df.formatCellValue(row.getCell(12));
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              // iterate all the rows and check each column value
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              seqNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              localCity = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              crossCity = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              localPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              cbPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              addressCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              attPerson = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
+              poBox = validateColValFromCell(currCell);
+            }
+
+            if ("Sold To Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                poBox1 = df.formatCellValue(row.getCell(12));
+              }
             }
 
             if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {

@@ -1796,12 +1796,14 @@ function isicScenarioHandler(value) {
     if (isicUnderB.has(value)) {
       if (custSubGrp == "COMME" || custSubGrp == "GOVRN" || custSubGrp == "CROSS") {
         FormManager.setValue('isuCd', '32');
+        setClientTierAndISR('32');
         FormManager.setValue('clientTier', 'N');
       }
     } else {
       var scen32S = ['COMME', 'PRICU', 'GOVRN', 'CROSS', 'SPAS'];
       if(scen32S.includes(custSubGrp)) {
         FormManager.setValue('isuCd', '32');
+        setClientTierAndISR('32');
         FormManager.setValue('clientTier', 'S');
       }
     }
@@ -3387,7 +3389,7 @@ function setISRValuesGR() {
   if (custSubGrp == 'SPAS') {
     FormManager.setValue('abbrevLocn', 'SAAS');
   } else if (custSubGrp == 'INTER' || custSubGrp == 'XINTR') {
-    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.setValue('repTeamMemberNo', 'W00000');
   } else if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && _isScenarioChanged && FormManager.getActualValue('repTeamMemberNo') == '') {
     FormManager.setValue('repTeamMemberNo', '200005');
   }
