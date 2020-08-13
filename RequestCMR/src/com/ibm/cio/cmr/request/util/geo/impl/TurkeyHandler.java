@@ -4098,7 +4098,7 @@ public class TurkeyHandler extends BaseSOFHandler {
       }
       }
 	    }
-    compareTwoSheets(localLang, soldto, book, validations);
+    // compareTwoSheets(localLang, soldto, book, validations);
 	  }
 
 	  @Override
@@ -4815,7 +4815,7 @@ public class TurkeyHandler extends BaseSOFHandler {
     }
 
     int firstCell1 = row1.getFirstCellNum();
-    int lastCell1 = row1.getLastCellNum();
+    int lastCell1 = 13;// set last row as 13, skip tax office
     boolean equalRows = true;
 
     // Compare all cells in a row

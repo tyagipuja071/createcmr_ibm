@@ -383,6 +383,14 @@ function afterConfigForCEMEA() {
   if (cntryRegion && cntryRegion != '' && cntryRegion.length > 3 && FormManager.getActualValue('cmrIssuingCntry') != SysLoc.SERBIA) {
     landCntry = cntryRegion.substring(3, 5);
   }
+  // Set 707 landed country base on sub region
+  if (cntryRegion == '707ME') {
+    landCntry = 'ME';
+  } else if (cntryRegion == '707CS') {
+    landCntry = 'RS';
+  } else if (cntryRegion == '707') {
+    landCntry = 'RS';
+  }
   if (landCntry != '') {
     FormManager.setValue('defaultLandedCountry', landCntry);
   }
@@ -4086,7 +4094,10 @@ function afterConfigTemplateForHungary() {
 function validatorsDIGIT() {
   FormManager.addValidator('EngineeringBo', Validators.DIGIT, [ 'EngineeringBo' ]);
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
-
+  // CMR-4606
+  if (FormManager.getActualValue('cmrIssuingCntry') == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+    FormManager.addValidator('taxCd3', Validators.DIGIT, [ 'Dup Enterprise Number' ]);
+  }
 }
 function addEmbargoCdValidatorForCEE() {
   var role = FormManager.getActualValue('userRole');
@@ -4270,6 +4281,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
   // CMR-4606 DupCMR exist
   GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, GEOHandler.CEE, null, true);
+  GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
+  GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
+  GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);

@@ -58,7 +58,7 @@
 					<lovId>CollectionCd</lovId>
 				</column>
 
-				<column>
+				<column exactLength="true">
 					<label>Enterprise Number</label>
 					<dbColumn>ENTERPRISE</dbColumn>
 					<width>30</width>
@@ -176,7 +176,7 @@
 					<label>Cross-border Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>5</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Name4</label>
@@ -271,7 +271,7 @@
 					<label>Cross-border Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>5</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Name4</label>
@@ -359,7 +359,7 @@
 					<label>Cross-border Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>5</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Name4</label>
@@ -447,7 +447,7 @@
 					<label>Cross-border Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>5</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Name4</label>

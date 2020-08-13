@@ -75,7 +75,7 @@
           <label>VAT</label>
           <dbColumn>VAT</dbColumn>
           <width>5</width>
-          <length>1</length>
+          <length>11</length>
         </column>
       </columns>
     </tab>

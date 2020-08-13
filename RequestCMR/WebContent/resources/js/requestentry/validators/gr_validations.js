@@ -1796,7 +1796,15 @@ function isicScenarioHandler(value) {
     if (isicUnderB.has(value)) {
       if (custSubGrp == "COMME" || custSubGrp == "GOVRN" || custSubGrp == "CROSS") {
         FormManager.setValue('isuCd', '32');
+        setClientTierAndISR('32');
         FormManager.setValue('clientTier', 'N');
+      }
+    } else {
+      var scen32S = ['COMME', 'PRICU', 'GOVRN', 'CROSS', 'SPAS'];
+      if(scen32S.includes(custSubGrp)) {
+        FormManager.setValue('isuCd', '32');
+        setClientTierAndISR('32');
+        FormManager.setValue('clientTier', 'S');
       }
     }
   }
@@ -3381,7 +3389,7 @@ function setISRValuesGR() {
   if (custSubGrp == 'SPAS') {
     FormManager.setValue('abbrevLocn', 'SAAS');
   } else if (custSubGrp == 'INTER' || custSubGrp == 'XINTR') {
-    FormManager.setValue('repTeamMemberNo', '000000');
+    FormManager.setValue('repTeamMemberNo', 'W00000');
   } else if ((custSubGrp == 'BUSPR' || custSubGrp == 'XBP') && _isScenarioChanged && FormManager.getActualValue('repTeamMemberNo') == '') {
     FormManager.setValue('repTeamMemberNo', '200005');
   }
@@ -3619,22 +3627,22 @@ function setEnterprise(value) {
       var isicBasedChange = /^(A|B|C|E|G|J|M|P|T|X)/.test(subindustry);
 
       if (isu == '32' && ctc == 'S' && isicBasedChange) {
-        if (repTeam == '041008' && FormManager.getActualValue('enterprise') != '') {
+        if (repTeam == 'R21180' && FormManager.getActualValue('enterprise') != '') {
           FormManager.setValue('enterprise', '');
         } else {
           FormManager.setValue('enterprise', '822806');
-          FormManager.setValue('repTeamMemberNo', '049050');
+          FormManager.setValue('repTeamMemberNo', 'D31180');
         }
       } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange) {
-        if (repTeam == '049050' && FormManager.getActualValue('enterprise') != '') {
+        if (repTeam == 'D31180' && FormManager.getActualValue('enterprise') != '') {
           FormManager.setValue('enterprise', '');
         } else {
           FormManager.setValue('enterprise', '822830');
-          FormManager.setValue('repTeamMemberNo', '041008');
+          FormManager.setValue('repTeamMemberNo', 'R21180');
         }
-      } else if (isu == '32' && ctc == 'S' && isicBasedChange && repTeam == '049050') {
+      } else if (isu == '32' && ctc == 'S' && isicBasedChange && repTeam == 'D31180') {
         FormManager.setValue('enterprise', '822806');
-      } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange && repTeam == '041008') {
+      } else if (isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange && repTeam == 'R21180') {
         FormManager.setValue('enterprise', '822830');
       } else if (getImportedIndcForGreece() == 'Y' && FormManager.getActualValue('reqType') == 'C'
           && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN' || FormManager.getActualValue('custSubGrp') == 'CROSS')) {

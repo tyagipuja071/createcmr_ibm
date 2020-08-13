@@ -1680,15 +1680,14 @@ public class GreeceHandler extends BaseSOFHandler {
       data.setBpRelType(mainRecord.getCmrBPRelType());
       data.setEnterprise(mainRecord.getCmrEnterpriseNumber());
 
-      if (!StringUtils.isEmpty(mainRecord.getCmrSortl())) {
-        String repTeamMmberNo = mainRecord.getCmrSortl().substring(0, 6);
-        data.setRepTeamMemberNo(repTeamMmberNo);
-      }
-
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
-        data.setSalesTeamCd(legacyObjects.getCustomer().getSalesGroupRep());
       }
+    }
+
+    if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+      data.setSalesTeamCd(legacyObjects.getCustomer().getSalesGroupRep());
+      data.setRepTeamMemberNo(legacyObjects.getCustomer().getSalesRepNo());
     }
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
@@ -3597,30 +3596,35 @@ public class GreeceHandler extends BaseSOFHandler {
               continue;
             }
 
-            // iterate all the rows and check each column value
-            currCell = (XSSFCell) row.getCell(0);
-            cmrNo = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(1);
-            seqNo = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(6);
-            localCity = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(7);
-            crossCity = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(8);
-            localPostal = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(9);
-            cbPostal = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(4);
-            street = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(5);
-            addressCont = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(11);
-            attPerson = validateColValFromCell(currCell);
-            currCell = (XSSFCell) row.getCell(12);
-            poBox = validateColValFromCell(currCell);
-            if (currCell != null) {
-              DataFormatter df = new DataFormatter();
-              poBox1 = df.formatCellValue(row.getCell(12));
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              // iterate all the rows and check each column value
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              seqNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              localCity = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              crossCity = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              localPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              cbPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              addressCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              attPerson = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
+              poBox = validateColValFromCell(currCell);
+            }
+
+            if ("Sold To Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                poBox1 = df.formatCellValue(row.getCell(12));
+              }
             }
 
             if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {

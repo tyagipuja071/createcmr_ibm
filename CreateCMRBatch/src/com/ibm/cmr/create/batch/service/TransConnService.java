@@ -444,7 +444,14 @@ public class TransConnService extends BaseBatchService {
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
         updateEntity(admin, entityManager);
+        
+        sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
+        query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", admin.getId().getReqId());
 
+        Data data = query.getSingleResult(Data.class);
+        entityManager.detach(data);
+        
         // Query FindCMR using filter on configuration file
         CompanyRecordModel search = new CompanyRecordModel();
         search.setName(SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
@@ -483,14 +490,6 @@ public class TransConnService extends BaseBatchService {
           LOG.info("CMR no does not exist on reserved. Continuing...");
           // Update CREQCMR.DATA set CMR_NO = from pool CMR, set CREQCMR.ADMIN
           // REQ_STATUS to 'COM', put CMR_NO in RESERVED_CMR_NOS
-
-          sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
-          query = new PreparedQuery(entityManager, sql);
-          query.setParameter("REQ_ID", admin.getId().getReqId());
-
-          Data data = query.getSingleResult(Data.class);
-          entityManager.detach(data);
-
           data.setCmrNo(record.getCmrNo());
           updateEntity(data, entityManager);
 
@@ -555,7 +554,7 @@ public class TransConnService extends BaseBatchService {
           }
           RequestEntryModel reqModel = qs.process(dummyReq, params);
           // get a request id, get the request and update data from the original
-          // request?
+          // request
           AdminPK adminPk = new AdminPK();
           long reqId = reqModel.getReqId();
           adminPk.setReqId(reqId);
@@ -592,21 +591,32 @@ public class TransConnService extends BaseBatchService {
           newData.setId(dataPk);
           newData.setCustGrp(null);
           newData.setCustSubGrp(null);
-
+          if(data.getAffiliate() == null || data.getAffiliate().equals("")) newData.setAffiliate(record.getCmrNo());
+          if(data.getEnterprise() == null || data.getEnterprise().equals("")) newData.setEnterprise(record.getCmrNo());
+          
           updateEntity(newData, entityManager);
 
-          String addrSql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO");
-          PreparedQuery addrQuery = new PreparedQuery(entityManager, addrSql);
+          PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+          addrQuery.setParameter("ADDR_TYPE", "ZS01");
           Addr addr = addrQuery.getSingleResult(Addr.class);
+          
+          PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
+          zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+          zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
+          Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);         
 
-          PreparedQuery newAddrQuery = new PreparedQuery(entityManager, addrSql);
+          PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
           newAddrQuery.setParameter("REQ_ID", reqId);
           List<Addr> newAddresses = newAddrQuery.getResults(Addr.class);
 
           for (Addr newAddr : newAddresses) {
             AddrPK addrPK = newAddr.getId();
-            copyValuesToEntity(addr, newAddr);
+            if(zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
+            	copyValuesToEntity(zi01Addr, newAddr);
+            } else {
+            	copyValuesToEntity(addr, newAddr);
+            }            
             newAddr.setId(addrPK);
             newAddr.setAddrStdResult("X");
             newAddr.setAddrStdAcceptInd(null);

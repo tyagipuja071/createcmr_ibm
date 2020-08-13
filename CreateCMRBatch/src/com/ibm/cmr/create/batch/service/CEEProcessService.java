@@ -87,7 +87,7 @@ public class CEEProcessService extends LegacyDirectService {
         }
       }
       partialCommit(entityManager);
-
+      //completeRecord(entityManager, admin, legacyDupObjects.getCustomerNo(), legacyDupObjects);
     }
   }
 
@@ -128,6 +128,8 @@ public class CEEProcessService extends LegacyDirectService {
           createEntity(legacyAddr, entityManager);
         }
       }
+      // completeRecord(entityManager, admin, legacyDupObjects.getCustomerNo(),
+      // legacyDupObjects);
     }
   }
 
@@ -147,6 +149,8 @@ public class CEEProcessService extends LegacyDirectService {
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
     String cntry = data.getDupIssuingCntryCd();
+    String companyBK = data.getEnterprise();
+    data.setEnterprise(data.getDupEnterpriseNo());
     data.setDupSalesBoCd(data.getSalesBusOffCd());
     data.setDupSalesRepNo(data.getSalesBusOffCd());
 
@@ -339,6 +343,7 @@ public class CEEProcessService extends LegacyDirectService {
       // legacyObjects.setCustomerExt(custExt);
       // }
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
+      data.setEnterprise(companyBK);
     }
 
     return legacyObjects;
@@ -960,14 +965,15 @@ public class CEEProcessService extends LegacyDirectService {
     return rdcSequences;
   }
 
-  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, String isuCntry, LegacyDirectObjectContainer legacyObjects)
+  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)
       throws CmrException, SQLException {
     LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
     admin.setLockBy(null);
     admin.setLockByNm(null);
     admin.setLockInd("N");
+    String isuCntry = legacyObjects.getCustomer().getId().getSofCntryCode();
 
-    String message = "Process Dup Records For " + isuCntry + " successfully on the Legacy Database. CMR No. " + cmrNo + " + "
+    String message = "Process Dup Records For " + isuCntry + " successfully on the Legacy Database. CMR No. " + cmrNo
         + (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) ? " assigned." : " updated.");
 
     // add the sequences generated
@@ -985,7 +991,7 @@ public class CEEProcessService extends LegacyDirectService {
         seqCmt.append(": ").append(addr.getId().getAddrNo()).append("\n");
       }
       if (seqCmt.toString().trim().length() > 0) {
-        message += "\nSequences Generated:\n" + seqCmt.toString();
+        message += "\nDup CMR Sequences Generated:\n" + seqCmt.toString();
       }
       message = message.trim();
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {

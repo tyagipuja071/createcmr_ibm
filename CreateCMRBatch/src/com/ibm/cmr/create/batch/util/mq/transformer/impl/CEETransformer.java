@@ -1060,12 +1060,12 @@ public class CEETransformer extends EMEATransformer {
         legacyCust.setModeOfPayment("");
       }
 
-      String ecoCode = data.getEconomicCd();
-      if (!StringUtils.isBlank(ecoCode)) {
-        legacyCust.setEconomicCd(ecoCode);
-      } else {
-        legacyCust.setEconomicCd("");
-      }
+      // String ecoCode = data.getEconomicCd();
+      // if (!StringUtils.isBlank(ecoCode)) {
+      // legacyCust.setEconomicCd(ecoCode);
+      // } else {
+      // legacyCust.setEconomicCd("");
+      // }
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
@@ -1187,9 +1187,9 @@ public class CEETransformer extends EMEATransformer {
       }
     // }
 
-    if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
-      legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
-    }
+    // if (!StringUtils.isEmpty(dummyHandler.messageHash.get("EconomicCode"))) {
+    // legacyCust.setEconomicCd(dummyHandler.messageHash.get("EconomicCode"));
+    // }
 
     if (!StringUtils.isEmpty(data.getIbmDeptCostCenter())) {
       legacyCust.setBankBranchNo(data.getIbmDeptCostCenter());
@@ -1416,13 +1416,7 @@ public class CEETransformer extends EMEATransformer {
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
       cust.setImsCd(subInd);
-      // Defect 1776715: Fix for Economic code
-      String firstChar = String.valueOf(subInd.charAt(0));
-      StringBuilder builder = new StringBuilder();
-      builder.append(firstChar);
-      builder.append(subInd);
-      LOG.debug("***Auto setting Economic code as > " + builder.toString());
-      cust.setEconomicCd(builder.toString());
+      // cust.setEconomicCd(subInd);
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
