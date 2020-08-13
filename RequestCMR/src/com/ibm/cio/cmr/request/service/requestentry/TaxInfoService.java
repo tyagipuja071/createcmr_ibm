@@ -193,6 +193,7 @@ public class TaxInfoService extends BaseService<GeoTaxInfoModel, GeoTaxInfo> {
         }
       }
     }
+    entityManager.flush();
   }
 
   public List<GeoTaxInfoModel> getCurrTaxInfo(GeoTaxInfoModel model, EntityManager entityManager, String issuingCntry) throws CmrException {
