@@ -724,9 +724,9 @@ function setSBOAndEBO() {
     if (FormManager.getActualValue('reqType') != 'C') {
       return;
     }
-    // if (FormManager.getActualValue('custGrp') == 'CROSS') {
-    // return;
-    // }
+    if (FormManager.getActualValue('custGrp') == 'CROSS') {
+      return;
+    }
     var custSubGroup = FormManager.getActualValue('custSubGrp');
     var locationNumber = FormManager.getActualValue('locationNumber');
     var isuCd = FormManager.getActualValue('isuCd');
