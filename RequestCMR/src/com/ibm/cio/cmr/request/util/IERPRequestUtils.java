@@ -149,10 +149,22 @@ public class IERPRequestUtils extends RequestUtils {
       String rejRes = "<tr><th style=\"text-align:left;width:200px\">Reject Reason:</th><td>{10}</td></tr>";
       temp.insert(insertstart, rejRes);
       email = temp.toString();
+
+      String cmrIssuingCountry = data.getCmrIssuingCntry();
+      String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+      country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+      email = StringUtils.replace(email, "$COUNTRY$", country);
+
       email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status,
           history.getCreateByNm() + " (" + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent,
           directUrlLink, rejectReason, feedbackLink);
     } else {
+
+      String cmrIssuingCountry = data.getCmrIssuingCntry();
+      String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+      country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+      email = StringUtils.replace(email, "$COUNTRY$", country);
+
       email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status,
           history.getCreateByNm() + " (" + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent,
           directUrlLink, "", feedbackLink);
@@ -182,7 +194,6 @@ public class IERPRequestUtils extends RequestUtils {
       String cmrIssuingCountry = data.getCmrIssuingCntry();
       String country = getIssuingCountry(entityManager, cmrIssuingCountry);
       country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
-
       email = StringUtils.replace(email, "$COUNTRY$", country);
 
       ExternalSystemUtil.addExternalMailParams(entityManager, params, admin); // {12},{13}
