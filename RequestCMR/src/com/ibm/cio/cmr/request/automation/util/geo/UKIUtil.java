@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
@@ -58,6 +59,7 @@ public class UKIUtil extends AutomationUtil {
   private static final List<String> SCENARIOS_TO_SKIP_COVERAGE = Arrays.asList(SCENARIO_INTERNAL, SCENARIO_PRIVATE_PERSON, SCENARIO_BUSINESS_PARTNER);
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIP_TO, CmrConstants.RDC_SECONDARY_SOLD_TO);
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Attn", "Phone #", "Hardware Master");
 
   @Override
   public boolean performScenarioValidation(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
@@ -176,8 +178,25 @@ public class UKIUtil extends AutomationUtil {
         break;
       case "INAC/NAC Code":
       case "Company Number":
-      case "Enterprise Number":
         cmdeReview = true;
+        break;
+      case "Tax Code":
+        // noop, for switch handling only
+        break;
+      case "ISU Code":
+        // noop, for switch handling only
+        break;
+      case "Client Tier":
+        // noop, for switch handling only
+        break;
+      case "Sales Rep No":
+        // noop, for switch handling only
+        break;
+      case "Order Block Code":
+        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData()) || "88".equals(change.getOldData())
+            || "88".equals(change.getNewData())) {
+          // noop, for switch handling only
+        }
         break;
       default:
         ignoredUpdates.add(change.getDataField());
@@ -257,31 +276,42 @@ public class UKIUtil extends AutomationUtil {
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
             // update address
-            if (CmrConstants.RDC_INSTALL_AT.equals(addrType) && null == changes.getAddressChange(addrType, "Hardware Master")) {
-              // CMDE Review
-              checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
-                  .append("\n");
-              resultCodes.add("D");
-            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType) && null == changes.getAddressChange(addrType, "Hardware Master")) {
-              Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
-              boolean matchesDnb = false;
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb) {
-                LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                resultCodes.add("R");
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+            if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                // CMDE Review
+                checkDetails.append("Updates to address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") need to be verified.")
+                    .append("\n");
+                resultCodes.add("D");
               } else {
-                checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
-                for (DnBMatchingResponse dnb : matches) {
-                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
-                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
-                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
-                      + dnb.getDnbCountry() + "\n\n");
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
+              }
+
+            } else if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+              if (isRelevantAddressFieldUpdated(changes, addr)) {
+                Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+                List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
+                boolean matchesDnb = false;
+                if (matches != null) {
+                  // check against D&B
+                  matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
                 }
+                if (!matchesDnb) {
+                  LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
+                  resultCodes.add("R");
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
+                } else {
+                  checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else {
+                checkDetails.append("Updates to non-address fields for " + addrType + "(" + addr.getId().getAddrSeq() + ") skipped in the checks.")
+                    .append("\n");
               }
             } else {
               // proceed
@@ -312,6 +342,26 @@ public class UKIUtil extends AutomationUtil {
     return true;
   }
 
+  /**
+   * Checks if relevant fields were updated
+   * 
+   * @param changes
+   * @param addr
+   * @return
+   */
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
@@ -328,37 +378,32 @@ public class UKIUtil extends AutomationUtil {
 
     if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) {
       Addr zi01 = requestData.getAddress("ZI01");
-      boolean hasValidMatches = false;
       boolean highQualityMatchExists = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
-      hasValidMatches = DnBUtil.hasValidMatches(response);
-      if (response != null && response.getMatched()) {
-        List<DnBMatchingResponse> dnbMatches = response.getMatches();
-        if (hasValidMatches) {
-          // actions to be performed only when matches with high confidence are
-          // found
-          for (DnBMatchingResponse dnbRecord : dnbMatches) {
-            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
-            if (closelyMatches) {
-              engineData.put("ZI01_DNB_MATCH", dnbRecord);
-              highQualityMatchExists = true;
-              details.append("High Quality DnB Match found for Installing address.\n");
-              details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
-              LOG.debug("Connecting to D&B details service..");
-              DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
-              if (dnbData != null) {
-                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
-                details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
-                String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
-                if (subInd != null) {
-                  overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
-                  details.append("Subindustry Code  =  " + subInd).append("\n");
-                }
+      List<DnBMatchingResponse> response = getMatches(requestData, engineData, zi01, false);
+      if (response != null && response.size() > 0) {
+        // actions to be performed only when matches with high confidence are
+        // found
+        for (DnBMatchingResponse dnbRecord : response) {
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+          if (closelyMatches) {
+            engineData.put("ZI01_DNB_MATCH", dnbRecord);
+            highQualityMatchExists = true;
+            details.append("High Quality DnB Match found for Installing address.\n");
+            details.append("Overriding ISIC and Sub Industry Code using DnB Match retrieved.\n");
+            LOG.debug("Connecting to D&B details service..");
+            DnBCompany dnbData = DnBUtil.getDnBDetails(dnbRecord.getDunsNo());
+            if (dnbData != null) {
+              overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
+              details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+              String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
+              if (subInd != null) {
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
+                details.append("Subindustry Code  =  " + subInd).append("\n");
               }
-              results.setResults("Calculated.");
-              results.setProcessOutput(overrides);
-              break;
             }
+            results.setResults("Calculated.");
+            results.setProcessOutput(overrides);
+            break;
           }
         }
       }
@@ -544,4 +589,20 @@ public class UKIUtil extends AutomationUtil {
     }
 
   }
+
+  @Override
+  public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr, Boolean isOrgIdMatchOnly) {
+    GBGFinderRequest request = super.createRequest(admin, data, addr, isOrgIdMatchOnly);
+    if (SCENARIO_THIRD_PARTY.equals(data.getCustSubGrp()) || SCENARIO_INTERNAL_FSL.equals(data.getCustSubGrp())) {
+      String custNmTrimmed = getCustomerFullName(addr);
+      if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}\\.+$") || custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}/.+$")) {
+        custNmTrimmed = custNmTrimmed.substring(6);
+      } else if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}.+$")) {
+        custNmTrimmed = custNmTrimmed.substring(5);
+      }
+      request.setCustomerName(custNmTrimmed);
+    }
+    return request;
+  }
+
 }
