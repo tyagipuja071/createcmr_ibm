@@ -559,6 +559,11 @@ public class UKIUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
+    String crn = requestData.getData().getTaxCd1();
+    if (!StringUtils.isBlank(crn)) {
+      request.setOrgId(crn); // CRN
+      LOG.debug("Passing CRN as " + request.getOrgId() + " with GBG finder request.");
+    }
     if ("C".equals(admin.getReqType()) && (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))) {
       DnBMatchingResponse dnbRecord = (DnBMatchingResponse) engineData.get("ZI01_DNB_MATCH");
       if (dnbRecord != null) {
@@ -602,7 +607,13 @@ public class UKIUtil extends AutomationUtil {
       }
       request.setCustomerName(custNmTrimmed);
     }
+    request.setOrgId(data.getTaxCd1());
     return request;
+  }
+
+  @Override
+  public boolean useTaxCd1ForDnbMatch(RequestData requestData) {
+    return true;
   }
 
 }
