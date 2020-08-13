@@ -1593,6 +1593,9 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
       }
+      if(legacyObjects != null && legacyObjects.getCustomer() != null){
+        data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+      }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
       String collCd = this.currentImportValues.get("CollectionCode");
