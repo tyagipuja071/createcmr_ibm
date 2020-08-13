@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -37,7 +38,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 /**
  * {@link MessageTransformer} implementation for Cyprus.
  * 
- * @author Jeffrey Zamora
+ * @author Dhananjay Yadav
  * 
  */
 public class CyprusTransformer extends EMEATransformer {
@@ -558,6 +559,30 @@ public class CyprusTransformer extends EMEATransformer {
           break;
         }
       }
+    }
+
+  }
+
+  @Override
+  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
+      MassUpdtData muData, String cmr) throws Exception {
+    LOG.debug("CY >> Mapping default CMRTCEXT values");
+
+    boolean isUpdated = false;
+
+    // Tax office
+    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+      if ("@".equals(muData.getNewEntpName1().trim())) {
+        custExt.setiTaxCode("");
+      } else {
+        custExt.setiTaxCode(muData.getNewEntpName1());
+      }
+      isUpdated = true;
+    }
+
+    // Current TimeStamp
+    if (isUpdated) {
+      custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
     }
 
   }
