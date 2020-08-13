@@ -5582,6 +5582,11 @@ function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) 
         if (abbrevNm && abbrevNm.length > 22) {
           abbrevNm = abbrevNm.substring(0, 22);
         }
+        if ("TR" != FormManager.getActualValue("landCntry")) {
+          if(document.getElementById('landCntry') != undefined){
+            abbrevLocn = document.getElementById('landCntry').value;
+          }
+        }
         if (abbrevLocn && abbrevLocn.length > 12) {
           abbrevLocn = abbrevLocn.substring(0, 12);
         }
@@ -5592,7 +5597,7 @@ function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) 
         }
 
         FormManager.setValue('abbrevNm', abbrevNm);
-        // FormManager.setValue('abbrevLocn', abbrevLocn);
+        FormManager.setValue('abbrevLocn', abbrevLocn);
       }
     }
   }
