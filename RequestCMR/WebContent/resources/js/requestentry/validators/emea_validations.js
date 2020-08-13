@@ -14,6 +14,7 @@ var _internalDeptHandler = null;
 var _isicHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
+var _isicCdCRNHandler = null;
 
 var SCOTLAND_POST_CD = [ 'AB', 'KA', 'DD', 'KW', 'DG', 'KY', 'EH', 'ML', 'FK', 'PA', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'PH', 'TD', 'IV' ];
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
@@ -378,6 +379,19 @@ function afterConfigForUKI() {
     } else if (role.toUpperCase() == 'PROCESSOR') {
       FormManager.removeValidator('taxCd1', Validators.REQUIRED);
     }
+  }
+
+  if (_isicCdCRNHandler == null) {
+    _isicCdCRNHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      var isicVal = FormManager.getActualValue('isicCd');
+      if (role.toUpperCase() == 'REQUESTER') {
+        if (isicVal != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
+          FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+        } else {
+          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        }
+      }
+    });
   }
   autoSetAbbrNameUKI();
   if (_customerTypeHandler == null) {
