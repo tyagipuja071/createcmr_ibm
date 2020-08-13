@@ -957,11 +957,15 @@ function set32SBOLogicOnISIC() {
   var isuCdValue = FormManager.getActualValue('isuCd');
   var isicCdValue = FormManager.getActualValue('isicCd');
   var tierValue = FormManager.getActualValue('clientTier');
-
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  
   if (isuCdValue == '32' && (tierValue == 'S' || tierValue == 'N')) {
     var qParams = {
-        ISU_CD:isuCdValue,
-        CLIENT_TIER:tierValue,
+        ISU_CD:'%' + isuCdValue + '%',
+        CLIENT_TIER:'%' + tierValue + '%',
         ISIC_CD:isicCdValue
     };
    var result = cmr.query('UK.GET.SBOSR_FOR_ISIC',qParams);
@@ -970,8 +974,10 @@ function set32SBOLogicOnISIC() {
      var salesRep = result.ret2;
      FormManager.setValue('salesBusOffCd',sbo);
      FormManager.setValue('repTeamMemberNo',salesRep);
+     if (role == 'Requester') {
      FormManager.readOnly('repTeamMemberNo');
      FormManager.readOnly('salesBusOffCd');
+     }
    }
   }
 }
@@ -1098,22 +1104,7 @@ function autoSetSboSrOnAddrSaveUK() {
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
       FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
       set32SBOLogicOnISIC();
-    } else if (custSubGrp == 'PRICU' || custSubGrp == 'IBMEM') {
-      FormManager.setValue('salesBusOffCd', "128");
-      FormManager.setValue('repTeamMemberNo', "SPA128");
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('repTeamMemberNo');
-    } else if (custSubGrp == 'INTER') {
-      FormManager.setValue('salesBusOffCd', "100");
-      FormManager.setValue('repTeamMemberNo', "M01000");
-      FormManager.readOnly('salesBusOffCd');
-      FormManager.readOnly('repTeamMemberNo');
-    } else {
-      FormManager.enable('salesBusOffCd');
-      FormManager.enable('repTeamMemberNo');
-      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
-      FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
-    }
+    } 
 
     // 1482148 - add Scotland and Northern Ireland logic
     if (isuCd == '32') {
