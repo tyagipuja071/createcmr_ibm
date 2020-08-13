@@ -61,6 +61,10 @@ import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
@@ -1794,6 +1798,11 @@ public class EMEAHandler extends BaseSOFHandler {
           String customerType = cust.getCustType();
           data.setCrosSubTyp(customerType);
         }
+      }
+      // CMR - 5715
+      if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(data.getCmrIssuingCntry())
+          || SystemLocation.IRELAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+        autoSetCompanyRegNum(mainRecord.getCmrNum(), data);
       }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
@@ -4612,6 +4621,42 @@ public class EMEAHandler extends BaseSOFHandler {
     } catch (CmrException e) {
       LOG.debug("Could not connect to Bluepages service.");
       e.printStackTrace();
+    }
+
+  }
+
+  private void autoSetCompanyRegNum(String cmrNo, Data data) {
+    if (StringUtils.isNotBlank(cmrNo)) {
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      String mandt = SystemConfiguration.getValue("MANDT");
+      String sql = ExternalizedQuery.getSql("GET_STCD1_ZS01.UKI");
+      sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+      sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+      sql = StringUtils.replace(sql, ":KATR6", "'" + data.getCmrIssuingCntry() + "'");
+
+      String dbId = QueryClient.RDC_APP_ID;
+
+      QueryRequest query = new QueryRequest();
+      query.setSql(sql);
+      query.addField("STCD1");
+      query.addField("KUNNR");
+
+      LOG.debug("Getting existing KUNNNR_EXT details from RDc DB..");
+      QueryClient client;
+      try {
+        client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+        QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+        if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+          List<Map<String, Object>> records = response.getRecords();
+          Map<String, Object> record = records.get(0);
+          if (record != null) {
+            data.setTaxCd1(record.get("STCD1") != null ? record.get("STCD1").toString() : "");
+          }
+          LOG.debug("***RETURNING CRN Number --> " + data.getTaxCd1());
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
   }

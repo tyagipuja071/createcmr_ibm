@@ -42,6 +42,8 @@
 			<p>
 				<label for="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />:
 					<cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
+					<cmr:view forCountry="866"><cmr:info text="${ui.info.CRN_UK}" /></cmr:view> 
+					<cmr:view forCountry="754"><cmr:info text="${ui.info.CRN_I}" /></cmr:view>           
 				</label>
 				<cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1"
 					tabId="MAIN_CUST_TAB" />
