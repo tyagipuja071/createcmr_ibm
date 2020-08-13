@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -39,13 +40,12 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 @Controller
 public class AttachmentController extends BaseController {
 
+  private static final Logger LOG = Logger.getLogger(AttachmentController.class);
   private static final MimetypesFileTypeMap MIME_TYPES = new MimetypesFileTypeMap();
   @Autowired
   AttachmentService service;
 
-  @RequestMapping(
-      value = "/token",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/token", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap checkTokenStatus(HttpServletRequest request, HttpServletResponse response) {
     ModelMap map = new ModelMap();
     String tokenId = request.getParameter("tokenId");
@@ -70,9 +70,7 @@ public class AttachmentController extends BaseController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/request/attachment",
-      method = { RequestMethod.POST, RequestMethod.GET })
+  @RequestMapping(value = "/request/attachment", method = { RequestMethod.POST, RequestMethod.GET })
   public ModelMap processAttachment(HttpServletRequest request, HttpServletResponse response, AttachmentModel model) throws CmrException {
 
     ProcessResultModel result = new ProcessResultModel();
@@ -99,8 +97,7 @@ public class AttachmentController extends BaseController {
     return wrapAsProcessResult(result);
   }
 
-  @RequestMapping(
-      value = "/search/attachment")
+  @RequestMapping(value = "/search/attachment")
   public ModelMap doAttachmentSearch(HttpServletRequest request, HttpServletResponse response, AttachmentModel model) throws CmrException {
 
     List<AttachmentModel> results = service.search(model, request);
@@ -109,9 +106,7 @@ public class AttachmentController extends BaseController {
     return map;
   }
 
-  @RequestMapping(
-      value = "/request/attachment/download",
-      method = RequestMethod.POST)
+  @RequestMapping(value = "/request/attachment/download", method = RequestMethod.POST)
   public void downloadAttachment(HttpServletRequest request, HttpServletResponse response, AttachmentModel model) throws Exception {
 
     String token = request.getParameter("tokenId");
@@ -121,8 +116,30 @@ public class AttachmentController extends BaseController {
       String fileName = docLink + ".zip";
 
       File file = new File(fileName);
+
+      // JZ: add here the last 3 historical locations of the file
+
       if (!file.exists()) {
-        throw new CmrException(MessageUtil.ERROR_FILE_DL_ERROR);
+        String name = file.getName();
+        File parent = file.getParentFile();
+        String reqIdDir = parent.getName();
+
+        // 2020 prod
+        file = new File("/gsa/nhbgsa/projects/c/cmma2020/prod" + File.separator + reqIdDir + File.separator + name);
+        LOG.debug(" - Checking historical location: " + file.getAbsolutePath());
+        if (!file.exists()) {
+          // 2020 prod2
+          file = new File("/gsa/nhbgsa/projects/c/cmma2020/prod2" + File.separator + reqIdDir + File.separator + name);
+          LOG.debug(" - Checking historical location: " + file.getAbsolutePath());
+          if (!file.exists()) {
+            // 2018
+            file = new File("/gsa/nhbgsa/projects/c/cmma2018/prod" + File.separator + reqIdDir + File.separator + name);
+            LOG.debug(" - Checking historical location: " + file.getAbsolutePath());
+            if (!file.exists()) {
+              throw new CmrException(MessageUtil.ERROR_FILE_DL_ERROR);
+            }
+          }
+        }
       }
       ZipFile zip = new ZipFile(file);
       try {
@@ -141,6 +158,7 @@ public class AttachmentController extends BaseController {
             if (StringUtils.isEmpty(type)) {
               type = "application/octet-stream";
             }
+            response.setCharacterEncoding("UTF-8");
             response.setContentType(type);
             response.addHeader("Content-Type", type);
             response.addHeader("Content-Disposition", "attachment; filename=\"" + dlfileName + "\"");
