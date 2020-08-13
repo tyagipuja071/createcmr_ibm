@@ -18,6 +18,7 @@ var _hwMstrInstallFlagHandler = null;
 var _scenarioSubTypeHandler = null;
 var _addrTypeOnChangeHandler = [];
 var _addrTypesForOnChange = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01' ];
+var _isicCdCRNHandler = null;
 
 var SCOTLAND_POST_CD = [ 'AB', 'KA', 'DD', 'KW', 'DG', 'KY', 'EH', 'ML', 'FK', 'PA', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'PH', 'TD', 'IV' ];
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
@@ -417,12 +418,27 @@ function autoSetAbbrevNmFrmDept() {
   }
 }
 
+function getZS01LandCntry() {
+  var reqId = FormManager.getActualValue('reqId');
+  if (reqId != null) {
+    reqParam = {
+      REQ_ID : reqId,
+    };
+  }
+  var results = cmr.query('ADDR.GET.ZS01LANDCNTRY.BY_REQID', reqParam);
+  var landCntry = results.ret2 != undefined ? results.ret2 : '';
+  return landCntry;
+}
+
 function afterConfigForUKI() {
   console.log(" --->>> Process afterConfigForUKI. <<<--- ");
   var reqType = FormManager.getActualValue('reqType');
   var role = null;
-  var issuingCntry = FormManager.getActualValue('reqType');
-  var companyNum = FormManager.getActualValue('cmrIssuingCntry');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  var companyNum = FormManager.getActualValue('taxCd1');
+  var isicCd = FormManager.getActualValue('isicCd');
+  var zs01LandCntry = getZS01LandCntry();
+
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
@@ -441,17 +457,25 @@ function afterConfigForUKI() {
     });
   }
 
-  // CMR - 5715
-  if (reqType == 'U' && role.toUpperCase() == 'REQUESTER') {
-    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-    if (companyNum != null & companyNum != '' && companyNum != undefined) {
-      FormManager.readOnly('taxCd1');
-    } else {
-      FormManager.enable('taxCd1');
-    }
-  } else if (reqType == 'U' && role.toUpperCase() == 'PROCESSOR') {
-    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-    FormManager.enable('taxCd1');
+  if (_isicCdCRNHandler == null) {
+    _isicCdCRNHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
+      var isicVal = FormManager.getActualValue('isicCd');
+      if (reqType == 'U') {
+        if (role.toUpperCase() == 'REQUESTER') {
+          if (isicVal != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
+            FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+          } else {
+            FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+          }
+        } else if (role.toUpperCase() == 'PROCESSOR') {
+          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        }
+      }
+    });
+  }
+
+  if (_isicCdCRNHandler && _isicCdCRNHandler[0]) {
+    _isicCdCRNHandler[0].onChange();
   }
 
   autoSetAbbrNameUKI();

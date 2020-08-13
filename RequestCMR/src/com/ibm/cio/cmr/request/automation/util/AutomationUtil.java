@@ -18,6 +18,7 @@ import org.codehaus.jackson.type.TypeReference;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -385,6 +386,17 @@ public abstract class AutomationUtil {
    */
   public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     // NOOP
+  }
+
+  /**
+   * Tells {@link DnBMatchingElement} if it needs to use TaxCd1 for
+   * orgIdMatching instead of VAT
+   * 
+   * @param requestData
+   * @return
+   */
+  public boolean useTaxCd1ForDnbMatch(RequestData requestData) {
+    return false;
   }
 
   /**
