@@ -3398,35 +3398,9 @@ var custType = FormManager.getActualValue('custGrp');
       });
     }
   }
-
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
-    if (_custSalesRepHandlerGr == null) {
-      _custSalesRepHandlerGr = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-        setISRValuesGR();
-        });
-    }
-  }
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
-    if (_custSubTypeHandlerGr == null) {
-      _custSubTypeHandlerGr = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-        FormManager.setValue('salesTeamCd', '');
-        setISRValuesGR();
-        setSalesBoSboIbo();
-        resetSubIndustryCdGR();
-      });
-    }
-  }
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-
-      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
-        setISRValuesGR();
-      } else {
-        if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
-          setISRValues();          
-        }
-      }
-
+      setISRValues();
     });
   }
 
@@ -3442,13 +3416,6 @@ var custType = FormManager.getActualValue('custGrp');
       _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value) {
         disableAddrFieldsGRCYTR();
         preFillTranslationAddrWithSoldToForTR();
-        
-        if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
-          convertToUpperCaseGR();
-          disableAddrFieldsGR();
-          preFillTranslationAddrWithSoldToForGR();    
-        }
-        
         if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS){
           disableAddrFieldsCY();
         }
@@ -3456,7 +3423,12 @@ var custType = FormManager.getActualValue('custGrp');
       });
     }
   }
-
+  
+  if (_gtcVatExemptHandler == null) {
+    _gtcVatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      setVatValidator();
+    });
+  }
 }
 
 function disableAddrFieldsCY(){
@@ -3485,6 +3457,17 @@ function disableAddrFieldsCY(){
   }
 }
 
+function setVatValidator() {
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
+    FormManager.resetValidations('vat');
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+    }
+  }
+}
+
 function addPOBoxValidatorGR() {
   FormManager.removeValidator('poBox', Validators.LATIN);
   FormManager.removeValidator('poBox', Validators.NON_LATIN);
@@ -3507,8 +3490,10 @@ function setClientTierAndISR(value) {
     // FormManager.setValue('clientTier', '');
   }
   tierValues = null;
+  enterpriseLov = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
+      enterpriseLov = [];
       tierValues = [ 'V', '6', 'A', 'Z' ];
       if (clientTier == '6') {
         enterpriseLov = [ '822835', '822836' ];
@@ -3621,7 +3606,7 @@ function setFieldsBehaviourCY() {
   if(FormManager.getActualValue('reqType') == 'U'){
     if(role == 'PROCESSOR') {
       FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'ISR' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('salesTeamCd', Validators.REQUIRED, [ 'Sales SR' ], 'MAIN_IBM_TAB');
+      FormManager.addValidator('salesTeamCd', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
     } else if(role == 'REQUESTER') {
       FormManager.resetValidations('repTeamMemberNo');
       FormManager.resetValidations('salesTeamCd');
@@ -4217,7 +4202,9 @@ function addHandlerForCustSubTypeBpGRTRCY() {
 function setCustSubTypeBpGRTRCY() {
   var custType = FormManager.getActualValue('custSubGrp');
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    if (FormManager.getActualValue('vatExempt') != null && FormManager.getActualValue('vatExempt') != 'Y' ) {
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+    }
     if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '7');
@@ -8327,5 +8314,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(showOnlyMailingOnFirstAddrAdd, [ SysLoc.CYPRUS ]);
   
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterConfig(setVatValidator, [ SysLoc.CYPRUS ]);
   
 });
