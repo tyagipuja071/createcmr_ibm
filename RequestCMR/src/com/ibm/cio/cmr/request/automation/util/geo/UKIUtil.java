@@ -193,8 +193,8 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "Order Block Code":
-        if ("94".equals(change.getOldData()) || "94".equals(change.getNewData()) || "88".equals(change.getOldData())
-            || "88".equals(change.getNewData())) {
+        if ("C".equals(change.getOldData()) || "C".equals(change.getNewData()) || "E".equals(change.getOldData())
+            || "E".equals(change.getNewData())) {
           // noop, for switch handling only
         }
         break;
