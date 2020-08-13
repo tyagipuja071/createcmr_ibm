@@ -7745,7 +7745,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterConfig(setFieldsBehaviourGR,[SysLoc.GREECE]);
   // GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR,[SysLoc.GREECE]);
   // GEOHandler.addAfterConfig(resetSubIndustryCdGR,[SysLoc.GREECE]);
-
   // CYPRUS Legacy
   GEOHandler.addAfterConfig(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAddrFunction(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
