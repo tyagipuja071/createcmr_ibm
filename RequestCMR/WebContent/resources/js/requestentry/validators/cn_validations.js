@@ -525,11 +525,11 @@ function setValuesForScenarios() {
             FormManager.setValue('rdcComment', 'Acquisition');
           }
         }
-      } else if(_custSubGrp == 'MRKT'){
-        FormManager.setValue('rdcComment', 'For Market place use only');       
-      }else if(_custSubGrp == 'BLUMX'){
-        FormManager.setValue('rdcComment', 'For Bluemix use only');       
-      }else {
+      } else if (_custSubGrp == 'MRKT') {
+        FormManager.setValue('rdcComment', 'For Market place use only');
+      } else if (_custSubGrp == 'BLUMX') {
+        FormManager.setValue('rdcComment', 'For Bluemix use only');
+      } else {
         FormManager.resetValidations('rdcComment');
       }
     }
@@ -647,12 +647,11 @@ function showHideCityCN() {
       FormManager.resetValidations('custPhone');
       FormManager.resetValidations('cnCustContJobTitle');
       FormManager.resetValidations('cnCustContNm');
-    } else if(_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX'){
+    } else if (_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
       FormManager.resetValidations('custPhone');
       FormManager.resetValidations('cnCustContJobTitle');
-      FormManager.resetValidations('cnCustContNm');     
-    }
-    else {
+      FormManager.resetValidations('cnCustContNm');
+    } else {
       FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ 'Street Address Chinese' ], null);
       FormManager.addValidator('cnCustName1', Validators.REQUIRED, [ 'Customer Name Chinese' ], null);
@@ -871,8 +870,7 @@ function addContactInfoValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C'
-            && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
           var record = null;
           var type = null;
 
@@ -989,6 +987,80 @@ function addEngNameFormatValidation() {
 
 }
 
+function doubleByteCharacterValidator() {
+  var _reqId = FormManager.getActualValue('reqId');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var AddrParams = {
+          REQ_ID : _reqId,
+        };
+        var AddrResult = cmr.query('GET.CN.ADDRDETAILS', AddrParams);
+        var _addrTxt = AddrResult.ret1;
+        var _addrTxt2 = AddrResult.ret2;
+        var _dropdowncity1 = AddrResult.ret3;
+        var _city2 = AddrResult.ret4;
+        var _dept = AddrResult.ret5;
+        var _bldg = AddrResult.ret6;
+        var _office = AddrResult.ret7;
+        var _poBox = AddrResult.ret8;
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (_addrTxt != '' && (_addrTxt.length > 0 && !_addrTxt.match(reg))) {
+          return new ValidationResult({
+            id : 'addrTxt',
+            type : 'text',
+            name : 'addrTxt'
+          }, false, 'Double byte characters are not allowed in Street Address English.');
+        } else if (_addrTxt2 != '' && (_addrTxt2.length > 0 && !_addrTxt2.match(reg))) {
+          return new ValidationResult({
+            id : 'addrTxt2',
+            type : 'text',
+            name : 'addrTxt2'
+          }, false, 'Double byte characters are not allowed in Address Cont English.');
+        } else if (_dropdowncity1 != '' && (_dropdowncity1.length > 0 && !_dropdowncity1.match(reg))) {
+          return new ValidationResult({
+            id : 'dropdowncity1',
+            type : 'dropdown',
+            name : 'dropdowncity1'
+          }, false, 'Double byte characters are not allowed in City English.');
+        } else if (_city2 != '' && (_city2.length > 0 && !_city2.match(reg))) {
+          return new ValidationResult({
+            id : 'city2',
+            type : 'text',
+            name : 'city2'
+          }, false, 'Double byte characters are not allowed in District English.');
+        } else if (_dept != '' && (_dept.length > 0 && !_dept.match(reg))) {
+          return new ValidationResult({
+            id : 'dept',
+            type : 'text',
+            name : 'dept'
+          }, false, 'Double byte characters are not allowed in Department English.');
+        } else if (_bldg != '' && (_bldg.length > 0 && !_bldg.match(reg))) {
+          return new ValidationResult({
+            id : 'bldg',
+            type : 'text',
+            name : 'bldg'
+          }, false, 'Double byte characters are not allowed in Building English.');
+        } else if (_office != '' && (_office.length > 0 && !_office.match(reg))) {
+          return new ValidationResult({
+            id : 'office',
+            type : 'text',
+            name : 'office'
+          }, false, 'Double byte characters are not allowed in Office English.');
+        } else if (_poBox != '' && (_poBox.length > 0 && !_poBox.match(reg))) {
+          return new ValidationResult({
+            id : 'poBox',
+            type : 'text',
+            name : 'poBox'
+          }, false, 'Double byte characters are not allowed in PoBox English.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CN = [ SysLoc.CHINA ];
   console.log('adding CN validators...');
@@ -1026,5 +1098,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSoltToAddressValidator, GEOHandler.CN, null, false, false);
   GEOHandler.registerValidator(addContactInfoValidator, GEOHandler.CN, GEOHandler.REQUESTER, false, false);
   GEOHandler.registerValidator(addCityRequiredOnUpdateValidatorAddrList, GEOHandler.CN, null, true);
+  GEOHandler.registerValidator(doubleByteCharacterValidator, GEOHandler.CN, null, true);
 
 });
