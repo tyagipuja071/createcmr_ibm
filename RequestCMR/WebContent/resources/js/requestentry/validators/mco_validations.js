@@ -669,13 +669,13 @@ function setEnterpriseValues(clientTier) {
   // For Spain, domestic with 32B, 32S, 32T & 217 ISUs, set enterprise based on
   // LocNo
   var isuCtc = isuCd + clientTier;
-  // if (custGroup != 'CROSS') {
-  if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
-    // FormManager.readOnly('enterprise');
-    setSBOAndEBO();
-    return;
+  if (custGroup != 'CROSS') {
+    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
+      // FormManager.readOnly('enterprise');
+      setSBOAndEBO();
+      return;
+    }
   }
-  // }
 
   var enterprises = [];
   if (isuCd != '' && clientTier != '') {
@@ -686,6 +686,7 @@ function setEnterpriseValues(clientTier) {
     };
     var results = cmr.query('GET.ENTLIST.BYISU', qParams);
     if (results != null) {
+      FormManager.resetDropdownValues(FormManager.getField('enterprise'));
       for (var i = 0; i < results.length; i++) {
         enterprises.push(results[i].ret1);
       }
@@ -2239,7 +2240,7 @@ function setISUCTCOnISIC() {
   var isic = FormManager.getActualValue('isicCd');
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
   if (reqType == 'C' && role == 'REQUESTER') {
-    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XINTR' || custSubGrp == 'XINSO' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
+    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XINTR' || custSubGrp == 'XINSO' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
       if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
         FormManager.setValue('clientTier', 'N');
       } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
