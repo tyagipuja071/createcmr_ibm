@@ -465,6 +465,7 @@ public class TransConnService extends BaseBatchService {
         // CREQCMR.RESERVED_CMR_NOS
 
         List<CompanyRecordModel> records = CompanyFinder.findCompanies(search);
+        LOG.info("Number of CMRs in Pool: " + records.size());
 
         if (records.size() == 0) {
           LOG.error("CMR Pool depleted. Cannot proceed with automatic CMR number assignment");
