@@ -443,7 +443,6 @@ public class TransConnService extends BaseBatchService {
         admin.setLockBy(BATCH_USER_ID);
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
-        updateEntity(admin, entityManager);
         
         sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         query = new PreparedQuery(entityManager, sql);
@@ -486,7 +485,7 @@ public class TransConnService extends BaseBatchService {
           } else if (queryReservedCMR.exists()) {
             continue;
           }
-
+          updateEntity(admin, entityManager);
           partialCommit(entityManager);
           LOG.info("CMR no does not exist on reserved. Continuing...");
           // Update CREQCMR.DATA set CMR_NO = from pool CMR, set CREQCMR.ADMIN
