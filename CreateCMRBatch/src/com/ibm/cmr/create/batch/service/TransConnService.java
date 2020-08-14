@@ -427,8 +427,9 @@ public class TransConnService extends BaseBatchService {
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
     query.setParameter("ISSU_CNTRY", SystemConfiguration.getValue("BATCH_CMR_POOL_ISSUING_CNTRY"));
     // jz: temporary, so that only Commercial REGULAR will be done for now until
+    // cm: scenario will be hardcoded for now for REGULAR and PRIV
     // CMR-5564 is implemented
-    query.setParameter("SCENARIO", "REGULAR");
+//    query.setParameter("SCENARIO", "REGULAR");
     List<Admin> pvcRecords = query.getResults(Admin.class);
     LOG.debug("Size of PVC Records : " + pvcRecords.size());
 
@@ -443,7 +444,6 @@ public class TransConnService extends BaseBatchService {
         admin.setLockBy(BATCH_USER_ID);
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
-        updateEntity(admin, entityManager);
         
         sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         query = new PreparedQuery(entityManager, sql);
@@ -465,6 +465,7 @@ public class TransConnService extends BaseBatchService {
         // CREQCMR.RESERVED_CMR_NOS
 
         List<CompanyRecordModel> records = CompanyFinder.findCompanies(search);
+        LOG.info("Number of CMRs in Pool: " + records.size());
 
         if (records.size() == 0) {
           LOG.error("CMR Pool depleted. Cannot proceed with automatic CMR number assignment");
@@ -485,7 +486,7 @@ public class TransConnService extends BaseBatchService {
           } else if (queryReservedCMR.exists()) {
             continue;
           }
-
+          updateEntity(admin, entityManager);
           partialCommit(entityManager);
           LOG.info("CMR no does not exist on reserved. Continuing...");
           // Update CREQCMR.DATA set CMR_NO = from pool CMR, set CREQCMR.ADMIN
@@ -563,7 +564,7 @@ public class TransConnService extends BaseBatchService {
           newAdmin.setId(adminPk);
           newAdmin.setCreateTs(SystemUtil.getCurrentTimestamp());
           newAdmin.setLastUpdtTs(SystemUtil.getCurrentTimestamp());
-          newAdmin.setInternalTyp("UPDATE_AUTO");
+          newAdmin.setInternalTyp("UPD_SIMPLE_AUTO");
           newAdmin.setLockInd(CmrConstants.YES_NO.N.toString());
           newAdmin.setLockTs(null);
           newAdmin.setLockBy(null);
