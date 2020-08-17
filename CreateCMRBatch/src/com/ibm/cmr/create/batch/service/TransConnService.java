@@ -461,6 +461,7 @@ public class TransConnService extends BaseBatchService {
         search.setCity(SystemConfiguration.getValue("BATCH_CMR_POOL_CITY"));
         search.setStateProv(SystemConfiguration.getValue("BATCH_CMR_POOL_STATE"));
         search.setPostCd(SystemConfiguration.getValue("BATCH_CMR_POOL_POSTAL"));
+        search.setPoolRecord(true);
         // Select first record from FindCMR which is not in
         // CREQCMR.RESERVED_CMR_NOS
 
