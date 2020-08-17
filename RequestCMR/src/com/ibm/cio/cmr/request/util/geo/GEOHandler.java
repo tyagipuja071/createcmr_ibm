@@ -833,4 +833,8 @@ public abstract class GEOHandler {
     return colVal;
   }
 
+  public String getCountrySpecificVatPrefix() {
+    return null;
+  }
+
 }
