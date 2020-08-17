@@ -227,32 +227,28 @@ public class SingaporeUtil extends AutomationUtil {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     StringBuilder checkDetails = new StringBuilder();
+    List<DnBMatchingResponse> matches = new ArrayList<DnBMatchingResponse>();
+    boolean matchesDnb = false;
     boolean cmdeReview = false;
     for (String addrType : RELEVANT_ADDRESSES) {
+      if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
+        Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+        matches = getMatches(requestData, engineData, soldTo, false);
+        if (matches != null) {
+          // check against D&B
+          matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
+        }
+      }
       if (changes.isAddressChanged(addrType)) {
         if (CmrConstants.RDC_SOLD_TO.equals(addrType)) {
           addresses = Collections.singletonList(requestData.getAddress(CmrConstants.RDC_SOLD_TO));
         } else {
           addresses = requestData.getAddresses(addrType);
         }
-        int multiAddressitr = 0;
         for (Addr addr : addresses) {
-          if ("Y".equals(addr.getImportInd())) {
-            // import and update address
-            multiAddressitr++;
-          }
-        }
-        for (Addr addr : addresses) {
-          if (CmrConstants.RDC_SOLD_TO.equals(addrType) && "Y".equals(addr.getImportInd())) {
+          if (CmrConstants.RDC_SOLD_TO.equals(addrType) && ("Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()))) {
             if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
-              Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-              List<DnBMatchingResponse> matchesSoldTo = getMatches(requestData, engineData, soldTo, false);
-              boolean matchesDnbSoldTo = false;
-              if (matchesSoldTo != null) {
-                // check against D&B
-                matchesDnbSoldTo = ifaddressCloselyMatchesDnb(matchesSoldTo, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnbSoldTo) {
+              if (!matchesDnb) {
                 // CMDE Review
                 checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.").append("\n");
                 cmdeReview = true;
@@ -260,6 +256,12 @@ public class SingaporeUtil extends AutomationUtil {
               } else {
                 // proceed
                 checkDetails.append("Updates to Sold To " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
+                for (DnBMatchingResponse dnb : matches) {
+                  checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                  checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                  checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                      + dnb.getDnbCountry() + "\n\n");
+                }
               }
             } else {
               // CMDE Review
@@ -270,28 +272,36 @@ public class SingaporeUtil extends AutomationUtil {
             }
           }
 
-          if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && multiAddressitr > 1) {
+          if (!CmrConstants.RDC_SOLD_TO.equals(addrType) && ("Y".equals(addr.getChangedIndc()) || "N".equals(addr.getImportInd()))) {
             if (null == changes.getAddressChange(addrType, "Customer Name") && null == changes.getAddressChange(addrType, "Customer Name Con't")) {
-              Addr address = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-              List<DnBMatchingResponse> matches = getMatches(requestData, engineData, address, false);
-              boolean matchesDnb = false;
-              if (matches != null) {
-                // check against D&B
-                matchesDnb = ifaddressCloselyMatchesDnb(matches, addr, admin, data.getCmrIssuingCntry());
-              }
-              if (!matchesDnb && addressEquals(requestData.getAddress("ZS01"), requestData.getAddress(addrType))) {
+              if (addressEquals(requestData.getAddress("ZS01"), requestData.getAddress(addrType))) {
+                // proceed
+                if (!matchesDnb) {
+                  // CMDE Review
+                  checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.")
+                      .append("\n");
+                  cmdeReview = true;
+                  break;
+                } else {
+                  // proceed
+                  checkDetails.append("Updates to Address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
+                  for (DnBMatchingResponse dnb : matches) {
+                    checkDetails.append(" - DUNS No.:  " + dnb.getDunsNo() + " \n");
+                    checkDetails.append(" - Name.:  " + dnb.getDnbName() + " \n");
+                    checkDetails.append(" - Address:  " + dnb.getDnbStreetLine1() + " " + dnb.getDnbCity() + " " + dnb.getDnbPostalCode() + " "
+                        + dnb.getDnbCountry() + "\n\n");
+                  }
+                }
+              } else {
                 // CMDE Review
-                checkDetails.append("Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.")
+                checkDetails.append("Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match Sold To Address. ")
                     .append("\n");
                 cmdeReview = true;
                 break;
-              } else {
-                // proceed
-                checkDetails.append("Updates to Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records.").append("\n");
               }
             } else {
               // CMDE Review
-              checkDetails.append("Customer name Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified")
+              checkDetails.append("Customer name Updates Addresses for " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified. ")
                   .append("\n");
               cmdeReview = true;
               break;

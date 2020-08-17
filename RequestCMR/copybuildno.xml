@@ -21,8 +21,13 @@
     </tstamp>
   	<echo>Build No: ${cmrconfig.BUILD}</echo>
   	<echo>Target File: ${target.file}</echo>
+    <echo>Build Time: ${build-time}</echo>
+    <echo>Label: ${label}</echo>
+    <echo>Environment Label: ${env.label}</echo>
   	<echo>Setting Build No to ${cmrprefix.PREFIX}${cmrconfig.BUILD}_${build-time}</echo>
-  	<echo file="${target.file}" append="false">${cmrprefix.PREFIX}${cmrconfig.BUILD}_${build-time}</echo>
+  	<loadfile property="CURRENT_CMR_BUILD_VERSION" srcfile="${target.file}" />
+    <echo>Current CMR Build Version: ${CURRENT_CMR_BUILD_VERSION}</echo>
+  	<!--<echo file="${target.file}" append="false">${cmrprefix.PREFIX}${cmrconfig.BUILD}_${build-time}</echo>-->
   </target>
 
 </project>
