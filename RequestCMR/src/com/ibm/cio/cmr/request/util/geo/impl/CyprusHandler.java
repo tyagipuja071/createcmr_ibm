@@ -55,6 +55,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -152,7 +153,7 @@ public class CyprusHandler extends BaseSOFHandler {
       FindCMRRecordModel record = mainRecord;
       // name4 in rdc = Attn on SOF
       record.setCmrDept(record.getCmrName4());
-      record.setCmrName4(null);
+      // record.setCmrName4(null);
       if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
         record.setCmrStreetAddressCont(record.getCmrName4());
         record.setCmrName3(record.getCmrName3());
@@ -160,14 +161,14 @@ public class CyprusHandler extends BaseSOFHandler {
         // name3 in rdc = Address Con't on SOF
         record.setCmrStreetAddressCont(record.getCmrName3());
         record.setCmrName3(null);
+        record.setCmrName4(record.getCmrName3());
       }
 
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
-        if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-          record.setCmrPOBox(record.getCmrPOBox());
-        } else {
-          record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+        if (record.getCmrPOBox().length() > 5) {
+          record.setCmrPOBox(record.getCmrPOBox().substring(0, 5));
         }
+        record.setCmrPOBox(record.getCmrPOBox());
       }
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
@@ -240,7 +241,8 @@ public class CyprusHandler extends BaseSOFHandler {
 
                   addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    addr.setCmrPOBox(record.getCmrPOBox());
+                    String poBox = LegacyCommonUtil.doFormatPoBox(record.getCmrPOBox());
+                    addr.setCmrPOBox(poBox);
                   }
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
@@ -1593,7 +1595,7 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
       }
-      if(legacyObjects != null && legacyObjects.getCustomer() != null){
+      if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
       }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
@@ -2107,7 +2109,7 @@ public class CyprusHandler extends BaseSOFHandler {
       if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
         addr.setTaxOffice("");
       }
-      
+
       if (!StringUtils.isEmpty(addr.getPoBox()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZP01".equals(addr.getId().getAddrType())) {
         addr.setPoBox("");
       }
