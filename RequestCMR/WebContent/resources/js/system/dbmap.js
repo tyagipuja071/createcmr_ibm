@@ -263,6 +263,9 @@ var DB_DATA_FIELDS = [ {
   id : 'ScenarioSubType',
   name : 'CUST_SUB_GRP'
 }, {
+  id : 'SpecialTaxCd',
+  name : 'SPECIAL_TAX_CD'
+}, {
   id : 'Province/TerritoryID',
   name : 'TERRITORY_CD'
 }, {
