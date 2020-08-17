@@ -3937,8 +3937,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
 
-  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
+  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
 
   GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
