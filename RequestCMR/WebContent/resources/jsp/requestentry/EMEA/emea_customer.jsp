@@ -36,19 +36,36 @@
 		<form:hidden path="fiscalDataCompanyNo" />
 		<form:hidden path="nationalCusId" />
 	</cmr:view>
-
-	<cmr:row addBackground="false">
-	<cmr:column span="2" containerForField="LocalTax1" forCountry="754,866">
+	<cmr:row addBackground="true">
+		<cmr:column span="2" containerForField="LocalTax1"
+			forCountry="754,866">
 			<p>
 				<label for="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />:
 					<cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
-					<cmr:view forCountry="866"><cmr:info text="${ui.info.CRN_UK}" /></cmr:view> 
-					<cmr:view forCountry="754"><cmr:info text="${ui.info.CRN_I}" /></cmr:view>           
+					<cmr:view forCountry="866">
+						<cmr:info text="${ui.info.CRN_UK}" />
+					</cmr:view> <cmr:view forCountry="754">
+						<cmr:info text="${ui.info.CRN_I}" />
+					</cmr:view>
 				</label>
 				<cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1"
 					tabId="MAIN_CUST_TAB" />
 			</p>
 		</cmr:column>
+		<cmr:column span="2" containerForField="CRNExempt"
+			forCountry="754,866">
+			<p>
+				<cmr:label fieldId="crnExempt">&nbsp;</cmr:label>
+				<cmr:field fieldId="CRNExempt" id="restrictInd" path="restrictInd"
+					tabId="MAIN_CUST_TAB" />
+				<cmr:label fieldId="restrictInd" forRadioOrCheckbox="true">
+					<cmr:fieldLabel fieldId="CRNExempt" />
+				</cmr:label>
+			</p>
+		</cmr:column>
+	</cmr:row>
+	<cmr:row addBackground="false">
+
 		<cmr:column span="2" containerForField="SpecialTaxCd"
 			exceptForCountry="666,726,862">
 			<p>
@@ -128,7 +145,7 @@
 				</cmr:column>
 			</c:if>
 		</cmr:view>
-		
+
 		<cmr:view forCountry="726">
 			<cmr:column span="2" containerForField="ModeOfPayment">
 				<p>
@@ -140,9 +157,9 @@
 					<cmr:field path="paymentMode" id="modeOfPayment"
 						fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
 				</p>
-			</cmr:column>		
+			</cmr:column>
 		</cmr:view>
-		
+
 	</cmr:row>
 	<cmr:view forCountry="726">
 		<cmr:row addBackground="true">
@@ -241,18 +258,19 @@
 		    </cmr:column>
 		</cmr:row>
 	</cmr:view>
-	
-		<cmr:view forCountry="866,754">
+
+	<cmr:view forCountry="866,754">
 		<cmr:row addBackground="true">
-	   <cmr:column span="2" containerForField="CustClass">
+			<cmr:column span="2" containerForField="CustClass">
 				<p>
 					<cmr:label fieldId="custClass">
-				    <cmr:fieldLabel fieldId="CustClass" /> :  
-				    <div id="info">  
-                    <cmr:info text="${ui.info.custClass}"></cmr:info>
-                    </div>   
-                    </cmr:label>
-                    <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_IBM_TAB" /> 
+						<cmr:fieldLabel fieldId="CustClass" /> :  
+				    <div id="info">
+							<cmr:info text="${ui.info.custClass}"></cmr:info>
+						</div>
+					</cmr:label>
+					<cmr:field fieldId="CustClass" id="custClass" path="custClass"
+						tabId="MAIN_IBM_TAB" />
 				</p>
 			</cmr:column>
 		</cmr:row>
