@@ -50,7 +50,7 @@ boolean approver = user != null && user.isApprover();
 
 
 <title><tiles:getAsString name="title" /></title>
-<script src="https://1.w3.s81c.com/common/js/dojo/w3.js" type="text/javascript">
+<script src="${resourcesPath}/js/w3.js" type="text/javascript">
 	//
 </script>
 

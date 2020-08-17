@@ -45,7 +45,7 @@ request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 <meta name="feedback" content="CMR Search Feedback" />
 
 <title>${windowtitle}</title>
-<script src="https://1.w3.s81c.com/common/js/dojo/w3.js" type="text/javascript">
+<script src="${resourcesPath}/js/w3.js" type="text/javascript">
   //
 </script>
 

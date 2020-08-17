@@ -360,7 +360,7 @@ div#ibm-content-main {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -495,7 +495,7 @@ div#ibm-content-main {
       <cmr:view forGEO="LA">
         <cmr:tab label="${ui.tab.contactInfo}" id="MAIN_CONTACTINFO_TAB" sectionId="CONTACTINFO_REQ_TAB" gridIds="CONTACTINFO_GRID" />
       </cmr:view>
-      <cmr:view forCountry="852,720,834,738,736,714,646,358,359,363,603,607,620,626,651,675,677,680,694,695,699,705,707,713,741,752,762,767,768,772,787,805,808,821,823,832,849,850,865,889,641">
+      <cmr:view forCountry="852,720,834,738,736,714,646,358,359,363,607,620,626,651,675,677,680,694,695,713,741,752,762,767,768,772,787,805,808,821,823,832,849,850,865,889,641">
         <cmr:tab label="${ui.tab.checklist}" id="MAIN_CHECKLIST_TAB" sectionId="CHECKLIST_TAB" />
       </cmr:view>
       <cmr:tab label="${ui.tab.attach}" id="MAIN_ATTACH_TAB" sectionId="ATTACH_REQ_TAB" gridIds="ATTACHMENT_GRID" />

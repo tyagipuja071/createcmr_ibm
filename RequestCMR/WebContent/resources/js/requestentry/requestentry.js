@@ -950,19 +950,23 @@ function connectToCmrServices() {
         errorMsg += (showError ? ', ' : '') + 'DUNS No.';
         showError = true;
       } else {
-        var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
-        var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
-            SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA, SysLoc.JAPAN ];
-        if (COUNTRIES.indexOf(sysLocCd) == -1) {
-          FormManager.setValue('dunsNo', data.dunsNo);
-        } else {
+//        var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
+//        var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
+//            SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA, SysLoc.JAPAN ];
+//        if (COUNTRIES.indexOf(sysLocCd) == -1) {
+//          FormManager.setValue('dunsNo', data.dunsNo);
+//        } else {
           var dunsNo = FormManager.getActualValue('dunsNo');
 
           if (dunsNo == '' && data.dunsNo != '') {
             FormManager.setValue('dunsNo', data.dunsNo);
+          } else {
+            if (dunsNo && data.dunsNo){
+              cmr.showAlert('DUNS '+data.dunsNo+' was retrieved but an existing DUNS '+dunsNo+' was found. The value was not overwritten.');
+            }
           }
 
-        }
+//        }
       }
       if (showError) {
         if (covError) {

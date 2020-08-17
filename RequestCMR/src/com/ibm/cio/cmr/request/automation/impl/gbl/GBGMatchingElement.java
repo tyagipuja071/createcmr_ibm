@@ -184,6 +184,11 @@ public class GBGMatchingElement extends MatchingElement {
               output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(), "VAT-Ctry/CMR Count", gbg.getCountry() + "/" + gbg.getCmrCount(), "GBG",
                   itemNo);
             }
+            output.addMatch(getProcessCode(), "BG_ID", gbg.getBgId(), "Derived", "Derived", "GBG", itemNo);
+            output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
+            output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
+            output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
+
             // else {
             // LOG.debug("Matches found via Name matching..");
             // details.append("\n").append("Found via Name matching [" +
@@ -260,6 +265,18 @@ public class GBGMatchingElement extends MatchingElement {
     switch (keyType) {
     case "LDE":
       return importLDE(entityManager, requestData, match);
+    case "BG_ID":
+      requestData.getData().setBgId(match.getId().getMatchKeyValue());
+      return true;
+    case "GBG_ID":
+      requestData.getData().setGbgId(match.getId().getMatchKeyValue());
+      return true;
+    case "BG_NAME":
+      requestData.getData().setBgDesc(match.getId().getMatchKeyValue());
+      return true;
+    case "GBG_NAME":
+      requestData.getData().setGbgDesc(match.getId().getMatchKeyValue());
+      return true;
     }
     return false;
   }

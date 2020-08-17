@@ -93,34 +93,36 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
 
-            // check if the record closely matches D&B. This really validates
-            // input against record
-            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
-            if (closelyMatches) {
-              LOG.debug("DUNS " + dnbRecord.getDunsNo() + " matches the request data.");
-              if (highestCloseMatch == null) {
-                highestCloseMatch = dnbRecord;
-                if (!scenarioExceptions.isCheckVATForDnB() || StringUtils.isBlank(data.getVat()) || "Y".equals(data.getVatExempt())) {
-                  // no D&B VAT check or no VAT on record or VAT exempt, this
-                  // match is the one we
-                  // need
+            if (dnbRecord.getConfidenceCode() > 7) {
+              // check if the record closely matches D&B. This really validates
+              // input against record
+              boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
+              if (closelyMatches) {
+                LOG.debug("DUNS " + dnbRecord.getDunsNo() + " matches the request data.");
+                if (highestCloseMatch == null) {
+                  highestCloseMatch = dnbRecord;
+                  if (!scenarioExceptions.isCheckVATForDnB() || StringUtils.isBlank(data.getVat()) || "Y".equals(data.getVatExempt())) {
+                    // no D&B VAT check or no VAT on record or VAT exempt, this
+                    // match is the one we
+                    // need
+                    perfectMatch = dnbRecord;
+                    break;
+                  }
+                }
+
+                isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+                vatFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+
+                if (scenarioExceptions.isCheckVATForDnB() && !StringUtils.isBlank(data.getVat())
+                    && ((!vatFound && engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED)) || (vatFound && isOrgIdMatched))) {
+                  // found the perfect match here
                   perfectMatch = dnbRecord;
                   break;
                 }
+
+              } else {
+                LOG.debug("DUNS " + dnbRecord.getDunsNo() + " does NOT match the request data.");
               }
-
-              isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
-              vatFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
-
-              if (scenarioExceptions.isCheckVATForDnB() && !StringUtils.isBlank(data.getVat())
-                  && ((!vatFound && engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED)) || (vatFound && isOrgIdMatched))) {
-                // found the perfect match here
-                perfectMatch = dnbRecord;
-                break;
-              }
-
-            } else {
-              LOG.debug("DUNS " + dnbRecord.getDunsNo() + " does NOT match the request data.");
             }
 
           }

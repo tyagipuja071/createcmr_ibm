@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.service.requestentry;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1154,6 +1155,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
   }
 
   public void saveChecklist(EntityManager entityManager, long reqId, AppUser user) {
+    if (!isCheckListValid()) {
+      this.log.debug("Checklist is blank for Request " + reqId + ", skipping saving.");
+      return;
+    }
     this.log.debug("Processing checklist for request " + reqId);
     String sql = ExternalizedQuery.getSql("REQENTRY.GETCHECKLIST");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1187,6 +1192,36 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       updateEntity(checklist, entityManager);
     }
 
+  }
+
+  /**
+   * Checks if the current checklist on this request has a valid value, which
+   * means it was properly submitted
+   * 
+   * @return
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   */
+  private boolean isCheckListValid() {
+    if (this.checklist == null) {
+      return false;
+    }
+    for (Field field : CheckListModel.class.getDeclaredFields()) {
+      if (String.class.equals(field.getType())) {
+        field.setAccessible(true);
+        String value = null;
+        try {
+          value = (String) field.get(this.checklist);
+        } catch (Exception e) {
+          this.log.warn("Field " + field.getName() + " cannot be retrieved from checklist model");
+        }
+        if (!StringUtils.isBlank(value)) {
+          // at least one valid checklist item
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   private ProlifChecklist getChecklist(EntityManager entityManager, long reqId) {

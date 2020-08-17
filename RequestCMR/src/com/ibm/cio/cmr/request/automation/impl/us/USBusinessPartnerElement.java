@@ -1136,23 +1136,20 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       stateProv = childInstallAt.getStateProv();
       county = childInstallAt.getCounty();
       createAddressOverrides = true;
+    } else if (ibmDirectCmr != null) {
+      // CMR-4033
+      String parts[] = handler.doSplitName(ibmDirectCmr.getCmrName(), "", 24, 24);
+      mainCustNm1 = parts[0];
+      mainCustNm2 = parts[1];
+      parts = handler.doSplitAddress(ibmDirectCmr.getCmrStreetAddress(), ibmDirectCmr.getCmrName4(), 24, 24);
+      streetAddress1 = parts[0];
+      streetAddress2 = parts[1];
+      city1 = ibmDirectCmr.getCmrCity();
+      postalCd = ibmDirectCmr.getCmrPostalCode();
+      stateProv = ibmDirectCmr.getCmrState();
+      county = ibmDirectCmr.getCmrCountry();
+      createAddressOverrides = true;
     }
-    // COMMENTED AS PER DISCUSSIONS OVER CMR-4033
-    // else if (ibmDirectCmr != null) {
-    // String parts[] = handler.doSplitName(ibmDirectCmr.getCmrName(), "", 24,
-    // 24);
-    // mainCustNm1 = parts[0];
-    // mainCustNm2 = parts[1];
-    // parts = handler.doSplitAddress(ibmDirectCmr.getCmrStreetAddress(),
-    // ibmDirectCmr.getCmrName4(), 24, 24);
-    // streetAddress1 = parts[0];
-    // streetAddress2 = parts[1];
-    // city1 = ibmDirectCmr.getCmrCity();
-    // postalCd = ibmDirectCmr.getCmrPostalCode();
-    // stateProv = ibmDirectCmr.getCmrState();
-    // county = ibmDirectCmr.getCmrCountry();
-    // createAddressOverrides = true;
-    // }
 
     if (createAddressOverrides) {
 

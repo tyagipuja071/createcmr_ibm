@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.util;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +24,15 @@ import com.ibm.swat.password.cwaapi;
  * @author Sandeep.Kanparthy May 16, 2011
  */
 public class BluePagesHelper {
+
+  public static void main(String[] args) {
+    String mgrMail = getManagerEmail("9esplar@ph.ibm.com");
+    System.out.println(mgrMail);
+    mgrMail = getManagerEmail("zamoraja@ph.ibm.com");
+    System.out.println(mgrMail);
+    mgrMail = getManagerEmail("136786PH1");
+    System.out.println(mgrMail);
+  }
 
   /** The Constant LOG. */
   private static final Logger LOG = Logger.getLogger(BluePagesHelper.class);
@@ -480,14 +490,20 @@ public class BluePagesHelper {
 
   public static boolean isBluePagesHeirarchyManager(String employeeEmail, String managerEmail) {
     if (StringUtils.isNotBlank(employeeEmail) && StringUtils.isNotBlank(managerEmail)) {
-      String email = employeeEmail;
-      while (StringUtils.isNotBlank(email)) {
-        String employeeId = getCNUMByIntranetAddr(email);
-        if (!"NOTFOUND".equals(employeeId) && !"MULTIPLE".equals(employeeId)) {
-          email = BluePagesHelper.getManagerEmail(employeeId);
-        }
-        if (email != null && email.equals(managerEmail)) {
-          return true;
+      if (employeeEmail.toLowerCase().equals(managerEmail.toLowerCase())) {
+        return true;
+      }
+      String cnum = getCNUMByIntranetAddr(employeeEmail);
+      BPResults results = BluePages.getMgrChainOf(cnum);
+      if (results != null) {
+        for (int i = 0; i < results.rows(); i++) {
+          Hashtable<String, String> row = results.getRow(i);
+          if (row != null) {
+            String mgrmail = row.get("INTERNET");
+            if (!StringUtils.isBlank(mgrmail) && mgrmail.toLowerCase().equals(managerEmail.toLowerCase())) {
+              return true;
+            }
+          }
         }
       }
     }

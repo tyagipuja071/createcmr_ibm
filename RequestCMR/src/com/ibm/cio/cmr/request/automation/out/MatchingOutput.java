@@ -57,6 +57,9 @@ public class MatchingOutput implements AutomationOutput {
     record.setMatchGradeValue(matchGradeValue);
     record.setMatchKeyName(matchKeyName);
     record.setMatchKeyValue(matchKeyValue);
+    if (record.getMatchKeyValue() != null && record.getMatchKeyValue().length() > 30) {
+      record.setMatchKeyValue(record.getMatchKeyValue().substring(0, 30));
+    }
     record.setRecordType(recordType);
     record.setItemNo(itemNo);
     record.setProcessCode(processCode);
@@ -156,8 +159,9 @@ public class MatchingOutput implements AutomationOutput {
           match.setMatchGradeValue(record.getMatchGradeValue());
           match.setRecordTyp(record.getRecordType());
 
-          LOG.trace("Creating match record for " + record.getMatchKeyName() + " = " + record.getMatchKeyValue());
-          entityManager.persist(match);
+          LOG.debug("Creating match record for " + record.getMatchKeyName() + " = " + record.getMatchKeyValue());
+          entityManager.merge(match);
+          entityManager.flush();
 
           this.recordedMatches.add(match);
         }
