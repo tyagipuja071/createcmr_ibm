@@ -15,6 +15,7 @@ var _isicHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
 var _isicCdCRNHandler = null;
+var _crnExemptHandler = null;
 
 var SCOTLAND_POST_CD = [ 'AB', 'KA', 'DD', 'KW', 'DG', 'KY', 'EH', 'ML', 'FK', 'PA', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'PH', 'TD', 'IV' ];
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
@@ -368,20 +369,7 @@ function afterConfigForUKI() {
   }
 
   if (_isicCdCRNHandler == null) {
-    _isicCdCRNHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      var isicVal = FormManager.getActualValue('isicCd');
-      if (reqType == 'U') {
-        if (role.toUpperCase() == 'REQUESTER') {
-          if (isicVal != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
-            FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
-          } else {
-            FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-          }
-        } else if (role.toUpperCase() == 'PROCESSOR') {
-          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-        }
-      }
-    });
+    _isicCdCRNHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', configureCRNForUpdatesUKI);
   }
 
   if (_isicCdCRNHandler && _isicCdCRNHandler[0]) {
@@ -433,6 +421,24 @@ function afterConfigForUKI() {
       }
     });
   }
+  
+  if (_crnExemptHandler == null) {
+    _crnExemptHandler = dojo.connect(FormManager.getField('restrictInd'), 'onClick', function(value) {
+      var reqType = FormManager.getActualValue('reqType');
+      if (dijit.byId('restrictInd').get('checked')) {
+        console.log(">>> Process crnExempt remove * >> ");
+        FormManager.removeValidator('taxCd1',Validators.REQUIRED);
+        FormManager.readOnly('taxCd1');
+      } else {
+        if(reqType == 'C'){
+          FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+          FormManager.enable('taxCd1')
+        } else if (reqType == 'U') {
+          configureCRNForUpdatesUKI();
+        }
+      }
+    });
+  }
   if (_lobHandler == null) {
     var _custType = FormManager.getActualValue('custSubGrp');
     ;
@@ -468,6 +474,22 @@ function afterConfigForUKI() {
       setISUCTCOnISIC();
       setCustClassCd();
     });
+  }
+}
+
+function configureCRNForUpdatesUKI(){
+  var isicVal = FormManager.getActualValue('isicCd');
+  var zs01LandCntry = getZS01LandCntry();
+  if (reqType == 'U' && !dijit.byId('restrictInd').get('checked')) {
+    if (role.toUpperCase() == 'REQUESTER') {
+      if (isicVal != '9500' && ((zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
+        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+      } else {
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      }
+    } else if (role.toUpperCase() == 'PROCESSOR') {
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    }
   }
 }
 
@@ -7444,6 +7466,8 @@ function autoSetAbbrNameUKI() {
 }
 
 function autoSetUIFieldsOnScnrioUKI() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custGrp = FormManager.getActualValue('custGrp');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'INTER') {
     FormManager.setValue('company', '');
@@ -7458,6 +7482,11 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.setValue('collectionCd', '69');
     FormManager.readOnly('custClass');
     FormManager.setValue('custClass', '33');
+  }
+  
+  if(reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU')){
+    FormManager.getField('restrictInd').checked = false;
+    FormManager.enable('restrictInd');
   }
 
 }
