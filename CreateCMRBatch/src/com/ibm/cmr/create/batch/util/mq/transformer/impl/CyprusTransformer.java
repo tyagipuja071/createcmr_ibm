@@ -436,7 +436,7 @@ public class CyprusTransformer extends EMEATransformer {
     legacyCust.setAccAdminBo(""); // RACBO
     legacyCust.setDcRepeatAgreement(""); // CAGXB
     legacyCust.setLeasingInd(""); // CIEDC
-    legacyCust.setAuthRemarketerInd("YES"); // CIEXJ
+    legacyCust.setAuthRemarketerInd("1"); // CIEXJ
 
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
