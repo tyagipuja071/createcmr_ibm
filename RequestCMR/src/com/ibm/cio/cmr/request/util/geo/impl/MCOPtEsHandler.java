@@ -461,6 +461,11 @@ public class MCOPtEsHandler extends MCOHandler {
         data.setAbbrevLocn(abbrevLocn.length() > 12 ? abbrevLocn.substring(0, 12) : abbrevLocn);
         data.getAbbrevLocn();
       }
+
+      CmrtCust cust = this.legacyObjects.getCustomer();
+      if (cust != null) {
+        data.setSpecialTaxCd(StringUtils.isEmpty(cust.getTaxCd()) ? "" : cust.getTaxCd());
+      }
     }
 
     if (SystemLocation.PORTUGAL.equalsIgnoreCase(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {

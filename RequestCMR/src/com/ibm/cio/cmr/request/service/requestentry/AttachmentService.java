@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -137,10 +138,11 @@ public class AttachmentService extends BaseService<AttachmentModel, Attachment> 
       tmp.mkdirs();
     }
     // Set factory constraints
-    factory.setSizeThreshold(5000);
-    factory.setRepository(tmp);
+    // factory.setSizeThreshold(5000);
+    // factory.setRepository(tmp);
 
     // Create a new file upload handler
+    this.log.debug("Preparing to upload file..");
     ServletFileUpload upload = new ServletFileUpload(factory);
     List<FileItem> items = upload.parseRequest(request);
     long reqId = 0;
@@ -272,6 +274,7 @@ public class AttachmentService extends BaseService<AttachmentModel, Attachment> 
                   throw new CmrException(MessageUtil.ERROR_FILE_ATTACH_SIZE, SystemConfiguration.getValue("ATTACHMENT_MAX_SIZE"));
                 }
 
+                this.log.debug("Creating ZIP file " + fileName + " for attachment.");
                 FileOutputStream fos = new FileOutputStream(new File(zipFileName));
                 try {
                   ZipOutputStream zos = new ZipOutputStream(fos);
@@ -280,13 +283,9 @@ public class AttachmentService extends BaseService<AttachmentModel, Attachment> 
                     zos.putNextEntry(entry);
 
                     // put the file as the single entry
-                    byte[] bytes = new byte[1024];
-                    int length = 0;
                     InputStream is = item.getInputStream();
                     try {
-                      while ((length = is.read(bytes)) >= 0) {
-                        zos.write(bytes, 0, length);
-                      }
+                      IOUtils.copy(is, zos);
                     } finally {
                       is.close();
                     }

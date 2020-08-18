@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 
@@ -197,7 +198,9 @@ public class CmrClientService extends BaseSimpleService<Object> {
   }
 
   public void getStandardCity(AddressModel address, String cmrIssuingCntry, ModelMap response) throws Exception {
+    LOG.debug("Performing standard city service for Request " + address.getReqId());
     String baseUrl = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    LOG.debug(" - connecting to " + baseUrl);
     StandardCityServiceClient stdCityClient = CmrServicesFactory.getInstance().createClient(baseUrl, StandardCityServiceClient.class);
     StandardCityRequest stdCityRequest = new StandardCityRequest();
     stdCityRequest.setCountry(address.getLandCntry());
@@ -212,8 +215,12 @@ public class CmrClientService extends BaseSimpleService<Object> {
     }
     stdCityClient.setStandardCityRequest(stdCityRequest);
 
+    String req = new ObjectMapper().writeValueAsString(stdCityClient);
+    LOG.debug(" - " + address.getReqId() + "std city request " + req);
     StandardCityResponse resp = stdCityClient.executeAndWrap(StandardCityResponse.class);
     if (resp != null) {
+      String res = new ObjectMapper().writeValueAsString(resp);
+      LOG.debug(" - " + address.getReqId() + " std city response " + res);
       response.put("result", resp);
     }
   }
