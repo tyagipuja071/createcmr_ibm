@@ -568,8 +568,14 @@ public class RequestEntryController extends BaseController {
     String cmrCntry = model.getCmrIssuingCntry();
     String searchCntry = model.getSearchIssuingCntry();
     String newParams = "?cmrIssuingCntry=" + cmrCntry + "&reqType=" + reqModel.getReqType();
+
     try {
-      FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
+      FindCMRResultModel results = null;
+      if(!model.isPoolRecord()){	
+    	  results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
+      } else {
+    	  results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry, true); //searching for pool records
+      }
 
       boolean noResults = false;
       if (results == null || results.getItems() == null || results.getItems().size() == 0) {
