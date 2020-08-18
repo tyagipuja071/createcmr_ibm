@@ -2994,12 +2994,6 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetAbbrevLocnAfterImport(entityManager, admin, data);
     }
 
-    if (SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
-      if (isOldRecordsGR) {
-        updateImportIndicatior(entityManager, data.getId().getReqId());
-      }
-    }
-
     if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       int zi01countrdc = getaddZI01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(),
           ziType);
