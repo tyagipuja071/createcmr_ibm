@@ -473,11 +473,14 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
       ibm.addCell(createLabelCell("Client Tier of Duplicate CMR:"));
       ibm.addCell(createValueCell(data.getDupClientTierCd()));
 
-      ibm.addCell(createLabelCell("Enterprise of Duplicate CMR:"));
+      ibm.addCell(createLabelCell("Company of Duplicate CMR:"));
       ibm.addCell(createValueCell(data.getDupEnterpriseNo()));
 
-      ibm.addCell(createLabelCell("Sales Rep of Duplicate CMR:"));
-      ibm.addCell(createValueCell(data.getDupSalesRepNo()));
+      // ibm.addCell(createLabelCell("Sales Rep of Duplicate CMR:"));
+      // ibm.addCell(createValueCell(data.getDupSalesRepNo()));
+
+      ibm.addCell(createLabelCell("Enterprise of Duplicate CMR:"));
+      ibm.addCell(createValueCell(data.getTaxCd3()));
 
       ibm.addCell(createLabelCell("SBO of Duplicate CMR:"));
       ibm.addCell(createValueCell(data.getSalesBusOffCd()));
