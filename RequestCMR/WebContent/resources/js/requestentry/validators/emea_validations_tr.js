@@ -3380,7 +3380,7 @@ function addLatinCharValidator() {
       checkAndAddValidator('dept', Validators.LATIN, [ 'District' ]);
     } else if (cntry == SysLoc.TURKEY) {
       checkAndAddValidator('custNm2', Validators.LATIN, [ 'Customer Name Con\'t' ]);
-      checkAndAddValidator('addrTxt2', Validators.LATIN, [ ' Address Con\'t' ]);
+      checkAndAddValidator('addrTxt2', Validators.LATIN, [ 'Street Con\'t' ]);
       checkAndAddValidator('dept', Validators.LATIN, [ 'District' ]);
     }
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
@@ -3505,7 +3505,7 @@ function addTurkishCharValidator() {
     checkAndAddValidator('custNm2', turkish, [ 'Customer Name Con\'t' ]);
     checkAndAddValidator('custNm4', turkish, [ 'Name 4' ]);
     checkAndAddValidator('addrTxt', turkish, [ 'Street Address' ]);
-    checkAndAddValidator('addrTxt2', turkish, [ ' Address Con\'t/Occupation' ]);
+    checkAndAddValidator('addrTxt2', turkish, [ 'Street Con\'t' ]);
     checkAndAddValidator('city1', turkish, [ 'City' ]);
     checkAndAddValidator('dept', turkish, [ 'District' ]);
     checkAndAddValidator('postCd', turkish, [ 'Postal Code' ]);

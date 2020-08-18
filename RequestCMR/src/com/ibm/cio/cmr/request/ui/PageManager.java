@@ -931,6 +931,8 @@ public class PageManager implements Serializable {
   }
 
   public static boolean autoProcEnabled(String cmrIssuingCntry, String reqType) {
+	if(instance == null)
+		return true;
     for (String code : instance.autoProcCountries) {
       String reqTypes = null;
       if (code != null && code.startsWith(cmrIssuingCntry)) {
