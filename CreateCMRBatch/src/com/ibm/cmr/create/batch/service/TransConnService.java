@@ -542,6 +542,7 @@ public class TransConnService extends BaseBatchService {
           ParamContainer params = new ParamContainer();
 
           record.setReqType("C");
+          record.setPoolRecord(true);
           params.addParam("model", record);
 
           AppUser user = new AppUser();

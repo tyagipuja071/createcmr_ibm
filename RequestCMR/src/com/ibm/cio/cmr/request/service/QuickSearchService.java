@@ -119,6 +119,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     if (!StringUtils.isBlank(model.getName())) {
       importModel.setQuickSearchData(formatSearchParams(model));
     }
+    importModel.setPoolRecord(model.isPoolRecord());
 
     LOG.debug("Creating request from CMR " + model.getCmrNo() + " under " + model.getIssuingCntry());
     ModelAndView mv = controller.importCMRs(request, null, importModel, reqModel);
