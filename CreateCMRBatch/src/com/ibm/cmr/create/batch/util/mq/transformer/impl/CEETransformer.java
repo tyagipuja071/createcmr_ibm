@@ -978,6 +978,10 @@ public class CEETransformer extends EMEATransformer {
             }
           }
 
+      if ("707ME".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("713");
+      }
+
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -989,8 +993,14 @@ public class CEETransformer extends EMEATransformer {
         }
       }
 
+      if ("707ME".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("713");
+      }
+
       if (!StringUtils.isBlank(data.getEnterprise())) {
         legacyCust.setEnterpriseNo(data.getEnterprise());
+      } else {
+        legacyCust.setEnterpriseNo("");
       }
 
       if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
@@ -1680,11 +1690,14 @@ public class CEETransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
 
     Data data = cmrObjects.getData();
-    // if (!StringUtils.isBlank(data.getTaxCd1())) {
-    // legacyCustExt.setBankAcctNo(data.getTaxCd1());
-    // } else {
-    // legacyCustExt.setBankAcctNo("");
-    // }
+    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
+      if (!StringUtils.isBlank(data.getTaxCd1())) {
+        legacyCustExt.setBankAcctNo(data.getTaxCd1());
+      } else {
+        legacyCustExt.setBankAcctNo("");
+      }
+    }
+
     Admin admin = cmrObjects.getAdmin();
     if ("C".equals(admin.getReqType()) && "644".equals(data.getCmrIssuingCntry()) && "LOCAL".equals(data.getCustGrp())
         && !"Y".equals(data.getVatExempt())) {
@@ -1740,14 +1753,14 @@ public class CEETransformer extends EMEATransformer {
         }
       }
     }
-    //
-    // if (!StringUtils.isBlank(muData.getEmail2())) {
-    // if ("@".equals(muData.getEmail2())) {
-    // custExt.setBankAcctNo("");
-    // } else {
-    // custExt.setBankAcctNo(muData.getEmail2());
-    // }
-    // }
+
+    if (!StringUtils.isBlank(muData.getEmail2())) {
+      if ("@".equals(muData.getEmail2())) {
+        custExt.setBankAcctNo("");
+      } else {
+        custExt.setBankAcctNo(muData.getEmail2());
+      }
+    }
 
     List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
     MassUpdtAddr zp01Addr = new MassUpdtAddr();

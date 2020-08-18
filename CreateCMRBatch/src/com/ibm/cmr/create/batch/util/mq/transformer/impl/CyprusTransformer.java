@@ -381,14 +381,6 @@ public class CyprusTransformer extends EMEATransformer {
         legacyCust.setImsCd("");
       }
 
-      // SBO,IBO,REMXA,REMXD
-      if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-        legacyCust.setIbo(data.getSalesBusOffCd());
-        legacyCust.setSbo(data.getSalesBusOffCd());
-      } else {
-        legacyCust.setIbo("");
-        legacyCust.setSbo("");
-      }
       if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
         legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
       } else {
@@ -437,6 +429,15 @@ public class CyprusTransformer extends EMEATransformer {
     legacyCust.setDcRepeatAgreement(""); // CAGXB
     legacyCust.setLeasingInd(""); // CIEDC
     legacyCust.setAuthRemarketerInd("1"); // CIEXJ
+
+    // SBO,IBO,REMXA,REMXD
+    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+      legacyCust.setIbo(data.getSalesBusOffCd() + "0000");
+      legacyCust.setSbo(data.getSalesBusOffCd() + "0000");
+    } else {
+      legacyCust.setIbo("");
+      legacyCust.setSbo("");
+    }
 
     // formatted data
     if (!StringUtils.isEmpty(dummyHandler.messageHash.get("AbbreviatedLocation"))) {
