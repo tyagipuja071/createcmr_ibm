@@ -246,7 +246,6 @@ public class CEMEAHandler extends BaseSOFHandler {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
                   if (sadr != null) {
                     Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -275,14 +274,12 @@ public class CEMEAHandler extends BaseSOFHandler {
                       }
                       installing.setCmrSapNumber("");
                       converted.add(installing);
-                    }
                   }
                 }
                 if (StringUtils.isBlank(adrnr)) {
                   CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
                   if (gAddr != null) {
                     Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -315,7 +312,6 @@ public class CEMEAHandler extends BaseSOFHandler {
                         installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
                       }
                       converted.add(installing);
-                    }
                   }
                 }
                 // add new here
