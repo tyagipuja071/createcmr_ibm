@@ -26,7 +26,7 @@
   <form:hidden path="searchTerm" />
 
   <cmr:row addBackground="false">
-    <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
+<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
         <cmr:label fieldId="locationNumber">
           <cmr:fieldLabel fieldId="LocationNumber" />: 
@@ -34,7 +34,7 @@
         </cmr:label>
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
-    </cmr:column>
+    </cmr:column> --%>
     <cmr:column span="2" containerForField="SpecialTaxCd" forCountry="822">
       <p>
         <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
@@ -155,7 +155,23 @@
           </cmr:label>
           <cmr:field path="legacyCurrencyCd" id="legacyCurrencyCd" fieldId="CurrencyCd" tabId="MAIN_CUST_TAB" />
         </p>
-      </cmr:column>
+      </cmr:column>   
+     <cmr:row topPad="10" addBackground="false">
+    <cmr:column span="2" containerForField="IbmDeptCostCenter">
+      <p>
+        <cmr:label fieldId="ibmDeptCostCenter">
+          <cmr:fieldLabel fieldId="IbmDeptCostCenter" />: 
+          </cmr:label>
+        <cmr:field fieldId="IbmDeptCostCenter" id="ibmDeptCostCenter" path="ibmDeptCostCenter" tabId="MAIN_IBM_TAB" />
+    </cmr:column>
+    <cmr:column span="2" containerForField="CustClass">
+      <p>
+        <cmr:label fieldId="custClass">
+          <cmr:fieldLabel fieldId="CustClass" />: 
+          </cmr:label>
+        <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_IBM_TAB" />
+    </cmr:column>
+    </cmr:row>
     </cmr:row>
   </cmr:view>
   
@@ -174,6 +190,7 @@
   </cmr:view>
   <cmr:view forCountry="838">
     <form:hidden path="acAdminBo" id="acAdminBo"/>
+    <form:hidden path="locationNo" id="locationNumber"/>
   </cmr:view>
     
   <form:hidden path="economicCd" id="economicCd"/>
