@@ -996,16 +996,37 @@ function doubleByteCharacterValidator() {
           REQ_ID : _reqId,
         };
         var AddrResult = cmr.query('GET.CN.ADDRDETAILS', AddrParams);
-        var _addrTxt = AddrResult.ret1;
-        var _addrTxt2 = AddrResult.ret2;
-        var _dropdowncity1 = AddrResult.ret3;
-        var _city2 = AddrResult.ret4;
-        var _dept = AddrResult.ret5;
-        var _bldg = AddrResult.ret6;
-        var _office = AddrResult.ret7;
-        var _poBox = AddrResult.ret8;
+        var _custNm1 = AddrResult.ret1;
+        var _custNm2 = AddrResult.ret2;
+        var _custNm3 = AddrResult.ret3;
+        var _addrTxt = AddrResult.ret4;
+        var _addrTxt2 = AddrResult.ret5;
+        var _dropdowncity1 = AddrResult.ret6;
+        var _city2 = AddrResult.ret7;
+        var _dept = AddrResult.ret8;
+        var _bldg = AddrResult.ret9;
+        var _office = AddrResult.ret10;
+        var _poBox = AddrResult.ret11;
         var reg = /^[-_ a-zA-Z0-9]+$/;
-        if (_addrTxt != '' && (_addrTxt.length > 0 && !_addrTxt.match(reg))) {
+        if (_custNm1 != '' && (_custNm1.length > 0 && !_custNm1.match(reg))) {
+          return new ValidationResult({
+            id : 'custNm1',
+            type : 'text',
+            name : 'custNm1'
+          }, false, 'Double byte characters are not allowed in Customer Name English.');
+        } else if (_custNm2 != '' && (_custNm2.length > 0 && !_custNm2.match(reg))) {
+          return new ValidationResult({
+            id : 'custNm2',
+            type : 'text',
+            name : 'custNm2'
+          }, false, 'Double byte characters are not allowed in Customer Name Cont English.');
+        } else if (_custNm3 != '' && (_custNm3.length > 0 && !_custNm3.match(reg))) {
+          return new ValidationResult({
+            id : 'custNm3',
+            type : 'text',
+            name : 'custNm3'
+          }, false, 'Double byte characters are not allowed in Customer Name Cont2 English.');
+        } else if (_addrTxt != '' && (_addrTxt.length > 0 && !_addrTxt.match(reg))) {
           return new ValidationResult({
             id : 'addrTxt',
             type : 'text',
