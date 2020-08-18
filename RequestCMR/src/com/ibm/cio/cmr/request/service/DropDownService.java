@@ -192,7 +192,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         sb.append("( ");
       }
 
-      if (SystemLocation.UNITED_KINGDOM.equals(country) && "SalesBusOffMU".equals(fieldId)) {
+      if (SystemLocation.UNITED_KINGDOM.equals(country) && ("SalesBusOffUK".equals(fieldId) || "SalRepNameNoUK".equals(fieldId))) {
         sb.append("select distinct trim(" + bds.getCd() + ") CD, ");
       } else {
         sb.append("select trim(" + bds.getCd() + ") CD, ");
@@ -498,13 +498,31 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       if (cntry2 == null) {
         cntry2 = country;
       }
-      if ("754".equals(cntry2) || "866".equals(cntry2)) {
-        query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
-        query.setParameter("ISSUING_CNTRY", cntry2);
-      }
       if (SystemLocation.PORTUGAL.equals(cntry)) {
         query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
         query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
+      }
+    }
+
+    if ("SalesBusOffUK".equalsIgnoreCase(fieldId)) {
+      String cntry2 = (String) params.getParam("cmrIssuingCntry");
+      if (cntry2 == null) {
+        cntry2 = country;
+      }
+      if ("866".equals(cntry2)) {
+        query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
+        query.setParameter("ISSUING_CNTRY", cntry2);
+      }
+    }
+
+    if ("SalRepNameNoUK".equalsIgnoreCase(fieldId)) {
+      String cntry2 = (String) params.getParam("cmrIssuingCntry");
+      if (cntry2 == null) {
+        cntry2 = country;
+      }
+      if ("866".equals(cntry2)) {
+        query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
+        query.setParameter("ISSUING_CNTRY", cntry2);
       }
     }
 

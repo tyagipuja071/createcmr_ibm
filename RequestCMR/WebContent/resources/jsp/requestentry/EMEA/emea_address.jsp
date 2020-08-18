@@ -39,7 +39,18 @@
   <br>
   <br>
 </cmr:row>
-
+<cmr:view forCountry="726">
+  <cmr:row>
+      <cmr:column span="2">
+      <p>
+	<cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
+        <cmr:fieldLabel fieldId="SitePartyID" />:</cmr:label>
+      <cmr:delta text="-" id="delta-ierpSitePrtyId" />
+      <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+      </p>
+    </cmr:column>
+  </cmr:row>
+</cmr:view>
 <cmr:row addBackground="true">
   <cmr:column span="4">
     <cmr:label fieldId="custNm1">
@@ -93,6 +104,17 @@
     <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
     </p>
   </cmr:column>
+  <%if ("U".equals(reqentry.getReqType())){%> 
+  <cmr:column span="2" forCountry="862">
+    <p>
+    <cmr:label fieldId="custNm4">
+      <cmr:fieldLabel fieldId="CustomerName4" />: 
+      <cmr:delta text="-" id="delta-custNm4" />
+    </cmr:label>
+    <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
+    </p>
+  </cmr:column>
+  <%}%> 
 <!--  rollback TR address change
     <cmr:column span="2" forCountry="862">
     <p>
@@ -177,7 +199,7 @@
     </p>
   </cmr:column>
   </cmr:view>
-  <cmr:column span="2" exceptForCountry="758">
+  <cmr:column span="2" exceptForCountry="758,862">
     <p>
       <cmr:label fieldId="stateProv">
         <cmr:fieldLabel fieldId="StateProv" />:
@@ -265,7 +287,7 @@
     </p>
   </cmr:column>
 
-  <cmr:column span="2" containerForField="TaxOffice" forCountry="726,666,862">
+  <cmr:column span="2" containerForField="TaxOffice" forCountry="726,666">
     <p>
       <cmr:label fieldId="taxOffice">
         <cmr:fieldLabel fieldId="TaxOffice" />:
@@ -276,6 +298,16 @@
 
   <form:hidden path="poBoxPostCd" forCountry="758"/>
   <form:hidden path="transportZone" forCountry="838,758,866,754"/>
+</cmr:row>
+<cmr:row>
+	<cmr:column span="2" containerForField="TaxOffice" forCountry="862">
+    <p>
+      <cmr:label fieldId="taxOffice">
+        <cmr:fieldLabel fieldId="TaxOffice" />:
+      </cmr:label>
+      <cmr:field fieldId="TaxOffice" id="taxOffice" path="taxOffice" />
+    </p>
+  </cmr:column>
 </cmr:row>
 <%--Story 1377871: For Postal Address  :Mukesh
 <cmr:view forCountry="758">
@@ -293,7 +325,7 @@
 </cmr:view>--%>
 <cmr:view exceptForCountry="758">
 <cmr:row>
-  <cmr:column span="2" containerForField="POBox" exceptForCountry="755">
+  <cmr:column span="2" containerForField="POBox" exceptForCountry="755,862">
     <p>
       <cmr:label fieldId="poBox">
         <cmr:fieldLabel fieldId="POBox" />:
@@ -324,7 +356,7 @@
       <cmr:field fieldId="SAPNumber" id="sapNo" path="sapNo" />
     </p>
   </cmr:column>
-  <cmr:view forCountry="758">
+  <cmr:view forCountry="758,862">
   	<cmr:column span="2">
      <p>
       <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
@@ -334,7 +366,6 @@
      </p>
   	</cmr:column>
   </cmr:view>
-
 </cmr:row>
 <cmr:view exceptForCountry="758">
 <cmr:row addBackground="true">

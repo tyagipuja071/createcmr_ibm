@@ -44,6 +44,7 @@ public class CmrClientController extends BaseController {
     params.addParam("data", data);
     params.addParam("addr", addr);
     try {
+      LOG.debug("Performing service call for " + serviceType);
       service.process(request, params);
     } catch (Exception e) {
       if (e instanceof CmrException) {

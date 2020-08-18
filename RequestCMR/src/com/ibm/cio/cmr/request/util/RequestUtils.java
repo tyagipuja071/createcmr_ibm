@@ -281,6 +281,19 @@ public class RequestUtils {
   }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history) {
+
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip) {
+      return;
+    }
+
     sendEmailNotifications(entityManager, admin, history, false, false);
   }
 
@@ -444,7 +457,7 @@ public class RequestUtils {
 
     boolean includeUser = false;
     String embeddedLink = "";
-    if ("COM".equals(history.getReqStatus())) {
+    if ("COM".equals(history.getReqStatus()) || "COM".equals(admin.getReqStatus())) {
       embeddedLink = Feedback.generateEmeddedFeedbackLink(data);
     } else if ("PPN".equals(history.getReqStatus())) {
       embeddedLink = Feedback.generateEmeddedContactLink(data);
@@ -524,6 +537,11 @@ public class RequestUtils {
     params.add(rejectReason); // {10}
     params.add(embeddedLink); // {11}
 
+    String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+    country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+
+    email = StringUtils.replace(email, "$COUNTRY$", country);
+
     if (!StringUtils.isBlank(admin.getSourceSystId())) {
       ExternalSystemUtil.addExternalMailParams(entityManager, params, admin);
     }
@@ -542,6 +560,27 @@ public class RequestUtils {
 
     mail.send(host);
 
+  }
+
+  /**
+   * String gets the fully qualified country name
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  private static String getIssuingCountry(EntityManager entityManager, String country) {
+    // TODO move to cmr-queries
+    try {
+      String sql = "select NM from CREQCMR.SUPP_CNTRY where CNTRY_CD = :CNTRY";
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", country);
+      query.setForReadOnly(true);
+      return query.getSingleResult(String.class);
+    } catch (Exception e) {
+      LOG.warn("Error in getting issuing country name", e);
+      return null;
+    }
   }
 
   private static String formatRejectionInfo(String current, WfHist rejection) {
