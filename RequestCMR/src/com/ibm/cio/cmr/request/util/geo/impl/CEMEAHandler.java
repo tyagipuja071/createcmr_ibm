@@ -215,6 +215,14 @@ public class CEMEAHandler extends BaseSOFHandler {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
+                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                    && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
+                  addr.setCmrAddrTypeCode("ZD02");
+                }
+                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
+                  addr.setCmrAddrTypeCode("ZP03");
+                }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
@@ -385,7 +393,6 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-
           }
         }
       } else {
@@ -444,16 +451,6 @@ public class CEMEAHandler extends BaseSOFHandler {
             if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
                 && "599".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZP02");
-            }
-
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && "598".equals(record.getCmrAddrSeq())) {
-              record.setCmrAddrTypeCode("ZD02");
-            }
-
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode())) && "599".equals(record.getCmrAddrSeq())) {
-              record.setCmrAddrTypeCode("ZP03");
             }
 
             // if
