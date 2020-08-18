@@ -384,6 +384,14 @@ function afterConfigForCEMEA() {
     landCntry = cntryRegion.substring(3, 5);
   }
   // Set 707 landed country base on sub region
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SERBIA && (cntryRegion == undefined || cntryRegion == '' || cntryRegion == null)) {
+    var result = cmr.query('GET_CNTRYUSED', {
+      REQ_ID : FormManager.getActualValue('reqId'),
+    });
+    if (result && result.ret1 && result.ret1 != '') {
+      cntryRegion = result.ret1;
+    }
+  }
   if (cntryRegion == '707ME') {
     landCntry = 'ME';
   } else if (cntryRegion == '707CS') {
@@ -1347,6 +1355,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '5B') {
         clientTiers = [ '7' ];
       }
+      
     } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
@@ -1440,32 +1449,37 @@ function setVatRequired(value) {
           if (result && result.ret1 && result.ret1 != '') {
             cntryUsed = result.ret1;
           }
-          var addrType = 'ZP01';
-          var zs01Cntry = '';
-
-          var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-            REQID : FormManager.getActualValue('reqId'),
-            TYPE : addrType ? addrType : 'ZP01'
-          });
-          if (ret && ret.ret1 && ret.ret1 != '') {
-            zs01Cntry = ret.ret1;
+          if (cntryUsed == '707ME' || cntryUsed == '707CS') {
+            return;
           }
 
-          if (cntryUsed != null && cntryUsed.length > 0 && zs01Cntry != null && zs01Cntry == 'CS') {
-            switch (cntryUsed) {
-            case '707ME':
-              return;
-              break;
-            case '707CS':
-              return;
-              break;
-            default:
-              cemeaCustomVATMandatory();
-              break;
-            }
-          } else {
-            cemeaCustomVATMandatory();
-          }
+          // var addrType = 'ZP01';
+          // var zs01Cntry = '';
+
+          // var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+          // REQID : FormManager.getActualValue('reqId'),
+          // TYPE : addrType ? addrType : 'ZP01'
+          // });
+          // if (ret && ret.ret1 && ret.ret1 != '') {
+          // zs01Cntry = ret.ret1;
+          // }
+
+          // if (cntryUsed != null && cntryUsed.length > 0 && zs01Cntry != null
+          // && zs01Cntry == 'CS') {
+          // switch (cntryUsed) {
+          // case '707ME':
+          // return;
+          // break;
+          // case '707CS':
+          // return;
+          // break;
+          // default:
+          // cemeaCustomVATMandatory();
+          // break;
+          // }
+          // } else {
+          // cemeaCustomVATMandatory();
+          // }
 
         }
         cemeaCustomVATMandatory();
@@ -1776,7 +1790,7 @@ function dupCMRExistCheckForRuCIS() {
     return {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var cmrNo = FormManager.getField('cmrNo').value;
+        var cmrNo = FormManager.getActualValue('cmrNo');
         if (FormManager.getActualValue('reqType') != 'U') {
           return new ValidationResult(null, true);
         } else {
@@ -2283,7 +2297,7 @@ function addCmrNoValidatorForCEE() {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var custSubType = FormManager.getActualValue('custSubGrp');
-        var cmrNo = FormManager.getField('cmrNo').value;
+        var cmrNo = FormManager.getActualValue('cmrNo');
         if (FormManager.getActualValue('reqType') == 'U') {
           return new ValidationResult(null, true);
         }
@@ -2363,6 +2377,7 @@ function cmrNoEnableForCEE() {
 }
 
 function setEnterprise2Values(dupClientTierCd) {
+  // CMR-4606
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -3664,7 +3679,7 @@ function togglePPSCeidCEE() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var cmrNo = FormManager.getActualValue('cmrNo');
-  if (_custType == 'BUSPR' || _custType == 'XBP') {
+  if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP' || _custType == 'RSBP') {
     FormManager.show('PPSCEID', 'ppsceid');
     FormManager.enable('ppsceid');
     FormManager.resetValidations('ppsceid');
@@ -4094,11 +4109,17 @@ function afterConfigTemplateForHungary() {
 function validatorsDIGIT() {
   FormManager.addValidator('EngineeringBo', Validators.DIGIT, [ 'EngineeringBo' ]);
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
-  // CMR-4606
-  if (FormManager.getActualValue('cmrIssuingCntry') == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
-    FormManager.addValidator('taxCd3', Validators.DIGIT, [ 'Dup Enterprise Number' ]);
+}
+
+// CMR-4606
+function validatorsDIGITForDupField() {
+  if (dijit.byId('cisServiceCustIndc') != undefined) {
+    if (dijit.byId('cisServiceCustIndc').get('checked')) {
+      FormManager.addValidator('taxCd3', Validators.DIGIT, [ 'Dup Enterprise Number' ]);
+    }
   }
 }
+
 function addEmbargoCdValidatorForCEE() {
   var role = FormManager.getActualValue('userRole');
   if (role == GEOHandler.ROLE_PROCESSOR) {
@@ -4178,8 +4199,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
   GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
 
-  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
+  GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
 
   GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
@@ -4280,11 +4301,13 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);
   // CMR-4606 DupCMR exist
-  GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, GEOHandler.CEE, null, true);
+  GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
+  GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
+  GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
-  GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);

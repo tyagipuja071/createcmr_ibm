@@ -2126,6 +2126,56 @@ function addMailingConditionValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
+      FormManager.resetValidations('vat');
+      FormManager.setValue('vatExempt', true);
+    }
+  }
+}
+
+function addAbbrevNmValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _abbrevNm = FormManager.getActualValue('abbrevNm');
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
+          return new ValidationResult({
+            id : 'abbrevNm',
+            type : 'text',
+            name : 'abbrevNm'
+          }, false, 'The value for Abbreviated name is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function addAbbrevLocationValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _abbrevLocn = FormManager.getActualValue('abbrevLocn');
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (_abbrevLocn != '' && (_abbrevLocn.length > 0 && !_abbrevLocn.match(reg))) {
+          return new ValidationResult({
+            id : 'abbrevLocn',
+            type : 'text',
+            name : 'abbrevLocn'
+          }, false, 'The value for Abbreviated Location is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2187,7 +2237,6 @@ function addMailingConditionValidator() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
-
 
 function setFieldsCharForScenarios() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
