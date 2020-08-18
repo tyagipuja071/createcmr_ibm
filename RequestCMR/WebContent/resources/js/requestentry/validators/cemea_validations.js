@@ -384,6 +384,14 @@ function afterConfigForCEMEA() {
     landCntry = cntryRegion.substring(3, 5);
   }
   // Set 707 landed country base on sub region
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SERBIA && (cntryRegion == undefined || cntryRegion == '' || cntryRegion == null)) {
+    var result = cmr.query('GET_CNTRYUSED', {
+      REQ_ID : FormManager.getActualValue('reqId'),
+    });
+    if (result && result.ret1 && result.ret1 != '') {
+      cntryRegion = result.ret1;
+    }
+  }
   if (cntryRegion == '707ME') {
     landCntry = 'ME';
   } else if (cntryRegion == '707CS') {
