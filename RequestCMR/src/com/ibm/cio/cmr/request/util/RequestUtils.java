@@ -282,7 +282,6 @@ public class RequestUtils {
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history) {
 
-    // for marketplace story
     String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
     String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
     boolean skip = false;
