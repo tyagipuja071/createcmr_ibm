@@ -49,6 +49,7 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
@@ -130,8 +131,10 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Processing Completed Manual records...");
       monitorDisAutoProcRec(entityManager);
 
-      LOG.info("Processing Pending if Host is Down...");
-      monitorLegacyPending(entityManager);
+      if("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
+        LOG.info("Processing Pending if Host is Down...");
+        monitorLegacyPending(entityManager);
+      }
 
       return true;
     } catch (Exception e) {
