@@ -69,7 +69,7 @@ String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntr
 </cmr:view>
 
 <cmr:view forGEO="MCO2">
-    <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
+  <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
   	<script src="${resourcesPath}/js/requestentry/validators/mco2_validations_ld.js?${cmrv}" type="text/javascript"></script>
   <%  }  else { %>  
 	<script src="${resourcesPath}/js/requestentry/validators/mco2_validations.js?${cmrv}" type="text/javascript"></script>
