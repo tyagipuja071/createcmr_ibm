@@ -532,6 +532,14 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getMailingCondition());
               results.add(update);
             }
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CurrencyCd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCd", "-"));
+              update.setNewData(newData.getLegacyCurrencyCd());
+              update.setOldData(oldData.getLegacyCurrencyCd());
+              results.add(update);
+            }
           }
 
           if (!"760".equals(oldData.getCmrIssuingCntry())) {
@@ -894,6 +902,9 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         }
         if (!equals(addr.getCustPhone(), addr.getCustPhoneOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CustPhone"))) {
+          if (!"ZS01".equals(addr.getId().getAddrType()) && SystemLocation.TURKEY.equals(cmrCountry)) {
+            // if Turkey and non sold-to address, do nothing
+          } else {
           update = new UpdatedNameAddrModel();
           update.setAddrTypeCode(addrType);
           update.setAddrType(addrTypeDesc);
@@ -903,6 +914,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           update.setNewData(addr.getCustPhone());
           update.setOldData(addr.getCustPhoneOld());
           results.add(update);
+          }
         }
         if (!equals(addr.getTransportZone(), addr.getTransportZoneOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "TransportZone"))) {

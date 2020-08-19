@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrPK;
@@ -59,6 +60,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
@@ -118,6 +120,12 @@ public class LegacyDirectService extends TransConnService {
   private static final String MASS_UPDATE_DONE = "DONE";
   private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
   private static final List<String> EMBARGO_LIST = Arrays.asList("E", "Y");
+
+  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA,
+      SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN, SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA,
+      SystemLocation.BELARUS, SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN, SystemLocation.BOSNIA_AND_HERZEGOVINA,
+      SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
+      SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
@@ -348,6 +356,12 @@ public class LegacyDirectService extends TransConnService {
       if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode()) && legacyObjects.getCustomerExt() != null) {
         updateCompanyBillingChildRecordsItaly(entityManager, legacyObjects, cmrObjects);
       }
+      // Add to build duplicate CMR data for Russia -CMR4606
+      Data data = cmrObjects.getData();
+      if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
+        CEEProcessService theService = new CEEProcessService();
+        theService.processDupCreate(entityManager, admin, cmrObjects);
+      }
     }
   }
 
@@ -418,6 +432,13 @@ public class LegacyDirectService extends TransConnService {
             updateBillingSequenceItaly(entityManager, legacyObjects);
           }
 
+          // Add to update duplicate CMR data for Russia CMR-4606
+          Data data = cmrObjects.getData();
+          if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
+            CEEProcessService theService = new CEEProcessService();
+            theService.processDupUpdate(entityManager, admin, data, cmrObjects);
+          }
+
         } else {
           int noOFWorkingDays = 0;
           if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
@@ -449,6 +470,13 @@ public class LegacyDirectService extends TransConnService {
             }
 
             completeTRECRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+
+            // Add to update duplicate CMR data for Russia CMR-4606
+            Data data = cmrObjects.getData();
+            if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
+              CEEProcessService theService = new CEEProcessService();
+              theService.processDupUpdate(entityManager, admin, data, cmrObjects);
+            }
           }
         }
       } else {
@@ -501,6 +529,12 @@ public class LegacyDirectService extends TransConnService {
           if (legacyObjects.getCustomerExt() != null) {
             updateCompanyBillingChildRecordsItaly(entityManager, legacyObjects, cmrObjects);
           }
+        }
+        // Add to update duplicate CMR data for Russia CMR-4606
+        Data data = cmrObjects.getData();
+        if ("821".equals(data.getCmrIssuingCntry()) && ("Y".equals(data.getDupCmrIndc()) || data.getDupIssuingCntryCd() != null)) {
+          CEEProcessService theService = new CEEProcessService();
+          theService.processDupUpdate(entityManager, admin, data, cmrObjects);
         }
       }
     }
@@ -1232,8 +1266,11 @@ public class LegacyDirectService extends TransConnService {
 
         legacyAddr.setStreet(addr.getAddrTxt());
 
-        if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
-          legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+        // Turkey not store phone on Address level
+        if (!SystemLocation.TURKEY.equals(cntry)) {
+          if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
+            legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+          }
         }
         legacyAddr.setCity(addr.getCity1());
         legacyAddr.setContact(addr.getDept());
@@ -1437,6 +1474,9 @@ public class LegacyDirectService extends TransConnService {
       // call the specific transformer to change data as needed
       dummyQueue.setReqStatus(MQMsgConstants.REQ_STATUS_NEW);
       transformer.transformLegacyCustomerData(entityManager, dummyHandler, cust, cmrObjects);
+      if (transformer.enableTempReactOnUpdates()) {
+        LegacyCommonUtil.processDB2TemporaryReactChanges(admin, cust, data, entityManager);
+      }
     }
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
@@ -1531,9 +1571,25 @@ public class LegacyDirectService extends TransConnService {
             legacyAddrPk = new CmrtAddrPK();
             legacyAddrPk.setCustomerNo(cmrNo);
             legacyAddrPk.setSofCntryCode(cntry);
-            int newSeq = availableSequences.remove();
-            String newAddrSeq = Integer.toString(newSeq);
-            newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+            int newSeq;
+            String newAddrSeq;
+            if (transformer.sequenceNoUpdateLogic(entityManager, cmrObjects, addr, false)) {
+              newSeq = availableSequences.remove();
+              newAddrSeq = Integer.toString(newSeq);
+            } else {
+              newAddrSeq = addr.getId().getAddrSeq();
+            }
+
+            if (CEE_COUNTRY_LIST.contains(cntry)) {
+              if ("598".equals(addr.getId().getAddrSeq()) || "599".equals(addr.getId().getAddrSeq())) {
+                newAddrSeq = addr.getId().getAddrSeq();
+              } else {
+                newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+              }
+            } else {
+              newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
+            }
+
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
             legacyAddrPk.setAddrNo(newAddrSeq);
@@ -1598,6 +1654,12 @@ public class LegacyDirectService extends TransConnService {
           }
           if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
             legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+          }
+          // this is for CEE countries IGF address
+          if (CEE_COUNTRY_LIST.contains(cntry)) {
+            if ("ZD02".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
+              legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+            }
           }
           if (!StringUtils.isBlank(addr.getCity1())) {
             legacyAddr.setCity(addr.getCity1());
@@ -1694,12 +1756,14 @@ public class LegacyDirectService extends TransConnService {
       boolean isCustExt = transformer.hasCmrtCustExt();
       if (isCustExt) {
         CmrtCustExt custExt = legacyObjects.getCustomerExt();
-        if (transformer != null) {
-          transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+        if (custExt != null) {
+          if (transformer != null) {
+            transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+          }
+          custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+          legacyObjects.setCustomerExt(custExt);
         }
-        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-        legacyObjects.setCustomerExt(custExt);
       }
 
       // rebuild the address use table
@@ -2398,8 +2462,20 @@ public class LegacyDirectService extends TransConnService {
           boolean isDataUpdated = false;
           isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
 
+          if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && !isDataUpdated) {
+            for (Addr addr : addresses) {
+              if ("ZS01".equals(addr.getId().getAddrType())) {
+                AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
+                if (addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
+                  isDataUpdated = true;
+                }
+              }
+            }
+          }
+
           for (Addr addr : addresses) {
             entityManager.detach(addr);
+
             if (usedSequences.contains(addr.getId().getAddrSeq())) {
               LOG.warn("Sequence " + addr.getId().getAddrSeq() + " already sent in a previous request. Skipping.");
               continue;
@@ -2607,10 +2683,11 @@ public class LegacyDirectService extends TransConnService {
             for (Addr addr : addresses) {
               entityManager.detach(addr);
 
-              if (!"ZS01".equals(addr.getId().getAddrType())) {
-                LOG.warn("Address Type: " + addr.getId().getAddrType() + "  Skipping all address except ZS01 address.");
-                continue;
-              }
+              /*
+               * if (!"ZS01".equals(addr.getId().getAddrType())) {
+               * LOG.warn("Address Type: " + addr.getId().getAddrType() +
+               * "  Skipping all address except ZS01 address."); continue; }
+               */
 
               request.setSapNo(addr.getSapNo());
 
@@ -2801,13 +2878,31 @@ public class LegacyDirectService extends TransConnService {
         String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
         boolean isDataUpdated = false;
+        boolean isExceptionOccured = false;
+        Set<String> rdcProcessedSequences = new HashSet<String>();
         isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
         MessageTransformer transformer = TransformerManager.getTransformer(data.getCmrIssuingCntry());
+
+        if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && !isDataUpdated) {
+          for (Addr addr : addresses) {
+            if ("ZS01".equals(addr.getId().getAddrType())) {
+              AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
+              if (addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
+                isDataUpdated = true;
+              }
+            }
+          }
+        }
 
         for (Addr addr : addresses) {
           entityManager.detach(addr);
           if (usedSequences.contains(addr.getId().getAddrSeq())) {
             LOG.warn("Sequence " + addr.getId().getAddrSeq() + " already sent in a previous request. Skipping.");
+            continue;
+          }
+
+          if (isExceptionOccured && rdcProcessedSequences.contains(addr.getId().getAddrSeq())) {
+            LOG.warn("New kunnr for Sequence " + addr.getId().getAddrSeq() + " already created in RDc. Skipping.");
             continue;
           }
 
@@ -2907,13 +3002,20 @@ public class LegacyDirectService extends TransConnService {
             try {
               updateEntity(addrNew, entityManager);
             } catch (Exception e) {
-              try {
-                LOG.info("Exception in LegacyDirect due to optimistic lock for KUNNR=" + addrNew.getSapNo());
-                Thread.sleep(60 * 1000);// 1 minute sleep time
-              } catch (InterruptedException ex) {
-                LOG.debug("Exception in LegacyDirect sleep method for KUNNR=" + addrNew.getSapNo());
+              // try {
+              LOG.info("Exception in LegacyDirect due to optimistic lock for KUNNR=" + addrNew.getSapNo() + "===" + addr.getSapNo());
+              if (addr.getSapNo() == null && addrNew.getSapNo() != null) {
+                LOG.info("Kunnr created for new address in RDc with Seq no=" + addrNew.getId().getAddrSeq());
+                isExceptionOccured = true;
+                rdcProcessedSequences.add(addrNew.getId().getAddrSeq());
               }
-              updateEntity(addrNew, entityManager);
+
+              // Thread.sleep(60 * 1000);// 1 minute sleep time
+              // } catch (InterruptedException ex) {
+              // LOG.debug("Exception in LegacyDirect sleep method for KUNNR=" +
+              // addrNew.getSapNo());
+              // }
+              // updateEntity(addrNew, entityManager);
             }
             // updateEntity(addrNew, entityManager);
 
@@ -3588,6 +3690,7 @@ public class LegacyDirectService extends TransConnService {
           untagAddrUseForSequence(use, address);
           taggedUse = StringUtils.replace(taggedUse, use, "");
           address.setAddressUse(taggedUse);
+          address.setForUpdate(true);
         }
       }
       LOG.trace("Untagged Address Use: " + address.getAddressUse());
@@ -4041,6 +4144,18 @@ public class LegacyDirectService extends TransConnService {
     query.setParameter("REQ_ID", data.getId().getReqId());
     query.setForReadOnly(true);
     return query.getSingleResult(DataRdc.class);
+  }
+
+  private AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {
+    LOG.debug("Searching for Addr_RDC records for Legacy Processing " + addr.getId().getReqId());
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("SEQ", addr.getId().getAddrSeq());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setForReadOnly(true);
+    return query.getSingleResult(AddrRdc.class);
+
   }
 
   private List<String> checkIfSeqExistOnRDC(EntityManager entityManager, String cmrNo, String cntry) {
