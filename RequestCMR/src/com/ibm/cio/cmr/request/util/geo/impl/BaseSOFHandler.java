@@ -316,24 +316,36 @@ public abstract class BaseSOFHandler extends GEOHandler {
       LOG.trace("Collection Code: " + data.getCollectionCd());
       data.setSalesTeamCd(this.currentImportValues.get("SMR"));
       LOG.trace("SMR: " + data.getSalesTeamCd());
-      if (this.currentImportValues.get("EconomicCode") != null) {
-        data.setEconomicCd(this.currentImportValues.get("EconomicCode"));
-        LOG.trace("Economic Code: " + data.getEconomicCd());
-      } else {
-        // temporary solution to handle the wrong tag
-        data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
-        LOG.trace("Economic Code: " + data.getEconomicCd());
+      
+      //For Turkey the key name is wrong, so add this branch only for turkey
+      if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+          if (this.currentImportValues.get("EconomicCd") != null) {
+              data.setEconomicCd(this.currentImportValues.get("EconomicCd"));
+              LOG.trace("Economic Code: " + data.getEconomicCd());
+            } else {
+              // temporary solution to handle the wrong tag
+              data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
+              LOG.trace("Economic Code: " + data.getEconomicCd());
+            }
+      }else{
+        if (this.currentImportValues.get("EconomicCode") != null) {
+          data.setEconomicCd(this.currentImportValues.get("EconomicCode"));
+          LOG.trace("Economic Code: " + data.getEconomicCd());
+        } else {
+          // temporary solution to handle the wrong tag
+          data.setEconomicCd(this.currentImportValues.get("EcononicCode"));
+          LOG.trace("Economic Code: " + data.getEconomicCd());
+        }       
       }
       
+      
+      
       //For Turkey ModeOfPayment set as CoF
-      // *abner revert begin
-      // if(SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())){
-      // data.setCommercialFinanced(this.currentImportValues.get("ModeOfPayment"));
-      // }else{
-      // data.setModeOfPayment(this.currentImportValues.get("ModeOfPayment"));
-      // }
-      data.setModeOfPayment(this.currentImportValues.get("ModeOfPayment"));
-      // *abner revert begin
+      if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
+        data.setCommercialFinanced(this.currentImportValues.get("ModeOfPayment"));
+      } else {
+        data.setModeOfPayment(this.currentImportValues.get("ModeOfPayment"));
+      }
 
       LOG.trace("Mode of Payment: " + data.getModeOfPayment());
 

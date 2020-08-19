@@ -75,7 +75,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
 
   private final DataService dataService = new DataService();
   private final AdminService adminService = new AdminService();
-  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("8620");
+  public static final List<String> LD_CEMA_COUNTRY = Arrays.asList("862");
 
   @Override
   protected Logger initLogger() {
@@ -144,11 +144,51 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       }
 
       if ("618".equals(model.getCmrIssuingCntry())) {
-    	newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
+
+        newAddrSeq = generateMAddrSeqCopy(entityManager, model.getReqId(), admin.getReqType(), model.getAddrType());
+
       }
 
       if (LD_CEMA_COUNTRY.contains(model.getCmrIssuingCntry())) {
-        newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
+        int zd01cout = Integer.valueOf(getTrZD01Count(entityManager, model.getReqId()));
+        int zi01cout = Integer.valueOf(getTrZI01Count(entityManager, model.getReqId()));
+        String existAddTypeText = "";
+        if (model.getAddrType().equals("ZS01")) {
+          newAddrSeq = "00003";
+          existAddTypeText = "Sold-To";
+        }
+        // update
+        if (model.getAddrType().equals("ZP01")) {
+          if ("C".equals(admin.getReqType())) {
+            newAddrSeq = "00001";
+          } else {
+            newAddrSeq = "00002";
+          }
+          existAddTypeText = "Local Language Translation of Sold-To";
+        }
+        if (model.getAddrType().equals("ZD01")) {
+          if (zd01cout == 0) {
+            newAddrSeq = "00004";
+          } else if (zd01cout == 1 && zi01cout == 0) {
+            newAddrSeq = "00006";
+          } else {
+            newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
+          }
+          existAddTypeText = "Ship-To";
+        }
+        if (model.getAddrType().equals("ZI01")) {
+          boolean seq5Exist = seq5Exists(entityManager, model.getReqId());
+          if (!seq5Exist) {
+            newAddrSeq = "00005";
+          } else {
+            newAddrSeq = generateEMEAddrSeqCopy(entityManager, model.getReqId());
+          }
+          existAddTypeText = "Install-At";
+        }
+        // If address type already exist, the err msg is address type text xxxx
+        // for turkey
+        uniqAddr.delete(0, uniqAddr.length());
+        uniqAddr.append(existAddTypeText);
       }
 
       // if ("864".equals(model.getCmrIssuingCntry())) {
@@ -2006,6 +2046,18 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     }
   }
 
+  private boolean seq5Exists(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_5");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      return true;
+    }
+    return false;
+  }
+
   public String generateAddrSeqLD(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry, GEOHandler geoHandler) {
     int addrSeq = 0;
     String newSeq = null;
@@ -2083,11 +2135,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
   }
 
   protected String generateMAddrSeqCopy(EntityManager entityManager, long reqId, String reqType, String addrType) {
-	if("ZD02".equals(addrType)) {
-		return "598";
-	}else if("ZP02".equals(addrType)) {
-		return "599";
-	}
+    if ("ZD02".equals(addrType)) {
+      return "598";
+    } else if ("ZP02".equals(addrType)) {
+      return "599";
+    }
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
@@ -2115,8 +2167,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         // if returned value is invalid
       }
       addrSeq++;
-      //Compare with RDC SEQ FOR UPDATE REQUEST
-      if(CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
+      // Compare with RDC SEQ FOR UPDATE REQUEST
+      if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType)) {
         String cmrNo = null;
         if (result != null && result.length > 0 && result[2] != null) {
           cmrNo = (String) result[2];
@@ -2140,7 +2192,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
       }
     }
-    
+
     newAddrSeq = Integer.toString(addrSeq);
 
     // newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5,
@@ -2153,7 +2205,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     int addrSeq = 0;
     String maxAddrSeq = null;
     String newAddrSeq = null;
-    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
+    String sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ_TR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
@@ -2181,6 +2233,38 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     newAddrSeq = newAddrSeq.substring(newAddrSeq.length() - 5, newAddrSeq.length());
 
     return newAddrSeq;
+  }
+
+  public String getTrZD01Count(EntityManager entityManager, long reqId) {
+    String zd01count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETZD01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      zd01count = sResult[0].toString();
+    }
+    System.out.println("zd01count = " + zd01count);
+
+    return zd01count;
+  }
+
+  public String getTrZI01Count(EntityManager entityManager, long reqId) {
+    String zi01count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETZI01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      zi01count = sResult[0].toString();
+    }
+    System.out.println("zi01count = " + zi01count);
+
+    return zi01count;
   }
 
 }

@@ -86,6 +86,7 @@ public class MQMsgConstants {
   public static final String ADDR_ZD01 = "ZD01";
   public static final String ADDR_ZS02 = "ZS02";
   public static final String ADDR_ZP02 = "ZP02";
+  public static final String ADDR_ZP03 = "ZP03";
   public static final String ADDR_ZD02 = "ZD02";
   public static final String ADDR_CTYA = "CTYA";
   public static final String ADDR_CTYB = "CTYB";

@@ -44,15 +44,11 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
-import com.ibm.cmr.services.client.PPSServiceClient;
-import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
-import com.ibm.cmr.services.client.pps.PPSRequest;
-import com.ibm.cmr.services.client.pps.PPSResponse;
 
 public class FranceUtil extends AutomationUtil {
 
@@ -256,14 +252,7 @@ public class FranceUtil extends AutomationUtil {
         case "BPUEU":
           if (StringUtils.isNotBlank(data.getPpsceid())) {
             try {
-              PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-                  PPSServiceClient.class);
-              client.setRequestMethod(Method.Get);
-              client.setReadTimeout(1000 * 60 * 5);
-              PPSRequest request = new PPSRequest();
-              request.setCeid(data.getPpsceid());
-              PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-              if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+              if (!checkPPSCEID(data.getPpsceid())) {
                 engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
                 details.append("PPS CE ID on the request is invalid.");
                 valid = false;
@@ -346,13 +335,16 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-        if (admin.getSourceSystId() != null) {
-          if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
-          } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-          }
-        }
+        // if (admin.getSourceSystId() != null) {
+        // // if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+        // // engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review
+        // // is required for MARKETPLACE requests.");
+        // // } else
+        // if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+        // engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is
+        // required for BP Portal requests.");
+        // }
+        // }
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
@@ -375,7 +367,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   @Override
-  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     String siret = requestData.getData().getTaxCd1();
     if (!StringUtils.isBlank(siret) && siret.length() > 9) {
       request.setOrgId(siret.substring(0, 9)); // SIREN
@@ -392,8 +384,7 @@ public class FranceUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     Addr zs01 = requestData.getAddress("ZS01");
     details.append("\n");
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)
-        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       // If calculated using buying group then skip any other calculation
       FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboValue = "";
@@ -435,8 +426,8 @@ public class FranceUtil extends AutomationUtil {
           CoverageContainer coverage = coverages.get(0);
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, container, CalculateCoverageElement.FINAL, null,
-              null, true);
+          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
+              CalculateCoverageElement.COV_REQ, true);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {
