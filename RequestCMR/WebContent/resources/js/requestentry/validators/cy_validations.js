@@ -8069,6 +8069,44 @@ function setAbbrvCyprus(){
   }
 }
 
+function addInacCodeValidator() {
+  console.log("addInacCodeValidator CY..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var value = FormManager.getActualValue('inacCd');
+        var inacCd1 = value.substring(0, 2);
+        var inacCd2 = value.substring(2, 4);
+        var result = false;
+        if (value && value.length == 4) {
+          if (value && value.length > 0 && isNaN(value)) {
+            result = false;
+            if (inacCd1 && inacCd1.length > 0 && inacCd1.match("^[a-zA-Z]+$")) {
+              result = true;
+              if (isNaN(inacCd2)) {
+                result = false;
+              }
+            } else {
+              result = false;
+            }
+          } else {
+            result = true;
+          }
+        } else {
+          result = false;
+        }
+        if (value.length == 0 || value == '') {
+          result = true;
+        }
+        if (!result) {
+          return new ValidationResult(null, false, 'Invalid value for INAC Code.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8315,5 +8353,6 @@ dojo.addOnLoad(function() {
   
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(setVatValidator, [ SysLoc.CYPRUS ]);
+  GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.CYPRUS ], null, true);
   
 });
