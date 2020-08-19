@@ -7,7 +7,7 @@
  * UI handling
  * 
  */
-var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
+//var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 dojo.require("dojo.io.iframe");
 
 /**
@@ -693,7 +693,7 @@ function afterConfigChange() {
     }
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-    if (FormManager.getActualValue('ordBlk') == '93' && !CNTRY_LIST_FOR_INVALID_CUSTOMERS.includes(cntry)) {
+    if (FormManager.getActualValue('ordBlk') == '93' && _pagemodel.reqType != 'X') {
       FormManager.show('DeactivateToActivateCMR', 'func');
       if (dijit.byId('func')) {
         FormManager.getField('func').set('checked', true);

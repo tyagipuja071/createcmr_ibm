@@ -532,6 +532,14 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getMailingCondition());
               results.add(update);
             }
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CurrencyCd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCd", "-"));
+              update.setNewData(newData.getLegacyCurrencyCd());
+              update.setOldData(oldData.getLegacyCurrencyCd());
+              results.add(update);
+            }
           }
 
           if (!"760".equals(oldData.getCmrIssuingCntry())) {
@@ -541,6 +549,17 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
               update.setNewData(newData.getCreditCd());
               update.setOldData(oldData.getCreditCd());
+              results.add(update);
+            }
+          }
+
+          if ("726".equals(oldData.getCmrIssuingCntry())) {
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "ModeOfPayment"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+              update.setNewData(getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+              update.setOldData(getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
               results.add(update);
             }
           }

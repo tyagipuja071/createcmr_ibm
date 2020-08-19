@@ -324,7 +324,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         // Story 1720159: State/Province should be automatically assigned based
         // on first two digits of Postal code
         String postalCode = params.getParam("postCd") != null ? params.getParam("postCd").toString() : "";
-        if (!"".equals(postalCode)) {
+        if (!"".equals(postalCode) && "ES".equals(params.getParam("landCntry"))) {
           query.append(" and STATE_PROV_CD IN (select CD from creqcmr.lov where field_id='##StateProv' and cmr_issuing_cntry='838' and txt LIKE '%"
               + postalCode.substring(0, 2) + "%') and COMMENTS <> 'Spain CB'");
         } else {

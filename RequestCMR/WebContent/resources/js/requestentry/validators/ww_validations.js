@@ -804,15 +804,15 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerWWValidator(addDPLCheckValidator,GEOHandler.ROLE_PROCESSOR);
   GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ], GEOHandler.ROLE_PROCESSOR, true, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ '862', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821',
-      '826', '889', '358', '359', '363', '726' ], GEOHandler.ROLE_PROCESSOR, true, true);
+      '826', '889', '358', '359', '363', '666', '726', '822' ], GEOHandler.ROLE_PROCESSOR, true, true);
 
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
-  // For Legacy GR
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  // For Legacy PT,CY,GR
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic

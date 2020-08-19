@@ -360,11 +360,11 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
-        <cmr:view forGEO="EMEA" exceptForCountry="862,758,726">
+        <cmr:view forGEO="EMEA" exceptForCountry="862,758,726,666">
           <cmr:gridCol width="100px" field="dept" header="Dept/Attn" />
         </cmr:view>
 		<!-- Attn for Greece & Cyprus-->
-        <cmr:view forCountry="726">
+        <cmr:view forCountry="726,666">
           <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" />
         </cmr:view>
         <!--  District for Turkey -->
@@ -433,7 +433,11 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
 
         <!-- Tax Office and Occupation for Greece/Cyprus -->
-        <cmr:view forCountry="726,666">
+        <cmr:view forCountry="666">
+          <cmr:gridCol width="187px" field="taxOffice" header="Tax Office" />
+          <cmr:gridCol width="90px" field="addrTxt2" header="Occupation" />
+        </cmr:view>
+        <cmr:view forCountry="726">
           <cmr:gridCol width="90px" field="taxOffice" header="Tax Office" />
           <cmr:gridCol width="90px" field="addrTxt2" header="Occupation" />
         </cmr:view>

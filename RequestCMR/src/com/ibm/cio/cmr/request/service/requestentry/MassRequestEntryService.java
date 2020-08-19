@@ -1844,7 +1844,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListDECND(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
                     setMassUpdateListLA(modelList, item.getInputStream(), reqId, newIterId, filePath);
-                  } else if (PageManager.fromGeo("MCO1", cmrIssuingCntry) || PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
+                  } else if (PageManager.fromGeo("MCO", cmrIssuingCntry) || PageManager.fromGeo("MCO1", cmrIssuingCntry)
+                      || PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
                     setMassUpdateListMCO(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("CEMEA", cmrIssuingCntry)) {
                     setMassUpdateListCEMEA(modelList, item.getInputStream(), reqId, newIterId, filePath);

@@ -134,7 +134,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       "Floor", "Building", "County", "City2", "Department" };
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
-      "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
+      "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "Department" };
 
   public static final List<String> CEMEA_POSTAL_FORMAT = Arrays.asList("603", "607", "644", "651", "740", "705", "708", "626", "694", "695", "826",
@@ -1059,9 +1059,8 @@ public class CEMEAHandler extends BaseSOFHandler {
       // Not ticked - check and load CIS duplicate fields
       for (String dupCntry : CIS_DUPLICATE_COUNTRIES) {
         if (loadDuplicateCMR(data, dupCntry, mainRecord.getCmrNum())) {
-          // CMR-4606
-          // data.setCisServiceCustIndc("Y");
-          // data.setDupIssuingCntryCd(dupCntry);
+          data.setCisServiceCustIndc("Y");
+          data.setDupIssuingCntryCd(dupCntry);
           break;
         }
       }
@@ -1071,11 +1070,6 @@ public class CEMEAHandler extends BaseSOFHandler {
         String aECISUBDateString = sdf.format(cmrtExt.getAeciSubDt());
         data.setAgreementSignDate(aECISUBDateString);
       }
-    }
-
-    if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry())
-        && ("010101".equals(data.getAgreementSignDate()) || "123101".equals(data.getAgreementSignDate()))) {
-      data.setAgreementSignDate("");
     }
 
     // Type of Customer
@@ -1113,7 +1107,7 @@ public class CEMEAHandler extends BaseSOFHandler {
           LOG.debug("ISU2: " + data.getIsuCd());
           data.setDupClientTierCd(dupRecordV.get("KATR3").toString());
           LOG.debug("ClientTier2: " + data.getDupClientTierCd());
-          data.setDupIssuingCntryCd(dupCntry);
+
           // String isuCtc = this.currentImportValues.get("ISU");
           // if (!StringUtils.isEmpty(isuCtc) && isuCtc.length() > 2) {
           // data.setDupIsuCd(isuCtc.substring(0, 2));
@@ -1384,7 +1378,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getAgreementSignDate(), "AECISubDate", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd()) && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getLegacyCurrencyCd(), "CurrencyCode", cmrCountry));
@@ -1484,14 +1478,6 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(addr.getDeptOld());
       results.add(update);
     }
-    if (CEE_COUNTRY_LIST.contains(cmrCountry)) {
-      for (UpdatedNameAddrModel model : results) {
-        if (model.getDataField() != null && model.getDataField().equals(PageManager.getLabel(cmrCountry, "CustPhone", "-"))) {
-          results.remove(model);
-          break;
-        }
-      }
-    }
   }
 
   @Override
@@ -1580,7 +1566,7 @@ public class CEMEAHandler extends BaseSOFHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
         "SUB_INDUSTRY_CD", "VAT", "COV_DESC", "COV_ID", "GBG_DESC", "GBG_ID", "BG_DESC", "BG_ID", "BG_RULE_ID", "GEO_LOC_DESC", "GEO_LOCATION_CD",
-        "DUNS_NO", "ABBREV_LOCN", "PHONE1"));// CMR-1947:add
+        "DUNS_NO", "ABBREV_LOCN"));// CMR-1947:add
     // Abbrev_locn
     // field
     // change
