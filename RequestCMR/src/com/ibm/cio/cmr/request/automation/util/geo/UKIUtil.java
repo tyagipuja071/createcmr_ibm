@@ -158,9 +158,9 @@ public class UKIUtil extends AutomationUtil {
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
-      case "VAT #":
+      case "Company Registration Number":
         if (!StringUtils.isBlank(change.getNewData()) && !(change.getOldData().equals(change.getNewData()))) {
-          // ADD OR UPDATE
+          // UPDATE
           Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
           boolean matchesDnb = false;
@@ -170,17 +170,21 @@ public class UKIUtil extends AutomationUtil {
           }
           if (!matchesDnb) {
             resultCodes.add("R");// Reject
-            details.append("VAT # on the request did not match D&B\n");
+            details.append("Company Registration Number on the request did not match D&B\n");
           } else {
-            details.append("VAT # on the request matches D&B\n");
+            details.append("Company Registration Number on the request matches D&B\n");
           }
         }
         break;
       case "INAC/NAC Code":
       case "Company Number":
+      case "ISIC":
         cmdeReview = true;
         break;
       case "Tax Code":
+        // noop, for switch handling only
+        break;
+      case "VAT #":
         // noop, for switch handling only
         break;
       case "ISU Code":
