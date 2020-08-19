@@ -397,6 +397,7 @@ public class ItalyHandler extends BaseSOFHandler {
             // DENNIS:If the company number is empty, we get the company addr
             // from
             // LD DB
+            companyAddr.setParentCMRNo(mainRecord.getCmrCompanyNo());
             loadCompanyAddressDataLD(entityManager, companyAddr);
           }
           converted.add(companyAddr);
