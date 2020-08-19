@@ -132,7 +132,7 @@
 		</cmr:column>
 
 		<!-- fields for Cyprus Legacy -->
-	<%-- 	<cmr:view forCountry="666">
+		<cmr:view forCountry="666">
 			<c:if test="${reqentry.reqType != 'C'}">
 				<cmr:column span="2" containerForField="ModeOfPayment">
 					<p>
