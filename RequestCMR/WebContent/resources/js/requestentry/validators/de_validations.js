@@ -682,6 +682,39 @@ function unlockCustGrpSubGrp() {
     FormManager.enable('custSubGrp');
   }
 }
+
+function lockIBMTabForDE() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('dunsNo');
+    if (custSubType != 'BUSPR') {
+      FormManager.readOnly('ppsceid');
+    } else {
+      FormManager.enable('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    if (custSubType != 'INTIN' && custSubType != 'INTSO' && custSubType != 'INTAM') {
+      FormManager.readOnly('ibmDeptCostCenter');
+    } else {
+      FormManager.enable('ibmDeptCostCenter');
+    }
+    FormManager.readOnly('custClass');
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.DE = [ SysLoc.GERMANY ];
   console.log('adding DE validators...');
@@ -718,4 +751,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addOrderBlockValidator, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(addReqReasonValidator, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
+  GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
 });
