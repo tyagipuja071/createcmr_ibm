@@ -131,7 +131,7 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Processing Completed Manual records...");
       monitorDisAutoProcRec(entityManager);
 
-      if(SystemParameters.getString("POOL.CMR.STATUS").equals("Y")) {
+      if("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
         LOG.info("Processing Pending if Host is Down...");
         monitorLegacyPending(entityManager);
       }
