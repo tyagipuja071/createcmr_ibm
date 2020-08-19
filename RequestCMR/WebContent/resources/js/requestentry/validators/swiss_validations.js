@@ -1465,6 +1465,35 @@ function setPreferredLangAddr() {
   }
 }
 
+function lockIBMTabForSWISS() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('dunsNo');
+    if (custSubType != 'CHBUS' && custSubType != 'LIBUS') {
+      FormManager.readOnly('ppsceid');
+    } else {
+      FormManager.enable('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    if (custSubType != 'CHINT' && custSubType != 'LIINT') {
+      FormManager.readOnly('ibmDeptCostCenter');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1516,4 +1545,6 @@ dojo.addOnLoad(function() {
   // new phase 2
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(lockIBMTabForSWISS, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
 });
