@@ -17,14 +17,12 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
-import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
-import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -479,16 +477,6 @@ public class CyprusTransformer extends EMEATransformer {
   }
 
   @Override
-  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-      CMRRequestContainer cmrObjects) {
-    for (Addr addr : cmrObjects.getAddresses()) {
-      if (addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZS01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
-        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
-      }
-    }
-  }
-
-  @Override
   public boolean hasCmrtCustExt() {
     return true;
   }
@@ -560,30 +548,6 @@ public class CyprusTransformer extends EMEATransformer {
           break;
         }
       }
-    }
-
-  }
-
-  @Override
-  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
-      MassUpdtData muData, String cmr) throws Exception {
-    LOG.debug("CY >> Mapping default CMRTCEXT values");
-
-    boolean isUpdated = false;
-
-    // Tax office
-    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getNewEntpName1().trim())) {
-        custExt.setiTaxCode("");
-      } else {
-        custExt.setiTaxCode(muData.getNewEntpName1());
-      }
-      isUpdated = true;
-    }
-
-    // Current TimeStamp
-    if (isUpdated) {
-      custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
     }
 
   }
