@@ -3468,6 +3468,7 @@ function addPOBoxValidatorGR() {
 function setClientTierAndISR(value) {
   var reqType = null;
   reqType = FormManager.getActualValue('reqType');
+  var clientTier = FormManager.getActualValue('clientTier');
   if (reqType != 'C') {
     return;
   }
@@ -8034,8 +8035,8 @@ function setAbbrvCyprus(){
     var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
     var abbrvNm = custNm.ret1;
     if (abbrvNm != null) {
-      if (abbrevNm.length > 22) {
-        abbrevNm = abbrevNm.substring(0, 22);
+      if (abbrvNm.length > 22) {
+        abbrvNm = abbrvNm.substring(0, 22);
       }
       FormManager.setValue('abbrevNm', abbrvNm);      
     }
