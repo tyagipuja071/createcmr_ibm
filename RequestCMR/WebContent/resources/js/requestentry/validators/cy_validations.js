@@ -8064,8 +8064,17 @@ function setAbbrvCyprus(){
     var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
     var abbrvNm = custNm.ret1;
     if (abbrvNm != null) {
-      FormManager.setValue('abbrevNm', abbrvNm);
+      if (abbrevNm.length > 22) {
+        abbrevNm = abbrevNm.substring(0, 22);
+      }
+      FormManager.setValue('abbrevNm', abbrvNm);      
     }
+  }else if(role == 'PROCESSOR'){
+    var abbrevNm = FormManager.getActualValue('abbrevNm');
+    if (abbrevNm.length > 22) {
+      abbrevNm = abbrevNm.substring(0, 22);
+    }
+    FormManager.setValue('abbrevNm', abbrevNm);  
   }
 }
 
