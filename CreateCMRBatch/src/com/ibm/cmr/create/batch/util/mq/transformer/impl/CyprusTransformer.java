@@ -482,8 +482,7 @@ public class CyprusTransformer extends EMEATransformer {
 
   }
 
-
-  @Override
+	@Override
   public boolean hasCmrtCustExt() {
     return true;
   }

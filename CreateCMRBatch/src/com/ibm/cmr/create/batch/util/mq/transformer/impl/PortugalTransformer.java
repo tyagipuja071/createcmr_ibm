@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -42,6 +43,7 @@ public class PortugalTransformer extends MessageTransformer {
   private static final String[] ADDRESS_ORDER = { "ZP01", "ZS01", "ZI01", "ZD01", "ZS02" };
 
   private static final Logger LOG = Logger.getLogger(PortugalTransformer.class);
+  private static final String DEFAULT_CLEAR_NUM = "0";
   private static final String DEFAULT_CLEAR_CHAR = "@";
   public static final String DEFAULT_LANDED_COUNTRY = "PT";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
@@ -684,110 +686,26 @@ public class PortugalTransformer extends MessageTransformer {
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
-    CmrtAddr legacyFiscalAddr = null;
 
-    if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType())) {
-      legacyFiscalAddr = LegacyDirectUtil.getLegacyFiscalAddr(entityManager, cntry, addr.getCmrNo(), true);
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setForUpdate(true);
-      }
-    }
-
-    legacyAddr.setForUpdate(true);
-
-    if (!StringUtils.isBlank(addr.getCustNm1())) {
-      legacyAddr.setAddrLine1(addr.getCustNm1());
-
-      if (legacyFiscalAddr != null) {
-        String prefix = !StringUtils.isEmpty(legacyFiscalAddr.getAddrLine1()) ? legacyFiscalAddr.getAddrLine1().substring(0, 1) : "";
-        legacyFiscalAddr.setAddrLine1(prefix + addr.getCustNm1());
-      }
-
-    }
-
-    if (!StringUtils.isBlank(addr.getCustNm2())) {
-      legacyAddr.setAddrLine2(addr.getCustNm2());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setAddrLine2("CL" + addr.getCustNm2());
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getAddrTxt())) {
-      legacyAddr.setStreet(addr.getAddrTxt());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setStreet(addr.getAddrTxt());
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getAddrTxt2())) {
-      legacyAddr.setStreetNo(addr.getAddrTxt2());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setStreetNo(addr.getAddrTxt2());
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getCity1())) {
-      legacyAddr.setCity(addr.getCity1());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setCity(addr.getCity1());
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getDept())) {
-      legacyAddr.setContact(addr.getDept());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setContact(addr.getDept());
-      }
-    }
+    LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
 
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setZipCode(addr.getPostCd());
-      }
-
-      if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType()) && isCrossBorderForMass(addr, legacyAddr)) {
-        handlePostCdSpecialLogic(cust, data, addr.getPostCd(), entityManager);
-      }
     }
 
-    String poBox = addr.getPoBox();
-    if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
-      poBox = " APTO " + poBox;
-      legacyAddr.setPoBox(addr.getPoBox());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(addr.getPoBox());
+    if (!StringUtils.isBlank(addr.getCounty())) {
+      if (addr.getId().getAddrType().equals("ZD01")) {
+        if (DEFAULT_CLEAR_NUM.equals(addr.getCounty().trim())) {
+          legacyAddr.setAddrPhone("");
+        } else {
+          legacyAddr.setAddrPhone(addr.getCounty());
+        }
       }
-    }
 
-    boolean crossBorder = false;
-    if (!StringUtils.isEmpty(addr.getLandCntry()) && !"PT".equals(addr.getLandCntry())) {
-      crossBorder = true;
-    } else {
-      crossBorder = false;
-    }
-
-    if (!StringUtils.isBlank(addr.getLandCntry()) && crossBorder) {
-      legacyAddr.setAddrLine5(LandedCountryMap.getCountryName(addr.getLandCntry()));
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(LandedCountryMap.getCountryName(addr.getLandCntry()));
-      }
-    }
-
-    if (!StringUtils.isBlank(addr.getCounty()) && !crossBorder) {
-      legacyAddr.setAddrLine5(addr.getCounty());
-      if (legacyFiscalAddr != null) {
-        legacyFiscalAddr.setPoBox(addr.getCounty());
-      }
     }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
-    if (legacyFiscalAddr != null) {
-      formatMassUpdateAddressLines(entityManager, legacyFiscalAddr, addr, true);
-      legacyObjects.addAddress(legacyFiscalAddr);
-    }
-
   }
 
   @Override
@@ -803,95 +721,57 @@ public class PortugalTransformer extends MessageTransformer {
     messageHash.remove(addrKey + "City");
     messageHash.remove(addrKey + "POBox");
 
-    String line1 = "";
-    String line2 = "";
-    String line3 = "";
-    String line4 = "";
-    String line5 = "";
-    String line6 = "";
+    String line1 = legacyAddr.getAddrLine1();
+    String line2 = legacyAddr.getAddrLine2();
+    String line3 = legacyAddr.getAddrLine3();
+    String line4 = legacyAddr.getAddrLine4();
+    String line5 = legacyAddr.getAddrLine5();
+    String line6 = legacyAddr.getAddrLine6();
 
-    // fiscal address
-    if (isFAddr) {
-      line1 = legacyAddr.getAddrLine1();
-      line2 = "CL " + legacyAddr.getStreet();
+    line1 = legacyAddr.getAddrLine1();
+    line2 = legacyAddr.getAddrLine2();
 
-      StringBuilder street = new StringBuilder();
-      line2 = StringUtils.replace(line2, " - ", "-");
-      line2 = StringUtils.replace(line2, "- ", "-");
-      line2 = StringUtils.replace(line2, " -", "-");
-      String[] parts = line2.split("[^A-Za-zÁáÉéÍíÓóÚúÑñ.0-9]");
-      for (String part : parts) {
-        if (!StringUtils.isEmpty(part) && (StringUtils.isNumeric(part) || (part.matches(".*\\d{1}.*") && part.contains("-")))) {
-          line3 = part;
-        } else if (!StringUtils.isEmpty(part)) {
-          street.append(street.length() > 0 ? " " : "");
-          street.append(part);
-        }
+    if (StringUtils.isEmpty(line2) && crossBorder) {
+      if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+        line2 = "ATT " + line2;
       }
-
-      line2 = street.toString();
-      if (StringUtils.isEmpty(legacyAddr.getStreet()) && !StringUtils.isEmpty(legacyAddr.getPoBox())) {
-        line2 = "CLAPTO " + legacyAddr.getPoBox().replaceAll("[^\\d]", "");
+      if (line2.length() > 30) {
+        line2 = line2.substring(0, 30);
       }
-      line3 = StringUtils.leftPad(line3, 5, '0');
+    }
+    if (StringUtils.isEmpty(line2)) {
+      line2 = legacyAddr.getStreetNo();
+    }
 
-      line4 = legacyAddr.getCity();
-      if (crossBorder) {
-        line5 = "88888";
-      } else {
-        line5 = legacyAddr.getZipCode();
+    // Att Person or Address Con't/Occupation
+    if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
+      line3 = massUpdtAddr.getAddrTxt2();
+    } else if (!StringUtils.isBlank(massUpdtAddr.getCustNm4())) {
+      if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
+        line3 = "ATT " + line3;
+      }
+      line3 = "ATT " + massUpdtAddr.getCustNm4().trim();
+    }
+
+    // Street OR PO BOX
+    if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt())) {
+      line4 = massUpdtAddr.getAddrTxt();
+    } else if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
+      line4 = "PO BOX " + massUpdtAddr.getPoBox();
+      legacyAddr.setPoBox(massUpdtAddr.getPoBox());
+    }
+
+    if (!StringUtils.isEmpty(massUpdtAddr.getPostCd()) || !StringUtils.isEmpty(massUpdtAddr.getCity1())) {
+      line5 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() + " " : "")
+          + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
+    }
+
+    if (crossBorder) {
+      if (!StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
+        line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
       }
     } else {
-      line1 = legacyAddr.getAddrLine1();
-      line2 = legacyAddr.getAddrLine2();
-
-      if (StringUtils.isEmpty(line2) && crossBorder) {
-        if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
-          line2 = "ATT " + line2;
-        }
-        if (line2.length() > 30) {
-          line2 = line2.substring(0, 30);
-        }
-      }
-
-      if (StringUtils.isEmpty(line2)) {
-        line2 = legacyAddr.getStreetNo();
-      }
-
-      line3 = legacyAddr.getStreet() != null ? legacyAddr.getStreet().trim() : "";
-
-      String poBox = !StringUtils.isEmpty(legacyAddr.getPoBox()) ? legacyAddr.getPoBox() : "";
-      if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
-        poBox = " APTO " + poBox;
-      }
-
-      line3 = (StringUtils.isEmpty(line3) ? poBox : line3.trim()) + poBox;
-      line4 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() : "") + " "
-          + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
-
-      if (!crossBorder) {
-        line5 = !StringUtils.isEmpty(legacyAddr.getAddrLine5()) ? legacyAddr.getAddrLine5().trim() : "";
-        if (!StringUtils.isEmpty(line5) && !line5.toUpperCase().startsWith("ATT ") && !line5.toUpperCase().startsWith("ATT:")) {
-          // Defect 1740670: SPAIN - attention person - ATT
-          line5 = "ATT " + line5;
-        }
-        if (line5.length() > 30) {
-          line5 = line5.substring(0, 30);
-        }
-      } else {
-        if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
-          line5 = massUpdtAddr.getLandCntry();
-        } else {
-          line5 = legacyAddr.getAddrLine5();
-        }
-      }
-
       line6 = "";
-      if ("Y".equalsIgnoreCase(legacyAddr.getIsAddrUseShipping())) {
-        // DTN: Commented because we are not passing phone numbers on the
-        // template
-        // line6 = legacyAddr.getAddrPhone();
-      }
     }
 
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
@@ -910,6 +790,7 @@ public class PortugalTransformer extends MessageTransformer {
     legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
     legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
     legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
+    legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
   }
 
   @Override
