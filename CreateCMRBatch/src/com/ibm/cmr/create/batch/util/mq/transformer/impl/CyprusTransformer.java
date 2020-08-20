@@ -17,12 +17,14 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -398,7 +400,11 @@ public class CyprusTransformer extends EMEATransformer {
       }
 
       if (!StringUtils.isBlank(data.getModeOfPayment())) {
-        legacyCust.setModeOfPayment(data.getModeOfPayment());
+        if (dummyHandler.messageHash.get("ModeOfPayment").equals("X")) {
+          legacyCust.setModeOfPayment(" ");
+        } else {
+          legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
+        }
       } else {
         legacyCust.setModeOfPayment("");
       }
@@ -476,7 +482,7 @@ public class CyprusTransformer extends EMEATransformer {
 
   }
 
-  @Override
+	@Override
   public boolean hasCmrtCustExt() {
     return true;
   }
