@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +57,16 @@ public class MCOFstHandler extends MCOHandler {
       }
 
     }
+  }
+
+  @Override
+  public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01", "ZS02");
+  }
+
+  @Override
+  public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("ZD01", "ZI01");
   }
 
 }
