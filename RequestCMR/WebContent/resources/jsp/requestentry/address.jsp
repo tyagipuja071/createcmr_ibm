@@ -432,16 +432,6 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="90px" field="custFax" header="Loc. Abbrev." />
         </cmr:view>
 
-        <!-- Tax Office and Occupation for Greece/Cyprus -->
-        <cmr:view forCountry="666">
-          <cmr:gridCol width="187px" field="taxOffice" header="Tax Office" />
-          <cmr:gridCol width="90px" field="addrTxt2" header="Occupation" />
-        </cmr:view>
-        <cmr:view forCountry="726">
-          <cmr:gridCol width="90px" field="taxOffice" header="Tax Office" />
-          <cmr:gridCol width="90px" field="addrTxt2" header="Occupation" />
-        </cmr:view>
-
         <!-- Tax Office for Turkey -->
         <cmr:view forCountry="862">
           <cmr:gridCol width="90px" field="taxOffice" header="Tax Office" />

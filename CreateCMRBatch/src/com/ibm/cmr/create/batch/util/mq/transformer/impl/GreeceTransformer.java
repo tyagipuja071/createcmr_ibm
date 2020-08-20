@@ -253,9 +253,6 @@ public class GreeceTransformer extends EMEATransformer {
       lineNo++;
     }
 
-    // tax office
-    messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressT",
-        !StringUtils.isEmpty(addrData.getTaxOffice()) ? addrData.getTaxOffice() : "");
 
     // vat
     if (!MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType())) {
@@ -579,15 +576,6 @@ public class GreeceTransformer extends EMEATransformer {
     return true;
   }
 
-  @Override
-  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-      CMRRequestContainer cmrObjects) {
-    for (Addr addr : cmrObjects.getAddresses()) {
-      if (addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
-        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
-      }
-    }
-  }
 
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
@@ -1060,43 +1048,6 @@ public class GreeceTransformer extends EMEATransformer {
     legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
     legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
     legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
-  }
-
-  @Override
-  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
-      MassUpdtData muData, String cmr) throws Exception {
-    // for tax office
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getFloor())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
-              custExt.setiTaxCode("");
-            } else {
-              custExt.setiTaxCode(mua.getFloor());
-            }
-            break;
-          }
-
-        }
-      }
-    }
-    List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-    MassUpdtAddr zp01Addr = new MassUpdtAddr();
-    for (MassUpdtAddr muAddr : muAddrList) {
-      if ("ZP01".equals(muAddr.getId().getAddrType())) {
-        zp01Addr = muAddr;
-        break;
-      }
-    }
-    if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
-      if ("@".equals(zp01Addr.getFloor())) {
-        custExt.setiTaxCode("");
-      } else {
-        custExt.setiTaxCode(zp01Addr.getFloor());
-      }
-    }
   }
 
   @Override
