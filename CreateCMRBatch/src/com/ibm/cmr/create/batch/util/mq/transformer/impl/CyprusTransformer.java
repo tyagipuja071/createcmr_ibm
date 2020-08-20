@@ -400,7 +400,11 @@ public class CyprusTransformer extends EMEATransformer {
       }
 
       if (!StringUtils.isBlank(data.getModeOfPayment())) {
-        legacyCust.setModeOfPayment(data.getModeOfPayment());
+        if (dummyHandler.messageHash.get("ModeOfPayment").equals("X")) {
+          legacyCust.setModeOfPayment(" ");
+        } else {
+          legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
+        }
       } else {
         legacyCust.setModeOfPayment("");
       }
@@ -478,15 +482,6 @@ public class CyprusTransformer extends EMEATransformer {
 
   }
 
-  @Override
-  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-      CMRRequestContainer cmrObjects) {
-    for (Addr addr : cmrObjects.getAddresses()) {
-      if (addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZS01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
-        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
-      }
-    }
-  }
 
   @Override
   public boolean hasCmrtCustExt() {
@@ -560,30 +555,6 @@ public class CyprusTransformer extends EMEATransformer {
           break;
         }
       }
-    }
-
-  }
-
-  @Override
-  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
-      MassUpdtData muData, String cmr) throws Exception {
-    LOG.debug("CY >> Mapping default CMRTCEXT values");
-
-    boolean isUpdated = false;
-
-    // Tax office
-    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getNewEntpName1().trim())) {
-        custExt.setiTaxCode("");
-      } else {
-        custExt.setiTaxCode(muData.getNewEntpName1());
-      }
-      isUpdated = true;
-    }
-
-    // Current TimeStamp
-    if (isUpdated) {
-      custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
     }
 
   }
