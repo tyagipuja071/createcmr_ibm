@@ -287,15 +287,6 @@
     </p>
   </cmr:column>
 
-  <cmr:column span="2" containerForField="TaxOffice" forCountry="726,666">
-    <p>
-      <cmr:label fieldId="taxOffice">
-        <cmr:fieldLabel fieldId="TaxOffice" />:
-      </cmr:label>
-      <cmr:field fieldId="TaxOffice" id="taxOffice" path="taxOffice" />
-    </p>
-  </cmr:column>
-
   <form:hidden path="poBoxPostCd" forCountry="758"/>
   <form:hidden path="transportZone" forCountry="838,758,866,754"/>
 </cmr:row>
