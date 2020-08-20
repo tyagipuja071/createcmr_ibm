@@ -130,8 +130,8 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Processing Completed Manual records...");
       monitorDisAutoProcRec(entityManager);
 
-      LOG.info("Processing Pending if Host is Down...");
-      monitorLegacyPending(entityManager);  
+//      LOG.info("Processing Pending if Host is Down...");
+////      monitorLegacyPending(entityManager);  
 
       return true;
     } catch (Exception e) {
