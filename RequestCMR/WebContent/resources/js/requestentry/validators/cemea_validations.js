@@ -1355,7 +1355,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '5B') {
         clientTiers = [ '7' ];
       }
-      
+
     } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
@@ -2607,7 +2607,7 @@ function setVatValidator() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custGroup = FormManager.getActualValue('custGrp');
 
-  var excludeCountries = new Set([ '644', '668', '693', '694', '704', '708', '740', '820', '821', '826', '889','707' ]);
+  var excludeCountries = new Set([ '644', '668', '693', '694', '704', '708', '740', '820', '821', '826', '889', '707' ]);
   var cntryRegion = FormManager.getActualValue('countryUse');
   if (excludeCountries.has(cntry) || cntryRegion == '707') {
     return;
@@ -4136,6 +4136,38 @@ function addEmbargoCdValidatorForCEE() {
     })(), 'MAIN_IBM_TAB', 'frmCMR');
   }
 }
+
+// CMR-4606
+function checkGAddressExist() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        if (FormManager.getActualValue('reqType') != 'U') {
+          return new ValidationResult(null, true);
+        } else {
+          if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
+            var cntryDup = FormManager.getActualValue('dupIssuingCntryCd');
+            var qParamsDup = {
+              RCYAA : cntryDup,
+              RCUXA : cmrNo
+            };
+            var resultD = cmr.query('GET_G_SEQ_FROM_LEGACY', qParamsDup);
+            if (resultD && resultD.ret1 && resultD.ret1 != '') {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, false, 'The Dup Country Missing a G address,please update it independent.');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
       '762', '767', '768', '772', '787', '805', '808', '820', '821', '823', '826', '832', '849', '850', '865', '889' ];
