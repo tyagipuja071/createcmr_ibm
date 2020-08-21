@@ -130,7 +130,7 @@ public class SingaporeUtil extends AutomationUtil {
     if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isNotBlank(data.getCmrNo())) {
       Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
       if (checkifCMRNumExists(data.getCmrNo(), addr.getLandCntry())) {
-        details.append("CMR field cleared as requested CMR does not exist.");
+        details.append("CMR Number field cleared as requested CMR does not exist.");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CMR_NO", data.getCmrNo(), "");
       }
     }
