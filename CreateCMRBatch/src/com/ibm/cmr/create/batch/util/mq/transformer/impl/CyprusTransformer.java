@@ -400,10 +400,10 @@ public class CyprusTransformer extends EMEATransformer {
       }
 
       if (!StringUtils.isBlank(data.getModeOfPayment())) {
-        if (dummyHandler.messageHash.get("ModeOfPayment").equals("X")) {
+        if (("X").equals(data.getModeOfPayment())) {
           legacyCust.setModeOfPayment(" ");
         } else {
-          legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
+          legacyCust.setModeOfPayment(data.getModeOfPayment());
         }
       } else {
         legacyCust.setModeOfPayment("");
