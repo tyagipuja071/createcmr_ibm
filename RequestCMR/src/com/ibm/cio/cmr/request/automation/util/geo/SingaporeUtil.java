@@ -77,27 +77,28 @@ public class SingaporeUtil extends AutomationUtil {
       details.append("Default cluster not used.\n");
     }
 
-    String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
-    LOG.debug("IfClusterSalesmanIsValid" + validRes);
+    if (!"SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
+      String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
+      LOG.debug("IfClusterSalesmanIsValid" + validRes);
 
-    if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
-      LOG.debug("Salesman check skipped for private and allowed scenarios.");
-      details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
-    } else {
+      if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+        LOG.debug("Salesman check skipped for private and allowed scenarios.");
+        details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
+      } else {
 
-      if (validRes != null && validRes.equals("INVALID")) {
-        details.append("The combination of Salesman No. and Cluster is not valid.\n");
-        engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
-        // eleResults.append("Invalid Salesman No.\n");
-        results.setOnError(true);
-      } else if (validRes != null && validRes.equals("VALID")) {
-        details.append("The combination of Salesman No. and Cluster is valid.\n");
-      } else if (validRes != null && validRes.equals("NO_RESULTS")) {
-        details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+        if (validRes != null && validRes.equals("INVALID")) {
+          details.append("The combination of Salesman No. and Cluster is not valid.\n");
+          engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
+          // eleResults.append("Invalid Salesman No.\n");
+          results.setOnError(true);
+        } else if (validRes != null && validRes.equals("VALID")) {
+          details.append("The combination of Salesman No. and Cluster is valid.\n");
+        } else if (validRes != null && validRes.equals("NO_RESULTS")) {
+          details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+        }
+
       }
-
     }
-
     if (govType != null && govType.equals("Y")) {
       // eleResults.append("Government Organization" + "\n");
       details.append("Processor review is needed as customer is a Government Organization" + "\n");
