@@ -1712,8 +1712,8 @@ public class CyprusHandler extends BaseSOFHandler {
         address.setDept(currentRecord.getCmrDept());
       }
 
-      if (SystemLocation.GREECE.equals(country)) {
-        address.setCustNm4(currentRecord.getCmrName4());
+      if (SystemLocation.CYPRUS.equals(country)) {
+        address.setCustNm4(LegacyCommonUtil.removeATT(currentRecord.getCmrName4()));
         // GR - old record
         if (isOldRecordsGR) {
           address.setImportInd("N");
