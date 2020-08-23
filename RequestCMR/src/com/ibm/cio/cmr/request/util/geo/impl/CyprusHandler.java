@@ -3500,7 +3500,7 @@ public class CyprusHandler extends BaseSOFHandler {
         String attPerson = ""; // 13
         row = sheet.getRow(rowIndex);
         if (row == null) {
-          return; // stop immediately when row is blank
+          break; // stop immediately when row is blank
         }
         // iterate all the rows and check each column value
         currCell = row.getCell(6);
@@ -3567,6 +3567,11 @@ public class CyprusHandler extends BaseSOFHandler {
             LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
             error.addError(rowIndex, "Street Con't/PO Box",
                 "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
+          }else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
+            LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "ATT Person/Street Con't",
+                "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
             validations.add(error);
           }
         }
