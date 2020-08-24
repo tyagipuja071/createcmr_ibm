@@ -156,7 +156,7 @@ public class CompanyFinder {
       request.setUsRestrictTo(searchModel.getRestrictTo());
       if(searchModel.isPoolRecord()){
     	  request.setIncludeDeleted("Y");
-      }
+      }      
 
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
       // connect to the duplicate CMR check service
