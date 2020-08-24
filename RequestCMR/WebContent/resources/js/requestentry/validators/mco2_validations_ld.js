@@ -98,29 +98,14 @@ function disableAddrFieldsCEWA() {
     FormManager.enable('landCntry');
   }
 
-  // Phone - for shipping and Sold-to (FST = Installing and Non-FST = Mailing )
-  if (addrType == 'ZD01' || addrType == 'ZS01') {
+  // Phone - for shipping and EPL addresses
+  if (addrType == 'ZD01' || addrType == 'ZS02') {
     FormManager.enable('custPhone');
   } else {
     FormManager.setValue('custPhone', '');
     FormManager.disable('custPhone');
   }
 
-  // PO Box allowed -> FST = Mail-to (ZS02), Bill-to (ZP01), Sold-to (ZS01)
-  // Non FST = Mailing (ZS01), Billing (ZP01)
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var addrPOBoxEnabled = [ 'ZS01', 'ZP01' ]
-
-  if (fstCEWA.includes(cntry)) {
-    addrPOBoxEnabled.push('ZS02');
-  }
-
-  if (addrPOBoxEnabled.includes(addrType)) {
-    FormManager.enable('poBox');
-  } else {
-    FormManager.setValue('poBox', '');
-    FormManager.disable('poBox');
-  }
 }
 
 function addAddressTypeValidator() {
@@ -162,44 +147,22 @@ function addAddressTypeValidator() {
             }
           }
 
-          var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
           if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
-          } else if (fstCEWA.includes(cntry)) {
-            return fstAddressValidator(zp01Cnt, zs01Cnt, zs02Cnt);
-          } else if (othCEWA.includes(cntry)) {
-            return nonFstAddressValidator(zs01Cnt, zp01Cnt, zs02Cnt);
+          } else if (zs01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Billing address is allowed.');
+          } else if (zp01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
+          } else if (zi01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Installing address is allowed.');
+          } else if (zs02Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one EPL address is allowed.');
           }
           return new ValidationResult(null, true);
         }
       }
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
-
-function fstAddressValidator(zp01Cnt, zs01Cnt, zs02Cnt) {
-  if (zp01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Billing address is allowed.');
-  } else if (zs02Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-  } else if (zs01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Installing address is allowed.');
-  } else {
-    return new ValidationResult(null, true);
-  }
-}
-
-function nonFstAddressValidator(zs01Cnt, zp01Cnt, zs02Cnt) {
-  if (zp01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Billing address is allowed.');
-  } else if (zs01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-  } else if (zs02Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one EPL address is allowed.');
-  } else {
-    return new ValidationResult(null, true);
-  }
 }
 
 function addAddressFieldValidators() {
@@ -222,8 +185,20 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  // addrCont + poBox should not exceed 21 characters
-  // ",<space>PO<space>BOX<space>" is included when counting to 30 max
+  // CEWA - postal code should accept alphanumeric and spaces
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var postCd = FormManager.getActualValue('postCd');
+        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$")) {
+          return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+  // addrCont + poBox should not exceed 28 characters
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -233,8 +208,8 @@ function addAddressFieldValidators() {
 
         if (poBox != '') {
           val += poBox;
-          if (val != null && val.length > 21) {
-            return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should not exceed 21 characters.');
+          if (val != null && val.length > 28) {
+            return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should not exceed 28 characters.');
           }
         }
         return new ValidationResult(null, true);
@@ -392,7 +367,6 @@ function addAddrValidatorMCO2() {
   FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ]);
 
   FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
-  FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO BOX' ]);
 }
 
 function streetAvenueValidator() {
@@ -646,16 +620,19 @@ function lockAbbrv() {
   }
 }
 
-function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
-  if (scenario == 'INTER' || scenario == 'XINTE') {
-    FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+function showDeptNoForInternalsOnly() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var subCustGrp = FormManager.getActualValue('custSubGrp');
+  if (subCustGrp == 'INTER' || subCustGrp == 'XINTE') {
+    checkAndAddValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ]);
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
-    FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
-    FormManager.hide('InternalDept', 'ibmDeptCostCenter');
-  }
-  if (scenarioChanged && scenario != null && scenario != '') {
     FormManager.clearValue('ibmDeptCostCenter');
+    FormManager.resetValidations('ibmDeptCostCenter');
+    FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
 }
 
@@ -748,6 +725,15 @@ function canRemoveAddress(value, rowIndex, grid) {
 
 function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   return canRemoveAddress(value, rowIndex, grid);
+}
+
+function hideCustName4() {
+  var custGroup = FormManager.getActualValue('custGrp');
+  if (custGroup == "CROSS") {
+    FormManager.hide('CustomerName4', 'custNm4');
+  } else {
+    FormManager.show('CustomerName4', 'custNm4');
+  }
 }
 
 function addValidatorStreet() {
@@ -984,79 +970,6 @@ function setFieldsBehavior(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function addStreetAddressFormValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
-          return new ValidationResult(null, false, 'Please fill-out either Street or PO Box.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
-function addAdditionalNameStreetContPOBoxValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var filledCount = 0;
-
-        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
-          return new ValidationResult(null, true);
-        }
-
-        if (FormManager.getActualValue('custNm4') != '') {
-          filledCount++;
-        }
-
-        if (FormManager.getActualValue('addrTxt2') != '') {
-          filledCount++;
-        }
-
-        if (FormManager.getActualValue('poBox') != '') {
-          filledCount++;
-        }
-
-        if (filledCount > 2) {
-          return new ValidationResult(null, false, 'Additional Name or Address Information, Street Continuation, and PO Box only 2 can be filled at the same time');
-        }
-
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
-function clearPhoneNoFromGrid() {
-  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-    if (_allAddressData != null && _allAddressData[i] != null) {
-      if (!(_allAddressData[i].addrType[0] == 'ZS01' || _allAddressData[i].addrType[0] == 'ZD01')) {
-        _allAddressData[i].custPhone[0] = '';
-      }
-    }
-  }
-}
-
-function clearPOBoxFromGrid() {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var addrPOBoxEnabled = [ 'ZS01', 'ZP01' ]
-
-  if (fstCEWA.includes(cntry)) {
-    addrPOBoxEnabled.push('ZS02');
-  }
-  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-    if (_allAddressData != null && _allAddressData[i] != null) {
-      if (!(addrPOBoxEnabled.includes(_allAddressData[i].addrType[0]))) {
-        _allAddressData[i].poBox[0] = '';
-      }
-    }
-  }
-}
-
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1083,7 +996,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
-  // GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(hideCustName4, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(hideCustName4, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
@@ -1092,12 +1007,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.MALTA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.MALTA ], null, true);
   // Story 1718889: Tanzania: new mandatory TIN number field fix
-  // GEOHandler.addAddrFunction(diplayTinNumberforTZ, [ SysLoc.TANZANIA ]);
-  // GEOHandler.registerValidator(addTinFormatValidationTanzania, [
-  // SysLoc.TANZANIA ], null, true);
+  GEOHandler.addAddrFunction(diplayTinNumberforTZ, [ SysLoc.TANZANIA ]);
+  GEOHandler.registerValidator(addTinFormatValidationTanzania, [ SysLoc.TANZANIA ], null, true);
 
-  // GEOHandler.registerValidator(addTinBillingValidator, [ SysLoc.TANZANIA ],
-  // null, true);
+  GEOHandler.registerValidator(addTinBillingValidator, [ SysLoc.TANZANIA ], null, true);
 
   // GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2,
   // GEOHandler.REQUESTER,true);
@@ -1116,8 +1029,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
 
   GEOHandler.addAfterTemplateLoad(setFieldsBehavior, GEOHandler.MCO2);
-  GEOHandler.registerValidator(addStreetAddressFormValidator, GEOHandler.MCO2, null, true);
-  GEOHandler.registerValidator(addAdditionalNameStreetContPOBoxValidator, GEOHandler.MCO2, null, true);
-  GEOHandler.addAfterConfig(clearPhoneNoFromGrid, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
+
 });
