@@ -392,6 +392,7 @@ div#ibm-content-main {
     <cmr:view exceptForCountry="758">
     	<form:hidden path="hwSvcsRepTeamNo" />
     </cmr:view>
+      <form:hidden path="paygoProcessIndc" />
 	
     <!-- Your Actions Dropdown -->
     <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : ""}" style="display: none">
