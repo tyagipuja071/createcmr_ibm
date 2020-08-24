@@ -564,6 +564,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
 
+          if (TYPE_IBM.equals(type) && !equals(oldData.getMilitary(), newData.getMilitary())
+              && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Military"))) {
+            update = new UpdatedDataModel();
+            update.setDataField(PageManager.getLabel(cmrCountry, "Military", "-"));
+            update.setNewData("Y".equals(newData.getMilitary()) ? "Yes" : "");
+            update.setOldData("Y".equals(oldData.getMilitary()) ? "Yes" : "");
+            results.add(update);
+          }
+          
           if (geoHandler != null) {
             geoHandler.addSummaryUpdatedFields(this, type, cmrCountry, newData, oldData, results);
           }
