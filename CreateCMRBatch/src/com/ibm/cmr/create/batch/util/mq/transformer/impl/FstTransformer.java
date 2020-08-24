@@ -192,13 +192,13 @@ public class FstTransformer extends MCOTransformer {
     case "ZP01":
       return "Billing";
     case "ZI01":
-      return "Mailing";
+      return "EPL";
     case "ZD01":
       return "Shipping";
     case "ZS01":
       return "Installing";
     case "ZS02":
-      return "EPL";
+      return "Mailing";
     default:
       return "";
     }
