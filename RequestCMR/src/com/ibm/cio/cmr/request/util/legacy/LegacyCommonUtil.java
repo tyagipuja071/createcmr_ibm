@@ -216,4 +216,14 @@ public class LegacyCommonUtil {
     return false;
   }
 
+  public static String doFormatPoBox(String poBox) {
+    boolean poBoxFlag = poBox.contains("PO BOX");
+    if (poBoxFlag) {
+      return poBox.substring(6).trim();
+    } else {
+      return poBox;
+    }
+
+  }
+
 }
