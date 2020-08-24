@@ -161,14 +161,18 @@ public class CyprusHandler extends BaseSOFHandler {
         // name3 in rdc = Address Con't on SOF
         record.setCmrStreetAddressCont(record.getCmrName3());
         record.setCmrName3(null);
-        record.setCmrName4(record.getCmrName3());
+        if (record.getCmrName4().startsWith("ATT")) {
+          record.setCmrName4(LegacyCommonUtil.removeATT(record.getCmrName4()));
+        }
       }
 
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
-        if (record.getCmrPOBox().length() > 5) {
-          record.setCmrPOBox(record.getCmrPOBox().substring(0, 5));
+        String poBox = LegacyCommonUtil.doFormatPoBox(record.getCmrPOBox());
+        if (poBox.length() > 5) {
+          record.setCmrPOBox(poBox.substring(0, 5));
+        }else{
+        record.setCmrPOBox(poBox);
         }
-        record.setCmrPOBox(record.getCmrPOBox());
       }
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
         record.setCmrAddrSeq("00001");
@@ -1236,7 +1240,7 @@ public class CyprusHandler extends BaseSOFHandler {
 
     address.setCmrName1Plain(name);
     address.setCmrTaxNumber(vat);
-    
+
     if (nickName == null || "*".equals(nickName)) {
       nickName = "";
     }
@@ -1713,8 +1717,8 @@ public class CyprusHandler extends BaseSOFHandler {
         address.setDept(currentRecord.getCmrDept());
       }
 
-      if (SystemLocation.GREECE.equals(country)) {
-        address.setCustNm4(currentRecord.getCmrName4());
+      if (SystemLocation.CYPRUS.equals(country)) {
+        address.setCustNm4(LegacyCommonUtil.removeATT(currentRecord.getCmrName4()));
         // GR - old record
         if (isOldRecordsGR) {
           address.setImportInd("N");
@@ -1959,6 +1963,9 @@ public class CyprusHandler extends BaseSOFHandler {
 
     if (SystemLocation.CYPRUS.equals(data.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
       data.setInstallBranchOff(data.getSalesBusOffCd());
+      if(!StringUtils.isEmpty(data.getModeOfPayment()) && data.getModeOfPayment().equals("X")){
+        data.setModeOfPayment(" ");
+      }
     } else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
       data.setInstallBranchOff(data.getSalesBusOffCd());
       data.setEngineeringBo(data.getSalesBusOffCd());
@@ -2174,7 +2181,7 @@ public class CyprusHandler extends BaseSOFHandler {
         addressDataMap.put("postCd", addr.getPostCd());
         addressDataMap.put("stateProv", addr.getStateProv());
         addressDataMap.put("stdCityNm", addr.getStdCityNm());
-        
+
         for (String key : addressDataMap.keySet()) {
           for (char problematicChar : problematicCharList) {
             if (!(StringUtils.isEmpty(addressDataMap.get(key)))) {
@@ -2300,7 +2307,7 @@ public class CyprusHandler extends BaseSOFHandler {
           if (!(StringUtils.isEmpty(addressDataMap.get("stdCityNm"))) && !(addressDataMap.get("stdCityNm").equals(addr.getStdCityNm()))) {
             addr.setStdCityNm(addressDataMap.get("stdCityNm"));
           }
-          
+
         }
       }
 
@@ -2609,6 +2616,14 @@ public class CyprusHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
+    
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
       results.add(update);
     }
   }
@@ -3501,7 +3516,7 @@ public class CyprusHandler extends BaseSOFHandler {
         String attPerson = ""; // 13
         row = sheet.getRow(rowIndex);
         if (row == null) {
-          return; // stop immediately when row is blank
+          break; // stop immediately when row is blank
         }
         // iterate all the rows and check each column value
         currCell = row.getCell(6);
@@ -3569,6 +3584,11 @@ public class CyprusHandler extends BaseSOFHandler {
             error.addError(rowIndex, "Street Con't/PO Box",
                 "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
             validations.add(error);
+          }else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
+            LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "ATT Person/Street Con't",
+                "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
           }
         }
       }
@@ -3578,7 +3598,7 @@ public class CyprusHandler extends BaseSOFHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
-    
+
     if (SystemLocation.UNITED_KINGDOM.equals(cmrCountry) || SystemLocation.IRELAND.equals(cmrCountry)) {
       if (!equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
@@ -3881,7 +3901,7 @@ public class CyprusHandler extends BaseSOFHandler {
     if (addrType.equals("ZP01") || addrType.equals("ZI01") || addrType.equals("ZS02")) {
       addrCopy.setCustPhone(null);
     }
-    
+
     entityManager.persist(addrCopy);
     entityManager.flush();
   }
