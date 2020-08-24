@@ -27,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -41,6 +42,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.JpaManager;
