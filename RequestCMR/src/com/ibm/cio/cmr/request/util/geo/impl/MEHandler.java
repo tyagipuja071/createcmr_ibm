@@ -130,6 +130,11 @@ public class MEHandler extends BaseSOFHandler {
       SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA,
       SystemLocation.CZECH_REPUBLIC);
 
+  private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
+      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
+      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT);
+
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "Department" };
@@ -1520,7 +1525,7 @@ public class MEHandler extends BaseSOFHandler {
       update.setOldData(addr.getDeptOld());
       results.add(update);
     }
-    if (CEE_COUNTRY_LIST.contains(cmrCountry)) {
+    if (ME_COUNTRY_LIST.contains(cmrCountry)) {
       for (UpdatedNameAddrModel model : results) {
         if (model.getDataField() != null && model.getDataField().equals(PageManager.getLabel(cmrCountry, "CustPhone", "-"))) {
           results.remove(model);
@@ -1607,6 +1612,8 @@ public class MEHandler extends BaseSOFHandler {
     if ("618".equals(issuingCountry)) {
       return true;
     } else if (CEE_COUNTRY_LIST.contains(issuingCountry)) {
+      return true;
+    } else if (ME_COUNTRY_LIST.contains(issuingCountry)) {
       return true;
     }
     return false;
