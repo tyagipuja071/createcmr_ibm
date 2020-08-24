@@ -618,9 +618,15 @@ public class TransConnService extends BaseBatchService {
           for (Addr newAddr : newAddresses) {
             AddrPK addrPK = newAddr.getId();
             if(zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
-            	copyValuesToEntity(zi01Addr, newAddr);
+              copyValuesToEntity(zi01Addr, newAddr);
+          	  newAddr.setSapNo(null);
+              newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+              newAddr.setChangedIndc(null);
             } else {
-            	copyValuesToEntity(addr, newAddr);
+          	  copyValuesToEntity(addr, newAddr);
+          	  newAddr.setSapNo(kna1.getId().getKunnr());
+              newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
+              newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
             }            
             newAddr.setId(addrPK);
             newAddr.setAddrStdResult("X");
@@ -628,11 +634,8 @@ public class TransConnService extends BaseBatchService {
             newAddr.setAddrStdRejReason(null);
             newAddr.setAddrStdRejCmt(null);
             newAddr.setAddrStdTs(null);
-            newAddr.setSapNo(kna1.getId().getKunnr());
-            newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
             newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
             newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
-            newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
             updateEntity(newAddr, entityManager);
           }
 
