@@ -1962,6 +1962,9 @@ public class CyprusHandler extends BaseSOFHandler {
 
     if (SystemLocation.CYPRUS.equals(data.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
       data.setInstallBranchOff(data.getSalesBusOffCd());
+      if(!StringUtils.isEmpty(data.getModeOfPayment()) && data.getModeOfPayment().equals("X")){
+        data.setModeOfPayment(" ");
+      }
     } else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
       data.setInstallBranchOff(data.getSalesBusOffCd());
       data.setEngineeringBo(data.getSalesBusOffCd());
@@ -2612,6 +2615,14 @@ public class CyprusHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
+    
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
       results.add(update);
     }
   }
@@ -3504,7 +3515,7 @@ public class CyprusHandler extends BaseSOFHandler {
         String attPerson = ""; // 13
         row = sheet.getRow(rowIndex);
         if (row == null) {
-          return; // stop immediately when row is blank
+          break; // stop immediately when row is blank
         }
         // iterate all the rows and check each column value
         currCell = row.getCell(6);
@@ -3571,6 +3582,11 @@ public class CyprusHandler extends BaseSOFHandler {
             LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
             error.addError(rowIndex, "Street Con't/PO Box",
                 "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
+          }else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
+            LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "ATT Person/Street Con't",
+                "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
             validations.add(error);
           }
         }
