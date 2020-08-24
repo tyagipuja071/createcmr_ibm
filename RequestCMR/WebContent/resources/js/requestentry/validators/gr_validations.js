@@ -4943,6 +4943,7 @@ function autoSetSBOOnSRValueIT() {
 function enableCMRNUMForPROCESSOR() {
   var isProspect = FormManager.getActualValue('prospLegalInd');
   var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   if (reqType != 'C') {
     return;
   }
@@ -4952,8 +4953,10 @@ function enableCMRNUMForPROCESSOR() {
   console.log("validateCMRNumberForLegacy ifProspect:" + isProspect);
   if ('Y' == isProspect) {
     FormManager.readOnly('cmrNo');
-  } else {
+  } else if(role == "PROCESSOR") {
     FormManager.enable('cmrNo');
+  } else {
+    FormManager.readOnly('cmrNo');
   }
 }
 
@@ -5776,8 +5779,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.EMEA);
 
   // For Legacy Direct
-  //GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.GREECE ]);
-  GEOHandler.registerValidator(enableCMRNUMForPROCESSOR, [ SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(enableCMRNUMForPROCESSOR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(setFieldsBehaviourGR, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(resetSubIndustryCdGR, [ SysLoc.GREECE ]);
