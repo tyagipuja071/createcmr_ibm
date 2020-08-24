@@ -60,6 +60,11 @@ public class METransformer extends EMEATransformer {
       SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
       SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);
 
+  private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
+      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
+      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT);
+
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
   public static String DEFAULT_LANDED_COUNTRY = "SK";
@@ -759,6 +764,13 @@ public class METransformer extends EMEATransformer {
 
     }
 
+    if (!StringUtils.isBlank(addr.getPoBox())) {
+      if ("@".equals(addr.getPoBox())) {
+        legacyAddr.setPoBox("");
+      } else {
+        legacyAddr.setPoBox(addr.getPoBox());
+      }
+    }
     // legacy addr line5 is set in order district+postCd+City
     StringBuilder addrLine5 = new StringBuilder();
 
@@ -1234,20 +1246,11 @@ public class METransformer extends EMEATransformer {
     }
 
     // use svcArOffice to store custLang
-    // if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-    // cust.setLangCd(muData.getSvcArOffice());
-    // }
-
-    // RBBXA :Bank Branch Number
-    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
-      if ("@".equals(muData.getNewEntpName1())) {
-        cust.setBankBranchNo("");
+    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
+      if ("@".equals(muData.getSvcArOffice())) {
+        cust.setLangCd("");
       } else {
-        if (muData.getNewEntpName1().length() > 9) {
-          cust.setBankBranchNo(muData.getNewEntpName1().substring(0, 8));
-        } else {
-          cust.setBankBranchNo(muData.getNewEntpName1());
-        }
+        cust.setLangCd(muData.getSvcArOffice());
       }
     }
 
@@ -1315,10 +1318,8 @@ public class METransformer extends EMEATransformer {
     String cebo = "";
     if (!StringUtils.isBlank(muData.getCustNm2())) {
       cebo = muData.getCustNm2();
-      if (SystemLocation.SERBIA.equals(cust.getId().getSofCntryCode()) || SystemLocation.KYRGYZSTAN.equals(cust.getId().getSofCntryCode())) {
-        if (cebo.length() < 7) {
-          cebo = StringUtils.rightPad(cebo, 7, '0');
-        }
+      if (cebo.length() < 7) {
+        cebo = StringUtils.rightPad(cebo, 7, '0');
       }
       if ("@".equals(muData.getCustNm2())) {
         cust.setCeBo("");
@@ -1612,25 +1613,6 @@ public class METransformer extends EMEATransformer {
 
     }
 
-    Data data = cmrObjects.getData();
-    CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
-    if ("821".equals(data.getCmrIssuingCntry()) && legacyCustExt != null) {
-      String acei = data.getAgreementSignDate();
-      if (!StringUtils.isBlank(acei) && acei.length() == 6) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd");
-        String month = acei.substring(0, 2);
-        String day = acei.substring(2, 4);
-        String year = acei.substring(4, 6);
-
-        try {
-          Date date = sdf.parse(year + "-" + month + "-" + day);
-          legacyCustExt.setAeciSubDt(date);
-        } catch (java.text.ParseException e) {
-          e.printStackTrace();
-        }
-      }
-    }
-
     String reqType = cmrObjects.getAdmin().getReqType();
     long requestId = cmrObjects.getAdmin().getId().getReqId();
 
@@ -1736,7 +1718,6 @@ public class METransformer extends EMEATransformer {
     // }
     // }
 
-    // RBBXA :Bank Branch Number
     if (!StringUtils.isBlank(muData.getNewEntpName1())) {
       if ("@".equals(muData.getNewEntpName1())) {
         custExt.setiTaxCode("");
@@ -1749,29 +1730,29 @@ public class METransformer extends EMEATransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getEmail2())) {
-      if ("@".equals(muData.getEmail2())) {
-        custExt.setBankAcctNo("");
+    if (!StringUtils.isBlank(muData.getAffiliate())) {
+      if ("@".equals(muData.getAffiliate())) {
+        custExt.setTeleCovRep("");
       } else {
-        custExt.setBankAcctNo(muData.getEmail2());
+        custExt.setTeleCovRep(muData.getAffiliate());
       }
     }
 
-    List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-    MassUpdtAddr zp01Addr = new MassUpdtAddr();
-    for (MassUpdtAddr muAddr : muAddrList) {
-      if ("ZP01".equals(muAddr.getId().getAddrType())) {
-        zp01Addr = muAddr;
-        break;
-      }
-    }
-    if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
-      if ("@".equals(zp01Addr.getFloor())) {
-        custExt.setiTaxCode("");
-      } else {
-        custExt.setiTaxCode(zp01Addr.getFloor());
-      }
-    }
+    // List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
+    // MassUpdtAddr zp01Addr = new MassUpdtAddr();
+    // for (MassUpdtAddr muAddr : muAddrList) {
+    // if ("ZP01".equals(muAddr.getId().getAddrType())) {
+    // zp01Addr = muAddr;
+    // break;
+    // }
+    // }
+    // if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
+    // if ("@".equals(zp01Addr.getFloor())) {
+    // custExt.setiTaxCode("");
+    // } else {
+    // custExt.setiTaxCode(zp01Addr.getFloor());
+    // }
+    // }
   }
 
   private void copyMailingFromBilling(LegacyDirectObjectContainer legacyObjects, CmrtAddr billingAddr) {
