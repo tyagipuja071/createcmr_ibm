@@ -16,6 +16,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -134,6 +135,7 @@ public class DnBUtil {
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
+    registerDnBTaxCd1Code("GB", 2541); // CRO Number/CRN
 
     // other codes
     registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
@@ -597,18 +599,27 @@ public class DnBUtil {
     Data data = requestData.getData();
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
+    boolean isTaxCdMatch = false;
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    if (countryUtil != null) {
+      isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
+    }
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
-      if (StringUtils.isNotBlank(data.getVat())) {
-        if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-          request.setOrgId(data.getVat().split("\\s")[0]);
-        } else {
-          request.setOrgId(data.getVat());
+      if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
+        request.setOrgId(data.getTaxCd1());
+      } else if (!isTaxCdMatch) {
+        if (StringUtils.isNotBlank(data.getVat())) {
+          if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+            request.setOrgId(data.getVat().split("\\s")[0]);
+          } else {
+            request.setOrgId(data.getVat());
+          }
+        } else if (StringUtils.isNotBlank(addr.getVat())) {
+          request.setOrgId(addr.getVat());
         }
-      } else if (StringUtils.isNotBlank(addr.getVat())) {
-        request.setOrgId(addr.getVat());
       }
 
       request.setCity(addr.getCity1());

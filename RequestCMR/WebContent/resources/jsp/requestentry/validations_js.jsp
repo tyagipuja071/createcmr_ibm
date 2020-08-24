@@ -4,6 +4,14 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
+<%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page import="com.ibm.cio.cmr.request.ui.PageManager"%>
+<%@page import="com.ibm.cio.cmr.request.CmrConstants"%>
+<%
+RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
+String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntry(), reqentry.getReqType());
+%>
+
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
 
@@ -32,7 +40,10 @@
   <cmr:view forCountry="726">
   <script src="${resourcesPath}/js/requestentry/validators/gr_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
-  <cmr:view exceptForCountry="726,862">
+  <cmr:view forCountry="666">
+  <script src="${resourcesPath}/js/requestentry/validators/cy_validations.js?${cmrv}" type="text/javascript"></script>
+  </cmr:view>
+  <cmr:view exceptForCountry="726,666,862">
   <script src="${resourcesPath}/js/requestentry/validators/emea_validations.js?${cmrv}" type="text/javascript"></script>
   </cmr:view>
 </cmr:view>
@@ -61,7 +72,11 @@
 </cmr:view>
 
 <cmr:view forGEO="MCO2">
-  <script src="${resourcesPath}/js/requestentry/validators/mco2_validations.js?${cmrv}" type="text/javascript"></script>
+  <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
+  	<script src="${resourcesPath}/js/requestentry/validators/mco2_validations_ld.js?${cmrv}" type="text/javascript"></script>
+  <%  }  else { %>  
+	<script src="${resourcesPath}/js/requestentry/validators/mco2_validations.js?${cmrv}" type="text/javascript"></script>
+  <%  } %>
 </cmr:view>
 
 <cmr:view forGEO="FR">
