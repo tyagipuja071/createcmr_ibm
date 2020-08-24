@@ -95,6 +95,11 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
     }
 
+    if((SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp()) && "Y".equals(data.getRestrictInd()))){
+      details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
+      engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
+    }
+    
     switch (scenario) {
     case SCENARIO_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
