@@ -614,6 +614,9 @@ function lockAbbrv() {
       FormManager.readOnly('abbrevLocn');
       FormManager.readOnly('abbrevNm');
     }
+    if (role == 'PROCESSOR') {
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
+    }
   }
 }
 
@@ -948,6 +951,25 @@ function addTinBillingValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function setFieldsBehavior(fromAddress, scenario, scenarioChanged) {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (role == 'Requester') {
+    FormManager.removeValidator('isuCd', Validators.REQUIRED);
+    FormManager.removeValidator('clientTier', Validators.REQUIRED);
+  }
+  if (role == 'Processor') {
+    FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1005,4 +1027,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO2);
 
   GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
+
+  GEOHandler.addAfterTemplateLoad(setFieldsBehavior, GEOHandler.MCO2);
+
 });
