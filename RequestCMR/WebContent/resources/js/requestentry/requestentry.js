@@ -469,7 +469,7 @@ function doSaveChangeComments() {
 	    if (dojo.byId('rejInfo1Label').innerText == "CMR No.") {
 	        var rej = FormManager.getActualValue('rejectReason');
 	        var isscntry = FormManager.getActualValue('cmrIssuingCntry');
-	        var mandt = "100";
+	        mandt = FormManager.getActualValue('mandt');
 	        var ktokd = "ZS01";
 	        var rejInfo1 = FormManager.getActualValue('rejSupplInfo1');
 	        if (rejInfo1 != '') {
@@ -498,7 +498,6 @@ function doSaveChangeComments() {
 	            	return;
 	            }
 	            var rejInfo2 = FormManager.getActualValue('rejSupplInfo2');
-	            console.log(rejInfo2);
 	            var rejField = '<input type="hidden" name="rejectReason" value="' + rej + '">';
 	            rejField += '<input type="hidden" name="rejSupplInfo1" value="' + rejInfo1 + '">';
 	            rejField += '<input type="hidden" name="rejSupplInfo2" value="' + rejInfo2 + '">';
@@ -1362,7 +1361,7 @@ function setRejSupplInfoFields(value) {
     cmr.showNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "CMR No.";
     dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
-    dojo.byId('rejSupplInfo2').readOnly = true;
+    FormManager.readOnly('rejSupplInfo2');
     break;
   case "MDOC":
     cmr.showNode('rejInfo1Div');
