@@ -1064,9 +1064,11 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.MALTA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.MALTA ], null, true);
   // Story 1718889: Tanzania: new mandatory TIN number field fix
   GEOHandler.addAddrFunction(diplayTinNumberforTZ, [ SysLoc.TANZANIA ]);
-  GEOHandler.registerValidator(addTinFormatValidationTanzania, [ SysLoc.TANZANIA ], null, true);
+  // GEOHandler.registerValidator(addTinFormatValidationTanzania, [
+  // SysLoc.TANZANIA ], null, true);
 
-  GEOHandler.registerValidator(addTinBillingValidator, [ SysLoc.TANZANIA ], null, true);
+  // GEOHandler.registerValidator(addTinBillingValidator, [ SysLoc.TANZANIA ],
+  // null, true);
 
   // GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2,
   // GEOHandler.REQUESTER,true);
