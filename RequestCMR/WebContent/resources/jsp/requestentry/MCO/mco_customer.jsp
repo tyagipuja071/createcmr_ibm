@@ -79,17 +79,16 @@
         <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
       </p>
     </cmr:column>
-	<c:if test="${reqentry.reqType != 'C'}">
-			<cmr:column span="2" containerForField="TypeOfCustomer">
-        		<p>
-          			<cmr:label fieldId="crosSubTyp">
-						<cmr:fieldLabel fieldId="TypeOfCustomer" />:
-					</cmr:label>
-          			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
-        		</p>
-      		</cmr:column>
-	</c:if>
-    </cmr:view>
+	<cmr:column span="2" containerForField="TypeOfCustomer">
+		<p>
+			<cmr:label fieldId="crosSubTyp">
+				<cmr:fieldLabel fieldId="TypeOfCustomer" />:
+			</cmr:label>
+			<cmr:field path="crosSubTyp" id="crosSubTyp"
+				fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+	</cmr:view>
   </cmr:row>
 
   <cmr:view forCountry="XXXX">

@@ -879,12 +879,15 @@ function getCommonSubgrpVal(custSubGrp) {
 
 function setTypeOfCustomerBehavior() {
   if(FormManager.getActualValue('reqType') == 'U') {
+    FormManager.show('TypeOfCustomer', 'crosSubTyp');
     var role = FormManager.getActualValue('userRole').toUpperCase();
     if(role == 'REQUESTER') {
       FormManager.readOnly('crosSubTyp');
     } else if (role == 'PROCESSOR') {
       FormManager.enable('crosSubTyp');
     }
+  }else{
+    FormManager.hide('TypeOfCustomer', 'crosSubTyp');
   }
 }
 
