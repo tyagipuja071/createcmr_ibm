@@ -610,7 +610,9 @@ function afterConfigForUKI() {
   }
 }
 
-function configureCRNForUpdatesUKI(){
+function configureCRNForUpdatesUKI() {
+  var reqType = FormManager.getActualValue('reqType');
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var isicVal = FormManager.getActualValue('isicCd');
   var zs01LandCntry = getZS01LandCntry();
   if (reqType == 'U' && !dijit.byId('restrictInd').get('checked')) {
