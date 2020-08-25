@@ -308,6 +308,9 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   @Column(name = "POOL_CMR_INDC")
   private String poolCmrIndc;  
 
+  @Column(name = "PAYGO_PROCESS_INDC")
+  private String paygoProcessIndc;
+
   public String getRequesterId() {
     return this.requesterId;
   }

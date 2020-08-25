@@ -423,8 +423,7 @@ public class TransConnService extends BaseBatchService {
   }
 
   private void monitorLegacyPending(EntityManager entityManager) {
-    // Search the records with Status PCP and check if current timestamp falls
-    // within host down outage
+	//  Search the records with Status PCP and check if current timestamp falls within host down outage 
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
@@ -432,7 +431,7 @@ public class TransConnService extends BaseBatchService {
     // jz: temporary, so that only Commercial REGULAR will be done for now until
     // cm: scenario will be hardcoded for now for REGULAR and PRIV
     // CMR-5564 is implemented
-//    query.setParameter("SCENARIO", "REGULAR");
+//	    query.setParameter("SCENARIO", "REGULAR");
     List<Admin> pvcRecords = query.getResults(Admin.class);
     LOG.debug("Size of PVC Records : " + pvcRecords.size());
 
@@ -447,14 +446,12 @@ public class TransConnService extends BaseBatchService {
         admin.setLockBy(BATCH_USER_ID);
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
-        
         sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
 
         Data data = query.getSingleResult(Data.class);
         entityManager.detach(data);
-        
         // Query FindCMR using filter on configuration file
         CompanyRecordModel search = new CompanyRecordModel();
         search.setName(SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
@@ -600,14 +597,12 @@ public class TransConnService extends BaseBatchService {
           newData.setCustSubGrp(null);
           if(data.getAffiliate() == null || data.getAffiliate().equals("")) newData.setAffiliate(record.getCmrNo());
           if(data.getEnterprise() == null || data.getEnterprise().equals("")) newData.setEnterprise(record.getCmrNo());
-          
           updateEntity(newData, entityManager);
 
           PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           addrQuery.setParameter("ADDR_TYPE", "ZS01");
           Addr addr = addrQuery.getSingleResult(Addr.class);
-          
           PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
@@ -620,15 +615,15 @@ public class TransConnService extends BaseBatchService {
           for (Addr newAddr : newAddresses) {
             AddrPK addrPK = newAddr.getId();
             if(zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
-            	copyValuesToEntity(zi01Addr, newAddr);
-            	newAddr.setSapNo(null);
-                newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
-                newAddr.setChangedIndc(null);
+              copyValuesToEntity(zi01Addr, newAddr);
+          	  newAddr.setSapNo(null);
+              newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+              newAddr.setChangedIndc(null);
             } else {
-            	copyValuesToEntity(addr, newAddr);
-            	newAddr.setSapNo(kna1.getId().getKunnr());
-                newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
-                newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
+          	  copyValuesToEntity(addr, newAddr);
+          	  newAddr.setSapNo(kna1.getId().getKunnr());
+              newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
+              newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
             }            
             newAddr.setId(addrPK);
             newAddr.setAddrStdResult("X");

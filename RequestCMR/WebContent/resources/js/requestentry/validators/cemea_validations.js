@@ -3715,6 +3715,9 @@ function setICOAndDICMandatory() {
 }
 
 function setClassificationCodeCEE() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   FormManager.readOnly('custClass');
   if ('C' == FormManager.getActualValue('reqType')) {
     var _custType = FormManager.getActualValue('custSubGrp');

@@ -135,7 +135,8 @@ public class DnBUtil {
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
-    registerDnBTaxCd1Code("GB", 2541); // CRO Number/CRN
+    registerDnBTaxCd1Code("GB", 2541); // UK CRO Number
+    registerDnBTaxCd1Code("IE", 9134); // Ireland CRO Number
 
     // other codes
     registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN

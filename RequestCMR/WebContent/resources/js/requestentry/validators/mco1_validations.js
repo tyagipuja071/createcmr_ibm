@@ -91,13 +91,9 @@ function afterConfigForZA() {
 function setCreditCdField() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'U' && FormManager.getActualValue('reqReason') == 'COD') {
-    FormManager.enable('creditCd');
     FormManager.setValue('repTeamMemberNo', 'AMSNBA');
     FormManager.setValue('salesBusOffCd', '0020');
     FormManager.setValue('collBoId', '0020');
-  } else {
-    FormManager.clearValue('creditCd');
-    FormManager.disable('creditCd');
   }
 }
 

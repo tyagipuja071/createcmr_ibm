@@ -128,6 +128,12 @@ public class CEMEAHandler extends BaseSOFHandler {
       SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
       SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA,
       SystemLocation.CZECH_REPUBLIC);
+  
+  private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
+      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
+      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT);
+
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
@@ -214,6 +220,14 @@ public class CEMEAHandler extends BaseSOFHandler {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
+                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                    && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
+                  addr.setCmrAddrTypeCode("ZD02");
+                }
+                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
+                  addr.setCmrAddrTypeCode("ZP03");
+                }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
@@ -245,7 +259,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
                   if (sadr != null) {
                     Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
+                   // if (installingAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -274,14 +288,9 @@ public class CEMEAHandler extends BaseSOFHandler {
                       }
                       installing.setCmrSapNumber("");
                       converted.add(installing);
-                    }
-                  }
-                }
-                if (StringUtils.isBlank(adrnr)) {
-                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                  if (gAddr != null) {
-                    Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
+                  } else {
+                    CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                    if (gAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -317,6 +326,45 @@ public class CEMEAHandler extends BaseSOFHandler {
                     }
                   }
                 }
+                if (StringUtils.isBlank(adrnr)) {
+                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                  if (gAddr != null) {
+                    Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
+                    // if (installingAddr != null) {
+                      LOG.debug("Adding installing to the records");
+                      FindCMRRecordModel installing = new FindCMRRecordModel();
+                      PropertyUtils.copyProperties(installing, mainRecord);
+                      // copyAddrData(installing, installingAddr, gAddrSeq);
+                      installing.setCmrAddrTypeCode("ZP02");
+                      installing.setCmrAddrSeq(gAddrSeq);
+                      // add value
+                      installing.setCmrName1Plain(gAddr.getAddrLine1());
+                      if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
+                        installing.setCmrName2Plain(gAddr.getAddrLine2());
+                      } else {
+                        installing.setCmrName2Plain("");
+                      }
+                      // installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                      if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
+                        installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                      } else {
+                        installing.setCmrStreetAddress(gAddr.getAddrLine4());
+                      }
+                      installing.setCmrCity(record.getCmrCity());
+                      installing.setCmrCity2(record.getCmrCity2());
+                      installing.setCmrCountry(gAddr.getAddrLine6());
+                      installing.setCmrCountryLanded("");
+                      installing.setCmrPostalCode(record.getCmrPostalCode());
+                      installing.setCmrState(record.getCmrState());
+                      installing.setCmrBldg(legacyGaddrLN6);
+                      if (StringUtils.isBlank(gAddr.getAddrLine3())) {
+                        installing.setCmrStreetAddressCont("");
+                      } else {
+                        installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
+                      }
+                      converted.add(installing);
+                    }
+                  }
                 // add new here
                 String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
@@ -390,7 +438,6 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-
           }
         }
       } else {
@@ -449,16 +496,6 @@ public class CEMEAHandler extends BaseSOFHandler {
             if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
                 && "599".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZP02");
-            }
-
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && "598".equals(record.getCmrAddrSeq())) {
-              record.setCmrAddrTypeCode("ZD02");
-            }
-
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode())) && "599".equals(record.getCmrAddrSeq())) {
-              record.setCmrAddrTypeCode("ZP03");
             }
 
             // if
@@ -1557,6 +1594,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     if ("618".equals(issuingCountry)) {
       return true;
     } else if (CEE_COUNTRY_LIST.contains(issuingCountry)) {
+      return true;
+    } else if (ME_COUNTRY_LIST.contains(issuingCountry)) {
       return true;
     }
     return false;
