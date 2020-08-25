@@ -94,4 +94,18 @@ public class MCOFstHandler extends MCOHandler {
     data.setRepTeamMemberNo("DUMMY1");
   }
 
+  @Override
+  public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    super.doBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
+
+    if (addr != null) {
+      if (!("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()))) {
+        addr.setCustPhone("");
+      }
+
+      if (!("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()) || "ZS02".equals(addr.getId().getAddrType()))) {
+        addr.setPoBox("");
+      }
+    }
+  }
 }
