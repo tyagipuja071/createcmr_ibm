@@ -837,7 +837,7 @@ function retainImportedValues(fromAddress, scenario, scenarioChanged) {
         origClientTier = result.ret2;
         origRepTeam = result.ret3;
         origSbo = result.ret4;
-        origInac = result.ret5;
+        origInac = result.ret6;
 
         FormManager.setValue('isuCd', origISU);
         FormManager.setValue('clientTier', origClientTier);
@@ -875,6 +875,18 @@ function getCommonSubgrpVal(custSubGrp) {
     val = val.substring(2, val.length);
   }
   return val;
+}
+
+function setTypeOfCustomerBehavior() {
+  if(FormManager.getActualValue('reqType') == 'U') {
+    FormManager.show('CrosSubTyp', 'crosSubTyp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if(role == 'REQUESTER') {
+      FormManager.readOnly('crosSubTyp');
+    } else if (role == 'PROCESSOR') {
+      FormManager.enable('crosSubTyp');
+    }
+  }
 }
 
 /* End 1430539 */
@@ -925,5 +937,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addIbmDeptCostCntrValidator, GEOHandler.MCO1, null, true);
   GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
+  GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO1);
 
 });
