@@ -5,13 +5,17 @@ package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
+import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
@@ -37,7 +41,21 @@ public class FstTransformer extends MCOTransformer {
   public void transformLegacyCustomerData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust,
       CMRRequestContainer cmrObjects) {
     LOG.debug("transformLegacyCustomerData FST Africa transformer...");
+    Admin admin = cmrObjects.getAdmin();
+    Data data = cmrObjects.getData();
 
+    String custType = data.getCustSubGrp();
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType) || "XGOV".equals(custType)) {
+        legacyCust.setCustType("G");
+      } else if (MQMsgConstants.CUSTSUBGRP_IBMEM.equals(custType)) {
+        legacyCust.setCustType("8");
+      }
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+
+    }
+    legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+    legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     legacyCust.setLeadingAccNo("");
     legacyCust.setMrcCd("");
 
@@ -56,6 +74,73 @@ public class FstTransformer extends MCOTransformer {
     if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
+    formatAddressLinesLD(dummyHandler, legacyAddr);
+  }
+
+  private void formatAddressLinesLD(MQMessageHandler handler, CmrtAddr legacyAddr) {
+    Addr addrData = handler.addrData;
+    boolean update = "U".equals(handler.adminData.getReqType());
+
+    LOG.debug("Legacy Direct formatAddressLinesLD - Handling Address for " + (update ? "update" : "create") + " request.");
+    boolean crossBorder = isCrossBorder(addrData);
+
+    String line1 = "";
+    String line2 = "";
+    String line3 = "";
+    String line4 = "";
+    String line5 = "";
+    String line6 = "";
+    String addrType = addrData.getId().getAddrType();
+
+    line1 = addrData.getCustNm1();
+    line2 = addrData.getCustNm2();
+
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line3 = addrData.getAddrTxt();
+    } else if (!StringUtils.isBlank(addrData.getCustNm4()))
+      line3 = addrData.getCustNm4();
+
+    if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getPoBox())) {
+      line4 = addrData.getAddrTxt() + " " + addrData.getPoBox();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
+      line4 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 = addrData.getAddrTxt();
+    } else if (!StringUtils.isBlank(addrData.getPoBox())) {
+      line4 = "PO BOX" + addrData.getAddrTxt();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+      line4 = addrData.getAddrTxt2();
+    }
+
+    if (crossBorder) {
+      if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
+        line5 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
+      } else if (!StringUtils.isBlank(addrData.getCity1()) && !StringUtils.isBlank(addrData.getPoBox())) {
+        line5 = addrData.getCity1() + ", " + addrData.getPoBox();
+      }
+      line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+
+    } else {
+      if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
+        line5 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
+      } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+        line5 = addrData.getAddrTxt2();
+      } else if (!StringUtils.isBlank(addrData.getPoBox())) {
+        line5 = "PO BOX " + addrData.getPoBox();
+      }
+
+      if (!StringUtils.isBlank(addrData.getCity1()) && !StringUtils.isBlank(addrData.getPoBox())) {
+        line6 = addrData.getCity1() + ", " + addrData.getPoBox();
+      }
+    }
+
+    legacyAddr.setAddrLine1(line1);
+    legacyAddr.setAddrLine2(line2);
+    legacyAddr.setAddrLine3(line3);
+    legacyAddr.setAddrLine4(line4);
+    legacyAddr.setAddrLine5(line5);
+    legacyAddr.setAddrLine6(line6);
+
   }
 
   @Override
@@ -192,13 +277,13 @@ public class FstTransformer extends MCOTransformer {
     case "ZP01":
       return "Billing";
     case "ZI01":
-      return "Mailing";
+      return "EPL";
     case "ZD01":
       return "Shipping";
     case "ZS01":
       return "Installing";
     case "ZS02":
-      return "EPL";
+      return "Mailing";
     default:
       return "";
     }
