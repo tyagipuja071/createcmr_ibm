@@ -107,7 +107,7 @@ function disableAddrFieldsCEWA() {
   }
 
   // PO Box allowed -> FST = Mail-to (ZS02), Bill-to (ZP01), Sold-to (ZS01)
-  // Non FST = Mailing (ZS01), Mailing (ZS01)
+  // Non FST = Mailing (ZS01), Billing (ZP01)
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var addrPOBoxEnabled = [ 'ZS01', 'ZP01' ]
 
@@ -404,6 +404,7 @@ function addAddrValidatorMCO2() {
   FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ]);
 
   FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
+  FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO BOX' ]);
 }
 
 function streetAvenueValidator() {
@@ -1043,6 +1044,34 @@ function addAdditionalNameStreetContPOBoxValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function clearPhoneNoFromGrid() {
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    if (_allAddressData != null && _allAddressData[i] != null) {
+      if (!(_allAddressData[i].addrType[0] == 'ZS01' || _allAddressData[i].addrType[0] == 'ZD01')) {
+        _allAddressData[i].custPhone[0] = '';
+      }
+    }
+  }
+}
+
+function clearPOBoxFromGrid() {
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var addrPOBoxEnabled = [ 'ZS01', 'ZP01' ]
+
+  if (fstCEWA.includes(cntry)) {
+    addrPOBoxEnabled.push('ZS02');
+  }
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    if (_allAddressData != null && _allAddressData[i] != null) {
+      if (!(addrPOBoxEnabled.includes(_allAddressData[i].addrType[0]))) {
+        _allAddressData[i].poBox[0] = '';
+      }
+    }
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1104,4 +1133,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setFieldsBehavior, GEOHandler.MCO2);
   GEOHandler.registerValidator(addStreetAddressFormValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAdditionalNameStreetContPOBoxValidator, GEOHandler.MCO2, null, true);
+  GEOHandler.addAfterConfig(clearPhoneNoFromGrid, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
 });
