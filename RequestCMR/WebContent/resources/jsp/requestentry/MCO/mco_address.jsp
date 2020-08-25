@@ -1,7 +1,5 @@
 <%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
 <%@page import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
-<%@page import="com.ibm.cio.cmr.request.ui.PageManager"%>
-<%@page import="com.ibm.cio.cmr.request.CmrConstants"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -11,7 +9,6 @@
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <%
   RequestEntryModel reqentry = (RequestEntryModel) request.getAttribute("reqentry");
-  String processingType = PageManager.getProcessingType(reqentry.getCmrIssuingCntry(), reqentry.getReqType());
 %>
 <cmr:row topPad="10">
   <cmr:column span="4">
@@ -121,27 +118,15 @@
   </cmr:column>
    <!-- We are using for Tin number -->
   <div id="tin">
-  <%  if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) { %>  
-    <cmr:column span="2" containerForField="Department" exceptForGEO="MCO2" exceptForCountry="780,864">
-      <p>
-        <cmr:label fieldId="dept">
-          <cmr:fieldLabel fieldId="Department" />:
-               <cmr:delta text="-" id="delta-dept" />
-        </cmr:label>
-        <cmr:field fieldId="Department" id="dept" path="dept"/>
-      </p>
-    </cmr:column>
-  <%  }  else { %>
-    <cmr:column span="2" containerForField="Department" exceptForCountry="780,864">
-      <p>
-        <cmr:label fieldId="dept">
-          <cmr:fieldLabel fieldId="Department" />:
-               <cmr:delta text="-" id="delta-dept" />
-        </cmr:label>
-        <cmr:field fieldId="Department" id="dept" path="dept"/>
-      </p>
-    </cmr:column>
-  <%  } %>
+  <cmr:column span="2" containerForField="Department" exceptForCountry="780,864">
+    <p>
+      <cmr:label fieldId="dept">
+        <cmr:fieldLabel fieldId="Department" />:
+             <cmr:delta text="-" id="delta-dept" />
+      </cmr:label>
+      <cmr:field fieldId="Department" id="dept" path="dept"/>
+    </p>
+  </cmr:column>
   </div>
   <cmr:column span="2" exceptForGEO="MCO1,MCO2">
     <p>

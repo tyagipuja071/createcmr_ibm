@@ -6,12 +6,16 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 import java.util.Arrays;
 import java.util.List;
 
+
+import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
+
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.ui.PageManager;
 
@@ -49,6 +53,11 @@ public class MCOCewaHandler extends MCOHandler {
   @Override
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
     return Arrays.asList("ZD01", "ZI01");
+  }
+
+  @Override
+  public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
+    data.setRepTeamMemberNo("DUMMY1");
   }
 
 }
