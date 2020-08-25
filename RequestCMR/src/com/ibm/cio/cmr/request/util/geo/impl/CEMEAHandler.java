@@ -320,6 +320,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                     }
                   }
                 }
+                }
                 if (StringUtils.isBlank(adrnr)) {
                   CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
                   if (gAddr != null) {
