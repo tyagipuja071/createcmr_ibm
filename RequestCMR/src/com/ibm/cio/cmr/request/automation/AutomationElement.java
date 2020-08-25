@@ -71,6 +71,29 @@ public abstract class AutomationElement<R extends AutomationOutput> {
       throws Exception;
 
   /**
+   * Executes the {@link AutomationElement} and returns an
+   * {@link AutomationResult} containing the results of the process<br>
+   * <br>
+   * Each {@link AutomationElement} can put or get data on the current
+   * {@link AutomationEngineData} passed on, to be able to share data.
+   * <strong>The processing of each element though is expected to work even
+   * without the needed data to be fully independent.</strong> Having the needed
+   * data will only avoid duplicate executions or database queries or service
+   * calls, whenever applicable
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   * @throws Exception
+   */
+  public AutomationResult<R> executeAutomationElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
+      throws Exception {
+    engineData.setTrackNegativeChecks(!(this instanceof CompanyVerifier));
+    return executeElement(entityManager, requestData, engineData);
+  }
+
+  /**
    * Builds the base results for {@link AutomationEngine}.
    * 
    * @param reqId

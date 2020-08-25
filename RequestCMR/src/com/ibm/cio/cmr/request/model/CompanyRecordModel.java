@@ -51,6 +51,7 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   private boolean highestRevenue;
   private String operStatusCode;
+  private boolean isPoolRecord;
 
   @Override
   public int compareTo(CompanyRecordModel o) {
@@ -333,5 +334,13 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   public void setRestrictTo(String restrictTo) {
     this.restrictTo = restrictTo;
+  }
+
+  public boolean isPoolRecord() {
+	return isPoolRecord;
+  }
+
+  public void setPoolRecord(boolean isPoolRecord) {
+	this.isPoolRecord = isPoolRecord;
   }
 }

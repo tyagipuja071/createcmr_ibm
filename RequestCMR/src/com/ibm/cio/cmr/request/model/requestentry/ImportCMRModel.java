@@ -22,6 +22,7 @@ public class ImportCMRModel {
   private boolean skipAddress;
   private boolean addressOnly;
   private String quickSearchData;
+  private boolean isPoolRecord;
 
   public String getCmrNum() {
     return cmrNum;
@@ -118,4 +119,12 @@ public class ImportCMRModel {
   public void setQuickSearchData(String quickSearchData) {
     this.quickSearchData = quickSearchData;
   }
+
+public boolean isPoolRecord() {
+	return isPoolRecord;
+}
+
+public void setPoolRecord(boolean isPoolRecord) {
+	this.isPoolRecord = isPoolRecord;
+}
 }

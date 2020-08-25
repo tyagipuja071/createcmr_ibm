@@ -302,6 +302,9 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   @Column(name = "CHILD_REQ_ID")
   private long childReqId;
 
+  @Column(name = "PAYGO_PROCESS_INDC")
+  private String paygoProcessIndc;
+
   public String getRequesterId() {
     return this.requesterId;
   }
@@ -740,6 +743,14 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
 
   public void setChildReqId(long childReqId) {
     this.childReqId = childReqId;
+  }
+
+  public String getPaygoProcessIndc() {
+    return paygoProcessIndc;
+  }
+
+  public void setPaygoProcessIndc(String paygoProcessIndc) {
+    this.paygoProcessIndc = paygoProcessIndc;
   }
 
 }

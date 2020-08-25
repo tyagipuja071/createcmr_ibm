@@ -68,7 +68,7 @@ function addAfterConfigAP() {
     FormManager.enable('postCd');
   }
 
-  if (reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF' && cntry == '834') {
+  if (reqType == 'C' && custGrp == 'CROSS' && custSubGrp == 'SPOFF' && cntry == '834') {
     FormManager.enable('cmrNo');
   } else {
     FormManager.readOnly('cmrNo');

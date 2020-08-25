@@ -2207,6 +2207,36 @@ function addSoldToAddressValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function lockIBMTabForFR() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('dunsNo');
+    if (custSubType != 'BPIEU' && custSubType != 'BPUEU' && custSubType != 'CBIEU' && custSubType != 'CBUEU') {
+      FormManager.readOnly('ppsceid');
+    } else {
+      FormManager.enable('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('installBranchOff');
+    if (custSubType != 'INTER' && custSubType != 'INTSO' && custSubType != 'CBTER' && custSubType != 'CBTSO') {
+      FormManager.readOnly('ibmDeptCostCenter');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -2251,5 +2281,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, [ '706' ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addSoldToAddressValidator, '706');
   GEOHandler.addAfterTemplateLoad(unlockAbbrevNmForInternalScenario, '706');
+  GEOHandler.addAfterConfig(lockIBMTabForFR, '706');
+  GEOHandler.addAfterTemplateLoad(lockIBMTabForFR, '706');
 
 });
