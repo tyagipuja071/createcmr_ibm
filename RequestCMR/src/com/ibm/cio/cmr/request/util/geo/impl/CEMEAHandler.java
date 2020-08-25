@@ -135,7 +135,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       "Floor", "Building", "County", "City2", "Department" };
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
-      "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
+      "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "Department" };
 
   public static final List<String> CEMEA_POSTAL_FORMAT = Arrays.asList("603", "607", "644", "651", "740", "705", "708", "626", "694", "695", "826",
@@ -215,6 +215,14 @@ public class CEMEAHandler extends BaseSOFHandler {
                 addr = cloneAddress(record, addrType);
                 addr.setCmrDept(record.getCmrCity2());
                 addr.setCmrName4(record.getCmrName4());
+                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                    && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode())) && "598".equals(addr.getCmrAddrSeq())) {
+                  addr.setCmrAddrTypeCode("ZD02");
+                }
+                if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
+                    && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(addr.getCmrAddrTypeCode())) && "599".equals(addr.getCmrAddrSeq())) {
+                  addr.setCmrAddrTypeCode("ZP03");
+                }
                 if ((CmrConstants.ADDR_TYPE.ZD01.toString().equals(addr.getCmrAddrTypeCode()))) {
                   String stkzn = "";
                   stkzn = getStkznFromDataRdc(entityManager, addr.getCmrSapNumber(), SystemConfiguration.getValue("MANDT"));
@@ -245,8 +253,6 @@ public class CEMEAHandler extends BaseSOFHandler {
                 if (!StringUtils.isBlank(adrnr)) {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
                   if (sadr != null) {
-                    Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -275,14 +281,9 @@ public class CEMEAHandler extends BaseSOFHandler {
                       }
                       installing.setCmrSapNumber("");
                       converted.add(installing);
-                    }
-                  }
-                }
-                if (StringUtils.isBlank(adrnr)) {
-                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
-                  if (gAddr != null) {
-                    Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
+                  } else {
+                    CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                    if (gAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -316,6 +317,43 @@ public class CEMEAHandler extends BaseSOFHandler {
                       }
                       converted.add(installing);
                     }
+                  }
+                }
+                if (StringUtils.isBlank(adrnr)) {
+                  CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                  if (gAddr != null) {
+                      LOG.debug("Adding installing to the records");
+                      FindCMRRecordModel installing = new FindCMRRecordModel();
+                      PropertyUtils.copyProperties(installing, mainRecord);
+                      // copyAddrData(installing, installingAddr, gAddrSeq);
+                      installing.setCmrAddrTypeCode("ZP02");
+                      installing.setCmrAddrSeq(gAddrSeq);
+                      // add value
+                      installing.setCmrName1Plain(gAddr.getAddrLine1());
+                      if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
+                        installing.setCmrName2Plain(gAddr.getAddrLine2());
+                      } else {
+                        installing.setCmrName2Plain("");
+                      }
+                      // installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                      if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
+                        installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                      } else {
+                        installing.setCmrStreetAddress(gAddr.getAddrLine4());
+                      }
+                      installing.setCmrCity(record.getCmrCity());
+                      installing.setCmrCity2(record.getCmrCity2());
+                      installing.setCmrCountry(gAddr.getAddrLine6());
+                      installing.setCmrCountryLanded("");
+                      installing.setCmrPostalCode(record.getCmrPostalCode());
+                      installing.setCmrState(record.getCmrState());
+                      installing.setCmrBldg(legacyGaddrLN6);
+                      if (StringUtils.isBlank(gAddr.getAddrLine3())) {
+                        installing.setCmrStreetAddressCont("");
+                      } else {
+                        installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
+                      }
+                      converted.add(installing);
                   }
                 }
                 // add new here
@@ -391,7 +429,6 @@ public class CEMEAHandler extends BaseSOFHandler {
             // && (parvmCount > 1)) {
             // record.setCmrAddrTypeCode("ZS02");
             // }
-
           }
         }
       } else {
@@ -450,16 +487,6 @@ public class CEMEAHandler extends BaseSOFHandler {
             if ("618".equals(reqEntry.getCmrIssuingCntry()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode()))
                 && "599".equals(record.getCmrAddrSeq())) {
               record.setCmrAddrTypeCode("ZP02");
-            }
-
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZD01.toString().equals(record.getCmrAddrTypeCode())) && "598".equals(record.getCmrAddrSeq())) {
-              record.setCmrAddrTypeCode("ZD02");
-            }
-
-            if (CEE_COUNTRIES_LIST.contains(reqEntry.getCmrIssuingCntry())
-                && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(record.getCmrAddrTypeCode())) && "599".equals(record.getCmrAddrSeq())) {
-              record.setCmrAddrTypeCode("ZP03");
             }
 
             // if
@@ -1393,7 +1420,7 @@ public class CEMEAHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getAgreementSignDate(), "AECISubDate", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd()) && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getLegacyCurrencyCd(), "CurrencyCode", cmrCountry));

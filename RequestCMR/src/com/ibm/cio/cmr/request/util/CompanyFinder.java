@@ -75,7 +75,7 @@ public class CompanyFinder {
       if (isLatin(searchModel.getName())) {
         matches.addAll(findCMRs(searchModel));
         boolean searchDnb = false;
-        List<String> lowLevelMatches = Arrays.asList("F4", "F5", "VAT", "DUNS");
+        List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT", "DUNS");
         if (!matches.isEmpty()) {
           for (CompanyRecordModel cmrMatch : matches) {
             if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
@@ -154,6 +154,9 @@ public class CompanyFinder {
       }
       request.setAddrType(addrType);
       request.setUsRestrictTo(searchModel.getRestrictTo());
+      if(searchModel.isPoolRecord()){
+    	  request.setIncludeDeleted("Y");
+      }      
 
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
       // connect to the duplicate CMR check service
