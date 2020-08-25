@@ -6,8 +6,8 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 import java.util.Arrays;
 import java.util.List;
 
-
 import javax.persistence.EntityManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -15,7 +15,6 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
-
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.ui.PageManager;
 
@@ -60,4 +59,18 @@ public class MCOCewaHandler extends MCOHandler {
     data.setRepTeamMemberNo("DUMMY1");
   }
 
+  @Override
+  public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    super.doBeforeAddrSave(entityManager, addr, cmrIssuingCntry);
+
+    if (addr != null) {
+      if (!("ZS01".equals(addr.getId().getAddrType()) || "ZD01".equals(addr.getId().getAddrType()))) {
+        addr.setCustPhone("");
+      }
+
+      if (!("ZS01".equals(addr.getId().getAddrType()) || "ZP01".equals(addr.getId().getAddrType()))) {
+        addr.setPoBox("");
+      }
+    }
+  }
 }
