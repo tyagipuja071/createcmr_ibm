@@ -5251,6 +5251,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_NM2":
         muaModel.setCustNm2(tempVal);
         break;
+      case "CUST_NM3":
+        muaModel.setCustNm3(tempVal);
+        break;
       case "CUST_NM4":
         muaModel.setCustNm4(tempVal);
         break;
