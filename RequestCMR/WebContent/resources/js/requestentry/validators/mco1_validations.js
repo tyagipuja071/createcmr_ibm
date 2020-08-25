@@ -624,14 +624,37 @@ function enterpriseValidation() {
 
 function showDeptNoForInternalsOnly() {
   var scenario = FormManager.getActualValue('custSubGrp');
-  var subGrp = getCommonSubgrpVal(scenario);
-  var isInternal = (subGrp == 'INT' || subGrp == 'XIN');
-  if (scenario != null && isInternal) {
+  var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+  if (scenario != null && internalScenarios.includes(scenario)) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
+    FormManager.addValidator('ibmDeptCostCenter', Validators.NUMBER, [ 'Internal Department Number' ]);
   } else {
     FormManager.clearValue('ibmDeptCostCenter');
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
+}
+
+function addIbmDeptCostCntrValidator() {
+  console.log("ibmDeptCostCenter..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var scenario = FormManager.getActualValue('custSubGrp');
+        var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+        if (scenario != null && internalScenarios.includes(scenario)) {
+          var value = FormManager.getActualValue('ibmDeptCostCenter');
+          var result = false;
+          if (value && value.length != 6) {
+            result = true;
+          }
+          if (result) {
+            return new ValidationResult(null, false, 'Internal Department Number should be exactly 6 digit.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function showCOForIGFonly() {
@@ -900,7 +923,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetContPoBoxLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCityPostalCodeLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
-
+  GEOHandler.registerValidator(addIbmDeptCostCntrValidator, GEOHandler.MCO1, null, true);
   GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
 
 });
