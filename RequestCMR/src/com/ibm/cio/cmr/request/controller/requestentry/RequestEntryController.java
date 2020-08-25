@@ -572,9 +572,9 @@ public class RequestEntryController extends BaseController {
     try {
       FindCMRResultModel results = null;
       if(!model.isPoolRecord()){	
-    	  results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
+  	    results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
       } else {
-    	  results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry, true); //searching for pool records
+  	    results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry, true); //searching for pool records
       }
 
       boolean noResults = false;

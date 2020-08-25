@@ -51,7 +51,6 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
 
   private boolean highestRevenue;
   private String operStatusCode;
-  
   private boolean isPoolRecord;
 
   @Override
