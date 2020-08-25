@@ -89,8 +89,9 @@ function afterConfigForBELUX() {
   } else {
     // 2020-08-24 George CMR-4992 field should be blank/no value can stay locked
     // for requester and be editable for processor
-    FormManager.readOnly('inacCd');
-
+    if (custSubGrpLst3 == 'INT' || custSubGrpLst3 == 'BUS' || custSubGrpLst3 == 'ISO') {
+      FormManager.readOnly('inacCd');
+    }
     if (role == 'Requester' && reqType == 'C') {
       FormManager.readOnly('abbrevNm');
       FormManager.readOnly('abbrevLocn');
