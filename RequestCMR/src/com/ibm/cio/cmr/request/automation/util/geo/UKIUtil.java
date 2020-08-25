@@ -164,7 +164,7 @@ public class UKIUtil extends AutomationUtil {
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
       case "Company Registration Number":
-        if (!StringUtils.isBlank(change.getNewData()) && !(change.getOldData().equals(change.getNewData()))) {
+        if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
           // UPDATE
           Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
