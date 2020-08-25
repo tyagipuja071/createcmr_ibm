@@ -128,6 +128,12 @@ public class CEMEAHandler extends BaseSOFHandler {
       SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
       SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA,
       SystemLocation.CZECH_REPUBLIC);
+  
+  private static final List<String> ME_COUNTRY_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
+      SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
+      SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
+      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT);
+
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
@@ -253,7 +259,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
                   if (sadr != null) {
                     Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
+                   // if (installingAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -324,7 +330,7 @@ public class CEMEAHandler extends BaseSOFHandler {
                   CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
                   if (gAddr != null) {
                     Addr installingAddr = getCurrentInstallingAddress(entityManager, reqEntry.getReqId());
-                    if (installingAddr != null) {
+                    // if (installingAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
                       PropertyUtils.copyProperties(installing, mainRecord);
@@ -359,7 +365,6 @@ public class CEMEAHandler extends BaseSOFHandler {
                       converted.add(installing);
                     }
                   }
-                }
                 // add new here
                 String soldtoseq = getSoldtoaddrSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 // int maxintSeqadd = getMaxSequenceOnLegacyAddr(entityManager,
@@ -1589,6 +1594,8 @@ public class CEMEAHandler extends BaseSOFHandler {
     if ("618".equals(issuingCountry)) {
       return true;
     } else if (CEE_COUNTRY_LIST.contains(issuingCountry)) {
+      return true;
+    } else if (ME_COUNTRY_LIST.contains(issuingCountry)) {
       return true;
     }
     return false;

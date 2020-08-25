@@ -26,6 +26,7 @@ import com.ibm.cmr.create.batch.util.mq.transformer.impl.IrelandTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.IsraelTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.ItalyTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.LaosTransformer;
+import com.ibm.cmr.create.batch.util.mq.transformer.impl.METransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.MacauTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.MalaysiaTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.impl.MyanmarTransformer;
@@ -143,49 +144,52 @@ public class TransformerManager {
 
     // CEMEA
 
-    addTransformer(new CEMEATransformer(SystemLocation.ABU_DHABI));
-//    addTransformer(new CEMEATransformer(SystemLocation.ALBANIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.ARMENIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.ABU_DHABI));
+    // addTransformer(new CEMEATransformer(SystemLocation.ALBANIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.ARMENIA));
     addTransformer(new CEMEATransformer(SystemLocation.AUSTRIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.AZERBAIJAN));
-    addTransformer(new CEMEATransformer(SystemLocation.BAHRAIN));
-//    addTransformer(new CEMEATransformer(SystemLocation.BELARUS));
-//    addTransformer(new CEMEATransformer(SystemLocation.BOSNIA_AND_HERZEGOVINA));
-//    addTransformer(new CEMEATransformer(SystemLocation.BULGARIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.CROATIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.CZECH_REPUBLIC));
-    addTransformer(new CEMEATransformer(SystemLocation.EGYPT));
-//    addTransformer(new CEMEATransformer(SystemLocation.GEORGIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.HUNGARY));
-    addTransformer(new CEMEATransformer(SystemLocation.IRAQ));
-    addTransformer(new CEMEATransformer(SystemLocation.JORDAN));
-//    addTransformer(new CEMEATransformer(SystemLocation.KAZAKHSTAN));
-    addTransformer(new CEMEATransformer(SystemLocation.KUWAIT));
+    // addTransformer(new CEMEATransformer(SystemLocation.AZERBAIJAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.BAHRAIN));
+    // addTransformer(new CEMEATransformer(SystemLocation.BELARUS));
+    // addTransformer(new
+    // CEMEATransformer(SystemLocation.BOSNIA_AND_HERZEGOVINA));
+    // addTransformer(new CEMEATransformer(SystemLocation.BULGARIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.CROATIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.CZECH_REPUBLIC));
+    // addTransformer(new CEMEATransformer(SystemLocation.EGYPT));
+    // addTransformer(new CEMEATransformer(SystemLocation.GEORGIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.HUNGARY));
+    // addTransformer(new CEMEATransformer(SystemLocation.IRAQ));
+    // addTransformer(new CEMEATransformer(SystemLocation.JORDAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.KAZAKHSTAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.KUWAIT));
     // addTransformer(new CEMEATransformer(SystemLocation.KYRGYZSTAN));
-    addTransformer(new CEMEATransformer(SystemLocation.LEBANON));
-    addTransformer(new CEMEATransformer(SystemLocation.LIBYA));
-//    addTransformer(new CEMEATransformer(SystemLocation.MACEDONIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.MOLDOVA));
+    // addTransformer(new CEMEATransformer(SystemLocation.LEBANON));
+    // addTransformer(new CEMEATransformer(SystemLocation.LIBYA));
+    // addTransformer(new CEMEATransformer(SystemLocation.MACEDONIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.MOLDOVA));
     addTransformer(new CEMEATransformer(SystemLocation.MONTENEGRO));
-    addTransformer(new CEMEATransformer(SystemLocation.MOROCCO));
-    addTransformer(new CEMEATransformer(SystemLocation.OMAN));
-    addTransformer(new CEMEATransformer(SystemLocation.PAKISTAN));
-//    addTransformer(new CEMEATransformer(SystemLocation.POLAND));
-    addTransformer(new CEMEATransformer(SystemLocation.QATAR));
-//    addTransformer(new CEMEATransformer(SystemLocation.ROMANIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.RUSSIAN_FEDERATION));
-    addTransformer(new CEMEATransformer(SystemLocation.SAUDI_ARABIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.SERBIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.MOROCCO));
+    // addTransformer(new CEMEATransformer(SystemLocation.OMAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.PAKISTAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.POLAND));
+    // addTransformer(new CEMEATransformer(SystemLocation.QATAR));
+    // addTransformer(new CEMEATransformer(SystemLocation.ROMANIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.RUSSIAN_FEDERATION));
+    // addTransformer(new CEMEATransformer(SystemLocation.SAUDI_ARABIA));
+    // addTransformer(new CEMEATransformer(SystemLocation.SERBIA));
     // addTransformer(new CEMEATransformer(SystemLocation.SLOVAKIA));
-//    addTransformer(new CEMEATransformer(SystemLocation.SLOVENIA));
-    addTransformer(new CEMEATransformer(SystemLocation.SYRIAN_ARAB_REPUBLIC));
-//    addTransformer(new CEMEATransformer(SystemLocation.TAJIKISTAN));
-//    addTransformer(new CEMEATransformer(SystemLocation.TURKMENISTAN));
-//    addTransformer(new CEMEATransformer(SystemLocation.UKRAINE));
-    addTransformer(new CEMEATransformer(SystemLocation.UNITED_ARAB_EMIRATES));
-//    addTransformer(new CEMEATransformer(SystemLocation.UZBEKISTAN));
-    addTransformer(new CEMEATransformer(SystemLocation.YEMEN));
-    addTransformer(new CEMEATransformer(SystemLocation.GULF));
+    // addTransformer(new CEMEATransformer(SystemLocation.SLOVENIA));
+    // addTransformer(new
+    // CEMEATransformer(SystemLocation.SYRIAN_ARAB_REPUBLIC));
+    // addTransformer(new CEMEATransformer(SystemLocation.TAJIKISTAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.TURKMENISTAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.UKRAINE));
+    // addTransformer(new
+    // CEMEATransformer(SystemLocation.UNITED_ARAB_EMIRATES));
+    // addTransformer(new CEMEATransformer(SystemLocation.UZBEKISTAN));
+    // addTransformer(new CEMEATransformer(SystemLocation.YEMEN));
+    // addTransformer(new CEMEATransformer(SystemLocation.GULF));
 
     // Nordics/BeLux/Netherlands
 
@@ -223,6 +227,26 @@ public class TransformerManager {
     addTransformer(new CEETransformer(SystemLocation.UKRAINE));
     addTransformer(new CEETransformer(SystemLocation.CROATIA));
     addTransformer(new CEETransformer(SystemLocation.CZECH_REPUBLIC));
+
+    // ME - LD
+    addTransformer(new METransformer(SystemLocation.ABU_DHABI));
+    addTransformer(new METransformer(SystemLocation.BAHRAIN));
+    addTransformer(new METransformer(SystemLocation.MOROCCO));
+    addTransformer(new METransformer(SystemLocation.GULF));
+    addTransformer(new METransformer(SystemLocation.UNITED_ARAB_EMIRATES));
+    addTransformer(new METransformer(SystemLocation.IRAQ));
+    addTransformer(new METransformer(SystemLocation.JORDAN));
+    addTransformer(new METransformer(SystemLocation.KUWAIT));
+    addTransformer(new METransformer(SystemLocation.LEBANON));
+    addTransformer(new METransformer(SystemLocation.LIBYA));
+    addTransformer(new METransformer(SystemLocation.OMAN));
+    addTransformer(new METransformer(SystemLocation.PAKISTAN));
+    addTransformer(new METransformer(SystemLocation.QATAR));
+    addTransformer(new METransformer(SystemLocation.SAUDI_ARABIA));
+    addTransformer(new METransformer(SystemLocation.YEMEN));
+    addTransformer(new METransformer(SystemLocation.SYRIAN_ARAB_REPUBLIC));
+    addTransformer(new METransformer(SystemLocation.EGYPT));
+
   }
 
   /**
