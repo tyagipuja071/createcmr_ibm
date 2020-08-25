@@ -106,6 +106,21 @@ function disableAddrFieldsCEWA() {
     FormManager.disable('custPhone');
   }
 
+  // PO Box allowed -> FST = Mail-to (ZS02), Bill-to (ZP01), Sold-to (ZS01)
+  // Non FST = Mailing (ZS01), Mailing (ZS01)
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var addrPOBoxEnabled = [ 'ZS01', 'ZP01' ]
+
+  if (fstCEWA.includes(cntry)) {
+    addrPOBoxEnabled.push('ZS02');
+  }
+
+  if (addrPOBoxEnabled.includes(addrType)) {
+    FormManager.enable('poBox');
+  } else {
+    FormManager.setValue('poBox', '');
+    FormManager.disable('poBox');
+  }
 }
 
 function addAddressTypeValidator() {
@@ -152,7 +167,7 @@ function addAddressTypeValidator() {
           if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
           } else if (fstCEWA.includes(cntry)) {
-            return fstAddressValidator(zp01Cnt, zi01Cnt, zs02Cnt);
+            return fstAddressValidator(zp01Cnt, zs01Cnt, zs02Cnt);
           } else if (othCEWA.includes(cntry)) {
             return nonFstAddressValidator(zs01Cnt, zp01Cnt, zs02Cnt);
           }
@@ -163,13 +178,13 @@ function addAddressTypeValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function fstAddressValidator(zp01Cnt, zi01Cnt, zs02Cnt) {
+function fstAddressValidator(zp01Cnt, zs01Cnt, zs02Cnt) {
   if (zp01Cnt > 1) {
     return new ValidationResult(null, false, 'Only one Billing address is allowed.');
   } else if (zs02Cnt > 1) {
     return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-  } else if (zi01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one EPL address is allowed.');
+  } else if (zs01Cnt > 1) {
+    return new ValidationResult(null, false, 'Only one Installing address is allowed.');
   } else {
     return new ValidationResult(null, true);
   }
