@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 
 /**
@@ -350,4 +351,14 @@ public class MCOSaHandler extends MCOHandler {
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
     return Arrays.asList("ZD01", "ZI01");
   }
+
+  @Override
+  public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
+    if (SystemLocation.SOUTH_AFRICA.equals(issuingCountry)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }
