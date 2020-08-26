@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -18,7 +19,11 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -32,6 +37,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 public class SouthAfricaTransformer extends MCOTransformer {
 
   private static final Logger LOG = Logger.getLogger(MCOTransformer.class);
+  private static final String DEFAULT_CLEAR_NUM = "0";
 
   public SouthAfricaTransformer() {
     super(SystemLocation.SOUTH_AFRICA);
@@ -194,6 +200,53 @@ public class SouthAfricaTransformer extends MCOTransformer {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCustExt.setTeleCovRep("3100");
     }
+  }
+
+  @Override
+  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
+      Data data, LegacyDirectObjectContainer legacyObjects) {
+
+    LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
+
+    if (!StringUtils.isBlank(muAddr.getPostCd())) {
+      legacyAddr.setZipCode(muAddr.getPostCd());
+    }
+
+    if (!StringUtils.isBlank(muAddr.getCounty())) {
+      if (muAddr.getId().getAddrType().equals("ZD01")) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCounty().trim())) {
+          legacyAddr.setAddrPhone("");
+        } else {
+          legacyAddr.setAddrPhone(muAddr.getCounty());
+        }
+      }
+    }
+    formatMassUpdateAddressLines(entityManager, legacyAddr, muAddr, false);
+    legacyObjects.addAddress(legacyAddr);
+  }
+
+  @Override
+  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust legacyCust, CMRRequestContainer cmrObjects,
+      MassUpdtData muData) {
+    LOG.debug("ZA >> Mapping default Data values..");
+    LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, legacyCust, muData);
+
+    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    if (muaList != null && muaList.size() > 0) {
+      for (MassUpdtAddr mua : muaList) {
+        if ("ZS01".equals(mua.getId().getAddrType())) {
+          if (!StringUtils.isBlank(mua.getCounty())) {
+            if (DEFAULT_CLEAR_NUM.equals(mua.getCounty().trim())) {
+              legacyCust.setTelNoOrVat("");
+            } else {
+              legacyCust.setTelNoOrVat(mua.getCounty());
+            }
+          }
+          break;
+        }
+      }
+    }
+
   }
 
   @Override
