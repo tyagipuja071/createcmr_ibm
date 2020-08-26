@@ -14,6 +14,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -311,6 +313,15 @@ public class MCOSaHandler extends MCOHandler {
     LOG.trace("State: " + address.getCmrState());
     LOG.trace("Country: " + address.getCmrCountryLanded());
 
+  }
+
+  @Override
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    super.setDataValuesOnImport(admin, data, results, mainRecord);
+    data.setCreditCd(mainRecord.getCreditCd());
+    if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+    }
   }
 
   @Override
