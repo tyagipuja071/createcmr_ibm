@@ -136,7 +136,7 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>
@@ -224,7 +224,7 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>

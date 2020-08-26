@@ -686,7 +686,7 @@ public class PortugalTransformer extends MessageTransformer {
   @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr addr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
-
+    legacyAddr.setForUpdate(true);
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
 
     if (!StringUtils.isBlank(addr.getPostCd())) {
@@ -701,16 +701,14 @@ public class PortugalTransformer extends MessageTransformer {
           legacyAddr.setAddrPhone(addr.getCounty());
         }
       }
-
     }
-
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
   }
 
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
-
+    LOG.debug("*** START PT formatMassUpdateAddressLines >>>");
     boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
     Map<String, String> messageHash = new LinkedHashMap<String, String>();
@@ -729,7 +727,9 @@ public class PortugalTransformer extends MessageTransformer {
     String line6 = legacyAddr.getAddrLine6();
 
     line1 = legacyAddr.getAddrLine1();
-    line2 = legacyAddr.getAddrLine2();
+    if (!StringUtils.isBlank(massUpdtAddr.getCustNm2())) {
+      line2 = massUpdtAddr.getCustNm2();
+    }
 
     if (StringUtils.isEmpty(line2) && crossBorder) {
       if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
