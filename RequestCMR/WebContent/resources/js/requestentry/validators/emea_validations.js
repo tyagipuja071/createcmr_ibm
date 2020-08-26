@@ -377,6 +377,7 @@ function afterConfigForUKI() {
   }
 
   autoSetAbbrNameUKI();
+  setVatCRNForUKI();
   if (_customerTypeHandler == null) {
     var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
@@ -403,6 +404,7 @@ function afterConfigForUKI() {
         optionalRuleForVatUK();
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
+        setVatCRNForUKI();
       }
       ;
     });
@@ -415,6 +417,8 @@ function afterConfigForUKI() {
       if (dijit.byId('vatExempt').get('checked')) {
         console.log(">>> Process vatExempt remove * >> ");
         FormManager.resetValidations('vat');
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
@@ -427,7 +431,8 @@ function afterConfigForUKI() {
       var reqType = FormManager.getActualValue('reqType');
       if (dijit.byId('restrictInd').get('checked')) {
         console.log(">>> Process crnExempt remove * >> ");
-        FormManager.removeValidator('taxCd1',Validators.REQUIRED);
+        FormManager.resetValidations('taxCd1');
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
         FormManager.readOnly('taxCd1');
       } else {
         if(reqType == 'C'){
@@ -868,6 +873,7 @@ function autoSetVAT(_custType, custTypeinDB) {
   // FormManager.enable('vat'); FormManager.enable('vatExempt');
   if (dijit.byId('vatExempt').get('checked')) {
     FormManager.resetValidations('vat');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
   } else {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
   }
@@ -878,6 +884,7 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (_custType == 'SOFTL' || _custType == 'INTER') {
     FormManager.resetValidations('vat');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatExempt', true);
     FormManager.enable('vat');
   } else {
@@ -887,7 +894,7 @@ function autoSetVAT(_custType, custTypeinDB) {
     FormManager.enable('vatExempt');
   }
   if (cntry == SysLoc.UK || cntry == SysLoc.IRELAND) {
-    if (_custType == 'INTER') {
+    if (_custType == 'INTER' && !dijit.byId('vatExempt').get('checked')) {
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       FormManager.setValue('vatExempt', false);
       FormManager.enable('vat');
@@ -896,6 +903,7 @@ function autoSetVAT(_custType, custTypeinDB) {
   }
   if (_custType == 'PRICU' || _custType == 'IBMEM') {
     FormManager.resetValidations('vat');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.readOnly('vat');
     FormManager.setValue('vat', '');
     if (_custType == 'PRICU') {
@@ -906,6 +914,7 @@ function autoSetVAT(_custType, custTypeinDB) {
 
   if (_custType == 'XPRIC') {
     FormManager.resetValidations('vat');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
     FormManager.setValue('vatExempt', true);
     FormManager.enable('vat');
   }
@@ -6411,6 +6420,7 @@ function optionalRuleForVatUK() {
 
     if (landCntry != 'undefined' && islandedCountry(landCntry)) {
       FormManager.resetValidations('vat');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.enable('vat');
     } else {
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
@@ -7485,8 +7495,8 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.readOnly('custClass');
     FormManager.setValue('custClass', '33');
   }
-  
-  if(reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU')){
+
+  if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU') && !dijit.byId('vatExempt').get('checked')) {
     FormManager.getField('restrictInd').checked = false;
     FormManager.enable('restrictInd');
   }
@@ -7585,6 +7595,20 @@ function addValidatorForCompanyRegNum() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function setVatCRNForUKI() {
+  var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (issuingCntry == SysLoc.IRELAND || issuingCntry == SysLoc.UK) {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.resetValidations('vat');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    }
+    if (dijit.byId('restrictInd').get('checked')) {
+      FormManager.resetValidations('taxCd1');
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    }
+  }
 }
 
 dojo.addOnLoad(function() {
