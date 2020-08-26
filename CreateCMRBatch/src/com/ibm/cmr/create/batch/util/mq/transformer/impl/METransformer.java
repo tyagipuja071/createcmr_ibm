@@ -67,7 +67,7 @@ public class METransformer extends EMEATransformer {
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
-  public static String DEFAULT_LANDED_COUNTRY = "SK";
+  public static String DEFAULT_LANDED_COUNTRY = "AE";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -434,77 +434,53 @@ public class METransformer extends EMEATransformer {
   }
 
   public void setDefaultLandedCountry(Data data) {
-    if ("693".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "SK";
+    if ("620".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "BH";
     }
-    if ("695".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "KG";
+    if ("642".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "MA";
     }
-    if ("707".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "CS";
+    if ("677".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "AE";
     }
-    if ("358".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AZ";
+    if ("680".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "AE";
     }
-    if ("359".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "TM";
+    if ("752".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "IQ";
     }
-    if ("363".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "TJ";
+    if ("762".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "JO";
     }
-    if ("603".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AL";
+    if ("767".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "KW";
     }
-    if ("607".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AM";
+    if ("768".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "LB";
     }
-    if ("626".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "BY";
+    if ("772".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "LY";
     }
-    if ("644".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "BG";
+    if ("805".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "OM";
     }
-    if ("651".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "GE";
+    if ("808".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "PK";
     }
-    if ("694".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "KZ";
+    if ("823".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "QA";
     }
-    if ("699".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "BA";
+    if ("832".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "SA";
     }
-    if ("705".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "MK";
+    if ("849".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "YE";
     }
-    if ("708".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "SI";
+    if ("850".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "SY";
     }
-    if ("740".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "HU";
-    }
-    if ("741".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "UZ";
-    }
-    if ("787".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "MD";
-    }
-    if ("820".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "PL";
-    }
-    if ("821".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "RU";
-    }
-    if ("826".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "RO";
-    }
-    if ("889".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "UA";
-    }
-    if ("704".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "HR";
-    }
-    if ("668".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "CZ";
+    if ("865".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "EG";
     }
   }
 
@@ -571,7 +547,7 @@ public class METransformer extends EMEATransformer {
   @Override
   public boolean isCrossBorderForMass(MassUpdtAddr addr, CmrtAddr legacyAddr) {
     boolean isCrossBorder = false;
-    if (!StringUtils.isEmpty(addr.getLandCntry()) && !SpainTransformer.DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry())) {
+    if (!StringUtils.isEmpty(addr.getLandCntry()) && !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry())) {
       isCrossBorder = true;
     } else if (!StringUtils.isEmpty(legacyAddr.getAddrLine5()) && legacyAddr.getAddrLine5().length() == 2) {
       isCrossBorder = true;
@@ -793,10 +769,6 @@ public class METransformer extends EMEATransformer {
         legacyAddr.setZipCode(addr.getPostCd());
         addrLine5.append(addr.getPostCd() + " ");
       }
-
-      if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType()) && isCrossBorderForMass(addr, legacyAddr)) {
-        handlePostCdSpecialLogic(cust, data, addr.getPostCd(), entityManager);
-      }
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
@@ -927,8 +899,8 @@ public class METransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     String landedCntry = "";
 
-    formatDataLines(dummyHandler);
     setDefaultLandedCountry(data);
+    formatDataLines(dummyHandler);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
@@ -1654,12 +1626,14 @@ public class METransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
+    return true;
+    // if ("SK".equals(DEFAULT_LANDED_COUNTRY) ||
+    // "BG".equals(DEFAULT_LANDED_COUNTRY) ||
+    // "RU".equals(DEFAULT_LANDED_COUNTRY)) {
     // return true;
-    if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)) {
-      return true;
-    } else {
-      return false;
-    }
+    // } else {
+    // return false;
+    // }
   }
 
   @Override
@@ -1667,23 +1641,12 @@ public class METransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
 
     Data data = cmrObjects.getData();
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCustExt.setBankAcctNo(data.getTaxCd1());
-      } else {
-        legacyCustExt.setBankAcctNo("");
-      }
+    Admin admin = cmrObjects.getAdmin();
+
+    if (!StringUtils.isBlank(data.getBpSalesRepNo())) {
+      legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
 
-    Admin admin = cmrObjects.getAdmin();
-    if ("C".equals(admin.getReqType()) && "644".equals(data.getCmrIssuingCntry()) && "LOCAL".equals(data.getCustGrp())
-        && !"Y".equals(data.getVatExempt())) {
-      String vat = data.getVat();
-      if (vat != null && vat.startsWith("BG")) {
-        String itax = vat.replaceAll("BG", "");
-        legacyCustExt.setiTaxCode(itax);
-      }
-    } else {
       if (!StringUtils.isBlank(data.getCompany())) {
         if (data.getCompany().length() > 9) {
           legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
@@ -1693,7 +1656,6 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCustExt.setiTaxCode("");
       }
-    }
   }
 
   @Override
