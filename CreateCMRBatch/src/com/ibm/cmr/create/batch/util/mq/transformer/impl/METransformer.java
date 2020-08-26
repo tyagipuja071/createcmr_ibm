@@ -150,13 +150,13 @@ public class METransformer extends EMEATransformer {
 
     String custType = cmrData.getCustSubGrp();
     if (!StringUtils.isBlank(custType)) {
-      if ("BUSPR".equals(custType) || "XBP".equals(custType)) {
+      if (custType.contains("BUS") || custType.contains("BP")) {
         messageHash.put("MarketingResponseCode", "5");
         messageHash.put("ARemark", "YES");
         messageHash.put("CustomerType", "BP");
       } else if ("GOVRN".equals(custType)) {
         messageHash.put("CustomerType", "G");
-      } else if ("INTER".equals(custType) || "XINT".equals(custType)) {
+      } else if (custType.contains("INT")) {
         messageHash.put("CustomerType", "91");
       } else {
         messageHash.put("CustomerType", "");
@@ -680,8 +680,7 @@ public class METransformer extends EMEATransformer {
 
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
-    if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp) || "CSINT".equals(custSubGrp) || "RSXIN".equals(custSubGrp)
-        || "MEINT".equals(custSubGrp) || "RSINT".equals(custSubGrp)) {
+    if (custSubGrp.contains("INT")) {
       if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
         generateCMRNoObj.setMin(985001);
         generateCMRNoObj.setMax(985999);
@@ -690,13 +689,9 @@ public class METransformer extends EMEATransformer {
         generateCMRNoObj.setMax(998899);
       }
       LOG.debug("that is CEE INTER CMR");
-    } else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp) || "CSBP".equals(custSubGrp) || "MEBP".equals(custSubGrp)
-        || "RSXBP".equals(custSubGrp) || "RSBP".equals(custSubGrp)) {
+    } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
       generateCMRNoObj.setMin(1000);
       generateCMRNoObj.setMax(9999);
-    } else if ("XCE".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(510000);
-      generateCMRNoObj.setMax(799999);
     } else {
       generateCMRNoObj.setMin(369320);
       generateCMRNoObj.setMax(979999);
@@ -1195,9 +1190,7 @@ public class METransformer extends EMEATransformer {
 
     if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
-    } else if (!StringUtils.isEmpty(data.getCustSubGrp()) && ("BUSPR".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp())
-        || "CSBP".equals(data.getCustSubGrp()) || "MEBP".equals(data.getCustSubGrp()) || "RSXBP".equals(data.getCustSubGrp())
-        || "BP".equals(data.getCustSubGrp()) || "RSBP".equals(data.getCustSubGrp()))) {
+    } else if (!StringUtils.isEmpty(data.getCustSubGrp()) && (data.getCustSubGrp().contains("BP") || data.getCustSubGrp().contains("BUS"))) {
       legacyCust.setMrcCd("5");
     } else {
       legacyCust.setMrcCd("3");
@@ -1453,7 +1446,7 @@ public class METransformer extends EMEATransformer {
     messageHash.put("MarketingResponseCode", "3");
 
     String custType = cmrData.getCustSubGrp();
-    if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
+    if (custType.contains("BP") || custType.contains("BUS")) {
       messageHash.put("MarketingResponseCode", "5");
       messageHash.put("ARemark", "YES");
     } else {
