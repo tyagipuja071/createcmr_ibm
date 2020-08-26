@@ -418,6 +418,7 @@ function afterConfigForUKI() {
         console.log(">>> Process vatExempt remove * >> ");
         FormManager.resetValidations('vat');
         FormManager.removeValidator('vat', Validators.REQUIRED);
+        FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
