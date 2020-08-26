@@ -150,7 +150,7 @@ public class METransformer extends EMEATransformer {
 
     String custType = cmrData.getCustSubGrp();
     if (!StringUtils.isBlank(custType)) {
-      if (custType.contains("BUSPR") || custType.contains("BP")) {
+      if (custType.contains("BUS") || custType.contains("BP")) {
         messageHash.put("MarketingResponseCode", "5");
         messageHash.put("ARemark", "YES");
         messageHash.put("CustomerType", "BP");
