@@ -153,15 +153,29 @@ public class SouthAfricaTransformer extends MCOTransformer {
       boolean isBusPr = Arrays.asList(busPrSubGrp).contains(custSubGrp);
 
       if (isBusPr) {
-        legacyCust.setAuthRemarketerInd("Y");
+        legacyCust.setAuthRemarketerInd("1");
       } else {
-        legacyCust.setAuthRemarketerInd("N");
+        legacyCust.setAuthRemarketerInd("0");
       }
 
       legacyCust.setCeDivision(dummyHandler.messageHash.get("CEdivision"));
       legacyCust.setCurrencyCd(dummyHandler.messageHash.get("CurrencyCode"));
       legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
 
+    }
+
+    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+      legacyCust.setIbo(data.getSalesBusOffCd());
+      legacyCust.setSbo(data.getSalesBusOffCd());
+    } else {
+      legacyCust.setIbo("");
+      legacyCust.setSbo("");
+    }
+
+    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+    } else {
+      legacyCust.setSalesGroupRep("");
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {
@@ -174,7 +188,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       if (data.getIbmDeptCostCenter().length() == 6)
         legacyCust.setDeptCd(data.getIbmDeptCostCenter().substring(2, 6));
     }
-    
+
     legacyCust.setAbbrevNm(data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
@@ -190,9 +204,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
-
+    Data data = cmrObjects.getData();
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCustExt.setTeleCovRep("3100");
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      legacyCustExt.setTeleCovRep(data.getCollBoId());
     }
   }
 
