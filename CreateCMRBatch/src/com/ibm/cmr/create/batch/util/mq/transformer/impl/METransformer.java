@@ -1667,23 +1667,12 @@ public class METransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
 
     Data data = cmrObjects.getData();
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCustExt.setBankAcctNo(data.getTaxCd1());
-      } else {
-        legacyCustExt.setBankAcctNo("");
-      }
+    Admin admin = cmrObjects.getAdmin();
+
+    if (!StringUtils.isBlank(data.getBpSalesRepNo())) {
+      legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
 
-    Admin admin = cmrObjects.getAdmin();
-    if ("C".equals(admin.getReqType()) && "644".equals(data.getCmrIssuingCntry()) && "LOCAL".equals(data.getCustGrp())
-        && !"Y".equals(data.getVatExempt())) {
-      String vat = data.getVat();
-      if (vat != null && vat.startsWith("BG")) {
-        String itax = vat.replaceAll("BG", "");
-        legacyCustExt.setiTaxCode(itax);
-      }
-    } else {
       if (!StringUtils.isBlank(data.getCompany())) {
         if (data.getCompany().length() > 9) {
           legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
@@ -1693,7 +1682,6 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCustExt.setiTaxCode("");
       }
-    }
   }
 
   @Override
