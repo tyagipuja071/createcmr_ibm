@@ -1246,7 +1246,7 @@ public class MEHandler extends BaseSOFHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
-    if ((data.getCustSubGrp().contains("BP") || data.getCustSubGrp().contains("BUS")) && ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+    if (data.getCustSubGrp().contains("BP") || data.getCustSubGrp().contains("BUS")) {
       data.setBpRelType("CA");
     }
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
