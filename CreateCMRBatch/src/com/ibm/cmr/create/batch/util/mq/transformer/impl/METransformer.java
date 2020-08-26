@@ -603,6 +603,10 @@ public class METransformer extends EMEATransformer {
     // Dept + Postal code + City
     line5 = addrData.getPostCd() + " " + addrData.getCity1();
 
+    if (!StringUtils.isBlank(addrData.getPoBox())) {
+      legacyAddr.setPoBox(addrData.getPoBox());
+    }
+
     if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
       String cntryUse = cmrData.getCountryUse();
       if (!StringUtils.isBlank(cntryUse)) {
