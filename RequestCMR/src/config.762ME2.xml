@@ -180,7 +180,7 @@
 				</column>
 				<column>
 					<label>PO Box</label>
-					<dbColumn>POST_CD</dbColumn>
+					<dbColumn>PO_BOX</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>
@@ -257,7 +257,7 @@
 				</column>
 				<column>
 					<label>PO Box</label>
-					<dbColumn>POST_CD</dbColumn>
+					<dbColumn>PO_BOX</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>
@@ -334,7 +334,7 @@
 				</column>
 				<column>
 					<label>PO Box</label>
-					<dbColumn>POST_CD</dbColumn>
+					<dbColumn>PO_BOX</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>
@@ -411,7 +411,7 @@
 				</column>
 				<column>
 					<label>PO Box</label>
-					<dbColumn>POST_CD</dbColumn>
+					<dbColumn>PO_BOX</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>
@@ -488,7 +488,7 @@
 				</column>
 				<column>
 					<label>PO Box</label>
-					<dbColumn>POST_CD</dbColumn>
+					<dbColumn>PO_BOX</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>
@@ -566,7 +566,7 @@
 				</column>
 				<column>
 					<label>PO Box</label>
-					<dbColumn>POST_CD</dbColumn>
+					<dbColumn>PO_BOX</dbColumn>
 					<width>20</width>
 					<length>10</length>
 				</column>
