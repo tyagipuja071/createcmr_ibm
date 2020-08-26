@@ -916,16 +916,15 @@ public class METransformer extends EMEATransformer {
           break;
         }
       }
-      List<String> scenario_list = Arrays.asList("XTP", "XCE", "THDPT", "COMME", "XCOM", "PRICU", "XPC", "CSCOM", "CSPC", "CSTP", "MECOM", "MEPC",
-          "METP", "RSXCO", "RSXPC", "RSXTP", "RSCOM", "RSPC", "RSTP");
-      if (scenario_list.contains(data.getCustSubGrp())) {// commerical
+
+      if (data.getCustSubGrp().contains("CO") || data.getCustSubGrp().contains("TH") || data.getCustSubGrp().contains("TP")
+          || data.getCustSubGrp().contains("PRI") || data.getCustSubGrp().contains("PC")) {// commerical
         if (!StringUtils.isBlank(data.getEnterprise())) {
           legacyCust.setEnterpriseNo(data.getEnterprise());
         } else {
           legacyCust.setEnterpriseNo("");
         }
-      } else if ("INTER".equals(data.getCustSubGrp()) || "XINT".equals(data.getCustSubGrp()) || "CSINT".equals(data.getCustSubGrp())
-          || "MEINT".equals(data.getCustSubGrp()) || "RSXIN".equals(data.getCustSubGrp()) || "RSINT".equals(data.getCustSubGrp())) {// internal
+      } else if (data.getCustSubGrp().contains("IN")) {// internal
         legacyCust.setEnterpriseNo("");
       } else {// bp
         legacyCust.setEnterpriseNo("");
