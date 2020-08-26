@@ -1754,15 +1754,13 @@ function setTelecoverageRep() {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
+    FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep' ]);
     return;
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRIA) {
-    return;
-  }
-
   var custGrp = FormManager.getActualValue('custGrp');
   if (custGrp != null && (custGrp == 'GBM' || custGrp == 'SBM')) {
     checkAndAddValidator('bpSalesRepNo', Validators.REQUIRED, [ 'Tele-coverage rep.' ]);
+    FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep' ]);
     FormManager.show('TeleCoverageRep', 'bpSalesRepNo');
   } else {
     FormManager.resetValidations('bpSalesRepNo');
