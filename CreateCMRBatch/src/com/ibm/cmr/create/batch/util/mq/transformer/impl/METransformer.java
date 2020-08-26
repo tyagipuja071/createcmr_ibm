@@ -602,37 +602,33 @@ public class METransformer extends EMEATransformer {
 
     // Dept + Postal code + City
     line5 = addrData.getPostCd() + " " + addrData.getCity1();
-    if (SystemLocation.SERBIA.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
-        } else {
-          line6 = "";
-        }
-      } else if (!StringUtils.isBlank(cntryUse)) {
-        if ("707CS".equals(cntryUse)) {
-          line6 = "Kosovo";
-        } else if ("707ME".equals(cntryUse)) {
-          line6 = "Montenegro";
-        } else {
-          line6 = "Serbia";
-        }
 
+    if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
+      String cntryUse = cmrData.getCountryUse();
+      if (!StringUtils.isBlank(cntryUse)) {
+        if ("762PS".equals(cntryUse)) {
+          line6 = "Palestine";
+        } else {
+          if (!StringUtils.isBlank(addrData.getLandCntry())) {
+            line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+          } else {
+            line6 = "";
+          }
+        }
       }
     } else {
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
-        } else {
-          line6 = "";
-        }
-      } else {
+      // if ("ZP02".equals(addrData.getId().getAddrType())) {
+      // if (!StringUtils.isBlank(addrData.getBldg())) {
+      // line6 = addrData.getBldg();
+      // } else {
+      // line6 = "";
+      // }
+      // } else {
         if (!StringUtils.isBlank(addrData.getLandCntry())) {
           line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
         } else {
           line6 = "";
-        }
+        // }
       }
     }
     // if (!StringUtils.isBlank(addrData.getLandCntry())) {
@@ -680,7 +676,7 @@ public class METransformer extends EMEATransformer {
 
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
-    if (custSubGrp.contains("INT")) {
+    if (custSubGrp.contains("IN")) {
       if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
         generateCMRNoObj.setMin(985001);
         generateCMRNoObj.setMax(985999);
@@ -940,23 +936,9 @@ public class METransformer extends EMEATransformer {
         legacyCust.setBankAcctNo("");
       }
 
-      if ("693".equals(data.getCmrIssuingCntry())) {
-
-        if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
-            legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
-          } else {
-            legacyCust.setBankBranchNo(data.getCompany());
-          }
-        } else {
-          legacyCust.setBankBranchNo("");
-        }
+      if ("762PS".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("762");
       }
-
-      if ("707ME".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("713");
-      }
-
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -968,8 +950,8 @@ public class METransformer extends EMEATransformer {
         }
       }
 
-      if ("707ME".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("713");
+      if ("762PS".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("762");
       }
 
       if (!StringUtils.isBlank(data.getEnterprise())) {
@@ -1098,11 +1080,12 @@ public class METransformer extends EMEATransformer {
 
     String cebo = data.getEngineeringBo();
     if (!StringUtils.isBlank(cebo)) {
-      if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) || SystemLocation.KYRGYZSTAN.equals(data.getCmrIssuingCntry())) {
-        if (cebo.length() < 7) {
-          cebo = StringUtils.rightPad(cebo, 7, '0');
-        }
-      }
+      // if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) ||
+      // SystemLocation.KYRGYZSTAN.equals(data.getCmrIssuingCntry())) {
+      // if (cebo.length() < 7) {
+      // cebo = StringUtils.rightPad(cebo, 7, '0');
+      // }
+      // }
       legacyCust.setCeBo(cebo);
     } else {
       legacyCust.setCeBo("");
