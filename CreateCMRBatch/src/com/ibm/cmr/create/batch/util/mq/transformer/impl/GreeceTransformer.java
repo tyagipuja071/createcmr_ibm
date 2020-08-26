@@ -444,6 +444,8 @@ public class GreeceTransformer extends EMEATransformer {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           if (!StringUtils.isEmpty(addr.getCustPhone())) {
             legacyCust.setTelNoOrVat(addr.getCustPhone());
+          } else {
+            legacyCust.setTelNoOrVat("");
           }
           landedCntry = addr.getLandCntry();
           break;
