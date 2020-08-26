@@ -658,19 +658,17 @@ function lockAbbrv() {
   }
 }
 
-function showDeptNoForInternalsOnly() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
+function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
 
-  var subCustGrp = FormManager.getActualValue('custSubGrp');
-  if (subCustGrp == 'INTER' || subCustGrp == 'XINTE') {
-    checkAndAddValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ]);
-    FormManager.show('InternalDept', 'ibmDeptCostCenter');
-  } else {
-    FormManager.clearValue('ibmDeptCostCenter');
-    FormManager.resetValidations('ibmDeptCostCenter');
-    FormManager.hide('InternalDept', 'ibmDeptCostCenter');
+  if (scenarioChanged) {
+    if (scenario == 'INTER' || scenario == 'XINTE') {
+      FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+      FormManager.show('InternalDept', 'ibmDeptCostCenter');
+    } else {
+      FormManager.clearValue('ibmDeptCostCenter');
+      FormManager.resetValidations('ibmDeptCostCenter');
+      FormManager.hide('InternalDept', 'ibmDeptCostCenter');
+    }
   }
 }
 
