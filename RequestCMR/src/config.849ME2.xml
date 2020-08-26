@@ -83,16 +83,16 @@
 					<length>7</length>					
 				</column>	
 				<column>
-					<label>Order block code</label>
-					<dbColumn>EMBARGO_CD</dbColumn>
-					<width>10</width>
-					<length>1</length>
-				</column>
-				<column>
 					<label>Classification Code</label>
 					<dbColumn>CUST_CLASS</dbColumn>
 					<width>10</width>
 					<lovId>CustClass</lovId>
+				</column>
+				<column>
+					<label>Order block code</label>
+					<dbColumn>EMBARGO_CD</dbColumn>
+					<width>10</width>
+					<length>1</length>
 				</column>
 				<column>
 					<label>VAT</label>
