@@ -44,7 +44,7 @@ public class CEWATransformer extends MCOTransformer {
       if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType) || "XGOV".equals(custType)) {
         legacyCust.setCustType("G");
       } else if (MQMsgConstants.CUSTSUBGRP_IBMEM.equals(custType)) {
-        legacyCust.setCustType("8");
+        legacyCust.setCustType("98");
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
 
@@ -102,7 +102,7 @@ public class CEWATransformer extends MCOTransformer {
     } else if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
       line4 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
     } else if (!StringUtils.isBlank(addrData.getPoBox())) {
-      line4 = "PO BOX" + addrData.getPoBox();
+      line4 = "PO BOX " + addrData.getPoBox();
     } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
       line4 = addrData.getAddrTxt2();
     }
