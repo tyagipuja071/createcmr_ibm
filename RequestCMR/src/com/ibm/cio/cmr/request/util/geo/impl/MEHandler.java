@@ -1975,7 +1975,7 @@ public class MEHandler extends BaseSOFHandler {
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     String newAddrSeq = null;
-    if (CEE_COUNTRY_LIST.contains(cmrIssuingCntry)) {
+    if (ME_COUNTRY_LIST.contains(cmrIssuingCntry)) {
       if (!StringUtils.isEmpty(addrType)) {
         if ("ZD02".equals(addrType)) {
           return "598";
