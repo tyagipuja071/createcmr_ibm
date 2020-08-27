@@ -1032,6 +1032,11 @@ public class MEHandler extends BaseSOFHandler {
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setPhone1(mainRecord.getCmrCustPhone());
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
+      CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
+      if (cmrtExt != null) {
+        String teleCovRep = cmrtExt.getTeleCovRep();
+        data.setBpSalesRepNo(teleCovRep);
+      }
     }
     // ICO field
     if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
