@@ -1202,7 +1202,11 @@ public class METransformer extends EMEATransformer {
       if ("@".equals(muData.getMiscBillCd())) {
         cust.setEmbargoCd("");
       } else {
-        cust.setEmbargoCd(muData.getMiscBillCd());
+        if ("S".equals(muData.getMiscBillCd())) {
+          cust.setEmbargoCd(muData.getMiscBillCd());
+        } else {
+          cust.setEmbargoCd("");
+        }
       }
     }
     // we use RestrictTo to store CoF in muData
