@@ -679,11 +679,12 @@ function validateCMRNumberForLegacy() {
             return new ValidationResult(null, true);
           }
           // Validation for Internal Scenario
-          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT') {
+          var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT' || internalScenarios.includes(_custSubGrp)) {
             if (!cmrNo.startsWith("99")) {
               return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
             }
-          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT') {
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT' || !internalScenarios.includes(_custSubGrp)) {
             if (cmrNo.startsWith("99")) {
               return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
             }
@@ -811,8 +812,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR);
 
   // For Legacy GR
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.GREECE, SysLoc.SOUTH_AFRICA], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.GREECE, SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic
