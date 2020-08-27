@@ -3504,31 +3504,24 @@ function setClassificationCodeCEE() {
 
 function lockIsicCdME() {
   var reqType = FormManager.getActualValue('reqType');
-  if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    var isic = FormManager.getActualValue('isicCd');
-    if ('9500' == isic || '0000' == isic) {
-      var oldISIC = null;
-      var requestId = FormManager.getActualValue('reqId');
-      qParams = {
-        REQ_ID : requestId,
-      };
-      var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
-      var oldISIC = result.ret1;
-      if (oldISIC == '9500' || oldISIC == '0000') {
-        FormManager.readOnly('isicCd');
-      } else {
-        FormManager.enable('isicCd');
-      }
-    } else {
+  if ('U' == reqType) {
+    var oldISIC = null;
+    var requestId = FormManager.getActualValue('reqId');
+    qParams = {
+      REQ_ID : requestId,
+    };
+    var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+    var oldISIC = result.ret1;
+    if (oldISIC == '9500' || oldISIC == '0000') {
       FormManager.enable('isicCd');
     }
   } else if ('C' == reqType) {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (custSubGrp.includes('PC')) {
+    if (custSubGrp.includes('PC') || custSubGrp.includes('PRI')) {
       if ('9500' == isic) {
         FormManager.readOnly('isicCd');
       }
-    } else if (custSubGrp.includes('INT')) {
+    } else if (custSubGrp.includes('IN')) {
       if ('0000' == isic) {
         FormManager.readOnly('isicCd');
       }
@@ -3545,28 +3538,21 @@ function validateIsicMEValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var isic = FormManager.getActualValue('isicCd');
-        var oldISIC = null;
-        var requestId = FormManager.getActualValue('reqId');
-        qParams = {
-          REQ_ID : requestId,
-        };
-        var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
-        var oldISIC = result.ret1;
 
         if ('U' == reqType) {
-          if ('9500' == isic || '0000' == isic) {
-            if (oldISIC != '9500' && oldISIC != '0000') {
-              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-            } else {
-              return new ValidationResult(null, true);
-            }
+          var oldISIC = null;
+          var requestId = FormManager.getActualValue('reqId');
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+          var oldISIC = result.ret1;
+          if (('9500' == isic || '0000' == isic) && isic != oldISIC) {
+            return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
+          } else if (oldISIC == '0000' || oldISIC == '9500') {
+            return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
           } else {
-            if (oldISIC == '9500' || oldISIC == '0000') {
-              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-            } else {
-              // FormManager.enable('isicCd');
-              return new ValidationResult(null, true);
-            }
+            return new ValidationResult(null, true);
           }
         }
         if (('C' == reqType && ('9500' == isic || '0000' == isic))) {
@@ -3574,6 +3560,8 @@ function validateIsicMEValidator() {
           if (custSubGrp.includes('BP') || custSubGrp.includes('BUS') || custSubGrp.includes('CO') || custSubGrp.includes('TH') || custSubGrp.includes('TP')) {
             FormManager.enable('isicCd');
             return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
+          } else {
+            return new ValidationResult(null, true);
           }
         } else {
           return new ValidationResult(null, true);
