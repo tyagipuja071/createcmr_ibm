@@ -2184,7 +2184,7 @@ function setEnterpriseValues(clientTier) {
   }
 }
 
-function addCmrNoValidatorForCEE() {
+function addCmrNoValidatorForME() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2201,54 +2201,22 @@ function addCmrNoValidatorForCEE() {
             return new ValidationResult(null, false, 'CMR Number should be only numbers.');
           } else if (cmrNo == "000000") {
             return new ValidationResult(null, false, 'CMR Number should not be 000000.');
-          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XINT' || custSubType == 'INTER') && (!cmrNo.startsWith('99') || cmrNo.startsWith('997'))) {
-            return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format (exclude 997XXX) for internal scenarios');
-          } else if (cmrNo != '' && custSubType != '' && custSubType == 'INTSO' && !cmrNo.startsWith('997')) {
-            return new ValidationResult(null, false, 'CMR Number should be in 997XXX for Internal SO scenarios');
-          } else if (cmrNo != '' && custSubType != ''
-              && !(custSubType == 'XINT' || custSubType == 'INTER' || custSubType == 'RSXIN' || custSubType == 'MEINT' || custSubType == 'RSINT' || custSubType == 'CSINT') && cmrNo.startsWith('99')) {
+          } else if (cmrNo != '' && custSubType != '' && (custSubType.includes('IN') && (!cmrNo.startsWith('99')))) {
+            return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenarios');
+          } else if (cmrNo != '' && custSubType != '' && !custSubType.includes('IN') && cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
-          } else if (cmrNo != ''
-              && custSubType != ''
-              && (custSubType == 'THDPT' || custSubType.includes('PRICU') || custSubType == 'XCOM' || custSubType.includes('XTP') || custSubType == 'COMME' || custSubType.includes('MECOM')
-                  || custSubType == 'MEPC' || custSubType.includes('METP') || custSubType == 'RSXCO' || custSubType.includes('RSXPC') || custSubType == 'RSXTP' || custSubType.includes('RSCOM')
-                  || custSubType == 'RSPC' || custSubType.includes('RSTP') || custSubType == 'CSCOM' || custSubType.includes('CSPC') || custSubType == 'CSTP')
-              && (cmrNo.startsWith('00') || cmrNo.startsWith('99'))) {
-            return new ValidationResult(null, false, 'CMR Number should not start with 99xxxx or 00xxxx for Commercial scenarios');
-          } else if (cmrNo != '' && custSubType != ''
-              && (custSubType == 'BUSPR' || custSubType.includes('BP') || custSubType == 'CSBP' || custSubType.includes('MEBP') || custSubType == 'RSXBP' || custSubType.includes('RSBP'))
-              && !(cmrNo.startsWith('00'))) {
-            return new ValidationResult(null, false, 'CMR Number should start with 00xxxx for Business Partner scenarios');
-          } else if (cmrNo != '' && custSubType != '' && (custSubType == 'XCEM' || custSubType == 'XCE') && !(cmrNo >= 500000 && cmrNo <= 799999)) {
-            return new ValidationResult(null, false, 'CMR Number should be within range: 500000 - 799999 for CEMEX scenarios');
+          } else if (cmrNo != '' && custSubType != '' && (custSubType.includes('BP') || custSubType.includes('BUS')) && !cmrNo.startsWith('00')) {
+            return new ValidationResult(null, false, 'CMR Number should start with 00xxxx for BP scenarios');
           } else {
             var qParams = {
               CMRNO : cmrNo,
               CNTRY : cntry,
               MANDT : cmr.MANDT
             };
-            var results = cmr.query('GET.CMR.CEE', qParams);
+            var results = cmr.query('GET.CMR.ME', qParams);
             if (results.ret1 != null) {
               return new ValidationResult(null, false, 'The CMR Number already exists.');
             }
-            // CMR4606 add cmr exist check for duplicate issued country
-            if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
-              var cntryDup = FormManager.getActualValue('dupIssuingCntryCd');
-              var qParamsDup = {
-                CMRNO : cmrNo,
-                CNTRY : cntryDup,
-                MANDT : cmr.MANDT
-              };
-              var resultsD = cmr.query('GET.CMR.CEE', qParamsDup);
-              if (resultsD.ret1 != null) {
-                return new ValidationResult(null, false, 'The CMR Number already exists For the Country of Duplicate CMR.');
-              }
-            }
-          }
-          // Cmr Number should not be within range: 500000 - 799999 for non
-          // CEMEX scenarios for 695
-          if (cmrNo != '' && cmrNo != null && cntry == '695' && cmrNo >= 500000 && cmrNo <= 799999 && custSubType != 'XCE') {
-            return new ValidationResult(null, false, 'CMR Number should not be within range: 500000 - 799999 for non CEMEX scenarios');
           }
         }
         return new ValidationResult(null, true);
@@ -2257,7 +2225,7 @@ function addCmrNoValidatorForCEE() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
-function cmrNoEnableForCEE() {
+function cmrNoEnableForME() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var reqType = FormManager.getActualValue('reqType');
   var cmrNo = FormManager.getActualValue('cmrNo');
@@ -3504,31 +3472,24 @@ function setClassificationCodeME() {
 
 function lockIsicCdME() {
   var reqType = FormManager.getActualValue('reqType');
-  if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    var isic = FormManager.getActualValue('isicCd');
-    if ('9500' == isic || '0000' == isic) {
-      var oldISIC = null;
-      var requestId = FormManager.getActualValue('reqId');
-      qParams = {
-        REQ_ID : requestId,
-      };
-      var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
-      var oldISIC = result.ret1;
-      if (oldISIC == '9500' || oldISIC == '0000') {
-        FormManager.readOnly('isicCd');
-      } else {
-        FormManager.enable('isicCd');
-      }
-    } else {
+  if ('U' == reqType) {
+    var oldISIC = null;
+    var requestId = FormManager.getActualValue('reqId');
+    qParams = {
+      REQ_ID : requestId,
+    };
+    var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+    var oldISIC = result.ret1;
+    if (oldISIC == '9500' || oldISIC == '0000') {
       FormManager.enable('isicCd');
     }
   } else if ('C' == reqType) {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
-    if (custSubGrp.includes('PC')) {
+    if (custSubGrp.includes('PC') || custSubGrp.includes('PRI')) {
       if ('9500' == isic) {
         FormManager.readOnly('isicCd');
       }
-    } else if (custSubGrp.includes('INT')) {
+    } else if (custSubGrp.includes('IN')) {
       if ('0000' == isic) {
         FormManager.readOnly('isicCd');
       }
@@ -3545,28 +3506,21 @@ function validateIsicMEValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var isic = FormManager.getActualValue('isicCd');
-        var oldISIC = null;
-        var requestId = FormManager.getActualValue('reqId');
-        qParams = {
-          REQ_ID : requestId,
-        };
-        var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
-        var oldISIC = result.ret1;
 
         if ('U' == reqType) {
-          if ('9500' == isic || '0000' == isic) {
-            if (oldISIC != '9500' && oldISIC != '0000') {
-              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-            } else {
-              return new ValidationResult(null, true);
-            }
+          var oldISIC = null;
+          var requestId = FormManager.getActualValue('reqId');
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+          var oldISIC = result.ret1;
+          if (('9500' == isic || '0000' == isic) && isic != oldISIC) {
+            return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
+          } else if (oldISIC == '0000' || oldISIC == '9500') {
+            return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
           } else {
-            if (oldISIC == '9500' || oldISIC == '0000') {
-              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-            } else {
-              // FormManager.enable('isicCd');
-              return new ValidationResult(null, true);
-            }
+            return new ValidationResult(null, true);
           }
         }
         if (('C' == reqType && ('9500' == isic || '0000' == isic))) {
@@ -3574,6 +3528,8 @@ function validateIsicMEValidator() {
           if (custSubGrp.includes('BP') || custSubGrp.includes('BUS') || custSubGrp.includes('CO') || custSubGrp.includes('TH') || custSubGrp.includes('TP')) {
             FormManager.enable('isicCd');
             return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
+          } else {
+            return new ValidationResult(null, true);
           }
         } else {
           return new ValidationResult(null, true);
@@ -4002,9 +3958,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
   GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
 
-  GEOHandler.addAfterConfig(cmrNoEnableForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(cmrNoEnableForCEE, GEOHandler.CEE);
-  GEOHandler.registerValidator(addCmrNoValidatorForCEE, GEOHandler.CEE);
+  GEOHandler.addAfterConfig(cmrNoEnableForME, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(cmrNoEnableForME, GEOHandler.ME);
+  GEOHandler.registerValidator(addCmrNoValidatorForME, GEOHandler.ME);
   GEOHandler.registerValidator(addEmbargoCdValidatorForCEE, GEOHandler.CEE);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
