@@ -3873,8 +3873,10 @@ function afterConfigTemplateForHungary() {
   }
 }
 function validatorsDIGIT() {
-  FormManager.addValidator('EngineeringBo', Validators.DIGIT, [ 'EngineeringBo' ]);
+  // FormManager.addValidator('EngineeringBo', Validators.DIGIT, [
+  // 'EngineeringBo' ]);
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
+  FormManager.addValidator('enterprise', Validators.DIGIT, [ 'Company Number' ]);
 }
 
 // CMR-4606
@@ -4059,7 +4061,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA_EXCLUDE_CEE);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.CEE);
+  GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.ME);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
   GEOHandler.addAfterConfig(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(customVATMandatoryForAT, [ SysLoc.AUSTRIA ]);
