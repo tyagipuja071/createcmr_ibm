@@ -143,6 +143,15 @@ public class SouthAfricaTransformer extends MCOTransformer {
     if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
+
+    String poBox = currAddr.getPoBox();
+    if (!StringUtils.isEmpty(poBox)) {
+      if (!poBox.startsWith("PO BOX ")) {
+        legacyAddr.setPoBox("PO BOX " + currAddr.getPoBox());
+      } else {
+        legacyAddr.setPoBox(poBox);
+      }
+    }
   }
 
   @Override
@@ -164,9 +173,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
         legacyCust.setAuthRemarketerInd("0");
       }
 
-      legacyCust.setCeDivision(dummyHandler.messageHash.get("CEdivision"));
-      legacyCust.setCurrencyCd(dummyHandler.messageHash.get("CurrencyCode"));
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+      legacyCust.setCeDivision("2");
+      legacyCust.setCurrencyCd("SA");
 
     }
 
@@ -198,7 +206,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setAbbrevNm(data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
-    cmrObjects.getData().setUser("");
+    legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+    // cmrObjects.getData().setUser("");
   }
 
   @Override
@@ -214,7 +223,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCustExt.setTeleCovRep("3100");
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      legacyCustExt.setTeleCovRep(data.getCollBoId());
+      legacyCustExt.setTeleCovRep(!StringUtils.isEmpty(data.getCollBoId()) ? data.getCollBoId() : "");
     }
   }
 
