@@ -1042,9 +1042,9 @@ public class METransformer extends EMEATransformer {
     }
 
     String dataEmbargoCd = data.getOrdBlk();
-    if (dataEmbargoCd != null && !StringUtils.isBlank(dataEmbargoCd) && "S".equals(dataEmbargoCd)) {
+    if (dataEmbargoCd != null && !StringUtils.isBlank(dataEmbargoCd)) {
       legacyCust.setEmbargoCd(dataEmbargoCd);
-    } else if (!"S".equals(dataEmbargoCd)) {
+    } else {
       legacyCust.setEmbargoCd("");
     }
 
@@ -1202,11 +1202,7 @@ public class METransformer extends EMEATransformer {
       if ("@".equals(muData.getMiscBillCd())) {
         cust.setEmbargoCd("");
       } else {
-        if ("S".equals(muData.getMiscBillCd())) {
-          cust.setEmbargoCd(muData.getMiscBillCd());
-        } else {
-          cust.setEmbargoCd("");
-        }
+        cust.setEmbargoCd(muData.getMiscBillCd());
       }
     }
     // we use RestrictTo to store CoF in muData
