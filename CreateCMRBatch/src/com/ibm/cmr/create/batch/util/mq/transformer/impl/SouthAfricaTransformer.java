@@ -184,6 +184,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setAbbrevNm(data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
+    legacyCust.setCustType(data.getCrosSubTyp());
     cmrObjects.getData().setUser("");
   }
 

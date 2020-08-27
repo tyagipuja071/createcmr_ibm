@@ -319,9 +319,9 @@ public class MCOSaHandler extends MCOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
-    data.setCreditCd(mainRecord.getCreditCd());
     if (legacyObjects != null && legacyObjects.getCustomer() != null) {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+      data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
     }
   }
 
