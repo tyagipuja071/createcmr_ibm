@@ -500,6 +500,7 @@ public class TransConnService extends BaseBatchService {
           admin.setLockBy(null);
           admin.setLockByNm(null);
           admin.setReqStatus("COM");
+          admin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
           updateEntity(admin, entityManager);
 
           ReservedCMRNos reservedCMRNo = new ReservedCMRNos();
@@ -636,6 +637,7 @@ public class TransConnService extends BaseBatchService {
           }
 
           newAdmin.setReqStatus("PCP");
+          newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());          
 
           RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(),
               "Child Update Request " + reqId + " created.");

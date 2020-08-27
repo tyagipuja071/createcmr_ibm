@@ -67,7 +67,7 @@ public class METransformer extends EMEATransformer {
 
   private static final Logger LOG = Logger.getLogger(EMEATransformer.class);
 
-  public static String DEFAULT_LANDED_COUNTRY = "SK";
+  public static String DEFAULT_LANDED_COUNTRY = "AE";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -150,13 +150,13 @@ public class METransformer extends EMEATransformer {
 
     String custType = cmrData.getCustSubGrp();
     if (!StringUtils.isBlank(custType)) {
-      if ("BUSPR".equals(custType) || "XBP".equals(custType)) {
+      if (custType.contains("BUS") || custType.contains("BP")) {
         messageHash.put("MarketingResponseCode", "5");
         messageHash.put("ARemark", "YES");
         messageHash.put("CustomerType", "BP");
       } else if ("GOVRN".equals(custType)) {
         messageHash.put("CustomerType", "G");
-      } else if ("INTER".equals(custType) || "XINT".equals(custType)) {
+      } else if (custType.contains("INT")) {
         messageHash.put("CustomerType", "91");
       } else {
         messageHash.put("CustomerType", "");
@@ -434,77 +434,53 @@ public class METransformer extends EMEATransformer {
   }
 
   public void setDefaultLandedCountry(Data data) {
-    if ("693".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "SK";
+    if ("620".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "BH";
     }
-    if ("695".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "KG";
+    if ("642".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "MA";
     }
-    if ("707".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "CS";
+    if ("677".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "AE";
     }
-    if ("358".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AZ";
+    if ("680".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "AE";
     }
-    if ("359".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "TM";
+    if ("752".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "IQ";
     }
-    if ("363".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "TJ";
+    if ("762".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "JO";
     }
-    if ("603".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AL";
+    if ("767".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "KW";
     }
-    if ("607".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "AM";
+    if ("768".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "LB";
     }
-    if ("626".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "BY";
+    if ("772".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "LY";
     }
-    if ("644".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "BG";
+    if ("805".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "OM";
     }
-    if ("651".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "GE";
+    if ("808".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "PK";
     }
-    if ("694".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "KZ";
+    if ("823".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "QA";
     }
-    if ("699".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "BA";
+    if ("832".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "SA";
     }
-    if ("705".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "MK";
+    if ("849".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "YE";
     }
-    if ("708".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "SI";
+    if ("850".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "SY";
     }
-    if ("740".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "HU";
-    }
-    if ("741".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "UZ";
-    }
-    if ("787".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "MD";
-    }
-    if ("820".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "PL";
-    }
-    if ("821".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "RU";
-    }
-    if ("826".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "RO";
-    }
-    if ("889".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "UA";
-    }
-    if ("704".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "HR";
-    }
-    if ("668".equals(data.getCmrIssuingCntry())) {
-      DEFAULT_LANDED_COUNTRY = "CZ";
+    if ("865".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "EG";
     }
   }
 
@@ -571,7 +547,7 @@ public class METransformer extends EMEATransformer {
   @Override
   public boolean isCrossBorderForMass(MassUpdtAddr addr, CmrtAddr legacyAddr) {
     boolean isCrossBorder = false;
-    if (!StringUtils.isEmpty(addr.getLandCntry()) && !SpainTransformer.DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry())) {
+    if (!StringUtils.isEmpty(addr.getLandCntry()) && !DEFAULT_LANDED_COUNTRY.equals(addr.getLandCntry())) {
       isCrossBorder = true;
     } else if (!StringUtils.isEmpty(legacyAddr.getAddrLine5()) && legacyAddr.getAddrLine5().length() == 2) {
       isCrossBorder = true;
@@ -626,37 +602,50 @@ public class METransformer extends EMEATransformer {
 
     // Dept + Postal code + City
     line5 = addrData.getPostCd() + " " + addrData.getCity1();
-    if (SystemLocation.SERBIA.equals(cmrData.getCmrIssuingCntry())) {
-      String cntryUse = cmrData.getCountryUse();
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
-        } else {
-          line6 = "";
-        }
-      } else if (!StringUtils.isBlank(cntryUse)) {
-        if ("707CS".equals(cntryUse)) {
-          line6 = "Kosovo";
-        } else if ("707ME".equals(cntryUse)) {
-          line6 = "Montenegro";
-        } else {
-          line6 = "Serbia";
-        }
 
+    if (!StringUtils.isBlank(addrData.getPoBox())) {
+      legacyAddr.setPoBox(addrData.getPoBox());
+    }
+
+    if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
+      String cntryUse = cmrData.getCountryUse();
+      if (!StringUtils.isBlank(cntryUse)) {
+        if ("762PS".equals(cntryUse)) {
+          line6 = "Palestine";
+        } else {
+          if (!StringUtils.isBlank(addrData.getLandCntry())) {
+            line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+          } else {
+            line6 = "";
+          }
+        }
+      }
+    } else if (SystemLocation.PAKISTAN.equals(cmrData.getCmrIssuingCntry())) {
+      String cntryUse = cmrData.getCountryUse();
+      if (!StringUtils.isBlank(cntryUse)) {
+        if ("808AF".equals(cntryUse)) {
+          line6 = "Afganistan";
+        } else {
+          if (!StringUtils.isBlank(addrData.getLandCntry())) {
+            line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+          } else {
+            line6 = "";
+          }
+        }
       }
     } else {
-      if ("ZP02".equals(addrData.getId().getAddrType())) {
-        if (!StringUtils.isBlank(addrData.getBldg())) {
-          line6 = addrData.getBldg();
-        } else {
-          line6 = "";
-        }
-      } else {
+      // if ("ZP02".equals(addrData.getId().getAddrType())) {
+      // if (!StringUtils.isBlank(addrData.getBldg())) {
+      // line6 = addrData.getBldg();
+      // } else {
+      // line6 = "";
+      // }
+      // } else {
         if (!StringUtils.isBlank(addrData.getLandCntry())) {
           line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
         } else {
           line6 = "";
-        }
+        // }
       }
     }
     // if (!StringUtils.isBlank(addrData.getLandCntry())) {
@@ -704,27 +693,17 @@ public class METransformer extends EMEATransformer {
 
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
-    if ("INTER".equals(custSubGrp) || "XINT".equals(custSubGrp) || "CSINT".equals(custSubGrp) || "RSXIN".equals(custSubGrp)
-        || "MEINT".equals(custSubGrp) || "RSINT".equals(custSubGrp)) {
-      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
-        generateCMRNoObj.setMin(985001);
-        generateCMRNoObj.setMax(985999);
-      } else {
-        generateCMRNoObj.setMin(993110);
-        generateCMRNoObj.setMax(998899);
-      }
-      LOG.debug("that is CEE INTER CMR");
-    } else if ("XBP".equals(custSubGrp) || "BUSPR".equals(custSubGrp) || "CSBP".equals(custSubGrp) || "MEBP".equals(custSubGrp)
-        || "RSXBP".equals(custSubGrp) || "RSBP".equals(custSubGrp)) {
+    if (custSubGrp.contains("IN")) {
+        generateCMRNoObj.setMin(990300);
+        generateCMRNoObj.setMax(999990);
+      LOG.debug("that is ME INTER CMR");
+    } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
       generateCMRNoObj.setMin(1000);
       generateCMRNoObj.setMax(9999);
-    } else if ("XCE".equals(custSubGrp)) {
-      generateCMRNoObj.setMin(510000);
-      generateCMRNoObj.setMax(799999);
+      LOG.debug("that is ME BP CMR");
     } else {
-      generateCMRNoObj.setMin(369320);
-      generateCMRNoObj.setMax(979999);
-      LOG.debug("that is CEE No INTER CMR");
+      generateCMRNoObj.setMin(15000);
+      generateCMRNoObj.setMax(988880);
     }
   }
 
@@ -792,10 +771,6 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyAddr.setZipCode(addr.getPostCd());
         addrLine5.append(addr.getPostCd() + " ");
-      }
-
-      if (CmrConstants.ADDR_TYPE.ZS01.toString().equals(addr.getId().getAddrType()) && isCrossBorderForMass(addr, legacyAddr)) {
-        handlePostCdSpecialLogic(cust, data, addr.getPostCd(), entityManager);
       }
     }
 
@@ -927,8 +902,8 @@ public class METransformer extends EMEATransformer {
     Data data = cmrObjects.getData();
     String landedCntry = "";
 
-    formatDataLines(dummyHandler);
     setDefaultLandedCountry(data);
+    formatDataLines(dummyHandler);
 
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
 
@@ -949,16 +924,15 @@ public class METransformer extends EMEATransformer {
           break;
         }
       }
-      List<String> scenario_list = Arrays.asList("XTP", "XCE", "THDPT", "COMME", "XCOM", "PRICU", "XPC", "CSCOM", "CSPC", "CSTP", "MECOM", "MEPC",
-          "METP", "RSXCO", "RSXPC", "RSXTP", "RSCOM", "RSPC", "RSTP");
-      if (scenario_list.contains(data.getCustSubGrp())) {// commerical
+
+      if (data.getCustSubGrp().contains("CO") || data.getCustSubGrp().contains("TH") || data.getCustSubGrp().contains("TP")
+          || data.getCustSubGrp().contains("PRI") || data.getCustSubGrp().contains("PC")) {// commerical
         if (!StringUtils.isBlank(data.getEnterprise())) {
           legacyCust.setEnterpriseNo(data.getEnterprise());
         } else {
           legacyCust.setEnterpriseNo("");
         }
-      } else if ("INTER".equals(data.getCustSubGrp()) || "XINT".equals(data.getCustSubGrp()) || "CSINT".equals(data.getCustSubGrp())
-          || "MEINT".equals(data.getCustSubGrp()) || "RSXIN".equals(data.getCustSubGrp()) || "RSINT".equals(data.getCustSubGrp())) {// internal
+      } else if (data.getCustSubGrp().contains("IN")) {// internal
         legacyCust.setEnterpriseNo("");
       } else {// bp
         legacyCust.setEnterpriseNo("");
@@ -974,23 +948,11 @@ public class METransformer extends EMEATransformer {
         legacyCust.setBankAcctNo("");
       }
 
-      if ("693".equals(data.getCmrIssuingCntry())) {
-
-        if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
-            legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
-          } else {
-            legacyCust.setBankBranchNo(data.getCompany());
-          }
-        } else {
-          legacyCust.setBankBranchNo("");
-        }
+      if ("762PS".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("762");
+      } else if ("808AF".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("614");
       }
-
-      if ("707ME".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("713");
-      }
-
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -1002,8 +964,10 @@ public class METransformer extends EMEATransformer {
         }
       }
 
-      if ("707ME".equals(data.getCountryUse())) {
-        legacyCust.setRealCtyCd("713");
+      if ("762PS".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("762");
+      } else if ("808AF".equals(data.getCountryUse())) {
+        legacyCust.setRealCtyCd("614");
       }
 
       if (!StringUtils.isBlank(data.getEnterprise())) {
@@ -1132,11 +1096,12 @@ public class METransformer extends EMEATransformer {
 
     String cebo = data.getEngineeringBo();
     if (!StringUtils.isBlank(cebo)) {
-      if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) || SystemLocation.KYRGYZSTAN.equals(data.getCmrIssuingCntry())) {
-        if (cebo.length() < 7) {
-          cebo = StringUtils.rightPad(cebo, 7, '0');
-        }
-      }
+      // if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) ||
+      // SystemLocation.KYRGYZSTAN.equals(data.getCmrIssuingCntry())) {
+      // if (cebo.length() < 7) {
+      // cebo = StringUtils.rightPad(cebo, 7, '0');
+      // }
+      // }
       legacyCust.setCeBo(cebo);
     } else {
       legacyCust.setCeBo("");
@@ -1223,9 +1188,7 @@ public class METransformer extends EMEATransformer {
 
     if (StringUtils.isEmpty(data.getCustSubGrp())) {
       legacyCust.setMrcCd("3");
-    } else if (!StringUtils.isEmpty(data.getCustSubGrp()) && ("BUSPR".equals(data.getCustSubGrp()) || "XBP".equals(data.getCustSubGrp())
-        || "CSBP".equals(data.getCustSubGrp()) || "MEBP".equals(data.getCustSubGrp()) || "RSXBP".equals(data.getCustSubGrp())
-        || "BP".equals(data.getCustSubGrp()) || "RSBP".equals(data.getCustSubGrp()))) {
+    } else if (!StringUtils.isEmpty(data.getCustSubGrp()) && (data.getCustSubGrp().contains("BP") || data.getCustSubGrp().contains("BUS"))) {
       legacyCust.setMrcCd("5");
     } else {
       legacyCust.setMrcCd("3");
@@ -1318,9 +1281,9 @@ public class METransformer extends EMEATransformer {
     String cebo = "";
     if (!StringUtils.isBlank(muData.getCustNm2())) {
       cebo = muData.getCustNm2();
-      if (cebo.length() < 7) {
-        cebo = StringUtils.rightPad(cebo, 7, '0');
-      }
+      // if (cebo.length() < 7) {
+      // cebo = StringUtils.rightPad(cebo, 7, '0');
+      // }
       if ("@".equals(muData.getCustNm2())) {
         cust.setCeBo("");
       } else {
@@ -1481,7 +1444,7 @@ public class METransformer extends EMEATransformer {
     messageHash.put("MarketingResponseCode", "3");
 
     String custType = cmrData.getCustSubGrp();
-    if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
+    if (custType.contains("BP") || custType.contains("BUS")) {
       messageHash.put("MarketingResponseCode", "5");
       messageHash.put("ARemark", "YES");
     } else {
@@ -1654,12 +1617,14 @@ public class METransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
+    return true;
+    // if ("SK".equals(DEFAULT_LANDED_COUNTRY) ||
+    // "BG".equals(DEFAULT_LANDED_COUNTRY) ||
+    // "RU".equals(DEFAULT_LANDED_COUNTRY)) {
     // return true;
-    if ("SK".equals(DEFAULT_LANDED_COUNTRY) || "BG".equals(DEFAULT_LANDED_COUNTRY) || "RU".equals(DEFAULT_LANDED_COUNTRY)) {
-      return true;
-    } else {
-      return false;
-    }
+    // } else {
+    // return false;
+    // }
   }
 
   @Override
@@ -1667,23 +1632,12 @@ public class METransformer extends EMEATransformer {
       CMRRequestContainer cmrObjects) {
 
     Data data = cmrObjects.getData();
-    if (SystemLocation.SLOVAKIA.equals(data.getCmrIssuingCntry())) {
-      if (!StringUtils.isBlank(data.getTaxCd1())) {
-        legacyCustExt.setBankAcctNo(data.getTaxCd1());
-      } else {
-        legacyCustExt.setBankAcctNo("");
-      }
+    Admin admin = cmrObjects.getAdmin();
+
+    if (!StringUtils.isBlank(data.getBpSalesRepNo())) {
+      legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
 
-    Admin admin = cmrObjects.getAdmin();
-    if ("C".equals(admin.getReqType()) && "644".equals(data.getCmrIssuingCntry()) && "LOCAL".equals(data.getCustGrp())
-        && !"Y".equals(data.getVatExempt())) {
-      String vat = data.getVat();
-      if (vat != null && vat.startsWith("BG")) {
-        String itax = vat.replaceAll("BG", "");
-        legacyCustExt.setiTaxCode(itax);
-      }
-    } else {
       if (!StringUtils.isBlank(data.getCompany())) {
         if (data.getCompany().length() > 9) {
           legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
@@ -1693,7 +1647,6 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCustExt.setiTaxCode("");
       }
-    }
   }
 
   @Override

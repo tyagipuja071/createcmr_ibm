@@ -14,19 +14,22 @@ function afterConfigForBELUX() {
   FormManager.setValue('capInd', true);
   FormManager.resetValidations('enterprise');
 
-  if ((custSubGrp.substring(2, 5) == 'LUINT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp.substring(2, 5) == 'BUS')) {
+  // if ((custSubGrp.substring(2, 5) == 'LUINT' || custSubGrp == 'CBBUS' ||
+  // custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO'
+  // || custSubGrp.substring(2, 5) == 'BUS')) {
+  if ((custSubGrp.substring(2, 5) == 'LUINT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI')) {
     FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code' ], 'MAIN_IBM_TAB');
 
   } else {
     FormManager.removeValidator('inacCd', Validators.REQUIRED);
   }
 
-  if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'LUCOM')){
+  if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO' || custSubGrp == 'BECOM' || custSubGrp == 'LUCOM')) {
     FormManager.addValidator('isicCd', Validators.REQUIRED, [ 'ISIC' ], 'MAIN_CUST_TAB');
   } else {
     FormManager.removeValidator('isicCd', Validators.REQUIRED);
   }
-  
+
   if ((custSubGrp.substring(2, 5) == 'INT' || custSubGrp == 'CBBUS' || custSubGrp.substring(2, 5) == 'PRI' || custSubGrp.substring(2, 5) == 'ISO')) {
     // FormManager.addValidator('inacCd', Validators.REQUIRED, [ 'INAC/NAC Code'
     // ], 'MAIN_IBM_TAB');
@@ -45,6 +48,14 @@ function afterConfigForBELUX() {
     FormManager.removeValidator('economicCd', Validators.REQUIRED);
     FormManager.removeValidator('searchTerm', Validators.REQUIRED);
   }
+
+  // 2020-08-24 George make INAC optional for those cases (Internal, Internal SO
+  // and BP scenario)
+  var custSubGrpLst3 = custSubGrp.substring(2, 5);
+  if (custSubGrpLst3 == 'INT' || custSubGrpLst3 == 'BUS' || custSubGrpLst3 == 'ISO') {
+    FormManager.removeValidator('inacCd', Validators.REQUIRED);
+  }
+  FormManager.setValue('inacCd', '');
 
   // Creating Manadatory to Account Team Number
 
@@ -66,15 +77,24 @@ function afterConfigForBELUX() {
   if (role == 'Processor') {
     FormManager.enable('abbrevNm');
     FormManager.enable('abbrevLocn');
+
+    // 2020-08-24 George CMR-4992 field should be blank/no value can stay locked
+    // for requester and be editable for processor
+    FormManager.enable('inacCd');
     FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
 
     // if (reqType != 'U')
     // FormManager.addValidator('searchTerm', Validators.REQUIRED,
     // [ 'Account Team Number' ], 'MAIN_IBM_TAB');
   } else {
-    if (role == 'Requester' && reqType == 'C'){
-    FormManager.readOnly('abbrevNm');
-    FormManager.readOnly('abbrevLocn');
+    // 2020-08-24 George CMR-4992 field should be blank/no value can stay locked
+    // for requester and be editable for processor
+    if (custSubGrpLst3 == 'INT' || custSubGrpLst3 == 'BUS' || custSubGrpLst3 == 'ISO') {
+      FormManager.readOnly('inacCd');
+    }
+    if (role == 'Requester' && reqType == 'C') {
+      FormManager.readOnly('abbrevNm');
+      FormManager.readOnly('abbrevLocn');
     }
     // FormManager.removeValidator('searchTerm', Validators.REQUIRED);
     FormManager.removeValidator('salesBusOffCd', Validators.REQUIRED);
@@ -314,15 +334,15 @@ function setVatValidatorBELUX() {
  * Set Client Tier Value
  */
 function setClientTierValues(isuCd) {
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  
+
   isuCd = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTiers = [];
@@ -334,7 +354,7 @@ function setClientTierValues(isuCd) {
     };
     var results = cmr.query('GET.CTCLIST.BYISU', qParams);
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         clientTiers.push(results[i].ret1);
       }
       if (clientTiers != null) {
@@ -351,11 +371,11 @@ function setClientTierValues(isuCd) {
  * Set Account Team Number Values based on isuCTC
  */
 function setAccountTeamNumberValues(clientTier) {
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -391,7 +411,7 @@ function setAccountTeamNumberValues(clientTier) {
     }
 
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         accountTeamNumber.push(results[i].ret1);
       }
       FormManager.limitDropdownValues(FormManager.getField('searchTerm'), accountTeamNumber);
@@ -403,8 +423,8 @@ function setAccountTeamNumberValues(clientTier) {
     var custGrp = FormManager.getActualValue('custGrp');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
     var role = FormManager.getActualValue('userRole').toUpperCase();
-    
-    if (role == 'PROCESSOR'){
+
+    if (role == 'PROCESSOR') {
       FormManager.enable('searchTerm');
     } else if ((geoCd == 'LU') && (custSubGrp == 'CBBUS')) {
       FormManager.setValue('searchTerm', 'LP0000');
@@ -413,10 +433,9 @@ function setAccountTeamNumberValues(clientTier) {
       FormManager.readOnly('searchTerm');
     } else if ((custSubGrp == 'BEBUS') || (custSubGrp == 'LUBUS')) {
       FormManager.readOnly('searchTerm');
-    } else if ((custSubGrp == 'LUBUS')){
+    } else if ((custSubGrp == 'LUBUS')) {
       FormManager.readOnly('searchTerm');
-    } else if ((custSubGrp == 'BEINT') || (custSubGrp == 'BEISO') || (custSubGrp == 'BEPRI') || 
-        (custSubGrp == 'LUINT') || (custSubGrp == 'LUPRI') || (custSubGrp == 'LUISO')) {
+    } else if ((custSubGrp == 'BEINT') || (custSubGrp == 'BEISO') || (custSubGrp == 'BEPRI') || (custSubGrp == 'LUINT') || (custSubGrp == 'LUPRI') || (custSubGrp == 'LUISO')) {
       FormManager.readOnly('searchTerm');
     } else {
       FormManager.enable('searchTerm');
@@ -432,7 +451,7 @@ function setINACValues(searchTerm) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -449,7 +468,7 @@ function setINACValues(searchTerm) {
     };
     var results = cmr.query('GET.INACLIST.BYST', qParams);
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         inacCode.push(results[i].ret1);
       }
       if (inacCode != null) {
@@ -457,9 +476,9 @@ function setINACValues(searchTerm) {
         if (inacCode.length == 1) {
           FormManager.setValue('inacCd', inacCode[0]);
         }
-       /* if (inacCode.length == 0) {
-          FormManager.setValue('inacCd', '');
-        }*/
+        /*
+         * if (inacCode.length == 0) { FormManager.setValue('inacCd', ''); }
+         */
       }
     }
   }
@@ -469,11 +488,11 @@ function setINACValues(searchTerm) {
  * NL - EconomicCode based on AccountTeamNumber Values
  */
 function setEconomicCodeValues(searchTerm) {
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -494,7 +513,7 @@ function setEconomicCodeValues(searchTerm) {
     };
     var results = cmr.query('GET.ECONOMICLIST.BYST', qParams);
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         economicCode.push(results[i].ret1);
       }
       if (economicCode != null) {
@@ -529,7 +548,7 @@ function setCollectionCodeValues(isicCd) {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  
+
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
   var isicCd = FormManager.getActualValue('isicCd');
@@ -544,7 +563,7 @@ function setCollectionCodeValues(isicCd) {
     };
     var results = cmr.query('GET.CCLIST.BYISIC', qParams);
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         collectionCode.push(results[i].ret1);
       }
       if (collectionCode != null) {
@@ -691,7 +710,7 @@ function addBELUXAddressTypeValidator() {
           var shippingCnt = 0;
           var eplCnt = 0;
 
-          for ( var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
               record = _allAddressData[i];
@@ -749,32 +768,32 @@ function addAddressFieldValidators() {
         if (FormManager.getActualValue('addrTxt') != '') {
           addrFldCnt++;
         }
-        
+
         if (FormManager.getActualValue('addrTxt2') != '') {
           addrFldCnt++;
           computedLength += addrTxt2;
         }
-        
-        if(addrFldCnt ==1){
-          if( poBox != null && poBox != '' && poBox.length > 23){
-              return new ValidationResult(null, false, 'PostBOX should not exceed 23 characters.');
-          }else if( addrTxt != null && addrTxt != '' && addrTxt.length > 30){
+
+        if (addrFldCnt == 1) {
+          if (poBox != null && poBox != '' && poBox.length > 23) {
+            return new ValidationResult(null, false, 'PostBOX should not exceed 23 characters.');
+          } else if (addrTxt != null && addrTxt != '' && addrTxt.length > 30) {
             return new ValidationResult(null, false, 'Street should not exceed 30 characters.');
-          }else if( addrTxt2 != null && addrTxt2 != '' && addrTxt2.length > 30){
+          } else if (addrTxt2 != null && addrTxt2 != '' && addrTxt2.length > 30) {
             return new ValidationResult(null, false, 'Street no. should not exceed 30 characters.');
           }
-        }else if(addrFldCnt ==2){
-          if( poBox != null && poBox != ''){
+        } else if (addrFldCnt == 2) {
+          if (poBox != null && poBox != '') {
             if (addrTxt != null && addrTxt != '' && computedLength.length > 22) {
               return new ValidationResult(null, false, 'Total computed length of Street and PostBOX should not exceed 22 characters.');
-            }else if(addrTxt2 != null && addrTxt2 != '' && computedLength.length > 22){
+            } else if (addrTxt2 != null && addrTxt2 != '' && computedLength.length > 22) {
               return new ValidationResult(null, false, 'Total computed length of Street no. and PostBOX should not exceed 22 characters.');
             }
-          }else{
-            if(computedLength.length > 29)
+          } else {
+            if (computedLength.length > 29)
               return new ValidationResult(null, false, 'Total computed length of Street and Street no. should not exceed 29 characters.');
           }
-        }else if(addrFldCnt ==3){
+        } else if (addrFldCnt == 3) {
           if (computedLength.length > 21) {
             return new ValidationResult(null, false, 'Total computed length of Street, Street no. and PostBOX should not exceed 21 characters.');
           }
@@ -957,7 +976,7 @@ function setAbbrvNmLoc() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var custGrp = FormManager.getActualValue('custGrp');
 
-  if (custSubGrp == 'CBCOM' || custGrp == 'LOCAL' || custGrp.substring(2,5) == 'LOC') {
+  if (custSubGrp == 'CBCOM' || custGrp == 'LOCAL' || custGrp.substring(2, 5) == 'LOC') {
     city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
     abbrevLocn = city.ret1;
   } else {
@@ -1131,7 +1150,7 @@ dojo.addOnLoad(function() {
   // null, true);
   GEOHandler.registerValidator(checkForBnkruptcy, GEOHandler.BELUX, null, true);
   // GEOHandler.addAfterConfig(addHandlerForReqRsn, GEOHandler.BELUX);
-  GEOHandler.addAfterTemplateLoad(setINACfrLux, GEOHandler.BELUX);
+  // GEOHandler.addAfterTemplateLoad(setINACfrLux, GEOHandler.BELUX);
   GEOHandler.addAfterConfig(setPreferredLanguage, GEOHandler.BELUX);
   GEOHandler.addAfterTemplateLoad(setPreferredLanguage, GEOHandler.BELUX);
   // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.BELUX);

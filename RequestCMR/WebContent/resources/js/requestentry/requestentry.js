@@ -483,7 +483,6 @@ function doSaveChangeComments() {
 	          if (cmrExist != undefined) {
 	            var qParams1 = {
 	              ZZKV_CUSNO : rejInfo1,
-	              KTOKD : ktokd,
 	              MANDT : mandt,
 	              KATR6 : isscntry
 	            };
