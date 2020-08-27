@@ -1584,6 +1584,8 @@ function lockIBMTabForSWISS() {
     FormManager.readOnly('soeReqNo');
     if (custSubType != 'CHINT' && custSubType != 'LIINT') {
       FormManager.readOnly('ibmDeptCostCenter');
+    } else {
+      FormManager.enable('ibmDeptCostCenter');
     }
   }
 }

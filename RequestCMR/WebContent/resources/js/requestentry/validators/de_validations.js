@@ -176,10 +176,8 @@ function setISUValues(value) {
     } else {
       FormManager.resetDropdownValues(FormManager.getField('isuCd'));
     }
-  } else if (_custSubGrp == 'IBMEM') {
+  } else if (_custSubGrp == 'IBMEM' || _custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
     FormManager.readOnly('isuCd');
-  } else if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
-    FormManager.enable('isuCd');
   } else if (_custSubGrp == 'CROSS' && _pagemodel.userRole.toUpperCase() != "PROCESSOR") {
     FormManager.readOnly('isuCd');
   }
