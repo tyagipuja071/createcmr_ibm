@@ -13,6 +13,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
@@ -50,10 +51,36 @@ public class CEWATransformer extends MCOTransformer {
 
     }
 
-    legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-    legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
-    legacyCust.setLeadingAccNo("");
-    legacyCust.setMrcCd("");
+    legacyCust.setAccAdminBo("");
+    legacyCust.setBankAcctNo("");
+    legacyCust.setBankBranchNo("");
+    legacyCust.setBankNo("");
+    legacyCust.setCeDivision("3");
+    legacyCust.setCurrencyCd("");
+    legacyCust.setCeBo("");
+    legacyCust.setLangCd("1");
+    legacyCust.setLocNo("");
+    legacyCust.setMailingCond("");
+    legacyCust.setAuthRemarketerInd("0");
+
+    if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
+      legacyCust.setMrcCd("5");
+      legacyCust.setAuthRemarketerInd("1");
+    } else {
+      legacyCust.setMrcCd("3");
+    }
+    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+    } else {
+      legacyCust.setSalesGroupRep("");
+    }
+
+    legacyCust.setSalesRepNo("DUMMY1");
+    legacyCust.setSalesGroupRep("DUMMY1");
+
+    String formatSBO = data.getSalesBusOffCd() + "000";
+    legacyCust.setIbo(formatSBO);
+    legacyCust.setSbo(formatSBO);
 
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
@@ -61,6 +88,21 @@ public class CEWATransformer extends MCOTransformer {
       }
     }
 
+  }
+
+  @Override
+  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+      CMRRequestContainer cmrObjects) {
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if ("851".equals(cmrIssuingCntry)) {
+        legacyCustExt.setiTaxCode(addr.getTaxOffice());
+      }
+    }
+  }
+
+  @Override
+  public boolean hasCmrtCustExt() {
+    return true;
   }
 
   @Override
