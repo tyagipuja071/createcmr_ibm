@@ -105,7 +105,7 @@ function lockRequireFieldsZA() {
   var role = FormManager.getActualValue('userRole');
 
   // fields locked for Requester
-  if (reqType == 'C' && role == GEOHandler.ROLE_REQUESTER) {
+  if (reqType == 'U' && role == GEOHandler.ROLE_REQUESTER) {
     FormManager.readOnly('specialTaxCd');
   }
 }
@@ -210,6 +210,8 @@ function addAddressFieldValidators() {
         var att = FormManager.getActualValue('custNm4');
         if (att != null && !hasAttPersonPrefix(att) && att.length > 25) {
           return new ValidationResult(null, false, 'Total computed length of Att. Person should not exceed 25 characters.');
+        }else if (att != null && hasAttPersonPrefix(att) && att.length > 30) {
+          return new ValidationResult(null, false, 'Total computed length of Att. Person should not exceed 30 characters.');
         }
         return new ValidationResult(null, true);
       }
@@ -688,11 +690,11 @@ function addStreetContPoBoxLengthValidator() {
         if (poBox != '') {
           combinedVal += poBox;
           if (combinedVal.length > 21) {
-            return new ValidationResult(null, false, 'Total computed length of Street Address and PO Box should be less than 21 characters.');
+            return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should be less than 21 characters.');
           }
         } else {
           if (combinedVal.length > 30) {
-            return new ValidationResult(null, false, 'Street Address should not exceed 30 characters.');
+            return new ValidationResult(null, false, 'Street Con\'t should not exceed 30 characters.');
           }
         }
         return new ValidationResult(null, true);
