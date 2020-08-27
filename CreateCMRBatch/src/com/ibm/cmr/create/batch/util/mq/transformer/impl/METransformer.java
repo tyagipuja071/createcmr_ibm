@@ -997,43 +997,9 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCust.setBankAcctNo("");
       }
-      if ("693".equals(data.getCmrIssuingCntry())) {
-
-        if (!StringUtils.isBlank(data.getCompany())) {
-          if (data.getCompany().length() > 9) {
-            legacyCust.setBankBranchNo(data.getCompany().substring(0, 8));
-          } else {
-            legacyCust.setBankBranchNo(data.getCompany());
-          }
-        } else {
-          legacyCust.setBankBranchNo("");
-        }
-      }
-      //
-      // if (!StringUtils.isBlank(data.getCrosSubTyp())) {
-      // legacyCust.setCustType(data.getCrosSubTyp());
-      // } else {
-      // legacyCust.setCustType("");
-      // }
-
-      // CMR-2279:ISR set based on SBO
-      // if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      //
-      // String sql = ExternalizedQuery.getSql("LEGACY.GET_ISR_BYSBO");
-      // PreparedQuery q = new PreparedQuery(entityManager, sql);
-      // q.setParameter("SBO", data.getSalesBusOffCd());
-      // q.setParameter("CNTRY", data.getCmrIssuingCntry());
-      // String isr = q.getSingleResult(String.class);
-      // if (!StringUtils.isBlank(isr)) {
-      // legacyCust.setSalesRepNo(isr);
-      // cmrObjects.getData().setRepTeamMemberNo(isr);
-      // }
-      // }
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin);
-
-      // CMR-2093:Requirement for CoF (Comercial Financed) field
       String cof = data.getCommercialFinanced();
       if (!StringUtils.isBlank(cof)) {
         if ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) {
@@ -1042,13 +1008,6 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCust.setModeOfPayment("");
       }
-
-      // String ecoCode = data.getEconomicCd();
-      // if (!StringUtils.isBlank(ecoCode)) {
-      // legacyCust.setEconomicCd(ecoCode);
-      // } else {
-      // legacyCust.setEconomicCd("");
-      // }
 
       // permanent removal-single inactivation
       if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
@@ -1082,17 +1041,12 @@ public class METransformer extends EMEATransformer {
       legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
     }
 
-    String dataEmbargoCd = data.getEmbargoCd();
-    if (dataEmbargoCd != null) {
+    String dataEmbargoCd = data.getOrdBlk();
+    if (dataEmbargoCd != null && !StringUtils.isBlank(dataEmbargoCd) && "S".equals(dataEmbargoCd)) {
       legacyCust.setEmbargoCd(dataEmbargoCd);
+    } else if (!"S".equals(dataEmbargoCd)) {
+      legacyCust.setEmbargoCd("");
     }
-
-    // if (data.getCustPrefLang() != null) {
-    // if (!StringUtils.isBlank(data.getCustPrefLang())) {
-    // legacyCust.setLangCd(data.getCustPrefLang());
-    // } else {
-    // legacyCust.setLangCd("");
-    // }
 
     String cebo = data.getEngineeringBo();
     if (!StringUtils.isBlank(cebo)) {
