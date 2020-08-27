@@ -235,7 +235,8 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  // addrCont + poBox should not exceed 28 characters
+  // addrCont + poBox should not exceed 21 characters
+  // ",<space>PO<space>BOX<space>" is included when counting to 30 max
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -245,8 +246,8 @@ function addAddressFieldValidators() {
 
         if (poBox != '') {
           val += poBox;
-          if (val != null && val.length > 28) {
-            return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should not exceed 28 characters.');
+          if (val != null && val.length > 21) {
+            return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should not exceed 21 characters.');
           }
         }
         return new ValidationResult(null, true);
@@ -658,19 +659,17 @@ function lockAbbrv() {
   }
 }
 
-function showDeptNoForInternalsOnly() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
+function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
 
-  var subCustGrp = FormManager.getActualValue('custSubGrp');
-  if (subCustGrp == 'INTER' || subCustGrp == 'XINTE') {
-    checkAndAddValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ]);
-    FormManager.show('InternalDept', 'ibmDeptCostCenter');
-  } else {
-    FormManager.clearValue('ibmDeptCostCenter');
-    FormManager.resetValidations('ibmDeptCostCenter');
-    FormManager.hide('InternalDept', 'ibmDeptCostCenter');
+  if (scenarioChanged) {
+    if (scenario == 'INTER' || scenario == 'XINTE') {
+      FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+      FormManager.show('InternalDept', 'ibmDeptCostCenter');
+    } else {
+      FormManager.clearValue('ibmDeptCostCenter');
+      FormManager.resetValidations('ibmDeptCostCenter');
+      FormManager.hide('InternalDept', 'ibmDeptCostCenter');
+    }
   }
 }
 

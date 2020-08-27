@@ -45,7 +45,7 @@ public class CEWATransformer extends MCOTransformer {
       if (MQMsgConstants.CUSTSUBGRP_GOVRN.equals(custType) || "XGOV".equals(custType)) {
         legacyCust.setCustType("G");
       } else if (MQMsgConstants.CUSTSUBGRP_IBMEM.equals(custType)) {
-        legacyCust.setCustType("8");
+        legacyCust.setCustType("98");
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
 
@@ -133,19 +133,18 @@ public class CEWATransformer extends MCOTransformer {
     line1 = addrData.getCustNm1();
     line2 = addrData.getCustNm2();
 
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line3 = addrData.getAddrTxt();
-    } else if (!StringUtils.isBlank(addrData.getCustNm4()))
+    if (!StringUtils.isBlank(addrData.getCustNm4())) {
       line3 = addrData.getCustNm4();
+    } else if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line3 = addrData.getAddrTxt();
+    }
 
-    if (!StringUtils.isBlank(addrData.getAddrTxt()) && !StringUtils.isBlank(addrData.getPoBox())) {
-      line4 = addrData.getAddrTxt() + " " + addrData.getPoBox();
+    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
+      line4 = addrData.getAddrTxt();
     } else if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
       line4 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
-    } else if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 = addrData.getAddrTxt();
     } else if (!StringUtils.isBlank(addrData.getPoBox())) {
-      line4 = "PO BOX" + addrData.getAddrTxt();
+      line4 = "PO BOX " + addrData.getPoBox();
     } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
       line4 = addrData.getAddrTxt2();
     }
@@ -153,8 +152,16 @@ public class CEWATransformer extends MCOTransformer {
     if (crossBorder) {
       if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
         line5 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
-      } else if (!StringUtils.isBlank(addrData.getCity1()) && !StringUtils.isBlank(addrData.getPoBox())) {
-        line5 = addrData.getCity1() + ", " + addrData.getPoBox();
+      } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
+        line5 = addrData.getAddrTxt2();
+      } else if (!StringUtils.isBlank(addrData.getPoBox())) {
+        line5 = "PO BOX " + addrData.getPoBox();
+      } else if (!StringUtils.isBlank(addrData.getCity1()) || !StringUtils.isBlank(addrData.getPostCd())) {
+        String cityPostalCode = addrData.getCity1();
+        if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(addrData.getPostCd())) {
+          cityPostalCode += ", " + addrData.getPostCd();
+        }
+        line5 = cityPostalCode;
       }
       line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
 
@@ -167,9 +174,11 @@ public class CEWATransformer extends MCOTransformer {
         line5 = "PO BOX " + addrData.getPoBox();
       }
 
-      if (!StringUtils.isBlank(addrData.getCity1()) && !StringUtils.isBlank(addrData.getPoBox())) {
-        line6 = addrData.getCity1() + ", " + addrData.getPoBox();
+      String cityPostalCode = addrData.getCity1();
+      if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(addrData.getPostCd())) {
+        cityPostalCode += ", " + addrData.getPostCd();
       }
+      line6 = cityPostalCode;
     }
 
     legacyAddr.setAddrLine1(line1);
