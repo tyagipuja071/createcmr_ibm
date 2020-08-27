@@ -3480,7 +3480,7 @@ function setICOAndDICMandatory() {
   }
 }
 
-function setClassificationCodeCEE() {
+function setClassificationCodeME() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -3488,11 +3488,11 @@ function setClassificationCodeCEE() {
   if ('C' == FormManager.getActualValue('reqType')) {
     var _custType = FormManager.getActualValue('custSubGrp');
     var isicCd = FormManager.getActualValue('isicCd');
-    if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'RSBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP') {
+    if (_custType == 'BUSPR' || _custType.includes('BP')) {
       FormManager.setValue('custClass', '46');
-    } else if (_custType == 'INTER' || _custType == 'XINT' || _custType == 'MEINT' || _custType == 'RSINT' || _custType == 'CSINT' || _custType == 'RSXIN') {
+    } else if (_custType.includes('IN')) {
       FormManager.setValue('custClass', '81');
-    } else if (_custType == 'PRICU' || _custType == 'CSPC' || _custType == 'MEPC' || _custType == 'RSPC' || _custType == 'RSXPC') {
+    } else if (_custType == 'PRICU' || _custType.includes('PC')) {
       FormManager.setValue('custClass', '60');
     } else if (isicCds.has(isicCd)) {
       FormManager.setValue('custClass', '13');
@@ -3686,9 +3686,9 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
       })(), null, 'frmCMR_addressModal');
 }
 
-function isicCdOnChangeCEE() {
+function isicCdOnChangeME() {
   dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-    setClassificationCodeCEE();
+    setClassificationCodeME();
   });
 }
 
@@ -3830,17 +3830,17 @@ function hideDisableAutoProcessingCheckBox() {
   FormManager.hide('DisableAutoProcessing', 'disableAutoProc');
 }
 
-function afterConfigTemplateLoadForCEE() {
-  filterCmrnoForCEE();
-  togglePPSCeidCEE();
-  setClassificationCodeCEE();
+function afterConfigTemplateLoadForME() {
+  // filterCmrnoForCEE();
+  // togglePPSCeidCEE();
+  setClassificationCodeME();
   // disableSBO();
-  setEngineeringBO();
+  // setEngineeringBO();
 }
 
-function afterConfigForCEE() {
-  isicCdOnChangeCEE();
-  reqReasonOnChange();
+function afterConfigForME() {
+  isicCdOnChangeME();
+  // reqReasonOnChange();
   hideDisableAutoProcessingCheckBox();
 
 }
@@ -4087,10 +4087,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
-  // CEE
-  GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
-  GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
+  // ME
+  GEOHandler.addAfterConfig(afterConfigTemplateLoadForME, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForME, GEOHandler.ME);
+  GEOHandler.addAfterConfig(afterConfigForME, GEOHandler.ME);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(validateIsicMEValidator, GEOHandler.ME, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorME, GEOHandler.ME, null, true);
