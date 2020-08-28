@@ -13,7 +13,6 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
-import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
@@ -95,20 +94,21 @@ public class FstTransformer extends MCOTransformer {
 
   }
 
-  @Override
-  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-      CMRRequestContainer cmrObjects) {
-    for (Addr addr : cmrObjects.getAddresses()) {
-      if ("700".equals(cmrIssuingCntry)) {
-        legacyCustExt.setiTaxCode(addr.getTaxOffice());
-      }
-    }
-  }
+  // @Override
+  // public void transformLegacyCustomerExtData(EntityManager entityManager,
+  // MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+  // CMRRequestContainer cmrObjects) {
+  // for (Addr addr : cmrObjects.getAddresses()) {
+  // if ("700".equals(cmrIssuingCntry)) {
+  // legacyCustExt.setiTaxCode(addr.getTaxOffice());
+  // }
+  // }
+  // }
 
-  @Override
-  public boolean hasCmrtCustExt() {
-    return true;
-  }
+  // @Override
+  // public boolean hasCmrtCustExt() {
+  // return true;
+  // }
 
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,

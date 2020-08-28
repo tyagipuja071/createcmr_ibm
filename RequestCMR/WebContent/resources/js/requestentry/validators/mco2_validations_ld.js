@@ -222,6 +222,19 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
+  // CEWA - postal code should accept alphanumeric and spaces
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var postCd = FormManager.getActualValue('postCd');
+        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$")) {
+          return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
   // addrCont + poBox should not exceed 21 characters
   // ",<space>PO<space>BOX<space>" is included when counting to 30 max
   FormManager.addFormValidator((function() {
@@ -651,10 +664,10 @@ function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
     FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
-    FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
+    FormManager.resetValidations('ibmDeptCostCenter');
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
-  if (scenarioChanged && scenario != null && scenario != '') {
+  if (scenarioChanged) {
     FormManager.clearValue('ibmDeptCostCenter');
   }
 }
@@ -1083,7 +1096,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
-  // GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
