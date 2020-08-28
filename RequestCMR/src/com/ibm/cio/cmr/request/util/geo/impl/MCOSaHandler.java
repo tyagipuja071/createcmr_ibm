@@ -323,6 +323,16 @@ public class MCOSaHandler extends MCOHandler {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
       data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
     }
+    
+    String mop = legacyObjects.getCustomer().getModeOfPayment();
+    if (mop == "R" || mop == "S" || mop == "T") {
+      data.setCommercialFinanced(mop);
+    } else if (mop == "5") {
+      data.setCodCondition(mop);
+    } else {
+      data.setCodCondition("N");
+      data.setCommercialFinanced("");
+    }
   }
 
   @Override

@@ -181,6 +181,18 @@ public class SouthAfricaTransformer extends MCOTransformer {
         legacyCust.setDeptCd(data.getIbmDeptCostCenter().substring(2, 6));
     }
     
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      legacyCust.setModeOfPayment(data.getCommercialFinanced());
+      if (data.getCodCondition() != null) {
+        String cod = data.getCodCondition();
+        if (cod == "Y") {
+          legacyCust.setModeOfPayment("5");
+        } else {
+          legacyCust.setModeOfPayment("");
+        }
+      }
+    }
+    
     legacyCust.setAbbrevNm(data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
