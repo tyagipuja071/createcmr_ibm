@@ -132,7 +132,7 @@ public class MEHandler extends BaseSOFHandler {
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department" };
+      "Floor", "Building", "County", "City2", "Department", "MembLevel", "BPRelationType" };
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
