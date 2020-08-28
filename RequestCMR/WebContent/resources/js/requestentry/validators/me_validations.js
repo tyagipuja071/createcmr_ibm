@@ -3482,6 +3482,7 @@ function setClassificationCodeME() {
 
 function lockIsicCdME() {
   var reqType = FormManager.getActualValue('reqType');
+  var isic = FormManager.getActualValue('isicCd');
   if ('U' == reqType) {
     var oldISIC = null;
     var requestId = FormManager.getActualValue('reqId');
