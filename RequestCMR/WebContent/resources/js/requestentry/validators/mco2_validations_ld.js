@@ -660,16 +660,15 @@ function lockAbbrv() {
 }
 
 function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
-
+  if (scenario == 'INTER' || scenario == 'XINTE') {
+    FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+    FormManager.show('InternalDept', 'ibmDeptCostCenter');
+  } else {
+    FormManager.resetValidations('ibmDeptCostCenter');
+    FormManager.hide('InternalDept', 'ibmDeptCostCenter');
+  }
   if (scenarioChanged) {
-    if (scenario == 'INTER' || scenario == 'XINTE') {
-      FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
-      FormManager.show('InternalDept', 'ibmDeptCostCenter');
-    } else {
-      FormManager.clearValue('ibmDeptCostCenter');
-      FormManager.resetValidations('ibmDeptCostCenter');
-      FormManager.hide('InternalDept', 'ibmDeptCostCenter');
-    }
+    FormManager.clearValue('ibmDeptCostCenter');
   }
 }
 
