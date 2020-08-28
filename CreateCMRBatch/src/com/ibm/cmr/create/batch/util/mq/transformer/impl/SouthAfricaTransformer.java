@@ -202,10 +202,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       if (data.getIbmDeptCostCenter().length() == 6)
         legacyCust.setDeptCd(data.getIbmDeptCostCenter().substring(2, 6));
     }
-<<<<<<< HEAD
 
-=======
-    
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       legacyCust.setModeOfPayment(data.getCommercialFinanced());
       if (data.getCodCondition() != null) {
@@ -217,8 +214,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
         }
       }
     }
-    
->>>>>>> branch 'green_south_africa' of ssh://git@github.ibm.com/CI-RDC/createcmr
+
     legacyCust.setAbbrevNm(data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
