@@ -139,9 +139,18 @@ public class SouthAfricaTransformer extends MCOTransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("transformLegacyAddressData South Africa transformer...");
-
+    formatAddressLines(dummyHandler);
     if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
+    }
+
+    String poBox = currAddr.getPoBox();
+    if (!StringUtils.isEmpty(poBox)) {
+      if (!poBox.startsWith("PO BOX ")) {
+        legacyAddr.setPoBox("PO BOX " + currAddr.getPoBox());
+      } else {
+        legacyAddr.setPoBox(poBox);
+      }
     }
   }
 
@@ -151,7 +160,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
-
+    formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
       String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
@@ -159,15 +168,28 @@ public class SouthAfricaTransformer extends MCOTransformer {
       boolean isBusPr = Arrays.asList(busPrSubGrp).contains(custSubGrp);
 
       if (isBusPr) {
-        legacyCust.setAuthRemarketerInd("Y");
+        legacyCust.setAuthRemarketerInd("1");
       } else {
-        legacyCust.setAuthRemarketerInd("N");
+        legacyCust.setAuthRemarketerInd("0");
       }
 
-      legacyCust.setCeDivision(dummyHandler.messageHash.get("CEdivision"));
-      legacyCust.setCurrencyCd(dummyHandler.messageHash.get("CurrencyCode"));
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+      legacyCust.setCeDivision("2");
+      legacyCust.setCurrencyCd("SA");
 
+    }
+
+    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+      legacyCust.setIbo(data.getSalesBusOffCd());
+      legacyCust.setSbo(data.getSalesBusOffCd());
+    } else {
+      legacyCust.setIbo("");
+      legacyCust.setSbo("");
+    }
+
+    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+    } else {
+      legacyCust.setSalesGroupRep("");
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {
@@ -180,7 +202,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       if (data.getIbmDeptCostCenter().length() == 6)
         legacyCust.setDeptCd(data.getIbmDeptCostCenter().substring(2, 6));
     }
-    
+
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       legacyCust.setModeOfPayment(data.getCommercialFinanced());
       if (data.getCodCondition() != null) {
@@ -192,12 +214,13 @@ public class SouthAfricaTransformer extends MCOTransformer {
         }
       }
     }
-    
+
     legacyCust.setAbbrevNm(data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
     legacyCust.setCustType(data.getCrosSubTyp());
-    cmrObjects.getData().setUser("");
+    legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+    // cmrObjects.getData().setUser("");
   }
 
   @Override
@@ -209,9 +232,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
-
+    Data data = cmrObjects.getData();
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCustExt.setTeleCovRep("3100");
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      legacyCustExt.setTeleCovRep(!StringUtils.isEmpty(data.getCollBoId()) ? data.getCollBoId() : "");
     }
   }
 
