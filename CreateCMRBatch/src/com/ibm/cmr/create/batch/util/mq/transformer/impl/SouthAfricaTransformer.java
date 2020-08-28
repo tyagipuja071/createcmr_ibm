@@ -139,7 +139,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("transformLegacyAddressData South Africa transformer...");
-
+    formatAddressLines(dummyHandler);
     if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
@@ -160,7 +160,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
-
+    formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
       String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
