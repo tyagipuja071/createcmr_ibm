@@ -3738,8 +3738,8 @@ function setClassificationCodeCEE() {
 
 function lockIsicCdCEE() {
   var reqType = FormManager.getActualValue('reqType');
+  var isic = FormManager.getActualValue('isicCd');
   if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    var isic = FormManager.getActualValue('isicCd');
     if ('9500' == isic || '0000' == isic) {
       var oldISIC = null;
       var requestId = FormManager.getActualValue('reqId');
