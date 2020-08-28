@@ -129,17 +129,19 @@ public class USHandler extends GEOHandler {
   }
 
   private List<FindCMRRecordModel> getZP01FromRDC(String cmrNo) {
-    FindCMRRecordModel address = new FindCMRRecordModel();
+    FindCMRRecordModel address = null;
     List<FindCMRRecordModel> addressList = new ArrayList<FindCMRRecordModel>();
     String sqlRDC = ExternalizedQuery.getSql("KNA1.US.MULTIPLE_BILLTO");
     PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
     queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+    queryRDC.setForReadOnly(true);
 
     List<Kna1> kna1List = queryRDC.getResults(Kna1.class);
     if (kna1List != null && !kna1List.isEmpty() && kna1List.size() > 0) {
       for (Kna1 kna1 : kna1List) {
-        address.setCmrAddrTypeCode(CmrConstants.RDC_SHIP_TO);
+        address = new FindCMRRecordModel();
+        address.setCmrAddrTypeCode(CmrConstants.RDC_BILL_TO);
         address.setCmrAddrSeq(kna1.getZzkvSeqno());
         address.setCmrStreetAddress(kna1.getStras());
         address.setCmrDept(kna1.getName4());
@@ -147,8 +149,8 @@ public class USHandler extends GEOHandler {
         address.setCmrState(kna1.getRegio());
         address.setCmrCounty(kna1.getCounc());
         address.setCmrAddrType(kna1.getKtokd());
+        addressList.add(address);
       }
-      addressList.add(address);
     }
     return addressList;
   }
@@ -461,7 +463,7 @@ public class USHandler extends GEOHandler {
     }
     // no cmr no, manual parse
     String postCd = address.getPostCd();
-    if (postCd.trim().length() == 9 && !postCd.contains("-")) {
+    if (StringUtils.isNotBlank(postCd) && postCd.trim().length() == 9 && !postCd.contains("-")) {
       postCd = postCd.substring(0, 5) + "-" + postCd.substring(5);
       LOG.debug("Postal code formatted: " + postCd);
       address.setPostCd(postCd);
