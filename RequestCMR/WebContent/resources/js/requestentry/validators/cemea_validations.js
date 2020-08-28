@@ -1355,7 +1355,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '5B') {
         clientTiers = [ '7' ];
       }
-      
+
     } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
@@ -3611,8 +3611,8 @@ function setClassificationCodeCEE() {
 
 function lockIsicCdCEE() {
   var reqType = FormManager.getActualValue('reqType');
+  var isic = FormManager.getActualValue('isicCd');
   if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    var isic = FormManager.getActualValue('isicCd');
     if ('9500' == isic || '0000' == isic) {
       var oldISIC = null;
       var requestId = FormManager.getActualValue('reqId');
