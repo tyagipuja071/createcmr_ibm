@@ -3,6 +3,7 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -369,6 +370,15 @@ public class MCOSaHandler extends MCOHandler {
     } else {
       return false;
     }
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
+        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
+        "BP_REL_TYPE", "MODE_OF_PAYMENT", "ENTERPRISE", "COMMERCIAL_FINANCED", "COLL_BO_ID", "COD_CONDITION", "IBM_DEPT_COST_CENTER"));
+    return fields;
   }
 
 }
