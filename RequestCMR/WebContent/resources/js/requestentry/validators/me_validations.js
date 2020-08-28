@@ -619,7 +619,7 @@ function addHandlersForCEMEA() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
-      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
+      if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
     });
@@ -633,7 +633,7 @@ function addHandlersForCEMEA() {
         setSalesRepValues(value);
       }
       setSBOValuesForIsuCtc();// CMR-2101
-      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
+      if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
     });
@@ -3423,7 +3423,7 @@ function togglePPSCeidCEE() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var cmrNo = FormManager.getActualValue('cmrNo');
-  if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP' || _custType == 'RSBP') {
+  if (_custType == 'BUSPR' || _custType.includes('BP')) {
     FormManager.show('PPSCEID', 'ppsceid');
     FormManager.enable('ppsceid');
     FormManager.resetValidations('ppsceid');
@@ -3798,7 +3798,7 @@ function hideDisableAutoProcessingCheckBox() {
 
 function afterConfigTemplateLoadForME() {
   // filterCmrnoForCEE();
-  // togglePPSCeidCEE();
+  togglePPSCeidCEE();
   setClassificationCodeME();
   // disableSBO();
   // setEngineeringBO();
