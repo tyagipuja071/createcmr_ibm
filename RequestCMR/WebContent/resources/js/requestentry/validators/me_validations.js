@@ -619,7 +619,7 @@ function addHandlersForCEMEA() {
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
-      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
+      if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
     });
@@ -633,7 +633,7 @@ function addHandlersForCEMEA() {
         setSalesRepValues(value);
       }
       setSBOValuesForIsuCtc();// CMR-2101
-      if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
+      if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
         togglePPSCeidCEE();
       }
     });
@@ -1754,19 +1754,29 @@ function setTelecoverageRep() {
     return;
   }
   if (FormManager.getActualValue('reqType') != 'C') {
-    FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep' ]);
+    FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('bpSalesRepNo', validTeleCoverageRep6Length, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
     return;
   }
   var custGrp = FormManager.getActualValue('custGrp');
   if (custGrp != null && (custGrp == 'GBM' || custGrp == 'SBM')) {
-    checkAndAddValidator('bpSalesRepNo', Validators.REQUIRED, [ 'Tele-coverage rep.' ]);
-    FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep' ]);
+    FormManager.addValidator('bpSalesRepNo', Validators.REQUIRED, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('bpSalesRepNo', Validators.DIGIT, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
+    FormManager.addValidator('bpSalesRepNo', validTeleCoverageRep6Length, [ 'Tele-coverage rep.' ], 'MAIN_CUST_TAB');
     FormManager.show('TeleCoverageRep', 'bpSalesRepNo');
   } else {
     FormManager.resetValidations('bpSalesRepNo');
-    FormManager.clearValue('bpSalesRepNo');
     FormManager.hide('TeleCoverageRep', 'bpSalesRepNo');
   }
+}
+function validTeleCoverageRep6Length(input) {
+  var bpSalesRepNo = FormManager.getActualValue('bpSalesRepNo');
+  if (bpSalesRepNo != '' && bpSalesRepNo != null && bpSalesRepNo != undefined) {
+    if (bpSalesRepNo.length != 6) {
+      return new ValidationResult(input, false, 'Tele-coverage rep. must be 6 length');
+    }
+  }
+  return new ValidationResult(input, true);
 }
 /**
  * Validate Special Character for Abbreviated Name/Location
@@ -3413,7 +3423,7 @@ function togglePPSCeidCEE() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var cmrNo = FormManager.getActualValue('cmrNo');
-  if (_custType == 'BUSPR' || _custType == 'XBP' || _custType == 'CSBP' || _custType == 'MEBP' || _custType == 'RSXBP' || _custType == 'RSBP') {
+  if (_custType == 'BUSPR' || _custType.includes('BP')) {
     FormManager.show('PPSCEID', 'ppsceid');
     FormManager.enable('ppsceid');
     FormManager.resetValidations('ppsceid');
@@ -3788,7 +3798,7 @@ function hideDisableAutoProcessingCheckBox() {
 
 function afterConfigTemplateLoadForME() {
   // filterCmrnoForCEE();
-  // togglePPSCeidCEE();
+  togglePPSCeidCEE();
   setClassificationCodeME();
   // disableSBO();
   // setEngineeringBO();
