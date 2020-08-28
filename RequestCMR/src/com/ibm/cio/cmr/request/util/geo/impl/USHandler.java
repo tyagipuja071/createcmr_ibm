@@ -73,11 +73,9 @@ public class USHandler extends GEOHandler {
     List<FindCMRRecordModel> converted = new ArrayList<>();
 
     List<FindCMRRecordModel> records = source.getItems();
-
     FindCMRRecordModel main = records != null && records.size() > 0 ? records.get(0) : new FindCMRRecordModel();
     boolean prospectConversion = CmrConstants.PROSPECT_ORDER_BLOCK.equals(main.getCmrOrderBlock());
     for (FindCMRRecordModel record : records) {
-
       record.setCmrName1Plain(null);
       record.setCmrName2Plain(null);
 
@@ -97,6 +95,9 @@ public class USHandler extends GEOHandler {
         } else if ("ZP01".equals(record.getCmrAddrTypeCode()) && seqList.contains(record.getCmrAddrSeq())) {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
+        } else if (StringUtils.isNotBlank(record.getCmrAddrSeq()) && "ZP01".equals(record.getCmrAddrTypeCode())
+            && Integer.parseInt(record.getCmrAddrSeq()) >= 200) {
+          continue;
         }
 
         converted.add(record);
