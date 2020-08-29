@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -213,6 +214,18 @@ public class SouthAfricaTransformer extends MCOTransformer {
           legacyCust.setModeOfPayment("");
         }
       }
+
+      String dataEmbargoCd = data.getEmbargoCd();
+      String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
+                                                                                            // removal-single
+      // inactivation
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && ("Y".equals(rdcEmbargoCd))) {
+          if (StringUtils.isBlank(data.getEmbargoCd())) {
+            legacyCust.setEmbargoCd("");
+          }
+        }
+      }
     }
 
     legacyCust.setAbbrevNm(data.getAbbrevNm());
@@ -299,5 +312,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
+  }
+
+  @Override
+  public boolean enableTempReactOnUpdates() {
+    return true;
   }
 }
