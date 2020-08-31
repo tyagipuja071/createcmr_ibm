@@ -1597,15 +1597,10 @@ public class METransformer extends EMEATransformer {
       legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
 
-      if (!StringUtils.isBlank(data.getCompany())) {
-        if (data.getCompany().length() > 9) {
-          legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
-        } else {
-          legacyCustExt.setiTaxCode(data.getCompany());
-        }
-      } else {
-        legacyCustExt.setiTaxCode("");
-      }
+    // Morocco use Phone3 to store ICE field
+    if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getPhone3())) {
+      legacyCustExt.setiTaxCode(data.getPhone3());
+    }
   }
 
   @Override
