@@ -2149,7 +2149,7 @@ function addrFormatterIcons(value, rowIndex) {
     }
     return actions;
   }
-  if (addrType == 'ZS01' || addrType == 'ZI01') {
+  if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
       actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
           + '\',\'' + name + '\')">';
