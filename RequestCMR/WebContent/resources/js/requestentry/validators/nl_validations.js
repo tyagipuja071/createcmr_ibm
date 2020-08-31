@@ -14,6 +14,13 @@ function afterConfigForNL() {
     role = _pagemodel.userRole;
   }
   
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'INTER' || custSubGrp == 'PRICU') {
+  	FormManager.removeValidator('inacCd', Validators.REQUIRED);
+  	FormManager.readOnly('inacCd');
+  	FormManager.setValue('inacCd', '');
+  }
+  
 //Set abbrevLocn for Softlayer Scenario
   var custSubType = FormManager.getActualValue('custSubGrp');
   if (custSubType == 'SOFTL') {
