@@ -103,6 +103,21 @@
 			</p>
 		</cmr:column>
 
+		<!-- fields for Cyprus Legacy -->
+		<cmr:view forCountry="666">
+			<c:if test="${reqentry.reqType != 'C'}">
+			<cmr:column span="2" containerForField="ModeOfPayment">
+				<p>
+				<cmr:label fieldId="modeOfPayment">
+					<cmr:fieldLabel fieldId="ModeOfPayment" />: 
+        					</cmr:label>
+				<cmr:field path="paymentMode" id="modeOfPayment"
+					fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+			</c:if>
+		</cmr:view>	
+
 		<!-- Type Of Customer CY -->
 		<c:if test="${reqentry.reqType != 'C'}">
 		<cmr:view forCountry="666">
@@ -117,21 +132,7 @@
 	      		</cmr:column>
 		</cmr:view>
 		</c:if>
-		<!-- fields for Cyprus Legacy -->
-	<%-- 	<cmr:view forCountry="666">
-			<c:if test="${reqentry.reqType != 'C'}">
-				<cmr:column span="2" containerForField="ModeOfPayment">
-					<p>
-						<cmr:label fieldId="modeOfPayment">
-							<cmr:fieldLabel fieldId="ModeOfPayment" />: 
-          </cmr:label>
-						<cmr:field path="paymentMode" id="modeOfPayment"
-							fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
-					</p>
-				</cmr:column>
-			</c:if>
-		</cmr:view>
- --%>		
+		
 		<cmr:view forCountry="726">
 			<cmr:column span="2" containerForField="ModeOfPayment">
 				<p>
