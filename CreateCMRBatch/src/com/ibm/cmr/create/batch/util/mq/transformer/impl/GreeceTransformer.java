@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -444,6 +445,8 @@ public class GreeceTransformer extends EMEATransformer {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           if (!StringUtils.isEmpty(addr.getCustPhone())) {
             legacyCust.setTelNoOrVat(addr.getCustPhone());
+          } else {
+            legacyCust.setTelNoOrVat("");
           }
           landedCntry = addr.getLandCntry();
           break;
@@ -1134,6 +1137,22 @@ public class GreeceTransformer extends EMEATransformer {
     } else {
       return false;
     }
+  }
+
+  @Override
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    List<Addr> addresses = cmrObjects.getAddresses();
+    for (Addr addr : addresses) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+        String currPhone = addr.getCustPhone() != null ? addr.getCustPhone() : "";
+        String oldPhone = addrRdc.getCustPhone() != null ? addrRdc.getCustPhone() : "";
+        if (addrRdc == null || (addrRdc != null && !currPhone.equals(oldPhone))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 }
