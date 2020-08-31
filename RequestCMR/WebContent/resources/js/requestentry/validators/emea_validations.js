@@ -7595,10 +7595,10 @@ function addValidatorForCompanyRegNum() {
         var companyNum = FormManager.getActualValue('taxCd1');
         var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         if (companyNum != null && companyNum != undefined && companyNum != '') {
-          if (issuingCntry == SysLoc.IRELAND && (companyNum.length != 6)) {
-            return new ValidationResult(null, false, 'Company Registartion Number should be of 6 character.');
-          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8)) {
-            return new ValidationResult(null, false, 'Company Registartion Number should be of 8 character.');
+          if (issuingCntry == SysLoc.IRELAND && (companyNum.length != 6 || !companyNum.match("^[0-9a-zA-Z]*$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 6 alphanumeric characters.');
+          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8 || !companyNum.match("^[0-9a-zA-Z]*$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 8 alphanumeric characters.');
           } else {
             return new ValidationResult(null, true);
           }
