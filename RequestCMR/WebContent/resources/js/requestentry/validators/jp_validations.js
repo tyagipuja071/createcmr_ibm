@@ -854,11 +854,11 @@ function toggleAddrTypesForJP(cntry, addressMode) {
     }
   }
 
-  return;
+
   if (FormManager.getActualValue('reqType') == 'C') {
     if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-      cmr.hideNode('radiocont_ZI02');
-      cmr.hideNode('radiocont_ZI01');
+      //cmr.hideNode('radiocont_ZI02');
+      //cmr.hideNode('radiocont_ZI01');
       cmr.hideNode('radiocont_ZI03');
       cmr.hideNode('radiocont_ZP02');
       cmr.hideNode('radiocont_ZP03');
@@ -869,6 +869,7 @@ function toggleAddrTypesForJP(cntry, addressMode) {
       cmr.hideNode('radiocont_ZP08');
     }
   }
+  return;
 }
 /**
  * Opens Find CMR search
