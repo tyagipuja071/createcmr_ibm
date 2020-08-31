@@ -794,9 +794,14 @@ public class METransformer extends EMEATransformer {
 
     }
 
-    if (!StringUtils.isEmpty(addr.getLandCntry())) {
-      legacyAddr.setAddrLine6(addr.getLandCntry());
-
+    if (SystemLocation.PAKISTAN.equals(cntry) || SystemLocation.JORDAN.equals(cntry)) {
+      if (!StringUtils.isBlank(addr.getDivn())) {
+        legacyAddr.setAddrLine6(addr.getDivn());
+      }
+    } else {
+      if (!StringUtils.isBlank(addr.getLandCntry())) {
+        legacyAddr.setAddrLine6(LandedCountryMap.getCountryName(addr.getLandCntry()));
+      }
     }
 
     // boolean crossBorder = false;
