@@ -1748,7 +1748,11 @@ public class GreeceHandler extends BaseSOFHandler {
 
       if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
         address.setCustPhone("");
+      } else if ("ZD01".equals(address.getId().getAddrType())) {
+        String phone = getShippingPhoneFromLegacyGR(currentRecord);
+        address.setCustPhone(phone != null ? phone : "");
       }
+
     }
   }
 
@@ -2003,6 +2007,7 @@ public class GreeceHandler extends BaseSOFHandler {
           addr.setCustPhone("");
         }
       }
+
       break;
 
     case SystemLocation.CYPRUS:
@@ -3088,14 +3093,14 @@ public class GreeceHandler extends BaseSOFHandler {
     return false;
   }
 
-  private void setMailingAddressFromLegacy(EntityManager entityManager, String cmrIssuingCntry, String addressKey, FindCMRRecordModel address) {
+  private String getShippingPhoneFromLegacyGR(FindCMRRecordModel address) {
     List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
     for (CmrtAddr cmrtAddr : cmrtAddrs) {
-      if ("Y".equals(cmrtAddr.getIsAddrUseMailing())) {
-        address.setCmrAddrSeq(cmrtAddr.getId().getAddrNo());
-        handleSOFAddressImportUKI(entityManager, cmrIssuingCntry, address, addressKey, cmrtAddr);
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && address.getCmrAddrSeq().equals(cmrtAddr.getId().getAddrNo())) {
+        return cmrtAddr.getAddrPhone();
       }
     }
+    return null;
   }
 
   protected void handleSOFAddressImportUKI(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey,

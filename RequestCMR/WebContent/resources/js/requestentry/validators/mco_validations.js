@@ -1562,7 +1562,7 @@ function setDPCEBObasedOnCntry() {
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   for (var i = 0; i < cntryCode.length; i++) {
-    if (locNum != null && locNum == cntryCode[i] && (custSubGrp != 'XINSO' && custSubGrp != 'XINTR') && custSubGrp != 'BUSPR') {
+    if (locNum != null && locNum == cntryCode[i] && custSubGrp != '' && custSubGrp != null && (custSubGrp != 'XINSO' && custSubGrp != 'XINTR') && custSubGrp != 'BUSPR' && custSubGrp != 'XIGS') {
       FormManager.setValue('engineeringBo', '8628628');
       FormManager.setValue('salesBusOffCd', '4515140');
     } else if (custSubGrp == 'XCRO' || custSubGrp == 'XBP' || custSubGrp == 'XIGS' || custSubGrp == 'XINSO' || custSubGrp == 'XINTR') {
@@ -1968,7 +1968,7 @@ function setISUCTCOnISIC() {
   var isic = FormManager.getActualValue('isicCd');
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
   if (reqType == 'C' && role == 'REQUESTER') {
-    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XINTR' || custSubGrp == 'XINSO' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
+    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XIGS' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
       if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
         FormManager.setValue('clientTier', 'N');
       } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {
