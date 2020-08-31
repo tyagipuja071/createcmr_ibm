@@ -2,7 +2,7 @@
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
-				<column exactLength="true" number="true">
+				<column exactLength="true">
 					<label>CMR. No</label>
 					<dbColumn>CMR_NO</dbColumn>
 					<width>20</width>
@@ -143,7 +143,7 @@
 					<width>40</width>
 					<length>30</length>
 				</column>
-				<column number="true" exactLength="false">
+				<column number="true">
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
@@ -156,7 +156,7 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Local Postal Code</label>
+					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
 					<length>8</length>
@@ -196,7 +196,7 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name Cont'd</label>
+					<label>Customer Name Cont't</label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
 					<length>30</length>
@@ -213,7 +213,7 @@
 					<width>40</width>
 					<length>30</length>
 				</column>
-				<column number="true" exactLength="false">
+				<column number="true">
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
@@ -266,7 +266,7 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name Cont'd</label>
+					<label>Customer Name Cont't</label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
 					<length>30</length>
@@ -330,7 +330,7 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Customer Name Cont'd</label>
+					<label>Customer Name Cont't</label>
 					<dbColumn>CUST_NM2</dbColumn>
 					<width>40</width>
 					<length>30</length>
