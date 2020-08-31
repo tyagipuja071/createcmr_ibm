@@ -620,7 +620,7 @@ function addHandlersForCEMEA() {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
-        togglePPSCeidCEE();
+        togglePPSCeidME();
       }
     });
   }
@@ -634,7 +634,7 @@ function addHandlersForCEMEA() {
       }
       setSBOValuesForIsuCtc();// CMR-2101
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
-        togglePPSCeidCEE();
+        togglePPSCeidME();
       }
     });
   }
@@ -3397,7 +3397,7 @@ function canCopyAddress(value, rowIndex, grid) {
   return false;
 }
 
-function filterCmrnoForCEE() {
+function filterCmrnoForME() {
   var cmrNo = FormManager.getActualValue('cmrNo');
   if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {
     FormManager.setValue('cmrNo', '');
@@ -3410,7 +3410,7 @@ function filterCmrnoForCEE() {
   });
 }
 
-function togglePPSCeidCEE() {
+function togglePPSCeidME() {
   var reqType = null;
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
@@ -3798,8 +3798,8 @@ function hideDisableAutoProcessingCheckBox() {
 }
 
 function afterConfigTemplateLoadForME() {
-  // filterCmrnoForCEE();
-  togglePPSCeidCEE();
+  filterCmrnoForME();
+  togglePPSCeidME();
   setClassificationCodeME();
   // disableSBO();
   // setEngineeringBO();
