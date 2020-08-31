@@ -4,6 +4,7 @@
 var CEMEA_EXCL = new Set([ '620', '767', '805', '823', '677', '680', '832' ]);
 var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ]);
 var ME_INCL = new Set([ '620', '642', '675', '677', '680', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865' ]);
+var GBM_SBM_INCL = new Set([ '677', '680', '620', '832', '805', '767', '823', '675' ]);
 var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '8010', '8021', '8022', '8030', '8090', '8511',
     '8512', '8519', '8532', '8809', '8813', '8818', '9900' ]);
 var landedCntryMapping = {
@@ -1640,6 +1641,53 @@ function setSBO(repTeamMemberNo) {
       FormManager.setValue('salesBusOffCd', '');
     }
   }
+}
+
+/**
+ * ME - sets SBO based on Issuing cntry value(CMR-5993)
+ */
+function setMESBO(repTeamMemberNo) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var role = FormManager.getActualValue('userRole');
+  var custGrp = FormManager.getActualValue('custGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  if (ME_INCL.has(cntry) && (reqType == 'C' || reqType == 'U')) {
+    if (GBM_SBM_INCL.has(cntry) && custGrp != null && (custGrp == 'GBM' || custGrp == 'SBM')) {
+      FormManager.setValue('salesBusOffCd', '530');
+    } else {
+      FormManager.setValue('salesBusOffCd', cntry);
+    }
+    // FormManager.setValue('repTeamMemberNo', cntry + cntry);
+    if (role != GEOHandler.ROLE_PROCESSOR) {
+      disableSBO();
+    }
+    return;
+  }
+
+}
+
+// CMR-5993 SBO is required for processor
+function validateMESBO() {
+  if (FormManager.getActualValue('userRole') == GEOHandler.ROLE_PROCESSOR) {
+    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var sbo = FormManager.getActualValue('salesBusOffCd');
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (sbo != null && cntry != sbo.substring(0, 3)) {
+      if (!(custGrp == 'GBM' || custGrp == 'SBM')) {
+        return new ValidationResult(null, false, 'For ME country,Selling Branch Office should be its cntry');
+      } else if (sbo.substring(0, 3) != '530') {
+        return new ValidationResult(null, false, 'For GBM/SBM type, Selling Branch Office should be 530');
+      }
+    }
+    return new ValidationResult(null, true);
+  }
+  return new ValidationResult(null, true);
 }
 
 // CMR-2101 SBO is required for processor
@@ -4061,6 +4109,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(validateIsicMEValidator, GEOHandler.ME, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorME, GEOHandler.ME, null, true);
+  // CMR-5993
+  GEOHandler.registerValidator(validateSBO, GEOHandler.ME, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.addAfterConfig(setMESBO, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(setMESBO, GEOHandler.ME);
   // CMR-4606 DupCMR exist
   GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
