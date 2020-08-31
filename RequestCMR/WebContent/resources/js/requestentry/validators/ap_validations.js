@@ -12,7 +12,7 @@ function addAfterConfigAP() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
 
-  if (cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custType == 'CROSS' && custSubGrp == 'SPOFF') {
+  if (cntry == '834' && reqType == 'C' && role == 'REQUESTER' && custType == 'CROSS' && custSubGrp == 'SPOFF') {
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('cmrNo', Validators.REQUIRED);
