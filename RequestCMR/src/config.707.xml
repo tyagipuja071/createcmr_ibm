@@ -194,6 +194,12 @@
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
+					<label>Local Country Name</label>
+					<dbColumn>DIVN</dbColumn>
+					<width>18</width>
+					<length>50</length>
+				</column>				
+				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
@@ -264,6 +270,12 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
+				<column>
+					<label>Local Country Name</label>
+					<dbColumn>DIVN</dbColumn>
+					<width>18</width>
+					<length>50</length>
+				</column>				
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -336,6 +348,12 @@
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
+					<label>Local Country Name</label>
+					<dbColumn>DIVN</dbColumn>
+					<width>18</width>
+					<length>50</length>
+				</column>				
+				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
@@ -406,6 +424,12 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
+				<column>
+					<label>Local Country Name</label>
+					<dbColumn>DIVN</dbColumn>
+					<width>18</width>
+					<length>50</length>
+				</column>				
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -478,6 +502,12 @@
 					<bdsId>LandedCountry</bdsId>
 				</column>
 				<column>
+					<label>Local Country Name</label>
+					<dbColumn>DIVN</dbColumn>
+					<width>18</width>
+					<length>50</length>
+				</column>				
+				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
 					<width>10</width>
@@ -548,6 +578,12 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column>
+					<label>Local Country Name</label>
+					<dbColumn>DIVN</dbColumn>
+					<width>18</width>
+					<length>50</length>
 				</column>
 				<column>
 					<label>Hardware Master</label>
