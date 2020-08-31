@@ -25,6 +25,15 @@
   <form:hidden path="searchTerm" />
 
   <cmr:row addBackground="true">
+  	<cmr:column span="2" containerForField="Phone3" forCountry="642">
+      <p>
+        <cmr:label fieldId="phone3">
+          <cmr:fieldLabel fieldId="Phone3" />:
+        <cmr:delta text="-" id="delta-phone3" />
+        </cmr:label>
+        <cmr:field fieldId="Phone3" id="phone3" path="phone3" />
+      </p>
+    </cmr:column>  
     <!-- ICO & DIC fields for Slovakia -->
     <cmr:view forCountry="693">
       <cmr:column span="2" containerForField="Company">
