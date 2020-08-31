@@ -675,10 +675,12 @@ public class MEHandler extends BaseSOFHandler {
       address.setCmrCountryLanded(code);
     }
 
+    // Remove ICE to customer tab
     // Story 1733554: Morocco: new mandatory ICE field
-    if (SystemLocation.MOROCCO.equals(cmrIssuingCntry) && "ZP01".equalsIgnoreCase(address.getCmrAddrTypeCode())) {
-      address.setCmrDept(this.currentImportValues.get("ICE"));
-    }
+    // if (SystemLocation.MOROCCO.equals(cmrIssuingCntry) &&
+    // "ZP01".equalsIgnoreCase(address.getCmrAddrTypeCode())) {
+    // address.setCmrDept(this.currentImportValues.get("ICE"));
+    // }
 
     formatAddressFields(address);
     trimAddressToFit(address);
@@ -994,6 +996,9 @@ public class MEHandler extends BaseSOFHandler {
         }
       }
       LOG.trace("TelephoneNo: " + data.getPhone1());
+      if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
+        data.setPhone3(this.currentImportValues.get("ICE"));
+      }
     }
 
     if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
