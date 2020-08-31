@@ -179,9 +179,9 @@
         <cmr:field fieldId="LocalLangCountryName" id="bldg" path="bldg" />
       </p>
     </cmr:column>
-    
+    <!-- Remove ICE to customer tab -->
       <!-- We are using for ICE Field -->
-  <div id="ice">
+  <!-- <div id="ice">
   <cmr:column span="2" containerForField="Department" forCountry="642">
     <p>
       <cmr:label fieldId="dept">
@@ -191,7 +191,7 @@
       <cmr:field fieldId="Department" id="dept" path="dept"/>
     </p>
   </cmr:column>
-  </div> 
+  </div> -->
        
   </cmr:row>
 </cmr:view>
