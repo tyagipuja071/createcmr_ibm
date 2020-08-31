@@ -621,7 +621,7 @@ function addHandlersForCEMEA() {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
       setClientTierValues(value);
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
-        togglePPSCeidCEE();
+        togglePPSCeidME();
       }
     });
   }
@@ -635,7 +635,7 @@ function addHandlersForCEMEA() {
       }
       setSBOValuesForIsuCtc();// CMR-2101
       if (ME_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
-        togglePPSCeidCEE();
+        togglePPSCeidME();
       }
     });
   }
@@ -2397,94 +2397,145 @@ function setAbbrvNmLocMandatoryProcessor() {
   }
 }
 
-var _addrTypesForMA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'ZP02' ];
-var addrTypeHandler = [];
-
-function displayIceForMA() {
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var scenario = FormManager.getActualValue('custGrp');
-
-  if (FormManager.getActualValue('reqType') != 'C') {
-    return;
-  }
-  if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress' && FormManager.getActualValue('cmrIssuingCntry') == '642') {
-    cmr.hideNode('ice');
-    for (var i = 0; i < _addrTypesForMA.length; i++) {
-      if (addrTypeHandler[i] == null) {
-        addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForMA[i]), 'onClick', function(value) {
-          if (FormManager.getField('addrType_ZP01').checked) {
-            if (cmr.currentRequestType == 'C' && scenario == 'LOCAL') {
-              cmr.showNode('ice');
-              if (role == 'REQUESTER') {
-                FormManager.addValidator('dept', Validators.REQUIRED, [ 'ICE#' ], '');
-              } else {
-                FormManager.resetValidations('dept');
-              }
-            } else if (cmr.currentRequestType == 'U') {
-              cmr.showNode('ice');
-              FormManager.resetValidations('dept');
-            } else {
-              cmr.hideNode('ice');
-              FormManager.resetValidations('dept');
-            }
-          } else {
-            cmr.hideNode('ice');
-            FormManager.resetValidations('dept');
-          }
-        });
-      } else {
-        if (FormManager.getField('addrType_ZP01').checked && ((cmr.currentRequestType == 'C' && scenario == 'LOCAL') || cmr.currentRequestType == 'U'))
-          cmr.showNode('ice');
-      }
-    }
-  }
-  if (cmr.addressMode == 'updateAddress') {
-    if (FormManager.getActualValue('addrType') == 'ZP01') {
-      cmr.showNode('ice');
-      if (role == 'REQUESTER' && cmr.currentRequestType == 'C' && scenario == 'LOCAL') {
-        FormManager.addValidator('dept', Validators.REQUIRED, [ 'ICE#' ], '');
-      } else {
-        FormManager.resetValidations('dept');
-      }
-    } else {
-      cmr.hideNode('ice');
-      FormManager.resetValidations('dept');
-    }
-  }
-}
+// Remove ICE to customer tab
+// var _addrTypesForMA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'ZP02' ];
+// var addrTypeHandler = [];
+//
+// function displayIceForMA() {
+// var role = FormManager.getActualValue('userRole').toUpperCase();
+// var scenario = FormManager.getActualValue('custGrp');
+//
+// if (FormManager.getActualValue('reqType') != 'C') {
+// return;
+// }
+// if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress' &&
+// FormManager.getActualValue('cmrIssuingCntry') == '642') {
+// cmr.hideNode('ice');
+// for (var i = 0; i < _addrTypesForMA.length; i++) {
+// if (addrTypeHandler[i] == null) {
+// addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' +
+// _addrTypesForMA[i]), 'onClick', function(value) {
+// if (FormManager.getField('addrType_ZP01').checked) {
+// if (cmr.currentRequestType == 'C' && scenario == 'LOCAL') {
+// cmr.showNode('ice');
+// if (role == 'REQUESTER') {
+// FormManager.addValidator('dept', Validators.REQUIRED, [ 'ICE#' ], '');
+// } else {
+// FormManager.resetValidations('dept');
+// }
+// } else if (cmr.currentRequestType == 'U') {
+// cmr.showNode('ice');
+// FormManager.resetValidations('dept');
+// } else {
+// cmr.hideNode('ice');
+// FormManager.resetValidations('dept');
+// }
+// } else {
+// cmr.hideNode('ice');
+// FormManager.resetValidations('dept');
+// }
+// });
+// } else {
+// if (FormManager.getField('addrType_ZP01').checked && ((cmr.currentRequestType
+// == 'C' && scenario == 'LOCAL') || cmr.currentRequestType == 'U'))
+// cmr.showNode('ice');
+// }
+// }
+// }
+// if (cmr.addressMode == 'updateAddress') {
+// if (FormManager.getActualValue('addrType') == 'ZP01') {
+// cmr.showNode('ice');
+// if (role == 'REQUESTER' && cmr.currentRequestType == 'C' && scenario ==
+// 'LOCAL') {
+// FormManager.addValidator('dept', Validators.REQUIRED, [ 'ICE#' ], '');
+// } else {
+// FormManager.resetValidations('dept');
+// }
+// } else {
+// cmr.hideNode('ice');
+// FormManager.resetValidations('dept');
+// }
+// }
+// }
 
 // Story 1733554 Moroco for ICE field Formator
+// function addIceFormatValidationMorocco() {
+// FormManager.addFormValidator((function() {
+// return {
+// validate : function() {
+// var dept = FormManager.getActualValue('dept');
+// var reqType = FormManager.getActualValue('reqType');
+// // var lbl1 = FormManager.getLabel('LocalTax1');
+// if (reqType == 'C') {
+// if (FormManager.getField('addrType_ZP01').checked && dept && dept.length > 0
+// && !dept.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
+// return new ValidationResult({
+// id : 'dept',
+// type : 'text',
+// name : 'dept'
+// }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN or "XXX"
+// or "xxx"');
+// }
+// }
+// if (reqType == 'U') {
+// if (FormManager.getField('addrType_ZP01').checked && dept && dept.length > 0
+// && !dept.match("([0-9]{15})|^(X{3})$|^(x{3})$|^(@{1})$")) {
+// return new ValidationResult({
+// id : 'dept',
+// type : 'text',
+// name : 'dept'
+// }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN or "XXX"
+// or "xxx" or "@"');
+// }
+//
+// }
+// return new ValidationResult(null, true);
+// }
+// };
+// })(), null, 'frmCMR_addressModal');
+// }
+
+function initICEField() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var scenario = FormManager.getActualValue('custGrp');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+  FormManager.show('Phone3', 'phone3');
+  if (reqType == 'C' && role == 'REQUESTER' && scenario == 'LOCAL' && (custSubType != 'INTER' && custSubType != 'PRICU')) {
+    FormManager.addValidator('phone3', Validators.REQUIRED, [ 'ICE#' ], 'MAIN_CUST_TAB');
+  } else {
+    FormManager.resetValidations('phone3');
+  }
+}
 
 function addIceFormatValidationMorocco() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var dept = FormManager.getActualValue('dept');
+        var ice = FormManager.getActualValue('phone3');
         var reqType = FormManager.getActualValue('reqType');
-        // var lbl1 = FormManager.getLabel('LocalTax1');
         if (reqType == 'C') {
-          if (FormManager.getField('addrType_ZP01').checked && dept && dept.length > 0 && !dept.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
+          if (ice && ice.length > 0 && !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
             return new ValidationResult({
-              id : 'dept',
+              id : 'phone3',
               type : 'text',
-              name : 'dept'
+              name : 'phone3'
             }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN or "XXX" or "xxx"');
           }
         }
         if (reqType == 'U') {
-          if (FormManager.getField('addrType_ZP01').checked && dept && dept.length > 0 && !dept.match("([0-9]{15})|^(X{3})$|^(x{3})$|^(@{1})$")) {
+          if (ice && ice.length > 0 && !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$|^(@{1})$")) {
             return new ValidationResult({
-              id : 'dept',
+              id : 'phone3',
               type : 'text',
-              name : 'dept'
+              name : 'phone3'
             }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN or "XXX" or "xxx" or "@"');
           }
-
         }
         return new ValidationResult(null, true);
       }
     };
-  })(), null, 'frmCMR_addressModal');
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 function addIceBillingValidator() {
@@ -3445,7 +3496,7 @@ function canCopyAddress(value, rowIndex, grid) {
   return false;
 }
 
-function filterCmrnoForCEE() {
+function filterCmrnoForME() {
   var cmrNo = FormManager.getActualValue('cmrNo');
   if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {
     FormManager.setValue('cmrNo', '');
@@ -3458,7 +3509,7 @@ function filterCmrnoForCEE() {
   });
 }
 
-function togglePPSCeidCEE() {
+function togglePPSCeidME() {
   var reqType = null;
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
@@ -3576,7 +3627,7 @@ function validateIsicMEValidator() {
           var oldISIC = result.ret1;
           if (('9500' == isic || '0000' == isic) && isic != oldISIC) {
             return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-          } else if (oldISIC == '0000' || oldISIC == '9500') {
+          } else if ((oldISIC == '0000' || oldISIC == '9500') && isic != oldISIC) {
             return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
           } else {
             return new ValidationResult(null, true);
@@ -3846,8 +3897,8 @@ function hideDisableAutoProcessingCheckBox() {
 }
 
 function afterConfigTemplateLoadForME() {
-  // filterCmrnoForCEE();
-  togglePPSCeidCEE();
+  filterCmrnoForME();
+  togglePPSCeidME();
   setClassificationCodeME();
   // disableSBO();
   // setEngineeringBO();
@@ -4056,7 +4107,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(customCrossPostCdValidator, GEOHandler.CEMEA,
   // null, true);
 
-  GEOHandler.addAddrFunction(displayIceForMA, [ SysLoc.MOROCCO ]);
+  GEOHandler.addAfterConfig(initICEField, [ SysLoc.MOROCCO ]);
+  GEOHandler.addAfterTemplateLoad(initICEField, [ SysLoc.MOROCCO ]);
   GEOHandler.registerValidator(addIceFormatValidationMorocco, [ SysLoc.MOROCCO ], null, true);
   GEOHandler.registerValidator(addIceBillingValidator, [ SysLoc.MOROCCO ], null, true);
 

@@ -799,9 +799,14 @@ public class METransformer extends EMEATransformer {
 
     }
 
-    if (!StringUtils.isEmpty(addr.getLandCntry())) {
-      legacyAddr.setAddrLine6(addr.getLandCntry());
-
+    if (SystemLocation.PAKISTAN.equals(cntry) || SystemLocation.JORDAN.equals(cntry)) {
+      if (!StringUtils.isBlank(addr.getDivn())) {
+        legacyAddr.setAddrLine6(addr.getDivn());
+      }
+    } else {
+      if (!StringUtils.isBlank(addr.getLandCntry())) {
+        legacyAddr.setAddrLine6(LandedCountryMap.getCountryName(addr.getLandCntry()));
+      }
     }
 
     // boolean crossBorder = false;
@@ -1603,14 +1608,9 @@ public class METransformer extends EMEATransformer {
       legacyCustExt.setTeleCovRep(data.getBpSalesRepNo());
     }
 
-    if (!StringUtils.isBlank(data.getCompany())) {
-      if (data.getCompany().length() > 9) {
-        legacyCustExt.setiTaxCode(data.getCompany().substring(0, 8));
-      } else {
-        legacyCustExt.setiTaxCode(data.getCompany());
-      }
-    } else {
-      legacyCustExt.setiTaxCode("");
+    // Morocco use Phone3 to store ICE field
+    if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getPhone3())) {
+      legacyCustExt.setiTaxCode(data.getPhone3());
     }
   }
 
