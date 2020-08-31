@@ -3528,7 +3528,7 @@ function validateIsicMEValidator() {
           var oldISIC = result.ret1;
           if (('9500' == isic || '0000' == isic) && isic != oldISIC) {
             return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-          } else if (oldISIC == '0000' || oldISIC == '9500') {
+          } else if ((oldISIC == '0000' || oldISIC == '9500') && isic != oldISIC) {
             return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
           } else {
             return new ValidationResult(null, true);
