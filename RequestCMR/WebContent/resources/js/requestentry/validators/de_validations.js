@@ -653,7 +653,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
               showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
               if (showDuplicateIGFBillToError) {
                 return new ValidationResult(null, false,
-                    'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+                    'Only one IGF Bill-To address is allowed.');
               }
             }
 
@@ -661,7 +661,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
               showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
               if (showDuplicateIGFInstallAtToError) {
                 return new ValidationResult(null, false,
-                    'Only one IGF Ship-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+                    'Only one IGF Ship-To address is allowed.');
               }
             }
 
