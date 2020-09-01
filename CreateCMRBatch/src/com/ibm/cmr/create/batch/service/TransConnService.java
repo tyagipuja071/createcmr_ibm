@@ -637,7 +637,7 @@ public class TransConnService extends BaseBatchService {
           }
 
           newAdmin.setReqStatus("PCP");
-          newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());          
+          newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString()); 
 
           RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(),
               "Child Update Request " + reqId + " created.");
@@ -1179,9 +1179,17 @@ public class TransConnService extends BaseBatchService {
     addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
 
     if ("897".equals(data.getCmrIssuingCntry())) {
-      // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
-      // the ZI01 address
-      addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      if ("ZP01".equals(record.getAddressType()) && record.getSeqNo() != null && Integer.parseInt(record.getSeqNo()) >= 200) {
+        // If additional bill to handle accordingly
+        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
+        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+        addrQuery.setParameter("ADDR_TYPE", "ZP01");
+        addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
+      } else {
+        // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
+        // the ZI01 address
+        addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      }
     } else {
       addrQuery.setParameter("ADDR_TYPE", record.getAddressType());
     }
