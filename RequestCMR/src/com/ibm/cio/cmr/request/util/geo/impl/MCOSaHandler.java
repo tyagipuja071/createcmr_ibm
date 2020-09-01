@@ -112,7 +112,6 @@ public class MCOSaHandler extends MCOHandler {
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
                   }
-
                   converted.add(addr);
                 }
               }
@@ -324,7 +323,7 @@ public class MCOSaHandler extends MCOHandler {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
       data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
     }
-    
+
     String mop = legacyObjects.getCustomer().getModeOfPayment();
     if (mop == "R" || mop == "S" || mop == "T") {
       data.setCommercialFinanced(mop);
@@ -334,11 +333,6 @@ public class MCOSaHandler extends MCOHandler {
       data.setCodCondition("N");
       data.setCommercialFinanced("");
     }
-  }
-
-  @Override
-  public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
-    return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01", "ZS02");
   }
 
   @Override
@@ -359,8 +353,29 @@ public class MCOSaHandler extends MCOHandler {
   }
 
   @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newSeq = null;
+    return newSeq;
+  }
+
+  @Override
+  public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01", "ZS02");
+  }
+
+  @Override
+  public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return null;
+  }
+
+  @Override
   public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
     return Arrays.asList("ZD01", "ZI01");
+  }
+
+  @Override
+  public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("5");
   }
 
   @Override
