@@ -101,7 +101,7 @@ public class TransConnService extends BaseBatchService {
   protected ProcessClient serviceClient;
   private MassProcessClient massServiceClient;
   private UpdateByEntClient updtByEntClient;
-  
+
   private SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
 
   private static final List<String> SINGLE_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_CREATE, CmrConstants.REQ_TYPE_UPDATE);
@@ -421,7 +421,7 @@ public class TransConnService extends BaseBatchService {
       }
     }
   }
-  
+
   private void monitorLegacyPending(EntityManager entityManager) {
 	//  Search the records with Status PCP and check if current timestamp falls within host down outage 
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
@@ -446,14 +446,12 @@ public class TransConnService extends BaseBatchService {
         admin.setLockBy(BATCH_USER_ID);
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
-
         sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
 
         Data data = query.getSingleResult(Data.class);
         entityManager.detach(data);
-
         // Query FindCMR using filter on configuration file
         CompanyRecordModel search = new CompanyRecordModel();
         search.setName(SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
@@ -599,14 +597,12 @@ public class TransConnService extends BaseBatchService {
           newData.setCustSubGrp(null);
           if(data.getAffiliate() == null || data.getAffiliate().equals("")) newData.setAffiliate(record.getCmrNo());
           if(data.getEnterprise() == null || data.getEnterprise().equals("")) newData.setEnterprise(record.getCmrNo());
-
           updateEntity(newData, entityManager);
 
           PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           addrQuery.setParameter("ADDR_TYPE", "ZS01");
           Addr addr = addrQuery.getSingleResult(Addr.class);
-
           PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
@@ -1183,9 +1179,17 @@ public class TransConnService extends BaseBatchService {
     addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
 
     if ("897".equals(data.getCmrIssuingCntry())) {
-      // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
-      // the ZI01 address
-      addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      if ("ZP01".equals(record.getAddressType()) && record.getSeqNo() != null && Integer.parseInt(record.getSeqNo()) >= 200) {
+        // If additional bill to handle accordingly
+        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
+        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+        addrQuery.setParameter("ADDR_TYPE", "ZP01");
+        addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
+      } else {
+        // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
+        // the ZI01 address
+        addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      }
     } else {
       addrQuery.setParameter("ADDR_TYPE", record.getAddressType());
     }

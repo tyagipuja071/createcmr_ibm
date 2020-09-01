@@ -336,11 +336,11 @@ public class CompanyRecordModel implements Comparable<CompanyRecordModel> {
     this.restrictTo = restrictTo;
   }
 
-public boolean isPoolRecord() {
+  public boolean isPoolRecord() {
 	return isPoolRecord;
-}
+  }
 
-public void setPoolRecord(boolean isPoolRecord) {
+  public void setPoolRecord(boolean isPoolRecord) {
 	this.isPoolRecord = isPoolRecord;
-}
+  }
 }
