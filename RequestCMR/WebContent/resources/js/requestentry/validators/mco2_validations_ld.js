@@ -222,19 +222,6 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  // CEWA - postal code should accept alphanumeric and spaces
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var postCd = FormManager.getActualValue('postCd');
-        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$")) {
-          return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
   // addrCont + poBox should not exceed 21 characters
   // ",<space>PO<space>BOX<space>" is included when counting to 30 max
   FormManager.addFormValidator((function() {
