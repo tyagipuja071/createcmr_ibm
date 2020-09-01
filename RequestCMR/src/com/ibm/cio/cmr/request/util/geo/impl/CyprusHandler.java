@@ -1963,9 +1963,6 @@ public class CyprusHandler extends BaseSOFHandler {
 
     if (SystemLocation.CYPRUS.equals(data.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
       data.setInstallBranchOff(data.getSalesBusOffCd());
-      if(!StringUtils.isEmpty(data.getModeOfPayment()) && data.getModeOfPayment().equals("X")){
-        data.setModeOfPayment(" ");
-      }
     } else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
       data.setInstallBranchOff(data.getSalesBusOffCd());
       data.setEngineeringBo(data.getSalesBusOffCd());
