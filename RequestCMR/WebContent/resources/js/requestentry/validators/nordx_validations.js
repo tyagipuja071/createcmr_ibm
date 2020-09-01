@@ -354,7 +354,8 @@ function setSalesRepValues(clientTier) {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
         ISU : '%' + isuCd + clientTier + '%',
-        UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
+      // George 2020-09-01 CMR-5079
+      // UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
       };
       results = cmr.query('GET.SRLIST.SWEDEN', qParams);
     } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T')) {
