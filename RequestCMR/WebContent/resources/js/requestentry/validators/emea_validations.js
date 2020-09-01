@@ -421,7 +421,7 @@ function afterConfigForUKI() {
       }
     });
   }
-  
+
   if (_crnExemptHandler == null) {
     _crnExemptHandler = dojo.connect(FormManager.getField('restrictInd'), 'onClick', function(value) {
       var reqType = FormManager.getActualValue('reqType');
@@ -430,7 +430,7 @@ function afterConfigForUKI() {
         FormManager.resetValidations('taxCd1');
         FormManager.removeValidator('taxCd1', Validators.REQUIRED);
       } else {
-        if(reqType == 'C'){
+        if (reqType == 'C') {
           FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
           FormManager.enable('taxCd1')
         } else if (reqType == 'U') {
@@ -7595,10 +7595,10 @@ function addValidatorForCompanyRegNum() {
         var companyNum = FormManager.getActualValue('taxCd1');
         var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
         if (companyNum != null && companyNum != undefined && companyNum != '') {
-          if (issuingCntry == SysLoc.IRELAND && (companyNum.length != 6 || !companyNum.match("^[0-9]+$"))) {
-            return new ValidationResult(null, false, 'Company Registartion Number should be of 6 digits.');
-          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8 || !companyNum.match("^[0-9]+$"))) {
-            return new ValidationResult(null, false, 'Company Registartion Number should be of 8 digits.');
+          if (issuingCntry == SysLoc.IRELAND && (companyNum.length != 6 || !companyNum.match("^[0-9a-zA-Z]*$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 6 alphanumeric characters.');
+          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8 || !companyNum.match("^[0-9a-zA-Z]*$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 8 alphanumeric characters.');
           } else {
             return new ValidationResult(null, true);
           }
