@@ -226,6 +226,7 @@ public class LegacyCommonUtil {
       return poBox;
     }
   }
+  
   public static AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {
     LOG.debug("Searching for Addr_RDC records for Legacy Processing " + addr.getId().getReqId());
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDADDR");

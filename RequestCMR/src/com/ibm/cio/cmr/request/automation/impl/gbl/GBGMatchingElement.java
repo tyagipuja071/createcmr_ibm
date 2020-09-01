@@ -99,13 +99,8 @@ public class GBGMatchingElement extends MatchingElement {
       return result;
     }
 
-    // boolean continueCheck = true;
-    // List<String> usedNames = new ArrayList<String>();
-    // while (continueCheck) {
     if (currentAddress != null) {
-      // if ("ZS01".equals(currentAddress.getId().getAddrType())) {
-      // continueCheck = false;
-      // }
+
       request.setCity(currentAddress.getCity1());
 
       if (geoHandler != null && !geoHandler.customerNamesOnAddress()) {
@@ -118,6 +113,7 @@ public class GBGMatchingElement extends MatchingElement {
       String nameUsed = request.getCustomerName();
       LOG.debug("Checking GBG for " + nameUsed);
       // usedNames.add(nameUsed.toUpperCase());
+      request.setIssuingCountry(data.getCmrIssuingCntry());
       request.setStreetLine1(currentAddress.getAddrTxt());
       request.setStreetLine2(currentAddress.getAddrTxt2());
       request.setLandedCountry(currentAddress.getLandCntry());
@@ -168,21 +164,10 @@ public class GBGMatchingElement extends MatchingElement {
           gbgMatches = gbgMatches.subList(0, 4);
           details.append("Showing top 5 matches only.");
         }
-        int itemNo = 1;
+        int itemNo = 0;
         for (GBGResponse gbg : gbgMatches) {
-          if (!currentAddress.getLandCntry().equals(gbg.getCountry())) {
-            LOG.debug("Non-Local gbg found as highest match..");
-            details.append("\n")
-                .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
-            break;
-          } else if (defaultLandCntry != null && !defaultLandCntry.equals(gbg.getCountry())) {
-            LOG.debug("Non-Local gbg found as highest match..");
-            details.append("\n")
-                .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
-            engineData.addNegativeCheckStatus("_nonLocalGBGFound",
-                "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
-            break;
-          } else {
+          if (gbg.isDomesticGBG()) {
+            itemNo++;
             details.append("\n");
             if (gbg.isDnbMatch()) {
               LOG.debug("Matches found via D&B matching..");
@@ -199,17 +184,6 @@ public class GBGMatchingElement extends MatchingElement {
             output.addMatch(getProcessCode(), "GBG_ID", gbg.getGbgId(), "Derived", "Derived", "GBG", itemNo);
             output.addMatch(getProcessCode(), "BG_NAME", gbg.getBgName(), "Derived", "Derived", "GBG", itemNo);
             output.addMatch(getProcessCode(), "GBG_NAME", gbg.getGbgName(), "Derived", "Derived", "GBG", itemNo);
-
-            // else {
-            // LOG.debug("Matches found via Name matching..");
-            // details.append("\n").append("Found via Name matching [" +
-            // CommonWordsUtil.minimize(nameUsed) + "]):");
-            // output.addMatch(getProcessCode(), "LDE", gbg.getLdeRule(),
-            // "Name-Ctry/CMR Count", gbg.getCountry() + "/" +
-            // gbg.getCmrCount(),
-            // "GBG",
-            // itemNo);
-            // }
             details.append("\n").append("GBG: " + gbg.getGbgId() + " (" + gbg.getGbgName() + ")");
             details.append("\n").append("BG: " + gbg.getBgId() + " (" + gbg.getBgName() + ")");
             details.append("\n").append("Country: " + gbg.getCountry());
@@ -223,42 +197,29 @@ public class GBGMatchingElement extends MatchingElement {
             if (itemNo == 1) {
               engineData.put(AutomationEngineData.GBG_MATCH, gbg);
             }
-
-            itemNo++;
           }
         }
+
+        if (itemNo == 0) {
+          LOG.debug("Non-Local gbg found");
+          details.append("\n")
+              .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
+          engineData.addNegativeCheckStatus("_nonLocalGBGFound",
+              "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
+        } else if (itemNo > 1) {
+          LOG.debug("Multiple matches for Global Buying Groups retrieved");
+          details.append("\n").append(
+              "Mutilple matches for Global Buying Groups retrieved. Using the highest quality match for further calculations. CMDE review will be required.");
+          engineData.addNegativeCheckStatus("_nonLocalGBGFound", "Mutiple matches for Global Buying Groups retrieved.");
+
+        }
+
         result.setProcessOutput(output);
         result.setDetails(details.toString());
-        // continueCheck = false;
       } else {
-        // boolean nextFound = false;
-        // if (geoHandler != null && geoHandler.customerNamesOnAddress()) {
-        // for (Addr addr : requestData.getAddresses()) {
-        // String name = addr.getCustNm1() +
-        // (StringUtils.isBlank(addr.getCustNm2()) ? "" : " " +
-        // addr.getCustNm2());
-        // name = name.toUpperCase();
-        // if (!usedNames.contains(name)) {
-        // currentAddress = addr;
-        // nextFound = true;
-        // // make sure to clear duns on non-main address to trigger re
-        // // check of DUNS for next call
-        // dnbMatching = null;
-        // break;
-        // }
-        // }
-        // }
-
-        // if (!nextFound) {
-        // continueCheck = false;
-        // result.setDetails("No GBG was found using DUNS hierarchy matching
-        // and Name matching.");
         result.setDetails("No GBG was found using DUNS hierarchy matching.");
-        // engineData.addRejectionComment("No GBG was found using DUNS
-        // hierarchy matching and Name matching.");
         result.setResults("No Matches");
         result.setOnError(false);
-        // }
       }
     } else {
       result.setDetails("Missing main address on the request.");
@@ -266,7 +227,6 @@ public class GBGMatchingElement extends MatchingElement {
       result.setResults("Missing Address");
       result.setOnError(true);
     }
-    // }
     return result;
   }
 
