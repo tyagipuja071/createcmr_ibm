@@ -200,7 +200,7 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   private String func;
 
-  @Column(name="\"USER\"")
+  @Column(name = "\"USER\"")
   private String user;
 
   private String loc;
@@ -427,6 +427,8 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   @Column(name = "US_SICMEN")
   private String usSicmen;
+
+  private String military;
 
   public String getAbbrevNm() {
     return this.abbrevNm;
@@ -1522,6 +1524,14 @@ public class DataRdc extends BaseEntity<DataPK> implements Serializable {
 
   public void setUsSicmen(String usSicmen) {
     this.usSicmen = usSicmen;
+  }
+
+  public String getMilitary() {
+    return military;
+  }
+
+  public void setMilitary(String military) {
+    this.military = military;
   }
 
 }

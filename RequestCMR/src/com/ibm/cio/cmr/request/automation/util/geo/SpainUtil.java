@@ -105,6 +105,7 @@ public class SpainUtil extends AutomationUtil {
 
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
@@ -114,7 +115,7 @@ public class SpainUtil extends AutomationUtil {
     case SCENARIO_INTERNAL:
     case SCENARIO_INTERNAL_SO:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
     }
     return true;

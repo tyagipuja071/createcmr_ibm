@@ -2461,6 +2461,7 @@ public class LegacyDirectService extends TransConnService {
 
           boolean isDataUpdated = false;
           isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+          MessageTransformer transformer = TransformerManager.getTransformer(data.getCmrIssuingCntry());
 
           if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && !isDataUpdated) {
             for (Addr addr : addresses) {
@@ -2471,6 +2472,10 @@ public class LegacyDirectService extends TransConnService {
                 }
               }
             }
+          }
+
+          if (transformer.isUpdateNeededOnAllAddressType(entityManager, cmrObjects)) {
+            isDataUpdated = true;
           }
 
           for (Addr addr : addresses) {
@@ -2892,6 +2897,10 @@ public class LegacyDirectService extends TransConnService {
               }
             }
           }
+        }
+
+        if (transformer.isUpdateNeededOnAllAddressType(entityManager, cmrObjects)) {
+          isDataUpdated = true;
         }
 
         for (Addr addr : addresses) {
