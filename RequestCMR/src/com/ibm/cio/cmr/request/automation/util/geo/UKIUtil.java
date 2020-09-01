@@ -159,6 +159,7 @@ public class UKIUtil extends AutomationUtil {
     }
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
+    int coverageFieldUpdtd = 0;
     Set<String> resultCodes = new HashSet<String>();// D for Reject
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
@@ -185,6 +186,10 @@ public class UKIUtil extends AutomationUtil {
       case "Company Number":
       case "ISIC":
         cmdeReview = true;
+        // CMR - 6276
+        if ("INAC/NAC Code".equalsIgnoreCase(change.getDataField())) {
+          coverageFieldUpdtd++;
+        }
         break;
       case "Tax Code":
         // noop, for switch handling only
@@ -193,10 +198,10 @@ public class UKIUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "ISU Code":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Client Tier":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Sales Rep No":
         // noop, for switch handling only
@@ -207,9 +212,23 @@ public class UKIUtil extends AutomationUtil {
           // noop, for switch handling only
         }
         break;
+      case "Enterprise Number":
+        coverageFieldUpdtd++;
+        break;
       default:
         ignoredUpdates.add(change.getDataField());
         break;
+      }
+    }
+
+    if (coverageFieldUpdtd > 0) {
+      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
+      if (StringUtils.isNotBlank(managerID)) {
+        String req_manager = BluePagesHelper.getManagerEmail(admin.getRequesterId());
+        boolean managerCheck = managerID.equalsIgnoreCase(req_manager);
+        if (managerCheck) {
+          cmdeReview = false;
+        }
       }
     }
     if (resultCodes.contains("R")) {
