@@ -33,7 +33,7 @@
 || reqentry.getCmrIssuingCntry().equalsIgnoreCase("363")){ %>
       <form:hidden path="repTeamMemberNo" id="repTeamMemberNo"/>
     <%} else { %>
-    <cmr:column span="2" containerForField="SalRepNameNo">
+    <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,823,832,849,850,865">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
           <cmr:fieldLabel fieldId="SalRepNameNo" />:

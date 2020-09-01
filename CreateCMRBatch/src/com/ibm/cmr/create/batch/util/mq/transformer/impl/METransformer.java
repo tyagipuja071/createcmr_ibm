@@ -89,6 +89,11 @@ public class METransformer extends EMEATransformer {
   private static final String ADDRESS_USE_COUNTRY_F = "F";
   private static final String ADDRESS_USE_COUNTRY_G = "G";
   private static final String ADDRESS_USE_COUNTRY_H = "H";
+  private static final String[] GULF_ORIGINAL_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "762", "768", "772", "849" };
+  private static final String[] ME_GBMSBM_COUNTRIES = { "677", "680", "620", "832", "805", "767", "823", "675" };
+  private static final String SCENARIO_TYPE_SBM = "SBM";
+  private static final String SCENARIO_TYPE_GBM = "GBM";
+  private static final String GULF_DUPLICATE = "GULF";
 
   public METransformer(String issuingCntry) {
     super(issuingCntry);
@@ -641,10 +646,10 @@ public class METransformer extends EMEATransformer {
       // line6 = "";
       // }
       // } else {
-        if (!StringUtils.isBlank(addrData.getLandCntry())) {
-          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-        } else {
-          line6 = "";
+      if (!StringUtils.isBlank(addrData.getLandCntry())) {
+        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+      } else {
+        line6 = "";
         // }
       }
     }
@@ -694,8 +699,8 @@ public class METransformer extends EMEATransformer {
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
     if (custSubGrp.contains("IN")) {
-        generateCMRNoObj.setMin(990300);
-        generateCMRNoObj.setMax(999990);
+      generateCMRNoObj.setMin(990300);
+      generateCMRNoObj.setMax(999990);
       LOG.debug("that is ME INTER CMR");
     } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
       generateCMRNoObj.setMin(1000);
@@ -914,8 +919,15 @@ public class METransformer extends EMEATransformer {
 
       legacyCust.setAccAdminBo("");
       legacyCust.setCeDivision("");
-      legacyCust.setSalesGroupRep("099998");
-      legacyCust.setSalesRepNo("099998");
+      // CMR-5993
+      String cntry = legacyCust.getId().getSofCntryCode().trim();
+      String sales_Rep_ID = cntry + cntry;
+      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
+          && Arrays.asList(ME_GBMSBM_COUNTRIES).contains(cntry)) {
+        sales_Rep_ID = "530530";
+      }
+      legacyCust.setSalesGroupRep(sales_Rep_ID);
+      legacyCust.setSalesRepNo(sales_Rep_ID);
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
@@ -1055,12 +1067,6 @@ public class METransformer extends EMEATransformer {
 
     String cebo = data.getEngineeringBo();
     if (!StringUtils.isBlank(cebo)) {
-      // if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) ||
-      // SystemLocation.KYRGYZSTAN.equals(data.getCmrIssuingCntry())) {
-      // if (cebo.length() < 7) {
-      // cebo = StringUtils.rightPad(cebo, 7, '0');
-      // }
-      // }
       legacyCust.setCeBo(cebo);
     } else {
       legacyCust.setCeBo("");
@@ -1070,6 +1076,11 @@ public class METransformer extends EMEATransformer {
       String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
       if (sbo.length() < 7) {
         sbo = StringUtils.rightPad(sbo, 7, '0');
+      }
+      // CMR-5993
+      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
+          && Arrays.asList(ME_GBMSBM_COUNTRIES).contains(legacyCust.getId().getSofCntryCode())) {
+        sbo = "5300000";
       }
       legacyCust.setSbo(sbo);
       legacyCust.setIbo(sbo);
@@ -1541,7 +1552,7 @@ public class METransformer extends EMEATransformer {
     Map<String, String> addrSeqToAddrUseMap = new HashMap<String, String>();
     addrSeqToAddrUseMap = mapSeqNoToAddrUse(getAddrLegacy(entityManager, String.valueOf(requestId)));
 
-    LOG.debug("LEGACY -- CEE OVERRIDE transformOtherData");
+    LOG.debug("LEGACY -- ME OVERRIDE transformOtherData");
     LOG.debug("addrSeqToAddrUseMap size: " + addrSeqToAddrUseMap.size());
     for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
       if ("C".equals(cmrObjects.getAdmin().getReqType())) {

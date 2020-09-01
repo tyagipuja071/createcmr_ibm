@@ -361,6 +361,12 @@ public class LegacyDirectService extends TransConnService {
         CEEProcessService theService = new CEEProcessService();
         theService.processDupCreate(entityManager, admin, cmrObjects);
       }
+
+      // Add to build duplicate CMR data for ME countries -CMR6019
+      if ("Y".equals(cmrObjects.getData().getDupCmrIndc())) {
+        DupCMRProcessService theService = new DupCMRProcessService();
+        theService.processDupCreate(entityManager, admin, cmrObjects);
+      }
     }
   }
 
@@ -531,7 +537,7 @@ public class LegacyDirectService extends TransConnService {
         }
         // Add to update duplicate CMR data for Russia CMR-4606
         Data data = cmrObjects.getData();
-        if ("821".equals(data.getCmrIssuingCntry()) && ("Y".equals(data.getDupCmrIndc()) || data.getDupIssuingCntryCd() != null)) {
+        if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
           CEEProcessService theService = new CEEProcessService();
           theService.processDupUpdate(entityManager, admin, data, cmrObjects);
         }
