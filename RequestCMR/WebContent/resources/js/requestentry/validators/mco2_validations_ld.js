@@ -664,10 +664,10 @@ function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
     FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
-    FormManager.resetValidations('ibmDeptCostCenter');
+    FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
-  if (scenarioChanged) {
+  if (scenarioChanged && scenario != null && scenario != '') {
     FormManager.clearValue('ibmDeptCostCenter');
   }
 }
@@ -1096,7 +1096,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
+  // GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
