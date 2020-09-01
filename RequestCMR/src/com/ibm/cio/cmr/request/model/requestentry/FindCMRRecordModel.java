@@ -241,6 +241,8 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   private String usCmrRestrictTo;
   private String usCmrBpAccountType;
 
+  private String militaryFlag;
+
   public String getCustClass() {
     return custClass;
   }
@@ -1871,4 +1873,13 @@ public class FindCMRRecordModel implements Serializable, Comparable<FindCMRRecor
   public void setUsCmrBpAccountType(String usCmrBpAccountType) {
     this.usCmrBpAccountType = usCmrBpAccountType;
   }
+
+  public String getMilitaryFlag() {
+    return militaryFlag;
+  }
+
+  public void setMilitaryFlag(String militaryFlag) {
+    this.militaryFlag = militaryFlag;
+  }
+
 }
