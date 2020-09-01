@@ -222,19 +222,6 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  // CEWA - postal code should accept alphanumeric and spaces
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var postCd = FormManager.getActualValue('postCd');
-        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$")) {
-          return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-
   // addrCont + poBox should not exceed 21 characters
   // ",<space>PO<space>BOX<space>" is included when counting to 30 max
   FormManager.addFormValidator((function() {
@@ -1070,6 +1057,48 @@ function clearPOBoxFromGrid() {
   }
 }
 
+function addAddressGridValidatorStreetPOBox() {
+  console.log("addAddressGridValidatorStreetPOBox..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+
+          var missingPOBoxStreetAddrs = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '') || (record.addrTxt[0] != null && record.addrTxt[0] != '');
+            if (!isPOBoxOrStreetFilled) {
+              if (missingPOBoxStreetAddrs != '') {
+                missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0];
+              } else {
+                missingPOBoxStreetAddrs += record.addrTypeText[0];
+              }
+            }
+          }
+
+          if (missingPOBoxStreetAddrs != '') {
+            return new ValidationResult(null, false, 'Please fill-out either Street or PO BOX for the following address: ' + missingPOBoxStreetAddrs);
+          }
+
+          return new ValidationResult(null, true);
+
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1133,4 +1162,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAdditionalNameStreetContPOBoxValidator, GEOHandler.MCO2, null, true);
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
+  GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
 });
