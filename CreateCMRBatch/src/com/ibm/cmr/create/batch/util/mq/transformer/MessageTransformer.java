@@ -361,4 +361,8 @@ public abstract class MessageTransformer {
     return false;
   }
 
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    return false;
+  }
+
 }

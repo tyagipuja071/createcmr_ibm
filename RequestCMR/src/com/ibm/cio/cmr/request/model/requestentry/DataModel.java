@@ -240,6 +240,8 @@ public class DataModel extends BaseModel {
 
   private String usSicmen;
 
+  private String military;
+
   public String getCreditCd() {
     return creditCd;
   }
@@ -1152,6 +1154,14 @@ public class DataModel extends BaseModel {
 
   public void setUsSicmen(String usSicmen) {
     this.usSicmen = usSicmen;
+  }
+
+  public String getMilitary() {
+    return military;
+  }
+
+  public void setMilitary(String military) {
+    this.military = military;
   }
 
 }

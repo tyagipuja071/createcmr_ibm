@@ -2912,6 +2912,28 @@ function resetVatExemptOnchange() {
   });
 }
 
+function vatExemptOnScenario() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var subGrp = new Array();
+  subGrp = [ 'COMME', 'GOVRN', 'BUSPR', 'THDPT', 'XCOM', 'XBP' ];
+  for (var i = 0; i < subGrp.length; i++) {
+    if (custSubType == subGrp[i]) {
+      if (dijit.byId('vatExempt').get('checked')) {
+        FormManager.getField('vatExempt').set('checked', false);
+
+      }
+      break;
+    }
+  }
+
+}
+
+function resetVatExemptOnScenario() {
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    vatExemptOnScenario();
+  });
+}
+
 function lockLocationNo() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -3588,6 +3610,9 @@ function setICOAndDICMandatory() {
 }
 
 function setClassificationCodeCEE() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   FormManager.readOnly('custClass');
   if ('C' == FormManager.getActualValue('reqType')) {
     var _custType = FormManager.getActualValue('custSubGrp');
@@ -4196,6 +4221,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
   // CEE
   GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
