@@ -562,6 +562,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
               results.add(update);
             }
+          }
+
           if (TYPE_IBM.equals(type) && !equals(oldData.getMilitary(), newData.getMilitary())
               && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Military"))) {
             update = new UpdatedDataModel();
