@@ -235,6 +235,7 @@ public class SpainUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    int coverageFieldUpdtd = 0;
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -293,6 +294,10 @@ public class SpainUtil extends AutomationUtil {
       case "ISIC":
       case "Currency Code":
         cmdeReview = true;
+        // CMR - 6278
+        if ("INAC/NAC Code".equalsIgnoreCase(change.getDataField())) {
+          coverageFieldUpdtd++;
+        }
         break;
       case "Mode Of Payment":
       case "Mailing Condition":
@@ -306,13 +311,13 @@ public class SpainUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "ISU Code":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Client Tier Code":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Enterprise Number":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Sales Rep":
         // noop, for switch handling only
@@ -325,6 +330,16 @@ public class SpainUtil extends AutomationUtil {
       default:
         ignoredUpdates.add(change.getDataField());
         break;
+      }
+    }
+    if (coverageFieldUpdtd > 0) {
+      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
+      if (StringUtils.isNotBlank(managerID)) {
+        String req_manager = BluePagesHelper.getManagerEmail(admin.getRequesterId());
+        boolean managerCheck = managerID.equalsIgnoreCase(req_manager);
+        if (managerCheck) {
+          cmdeReview = false;
+        }
       }
     }
     if (resultCodes.contains("D")) {
