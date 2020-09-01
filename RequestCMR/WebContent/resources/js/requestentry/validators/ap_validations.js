@@ -1732,8 +1732,9 @@ function addCmrNoValidator() {
 function removeStateValidatorForHkMoNZ() {
   var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
     var landCntry = FormManager.getActualValue('landCntry');
-    if (FormManager.getActualValue('cmrIssuingCntry') == '616') {
-      if (landCntry == 'HK' || landCntry == 'MO') {
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
+      if (custGrp == 'CROSS') {
         FormManager.resetValidations('stateProv');
       } else {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
