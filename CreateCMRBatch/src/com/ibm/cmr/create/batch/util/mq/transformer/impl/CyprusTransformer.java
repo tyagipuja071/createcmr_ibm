@@ -399,12 +399,8 @@ public class CyprusTransformer extends EMEATransformer {
         legacyCust.setCollectionCd("");
       }
 
-      if (!StringUtils.isBlank(data.getModeOfPayment())) {
-        if (("X").equals(data.getModeOfPayment())) {
-          legacyCust.setModeOfPayment(" ");
-        } else {
-          legacyCust.setModeOfPayment(data.getModeOfPayment());
-        }
+      if (!StringUtils.isBlank(data.getModeOfPayment()) && data.getModeOfPayment().equals('5')) {
+        legacyCust.setModeOfPayment(data.getModeOfPayment());
       } else {
         legacyCust.setModeOfPayment("");
       }

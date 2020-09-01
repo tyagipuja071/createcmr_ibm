@@ -8087,6 +8087,28 @@ function addInacCodeValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function modeOfPaymentValidator() {
+  console.log("register modeOfPaymentValidator . . .");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var modeOfPayment = FormManager.getActualValue('modeOfPayment');
+        var role = FormManager.getActualValue('userRole');
+        if (FormManager.getActualValue('reqType') == 'U') {
+          if (modeOfPayment != "" && modeOfPayment != '5' && modeOfPayment != null) {
+            return new ValidationResult({
+              id : 'modeOfPayment',
+              type : 'text',
+              name : 'modeOfPayment'
+            }, false, 'Mode of Payment can either be 5 or blank.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8334,5 +8356,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartnerCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(setVatValidator, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.CYPRUS ], null, true);
+  GEOHandler.registerValidator(modeOfPaymentValidator, [ SysLoc.CYPRUS ], null, true);
   
 });
