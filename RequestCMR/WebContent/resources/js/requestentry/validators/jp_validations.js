@@ -680,7 +680,7 @@ function setAccountAbbNmForCreate() {
       } else {
         var blankSpaceLength = 22 - oldAccountAbbNm.length - 5;
         var blankSpace = '';
-        for ( var i = 0; i < blankSpaceLength; i++) {
+        for (var i = 0; i < blankSpaceLength; i++) {
           blankSpace += ' ';
         }
         accountAbbNm = oldAccountAbbNm + blankSpace + '   SO';
@@ -1935,7 +1935,7 @@ function disableFieldsForUpdate() {
       var accountFieldList = [ 'creditToCustNo', 'billToCustNo', 'tier2', 'salesTeamCd', 'custClass', 'custAcctType', 'outsourcingService', 'abbrevNm', 'zseriesSw', 'email2', 'salesBusOffCd',
           'salesTeamCd', 'func', 'oemInd', 'leasingCompanyIndc', 'searchTerm', 'repTeamMemberNo', 'govType', 'iinInd', 'valueAddRem', 'channelCd', 'siInd', 'inacType', 'inacCd', 'creditCd', 'csDiv',
           'rol' ];
-      for ( var i = 0; i < accountFieldList.length; i++) {
+      for (var i = 0; i < accountFieldList.length; i++) {
         disableFiled(accountFieldList[i]);
       }
     } else if (custType == 'CEA') {
@@ -2609,7 +2609,7 @@ function setAccountAbbNmOnAddrSaveCreate() {
       } else {
         var blankSpaceLength = 22 - fullEngNm.length - 5;
         var blankSpace = '';
-        for ( var i = 0; i < blankSpaceLength; i++) {
+        for (var i = 0; i < blankSpaceLength; i++) {
           blankSpace += ' ';
         }
         accountAbbNm = fullEngNm + blankSpace + '   SO';
@@ -2693,7 +2693,7 @@ function setINACCodeMandatory() {
     FormManager.resetValidations('inacCd');
     FormManager.resetDropdownValues(FormManager.getField('inacCd'));
   } else if (results != null && results.length > 0) {
-    for ( var i = 0; i < results.length; i++) {
+    for (var i = 0; i < results.length; i++) {
       if (results[i].ret2 != ' ' && results[i].ret3 == ' ') {
         isRequired = true;
         inacCd.push(results[i].ret2);
@@ -2740,7 +2740,7 @@ function addJSICLogic() {
 function checkSpecialOfficeCdList(officeCd) {
   var specialOfficeCdList = [ 'EN', 'OC', 'OM', 'OP', 'OR', 'O0', 'QS', 'QT', 'QY', 'QZ', 'Q9', 'VD', 'VE', 'VP', 'VR', 'VS', 'VT', 'VU', 'VW', 'VX', 'VY', 'VZ', 'WE', 'WS', 'WT', 'WU', 'WX', 'WZ',
       'W3', 'W6', 'XH', 'XY', 'XZ', 'X3', 'X4', 'X6', '0V', '2B', '2D', '2K', '2L', '2M', '2N', '2P', '2Q', '3A', '3M', '3N', '3P', '3R', '3X', '3Y', '4N', '4W', '6A', '72' ];
-  for ( var i = 0; i < specialOfficeCdList.length; i++) {
+  for (var i = 0; i < specialOfficeCdList.length; i++) {
     if (officeCd == specialOfficeCdList[i]) {
       return true;
     }
@@ -2758,7 +2758,7 @@ function getSector(officeCd) {
   };
   var results = cmr.query('GET.INACCD_SECTOR_CLUSTER_BY_OFCD', qParams);
   if (results != null && results.length > 0) {
-    for ( var i = 0; i < results.length; i++) {
+    for (var i = 0; i < results.length; i++) {
       if (results[i].ret2 == ' ' && results[i].ret3 != ' ') {
         sector.push(results[i].ret3);
       }
@@ -2777,7 +2777,7 @@ function getJSIC(sector) {
   };
   var results = cmr.query('GET.JSIC_BY_SECTOR', qParams);
   if (results != null && results.length > 0) {
-    for ( var i = 0; i < results.length; i++) {
+    for (var i = 0; i < results.length; i++) {
       jsicValueList.push(results[i].ret1);
     }
     return jsicValueList;
@@ -2819,7 +2819,7 @@ function addClusterOfcdLogic() {
   };
   var results = cmr.query('GET.INACCD_SECTOR_CLUSTER_BY_OFCD', qParams);
   if (results != null && results.length > 0) {
-    for ( var i = 0; i < results.length; i++) {
+    for (var i = 0; i < results.length; i++) {
       if (results[i].ret2 == ' ' && results[i].ret4 != ' ') {
         cluster = results[i].ret4;
       }
@@ -2904,7 +2904,7 @@ function performDPLCheck4JP() {
   var reqType = FormManager.getActualValue('reqType');
   var dplChkResult = FormManager.getActualValue('dplChkResult');
   if (reqType == 'C') {
-    if (custSubGrp == 'INTER' || custSubGrp == 'BPWPQ') {
+    if (custSubGrp == 'INTER' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
       FormManager.setValue('dplChkResult', 'NR');
     } else if (dplChkResult == 'NR') {
       FormManager.setValue('dplChkResult', 'Not Done');
@@ -3420,7 +3420,7 @@ function setTier2Required() {
   var matched = false;
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
-    for ( var i = 0; i < requiredDealerNoList.length; i++) {
+    for (var i = 0; i < requiredDealerNoList.length; i++) {
       if (dealerNo == requiredDealerNoList[i]) {
         matched = true;
       }
@@ -3583,7 +3583,7 @@ function checkEstabFuncCdMandatory() {
           var type = null;
           var estabFuncCd = null;
 
-          for ( var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             type = record.addrType;
             estabFuncCd = record.estabFuncCd;
@@ -4614,7 +4614,7 @@ function addAddressRecordsValidatorJP() {
 
         var hasCompany = false;
         var hasEstab = false;
-        for ( var i = 0; i < addresses.length; i++) {
+        for (var i = 0; i < addresses.length; i++) {
           var addrType = addresses[i].addrType ? addresses[i].addrType[0] : '';
           if (addrType == 'ZC01') {
             hasCompany = true;
@@ -4856,9 +4856,9 @@ function addressDuplicateValidator() {
         };
         var addrTypesInLOV = cmr.query('GET.ADDR_TYPES', qParams);
         if (addrTypesInLOV != null && CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-          for ( var i = 0; i < addrTypesInLOV.length; i++) {
+          for (var i = 0; i < addrTypesInLOV.length; i++) {
             var addrCount = 0;
-            for ( var j = 0; j < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; j++) {
+            for (var j = 0; j < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; j++) {
               var record = null;
               var type = null;
               record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(j);
@@ -4922,7 +4922,7 @@ function ROLValidatorForZC01() {
           var type = null;
           var rol = null;
 
-          for ( var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             type = record.addrType;
             rol = record.rol;
