@@ -318,6 +318,13 @@ public class CyprusTransformer extends EMEATransformer {
         legacyCust.setCustType("G");
       }
 
+      legacyCust.setDcRepeatAgreement("0"); // CAGXB
+      legacyCust.setLeasingInd("0"); // CIEDC
+      legacyCust.setAuthRemarketerInd("0"); // CIEXJ
+      if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "CRBUS".equals(custType)) {
+        legacyCust.setMrcCd("5");
+        legacyCust.setAuthRemarketerInd("1");
+      }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
@@ -426,9 +433,6 @@ public class CyprusTransformer extends EMEATransformer {
     // common data for C/U
     legacyCust.setCeDivision(""); // CCEDA
     legacyCust.setAccAdminBo(""); // RACBO
-    legacyCust.setDcRepeatAgreement(""); // CAGXB
-    legacyCust.setLeasingInd(""); // CIEDC
-    legacyCust.setAuthRemarketerInd("1"); // CIEXJ
 
     // SBO,IBO,REMXA,REMXD
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
