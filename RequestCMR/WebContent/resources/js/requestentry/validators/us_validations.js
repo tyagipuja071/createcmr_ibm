@@ -90,7 +90,13 @@ function addAddressRecordTypeValidator() {
               invoiceToCnt++;
             }
           }
-          if (installAtCnt != 1 || CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 2) {
+          // if (installAtCnt != 1 || CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >
+          // 2) {
+          // return new ValidationResult(null, false, 'The request should
+          // contain exactly one Install At address and one optional Invoice To
+          // address.');
+          // }
+          if (installAtCnt != 1 || invoiceToCnt > 1) {
             return new ValidationResult(null, false, 'The request should contain exactly one Install At address and one optional Invoice To address.');
           } else {
             return new ValidationResult(null, true);

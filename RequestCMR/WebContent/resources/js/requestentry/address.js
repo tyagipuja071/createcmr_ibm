@@ -124,7 +124,7 @@ function addrFormatter(value, rowIndex) {
     }
     return actions;
   }
-  if (addrType == 'ZS01' || addrType == 'ZI01') {
+  if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
       actions += '<input type="button" value="Copy" class="cmr-grid-btn" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\',\'' + name + '\')">';
     }
@@ -904,7 +904,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('addrType', 'ZP01');
     }
     if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN
-     || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+        || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
       FormManager.setValue('addrType', 'ZS01');
     }
     FormManager.clearValue('transportZone');
@@ -1766,21 +1766,21 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
-    	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {
-    		  continue;
-    	  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
-    		  continue;
-    	  } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
-    		  continue;
-    	  }
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+          continue;
+        } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+          continue;
+        } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
       }
-      
-      if(SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
-    	  if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
-    		  continue;
-    	  }
-      } 
+
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
 
       if (type.ret3 == cntry) {
         useCntry = true;
@@ -2149,7 +2149,7 @@ function addrFormatterIcons(value, rowIndex) {
     }
     return actions;
   }
-  if (addrType == 'ZS01' || addrType == 'ZI01') {
+  if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
       actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
           + '\',\'' + name + '\')">';
