@@ -301,6 +301,10 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
+        <cmr:view forCountry="666">
+          <cmr:gridCol width="90px" field="addrTxt2" header="${ui.grid.occupation}" />
+        </cmr:view>
+        
         <!-- PO Box for ES/PT/IL/GR/CY/TU/UKI -->
         <cmr:view forCountry="838,755,822,726,666,866,754">
           <cmr:gridCol width="90px" field="poBox" header="PO Box" />

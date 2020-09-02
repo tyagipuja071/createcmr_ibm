@@ -1481,22 +1481,6 @@ function addDistrictPostCodeCityValidator() {
     };
   })(), null, 'frmCMR_addressModal');
 }
-function addOccupationPOBoxValidator() {
-  console.log("addOccupationPOBoxValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.GREECE && FormManager.getActualValue('cmrIssuingCntry') != SysLoc.CYPRUS) {
-          return new ValidationResult(null, true);
-        }
-        if (FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('poBox') != '') {
-          return new ValidationResult(null, false, 'Please fill-out either PO Box or Occupation only.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
 
 function addOccupationPOBoxAttnPersonValidatorForCY() {
     console.log("CYPRUS - addOccupationPOBoxAttnPersonValidatorForCY..............");
@@ -3394,6 +3378,7 @@ var custType = FormManager.getActualValue('custGrp');
         }
         setClientTierAndISR(value);
       });
+      
     }
   }
   if (_CTCHandler == null) {
@@ -3482,16 +3467,9 @@ function setClientTierAndISR(value) {
     // FormManager.setValue('clientTier', '');
   }
   tierValues = null;
-  enterpriseLov = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
-      enterpriseLov = [];
       tierValues = [ 'V', '6', 'A', 'Z' ];
-      if (clientTier == '6') {
-        enterpriseLov = [ '822835', '822836' ];
-      }else if(clientTier == 'V'){
-        enterpriseLov = [ '822805'];
-      }
     } else if (value == '32') {
       tierValues = [ 'B', 'N', 'S', 'Z', 'M' ];
     } else if (value == '21') {
@@ -3505,14 +3483,6 @@ function setClientTierAndISR(value) {
     }
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
-  }
-  if (enterpriseLov != null) {
-    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-    if (enterpriseLov.length == 1) {
-      FormManager.setValue('enterprise', enterpriseLov[0]);
-    }
-  } else {
-    FormManager.resetDropdownValues(FormManager.getField('enterprise'));
   }
   setISRValues();
   
@@ -3699,6 +3669,7 @@ function setEnterprise(value) {
   var repTeam = FormManager.getActualValue('repTeamMemberNo');
   var valueChanged = false;
   var shouldSetEnterprise = false;
+  var enterpriseLov = null;
 
   if(cmr.currentTab == 'IBM_REQ_TAB') {
     valueChanged = _oldEnterpriseValue != value;  
@@ -3708,37 +3679,16 @@ function setEnterprise(value) {
     shouldSetEnterprise = true;
   }
     
-  if(cmrCntry == SysLoc.GREECE) {
-    if(shouldSetEnterprise) {
-      
-      var subindustry = FormManager.getActualValue('subIndustryCd');
-      var isicBasedChange = /^A|B|C|E|G|J|M|P|T|X/.test(subindustry);
-            
-      if (repTeam == '049050' && isu == '32' && ctc == 'S' && isicBasedChange) {
-        FormManager.setValue('enterprise', '822806');
-      } else if (repTeam == '041008' && isu == '32' && ctc == 'S' && subindustry != '' && !isicBasedChange) {
-        FormManager.setValue('enterprise', '822830');
-      } else if (value == '048257' && isu == '34' && ctc == '6') {
-        FormManager.setValue('enterprise', '822836');
-      } else if (value == '048257' && isu == '34' && ctc == '6') {
-        FormManager.setValue('enterprise', '822835');
-      } else if (getImportedIndcForGreece() == 'Y' && FormManager.getActualValue('reqType') == 'C'
-        && (FormManager.getActualValue('custSubGrp') == 'COMME'|| FormManager.getActualValue('custSubGrp') == 'GOVRN')){
-        // DO NOTHING -- Don't overwrite imported value
-      } else {
-        FormManager.setValue('enterprise', '');
-      }
-      _subindustryChanged = false;
-      FormManager.readOnly('subIndustryCd');
-    }
-    _oldEnterpriseValue = value;
-  }
-
   if (cmrCntry == SysLoc.CYPRUS) {
-    if (value == 'E33290' && isu == '32' && ctc == 'M') {
-      FormManager.setValue('enterprise', '822835');
-    } else {
-      FormManager.setValue('enterprise', '');
+    enterpriseLov = [];
+    if (isu == '34' && ctc == 'V') {
+      enterpriseLov= ['822805'];
+      FormManager.setValue('enterprise',  enterpriseLov[0]);
+    } else if(isu == '34' && ctc == '6'){
+      enterpriseLov = [ '822835', '822836' ];
+      FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+    }else{
+      FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
     }
   } 
 }
@@ -6632,7 +6582,7 @@ function lockRequireFieldsUKI() {
   }
 }
 
-function addStreetPoBoxValidatorUKI() {
+function addStreetPoBoxValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -6641,7 +6591,7 @@ function addStreetPoBoxValidatorUKI() {
         var addrType = FormManager.getActualValue('addrType');
         if ((addrType != undefined && addrType != '') && (addrType == 'ZS01' || addrType == 'ZP01')) {
           if (addrTxt == '' && poBox == '') {
-            return new ValidationResult(null, false, 'Please fill-out either Street Address or PO Box.');
+            return new ValidationResult(null, false, 'Please fill-out Street Address or PO Box or both.');
           }
           return new ValidationResult(null, true);
         }
@@ -8218,7 +8168,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateAbbrevNmLocnGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.registerValidator(addGRAddressTypeValidator, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addGRAddressGridValidatorStreetPOBox, [ SysLoc.GREECE ], null, true);
-  GEOHandler.registerValidator(addOccupationPOBoxValidator, [  SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addOccupationPOBoxAttnPersonValidatorForCY, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addStreetAddressFormValidatorGR, [ SysLoc.GREECE ], null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidatorGR, [ SysLoc.GREECE ], null, true);
@@ -8306,7 +8255,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateNumericValueUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterConfig(lockRequireFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(lockRequireFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.registerValidator(addStreetPoBoxValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
+  GEOHandler.registerValidator(addStreetPoBoxValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorUKI, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
   GEOHandler.addAddrFunction(autoPopulateISUClientTierUK, [ SysLoc.UK ]);
   GEOHandler.addAddrFunction(disableAddrFieldsUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
