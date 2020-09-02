@@ -167,7 +167,9 @@ public class ApprovalBatchService extends BaseBatchService {
           }
 
           if (isEROApproval(approvalType)) {
-            engine.initChecklist();
+            if (skip == false) {
+              engine.initChecklist();
+            }
           }
           if (CmrConstants.APPROVAL_PENDING_APPROVAL.equals(request.getStatus())) {
             LOG.debug("Sending approval email for Approval Request ID " + request.getId().getApprovalId());
