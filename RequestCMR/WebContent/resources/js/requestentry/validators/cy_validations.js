@@ -3484,7 +3484,6 @@ function setClientTierAndISR(value) {
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
   }
-  set
   
 }
 
