@@ -92,6 +92,10 @@ public class FstTransformer extends MCOTransformer {
       }
     }
 
+    if (StringUtils.isNotBlank(data.getIbmDeptCostCenter())) {
+      String deptCd = data.getIbmDeptCostCenter().substring(2);
+      legacyCust.setDeptCd(deptCd);
+    }
   }
 
   // @Override
