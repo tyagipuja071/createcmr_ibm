@@ -3373,8 +3373,7 @@ var custType = FormManager.getActualValue('custGrp');
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
         if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
           FormManager.clearValue('repTeamMemberNo');
-          FormManager.setValue('salesBusOffCd', '');
-          FormManager.setValue('salesTeamCd', '');          
+          FormManager.setValue('salesBusOffCd', '');        
         }
         setClientTierAndISR(value);
       });
@@ -3383,12 +3382,13 @@ var custType = FormManager.getActualValue('custGrp');
   }
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setISRValues();
+      setSalesBoSboIbo();
+      setEnterprise();
     });
   }
 
   if (_gtcISRHandler == null) {
-    dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
+    dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
       setSalesBoSboIbo();
     });
   }
@@ -3484,7 +3484,7 @@ function setClientTierAndISR(value) {
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
   }
-  setISRValues();
+  set
   
 }
 
@@ -3663,10 +3663,10 @@ function setISRValues() {
 
 var _oldEnterpriseValue = '';
 function setEnterprise(value) {
-  var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
-  var repTeam = FormManager.getActualValue('repTeamMemberNo');
+  var repTeam = FormManager.getActualValue('salesTeamCd');
+  var sbo = FormManager.getActualValue('salesBusOffCd');
   var valueChanged = false;
   var shouldSetEnterprise = false;
   var enterpriseLov = null;
@@ -3679,18 +3679,17 @@ function setEnterprise(value) {
     shouldSetEnterprise = true;
   }
     
-  if (cmrCntry == SysLoc.CYPRUS) {
-    enterpriseLov = [];
-    if (isu == '34' && ctc == 'V') {
-      enterpriseLov= ['822805'];
-      FormManager.setValue('enterprise',  enterpriseLov[0]);
-    } else if(isu == '34' && ctc == '6'){
-      enterpriseLov = [ '822835', '822836' ];
-      FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-    }else{
-      FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-    }
-  } 
+  enterpriseLov = [];
+  if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
+    enterpriseLov= ['822805'];
+    FormManager.setValue('enterprise',  enterpriseLov[0]);
+  } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
+    enterpriseLov = [ '822835', '822836' ];
+    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+  }else{
+    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+  }
+   
 }
 
 function hideCollectionCd() {
@@ -3703,22 +3702,22 @@ function hideCollectionCd() {
 }
 
 function setSalesBoSboIbo() {
-  var repTeamMemberNo = FormManager.getActualValue('repTeamMemberNo');
+  var salesRep = FormManager.getActualValue('salesTeamCd');
   
   if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE && repTeamMemberNo.length > 6) {
     repTeamMemberNo = repTeamMemberNo.substring(0,6);
   }
   
-  if (repTeamMemberNo != '') {
+  if (salesRep != '') {
     var qParams = {
       ISSUING_CNTRY : FormManager.getActualValue('cmrIssuingCntry'),
-      REP_TEAM_CD : repTeamMemberNo
+      REP_TEAM_CD : salesRep
     };
     var result = cmr.query('DATA.GET.SALES_BO_CD', qParams);
     var salesBoCd = result.ret1;
     var selsr = result.ret2;
     FormManager.setValue('salesBusOffCd', salesBoCd);
-    FormManager.setValue('salesTeamCd', selsr);
+    FormManager.setValue('repTeamMemberNo', selsr);
   } else {
     FormManager.setValue('salesBusOffCd', '');
   }
@@ -3858,6 +3857,7 @@ function setFieldsToReadOnlyGRCYTR() {
   }
   FormManager.readOnly('salesTeamCd');
   FormManager.readOnly('subIndustryCd');
+  FormManager.readOnly('repTeamMemberNo');
 }
 
 function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) {
@@ -4142,7 +4142,6 @@ function setCustSubTypeBpGRTRCY() {
     }
   }
 
-   setISRValues();
 }
 
 function disableINACEnterpriseOnViewOnly() {
