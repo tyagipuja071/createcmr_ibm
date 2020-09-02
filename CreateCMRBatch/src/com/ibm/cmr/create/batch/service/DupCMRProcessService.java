@@ -106,9 +106,10 @@ public class DupCMRProcessService extends LegacyDirectService {
    * @param admin
    * @throws Exception
    */
-  protected void processDupUpdate(EntityManager entityManager, Admin admin, Data data, CMRRequestContainer cmrObjects) throws Exception {
+  protected void processDupUpdate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Update processing of Request " + admin.getId().getReqId());
-    // Add to limited this process just used for RU for now
+    Data data = cmrObjects.getData();
+
     if (ME_DUPCOUNTRY_LIST.contains(data.getCmrIssuingCntry().trim())) {
       String dupCntry = "675";
       LegacyDirectObjectContainer legacyDupObjects = mapRequestDupDataForUpdate(entityManager, cmrObjects, dupCntry);
@@ -634,6 +635,17 @@ public class DupCMRProcessService extends LegacyDirectService {
       dummyQueue.setReqStatus(MQMsgConstants.REQ_STATUS_NEW);
       transformer.transformLegacyCustomerData(entityManager, dummyHandler, cust, cmrObjects);
     }
+    // CMR-6019 special field for ME dup cntry -675
+    if ("675".equals(dupCntry)) {
+      cust.setCeBo(data.getCmrIssuingCntry() + "0000");
+      if (!"5300000".equals(cust.getSbo())) {
+        cust.setSbo("6750000");
+        cust.setIbo("6750000");
+        cust.setSalesGroupRep("675675");
+        cust.setSalesRepNo("675675");
+      }
+    }
+
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
 
