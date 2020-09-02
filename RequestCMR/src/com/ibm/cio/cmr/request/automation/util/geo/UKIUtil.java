@@ -221,7 +221,7 @@ public class UKIUtil extends AutomationUtil {
         if (!managerCheck) {
           cmdeReview = true;
         } else {
-          cmdeReview = false;
+          admin.setScenarioVerifiedIndc("Y");
         }
       }
     }
