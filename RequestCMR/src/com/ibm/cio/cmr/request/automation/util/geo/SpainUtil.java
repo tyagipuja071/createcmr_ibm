@@ -290,14 +290,9 @@ public class SpainUtil extends AutomationUtil {
           }
         }
         break;
-      case "INAC/NAC Code":
       case "ISIC":
       case "Currency Code":
         cmdeReview = true;
-        // CMR - 6278
-        if ("INAC/NAC Code".equalsIgnoreCase(change.getDataField())) {
-          coverageFieldUpdtd++;
-        }
         break;
       case "Mode Of Payment":
       case "Mailing Condition":
@@ -311,12 +306,9 @@ public class SpainUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "ISU Code":
-        coverageFieldUpdtd++;
-        break;
       case "Client Tier Code":
-        coverageFieldUpdtd++;
-        break;
       case "Enterprise Number":
+      case "INAC/NAC Code":
         coverageFieldUpdtd++;
         break;
       case "Sales Rep":
@@ -337,8 +329,10 @@ public class SpainUtil extends AutomationUtil {
       if (StringUtils.isNotBlank(managerID)) {
         String req_manager = BluePagesHelper.getManagerEmail(admin.getRequesterId());
         boolean managerCheck = managerID.equalsIgnoreCase(req_manager);
-        if (managerCheck) {
-          cmdeReview = false;
+        if (!managerCheck) {
+          cmdeReview = true;
+        } else {
+          admin.setScenarioVerifiedIndc("Y");
         }
       }
     }
