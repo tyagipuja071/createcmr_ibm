@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -332,6 +333,32 @@ public class MCOSaHandler extends MCOHandler {
     } else {
       data.setCodCondition("N");
       data.setCommercialFinanced("");
+    }
+  }
+
+  @Override
+  protected void handleSOFSequenceImport(List<FindCMRRecordModel> records, String cmrIssuingCntry) {
+    String addrKey = "Mailing";
+    String seqNoFromSOF = null;
+    for (FindCMRRecordModel record : records) {
+      if (!"ZS01".equals(record.getCmrAddrTypeCode())) {
+        return;
+      }
+      seqNoFromSOF = this.currentImportValues.get(addrKey + "AddressNumber");
+      if (!StringUtils.isEmpty(seqNoFromSOF)) {
+        LOG.trace("Assigning SOF Sequence " + seqNoFromSOF + " to " + addrKey);
+        record.setCmrAddrSeq(seqNoFromSOF);
+      }
+    }
+  }
+
+  @Override
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    address.setCustNm1(currentRecord.getCmrName1Plain());
+    address.setCustNm2(currentRecord.getCmrName2Plain());
+    if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
+      address.getId().setAddrSeq(seq);
     }
   }
 
