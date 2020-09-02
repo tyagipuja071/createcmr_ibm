@@ -1732,9 +1732,9 @@ function addCmrNoValidator() {
 function removeStateValidatorForHkMoNZ() {
   var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
     var landCntry = FormManager.getActualValue('landCntry');
-    var custGrp = FormManager.getActualValue('custGrp');
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
-      if (custGrp == 'CROSS') {
+      var custGrp = FormManager.getActualValue('custGrp');
+      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
+        if (custGrp == 'CROSS') {
         FormManager.resetValidations('stateProv');
       } else {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);
@@ -2125,8 +2125,15 @@ function addContactInfoValidator() {
               }
               break;
             case '796':
-            case '616':
               if ((custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
+                mandtDetails_2++;
+              }
+              break;
+            case '616':
+              var custGrp = FormManager.getActualValue('custGrp');
+              if (custGrp != 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null || state == null)) {
+                mandtDetails_2++;
+              }else if (custGrp == 'CROSS' && (custName == null || streetAddr == null || postCd == null || city == null)) {
                 mandtDetails_2++;
               }
               break;
