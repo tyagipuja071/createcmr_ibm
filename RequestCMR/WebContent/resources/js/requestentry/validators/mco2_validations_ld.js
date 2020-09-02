@@ -180,11 +180,11 @@ function addAddressTypeValidator() {
 
 function fstAddressValidator(zp01Cnt, zs01Cnt, zs02Cnt) {
   if (zp01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Billing address is allowed.');
+    return new ValidationResult(null, false, 'Only one Bill-to address is allowed.');
   } else if (zs02Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
+    return new ValidationResult(null, false, 'Only one Mail-to address is allowed.');
   } else if (zs01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Installing address is allowed.');
+    return new ValidationResult(null, false, 'Only one Install-at address is allowed.');
   } else {
     return new ValidationResult(null, true);
   }
@@ -385,7 +385,7 @@ function scenariosAbbrvLocOnChange() {
 function addAddrValidatorMCO2() {
   FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer Name Continuation' ]);
-  FormManager.addValidator('custNm4', Validators.LATIN, [ 'Division/ Floor/ Building/ Department/ Attention Person' ]);
+  FormManager.addValidator('custNm4', Validators.LATIN, [ 'Additional Name or Address Information' ]);
   FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
   FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
   FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Abbreviated Name' ]);
@@ -621,7 +621,7 @@ function setAddressDetailsForView() {
     $('label[for="custNm1_view"]').text('Customer Name:');
     $('label[for="custNm2_view"]').text('Customer Name Continuation:');
     $('label[for="landCntry_view"]').text('Country (Landed):');
-    $('label[for="custNm4_view"]').text('Division/ Floor/ Building/ Department/ Attention Person:');
+    $('label[for="custNm4_view"]').text('Additional Name or Address Information:');
     $('label[for="addrTxt_view"]').text('Street:');
     $('label[for="addrTxt2_view"]').text('Street Continuation:');
     $('label[for="custPhone_view"]').text('Phone #:');
@@ -649,6 +649,7 @@ function lockAbbrv() {
 function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
   if (scenario == 'INTER' || scenario == 'XINTE') {
     FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
     FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
@@ -1099,6 +1100,41 @@ function addAddressGridValidatorStreetPOBox() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
+function addInternalDeptNumberValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = null;
+        var scenario = null;
+        if (typeof (_pagemodel) != 'undefined') {
+          reqType = FormManager.getActualValue('reqType');
+          scenario = FormManager.getActualValue('custSubGrp');
+        }
+
+        if (!(scenario == 'INTER' || scenario == 'XINTE' || reqType == 'U')) {
+          return new ValidationResult(null, true);
+        }
+
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return new ValidationResult(null, true);
+        }
+
+        var internalDept = FormManager.getActualValue('ibmDeptCostCenter');
+
+        if (internalDept == '') {
+          return new ValidationResult(null, true);
+        } else {
+          if (internalDept.length != 6) {
+            return new ValidationResult(null, false, 'Internal Department Number should be 6 characters long.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1163,4 +1199,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
+  GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
+
 });
