@@ -182,14 +182,9 @@ public class UKIUtil extends AutomationUtil {
           }
         }
         break;
-      case "INAC/NAC Code":
       case "Company Number":
       case "ISIC":
         cmdeReview = true;
-        // CMR - 6276
-        if ("INAC/NAC Code".equalsIgnoreCase(change.getDataField())) {
-          coverageFieldUpdtd++;
-        }
         break;
       case "Tax Code":
         // noop, for switch handling only
@@ -197,10 +192,10 @@ public class UKIUtil extends AutomationUtil {
       case "VAT #":
         // noop, for switch handling only
         break;
+      case "INAC/NAC Code":
       case "ISU Code":
-        coverageFieldUpdtd++;
-        break;
       case "Client Tier":
+      case "Enterprise Number":
         coverageFieldUpdtd++;
         break;
       case "Sales Rep No":
@@ -211,9 +206,6 @@ public class UKIUtil extends AutomationUtil {
             || "E".equals(change.getNewData())) {
           // noop, for switch handling only
         }
-        break;
-      case "Enterprise Number":
-        coverageFieldUpdtd++;
         break;
       default:
         ignoredUpdates.add(change.getDataField());
@@ -226,7 +218,9 @@ public class UKIUtil extends AutomationUtil {
       if (StringUtils.isNotBlank(managerID)) {
         String req_manager = BluePagesHelper.getManagerEmail(admin.getRequesterId());
         boolean managerCheck = managerID.equalsIgnoreCase(req_manager);
-        if (managerCheck) {
+        if (!managerCheck) {
+          cmdeReview = true;
+        } else {
           cmdeReview = false;
         }
       }
