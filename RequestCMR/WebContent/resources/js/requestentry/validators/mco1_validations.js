@@ -74,6 +74,7 @@ function afterConfigForZA() {
   }
 
   FormManager.setValue('defaultLandedCountry', landCntry);
+  FormManager.setValue('landCntry', landCntry);
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
 
