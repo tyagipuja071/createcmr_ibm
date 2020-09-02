@@ -1298,6 +1298,17 @@ public class MEHandler extends BaseSOFHandler {
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && data != null && "ZP02".equals(addr.getId().getAddrType())) {
       upperChar(addr);
     }
+
+    if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+      if (StringUtils.isNotBlank(addr.getPoBox())) {
+        if (StringUtils.isNotBlank(addr.getPostCd())) {
+          addr.setPoBoxPostCd(addr.getPostCd());
+        }
+        if (StringUtils.isNotBlank(addr.getCity1())) {
+          addr.setPoBoxCity(addr.getCity1());
+        }
+      }
+    }
   }
 
   @Override
