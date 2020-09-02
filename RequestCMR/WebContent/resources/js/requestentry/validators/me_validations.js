@@ -2263,6 +2263,8 @@ function addCmrNoValidatorForME() {
             return new ValidationResult(null, false, 'CMR Number should be in 99XXXX format for internal scenarios');
           } else if (cmrNo != '' && custSubType != '' && !custSubType.includes('IN') && cmrNo.startsWith('99')) {
             return new ValidationResult(null, false, 'Non Internal CMR Number should not be in 99XXXX for scenarios');
+          } else if (cmrNo != '' && custSubType != '' && !custSubType.includes('IN') && cmrNo.startsWith('00')) {
+            return new ValidationResult(null, false, 'Non BP CMR Number should not be in 00XXXX for scenarios');
           } else if (cmrNo != '' && custSubType != '' && (custSubType.includes('BP') || custSubType.includes('BUS')) && !cmrNo.startsWith('00')) {
             return new ValidationResult(null, false, 'CMR Number should start with 00xxxx for BP scenarios');
           } else {
