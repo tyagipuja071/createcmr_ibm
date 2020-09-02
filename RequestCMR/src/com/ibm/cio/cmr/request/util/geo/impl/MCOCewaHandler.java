@@ -45,9 +45,11 @@ public class MCOCewaHandler extends MCOHandler {
         seq = StringUtils.leftPad(seq, 5, '0');
         address.getId().setAddrSeq(seq);
       }
+      address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+      if (!("ZS01".equals(address.getId().getAddrType()) || "ZD01".equals(address.getId().getAddrType()))) {
+        address.setCustPhone("");
+      }
     }
-
-    address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
   }
 
   @Override
