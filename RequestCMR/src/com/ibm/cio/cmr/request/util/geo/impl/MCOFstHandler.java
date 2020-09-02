@@ -80,6 +80,7 @@ public class MCOFstHandler extends MCOHandler {
         seq = StringUtils.leftPad(seq, 5, '0');
         address.getId().setAddrSeq(seq);
       }
+      address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
     }
   }
 
