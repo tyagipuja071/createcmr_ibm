@@ -54,7 +54,7 @@ public class MCOSaHandler extends MCOHandler {
       // name3 in rdc = attn on SOF
       if (!StringUtils.isEmpty(record.getCmrName3())) {
         if (record.getCmrName3().startsWith("ATT")) {
-          record.setCmrName4(LegacyCommonUtil.removeATT(record.getCmrName3()));
+          record.setCmrName4(record.getCmrName3());
         }
         record.setCmrName3(null);
       }
@@ -371,6 +371,20 @@ public class MCOSaHandler extends MCOHandler {
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
       address.getId().setAddrSeq(seq);
+    }
+
+    if ("D".equals(address.getImportInd())) {
+      String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
+      address.getId().setAddrSeq(seq);
+    }
+
+    if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
+      address.setCustPhone("");
+    } else if ("ZD01".equals(address.getId().getAddrType())) {
+      String phone = getShippingPhoneFromLegacy(currentRecord);
+      address.setCustPhone(phone != null ? phone : "");
+    } else if ("ZS01".equals(address.getId().getAddrType())) {
+      address.setCustPhone(currentRecord.getCmrCustPhone());
     }
   }
 
@@ -801,6 +815,16 @@ public class MCOSaHandler extends MCOHandler {
     LOG.trace("State: " + address.getCmrState());
     LOG.trace("Country: " + address.getCmrCountryLanded());
 
+  }
+
+  private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {
+    List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
+    for (CmrtAddr cmrtAddr : cmrtAddrs) {
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && address.getCmrAddrSeq().equals(cmrtAddr.getId().getAddrNo())) {
+        return cmrtAddr.getAddrPhone();
+      }
+    }
+    return null;
   }
 
 }
