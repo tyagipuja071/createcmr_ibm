@@ -12,7 +12,7 @@ function addAfterConfigAP() {
     FormManager.removeValidator('vat', Validators.REQUIRED);
   }
 
-  if (cntry == '834' && reqType == 'C' && role == 'PROCESSOR' && custType == 'CROSS' && custSubGrp == 'SPOFF') {
+  if (cntry == '834' && reqType == 'C' && role == 'REQUESTER' && custType == 'CROSS' && custSubGrp == 'SPOFF') {
     FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('cmrNo', Validators.REQUIRED);
@@ -68,7 +68,7 @@ function addAfterConfigAP() {
     FormManager.enable('postCd');
   }
 
-  if (reqType == 'C' && role == 'PROCESSOR' && custGrp == 'CROSS' && custSubGrp == 'SPOFF' && cntry == '834') {
+  if (reqType == 'C' && custGrp == 'CROSS' && custSubGrp == 'SPOFF' && cntry == '834') {
     FormManager.enable('cmrNo');
   } else {
     FormManager.readOnly('cmrNo');
@@ -1732,8 +1732,9 @@ function addCmrNoValidator() {
 function removeStateValidatorForHkMoNZ() {
   var _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
     var landCntry = FormManager.getActualValue('landCntry');
-    if (FormManager.getActualValue('cmrIssuingCntry') == '616') {
-      if (landCntry == 'HK' || landCntry == 'MO') {
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.AUSTRALIA) {
+      if (custGrp == 'CROSS') {
         FormManager.resetValidations('stateProv');
       } else {
         FormManager.addValidator('stateProv', Validators.REQUIRED, [ 'State/Province' ], null);

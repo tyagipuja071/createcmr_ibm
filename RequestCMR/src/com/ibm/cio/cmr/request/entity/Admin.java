@@ -749,19 +749,19 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
   }
 
   public String getPaygoProcessIndc() {
-	return paygoProcessIndc;
+    return paygoProcessIndc;
   }
 
   public void setPaygoProcessIndc(String paygoProcessIndc) {
-	this.paygoProcessIndc = paygoProcessIndc;
+    this.paygoProcessIndc = paygoProcessIndc;
   }
 
   public String getPoolCmrIndc() {
-	return poolCmrIndc;
+    return poolCmrIndc;
   }
 
   public void setPoolCmrIndc(String poolCmrIndc) {
-	this.poolCmrIndc = poolCmrIndc;
+    this.poolCmrIndc = poolCmrIndc;
   }
 
 }

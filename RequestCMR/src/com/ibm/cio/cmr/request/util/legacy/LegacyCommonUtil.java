@@ -218,6 +218,15 @@ public class LegacyCommonUtil {
     return false;
   }
 
+  public static String doFormatPoBox(String poBox) {
+    boolean poBoxFlag = poBox.contains("PO BOX");
+    if (poBoxFlag) {
+      return poBox.substring(6).trim();
+    } else {
+      return poBox;
+    }
+  }
+  
   public static AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {
     LOG.debug("Searching for Addr_RDC records for Legacy Processing " + addr.getId().getReqId());
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDADDR");

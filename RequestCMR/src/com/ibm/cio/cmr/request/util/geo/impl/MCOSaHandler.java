@@ -3,12 +3,28 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 
 /**
  * Handler for MCO South Africa
@@ -19,6 +35,173 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 public class MCOSaHandler extends MCOHandler {
 
   protected static final Logger LOG = Logger.getLogger(MCOSaHandler.class);
+
+  @Override
+  protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
+      FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+      // only add zs01 equivalent for create by model
+      FindCMRRecordModel record = mainRecord;
+
+      if (!StringUtils.isEmpty(record.getCmrName4())) {
+        // name4 in rdc is street con't
+        record.setCmrStreetAddressCont(record.getCmrName4());
+        record.setCmrName4(null);
+      }
+
+      // name3 in rdc = attn on SOF
+      if (!StringUtils.isEmpty(record.getCmrName3())) {
+        if (record.getCmrName3().startsWith("ATT")) {
+          record.setCmrName4(LegacyCommonUtil.removeATT(record.getCmrName3()));
+        }
+        record.setCmrName3(null);
+      }
+
+      if (!StringUtils.isBlank(record.getCmrPOBox())) {
+        record.setCmrPOBox(record.getCmrPOBox());
+      }
+      if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+        record.setCmrAddrSeq("00001");
+      } else {
+        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+      }
+
+      record.setCmrName2Plain(record.getCmrName2Plain());
+      record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
+      record.setCmrDept(null);
+
+      if (StringUtils.isEmpty(record.getCmrCustPhone())) {
+        record.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
+      }
+      converted.add(record);
+    } else {
+
+      String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
+      if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
+
+        if (source.getItems() != null) {
+
+          String addrType = null;
+          String seqNo = null;
+          List<String> sofUses = null;
+          FindCMRRecordModel addr = null;
+
+          // map RDc - SOF - CreateCMR by sequence no
+          for (FindCMRRecordModel record : source.getItems()) {
+            seqNo = record.getCmrAddrSeq();
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+              for (String sofUse : sofUses) {
+                addrType = getAddressTypeByUse(sofUse);
+                if (!StringUtils.isEmpty(addrType)) {
+                  addr = cloneAddress(record, addrType);
+                  LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+
+                  // name3 in rdc = Address Con't on SOF
+                  addr.setCmrStreetAddressCont(record.getCmrName4());
+                  addr.setCmrName3(null);
+                  if (record.getCmrName3() != null && record.getCmrName3().startsWith("ATT")) {
+                    addr.setCmrName4(LegacyCommonUtil.removeATT(record.getCmrName3()));
+                  }
+
+                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                    String poBox = record.getCmrPOBox().trim();
+                    addr.setCmrPOBox(LegacyCommonUtil.doFormatPoBox(poBox));
+                  }
+
+                  if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                    addr.setCmrAddrSeq("00001");
+                  }
+                  converted.add(addr);
+                }
+              }
+            }
+          }
+        }
+      } else {
+
+        // import process:
+        // a. Import ZS01 record from RDc, only 1
+        // b. Import Installing addresses from RDc if found
+        // c. Import EplMailing from RDc, if found. This will also be an
+        // installing in RDc
+        // d. Import all shipping, fiscal, and mailing from SOF
+
+        // customer phone is in BillingPhone
+        if (StringUtils.isEmpty(mainRecord.getCmrCustPhone())) {
+          mainRecord.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
+        }
+
+        Map<String, FindCMRRecordModel> zi01Map = new HashMap<String, FindCMRRecordModel>();
+
+        // parse the rdc records
+        String cmrCountry = mainRecord != null ? mainRecord.getCmrIssuedBy() : "";
+
+        if (source.getItems() != null) {
+          for (FindCMRRecordModel record : source.getItems()) {
+
+            if (!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+              LOG.trace("Non Sold-to will be ignored. Will get from SOF");
+              this.rdcShippingRecords.add(record);
+              continue;
+            }
+
+            if (!StringUtils.isEmpty(record.getCmrName4())) {
+              // name4 in rdc is street con't
+              record.setCmrStreetAddressCont(record.getCmrName4());
+              record.setCmrName4(null);
+            }
+
+            // name3 in rdc = attn on SOF
+            if (!StringUtils.isEmpty(record.getCmrName3())) {
+              record.setCmrName4(record.getCmrName3());
+              record.setCmrName3(null);
+            }
+
+            if (!StringUtils.isBlank(record.getCmrPOBox())) {
+              record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+            }
+
+            if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+              record.setCmrAddrSeq("00001");
+            } else {
+              record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+            }
+
+            converted.add(record);
+
+          }
+        }
+
+        // add the missing records
+        if (mainRecord != null) {
+
+          FindCMRRecordModel record = null;
+
+          // import all shipping from SOF
+          List<String> sequences = this.shippingSequences;
+          if (sequences != null && !sequences.isEmpty()) {
+            LOG.debug("Shipping Sequences is not empty. Importing " + sequences.size() + " shipping addresses.");
+            for (String seq : sequences) {
+              record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping_" + seq + "_", zi01Map);
+              if (record != null) {
+                converted.add(record);
+              }
+            }
+          } else {
+            LOG.debug("Shipping Sequences is empty. ");
+            record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping", zi01Map);
+            if (record != null) {
+              converted.add(record);
+            }
+          }
+
+          importOtherSOFAddresses(entityManager, cmrCountry, zi01Map, converted);
+        }
+      }
+    }
+  }
 
   @Override
   protected void handleSOFAddressImport(EntityManager entityManager, String cmrIssuingCntry, FindCMRRecordModel address, String addressKey) {
@@ -133,4 +316,111 @@ public class MCOSaHandler extends MCOHandler {
     LOG.trace("Country: " + address.getCmrCountryLanded());
 
   }
+
+  @Override
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    super.setDataValuesOnImport(admin, data, results, mainRecord);
+    if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+      data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+      data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
+    }
+
+    String mop = legacyObjects.getCustomer().getModeOfPayment();
+    if (mop == "R" || mop == "S" || mop == "T") {
+      data.setCommercialFinanced(mop);
+    } else if (mop == "5") {
+      data.setCodCondition(mop);
+    } else {
+      data.setCodCondition("N");
+      data.setCommercialFinanced("");
+    }
+  }
+
+  @Override
+  protected void handleSOFSequenceImport(List<FindCMRRecordModel> records, String cmrIssuingCntry) {
+    String addrKey = "Mailing";
+    String seqNoFromSOF = null;
+    for (FindCMRRecordModel record : records) {
+      if (!"ZS01".equals(record.getCmrAddrTypeCode())) {
+        return;
+      }
+      seqNoFromSOF = this.currentImportValues.get(addrKey + "AddressNumber");
+      if (!StringUtils.isEmpty(seqNoFromSOF)) {
+        LOG.trace("Assigning SOF Sequence " + seqNoFromSOF + " to " + addrKey);
+        record.setCmrAddrSeq(seqNoFromSOF);
+      }
+    }
+  }
+
+  @Override
+  public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    address.setCustNm1(currentRecord.getCmrName1Plain());
+    address.setCustNm2(currentRecord.getCmrName2Plain());
+    if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+      String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
+      address.getId().setAddrSeq(seq);
+    }
+  }
+
+  @Override
+  protected String getAddressTypeByUse(String addressUse) {
+    switch (addressUse) {
+    case "1":
+      return "ZS01";
+    case "2":
+      return "ZP01";
+    case "3":
+      return "ZI01";
+    case "4":
+      return "ZD01";
+    case "5":
+      return "ZS02";
+    }
+    return null;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newSeq = null;
+    return newSeq;
+  }
+
+  @Override
+  public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01", "ZS02");
+  }
+
+  @Override
+  public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return null;
+  }
+
+  @Override
+  public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("ZD01", "ZI01");
+  }
+
+  @Override
+  public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
+    return Arrays.asList("5");
+  }
+
+  @Override
+  public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
+    if (SystemLocation.SOUTH_AFRICA.equals(issuingCountry)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
+    List<String> fields = new ArrayList<>();
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
+        "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
+        "BP_REL_TYPE", "MODE_OF_PAYMENT", "ENTERPRISE", "COMMERCIAL_FINANCED", "COLL_BO_ID", "COD_CONDITION", "IBM_DEPT_COST_CENTER"));
+    return fields;
+  }
+
 }
