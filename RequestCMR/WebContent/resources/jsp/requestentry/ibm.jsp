@@ -73,6 +73,19 @@ dojo.addOnLoad(function(){
              <cmr:field fieldId="CMROwner" id="cmrOwner" path="cmrOwner" tabId="MAIN_IBM_TAB" />
 		  </p>
 	  </cmr:column>
+      <cmr:view forCountry="641">
+        <cmr:column span="1" containerForField="Military">
+          <p>
+              <cmr:label fieldId="military">&nbsp;</cmr:label>
+              <cmr:field fieldId="Military" path="military" tabId="MAIN_IBM_TAB"/>
+              <cmr:label fieldId="military" forRadioOrCheckbox="true">
+                 <cmr:fieldLabel fieldId="Military" />
+                 <cmr:info text="Military Use means that the company is owned, managed, or intended to be used by the local government's Military. This is for Export Regulations."></cmr:info>
+                 <cmr:delta text="${rdcdata.military}" oldValue="${reqentry.military == 'Y' ? 'Yes' : 'No'}"/>
+              </cmr:label>
+          </p>
+        </cmr:column>
+      </cmr:view>
     </cmr:row>
     
     <!-- Defect : 1444422 -->
