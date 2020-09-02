@@ -3383,7 +3383,7 @@ var custType = FormManager.getActualValue('custGrp');
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSalesBoSboIbo();
-      setEnterprise();
+      setEnterprise(value);
     });
   }
 
@@ -3702,10 +3702,6 @@ function hideCollectionCd() {
 
 function setSalesBoSboIbo() {
   var salesRep = FormManager.getActualValue('salesTeamCd');
-  
-  if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE && repTeamMemberNo.length > 6) {
-    repTeamMemberNo = repTeamMemberNo.substring(0,6);
-  }
   
   if (salesRep != '') {
     var qParams = {
