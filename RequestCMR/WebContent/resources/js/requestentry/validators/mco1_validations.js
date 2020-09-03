@@ -68,9 +68,11 @@ function afterConfigForZA() {
   var reqReason = FormManager.getActualValue('reqReason');
   var custType = FormManager.getActualValue('custGrp');
   var cntryRegion = FormManager.getActualValue('countryUse');
-  var landCntry = 'ZA'; // default to South Africa
+  var landCntry = ''; // default to South Africa
   if (cntryRegion != '' && cntryRegion.length > 3) {
     landCntry = cntryRegion.substring(3, 5);
+  }else{
+    landCntry='ZA';
   }
 
   FormManager.setValue('defaultLandedCountry', landCntry);
@@ -703,7 +705,9 @@ function showDeptNoForInternalsOnly() {
   if (scenario != null && internalScenarios.includes(scenario)) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
     FormManager.addValidator('ibmDeptCostCenter', Validators.NUMBER, [ 'Internal Department Number' ]);
+    FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
   } else {
+    FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
     FormManager.clearValue('ibmDeptCostCenter');
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
