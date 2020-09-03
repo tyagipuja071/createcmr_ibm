@@ -403,6 +403,7 @@ function afterConfigForUKI() {
         optionalRuleForVatUK();
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
+        autoSetCRNAndVAT();
       }
       ;
     });
@@ -415,9 +416,11 @@ function afterConfigForUKI() {
       if (dijit.byId('vatExempt').get('checked')) {
         console.log(">>> Process vatExempt remove * >> ");
         FormManager.resetValidations('vat');
+        FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        FormManager.enable('vat');
       }
     });
   }
@@ -429,10 +432,11 @@ function afterConfigForUKI() {
         console.log(">>> Process crnExempt remove * >> ");
         FormManager.resetValidations('taxCd1');
         FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        FormManager.readOnly('taxCd1');
       } else {
         if (reqType == 'C') {
           FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
-          FormManager.enable('taxCd1')
+          FormManager.enable('taxCd1');
         } else if (reqType == 'U') {
           configureCRNForUpdatesUKI();
         }
@@ -857,6 +861,25 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
  * FormManager.setValue('abbrevLocn', _abbrevLocn); }
  */
 
+function autoSetCRNAndVAT() {
+  if (PageManager.isReadOnly()) {
+    return;
+  }
+  if (dijit.byId('vatExempt').get('checked')) {
+    FormManager.resetValidations('vat');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    FormManager.readOnly('vat');
+  } else if (_custType != 'PRICU') {
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+  }
+  if (dijit.byId('restrictInd').get('checked')) {
+    FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    FormManager.readOnly('taxCd1');
+  } else if (_custType != 'PRICU') {
+    FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
+  }
+}
+
 function autoSetVAT(_custType, custTypeinDB) {
   console.log(">>> Process autoSetVAT ...>> " + _custType);
   console.log(">>> Process autoSetVAT 2...>> " + custTypeinDB);
@@ -869,7 +892,8 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (dijit.byId('vatExempt').get('checked')) {
     FormManager.resetValidations('vat');
     FormManager.removeValidator('vat', Validators.REQUIRED);
-  } else {
+    FormManager.readOnly('vat');
+  } else if (_custType != 'PRICU') {
     FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
   }
 
@@ -6428,15 +6452,9 @@ function optionalRuleForVatUK() {
 
     if (landCntry != 'undefined' && islandedCountry(landCntry)) {
       FormManager.resetValidations('vat');
-      FormManager.removeValidator('vat', Validators.REQUIRED);
       FormManager.enable('vat');
     } else {
-      if (!dijit.byId('vatExempt').get('checked')) {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      } else {
-        FormManager.resetValidations('vat');
-        FormManager.removeValidator('vat', Validators.REQUIRED);
-      }
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
   }
 }
@@ -7509,7 +7527,7 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.setValue('custClass', '33');
   }
 
-  if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU')) {
+  if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU') && !dijit.byId('restrictInd').get('checked')) {
     FormManager.getField('restrictInd').checked = false;
     FormManager.enable('restrictInd');
   }
@@ -7830,6 +7848,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.UK ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
+
+  GEOHandler.addAfterTemplateLoad(autoSetCRNAndVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
 
   GEOHandler.addAfterTemplateLoad(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
