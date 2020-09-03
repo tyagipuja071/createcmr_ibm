@@ -517,7 +517,7 @@ function setISUCTCOnISIC() {
 function setCustClassCd() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isic = FormManager.getActualValue('isicCd');
-  var isicList = new Set([ '7320', '9808', '8512', '9818', '8030', '8090', '8010', '8021', '8022', '7704', '8511', '8519', '7704', '9231' ]);
+  var isicList = new Set([ '7320', '9808', '8512', '9818', '8030', '8090', '8010', '8021', '8022', '7704', '8511', '8519', '7707', '9231' ]);
   if (custSubGrp == 'GOVRN' || custSubGrp == 'XGOVR') {
     if (isicList.has(isic)) {
       FormManager.setValue('custClass', '16');
