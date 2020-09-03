@@ -32,7 +32,6 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
-import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
@@ -328,9 +327,7 @@ public class SpainUtil extends AutomationUtil {
     if (coverageFieldUpdtd > 0) {
       String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
       if (StringUtils.isNotBlank(managerID)) {
-        Person employee = BluePagesHelper.getPerson(admin.getRequesterId());
-        String req_manager = BluePagesHelper.getManagerEmail(employee.getEmployeeId());
-        boolean managerCheck = managerID.equalsIgnoreCase(req_manager);
+        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
           cmdeReview = true;
         } else {
