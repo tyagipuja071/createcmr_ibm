@@ -262,6 +262,19 @@
     	<form:hidden path="crosSubTyp" id="crosSubTyp"/>
     </c:if>
   </cmr:view>
+  <cmr:view>
+	<cmr:row addBackground="true">
+	  <cmr:column span="2" containerForField="CrosSubTyp">
+		<p>
+		  <cmr:label fieldId="crosSubTyp">
+			<cmr:fieldLabel fieldId="CrosSubTyp" />:
+		  </cmr:label>
+		  <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="CrosSubTyp"
+			tabId="MAIN_CUST_TAB" />
+		</p>
+	  </cmr:column>
+	</cmr:row>
+  </cmr:view>  
     
   <form:hidden path="economicCd" id="economicCd"/>
 </cmr:view>
