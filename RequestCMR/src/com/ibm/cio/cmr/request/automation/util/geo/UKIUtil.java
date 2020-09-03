@@ -112,7 +112,7 @@ public class UKIUtil extends AutomationUtil {
       }
       break;
     case SCENARIO_THIRD_PARTY:
-      if (!(!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
+      if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && !customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$")) {
         details.append("The request does not meet the criteria for Third Party Scenario.").append("\n");
         engineData.addRejectionComment("OTH", "The request does not meet the criteria for Third Party Scenario.", "", "");
         return false;
