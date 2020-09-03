@@ -7761,6 +7761,20 @@ function disableProcpectCmrIT() {
   }
 }
 
+function disableProcpectCmrCY() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var ifProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  console.log("disable prospect CMR");
+  if ('Y' == ifProspect) {
+    FormManager.readOnly('cmrNo');
+  }
+}
+
 /**
  * CMR-2279:Turkey - sets SBO based on isuCtc
  */
@@ -8300,5 +8314,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setVatValidator, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(addInacCodeValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.registerValidator(modeOfPaymentValidator, [ SysLoc.CYPRUS ], null, true);
-  
+  GEOHandler.addAfterConfig(disableProcpectCmrCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterTemplateLoad(disableProcpectCmrCY, [ SysLoc.CYPRUS ]);
 });
