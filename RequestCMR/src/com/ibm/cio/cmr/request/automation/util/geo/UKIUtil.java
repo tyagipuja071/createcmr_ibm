@@ -197,6 +197,7 @@ public class UKIUtil extends AutomationUtil {
       case "ISU Code":
       case "Client Tier":
       case "Enterprise Number":
+      case "SBO":
         coverageFieldUpdtd++;
         break;
       case "Sales Rep No":
@@ -217,8 +218,7 @@ public class UKIUtil extends AutomationUtil {
     if (coverageFieldUpdtd > 0) {
       String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
       if (StringUtils.isNotBlank(managerID)) {
-        String req_manager = BluePagesHelper.getManagerEmail(admin.getRequesterId());
-        boolean managerCheck = managerID.equalsIgnoreCase(req_manager);
+        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
           cmdeReview = true;
         } else {
