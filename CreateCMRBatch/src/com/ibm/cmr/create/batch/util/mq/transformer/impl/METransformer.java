@@ -993,16 +993,24 @@ public class METransformer extends EMEATransformer {
         legacyCust.setEnterpriseNo("");
       }
 
+      // CMR-5993
+      String cntry = legacyCust.getId().getSofCntryCode().trim();
+      String sales_Rep_ID = cntry + cntry;
+      if ((SCENARIO_TYPE_SBM.equals(data.getCustGrp()) || SCENARIO_TYPE_GBM.equals(data.getCustGrp()))
+          && Arrays.asList(ME_GBMSBM_COUNTRIES).contains(cntry)) {
+        sales_Rep_ID = "530530";
+      }
+
       if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
         legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
       } else {
-        legacyCust.setSalesGroupRep("");
+        legacyCust.setSalesGroupRep(sales_Rep_ID);
       }
 
       if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
         legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
       } else {
-        legacyCust.setSalesRepNo("");
+        legacyCust.setSalesRepNo(sales_Rep_ID);
       }
 
       if (!StringUtils.isBlank(data.getPhone1())) {

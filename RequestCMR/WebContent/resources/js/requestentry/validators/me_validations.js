@@ -5,6 +5,7 @@ var CEMEA_EXCL = new Set([ '620', '767', '805', '823', '677', '680', '832' ]);
 var CEE_INCL = new Set([ '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '358', '359', '363' ]);
 var ME_INCL = new Set([ '620', '642', '675', '677', '680', '752', '762', '767', '768', '772', '805', '808', '823', '832', '849', '850', '865' ]);
 var GBM_SBM_INCL = new Set([ '677', '680', '620', '832', '805', '767', '823', '675' ]);
+var ME_DUP_INCL = new Set([ '677', '680', '620', '832', '805', '767', '823', '675', '762', '768', '772', '849' ]);
 var isicCds = new Set([ '6010', '6411', '6421', '7320', '7511', '7512', '7513', '7514', '7521', '7522', '7523', '7530', '7704', '7706', '7707', '7720', '8010', '8021', '8022', '8030', '8090', '8511',
     '8512', '8519', '8532', '8809', '8813', '8818', '9900' ]);
 var landedCntryMapping = {
@@ -1729,8 +1730,8 @@ function setSBO2(dupSalesRepNo) {
   }
 }
 
-// CMR-4606 add cmr exist check for duplicate issued country
-function dupCMRExistCheckForRuCIS() {
+// CMR-6019 add cmr exist check for duplicate issued country
+function dupCMRExistCheck() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -1738,32 +1739,31 @@ function dupCMRExistCheckForRuCIS() {
         var cmrNo = FormManager.getActualValue('cmrNo');
         if (FormManager.getActualValue('reqType') != 'U') {
           return new ValidationResult(null, true);
-        } else {
-          if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
-            var cntryDup = FormManager.getActualValue('dupIssuingCntryCd');
-            var qParamsDup = {
-              CMRNO : cmrNo,
-              MANDT : cmr.MANDT
-            };
-            var resultsD = cmr.query('GET.CIS.DUP.CNTRY.BYCMR', qParamsDup);
-            if (resultsD.ret1 != null) {
-              var existDupcntry = resultsD.ret1;
-              if (cntryDup == existDupcntry) {
-                return new ValidationResult(null, true);
-              } else {
-                return new ValidationResult(null, false, 'The choosed duplicate country is not exist in the CMR,the exist dup Country is:' + existDupcntry);
-              }
-            } else {
-              return new ValidationResult(null, false, 'This CMR Number for Russia do not have duplicate CMR country.');
-            }
-          }
+        }
+
+        if (!ME_DUP_INCL.has(cntry) || !dijit.byId('dupCmrIndc')) {
           return new ValidationResult(null, true);
+        }
+
+        if (ME_DUP_INCL.has(cntry) && dijit.byId('dupCmrIndc').get('checked')) {
+
+          var dupCEBO = cntry + '0000';
+          var qParamsDup = {
+            CMRNO : cmrNo,
+            CEBO : dupCEBO
+          };
+          var resultsD = cmr.query('CHECK.ME.DUP.EXIST.DB2', qParamsDup);
+          if (resultsD.ret1 != null && resultsD.ret1 > 0) {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult(null, false, 'This CMR Number for ' + cntry + ' do not have duplicate 675.');
+          }
         }
         return new ValidationResult(null, true);
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-}// End of dupCMRExistCheckForRuCIS() CMR-4606
+}// End of dupCMRExistCheck() CMR-6019
 
 /**
  * CEEME - show CoF field for Update req and LOB=IGF and reason=COPT
@@ -4155,8 +4155,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSBO, GEOHandler.ME, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(setMESBO, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(setMESBO, GEOHandler.ME);
+  GEOHandler.registerValidator(dupCMRExistCheck, GEOHandler.ME, null, true);
   // CMR-4606 DupCMR exist
-  GEOHandler.registerValidator(dupCMRExistCheckForRuCIS, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);

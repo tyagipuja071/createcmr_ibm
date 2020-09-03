@@ -445,6 +445,12 @@ public class LegacyDirectService extends TransConnService {
             theService.processDupUpdate(entityManager, admin, data, cmrObjects);
           }
 
+          // Add to build duplicate CMR data for ME countries -CMR6019
+          if ("Y".equals(cmrObjects.getData().getDupCmrIndc())) {
+            DupCMRProcessService theService = new DupCMRProcessService();
+            theService.processDupUpdate(entityManager, admin, cmrObjects);
+          }
+
         } else {
           int noOFWorkingDays = 0;
           if (admin.getReqStatus() != null && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR)) {
@@ -482,6 +488,12 @@ public class LegacyDirectService extends TransConnService {
             if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
               CEEProcessService theService = new CEEProcessService();
               theService.processDupUpdate(entityManager, admin, data, cmrObjects);
+            }
+
+            // Add to build duplicate CMR data for ME countries -CMR6019
+            if ("Y".equals(cmrObjects.getData().getDupCmrIndc())) {
+              DupCMRProcessService theService = new DupCMRProcessService();
+              theService.processDupUpdate(entityManager, admin, cmrObjects);
             }
           }
         }
@@ -541,6 +553,12 @@ public class LegacyDirectService extends TransConnService {
         if ("Y".equals(data.getCisServiceCustIndc()) && data.getDupIssuingCntryCd() != null) {
           CEEProcessService theService = new CEEProcessService();
           theService.processDupUpdate(entityManager, admin, data, cmrObjects);
+        }
+
+        // Add to build duplicate CMR data for ME countries -CMR6019
+        if ("Y".equals(cmrObjects.getData().getDupCmrIndc())) {
+          DupCMRProcessService theService = new DupCMRProcessService();
+          theService.processDupUpdate(entityManager, admin, cmrObjects);
         }
       }
     }
