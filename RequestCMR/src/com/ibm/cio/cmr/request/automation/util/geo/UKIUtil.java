@@ -95,11 +95,11 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
     }
 
-    if((SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp()) && "Y".equals(data.getRestrictInd()))){
+    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp()) && "Y".equals(data.getRestrictInd()))) {
       details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
-    
+
     switch (scenario) {
     case SCENARIO_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
@@ -154,6 +154,7 @@ public class UKIUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -167,7 +168,7 @@ public class UKIUtil extends AutomationUtil {
       case "Company Registration Number":
         if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
           // UPDATE
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+          // Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
           boolean matchesDnb = false;
           if (matches != null) {
@@ -225,6 +226,13 @@ public class UKIUtil extends AutomationUtil {
         }
       }
     }
+
+    if (!"9500".equals(data.getIsicCd()) && !"GB".equals(soldTo.getLandCntry()) && !"IE".equals(soldTo.getLandCntry())
+        && "Y".equals(data.getRestrictInd())) {
+      details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
+      engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
+    }
+
     if (resultCodes.contains("R")) {
       output.setOnError(true);
       validation.setSuccess(false);
