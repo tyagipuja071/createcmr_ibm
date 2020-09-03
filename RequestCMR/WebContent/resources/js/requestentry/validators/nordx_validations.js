@@ -353,8 +353,8 @@ function setSalesRepValues(clientTier) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
+        ISU : '%' + isuCd + clientTier + '%'
+        //UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
       };
       results = cmr.query('GET.SRLIST.SWEDEN', qParams);
     } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T')) {
@@ -484,7 +484,7 @@ function setAdminDSCValues(repTeamMemberNo) {
       }
       if (adminDSC != null) {
         FormManager.limitDropdownValues(FormManager.getField('engineeringBo'), adminDSC);
-        if (adminDSC.length == 1) {
+        if (adminDSC.length >= 1) {
           FormManager.setValue('engineeringBo', adminDSC[0]);
         }
       }
