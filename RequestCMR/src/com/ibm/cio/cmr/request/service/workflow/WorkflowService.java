@@ -220,6 +220,8 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
       String typeDesc = null;
       String rejectReason = null;
       String pendingAppr = null;
+      long childRequestId = 0;
+      String childRequestStatus = null;
       if (rs != null) {
         for (CompoundEntity entity : rs) {
           a = entity.getEntity(Admin.class);
@@ -236,6 +238,8 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
           typeDesc = (String) entity.getValue("TYPE_DESCRIPTION");
           pendingAppr = (String) entity.getValue("PENDING_APPROVALS");
           rejectReason = (String) entity.getValue("REJ_REASON");
+          childRequestId = entity.getValue("C_REQ_ID") != null ? (long) entity.getValue("C_REQ_ID") : 0;
+          childRequestStatus = (String) entity.getValue("C_REQ_STATUS");
           workflowRequestsModel = new WorkflowRequestsModel();
           if (a != null) {
             copyValuesFromEntity(a, workflowRequestsModel);
@@ -264,6 +268,8 @@ public class WorkflowService extends BaseService<WorkflowRequestsModel, Admin> {
           workflowRequestsModel.setReqReason(a.getReqReason());
           workflowRequestsModel.setPendingAppr(pendingAppr);
           workflowRequestsModel.setRequestDueDate(data.getRequestDueDate() == null ? null : getStrFromDate(data.getRequestDueDate()));
+          workflowRequestsModel.setChildRequestId(childRequestId);
+          workflowRequestsModel.setChildRequestStatus(childRequestStatus);
           results.add(workflowRequestsModel);
         }
       }
