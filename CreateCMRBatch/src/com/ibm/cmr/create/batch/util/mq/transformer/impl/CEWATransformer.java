@@ -47,7 +47,7 @@ public class CEWATransformer extends MCOTransformer {
         legacyCust.setCustType("98");
       }
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-
+      legacyCust.setCustType(data.getCrosSubTyp());
     }
 
     legacyCust.setAccAdminBo("");
