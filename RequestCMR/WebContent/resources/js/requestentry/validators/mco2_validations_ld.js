@@ -68,6 +68,7 @@ function lockEmbargo() {
 function afterConfigForMCO2() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
+  FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
 }
 
 /**
@@ -649,7 +650,6 @@ function lockAbbrv() {
 function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
   if (scenario == 'INTER' || scenario == 'XINTE') {
     FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
   } else {
     FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
@@ -1078,8 +1078,21 @@ function addAddressGridValidatorStreetPOBox() {
               type = type[0];
             }
 
+            var addrIsNewOrUpdated = null;
+            var reqType = FormManager.getActualValue('reqType');
+
+            if (reqType == 'U') {
+              if (record.updateInd[0] == 'U' || record.updateInd[0] == 'N') {
+                addrIsNewOrUpdated = true;
+              } else {
+                addrIsNewOrUpdated = false;
+              }
+            } else {
+              addrIsNewOrUpdated = true;
+            }
+
             var isPOBoxOrStreetFilled = (record.poBox[0] != null && record.poBox[0] != '') || (record.addrTxt[0] != null && record.addrTxt[0] != '');
-            if (!isPOBoxOrStreetFilled) {
+            if (!isPOBoxOrStreetFilled && addrIsNewOrUpdated) {
               if (missingPOBoxStreetAddrs != '') {
                 missingPOBoxStreetAddrs += ', ' + record.addrTypeText[0];
               } else {
