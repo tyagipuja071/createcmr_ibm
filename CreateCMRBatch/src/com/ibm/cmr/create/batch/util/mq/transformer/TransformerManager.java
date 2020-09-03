@@ -246,6 +246,7 @@ public class TransformerManager {
     addTransformer(new METransformer(SystemLocation.YEMEN));
     addTransformer(new METransformer(SystemLocation.SYRIAN_ARAB_REPUBLIC));
     addTransformer(new METransformer(SystemLocation.EGYPT));
+    addTransformer(new METransformer(SystemLocation.TUNISIA_SOF));
 
   }
 
