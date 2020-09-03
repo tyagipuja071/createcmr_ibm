@@ -177,9 +177,10 @@ public class SingaporeUtil extends AutomationUtil {
     if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
       Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
       String zs01LandCntry = addr.getLandCntry();
+      String landCntryCd = getLandCntryCode(entityManager, zs01LandCntry);
       try {
-        if (StringUtils.isNotBlank(data.getCmrIssuingCntry()) && StringUtils.isNotBlank(zs01LandCntry)) {
-          Map<String, Boolean> checkresult = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), zs01LandCntry, entityManager, data,
+        if (StringUtils.isNotBlank(data.getCmrIssuingCntry()) && StringUtils.isNotBlank(landCntryCd)) {
+          Map<String, Boolean> checkresult = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), landCntryCd, entityManager, data,
               requestData.getAddress(CmrConstants.RDC_SOLD_TO));
           boolean cmrExists = checkresult.get("cmrExists");
           boolean cmrExistsFrSG = checkresult.get("cmrExistsFrSG");
@@ -207,14 +208,13 @@ public class SingaporeUtil extends AutomationUtil {
     return true;
   }
 
-  private Map<String, Boolean> checkifCMRNumExistsNDetailsMatch(String cmrNo, String zs01LandCntry, EntityManager entityManager, Data data,
-      Addr addr) {
+  private Map<String, Boolean> checkifCMRNumExistsNDetailsMatch(String cmrNo, String landCntryCd, EntityManager entityManager, Data data, Addr addr) {
     Map<String, Boolean> cmrdetails = new HashMap<String, Boolean>();
     String sqlRDC = ExternalizedQuery.getSql("KNA1.CHECK_IF_CMR_EXISTS");
     PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
     queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
     queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
-    queryRDC.setParameter("KATR6", zs01LandCntry);
+    queryRDC.setParameter("KATR6", landCntryCd);
 
     Kna1 kna1 = queryRDC.getSingleResult(Kna1.class);
     if (kna1 != null) {
@@ -252,8 +252,8 @@ public class SingaporeUtil extends AutomationUtil {
       } else {
         cmrdetails.put("cmrExistsFrSG", true);
       }
-    }else{
-      cmrdetails.put("cmrExists", false); 
+    } else {
+      cmrdetails.put("cmrExists", false);
     }
 
     return cmrdetails;
@@ -272,6 +272,19 @@ public class SingaporeUtil extends AutomationUtil {
     } else {
       return false;
     }
+  }
+
+  private String getLandCntryCode(EntityManager entityManager, String landCntryCd) {
+    String issuingCntryCd = null;
+    String sql = ExternalizedQuery.getSql("GET.CNTRYCD_FRM_LANDCNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", landCntryCd);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      issuingCntryCd = results.get(0);
+    }
+    entityManager.flush();
+    return issuingCntryCd;
   }
 
   /**
