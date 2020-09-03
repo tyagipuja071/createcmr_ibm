@@ -1030,6 +1030,21 @@ function addAdditionalNameStreetContPOBoxValidator() {
   })(), null, 'frmCMR_addressModal');
 }
 
+function setTypeOfCustomerBehavior() {
+
+  if (FormManager.getActualValue('reqType') == 'C') {
+    FormManager.hide('CrosSubTyp', 'crosSubTyp');
+  } else if (FormManager.getActualValue('reqType') == 'U') {
+    FormManager.show('CrosSubTyp', 'crosSubTyp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if (role == 'REQUESTER') {
+      FormManager.readOnly('crosSubTyp');
+    } else if (role == 'PROCESSOR') {
+      FormManager.enable('crosSubTyp');
+    }
+  }
+}
+
 function clearPhoneNoFromGrid() {
   for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
     recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
@@ -1170,6 +1185,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enterpriseMalta, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
