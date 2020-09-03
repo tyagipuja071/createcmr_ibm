@@ -1335,52 +1335,6 @@ function setVatRequired(value) {
       FormManager.resetValidations('vat');
       if (!dijit.byId('vatExempt').get('checked')) {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        /*
-         * if (cntry == SysLoc.AUSTRIA) { var custGroup =
-         * FormManager.getActualValue('custGrp'); if (custGroup != 'CROSS') {
-         * checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
-         * cemeaCustomVATMandatory(); } } else
-         */if (cntry == SysLoc.SERBIA) {
-          var cntryUsed = '';
-          var result = cmr.query('GET_CNTRYUSED', {
-            REQ_ID : FormManager.getActualValue('reqId'),
-          });
-          if (result && result.ret1 && result.ret1 != '') {
-            cntryUsed = result.ret1;
-          }
-          if (cntryUsed == '707ME' || cntryUsed == '707CS') {
-            return;
-          }
-
-          // var addrType = 'ZP01';
-          // var zs01Cntry = '';
-
-          // var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-          // REQID : FormManager.getActualValue('reqId'),
-          // TYPE : addrType ? addrType : 'ZP01'
-          // });
-          // if (ret && ret.ret1 && ret.ret1 != '') {
-          // zs01Cntry = ret.ret1;
-          // }
-
-          // if (cntryUsed != null && cntryUsed.length > 0 && zs01Cntry != null
-          // && zs01Cntry == 'CS') {
-          // switch (cntryUsed) {
-          // case '707ME':
-          // return;
-          // break;
-          // case '707CS':
-          // return;
-          // break;
-          // default:
-          // cemeaCustomVATMandatory();
-          // break;
-          // }
-          // } else {
-          // cemeaCustomVATMandatory();
-          // }
-
-        }
         cemeaCustomVATMandatory();
       }
     }
@@ -2576,24 +2530,6 @@ function addIceBillingValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-function setVatValidator() {
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custGroup = FormManager.getActualValue('custGrp');
-
-  var excludeCountries = new Set([ '644', '668', '693', '694', '704', '708', '740', '820', '821', '826', '889', '707' ]);
-  var cntryRegion = FormManager.getActualValue('countryUse');
-  if (excludeCountries.has(cntry) || cntryRegion == '707') {
-    return;
-  }
-
-  if ((role == 'PROCESSOR' || role == 'REQUESTER') && (cntry == '620') && custGroup == 'LOCAL') {
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-  } else {
-    FormManager.removeValidator('vat', Validators.REQUIRED);
-  }
-}
-
 function setChecklistStatus() {
   console.log('validating checklist..');
   var checklist = dojo.query('table.checklist');
@@ -2878,6 +2814,19 @@ function resetVatExempt() {
       }
     }
   }
+}
+
+function resetVatExemptMandatoryForLocalScenario() {
+  var listVatMandatoryForLocal = [ '620', '677', '680', '865', '808', '832' ];
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (listVatMandatoryForLocal.indexOf(cntry) > -1 && custSubType != undefined && custSubType != null && custSubType != '') {
+    var scenario = FormManager.getActualValue('custGrp');
+    if (scenario == 'LOCAL' && !(custSubType.includes('IN') || custSubType == 'PRICU' || custSubType.includes('PC'))) {
+      FormManager.resetValidations('vatExempt');
+    }
+  }
+
 }
 
 function resetVatExemptOnchange() {
@@ -3215,17 +3164,26 @@ function requireVATForCrossBorderAT() {
 }
 
 function cemeaCustomVATMandatory() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   console.log('1cemeaCustomVATMandatory ');
   var landCntry = '';
   var addrType = 'ZP01';
   var listVatReq = [ 'AT', 'AE', 'BG', 'HR', 'CS', 'CZ', 'EG', 'HU', 'KZ', 'PK', 'PL', 'RO', 'RU', 'SA', 'RS', 'SK', 'SI', 'UA' ];
-
-  if (FormManager.getActualValue('reqType') != 'C') {
+  var listVatMandatoryForLocal = [ '620', '677', '680', '865', '808', '832' ];
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (listVatMandatoryForLocal.indexOf(cntry) > -1 && custSubType != undefined && custSubType != null && custSubType != '') {
+    var scenario = FormManager.getActualValue('custGrp');
+    if (scenario == 'LOCAL' && !(custSubType.includes('IN') || custSubType == 'PRICU' || custSubType.includes('PC'))) {
+      // Make Vat Mandatory
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      console.log("Vat is Mandatory");
+    }
     return;
   }
-
   // Internal, Softlayer, & Private scenario - set vat to optional
-  var custSubType = FormManager.getActualValue('custSubGrp');
   if (custSubType != null && custSubType != '' && (custSubType.includes('IN') || custSubType == 'SOFTL' || custSubType.includes('SL') || custSubType == 'PRICU' || custSubType.includes('PC'))) {
     FormManager.resetValidations('vat');
     return;
@@ -4051,8 +4009,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(populateBundeslandercodeOnChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(populateBundeslandercode, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(setAbbrvNmLocMandatoryProcessor, GEOHandler.CEMEA);
-  GEOHandler.addAfterConfig(setVatValidator, GEOHandler.CEMEA);
-  GEOHandler.addAfterTemplateLoad(setVatValidator, GEOHandler.CEMEA);
 
   GEOHandler.addAfterTemplateLoad(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
   GEOHandler.addAfterConfig(cmrNoEnabled, GEOHandler.CEMEA_EXCLUDE_CEE);
@@ -4181,6 +4137,8 @@ dojo.addOnLoad(function() {
 
   GEOHandler.addAfterConfig(lockIsicCdME, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(lockIsicCdME, GEOHandler.ME);
+  GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
+  GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
 
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
