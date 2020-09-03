@@ -3636,7 +3636,6 @@ function validateIsicMEValidator() {
           }
         }
         if (('C' == reqType && ('9500' == isic || '0000' == isic))) {
-          var custSubGrp = FormManager.getActualValue('custSubGrp');
           if (custSubGrp.includes('BP') || custSubGrp.includes('BUS') || custSubGrp.includes('CO') || custSubGrp.includes('TH') || custSubGrp.includes('TP')) {
             FormManager.enable('isicCd');
             return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
