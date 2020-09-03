@@ -1765,6 +1765,7 @@ public class CyprusHandler extends BaseSOFHandler {
       data.setCustPrefLang("I");
     } else {
       data.setCustPrefLang("E");
+      data.setSalesTeamCd("000000");
     }
     data.setCmrOwner("IBM");
   }
