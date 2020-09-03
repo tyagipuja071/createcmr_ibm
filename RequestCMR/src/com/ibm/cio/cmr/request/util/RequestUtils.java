@@ -830,7 +830,14 @@ public class RequestUtils {
     entityManager.persist(hist);
     entityManager.flush();
 
-    if (sendMail) {
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (sendMail && (skip == false)) {
       sendEmailNotifications(entityManager, admin, hist);
     }
 
