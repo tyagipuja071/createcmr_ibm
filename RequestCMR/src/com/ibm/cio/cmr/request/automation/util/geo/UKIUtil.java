@@ -84,8 +84,7 @@ public class UKIUtil extends AutomationUtil {
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
     if (!SCENARIO_THIRD_PARTY.equals(scenario)
-        && ((customerNameZI01.toUpperCase().contains("C/O") || customerNameZI01.toUpperCase().contains("CAREOF")
-            || customerNameZI01.toUpperCase().contains("CARE OF")) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
+        && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
       details.append("Third Party Scenario should be selected.").append("\n");
       engineData.addRejectionComment("OTH", "Third Party Scenario should be selected.", "", "");
       return false;
@@ -113,13 +112,7 @@ public class UKIUtil extends AutomationUtil {
       }
       break;
     case SCENARIO_THIRD_PARTY:
-      if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
-        details.append("Customer Names on installing and billing address should be different for Third Party Scenario").append("\n");
-        engineData.addRejectionComment("OTH", "Customer Names on installing and billing address should be different for Third Party Scenario", "",
-            "");
-        return false;
-      } else if (!(customerNameZI01.toUpperCase().contains("C/O") || customerNameZI01.toUpperCase().contains("CAREOF")
-          || customerNameZI01.toUpperCase().contains("CARE OF")) && !customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$")) {
+      if (!(!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
         details.append("The request does not meet the criteria for Third Party Scenario.").append("\n");
         engineData.addRejectionComment("OTH", "The request does not meet the criteria for Third Party Scenario.", "", "");
         return false;
