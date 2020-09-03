@@ -206,13 +206,14 @@ public class GBGMatchingElement extends MatchingElement {
               .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
           engineData.addNegativeCheckStatus("_nonLocalGBGFound",
               "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
-        } else if (itemNo > 1) {
-          LOG.debug("Multiple matches for Global Buying Groups retrieved");
-          details.append("\n").append(
-              "Mutilple matches for Global Buying Groups retrieved. Using the highest quality match for further calculations. CMDE review will be required.");
-          engineData.addNegativeCheckStatus("_nonLocalGBGFound", "Mutiple matches for Global Buying Groups retrieved.");
+        } 
+//         else if (itemNo > 1) {
+//           LOG.debug("Multiple matches for Global Buying Groups retrieved");
+//           details.append("\n").append(
+//               "Mutilple matches for Global Buying Groups retrieved. Using the highest quality match for further calculations. CMDE review will be required.");
+//           engineData.addNegativeCheckStatus("_nonLocalGBGFound", "Mutiple matches for Global Buying Groups retrieved.");
 
-        }
+//         }
 
         result.setProcessOutput(output);
         result.setDetails(details.toString());
