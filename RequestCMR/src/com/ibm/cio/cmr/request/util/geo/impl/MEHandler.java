@@ -118,6 +118,7 @@ public class MEHandler extends BaseSOFHandler {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_ARAB_EMIRATES, "AE");
     LANDED_CNTRY_MAP.put(SystemLocation.UZBEKISTAN, "UZ");
     LANDED_CNTRY_MAP.put(SystemLocation.YEMEN, "YE");
+    LANDED_CNTRY_MAP.put(SystemLocation.TUNISIA_SOF, "TN");
   }
 
   public static final List<String> CEMEA_CHECKLIST = Arrays.asList("358", "359", "363", "603", "607", "620", "626", "651", "675", "677", "680", "694",
