@@ -289,6 +289,8 @@ public class SpainUtil extends AutomationUtil {
             cmdeReview = true;
           }
         }
+        coverageFieldUpdtd++;
+
         break;
       case "ISIC":
       case "Currency Code":
@@ -309,10 +311,8 @@ public class SpainUtil extends AutomationUtil {
       case "Client Tier Code":
       case "Enterprise Number":
       case "INAC/NAC Code":
-        coverageFieldUpdtd++;
-        break;
       case "Sales Rep":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Order Block Code":
         if ("E".equals(change.getOldData()) || "E".equals(change.getNewData())) {
@@ -327,8 +327,7 @@ public class SpainUtil extends AutomationUtil {
     if (coverageFieldUpdtd > 0) {
       String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
       if (StringUtils.isNotBlank(managerID)) {
-        String req_manager = BluePagesHelper.getManagerEmail(admin.getRequesterId());
-        boolean managerCheck = managerID.equalsIgnoreCase(req_manager);
+        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
           cmdeReview = true;
         } else {
