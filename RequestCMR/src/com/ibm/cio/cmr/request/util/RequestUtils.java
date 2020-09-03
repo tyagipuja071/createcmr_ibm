@@ -559,7 +559,17 @@ public class RequestUtils {
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
 
-    mail.send(host);
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
 
   }
 
@@ -1002,7 +1012,19 @@ public class RequestUtils {
     mail.setFrom(from);
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
-    mail.send(host);
+
+    Admin admin = new Admin();
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
     batchemailTemplate = null;
     refresh();
   }
@@ -1104,7 +1126,18 @@ public class RequestUtils {
       mail.addAttachment(admin.getFileName());
     }
 
-    mail.send(host);
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
+
   }
 
   /**
