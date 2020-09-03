@@ -400,6 +400,8 @@ function afterConfigForCEMEA() {
     landCntry = 'RS';
   } else if (cntryRegion == '707') {
     landCntry = 'RS';
+  } else if (cntryRegion == '808AF') {
+    landCntry = 'AF';
   }
   if (landCntry != '') {
     FormManager.setValue('defaultLandedCountry', landCntry);
@@ -585,7 +587,7 @@ function lockLandCntry() {
   }
   if (local && FormManager.getActualValue('addrType') == 'ZS01') {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    if (CEE_INCL.has(cntry)) {
+    if (ME_INCL.has(cntry)) {
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
     }
     FormManager.readOnly('landCntry');
@@ -3835,28 +3837,14 @@ function setEngineeringBO() {
   var cmrIssuing = FormManager.getActualValue('cmrIssuingCntry');
   var cntryRegion = FormManager.getActualValue('countryUse');
   if (reqType == 'C') {
-    if (cmrIssuing == SysLoc.KYRGYZSTAN && _custType == 'XCE') {
-      var landedCntry = getLandedCountryByAddType('ZS01');
-      if (landedCntry == '') {
-        FormManager.setValue('engineeringBo', '');
-      } else {
-        var landedCntryCode = landedCntryMapping[landedCntry];
-        FormManager.setValue('engineeringBo', landedCntryCode);
-      }
+    if (cntryRegion == '808AF') {
+      FormManager.setValue('engineeringBo', '6140000');
       FormManager.readOnly('engineeringBo');
-    } else if (cntryRegion == '707ME') {
-      FormManager.setValue('engineeringBo', '713');
-      FormManager.readOnly('engineeringBo');
-    } else {
-      // FormManager.setValue('engineeringBo', '');
-      FormManager.enable('engineeringBo');
     }
   } else if (reqType == 'U') {
-    if (cmrIssuing == SysLoc.KYRGYZSTAN) {
-      FormManager.readOnly('engineeringBo');
-    } else if (cmrIssuing == SysLoc.SERBIA) {
+    if (cmrIssuing == SysLoc.PAKISTAN) {
       var cebo = FormManager.getActualValue('engineeringBo');
-      if (cebo == '7130000') {
+      if (cebo == '6140000') {
         FormManager.readOnly('engineeringBo');
       }
     } else {
@@ -3903,7 +3891,7 @@ function afterConfigTemplateLoadForME() {
   togglePPSCeidME();
   setClassificationCodeME();
   // disableSBO();
-  // setEngineeringBO();
+  setEngineeringBO();
 }
 
 function afterConfigForME() {
@@ -4128,7 +4116,8 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NON_CEE_CHECK, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterConfig(hideEngineeringBOForReq, GEOHandler.CEMEA_EXCLUDE_CEE);
+  // GEOHandler.addAfterConfig(hideEngineeringBOForReq,
+  // GEOHandler.CEMEA_EXCLUDE_CEE);
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.CEE, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(validatorsDIGIT, GEOHandler.ME);
   // CMR-1912 Vat should be required for AT local-BP and Commercial
