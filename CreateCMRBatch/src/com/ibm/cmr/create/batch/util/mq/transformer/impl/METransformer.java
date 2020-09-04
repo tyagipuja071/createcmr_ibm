@@ -1067,10 +1067,8 @@ public class METransformer extends EMEATransformer {
     }
 
     String dataEmbargoCd = data.getEmbargoCd();
-    if (dataEmbargoCd != null && !StringUtils.isBlank(dataEmbargoCd)) {
+    if (dataEmbargoCd != null) {
       legacyCust.setEmbargoCd(dataEmbargoCd);
-    } else {
-      legacyCust.setEmbargoCd("");
     }
 
     String cebo = data.getEngineeringBo();
