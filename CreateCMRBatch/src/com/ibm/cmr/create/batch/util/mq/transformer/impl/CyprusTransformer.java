@@ -307,7 +307,7 @@ public class CyprusTransformer extends EMEATransformer {
       legacyCust.setLangCd("");
       legacyCust.setTaxCd("");
 
-      legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getSalesTeamCd()) ? data.getSalesTeamCd() : ""); // REMXD
+      legacyCust.setSalesGroupRep(!StringUtils.isEmpty(data.getRepTeamMemberNo()) ? data.getRepTeamMemberNo() : ""); // REMXD
 
       String formatSBO = data.getSalesBusOffCd() + "0000";
       legacyCust.setIbo(formatSBO);
@@ -388,14 +388,14 @@ public class CyprusTransformer extends EMEATransformer {
         legacyCust.setImsCd("");
       }
 
-      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+        legacyCust.setSalesRepNo(data.getSalesTeamCd());
       } else {
         legacyCust.setSalesRepNo("");
       }
 
-      if (!StringUtils.isBlank(data.getSalesTeamCd())) {
-        legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+        legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
       } else {
         legacyCust.setSalesGroupRep("");
       }
@@ -422,7 +422,7 @@ public class CyprusTransformer extends EMEATransformer {
           legacyCust.setInacCd(data.getInacCd());
           legacyCust.setIsicCd(isuClientTier);
           legacyCust.setSbo(data.getSalesBusOffCd());
-          legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+          legacyCust.setSalesRepNo(data.getSalesTeamCd());
           legacyCust.setCollectionCd(data.getCollectionCd());
         }
       } catch (Exception e) {
@@ -539,6 +539,10 @@ public class CyprusTransformer extends EMEATransformer {
   public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust cust, CMRRequestContainer cmrObjects, MassUpdtData muData) {
     LOG.debug("CY >> Mapping default Data values..");
     LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, cust, muData);
+    
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      cust.setImsCd(muData.getSubIndustryCd());
+    }
 
     List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
     if (muaList != null && muaList.size() > 0) {
