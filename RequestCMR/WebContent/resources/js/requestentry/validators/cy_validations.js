@@ -3383,7 +3383,7 @@ var custType = FormManager.getActualValue('custGrp');
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setSalesBoSboIbo();
-      setEnterprise(value);
+      setEnterprise();
     });
   }
 
@@ -3652,7 +3652,7 @@ function setISRValues() {
       }
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), isrs);
       if (isrs.length == 1) {
-        setEnterprise(isrs[0]);
+        setEnterprise();
         FormManager.setValue('repTeamMemberNo', isrs[0]);
       }
       setSalesBoSboIbo();
@@ -3661,7 +3661,7 @@ function setISRValues() {
 }
 
 var _oldEnterpriseValue = '';
-function setEnterprise(value) {
+function setEnterprise() {
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var repTeam = FormManager.getActualValue('salesTeamCd');
@@ -3682,6 +3682,7 @@ function setEnterprise(value) {
   if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
     enterpriseLov= ['822805'];
     FormManager.setValue('enterprise',  enterpriseLov[0]);
+    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
   } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
     enterpriseLov = [ '822835', '822836' ];
     FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
@@ -7570,51 +7571,6 @@ function setClientTierValuesIT(isuCd) {
   }
 }
 
-function validateExistingCMRNo() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        console.log('checking requested cmr number...');
-        var reqType = FormManager.getActualValue('reqType');
-        var cmrNo = FormManager.getActualValue('cmrNo');
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (reqType == 'C' && cmrNo) {
-          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
-            COUNTRY : cntry,
-            CMR_NO : cmrNo,
-            MANDT : cmr.MANDT
-          });
-          if (exists && exists.ret1) {
-            return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
-            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
-          } else {
-            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
-              COUNTRY : cntry,
-              CMR_NO : cmrNo,
-              MANDT : cmr.MANDT
-            });
-            if (exists && exists.ret1) {
-              return new ValidationResult({
-                id : 'cmrNo',
-                type : 'text',
-                name : 'cmrNo'
-              }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
-            }
-          }
-        }
-        return new ValidationResult({
-          id : 'cmrNo',
-          type : 'text',
-          name : 'cmrNo'
-        }, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
-}
-
 function addAfterTemplateLoadIT() {
   var _custSubGrp = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -8182,7 +8138,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPhoneNoFromGrid, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
-  GEOHandler.addAfterConfig(setEnterpriseBasedOnSubIndustry, [ SysLoc.GREECE ]);
+  GEOHandler.addAfterConfig(setEnterprise, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.GREECE ]);
   GEOHandler.addAfterTemplateLoad(retainImportValues, [ SysLoc.GREECE ]);
   
@@ -8278,7 +8234,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(validateCMRNumberForIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [ SysLoc.ITALY ], null, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(checkIsicCodeValidationIT, [ SysLoc.ITALY ]);
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
