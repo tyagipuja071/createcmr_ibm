@@ -1066,7 +1066,7 @@ public class METransformer extends EMEATransformer {
       legacyCust.setLocNo(legacyCust.getId().getSofCntryCode() + data.getSubIndustryCd());
     }
 
-    String dataEmbargoCd = data.getOrdBlk();
+    String dataEmbargoCd = data.getEmbargoCd();
     if (dataEmbargoCd != null && !StringUtils.isBlank(dataEmbargoCd)) {
       legacyCust.setEmbargoCd(dataEmbargoCd);
     } else {
