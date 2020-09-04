@@ -46,6 +46,18 @@
       </cmr:column>
     </cmr:view>
 
+    <cmr:view forGEO="CEMEA" exceptForCountry="618">
+      <cmr:column span="2" containerForField="CustLang">
+        <p>
+          <cmr:label fieldId="custPrefLang">
+            <cmr:fieldLabel fieldId="CustLang" />:
+             <cmr:delta text="${rdcdata.custPrefLang}" oldValue="${reqentry.custPrefLang}" />
+          </cmr:label>
+          <cmr:field path="custPrefLang" id="custPrefLang" fieldId="CustLang" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+    </cmr:view>
+    
     <cmr:view forCountry="618">
       <cmr:column span="2" containerForField="CustLang">
         <p>
@@ -210,7 +222,7 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX">
+      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,MCO2">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>

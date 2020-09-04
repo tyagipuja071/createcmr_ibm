@@ -51,8 +51,8 @@ public class DEHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("724");
 
-  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity",
-      "CustFAX", "City2", "Affiliate", "Company", "INACType" };
+  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
+      "City2", "Affiliate", "Company", "INACType" };
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
@@ -78,6 +78,13 @@ public class DEHandler extends GEOHandler {
         for (Object tempRecObj : recordsToCheck) {
           if (tempRecObj instanceof FindCMRRecordModel) {
             FindCMRRecordModel tempRec = (FindCMRRecordModel) tempRecObj;
+            if (CmrConstants.ADDR_TYPE.ZD01.toString().equals(tempRec.getCmrAddrTypeCode()) && "598".equals(tempRec.getCmrAddrSeq())) {
+              tempRec.setCmrAddrTypeCode("ZD02");
+            }
+
+            if (CmrConstants.ADDR_TYPE.ZP01.toString().equals(tempRec.getCmrAddrTypeCode()) && "599".equals(tempRec.getCmrAddrSeq())) {
+              tempRec.setCmrAddrTypeCode("ZP02");
+            }
             recordsToReturn.add(tempRec);
           }
         }
@@ -129,6 +136,25 @@ public class DEHandler extends GEOHandler {
     // {
     address.setPairedAddrSeq(currentRecord.getCmrAddrSeq());
     // }
+  }
+
+  @Override
+  public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    if (!StringUtils.isEmpty(addrType)) {
+      if ("ZD02".equals(addrType)) {
+        return "598";
+      } else if ("ZP02".equals(addrType)) {
+        return "599";
+      }
+    }
+    return super.generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newAddrSeq = "";
+    newAddrSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    return newAddrSeq;
   }
 
   @Override

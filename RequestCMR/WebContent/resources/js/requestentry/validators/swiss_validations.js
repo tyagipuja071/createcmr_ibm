@@ -1287,6 +1287,100 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   return canRemoveAddress(value, rowIndex, grid);
 }
 
+function reqReasonOnChange() {
+  var reqReason = FormManager.getActualValue('reqReason');
+  if (reqReason == 'IGF' && isZD01OrZP01ExistOnCMR()) {
+    dojo.byId('radiocont_ZP02').style.display = 'inline-block';
+    dojo.byId('radiocont_ZD02').style.display = 'inline-block';
+  } else {
+    dojo.byId('radiocont_ZP02').style.display = 'none';
+    dojo.byId('radiocont_ZD02').style.display = 'none';
+  }
+  dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
+    if (value == 'IGF' && isZD01OrZP01ExistOnCMR()) {
+      dojo.byId('radiocont_ZP02').style.display = 'inline-block';
+      dojo.byId('radiocont_ZD02').style.display = 'inline-block';
+    } else {
+      dojo.byId('radiocont_ZP02').style.display = 'none';
+      dojo.byId('radiocont_ZD02').style.display = 'none';
+    }
+  });
+}
+
+function isZD01OrZP01ExistOnCMR() {
+  for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+    record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+    if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+      record = _allAddressData[i];
+    }
+    var type = record.addrType;
+    if (typeof (type) == 'object') {
+      type = type[0];
+    }
+    var importInd = record.importInd[0];
+    var reqType = FormManager.getActualValue('reqType');
+    if ('U' == reqType && 'Y' == importInd && (type == 'ZD01' || type == 'ZP01')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
+  FormManager.addFormValidator(
+      (function() {
+        return {
+          validate : function() {
+            var reqReason = FormManager.getActualValue('reqReason');
+            var addressType = FormManager.getActualValue('addrType');
+            if (addressType == 'ZP02' || addressType == 'ZD02') {
+              if (reqReason != 'IGF') {
+                return new ValidationResult(null, false, 'Request Reason should be IGF.');
+              }
+            }
+            var requestId = FormManager.getActualValue('reqId');
+            var addressSeq = FormManager.getActualValue('addrSeq');
+            var dummyseq = "xx";
+            var showDuplicateIGFBillToError = false;
+            var showDuplicateIGFInstallAtToError = false;
+            var qParams;
+            if (addressMode == 'updateAddress') {
+              qParams = {
+                REQ_ID : requestId,
+                ADDR_SEQ : addressSeq,
+                ADDR_TYPE : addressType
+              };
+            } else {
+              qParams = {
+                REQ_ID : requestId,
+                ADDR_SEQ : dummyseq,
+                ADDR_TYPE : addressType
+              };
+            }
+            var result = cmr.query('GETADDRECORDSBYTYPE', qParams);
+            var addCount = result.ret1;
+            if (addressType != undefined && addressType != '' && addressType == 'ZP02' && cmr.addressMode != 'updateAddress') {
+              showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
+              if (showDuplicateIGFBillToError) {
+                return new ValidationResult(null, false,
+                    'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+              }
+            }
+
+            if (addressType != undefined && addressType != '' && addressType == 'ZD02' && cmr.addressMode != 'updateAddress') {
+              showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
+              if (showDuplicateIGFInstallAtToError) {
+                return new ValidationResult(null, false,
+                    'Only one IGF Ship-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+              }
+            }
+
+            return new ValidationResult(null, true);
+          }
+        };
+      })(), null, 'frmCMR_addressModal');
+}
+
 function setPreferredLangAddr() {
   // Based on the value of postal code Customer Language field should be
   // populated on each address:
@@ -1437,6 +1531,65 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
       })(), null, 'frmCMR_addressModal');
 }
 
+function setPreferredLangAddr() {
+  // Based on the value of postal code Customer Language field should be
+  // populated on each address:
+  //
+  // 3000 - 6499 and 6999 - 9999 it is D (German)
+  // 6500 - 6999 it is I (Italian)
+  // 0000 - 3000 it is F (French)
+  //
+  // Cross Border it is E (English)
+
+  var zs01ReqId = FormManager.getActualValue('reqId');
+  var qParams = {
+    REQ_ID : zs01ReqId,
+  };
+
+  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
+  var postCd = FormManager.getActualValue('postCd');
+  postCd = postCd == undefined || postCd == '' ? result.ret1 : postCd;
+
+  if ((postCd >= 3000 && postCd <= 6499) || (postCd >= 6999 && postCd <= 9999)) {
+    FormManager.setValue('custLangCd', 'D');
+  } else if (postCd >= 6500 && postCd <= 6999) {
+    FormManager.setValue('custLangCd', 'I');
+  } else if (postCd >= 0000 && postCd <= 3000) {
+    FormManager.setValue('custLangCd', 'F');
+  }
+}
+
+function lockIBMTabForSWISS() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('dunsNo');
+    if (custSubType != 'CHBUS' && custSubType != 'LIBUS') {
+      FormManager.readOnly('ppsceid');
+    } else {
+      FormManager.enable('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    if (custSubType != 'CHINT' && custSubType != 'LIINT') {
+      FormManager.readOnly('ibmDeptCostCenter');
+    } else {
+      FormManager.enable('ibmDeptCostCenter');
+    }
+  }
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.SWISS = [ '848' ];
   console.log('adding SWISS functions...');
@@ -1488,4 +1641,6 @@ dojo.addOnLoad(function() {
   // new phase 2
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, GEOHandler.SWISS);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnIMSChange, GEOHandler.SWISS);
+  GEOHandler.addAfterConfig(lockIBMTabForSWISS, GEOHandler.SWISS);
+  GEOHandler.addAfterTemplateLoad(lockIBMTabForSWISS, GEOHandler.SWISS);
 });

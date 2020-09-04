@@ -51,6 +51,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.approval.ApprovalUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -191,10 +192,19 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     // get the logical name of the updated status
     getLogicalStatus(req, approval, entityManager);
 
-    // send generic mail
-    ApprovalTyp type = getApprovalType(entityManager, req);
-    sendGenericMail(entityManager, type, approval, admin);
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
 
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      // send generic mail
+      ApprovalTyp type = getApprovalType(entityManager, req);
+      sendGenericMail(entityManager, type, approval, admin);
+    }
     // create the comment
 
     String approvalComment = StringUtils.isEmpty(approval.getComments()) ? "(no comments specified)" : approval.getComments();

@@ -124,7 +124,7 @@ function addrFormatter(value, rowIndex) {
     }
     return actions;
   }
-  if (addrType == 'ZS01' || addrType == 'ZI01') {
+  if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
       actions += '<input type="button" value="Copy" class="cmr-grid-btn" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\',\'' + name + '\')">';
     }
@@ -436,6 +436,17 @@ function AddressDetailsModal_onLoad() {
       } else {
         cmr.showNode('updateButtonFromView');
       }
+    }
+  }
+  if (FormManager.getActualValue('cmrIssuingCntry') == '862') {
+    var addrType = details.ret2;
+    if (addrType == 'ZS01') {
+      FormManager.hide('taxOffice_view', 'taxOffice_view');
+      FormManager.show('custPhone_view', 'custPhone_view');
+    } else {
+      FormManager.hide('custPhone_view', 'custPhone_view');
+      FormManager.show('taxOffice_view', 'taxOffice_view');
+      _assignDetailsValue('#AddressDetailsModal #custPhone_view', '');
     }
   }
 }
@@ -889,10 +900,11 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('landCntry', 'IE');
       // FormManager.setValue('postCd', 'II1 1II');
     }
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
       FormManager.setValue('addrType', 'ZP01');
     }
-    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN
+        || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
       FormManager.setValue('addrType', 'ZS01');
     }
     FormManager.clearValue('transportZone');
@@ -1497,6 +1509,15 @@ function doUpdateAddr(reqId, addrType, addrSeq, mandt, skipDnb) {
 
 function continueEditDnbAddress() {
   cmr.showModal('addEditAddressModal');
+  // CMR-2383
+  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.TURKEY) {
+    if (addrType == 'ZS01' || addrType == 'ZD01' || addrType == 'ZI01') {
+      FormManager.disable('taxOffice');
+      dojo.byId('ast-taxOffice').style.display = 'none';
+    } else if (addrType == 'ZP01') {
+      dojo.byId('ast-taxOffice').style.display = 'inline-block';
+    }
+  }
 }
 
 /**
@@ -1719,21 +1740,70 @@ function applyAddrChangesModal_onLoad() {
     var choices = '';
     var type = null;
     var useCntry = false;
-
+    var cEECountries = [ '644', '668', '693', '704', '708', '740', '820', '821', '826', '358', '359', '363', '603', '607', '626', '651', '694', '695', '699', '705', '707', '787', '741', '889' ];
     document.getElementById('copy_createOnly').value = '';
     for (var i = 0; i < types.length; i++) {
       type = types[i];
       if (useCntry && type.ret3 != cntry) {
         break;
       }
+      
+      if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+    	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+    		  continue;
+        }
+      }
 
-      // update TR
-      // Rollback TR change
-      // if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01')
-      // {
-      if ((SysLoc.GREECE == cntry || SysLoc.TURKEY == cntry || SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
+      // update For TR
+
+      if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
         break;
       }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+          continue;
+        } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+          continue;
+        } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
       if (type.ret3 == cntry) {
         useCntry = true;
       }
@@ -1873,6 +1943,32 @@ function applyAddrChangesModal_onLoad() {
       } else if (cntry == '618') {
         var reqReason = FormManager.getActualValue('reqReason');
         if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR())) {
+          continue;
+        }
+        if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+        } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
+        } else {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
+          addressDesc = type.ret2;
+        }
+      } else if (cntry == '724') {
+        var reqReason = FormManager.getActualValue('reqReason');
+        if ((type.ret1 == 'ZP02' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
+          continue;
+        }
+        if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
+        } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
+        } else {
+          choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
+          addressDesc = type.ret2;
+        }
+      } else if (cEECountries.indexOf(cntry) > -1) {
+        var reqReason = FormManager.getActualValue('reqReason');
+        if ((type.ret1 == 'ZP03' || type.ret1 == 'ZD02') && (reqReason != 'IGF' || !isZD01OrZP01ExistOnCMR(type.ret1))) {
           continue;
         }
         if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
@@ -2075,7 +2171,7 @@ function addrFormatterIcons(value, rowIndex) {
     }
     return actions;
   }
-  if (addrType == 'ZS01' || addrType == 'ZI01') {
+  if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
       actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
           + '\',\'' + name + '\')">';

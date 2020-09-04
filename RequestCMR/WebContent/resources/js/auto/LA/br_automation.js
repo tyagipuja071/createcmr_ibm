@@ -35,8 +35,8 @@ function afterConfigForBRV2() {
     var prompt = 'Are you creating a request for any of the following client/customer types?';
     prompt += '<br>';
     // commented as a fix for defect CMR - 688
-//    prompt += '<br>SaaS/PaaS (Private Person or Company)';
-//    prompt += '<br>Softlayer';
+    // prompt += '<br>SaaS/PaaS (Private Person or Company)';
+    // prompt += '<br>Softlayer';
     prompt += '<br>Private Person';
     prompt += '<br>IBM Employee';
     prompt += '<br>Cross-Border';
@@ -386,11 +386,10 @@ function checkAndImport() {
   console.log(result);
   if (result.ret1 != '1') {
     cmr.showConfirm('doImport()', 'Record with CMR Number ' + cmrNo
-        + ' is a Deactivated CMR. The Request will be set to convert it into a Reactivated CMR. Any current data on the request will also be replaced. Proceed?',
-        null, 'cancelImport()', {
-          OK : 'Yes',
-          CANCEL : 'Cancel'
-        });
+        + ' is a Deactivated CMR. The Request will be set to convert it into a Reactivated CMR. Any current data on the request will also be replaced. Proceed?', null, 'cancelImport()', {
+      OK : 'Yes',
+      CANCEL : 'Cancel'
+    });
   } else {
     doImport();
   }
@@ -442,7 +441,7 @@ function createRequestForCountry(formName) {
 
       if (FormManager.getActualValue('updateReason') == 'REAC' && _aufsd != '93') {
         cmr.showAlert('The imported CMR is already active. Please import an inactive CMR to the request for reactivation or change the Update Reason', 'Error');
-      } else if (FormManager.getActualValue('updateReason') == 'REAC' && _aufsd == '93'){
+      } else if (FormManager.getActualValue('updateReason') == 'REAC' && _aufsd == '93') {
         showModalDupReq(frmCMR).then(function(data) {
           showModalDupCMR(formName).then(function() {
             Automation.submitForCreation(formName);
@@ -561,7 +560,7 @@ function checkForBlueGroup(subScenario) {
           cmr.hideProgress();
           console.log(data);
           if (!data.success) {
-            cmr.showAlert("This user does not belong to BR_BP_BLUEGROUPS. Please contact Luciana Costa Romanetto/Brazil/IBM of Q2C Operations - LA BPCM.", 'Error',
+            cmr.showAlert("This user is not allowed to submit BP request. Please contact Luciana Costa Romanetto/Brazil/IBM of Q2C Operations - LA BPCM.", 'Error',
                 "FormManager.clearValue('custSubGrp')");
           } else {
             // continue
@@ -580,7 +579,7 @@ function checkForBlueGroup(subScenario) {
 
 function closeDupCMRChkModal() {
   cmr.hideModal('dupCMR_modal');
-  window.location =  './autoreq?cmrIssuingCntry=631&reqType=C';
+  window.location = './autoreq?cmrIssuingCntry=631&reqType=C';
 }
 
 function addToNotifList(reqId) {
@@ -643,9 +642,9 @@ function submitForCreationBR(formName) {
   });
 }
 
-function closeDupCMRReasonModal(){
+function closeDupCMRReasonModal() {
   var dupCmrReason = dojo.byId('dupCmrRsn').value.trim();
-  if(dupCmrReason!=null && dupCmrReason!=''){
+  if (dupCmrReason != null && dupCmrReason != '') {
     FormManager.setValue('dupCmrReason', dupCmrReason);
     cmr.hideModal('dupCMRReasonModal');
     Automation.submitForCreation('frmCMR');
@@ -671,8 +670,7 @@ function saveDupCMRReason() {
       console.log(data);
       if (!data.success) {
         cmr.showAlert(data.error, 'Error');
-      } 
-      else {
+      } else {
         cmr.showAlert('Request created with ID ' + requestIdRsn + ' and has been sent for processing.', 'Success', 'Automation.redirectToWorkflow()', true);
       }
     },
@@ -707,7 +705,6 @@ function addBrVATValidator() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-
 
   // length validator
   FormManager.addFormValidator((function() {
@@ -753,12 +750,12 @@ function addBrFiscalCdValidator() {
       }
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-  
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var fiscalCdEndUsr = FormManager.getActualValue('municipalFiscalCodeEndUser');
-        
+
         if ((fiscalCdEndUsr != null && fiscalCdEndUsr != '')) {
           console.log("Running addBrFiscalCdEndUserValidator");
           var regex = /[^0]+/gm;

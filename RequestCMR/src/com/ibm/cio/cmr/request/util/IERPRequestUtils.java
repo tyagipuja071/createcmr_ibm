@@ -208,7 +208,18 @@ public class IERPRequestUtils extends RequestUtils {
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
 
-    mail.send(host);
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
+
   }
 
   /**

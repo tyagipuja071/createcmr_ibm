@@ -16,6 +16,7 @@ import java.util.zip.ZipFile;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -29,6 +30,7 @@ import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
@@ -138,28 +140,47 @@ public class ApprovalBatchService extends BaseBatchService {
         updateEntity(request, entityManager);
 
         model.setComments("(system generated status change)");
-        service.sendGenericMail(entityManager, approvalType, model, admin);
+
+        String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+        String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+        boolean skip = false;
+
+        if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+          skip = true;
+        }
+
+        if (skip == false) {
+          service.sendGenericMail(entityManager, approvalType, model, admin);
+        }
 
         if (CmrConstants.APPROVAL_PENDING_APPROVAL.equals(request.getStatus()) || CmrConstants.APPROVAL_CANCELLED.equals(request.getStatus())) {
           // need to prepare engine
           engine = this.requestEngines.get(request.getReqId());
           if (engine == null) {
             LOG.debug("Initializing email engine for Request " + request.getReqId());
-            engine = new EmailEngine(entityManager, request.getReqId());
+            if (skip == false) {
+              engine = new EmailEngine(entityManager, request.getReqId());
+            }
             this.requestEngines.put(request.getReqId(), engine);
           } else {
             LOG.debug("Using email engine for Request " + request.getReqId());
           }
 
           if (isEROApproval(approvalType)) {
-            engine.initChecklist();
+            if (skip == false) {
+              engine.initChecklist();
+            }
           }
           if (CmrConstants.APPROVAL_PENDING_APPROVAL.equals(request.getStatus())) {
             LOG.debug("Sending approval email for Approval Request ID " + request.getId().getApprovalId());
-            mail = engine.generateMail(entityManager, request, approvalType, mailSubject, model.getRequester(), userComments);
+            if (skip == false) {
+              mail = engine.generateMail(entityManager, request, approvalType, mailSubject, model.getRequester(), userComments);
+            }
           } else if (CmrConstants.APPROVAL_CANCELLED.equals(request.getStatus())) {
             LOG.debug("Sending cancellation notification for Approval Request ID " + request.getId().getApprovalId());
-            mail = engine.generateCancellationMail(entityManager, request, approvalType, mailSubject, model.getRequester(), userComments);
+            if (skip == false) {
+              mail = engine.generateCancellationMail(entityManager, request, approvalType, mailSubject, model.getRequester(), userComments);
+            }
           }
           // add the PDF attachment for the request details
           if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
@@ -181,8 +202,10 @@ public class ApprovalBatchService extends BaseBatchService {
           // add ALL attachments to approvals
           addAttachments(entityManager, mail, request, approvalType);
 
-          mail.setTo(request.getIntranetId());
-          mail.send(SystemConfiguration.getValue("MAIL_HOST"));
+          if (skip == false) {
+            mail.setTo(request.getIntranetId());
+            mail.send(SystemConfiguration.getValue("MAIL_HOST"));
+          }
         }
 
         LOG.debug("Partially committing for Approval Request " + request.getId().getApprovalId());
