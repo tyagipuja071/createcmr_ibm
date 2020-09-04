@@ -797,5 +797,3 @@ public class GermanyUtil extends AutomationUtil {
   }
 
 }
-
-}
