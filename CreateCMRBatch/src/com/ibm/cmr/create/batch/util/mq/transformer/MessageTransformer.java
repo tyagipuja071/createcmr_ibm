@@ -365,4 +365,8 @@ public abstract class MessageTransformer {
     return false;
   }
 
+  public String getGmllcDupCreation(Data data) {
+    return "NA";
+  }
+
 }

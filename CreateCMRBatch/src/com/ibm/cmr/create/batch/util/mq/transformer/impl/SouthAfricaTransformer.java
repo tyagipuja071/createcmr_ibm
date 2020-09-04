@@ -330,9 +330,21 @@ public class SouthAfricaTransformer extends MCOTransformer {
         String oldPhone = addrRdc.getCustPhone() != null ? addrRdc.getCustPhone() : "";
         if (addrRdc == null || (addrRdc != null && !currPhone.equals(oldPhone))) {
           return true;
+        } else if (!"ZS01".equals(addr.getId().getAddrType()) && StringUtils.isEmpty(addr.getSapNo())) {
+          return true;
         }
       }
     }
+
     return false;
+  }
+
+  @Override
+  public String getGmllcDupCreation(Data data) {
+    List<String> validScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC");
+    if (data != null && StringUtils.isNotEmpty(data.getCustSubGrp()) && validScenarios.contains(data.getCustSubGrp())) {
+      return "764";
+    }
+    return "NA";
   }
 }
