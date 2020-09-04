@@ -219,9 +219,10 @@ public class UKIUtil extends AutomationUtil {
       if (StringUtils.isNotBlank(managerID)) {
         boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
-          cmdeReview = true;
+          details.append("'Updates to coverage fields cannot be validated.\n");
         } else {
           admin.setScenarioVerifiedIndc("Y");
+          details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
         }
       }
     }
