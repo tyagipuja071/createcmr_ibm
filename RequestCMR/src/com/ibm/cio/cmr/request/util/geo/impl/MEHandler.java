@@ -118,6 +118,7 @@ public class MEHandler extends BaseSOFHandler {
     LANDED_CNTRY_MAP.put(SystemLocation.UNITED_ARAB_EMIRATES, "AE");
     LANDED_CNTRY_MAP.put(SystemLocation.UZBEKISTAN, "UZ");
     LANDED_CNTRY_MAP.put(SystemLocation.YEMEN, "YE");
+    LANDED_CNTRY_MAP.put(SystemLocation.TUNISIA_SOF, "TN");
   }
 
   public static final List<String> CEMEA_CHECKLIST = Arrays.asList("358", "359", "363", "603", "607", "620", "626", "651", "675", "677", "680", "694",
@@ -147,10 +148,13 @@ public class MEHandler extends BaseSOFHandler {
   private static final List<String> ME_COUNTRIES_LIST = Arrays.asList(SystemLocation.BAHRAIN, SystemLocation.MOROCCO, SystemLocation.GULF,
       SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI, SystemLocation.IRAQ, SystemLocation.JORDAN, SystemLocation.KUWAIT,
       SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.OMAN, SystemLocation.PAKISTAN, SystemLocation.QATAR, SystemLocation.SAUDI_ARABIA,
-      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT);
+      SystemLocation.YEMEN, SystemLocation.SYRIAN_ARAB_REPUBLIC, SystemLocation.EGYPT, SystemLocation.TUNISIA_SOF);
 
   protected static final String[] ME_MASS_UPDATE_SHEET_NAMES = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At",
       "Address in Local language", };
+
+  private static final List<String> GULF_ORIGINAL_COUNTRIES = Arrays.asList("677", "680", "620", "832", "805", "767", "823", "762", "768", "772",
+      "849");
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
@@ -255,34 +259,34 @@ public class MEHandler extends BaseSOFHandler {
                 if (!StringUtils.isBlank(adrnr)) {
                   Sadr sadr = getCEEAddtlAddr(entityManager, adrnr, SystemConfiguration.getValue("MANDT"));
                   if (sadr != null) {
-                      LOG.debug("Adding installing to the records");
-                      FindCMRRecordModel installing = new FindCMRRecordModel();
-                      PropertyUtils.copyProperties(installing, mainRecord);
-                      installing.setCmrAddrTypeCode("ZP02");
-                      installing.setCmrAddrSeq(gAddrSeq);
-                      // installing.setParentCMRNo(mainRecord.getCmrNum());
-                      installing.setCmrName1Plain(sadr.getName1());
-                      installing.setCmrName2Plain(sadr.getName2());
-                      installing.setCmrCity(sadr.getOrt01());
-                      installing.setCmrCity2(sadr.getOrt02());
-                      installing.setCmrStreetAddress(sadr.getStras());
-                      installing.setCmrName3(sadr.getName3());
-                      installing.setCmrName4(sadr.getName4());
-                      installing.setCmrCountryLanded(sadr.getLand1());
-                      installing.setCmrCountry(sadr.getSpras());
-                      installing.setCmrStreetAddressCont(sadr.getStrs2());
-                      installing.setCmrState(sadr.getRegio());
-                      installing.setCmrPostalCode(sadr.getPstlz());
-                      installing.setCmrDept(sadr.getOrt02());
-                      installing.setCmrBldg(legacyGaddrLN6);
-                      if (!StringUtils.isBlank(sadr.getTxjcd())) {
-                        installing.setCmrTaxOffice(sadr.getTxjcd());
-                      }
-                      if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
-                        installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
-                      }
-                      installing.setCmrSapNumber("");
-                      converted.add(installing);
+                    LOG.debug("Adding installing to the records");
+                    FindCMRRecordModel installing = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(installing, mainRecord);
+                    installing.setCmrAddrTypeCode("ZP02");
+                    installing.setCmrAddrSeq(gAddrSeq);
+                    // installing.setParentCMRNo(mainRecord.getCmrNum());
+                    installing.setCmrName1Plain(sadr.getName1());
+                    installing.setCmrName2Plain(sadr.getName2());
+                    installing.setCmrCity(sadr.getOrt01());
+                    installing.setCmrCity2(sadr.getOrt02());
+                    installing.setCmrStreetAddress(sadr.getStras());
+                    installing.setCmrName3(sadr.getName3());
+                    installing.setCmrName4(sadr.getName4());
+                    installing.setCmrCountryLanded(sadr.getLand1());
+                    installing.setCmrCountry(sadr.getSpras());
+                    installing.setCmrStreetAddressCont(sadr.getStrs2());
+                    installing.setCmrState(sadr.getRegio());
+                    installing.setCmrPostalCode(sadr.getPstlz());
+                    installing.setCmrDept(sadr.getOrt02());
+                    installing.setCmrBldg(legacyGaddrLN6);
+                    if (!StringUtils.isBlank(sadr.getTxjcd())) {
+                      installing.setCmrTaxOffice(sadr.getTxjcd());
+                    }
+                    if (!StringUtils.isBlank(sadr.getTxjcd()) && !StringUtils.isBlank(sadr.getPfort())) {
+                      installing.setCmrTaxOffice(sadr.getTxjcd() + sadr.getPfort());
+                    }
+                    installing.setCmrSapNumber("");
+                    converted.add(installing);
                   } else {
                     CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
                     if (gAddr != null) {
@@ -324,38 +328,38 @@ public class MEHandler extends BaseSOFHandler {
                 if (StringUtils.isBlank(adrnr)) {
                   CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
                   if (gAddr != null) {
-                      LOG.debug("Adding installing to the records");
-                      FindCMRRecordModel installing = new FindCMRRecordModel();
-                      PropertyUtils.copyProperties(installing, mainRecord);
-                      // copyAddrData(installing, installingAddr, gAddrSeq);
-                      installing.setCmrAddrTypeCode("ZP02");
-                      installing.setCmrAddrSeq(gAddrSeq);
-                      // add value
-                      installing.setCmrName1Plain(gAddr.getAddrLine1());
-                      if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
-                        installing.setCmrName2Plain(gAddr.getAddrLine2());
-                      } else {
-                        installing.setCmrName2Plain("");
-                      }
-                      // installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                      if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
-                        installing.setCmrStreetAddress(gAddr.getAddrLine3());
-                      } else {
-                        installing.setCmrStreetAddress(gAddr.getAddrLine4());
-                      }
-                      installing.setCmrCity(record.getCmrCity());
-                      installing.setCmrCity2(record.getCmrCity2());
-                      installing.setCmrCountry(gAddr.getAddrLine6());
-                      installing.setCmrCountryLanded("");
-                      installing.setCmrPostalCode(record.getCmrPostalCode());
-                      installing.setCmrState(record.getCmrState());
-                      installing.setCmrBldg(legacyGaddrLN6);
-                      if (StringUtils.isBlank(gAddr.getAddrLine3())) {
-                        installing.setCmrStreetAddressCont("");
-                      } else {
-                        installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
-                      }
-                      converted.add(installing);
+                    LOG.debug("Adding installing to the records");
+                    FindCMRRecordModel installing = new FindCMRRecordModel();
+                    PropertyUtils.copyProperties(installing, mainRecord);
+                    // copyAddrData(installing, installingAddr, gAddrSeq);
+                    installing.setCmrAddrTypeCode("ZP02");
+                    installing.setCmrAddrSeq(gAddrSeq);
+                    // add value
+                    installing.setCmrName1Plain(gAddr.getAddrLine1());
+                    if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
+                      installing.setCmrName2Plain(gAddr.getAddrLine2());
+                    } else {
+                      installing.setCmrName2Plain("");
+                    }
+                    // installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                    if (!StringUtils.isBlank(gAddr.getAddrLine3())) {
+                      installing.setCmrStreetAddress(gAddr.getAddrLine3());
+                    } else {
+                      installing.setCmrStreetAddress(gAddr.getAddrLine4());
+                    }
+                    installing.setCmrCity(record.getCmrCity());
+                    installing.setCmrCity2(record.getCmrCity2());
+                    installing.setCmrCountry(gAddr.getAddrLine6());
+                    installing.setCmrCountryLanded("");
+                    installing.setCmrPostalCode(record.getCmrPostalCode());
+                    installing.setCmrState(record.getCmrState());
+                    installing.setCmrBldg(legacyGaddrLN6);
+                    if (StringUtils.isBlank(gAddr.getAddrLine3())) {
+                      installing.setCmrStreetAddressCont("");
+                    } else {
+                      installing.setCmrStreetAddressCont(gAddr.getAddrLine4());
+                    }
+                    converted.add(installing);
                   }
                 }
                 // add new here
@@ -1105,11 +1109,19 @@ public class MEHandler extends BaseSOFHandler {
           break;
         }
       }
+
       CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
       if (cmrtExt != null) {
         SimpleDateFormat sdf = new SimpleDateFormat("MMddyy");
         String aECISUBDateString = sdf.format(cmrtExt.getAeciSubDt());
         data.setAgreementSignDate(aECISUBDateString);
+      }
+    }
+
+    // CMR-6019 - load duplicate 675 CHECKED if exist
+    if (GULF_ORIGINAL_COUNTRIES.contains(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (checkMEDupCMRExist(data.getCmrIssuingCntry(), mainRecord.getCmrNum())) {
+        data.setDupCmrIndc("Y");
       }
     }
 
@@ -1297,6 +1309,17 @@ public class MEHandler extends BaseSOFHandler {
 
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && data != null && "ZP02".equals(addr.getId().getAddrType())) {
       upperChar(addr);
+    }
+
+    if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
+      if (StringUtils.isNotBlank(addr.getPoBox())) {
+        if (StringUtils.isNotBlank(addr.getPostCd())) {
+          addr.setPoBoxPostCd(addr.getPostCd());
+        }
+        if (StringUtils.isNotBlank(addr.getCity1())) {
+          addr.setPoBoxCity(addr.getCity1());
+        }
+      }
     }
   }
 
@@ -2331,6 +2354,26 @@ public class MEHandler extends BaseSOFHandler {
       dupRecord = records.get(0);
     }
     return dupRecord;
+  }
+
+  // CMR-6019
+  private boolean checkMEDupCMRExist(String cntry, String cmrNo) {
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String countME = null;
+    String CEBO = cntry + "0000";
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK.ME.DUP.EXIST.DB2");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMRNO", cmrNo);
+    query.setParameter("CEBO", CEBO);
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      countME = result[0].toString();
+      if (!countME.equals("0")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static String getZP02importInit(EntityManager entityManager, long req_id) {
