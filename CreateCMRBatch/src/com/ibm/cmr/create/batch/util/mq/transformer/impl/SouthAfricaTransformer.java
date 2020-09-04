@@ -233,6 +233,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setMrcCd("2");
     legacyCust.setCustType(data.getCrosSubTyp());
     legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+    legacyCust.setBankBranchNo("");
 
   }
 
