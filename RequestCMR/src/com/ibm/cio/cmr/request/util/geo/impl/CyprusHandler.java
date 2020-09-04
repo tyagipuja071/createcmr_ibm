@@ -1527,16 +1527,10 @@ public class CyprusHandler extends BaseSOFHandler {
 
       // defect 1299146
       if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
-        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
+        data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(0, 6));
+        LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
+        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(7, 10));
         LOG.trace("SBO from Sortl : " + data.getSalesBusOffCd());
-        if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4));
-          LOG.trace("Rep No from Sortl (IL) : " + data.getRepTeamMemberNo());
-        } else {
-          // defect fix 1329919 changed from 5 to 4
-          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4, 10));
-          LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
-        }
       }
       // 1299146
       // Translate and auto-populate for next release
@@ -1592,6 +1586,7 @@ public class CyprusHandler extends BaseSOFHandler {
       }
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+        data.setSalesTeamCd(legacyObjects.getCustomer().getSalesRepNo());
       }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
