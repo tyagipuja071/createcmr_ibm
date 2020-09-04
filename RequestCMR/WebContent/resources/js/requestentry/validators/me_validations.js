@@ -528,7 +528,7 @@ function lockIBMtab() {
     } else {
       FormManager.enable('ppsceid');
     }
-    FormManager.readOnly('soeReqNo');
+    // FormManager.readOnly('soeReqNo'); field remove for CMR-6012
     FormManager.readOnly('salesBusOffCd');
     FormManager.readOnly('locationNumber');
 
