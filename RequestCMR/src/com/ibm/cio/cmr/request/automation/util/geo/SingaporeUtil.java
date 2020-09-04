@@ -27,9 +27,11 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Kna1;
+import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -211,14 +213,17 @@ public class SingaporeUtil extends AutomationUtil {
 
   private Map<String, Boolean> checkifCMRNumExistsNDetailsMatch(String cmrNo, String landCntryCd, EntityManager entityManager, Data data, Addr addr) {
     Map<String, Boolean> cmrdetails = new HashMap<String, Boolean>();
-    String sqlRDC = ExternalizedQuery.getSql("KNA1.CHECK_IF_CMR_EXISTS");
-    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
-    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
-    queryRDC.setParameter("KATR6", landCntryCd);
-
-    Kna1 kna1 = queryRDC.getSingleResult(Kna1.class);
-    if (kna1 != null) {
+    CompanyRecordModel searchModel = new CompanyRecordModel();
+    searchModel.setCmrNo(cmrNo);
+    searchModel.setIssuingCntry(landCntryCd);
+    CompanyRecordModel cmrData = null;
+    try {
+      List<CompanyRecordModel> cmrsData = CompanyFinder.findCompanies(searchModel);
+      cmrData = cmrsData.get(0);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    if (cmrData != null) {
       LOG.debug("CMR No. exists in RDC Db > " + cmrNo);
       cmrdetails.put("cmrExists", true);
 
@@ -229,24 +234,30 @@ public class SingaporeUtil extends AutomationUtil {
       if (!cmrExistsFrSG) {
         LOG.debug("CMR No. does not exist in RDC Db for SG and hence can be used for processing > " + cmrNo);
         cmrdetails.put("cmrExistsFrSG", false);
+
         // collect Req Data
         String reqNme1 = addr.getCustNm1();
         String reqNme2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
-        String reqNme3 = addr.getAddrTxt();
-        String reqNme4 = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2() : "";
+        String reqFullNme = reqNme1.concat(reqNme2);
+        String reqAddr1 = addr.getAddrTxt();
+        String reqAddr2 = addr.getAddrTxt2();
+        String addrFullTxt = reqAddr1.concat(reqAddr2);
         String isicCd = data.getIsicCd();
 
-        // collect Kna1 Data
-        String kna1Nm1 = kna1.getName1();
-        String kna1Nm2 = StringUtils.isNotBlank(kna1.getName2()) ? kna1.getName2() : "";
-        String kna1Nm3 = kna1.getName3();
-        String kna1Nm4 = StringUtils.isNotBlank(kna1.getName4()) ? kna1.getName4() : "";
-        String kna1Isic = kna1.getZzkvSic();
+        // collect Find CMR Data
+        String findCMRNm = cmrData.getName();
+        String findCMRAddr1 = cmrData.getStreetAddress1();
+        String findCMRAddr2 = cmrData.getStreetAddress2();
+        String findCMRFullAddr = findCMRAddr1.concat(findCMRAddr2);
+        String rdcIsicCd = getIsicCdFrmRDC(cmrNo, entityManager);
 
         // compare the two data , to see if they match
-        if ((kna1Nm1.equalsIgnoreCase(reqNme1) && kna1Isic.equalsIgnoreCase(isicCd)) || kna1Nm2.equalsIgnoreCase(reqNme2)
-            || kna1Nm3.equalsIgnoreCase(reqNme3) || kna1Nm4.equalsIgnoreCase(reqNme4)) {
-          cmrdetails.put("detailsMatch", true);
+        if ((findCMRNm.equalsIgnoreCase(reqFullNme) && findCMRFullAddr.equalsIgnoreCase(addrFullTxt))) {
+          if (StringUtils.isNotBlank(rdcIsicCd) && isicCd.equals(rdcIsicCd)) {
+            cmrdetails.put("detailsMatch", true);
+          } else {
+            cmrdetails.put("detailsMatch", false);
+          }
         } else {
           cmrdetails.put("detailsMatch", false);
         }
@@ -286,6 +297,17 @@ public class SingaporeUtil extends AutomationUtil {
     }
     entityManager.flush();
     return issuingCntryCd;
+  }
+
+  private String getIsicCdFrmRDC(String cmrNo, EntityManager entityManager) {
+    String sqlRDC = ExternalizedQuery.getSql("KNA1.GET_ISIC");
+    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC.setParameter("CMR_NO", cmrNo);
+    queryRDC.setParameter("KATR6", SystemLocation.SINGAPORE);
+
+    String isicCd = queryRDC.getSingleResult(String.class);
+    return isicCd;
   }
 
   /**
