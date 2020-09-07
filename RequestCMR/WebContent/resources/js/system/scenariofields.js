@@ -610,6 +610,12 @@ var SCENARIO_FIELDS = [ {
   name : 'cmrNoPrefix',
   tab : 'MAIN_IBM_TAB',
   address : false
+}, {
+  id : '##RestrictInd',
+  lbl : 'Restrict Ind',
+  name : 'restrictInd',
+  tab : 'MAIN_CUST_TAB',
+  address : false
 } ];
 
 function scenariofieldSort(field1, field2) {

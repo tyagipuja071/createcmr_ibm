@@ -1747,6 +1747,16 @@ function applyAddrChangesModal_onLoad() {
       if (useCntry && type.ret3 != cntry) {
         break;
       }
+      
+      if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+    	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+    		  continue;
+        }
+      }
 
       // update For TR
 
@@ -1777,6 +1787,18 @@ function applyAddrChangesModal_onLoad() {
       }
 
       if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
           continue;
         }

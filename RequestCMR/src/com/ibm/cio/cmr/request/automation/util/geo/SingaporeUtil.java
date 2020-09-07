@@ -3,7 +3,9 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -11,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -19,10 +22,14 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
@@ -70,27 +77,28 @@ public class SingaporeUtil extends AutomationUtil {
       details.append("Default cluster not used.\n");
     }
 
-    String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
-    LOG.debug("IfClusterSalesmanIsValid" + validRes);
+    if (!"SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
+      String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
+      LOG.debug("IfClusterSalesmanIsValid" + validRes);
 
-    if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
-      LOG.debug("Salesman check skipped for private and allowed scenarios.");
-      details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
-    } else {
+      if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+        LOG.debug("Salesman check skipped for private and allowed scenarios.");
+        details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
+      } else {
 
-      if (validRes != null && validRes.equals("INVALID")) {
-        details.append("The combination of Salesman No. and Cluster is not valid.\n");
-        engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
-        // eleResults.append("Invalid Salesman No.\n");
-        results.setOnError(true);
-      } else if (validRes != null && validRes.equals("VALID")) {
-        details.append("The combination of Salesman No. and Cluster is valid.\n");
-      } else if (validRes != null && validRes.equals("NO_RESULTS")) {
-        details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+        if (validRes != null && validRes.equals("INVALID")) {
+          details.append("The combination of Salesman No. and Cluster is not valid.\n");
+          engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
+          // eleResults.append("Invalid Salesman No.\n");
+          results.setOnError(true);
+        } else if (validRes != null && validRes.equals("VALID")) {
+          details.append("The combination of Salesman No. and Cluster is valid.\n");
+        } else if (validRes != null && validRes.equals("NO_RESULTS")) {
+          details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+        }
+
       }
-
     }
-
     if (govType != null && govType.equals("Y")) {
       // eleResults.append("Government Organization" + "\n");
       details.append("Processor review is needed as customer is a Government Organization" + "\n");
@@ -119,6 +127,17 @@ public class SingaporeUtil extends AutomationUtil {
       details.append("ISIC is valid" + "\n");
     }
 
+    // CMR - 4507
+    if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isNotBlank(data.getCmrNo())) {
+      Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+      Map<String, Boolean> checkResults = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), addr.getLandCntry(), entityManager, data,
+          requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+      if (!checkResults.get("cmrExists")) {
+        details.append("CMR Number field with CMR# " + data.getCmrNo() + " cleared as requested CMR does not exist.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CMR_NO", data.getCmrNo(), "");
+      }
+    }
+
     if (!results.isOnError()) {
       // eleResults.append("Successful Exceution");
       details.append("Field Computation completed successfully." + "\n");
@@ -142,13 +161,85 @@ public class SingaporeUtil extends AutomationUtil {
      * skipCompanyCheckForScenario(requestData, engineData,
      * Arrays.asList(scnarioList), false);
      */
-
+    Data data = requestData.getData();
     String[] scnarioList = { "ASLOM", "NRML" };
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
+
+    // CMR - 4507
+    if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
+      Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+      String zs01LandCntry = addr.getLandCntry();
+      try {
+        if (StringUtils.isNotBlank(data.getCmrIssuingCntry()) && StringUtils.isNotBlank(zs01LandCntry)) {
+          Map<String, Boolean> checkresult = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), zs01LandCntry, entityManager, data,
+              requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+          boolean cmrExists = checkresult.get("cmrExists");
+          boolean detailsMatch = checkresult.get("detailsMatch");
+
+          if (!cmrExists) {
+            details.append("CMR# " + data.getCmrNo() + " does not exist in RDc.");
+            engineData.addNegativeCheckStatus("OTH", "CMR# " + data.getCmrNo() + " does not exist in RDc.");
+            result.setOnError(true);
+          } else if (!detailsMatch) {
+            details.append("Request Details do not match the details of CMR in RDc.");
+            engineData.addNegativeCheckStatus("OTH", "Request Details do not match the details of CMR in RDc.");
+            result.setOnError(true);
+          } else if (cmrExists && detailsMatch) {
+            details.append("Details Match , Hence proceeding with automating the request.");
+          } else if (!cmrExists) {
+            details.append("Requested CMR No. " + data.getCmrNo() + " is not available, CMR No. will automatically be generated by the system.");
+          }
+        }
+      } catch (Exception e) {
+        LOG.debug("");
+      }
+      result.setDetails(details.toString());
+    }
     return true;
+  }
+
+  private Map<String, Boolean> checkifCMRNumExistsNDetailsMatch(String cmrNo, String zs01LandCntry, EntityManager entityManager, Data data,
+      Addr addr) {
+    Map<String, Boolean> cmrdetails = new HashMap<String, Boolean>();
+    String sqlRDC = ExternalizedQuery.getSql("KNA1.CHECK_IF_CMR_EXISTS");
+    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+    queryRDC.setParameter("BEGRU", zs01LandCntry);
+
+    Kna1 kna1 = queryRDC.getSingleResult(Kna1.class);
+    if (kna1 != null) {
+      LOG.debug("CMR No. exists in RDC Db > " + cmrNo);
+      cmrdetails.put("cmrExists", true);
+      // if cmr exists , check for name , address and isic
+      // collect Req Data
+      String reqNme1 = addr.getCustNm1();
+      String reqNme2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
+      String reqNme3 = addr.getAddrTxt();
+      String reqNme4 = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2() : "";
+      String isicCd = data.getIsicCd();
+
+      // collect Kna1 Data
+      String kna1Nm1 = kna1.getName1();
+      String kna1Nm2 = StringUtils.isNotBlank(kna1.getName2()) ? kna1.getName2() : "";
+      String kna1Nm3 = kna1.getName3();
+      String kna1Nm4 = StringUtils.isNotBlank(kna1.getName4()) ? kna1.getName4() : "";
+      String kna1Isic = kna1.getZzkvSic();
+
+      // compare the two data , to see if they match
+      if (kna1Nm1.equalsIgnoreCase(reqNme1) && kna1Nm2.equalsIgnoreCase(reqNme2) && kna1Nm3.equalsIgnoreCase(reqNme3)
+          && kna1Nm4.equalsIgnoreCase(reqNme4) && kna1Isic.equalsIgnoreCase(isicCd)) {
+        cmrdetails.put("detailsMatch", true);
+      } else {
+        cmrdetails.put("detailsMatch", false);
+      }
+    } else {
+      cmrdetails.put("cmrExists", false);
+    }
+    return cmrdetails;
   }
 
   /**
