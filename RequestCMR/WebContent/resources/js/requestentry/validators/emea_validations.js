@@ -10,7 +10,7 @@ var _custSubTypeHandler = null;
 var _custSubTypeHandlerGr = null;
 var _landCntryHandler = null;
 var _stateProvITHandler = null;
-var _internalDeptHandler = null;
+var _internalDeptHandler =     null;
 var _isicHandler = null;
 var addrTypeHandler = [];
 var _hwMstrInstallFlagHandler = null;
@@ -389,7 +389,6 @@ function afterConfigForUKI() {
         var result = cmr.query('DATA.GET.CUSTSUBGRP.BY_REQID', qParams);
         var custTypeinDB = result.ret1;
         autoSetVAT(_custType, custTypeinDB);
-        configureCRNForUKI();
         autoSetSpecialTaxCdByScenario(_custType, custTypeinDB);
         autoSetCollectionCdByScenario(_custType);
         autoSetSBO(_custType, custTypeinDB);
@@ -482,17 +481,20 @@ function configureCRNForUKI() {
 
   if (reqType == 'C') {
     if ("PRICU" == FormManager.getActualValue('custSubGrp') || "CROSS" == FormManager.getActualValue('custGrp')) {
+      console.log(">>> Removing CRN Mandatory Validation >>>");
       FormManager.getField('restrictInd').checked = true;
-      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      FormManager.resetValidations('taxCd1');
       FormManager.readOnly('taxCd1');
       FormManager.setValue('taxCd1','');
       FormManager.readOnly('restrictInd');
     } else {
       if (!dijit.byId('restrictInd').get('checked')) {
+        console.log(">>> Adding CRN Mandatory Validation >>>");
         FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
         FormManager.enable('taxCd1');
       } else {
-        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        console.log(">>> Removing CRN Mandatory Validation >>>");
+        FormManager.resetValidations('taxCd1');
         FormManager.readOnly('taxCd1');
         FormManager.setValue('taxCd1','');
       }
@@ -502,17 +504,20 @@ function configureCRNForUKI() {
 //    if (role.toUpperCase() == 'REQUESTER') {
       if (isicVal != '9500' && (zs01LandCntry == '' || (zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
         if (!dijit.byId('restrictInd').get('checked')) {
+          console.log(">>> Adding CRN Mandatory Validation >>>");
           FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
           FormManager.enable('taxCd1');
         } else {
-          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+          console.log(">>> Removing CRN Mandatory Validation >>>");
+          FormManager.resetValidations('taxCd1');
           FormManager.readOnly('taxCd1');
           FormManager.setValue('taxCd1','');
         }
         FormManager.enable('restrictInd');
       } else {
+        console.log(">>> Removing CRN Mandatory Validation >>>");
         FormManager.getField('restrictInd').checked = true;
-        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        FormManager.resetValidations('taxCd1');
         FormManager.readOnly('taxCd1');
         FormManager.readOnly('restrictInd');
         FormManager.setValue('taxCd1','');
@@ -1292,6 +1297,8 @@ function autoSetAbbrevNmOnChanageUKI() {
       REQ_ID : zs01ReqId,
       ADDR_TYPE : "ZI01",
     };
+
+
     var result = cmr.query('ADDR.GET.CUSTNM1.BY_REQID_ADDRTYP', qParams);
     var _abbrevNmValue = result.ret1;
 
@@ -7556,6 +7563,7 @@ function addValidatorForCollectionCdUpdateUKI() {
 }
 
 function addValidatorForCompanyRegNum() {
+  // CRN
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -7799,5 +7807,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
 
 });
