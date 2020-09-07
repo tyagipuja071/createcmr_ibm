@@ -406,7 +406,7 @@ public class CyprusTransformer extends EMEATransformer {
         legacyCust.setCollectionCd("");
       }
 
-      if (!StringUtils.isBlank(data.getModeOfPayment()) && data.getModeOfPayment().equals('5')) {
+      if (!StringUtils.isBlank(data.getModeOfPayment()) && data.getModeOfPayment().equals("5")) {
         legacyCust.setModeOfPayment(data.getModeOfPayment());
       } else {
         legacyCust.setModeOfPayment("");
@@ -458,14 +458,6 @@ public class CyprusTransformer extends EMEATransformer {
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
-      }
-    }
-
-    if (!StringUtils.isEmpty(dummyHandler.messageHash.get("ModeOfPayment"))) {
-      if (dummyHandler.messageHash.get("ModeOfPayment").equals("X")) {
-        legacyCust.setModeOfPayment(" ");
-      } else {
-        legacyCust.setModeOfPayment(dummyHandler.messageHash.get("ModeOfPayment"));
       }
     }
 
