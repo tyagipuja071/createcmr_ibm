@@ -131,7 +131,7 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Processing Completed Manual records...");
       monitorDisAutoProcRec(entityManager);
 
-      if ("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
+      if("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
         LOG.info("Processing Pending if Host is Down...");
         monitorLegacyPending(entityManager);
       }
@@ -423,8 +423,7 @@ public class TransConnService extends BaseBatchService {
   }
 
   private void monitorLegacyPending(EntityManager entityManager) {
-    // Search the records with Status PCP and check if current timestamp falls
-    // within host down outage
+	//  Search the records with Status PCP and check if current timestamp falls within host down outage 
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
