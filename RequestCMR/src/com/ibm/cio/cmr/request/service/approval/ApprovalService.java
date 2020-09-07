@@ -200,9 +200,9 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       skip = true;
     }
 
+    // send generic mail
+    ApprovalTyp type = getApprovalType(entityManager, req);
     if (skip == false) {
-      // send generic mail
-      ApprovalTyp type = getApprovalType(entityManager, req);
       sendGenericMail(entityManager, type, approval, admin);
     }
     // create the comment
