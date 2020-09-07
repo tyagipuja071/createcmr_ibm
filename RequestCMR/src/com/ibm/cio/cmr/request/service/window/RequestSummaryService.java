@@ -553,6 +553,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
 
+          if (TYPE_IBM.equals(type) && !equals(oldData.getMilitary(), newData.getMilitary())
+              && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Military"))) {
+            update = new UpdatedDataModel();
+            update.setDataField(PageManager.getLabel(cmrCountry, "Military", "-"));
+            update.setNewData("Y".equals(newData.getMilitary()) ? "Yes" : "");
+            update.setOldData("Y".equals(oldData.getMilitary()) ? "Yes" : "");
+            results.add(update);
+          }
+
           if (geoHandler != null) {
             geoHandler.addSummaryUpdatedFields(this, type, cmrCountry, newData, oldData, results);
           }
@@ -902,15 +911,19 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
         }
         if (!equals(addr.getCustPhone(), addr.getCustPhoneOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CustPhone"))) {
-          update = new UpdatedNameAddrModel();
-          update.setAddrTypeCode(addrType);
-          update.setAddrType(addrTypeDesc);
-          update.setAddrSeq(seqNo);
-          update.setSapNumber(sapNumber);
-          update.setDataField(PageManager.getLabel(cmrCountry, "CustPhone", "-"));
-          update.setNewData(addr.getCustPhone());
-          update.setOldData(addr.getCustPhoneOld());
-          results.add(update);
+          if (!"ZS01".equals(addr.getId().getAddrType()) && SystemLocation.TURKEY.equals(cmrCountry)) {
+            // if Turkey and non sold-to address, do nothing
+          } else {
+            update = new UpdatedNameAddrModel();
+            update.setAddrTypeCode(addrType);
+            update.setAddrType(addrTypeDesc);
+            update.setAddrSeq(seqNo);
+            update.setSapNumber(sapNumber);
+            update.setDataField(PageManager.getLabel(cmrCountry, "CustPhone", "-"));
+            update.setNewData(addr.getCustPhone());
+            update.setOldData(addr.getCustPhoneOld());
+            results.add(update);
+          }
         }
         if (!equals(addr.getTransportZone(), addr.getTransportZoneOld())
             && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "TransportZone"))) {

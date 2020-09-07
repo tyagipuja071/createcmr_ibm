@@ -594,7 +594,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
           state = soldTo.getStateProv();
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_SBO_FROM_STATE");
           query = new PreparedQuery(entityManager, sql);
-          query.setParameter("STATE", "MSP");
+          query.setParameter("STATE", "M" + state);
           List<String> sboMSPList = query.getResults(String.class);
 
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_COLLECTOR_FROM_STATE");

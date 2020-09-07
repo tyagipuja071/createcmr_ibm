@@ -23,7 +23,7 @@
 	<form:hidden path="orgNo" />
 	<form:hidden path="sourceCd" />
 	<form:hidden path="mrcCd" />
-	<cmr:view exceptForCountry="758">
+	<cmr:view exceptForCountry="758,726">
 		<form:hidden path="sitePartyId" />
 	</cmr:view>
 	<form:hidden path="searchTerm" />
@@ -107,7 +107,6 @@
 			</p>
 		</cmr:column>
 		<!-- CMR-2093: add CoF field for Turkey -->
-		<%-- *abner revert begin
 		<cmr:column span="2" containerForField="CommercialFinanced"
 			forCountry="862">
 			<p>
@@ -120,7 +119,6 @@
 					fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB" />
 			</p>
 		</cmr:column>
-		 *abner revert end --%>
 		<cmr:column span="2" containerForField="EmbargoCode">
 			<p>
 				<cmr:label fieldId="embargoCd">
@@ -134,7 +132,7 @@
 		</cmr:column>
 
 		<!-- fields for Cyprus Legacy -->
-		<cmr:view forCountry="666">
+	<%-- 	<cmr:view forCountry="666">
 			<c:if test="${reqentry.reqType != 'C'}">
 				<cmr:column span="2" containerForField="ModeOfPayment">
 					<p>
@@ -147,12 +145,14 @@
 				</cmr:column>
 			</c:if>
 		</cmr:view>
-
+ --%>		
 		<cmr:view forCountry="726">
 			<cmr:column span="2" containerForField="ModeOfPayment">
 				<p>
 					<cmr:label fieldId="modeOfPayment">
-						<cmr:fieldLabel fieldId="ModeOfPayment" />: 
+						<cmr:fieldLabel fieldId="ModeOfPayment" />:
+						<cmr:delta text="${rdcdata.modeOfPayment}"
+						oldValue="${reqentry.paymentMode}" /> 
           			</cmr:label>
 					<cmr:field path="paymentMode" id="modeOfPayment"
 						fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
@@ -161,7 +161,21 @@
 		</cmr:view>
 
 	</cmr:row>
+	<cmr:view forCountry="726">
+		<cmr:row addBackground="true">
 
+			<cmr:column span="2" containerForField="CrosSubTyp">
+				<p>
+					<cmr:label fieldId="crosSubTyp">
+						<cmr:fieldLabel fieldId="CrosSubTyp" />:
+					</cmr:label>
+					<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="CrosSubTyp"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+		</cmr:row>
+	</cmr:view>
+	
 	<cmr:view forCountry="XXXX">
 		<cmr:row addBackground="false">
 			<cmr:column span="2" containerForField="OrgNo">
@@ -208,6 +222,24 @@
 						tabId="MAIN_CUST_TAB" />
 				</p>
 			</cmr:column>
+			<cmr:column span="2" containerForField="CustClass">
+		        <p>
+		          <cmr:label fieldId="custClass">
+		            <cmr:fieldLabel fieldId="CustClass" />:
+		          </cmr:label>
+		          <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
+		        </p>
+		    </cmr:column>
+		</cmr:row>
+		<cmr:row addBackground="true">
+			<cmr:column span="2" containerForField="TypeOfCustomer">
+		        <p>
+		          <cmr:label fieldId="crosSubTyp">
+		            <cmr:fieldLabel fieldId="TypeOfCustomer" />:
+		          </cmr:label>
+		          <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+		        </p>
+		    </cmr:column>
 		</cmr:row>
 	</cmr:view>
 

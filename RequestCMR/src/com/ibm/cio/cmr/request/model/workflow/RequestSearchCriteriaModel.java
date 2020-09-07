@@ -40,6 +40,9 @@ public class RequestSearchCriteriaModel extends BaseModel {
   private String requestType;
   private String procStatus;
 
+  private long childRequestId;
+  private String childRequestStatus;
+
   public String getResultRows() {
     return resultRows;
   }
@@ -574,6 +577,22 @@ public class RequestSearchCriteriaModel extends BaseModel {
 
   public void setSourceSystId(String sourceSystId) {
     this.sourceSystId = sourceSystId;
+  }
+
+  public long getChildRequestId() {
+    return childRequestId;
+  }
+
+  public void setChildRequestId(long childRequestId) {
+    this.childRequestId = childRequestId;
+  }
+
+  public String getChildRequestStatus() {
+    return childRequestStatus;
+  }
+
+  public void setChildRequestStatus(String childRequestStatus) {
+    this.childRequestStatus = childRequestStatus;
   }
 
 }
