@@ -651,5 +651,10 @@
     <put-attribute name="body" value="/resources/jsp/windows/singlereactnoresults.jsp" />
   </definition>
   
+  <definition name="legacysearch" extends="base">
+    <put-attribute name="title" value="CreateCMR | Legacy Search" />
+    <put-attribute name="body" value="/resources/jsp/legacy/legacysearch.jsp" />
+  </definition>
+  
    <!-- Single Reactivation End -->
 </tiles-definitions>
