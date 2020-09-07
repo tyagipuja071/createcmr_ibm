@@ -33,6 +33,18 @@ public class MCOCewaHandler extends MCOHandler {
   protected static final Logger LOG = Logger.getLogger(MCOCewaHandler.class);
 
   @Override
+  public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    super.setDataValuesOnImport(admin, data, results, mainRecord);
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+        data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+      }
+    }
+
+  }
+
+  @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     super.setAddressValuesOnImport(address, admin, currentRecord, cmrNo);
 
