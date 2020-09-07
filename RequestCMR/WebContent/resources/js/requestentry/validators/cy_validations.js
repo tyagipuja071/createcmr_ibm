@@ -3848,13 +3848,17 @@ function updateAddrTypeList(cntry, addressMode, saving) {
 
 function setFieldsToReadOnlyGRCYTR() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
   if (role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.readOnly('abbrevLocn');
   }
-  FormManager.readOnly('salesTeamCd');
+ 
   FormManager.readOnly('subIndustryCd');
-  FormManager.readOnly('repTeamMemberNo');
+  if(reqType != 'U'){
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('salesTeamCd');
+  }
 }
 
 function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) {
@@ -3916,7 +3920,7 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
     // for cross border
     if (custType == 'CROSS' && cmr.currentRequestType == 'U') {
       FormManager.readOnly('landCntry');
-    }else if(!(custType == 'CROSS')){
+    }else if((custType != 'CROSS') && (FormManager.getActualValue('addrType') == 'ZS01')){
       FormManager.readOnly('landCntry');
     }
     // for Turkey - cross border
