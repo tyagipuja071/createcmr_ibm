@@ -45,8 +45,8 @@ public class WorkflowRequestsModel extends BaseModel {
   private String workflowType;
 
   private String rejectReason;
-  private String rejReasonCd; 
-  
+  private String rejReasonCd;
+
   private String cmrIssuingCntry;
   private String cmrNo;
   private String cmrOwner;
@@ -75,6 +75,9 @@ public class WorkflowRequestsModel extends BaseModel {
 
   private String sourceSystId;
   private String requestDueDate;
+
+  private long childRequestId;
+  private String childRequestStatus;
 
   @Override
   public boolean allKeysAssigned() {
@@ -259,7 +262,7 @@ public class WorkflowRequestsModel extends BaseModel {
   public void setRejectReason(String rejectReason) {
     this.rejectReason = rejectReason;
   }
-  
+
   public String getRejReasonCd() {
     return rejReasonCd;
   }
@@ -267,7 +270,6 @@ public class WorkflowRequestsModel extends BaseModel {
   public void setRejReasonCd(String rejReasonCd) {
     this.rejReasonCd = rejReasonCd;
   }
-
 
   public String getClaimField() {
     return claimField;
@@ -435,6 +437,22 @@ public class WorkflowRequestsModel extends BaseModel {
 
   public void setRequestDueDate(String requestDueDate) {
     this.requestDueDate = requestDueDate;
+  }
+
+  public long getChildRequestId() {
+    return childRequestId;
+  }
+
+  public void setChildRequestId(long childRequestId) {
+    this.childRequestId = childRequestId;
+  }
+
+  public String getChildRequestStatus() {
+    return childRequestStatus;
+  }
+
+  public void setChildRequestStatus(String childRequestStatus) {
+    this.childRequestStatus = childRequestStatus;
   }
 
 }
