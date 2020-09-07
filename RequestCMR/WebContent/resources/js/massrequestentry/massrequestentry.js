@@ -314,17 +314,17 @@ function isDPLCheckNeeded() {
 
 function isNewMassTemplateUsed() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cntry == SysLoc.SPAIN) {
-    return true;
-  } else if (cntry == SysLoc.UK) {
-    return true;
-  } else if (cntry == SysLoc.IRELAND) {
-    return true;
-  } else if (cntry == SysLoc.ITALY) {
-    return true;
-  } else {
-    return false;
-  }
+  qParams = {
+      CNTRY : cntry,
+    };
+    var recordLD = cmr.query('CHECK_LD_MASS_NEW_TEMP', qParams);
+    var countrecordLD = recordLD.ret1;
+
+    if (Number(countrecordLD) > 0) {
+      return true;
+    } else {
+      return false;
+    }
 }
 
 /**
