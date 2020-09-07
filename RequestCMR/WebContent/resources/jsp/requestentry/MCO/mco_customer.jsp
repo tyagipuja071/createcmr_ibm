@@ -17,7 +17,6 @@
 %>
 
 <cmr:view forGEO="MCO,MCO1,MCO2">
-
   <!-- Add hidden fields to keep imported values -->
   <form:hidden path="orgNo" />
   <form:hidden path="sourceCd" />
@@ -81,18 +80,7 @@
       </p>
     </cmr:column>
 	</cmr:view>
-    <cmr:view forGEO="MCO1">
-	<cmr:column span="2" containerForField="TypeOfCustomer">
-		<p>
-			<cmr:label fieldId="crosSubTyp">
-				<cmr:fieldLabel fieldId="TypeOfCustomer" />:
-			</cmr:label>
-			<cmr:field path="crosSubTyp" id="crosSubTyp"
-				fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
-		</p>
-	</cmr:column>
-	</cmr:view>
-  </cmr:row>
+     </cmr:row>
   <%--New Fields for Malta --%> 
  <cmr:row addBackground="false">
 	<cmr:column span="2" containerForField="OrdBlk" forCountry="780">
@@ -158,18 +146,19 @@
         </p>
       </cmr:column>
       
-	<cmr:view forCountry="822">
-		<c:if test="${reqentry.reqType != 'C'}">
-			<cmr:column span="2" containerForField="TypeOfCustomer">
-        		<p>
-          			<cmr:label fieldId="crosSubTyp">
-						<cmr:fieldLabel fieldId="TypeOfCustomer" />:
+	<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
+			<c:if test="${reqentry.reqType != 'C'}">
+				<cmr:column span="2" containerForField="TypeOfCustomer">
+					<p>
+						<cmr:label fieldId="crosSubTyp">
+							<cmr:fieldLabel fieldId="TypeOfCustomer" />:
 					</cmr:label>
-          			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
-        		</p>
-      		</cmr:column>
-		</c:if>
-	</cmr:view>
+						<cmr:field path="crosSubTyp" id="crosSubTyp"
+							fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+					</p>
+				</cmr:column>
+			</c:if>
+		</cmr:view>
 	
 	</cmr:row>
 	</cmr:view>
@@ -257,7 +246,7 @@
     <form:hidden path="acAdminBo" id="acAdminBo"/>
     <form:hidden path="locationNo" id="locationNumber"/>
   </cmr:view>
-  <cmr:view forCountry="822">
+  <cmr:view forCountry="822,864">
   	<c:if test="${reqentry.reqType == 'C'}">
     	<form:hidden path="crosSubTyp" id="crosSubTyp"/>
     </c:if>
