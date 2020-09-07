@@ -40,7 +40,7 @@
 </cmr:row>
   <cmr:row addBackground="false">
 <%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
-      <p>D
+      <p>
         <cmr:label fieldId="locationNumber">
           <cmr:fieldLabel fieldId="LocationNumber" />: 
             <cmr:delta text="${rdcdata.locationNumber}" oldValue="${reqentry.locationNo}" id="delta-locationNumber" />
