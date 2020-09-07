@@ -337,15 +337,12 @@ public class MCOSaHandler extends MCOHandler {
       data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
     }
 
-    String mop = legacyObjects.getCustomer().getModeOfPayment();
-    if (mop == "R" || mop == "S" || mop == "T") {
-      data.setCommercialFinanced(mop);
-    } else if (mop == "5") {
-      data.setCodCondition(mop);
-    } else {
-      data.setCodCondition("N");
-      data.setCommercialFinanced("");
-    }
+    /*
+     * String mop = legacyObjects.getCustomer().getModeOfPayment(); if (mop ==
+     * "R" || mop == "S" || mop == "T") { data.setCommercialFinanced(mop); }
+     * else if (mop == "5") { data.setCodCondition(mop); } else {
+     * data.setCodCondition("N"); data.setCommercialFinanced(""); }
+     */
   }
 
   @Override
@@ -366,8 +363,10 @@ public class MCOSaHandler extends MCOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
+
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
       address.getId().setAddrSeq(seq);
