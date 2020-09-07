@@ -53,7 +53,7 @@
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    <cmr:view forCountry="666,726">
+    <cmr:view forCountry="726">
       <cmr:column span="2" containerForField="ISR">
         <p>
           <cmr:label fieldId="repTeamMemberNo">
@@ -72,6 +72,26 @@
           <cmr:field fieldId="SalesSR" id="salesTeamCd" path="salesTeamCd" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>    
+    </cmr:view>
+    <cmr:view forCountry="666">
+      <cmr:column span="2" containerForField="SalesSR">
+        <p>
+          <cmr:label fieldId="salesSR">
+            <cmr:fieldLabel fieldId="SalesSR" />:
+             <!--cmr:delta text="{rdcdata.salesTeamCd}" oldValue="${reqentry.salesTeamCd}" id="delta-salesTeamCd" />-->
+          </cmr:label>
+          <cmr:field fieldId="SalesSR" id="salesTeamCd" path="salesTeamCd" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="2" containerForField="ISR">
+        <p>
+          <cmr:label fieldId="repTeamMemberNo">
+            <cmr:fieldLabel fieldId="ISR" />:
+             <cmr:delta text="${rdcdata.repTeamMemberNo}" oldValue="${reqentry.repTeamMemberNo}"  id="delta-repTeamMemberNo" />
+          </cmr:label>
+          <cmr:field fieldId="ISR" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>        
     </cmr:view>
     <cmr:column span="2" containerForField="Enterprise" forCountry="755">
       <p>
