@@ -1137,21 +1137,22 @@ function setPreferredLang() {
     return;
   }
   FormManager.readOnly('custPrefLang');
-  if ('693' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  var custGrp = FormManager.getActualValue('custGrp');
+  if ('693' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', 'Q');
-  } else if ('668' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  } else if ('668' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', 'C');
-  } else if ('820' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  } else if ('820' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', 'L');
-  } else if ('708' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  } else if ('708' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', '5');
-  } else if ('642' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  } else if ('642' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', 'F');
-  } else if ('832' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  } else if ('832' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', 'A');
-  } else if ('821' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  } else if ('821' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', 'R');
-  } else if ('826' == cntry && FormManager.getActualValue('custGrp') != 'CROSS') {
+  } else if ('826' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
     FormManager.setValue('custPrefLang', '4');
   } else {
     var preLang = FormManager.getActualValue('custPrefLang');
@@ -2496,39 +2497,40 @@ function addIceFormatValidationMorocco() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function addIceBillingValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var billingBool = true;
-        var reqType = FormManager.getActualValue('reqType');
-        var reqId = FormManager.getActualValue('reqId');
-        var addr = 'ZP01';
-        var qParams = {
-          _qall : 'Y',
-          REQID : reqId,
-          ADDR_TYPE : addr
-        };
-
-        var results = cmr.query('GET_ICE_ADDRSEQ', qParams);
-        if (results != null) {
-          for (var i = 0; i < results.length; i++) {
-            if (results[i].ret1.length < 1) {
-              billingBool = false;
-            }
-          }
-        }
-
-        if (billingBool) {
-          return new ValidationResult(null, true);
-        } else if (!billingBool && reqType == 'C') {
-          return new ValidationResult(null, false, 'ICE should not be empty in Billing Address.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
+// function addIceBillingValidator() {
+// FormManager.addFormValidator((function() {
+// return {
+// validate : function() {
+// var billingBool = true;
+// var reqType = FormManager.getActualValue('reqType');
+// var reqId = FormManager.getActualValue('reqId');
+// var addr = 'ZP01';
+// var qParams = {
+// _qall : 'Y',
+// REQID : reqId,
+// ADDR_TYPE : addr
+// };
+//
+// var results = cmr.query('GET_ICE_ADDRSEQ', qParams);
+// if (results != null) {
+// for (var i = 0; i < results.length; i++) {
+// if (results[i].ret1.length < 1) {
+// billingBool = false;
+// }
+// }
+// }
+//
+// if (billingBool) {
+// return new ValidationResult(null, true);
+// } else if (!billingBool && reqType == 'C') {
+// return new ValidationResult(null, false, 'ICE should not be empty in Billing
+// Address.');
+// }
+// return new ValidationResult(null, true);
+// }
+// };
+// })(), 'MAIN_NAME_TAB', 'frmCMR');
+// }
 
 function setChecklistStatus() {
   console.log('validating checklist..');
@@ -4055,7 +4057,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(initICEField, [ SysLoc.MOROCCO ]);
   GEOHandler.addAfterTemplateLoad(initICEField, [ SysLoc.MOROCCO ]);
   GEOHandler.registerValidator(addIceFormatValidationMorocco, [ SysLoc.MOROCCO ], null, true);
-  GEOHandler.registerValidator(addIceBillingValidator, [ SysLoc.MOROCCO ], null, true);
+  // GEOHandler.registerValidator(addIceBillingValidator, [ SysLoc.MOROCCO ],
+  // null, true);
 
   GEOHandler.registerValidator(validateAbbrevNmForCIS, [ SysLoc.RUSSIA ], null, true);
 
