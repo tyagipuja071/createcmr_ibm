@@ -142,13 +142,18 @@ public class USHandler extends GEOHandler {
       for (Kna1 kna1 : kna1List) {
         address = new FindCMRRecordModel();
         address.setCmrAddrTypeCode(CmrConstants.RDC_BILL_TO);
+        address.setCmrName(kna1.getName1());
+        address.setCmrName2(kna1.getName2());
         address.setCmrAddrSeq(kna1.getZzkvSeqno());
         address.setCmrStreetAddress(kna1.getStras());
+        address.setCmrCountryLanded(kna1.getBegru());
+        address.setCmrPostalCode(kna1.getPstlz());
         address.setCmrDept(kna1.getName4());
         address.setCmrCity(kna1.getOrt01());
         address.setCmrState(kna1.getRegio());
         address.setCmrCounty(kna1.getCounc());
         address.setCmrAddrType(kna1.getKtokd());
+        address.setCmrSapNumber(kna1.getId().getKunnr());
         addressList.add(address);
       }
     }
