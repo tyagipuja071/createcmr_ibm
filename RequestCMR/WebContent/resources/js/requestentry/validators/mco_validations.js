@@ -241,7 +241,10 @@ function afterConfigForPT() {
     FormManager.readOnly('cmrNo');
   } else if(role == 'PROCESSOR' && reqType != 'U'){
     FormManager.enable('cmrNo');
+  }else {
+    FormManager.enable('cmrNo');
   }
+  
 
 }
 
