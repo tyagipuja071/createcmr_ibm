@@ -512,6 +512,40 @@ public class BluePagesHelper {
     return false;
 
   }
+  
+  /**
+   * Checks if the employee is under any manager provided in the list
+   * 
+   * @param employeeEmail
+   * @param managerEmails
+   * @return
+   */
+  public static boolean isBluePagesHeirarchyManager(String employeeEmail, List<String> managerEmails) {
+    if (StringUtils.isNotBlank(employeeEmail) && !managerEmails.isEmpty()) {
+      List<String> managerEmailList = new ArrayList<>();
+      for (String str : managerEmails) {
+        managerEmailList.add(str.toLowerCase());
+      }
+      if (managerEmailList.contains(employeeEmail.toLowerCase())) {
+        return true;
+      }
+      String cnum = getCNUMByIntranetAddr(employeeEmail);
+      BPResults results = BluePages.getMgrChainOf(cnum);
+      if (results != null) {
+        for (int i = 0; i < results.rows(); i++) {
+          Hashtable<String, String> row = results.getRow(i);
+          if (row != null) {
+            String mgrmail = row.get("INTERNET");
+            if (!StringUtils.isBlank(mgrmail) && managerEmailList.contains(mgrmail.toLowerCase())) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+
+  }
 
   /**
    * Checks if the employee is under any manager provided in the list

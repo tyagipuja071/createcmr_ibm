@@ -88,7 +88,7 @@ public class CalculateCoverageElement extends OverridingElement {
    * 
    * @throws Exception
    */
-  private static synchronized void initCoverageRules() throws Exception {
+  public static synchronized void initCoverageRules() throws Exception {
     // determine ruleset
     String ruleSetId = SystemParameters.getString("COV_RULES_ID");
     if (StringUtils.isBlank(ruleSetId)) {
@@ -157,8 +157,12 @@ public class CalculateCoverageElement extends OverridingElement {
           result.setDetails(details.toString());
           result.setResults("Skipped");
           result.setProcessOutput(output);
-          return result;
+        } else {
+          result.setDetails("GBG Matching skipped due to previous element execution results.");
+          result.setResults("Skipped");
+          result.setProcessOutput(output);
         }
+        return result;
       }
 
       // check if coverage rules are initialized or not

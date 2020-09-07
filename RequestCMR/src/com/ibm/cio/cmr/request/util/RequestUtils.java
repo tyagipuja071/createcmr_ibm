@@ -221,18 +221,6 @@ public class RequestUtils {
     }
 
     service.createEntity(hist, entityManager);
-    
-    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
-    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
-    boolean skip = false;
-
-    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
-      skip = true;
-    }
-
-    if (skip) {
-      return;
-    }
 
     sendEmailNotifications(entityManager, admin, hist);
   }
@@ -271,18 +259,6 @@ public class RequestUtils {
     }
 
     service.createEntity(hist, entityManager);
-    
-    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
-    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
-    boolean skip = false;
-
-    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
-      skip = true;
-    }
-
-    if (skip) {
-      return;
-    }
 
     sendEmailNotifications(entityManager, admin, hist);
   }
@@ -305,6 +281,19 @@ public class RequestUtils {
   }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history) {
+
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip) {
+      return;
+    }
+
     sendEmailNotifications(entityManager, admin, history, false, false);
   }
 
