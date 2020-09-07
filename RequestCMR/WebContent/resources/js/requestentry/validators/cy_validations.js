@@ -3666,11 +3666,12 @@ function setEnterprise() {
   var ctc = FormManager.getActualValue('clientTier');
   var repTeam = FormManager.getActualValue('salesTeamCd');
   var sbo = FormManager.getActualValue('salesBusOffCd');
+  var value = FormManager.getActualValue('enterprise');
   var valueChanged = false;
   var shouldSetEnterprise = false;
   var enterpriseLov = null;
 
-  if(cmr.currentTab == 'IBM_REQ_TAB') {
+  if(cmr.currentTab == 'IBM_REQ_TAB') { 
     valueChanged = _oldEnterpriseValue != value;  
   }
 
@@ -3914,6 +3915,8 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
     }
     // for cross border
     if (custType == 'CROSS' && cmr.currentRequestType == 'U') {
+      FormManager.readOnly('landCntry');
+    }else if(!(custType == 'CROSS')){
       FormManager.readOnly('landCntry');
     }
     // for Turkey - cross border
@@ -6233,7 +6236,8 @@ function validateCMRNumExistForTR() {
 
 function enableCMRNUMForPROCESSOR() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == "PROCESSOR") {
+  var requestType = FormManager.getActualValue('reqType');
+    if (role == 'PROCESSOR' && requestType != 'U') {
       FormManager.enable('cmrNo');
     }
 }
