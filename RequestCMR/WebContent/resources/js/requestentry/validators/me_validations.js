@@ -2497,39 +2497,40 @@ function addIceFormatValidationMorocco() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function addIceBillingValidator() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var billingBool = true;
-        var reqType = FormManager.getActualValue('reqType');
-        var reqId = FormManager.getActualValue('reqId');
-        var addr = 'ZP01';
-        var qParams = {
-          _qall : 'Y',
-          REQID : reqId,
-          ADDR_TYPE : addr
-        };
-
-        var results = cmr.query('GET_ICE_ADDRSEQ', qParams);
-        if (results != null) {
-          for (var i = 0; i < results.length; i++) {
-            if (results[i].ret1.length < 1) {
-              billingBool = false;
-            }
-          }
-        }
-
-        if (billingBool) {
-          return new ValidationResult(null, true);
-        } else if (!billingBool && reqType == 'C') {
-          return new ValidationResult(null, false, 'ICE should not be empty in Billing Address.');
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
-}
+// function addIceBillingValidator() {
+// FormManager.addFormValidator((function() {
+// return {
+// validate : function() {
+// var billingBool = true;
+// var reqType = FormManager.getActualValue('reqType');
+// var reqId = FormManager.getActualValue('reqId');
+// var addr = 'ZP01';
+// var qParams = {
+// _qall : 'Y',
+// REQID : reqId,
+// ADDR_TYPE : addr
+// };
+//
+// var results = cmr.query('GET_ICE_ADDRSEQ', qParams);
+// if (results != null) {
+// for (var i = 0; i < results.length; i++) {
+// if (results[i].ret1.length < 1) {
+// billingBool = false;
+// }
+// }
+// }
+//
+// if (billingBool) {
+// return new ValidationResult(null, true);
+// } else if (!billingBool && reqType == 'C') {
+// return new ValidationResult(null, false, 'ICE should not be empty in Billing
+// Address.');
+// }
+// return new ValidationResult(null, true);
+// }
+// };
+// })(), 'MAIN_NAME_TAB', 'frmCMR');
+// }
 
 function setChecklistStatus() {
   console.log('validating checklist..');
@@ -4056,7 +4057,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(initICEField, [ SysLoc.MOROCCO ]);
   GEOHandler.addAfterTemplateLoad(initICEField, [ SysLoc.MOROCCO ]);
   GEOHandler.registerValidator(addIceFormatValidationMorocco, [ SysLoc.MOROCCO ], null, true);
-  GEOHandler.registerValidator(addIceBillingValidator, [ SysLoc.MOROCCO ], null, true);
+  // GEOHandler.registerValidator(addIceBillingValidator, [ SysLoc.MOROCCO ],
+  // null, true);
 
   GEOHandler.registerValidator(validateAbbrevNmForCIS, [ SysLoc.RUSSIA ], null, true);
 
