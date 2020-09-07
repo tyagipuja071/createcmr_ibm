@@ -88,7 +88,7 @@ public class CalculateCoverageElement extends OverridingElement {
    * 
    * @throws Exception
    */
-  private static synchronized void initCoverageRules() throws Exception {
+  public static synchronized void initCoverageRules() throws Exception {
     // determine ruleset
     String ruleSetId = SystemParameters.getString("COV_RULES_ID");
     if (StringUtils.isBlank(ruleSetId)) {
