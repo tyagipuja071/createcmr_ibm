@@ -105,6 +105,7 @@ public class SpainUtil extends AutomationUtil {
 
     switch (scenario) {
     case SCENARIO_PRIVATE_CUSTOMER:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       return doPrivatePersonChecks(engineData, SystemLocation.SPAIN, soldTo.getLandCntry(), customerName, details, false, requestData);
     case SCENARIO_BUSINESS_PARTNER:
     case SCENARIO_CROSSBORDER_BP:
@@ -114,7 +115,7 @@ public class SpainUtil extends AutomationUtil {
     case SCENARIO_INTERNAL:
     case SCENARIO_INTERNAL_SO:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       break;
     }
     return true;
@@ -234,6 +235,7 @@ public class SpainUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    int coverageFieldUpdtd = 0;
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -287,8 +289,9 @@ public class SpainUtil extends AutomationUtil {
             cmdeReview = true;
           }
         }
+        coverageFieldUpdtd++;
+
         break;
-      case "INAC/NAC Code":
       case "ISIC":
       case "Currency Code":
         cmdeReview = true;
@@ -305,16 +308,11 @@ public class SpainUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "ISU Code":
-        // noop, for switch handling only
-        break;
       case "Client Tier Code":
-        // noop, for switch handling only
-        break;
       case "Enterprise Number":
-        // noop, for switch handling only
-        break;
+      case "INAC/NAC Code":
       case "Sales Rep":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Order Block Code":
         if ("E".equals(change.getOldData()) || "E".equals(change.getNewData())) {
@@ -324,6 +322,18 @@ public class SpainUtil extends AutomationUtil {
       default:
         ignoredUpdates.add(change.getDataField());
         break;
+      }
+    }
+    if (coverageFieldUpdtd > 0) {
+      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
+      if (StringUtils.isNotBlank(managerID)) {
+        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+        if (!managerCheck) {
+          details.append("Updates to coverage fields cannot be validated. An approval will be required.\n");
+        } else {
+          details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
+          admin.setScenarioVerifiedIndc("Y");
+        }
       }
     }
     if (resultCodes.contains("D")) {

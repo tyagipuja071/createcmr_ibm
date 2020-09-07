@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.AutomationEngine;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -57,6 +58,13 @@ public class AutomationService extends MultiThreadedBatchService {
     if (reqIds != null) {
       pendingList.addAll(reqIds);
     }
+
+    try {
+      CalculateCoverageElement.initCoverageRules();
+    } catch (Exception e) {
+      LOG.error("Error in initializing rules...");
+    }
+
     return pendingList;
   }
 

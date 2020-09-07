@@ -82,9 +82,9 @@ public class EMEAHandler extends BaseSOFHandler {
   private final String[] NAC_VALUES = { "0915", "0918", "0977", "0988", "0992", "1071", "1076", "1082", "1090", "1140", "1206", "1265", "1828",
       "1960", "2159", "2232", "3680", "4110", "5586", "5782", "6909", "7221", "8820" };
 
-  private static final String[] UKI_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "CustClassCode", "LocalTax1", "LocalTax2",
-      "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2" };
+  private static final String[] UKI_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "CustClassCode", "LocalTax2", "Enterprise",
+      "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County",
+      "City2" };
   private static final String[] ISRAEL_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode", "LocalTax1",
       "LocalTax2", "SearchTerm", "SitePartyID", "StreetAddress2", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
       "Floor", "Building", "County", "City2", "CustomerName2" };
@@ -1935,10 +1935,6 @@ public class EMEAHandler extends BaseSOFHandler {
 
       if (SystemLocation.GREECE.equals(country)) {
         address.setCustNm4(currentRecord.getCmrName4());
-        // GR - old record
-        if (isOldRecordsGR) {
-          address.setImportInd("N");
-        }
       }
 
       if (SystemLocation.UNITED_KINGDOM.equals(country) || SystemLocation.IRELAND.equals(country)) {
@@ -3414,8 +3410,6 @@ public class EMEAHandler extends BaseSOFHandler {
       return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01");
     } else if (SystemLocation.TURKEY.equals(cmrIssuingCntry)) {
       return Arrays.asList("ZP01", "ZS01");
-    } else if (SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZP01", "ZS01", "ZD01", "ZI01", "ZS02");
     }
     return null;
   }
@@ -3439,10 +3433,6 @@ public class EMEAHandler extends BaseSOFHandler {
     if (SystemLocation.GREECE.equals(cmrIssuingCntry)) {
       return Arrays.asList("ZD01", "ZI01");
     }
-    if (SystemLocation.CYPRUS.equals(cmrIssuingCntry)) {
-      return Arrays.asList("ZD01", "ZI01");
-    }
-
     return null;
   }
 

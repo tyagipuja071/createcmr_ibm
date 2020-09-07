@@ -82,16 +82,16 @@
     </cmr:column>
 	</cmr:view>
     <cmr:view forGEO="MCO1">
-    <cmr:column span="2" containerForField="CommercialFinanced">
-      <p>
-        <cmr:label fieldId="commercialFinanced">
-          <cmr:fieldLabel fieldId="CommercialFinanced" />:
-            <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
-        </cmr:label>
-        <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
-      </p>
-    </cmr:column>
-    </cmr:view>
+	<cmr:column span="2" containerForField="TypeOfCustomer">
+		<p>
+			<cmr:label fieldId="crosSubTyp">
+				<cmr:fieldLabel fieldId="TypeOfCustomer" />:
+			</cmr:label>
+			<cmr:field path="crosSubTyp" id="crosSubTyp"
+				fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+		</p>
+	</cmr:column>
+	</cmr:view>
   </cmr:row>
   <%--New Fields for Malta --%> 
  <cmr:row addBackground="false">
@@ -184,7 +184,26 @@
       </cmr:column>
     </cmr:row>
   </cmr:view>
-	
+	<cmr:view forGEO="MCO1" >
+	  <cmr:row addBackground="false">
+	    <cmr:column span="2" containerForField="CommercialFinanced">
+	      <p>
+	          <cmr:label fieldId="commercialFinanced">
+	          <cmr:fieldLabel fieldId="CommercialFinanced" />:
+	          </cmr:label>
+	          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    <cmr:column span="2" containerForField="CodFlag">
+	      <p>
+	          <cmr:label fieldId="codFlag">
+	          <cmr:fieldLabel fieldId="CodFlag" />:
+	          </cmr:label>
+	          <cmr:field path="codCondition" id="codFlag" fieldId="CodFlag" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    </cmr:row>
+  </cmr:view>
   <cmr:view forCountry="838">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="SpecialTaxCd">
@@ -243,6 +262,19 @@
     	<form:hidden path="crosSubTyp" id="crosSubTyp"/>
     </c:if>
   </cmr:view>
+  <cmr:view forGEO="MCO2">
+	<cmr:row addBackground="true">
+	  <cmr:column span="2" containerForField="CrosSubTyp">
+		<p>
+		  <cmr:label fieldId="crosSubTyp">
+			<cmr:fieldLabel fieldId="CrosSubTyp" />:
+		  </cmr:label>
+		  <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="CrosSubTyp"
+			tabId="MAIN_CUST_TAB" />
+		</p>
+	  </cmr:column>
+	</cmr:row>
+  </cmr:view>  
     
   <form:hidden path="economicCd" id="economicCd"/>
 </cmr:view>

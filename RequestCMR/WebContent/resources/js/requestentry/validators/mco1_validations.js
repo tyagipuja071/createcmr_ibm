@@ -63,14 +63,20 @@ function afterConfigForZA() {
     return;
   }
 
+  var reqType = FormManager.getActualValue('reqType');
+  var requestingLob = FormManager.getActualValue('requestingLob');
+  var reqReason = FormManager.getActualValue('reqReason');
   var custType = FormManager.getActualValue('custGrp');
   var cntryRegion = FormManager.getActualValue('countryUse');
-  var landCntry = 'ZA'; // default to South Africa
+  var landCntry = ''; // default to South Africa
   if (cntryRegion != '' && cntryRegion.length > 3) {
     landCntry = cntryRegion.substring(3, 5);
+  }else{
+    landCntry='ZA';
   }
 
   FormManager.setValue('defaultLandedCountry', landCntry);
+  FormManager.setValue('landCntry', landCntry);
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
 
@@ -82,22 +88,87 @@ function afterConfigForZA() {
   if (landCntry == 'ZA' && custType != 'CROSS') {
     checkAndAddValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ]);
   }
+  
+  if (reqType == 'U') {
+    cmr.showNode('cod');
+  } else {
+    cmr.hideNode('cod');
+  }
+  if (reqType == 'U') {
+    FormManager.readOnly('commercialFinanced');
+    FormManager.readOnly('codFlag');
+  }
+  lobChange();
 
   setCreditCdField();
   enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
 }
 
+function onLobchange() {
+  dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+    lobChange();
+  });
+  dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
+    lobChange();
+  });
+}
+function lobChange() {
+  if (FormManager.getActualValue('requestingLob') == 'IGF' && FormManager.getActualValue('reqReason') == 'COPT') {
+    FormManager.enable('commercialFinanced');
+  } else {
+    FormManager.readOnly('commercialFinanced');
+  }
+
+  if (FormManager.getActualValue('requestingLob') == 'AR' && FormManager.getActualValue('reqReason') == 'COD') {
+    FormManager.enable('codFlag');
+  } else {
+    FormManager.readOnly('codFlag');
+  }
+
+}
+
+function setCofField() {
+  dojo.connect(FormManager.getField('commercialFinanced'), 'onChange', function(value) {
+    if (FormManager.getActualValue('codFlag') != "") {
+      setCodFieldOnChange();
+    }
+  });
+
+  dojo.connect(FormManager.getField('codFlag'), 'onChange', function(value) {
+    if (FormManager.getActualValue('commercialFinanced') != "") {
+      setCofFieldOnChange();
+    }
+  });
+}
+
+function setCodFieldOnChange() {
+  var cof = FormManager.getActualValue('commercialFinanced');
+  var cod = FormManager.getActualValue('codFlag');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    if (cod != null && cod != "" && (cof == 'R' || cof == 'S' || cof == 'T')) {
+      FormManager.setValue('codFlag', '');
+    }
+  }
+}
+function setCofFieldOnChange() {
+  var cof = FormManager.getActualValue('commercialFinanced');
+  var cod = FormManager.getActualValue('codFlag');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'REQUESTER') {
+    if (cof != null && cof != "" && (cod == 'Y' || cod == 'N')) {
+      FormManager.setValue('commercialFinanced', '');
+    }
+  }
+}
+
 function setCreditCdField() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType == 'U' && FormManager.getActualValue('reqReason') == 'COD') {
-    FormManager.enable('creditCd');
     FormManager.setValue('repTeamMemberNo', 'AMSNBA');
     FormManager.setValue('salesBusOffCd', '0020');
     FormManager.setValue('collBoId', '0020');
-  } else {
-    FormManager.clearValue('creditCd');
-    FormManager.disable('creditCd');
   }
 }
 
@@ -109,7 +180,7 @@ function lockRequireFieldsZA() {
   var role = FormManager.getActualValue('userRole');
 
   // fields locked for Requester
-  if (reqType == 'C' && role == GEOHandler.ROLE_REQUESTER) {
+  if (reqType == 'U' && role == GEOHandler.ROLE_REQUESTER) {
     FormManager.readOnly('specialTaxCd');
   }
 }
@@ -214,6 +285,8 @@ function addAddressFieldValidators() {
         var att = FormManager.getActualValue('custNm4');
         if (att != null && !hasAttPersonPrefix(att) && att.length > 25) {
           return new ValidationResult(null, false, 'Total computed length of Att. Person should not exceed 25 characters.');
+        }else if(att != null && hasAttPersonPrefix(att) && att.length > 30){
+          return new ValidationResult(null, false, 'Total computed length of Att. Person should not exceed 30 characters.');
         }
         return new ValidationResult(null, true);
       }
@@ -246,7 +319,7 @@ function addAddressFieldValidators() {
 }
 
 function hasAttPersonPrefix(attPerson) {
-  var attPrefixList = [ 'Att:', 'Att', 'Attention Person' ];
+  var attPrefixList = [ 'Att:'];
   var prefixFound = false;
   for (var i = 0; i < attPrefixList.length; i++) {
     if (!prefixFound) {
@@ -628,33 +701,39 @@ function enterpriseValidation() {
 
 function showDeptNoForInternalsOnly() {
   var scenario = FormManager.getActualValue('custSubGrp');
-  var subGrp = getCommonSubgrpVal(scenario);
-  var isInternal = (subGrp == 'INT' || subGrp == 'XIN');
-  if (scenario != null && isInternal) {
+  var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+  if (scenario != null && internalScenarios.includes(scenario)) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
+    FormManager.addValidator('ibmDeptCostCenter', Validators.NUMBER, [ 'Internal Department Number' ]);
+    FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
   } else {
+    FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
     FormManager.clearValue('ibmDeptCostCenter');
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
   }
 }
 
-function showCOForIGFonly() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var subCustGrp = FormManager.getActualValue('custSubGrp');
-  var str = null;
-  if (subCustGrp != null && subCustGrp.length > 0) {
-    str = subCustGrp.toUpperCase();
-    str = str.substring(2, str.length);
-  }
-  if (str == 'IGF' || str == 'XIG') {
-    FormManager.show('CommercialFinanced', 'commercialFinanced');
-  } else {
-    FormManager.clearValue('CommercialFinanced');
-    FormManager.hide('CommercialFinanced', 'commercialFinanced');
-  }
+function addIbmDeptCostCntrValidator() {
+  console.log("ibmDeptCostCenter..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var scenario = FormManager.getActualValue('custSubGrp');
+        var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+        if (scenario != null && internalScenarios.includes(scenario)) {
+          var value = FormManager.getActualValue('ibmDeptCostCenter');
+          var result = false;
+          if (value && value.length != 6) {
+            result = true;
+          }
+          if (result) {
+            return new ValidationResult(null, false, 'Internal Department Number should be exactly 6 digit.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 function addStreetContPoBoxLengthValidator() {
@@ -666,14 +745,20 @@ function addStreetContPoBoxLengthValidator() {
         var addrTxt = FormManager.getActualValue('addrTxt2').trim();
         var poBox = FormManager.getActualValue('poBox');
         var combinedVal = addrTxt;
-        if (poBox != '') {
-          combinedVal += poBox;
-          if (combinedVal.length > 21) {
-            return new ValidationResult(null, false, 'Total computed length of Street Address and PO Box should be less than 21 characters.');
+        if(combinedVal != ''){
+          if (poBox != '') {
+            combinedVal += poBox;
+            if (combinedVal.length > 22) {
+              return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should be less than 22 characters.');
+            }
+          } else {
+            if (combinedVal.length > 30) {
+              return new ValidationResult(null, false, 'Street Con\'t should not exceed 30 characters.');
+            }
           }
-        } else {
-          if (combinedVal.length > 30) {
-            return new ValidationResult(null, false, 'Street Address should not exceed 30 characters.');
+        }else {
+          if (poBox.length > 10) {
+            return new ValidationResult(null, false, 'Max Allowed fpr PO BOX length will be 10 characters');
           }
         }
         return new ValidationResult(null, true);
@@ -818,7 +903,7 @@ function retainImportedValues(fromAddress, scenario, scenarioChanged) {
         origClientTier = result.ret2;
         origRepTeam = result.ret3;
         origSbo = result.ret4;
-        origInac = result.ret5;
+        origInac = result.ret6;
 
         FormManager.setValue('isuCd', origISU);
         FormManager.setValue('clientTier', origClientTier);
@@ -858,6 +943,20 @@ function getCommonSubgrpVal(custSubGrp) {
   return val;
 }
 
+function setTypeOfCustomerBehavior() {
+  if(FormManager.getActualValue('reqType') == 'U') {
+    FormManager.show('TypeOfCustomer', 'crosSubTyp');
+    var role = FormManager.getActualValue('userRole').toUpperCase();
+    if(role == 'REQUESTER') {
+      FormManager.readOnly('crosSubTyp');
+    } else if (role == 'PROCESSOR') {
+      FormManager.enable('crosSubTyp');
+    }
+  }else{
+    FormManager.hide('TypeOfCustomer', 'crosSubTyp');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -878,8 +977,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO1);
-  GEOHandler.addAfterConfig(showCOForIGFonly, GEOHandler.MCO1);
-  GEOHandler.addAfterTemplateLoad(showCOForIGFonly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onChangeSubCustGroup, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO1);
@@ -904,7 +1001,13 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetContPoBoxLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCityPostalCodeLengthValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
-
+  GEOHandler.registerValidator(addIbmDeptCostCntrValidator, GEOHandler.MCO1, null, true);
   GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
+  GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO1);
+  
+  GEOHandler.addAfterConfig(onLobchange, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(onLobchange, GEOHandler.MCO1);
+  GEOHandler.addAfterConfig(setCofField, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(setCofField, GEOHandler.MCO1);
 
 });

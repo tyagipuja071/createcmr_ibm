@@ -239,9 +239,12 @@ function afterConfigForPT() {
 
   if (role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
-  } else {
+  } else if(role == 'PROCESSOR' && reqType != 'U'){
+    FormManager.enable('cmrNo');
+  }else {
     FormManager.enable('cmrNo');
   }
+  
 
 }
 
@@ -669,13 +672,13 @@ function setEnterpriseValues(clientTier) {
   // For Spain, domestic with 32B, 32S, 32T & 217 ISUs, set enterprise based on
   // LocNo
   var isuCtc = isuCd + clientTier;
-  // if (custGroup != 'CROSS') {
-  if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
-    // FormManager.readOnly('enterprise');
-    setSBOAndEBO();
-    return;
+  if (custGroup != 'CROSS') {
+    if (cntry == SysLoc.SPAIN && (isuCtc == '32B' || isuCtc == '32N' || isuCtc == '32S' || isuCtc == '32T' || isuCtc == '217')) {
+      // FormManager.readOnly('enterprise');
+      setSBOAndEBO();
+      return;
+    }
   }
-  // }
 
   var enterprises = [];
   if (isuCd != '' && clientTier != '') {
@@ -686,6 +689,7 @@ function setEnterpriseValues(clientTier) {
     };
     var results = cmr.query('GET.ENTLIST.BYISU', qParams);
     if (results != null) {
+      FormManager.resetDropdownValues(FormManager.getField('enterprise'));
       for (var i = 0; i < results.length; i++) {
         enterprises.push(results[i].ret1);
       }
@@ -724,9 +728,9 @@ function setSBOAndEBO() {
     if (FormManager.getActualValue('reqType') != 'C') {
       return;
     }
-    // if (FormManager.getActualValue('custGrp') == 'CROSS') {
-    // return;
-    // }
+    if (FormManager.getActualValue('custGrp') == 'CROSS') {
+      return;
+    }
     var custSubGroup = FormManager.getActualValue('custSubGrp');
     var locationNumber = FormManager.getActualValue('locationNumber');
     var isuCd = FormManager.getActualValue('isuCd');
@@ -1780,7 +1784,7 @@ function setDPCEBObasedOnCntry() {
 
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   for (var i = 0; i < cntryCode.length; i++) {
-    if (locNum != null && locNum == cntryCode[i] && (custSubGrp != 'XINSO' && custSubGrp != 'XINTR') && custSubGrp != 'BUSPR') {
+    if (locNum != null && locNum == cntryCode[i] && custSubGrp != '' && custSubGrp != null && (custSubGrp != 'XINSO' && custSubGrp != 'XINTR') && custSubGrp != 'BUSPR' && custSubGrp != 'XIGS') {
       FormManager.setValue('engineeringBo', '8628628');
       FormManager.setValue('salesBusOffCd', '4515140');
     } else if (custSubGrp == 'XCRO' || custSubGrp == 'XBP' || custSubGrp == 'XIGS' || custSubGrp == 'XINSO' || custSubGrp == 'XINTR') {
@@ -2125,6 +2129,56 @@ function addMailingConditionValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+
+function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
+      FormManager.resetValidations('vat');
+      FormManager.setValue('vatExempt', true);
+    }
+  }
+}
+
+function addAbbrevNmValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _abbrevNm = FormManager.getActualValue('abbrevNm');
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
+          return new ValidationResult({
+            id : 'abbrevNm',
+            type : 'text',
+            name : 'abbrevNm'
+          }, false, 'The value for Abbreviated name is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function addAbbrevLocationValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var _abbrevLocn = FormManager.getActualValue('abbrevLocn');
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (_abbrevLocn != '' && (_abbrevLocn.length > 0 && !_abbrevLocn.match(reg))) {
+          return new ValidationResult({
+            id : 'abbrevLocn',
+            type : 'text',
+            name : 'abbrevLocn'
+          }, false, 'The value for Abbreviated Location is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2187,7 +2241,6 @@ function addMailingConditionValidator() {
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
-
 function setFieldsCharForScenarios() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -2239,7 +2292,7 @@ function setISUCTCOnISIC() {
   var isic = FormManager.getActualValue('isicCd');
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229' ]);
   if (reqType == 'C' && role == 'REQUESTER') {
-    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XINTR' || custSubGrp == 'XINSO' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
+    if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'XIGS' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP' || custSubGrp == 'XCRO')) {
       if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
         FormManager.setValue('clientTier', 'N');
       } else if ('32' == isuCd && 'N' == clientTier && !isicList.has(isic)) {

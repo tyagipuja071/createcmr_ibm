@@ -136,11 +136,11 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>
-          <length>20</length>
+          <length>23</length>
         </column>
         <column>
           <label>Att. Person</label>
@@ -158,7 +158,7 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>21</length>
         </column>
         <column>
           <label>Cross Border City</label>
@@ -224,11 +224,11 @@
           <width>40</width>
           <length>30</length>
         </column>
-        <column>
+        <column number="true" exactLength="false">
           <label>PO Box</label>
           <dbColumn>PO_BOX</dbColumn>
           <width>18</width>
-          <length>20</length>
+          <length>23</length>
         </column>
         <column>
           <label>Att. Person</label>
@@ -322,7 +322,7 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>21</length>
         </column>
         <column>
           <label>Cross Border City</label>
@@ -398,7 +398,7 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>21</length>
         </column>
         <column>
           <label>Cross Border City</label>
@@ -480,7 +480,7 @@
           <label>Local City</label>
           <dbColumn>CITY1</dbColumn>
           <width>40</width>
-          <length>24</length>
+          <length>21</length>
         </column>
         <column>
           <label>Cross Border City</label>

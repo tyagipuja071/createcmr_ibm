@@ -59,6 +59,9 @@ public class GermanyUtil extends AutomationUtil {
   private static final String POSTAL_CD_RANGE = "postalCdRange";
   private static final String SORTL = "SORTL";
 
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
+      "Phone #", "PostBox", "State/Province");
+
   @SuppressWarnings("unchecked")
   public GermanyUtil() {
     if (GermanyUtil.sortlMappings.isEmpty()) {
@@ -605,7 +608,7 @@ public class GermanyUtil extends AutomationUtil {
         return true;
       }
 
-      if (shipTo != null && (changes.isAddressChanged("ZD01") || isAddressAdded(shipTo))) {
+      if (shipTo != null && ((changes.isAddressChanged("ZD01") && isRelevantAddressFieldUpdated(changes, shipTo)) || isAddressAdded(shipTo))) {
         // Check If Address already exists on request
         isShipToExistOnReq = addressExists(entityManager, shipTo);
         if (isShipToExistOnReq) {
@@ -622,7 +625,7 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      if (installAt != null && (changes.isAddressChanged("ZI01") || isAddressAdded(installAt))) {
+      if (installAt != null && ((changes.isAddressChanged("ZI01") && isRelevantAddressFieldUpdated(changes, shipTo)) || isAddressAdded(installAt))) {
         // Check If Address already exists on request
         isInstallAtExistOnReq = addressExists(entityManager, installAt);
         if (isInstallAtExistOnReq) {
@@ -650,7 +653,7 @@ public class GermanyUtil extends AutomationUtil {
         }
       }
 
-      if (billTo != null && (changes.isAddressChanged("ZP01") || isAddressAdded(billTo))) {
+      if (billTo != null && ((changes.isAddressChanged("ZP01") && isRelevantAddressFieldUpdated(changes, shipTo)) || isAddressAdded(billTo))) {
         // Check If Address already exists on request
         isBillToExistOnReq = addressExists(entityManager, billTo);
         if (isBillToExistOnReq) {
@@ -761,7 +764,7 @@ public class GermanyUtil extends AutomationUtil {
 
   private boolean isOnlyDnBRelevantFieldUpdated(RequestChangeContainer changes, String addrTypeCode) {
     boolean isDnBRelevantFieldUpdated = false;
-    String[] addressFields = { "Customer Name 1", "Customer Name 2", "Country (Landed)", "State/Province", "Street Address", "Postal Code", "City" };
+    String[] addressFields = { "Customer Name 1", "Country (Landed)", "Street Address", "Postal Code", "City" };
     List<String> relevantFieldNames = Arrays.asList(addressFields);
     for (String fieldId : relevantFieldNames) {
       UpdatedNameAddrModel addressChange = changes.getAddressChange(addrTypeCode, fieldId);
@@ -772,4 +775,25 @@ public class GermanyUtil extends AutomationUtil {
     }
     return isDnBRelevantFieldUpdated;
   }
+
+  /**
+   * Checks if relevant fields were updated
+   * 
+   * @param changes
+   * @param addr
+   * @return
+   */
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

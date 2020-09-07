@@ -84,8 +84,7 @@ public class UKIUtil extends AutomationUtil {
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
     if (!SCENARIO_THIRD_PARTY.equals(scenario)
-        && ((customerNameZI01.toUpperCase().contains("C/O") || customerNameZI01.toUpperCase().contains("CAREOF")
-            || customerNameZI01.toUpperCase().contains("CARE OF")) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
+        && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
       details.append("Third Party Scenario should be selected.").append("\n");
       engineData.addRejectionComment("OTH", "Third Party Scenario should be selected.", "", "");
       return false;
@@ -93,6 +92,11 @@ public class UKIUtil extends AutomationUtil {
         || SCENARIO_CROSS_GOVERNMENT.equals(scenario)) && !addressEquals(zs01, zi01)) {
       details.append("Billing and Installing addresses are not same. Request will require CMDE review before proceeding.").append("\n");
       engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
+    }
+
+    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp())) && "Y".equals(data.getRestrictInd())) {
+      details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
+      engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
 
     switch (scenario) {
@@ -108,13 +112,7 @@ public class UKIUtil extends AutomationUtil {
       }
       break;
     case SCENARIO_THIRD_PARTY:
-      if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
-        details.append("Customer Names on installing and billing address should be different for Third Party Scenario").append("\n");
-        engineData.addRejectionComment("OTH", "Customer Names on installing and billing address should be different for Third Party Scenario", "",
-            "");
-        return false;
-      } else if (!(customerNameZI01.toUpperCase().contains("C/O") || customerNameZI01.toUpperCase().contains("CAREOF")
-          || customerNameZI01.toUpperCase().contains("CARE OF")) && !customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$")) {
+      if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && !customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$")) {
         details.append("The request does not meet the criteria for Third Party Scenario.").append("\n");
         engineData.addRejectionComment("OTH", "The request does not meet the criteria for Third Party Scenario.", "", "");
         return false;
@@ -137,6 +135,7 @@ public class UKIUtil extends AutomationUtil {
       }
     }
     return true;
+
   }
 
   @Override
@@ -149,19 +148,21 @@ public class UKIUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
     StringBuilder details = new StringBuilder();
     boolean cmdeReview = false;
+    int coverageFieldUpdtd = 0;
     Set<String> resultCodes = new HashSet<String>();// D for Reject
     List<String> ignoredUpdates = new ArrayList<String>();
     for (UpdatedDataModel change : changes.getDataUpdates()) {
       switch (change.getDataField()) {
-      case "VAT #":
-        if (!StringUtils.isBlank(change.getNewData()) && !(change.getOldData().equals(change.getNewData()))) {
-          // ADD OR UPDATE
-          Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+      case "Company Registration Number":
+        if (!StringUtils.isBlank(change.getNewData()) && !(change.getNewData().equals(change.getOldData()))) {
+          // UPDATE
+          // Addr soldTo = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
           List<DnBMatchingResponse> matches = getMatches(requestData, engineData, soldTo, true);
           boolean matchesDnb = false;
           if (matches != null) {
@@ -170,24 +171,28 @@ public class UKIUtil extends AutomationUtil {
           }
           if (!matchesDnb) {
             resultCodes.add("R");// Reject
-            details.append("VAT # on the request did not match D&B\n");
+            details.append("Company Registration Number on the request did not match D&B\n");
           } else {
-            details.append("VAT # on the request matches D&B\n");
+            details.append("Company Registration Number on the request matches D&B\n");
           }
         }
         break;
-      case "INAC/NAC Code":
       case "Company Number":
+      case "ISIC":
         cmdeReview = true;
         break;
       case "Tax Code":
         // noop, for switch handling only
         break;
-      case "ISU Code":
+      case "VAT #":
         // noop, for switch handling only
         break;
+      case "INAC/NAC Code":
+      case "ISU Code":
       case "Client Tier":
-        // noop, for switch handling only
+      case "Enterprise Number":
+      case "SBO":
+        coverageFieldUpdtd++;
         break;
       case "Sales Rep No":
         // noop, for switch handling only
@@ -203,6 +208,26 @@ public class UKIUtil extends AutomationUtil {
         break;
       }
     }
+
+    if (coverageFieldUpdtd > 0) {
+      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
+      if (StringUtils.isNotBlank(managerID)) {
+        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+        if (!managerCheck) {
+          details.append("'Updates to coverage fields cannot be validated.\n");
+        } else {
+          admin.setScenarioVerifiedIndc("Y");
+          details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
+        }
+      }
+    }
+
+    if (!"9500".equals(data.getIsicCd()) && !"GB".equals(soldTo.getLandCntry()) && !"IE".equals(soldTo.getLandCntry())
+        && "Y".equals(data.getRestrictInd())) {
+      details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
+      engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
+    }
+
     if (resultCodes.contains("R")) {
       output.setOnError(true);
       validation.setSuccess(false);

@@ -233,7 +233,7 @@
     <cmr:row>
       <cmr:column span="1">
 		<cmr:label fieldId="custNm2_view">
-        <span class="lbl-CustomerName2">${ui.custName2}:</span>
+        <span class="lbl-CustomerName2">${ui.custNameUKI2}:</span>
         </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -511,7 +511,7 @@
     <cmr:view forCountry="726,666" >
       <cmr:column span="1">
         <cmr:label fieldId="custNm4_view">
-          <span class="lbl-CustomerName4">${ui.custName4}</span>
+          <span class="lbl-CustomerName4">${ui.custNameSwiss}</span>
         </cmr:label>:
       </cmr:column>
       <cmr:column span="2">
@@ -1090,18 +1090,6 @@
     </cmr:row>
   </cmr:view>
 
-  <cmr:view forCountry="726,666">
-    <cmr:row addBackground="true">
-      <cmr:column span="1">
-        <cmr:label fieldId="vat_view">
-          <span class="lbl-Vat">${ui.taxOffice}</span>:</cmr:label>
-      </cmr:column>
-      <cmr:column span="2">
-        <div id="taxOffice_view">-</div>
-      </cmr:column>
-    </cmr:row>
-  </cmr:view>
-	
   <cmr:view forCountry="862">
     <cmr:row addBackground="true">
       <cmr:column span="1" containerForField="taxOffice_view">

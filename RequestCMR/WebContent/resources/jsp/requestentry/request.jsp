@@ -360,7 +360,7 @@ div#ibm-content-main {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862,780,838,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,866,754">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862,780,838,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,866,754,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -392,6 +392,7 @@ div#ibm-content-main {
     <cmr:view exceptForCountry="758">
     	<form:hidden path="hwSvcsRepTeamNo" />
     </cmr:view>
+      <form:hidden path="paygoProcessIndc" />
 	
     <!-- Your Actions Dropdown -->
     <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : ""}" style="display: none">

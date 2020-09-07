@@ -4,6 +4,7 @@
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -13,12 +14,18 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -32,6 +39,7 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 public class SouthAfricaTransformer extends MCOTransformer {
 
   private static final Logger LOG = Logger.getLogger(MCOTransformer.class);
+  private static final String DEFAULT_CLEAR_NUM = "0";
 
   public SouthAfricaTransformer() {
     super(SystemLocation.SOUTH_AFRICA);
@@ -133,9 +141,18 @@ public class SouthAfricaTransformer extends MCOTransformer {
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("transformLegacyAddressData South Africa transformer...");
-
+    formatAddressLines(dummyHandler);
     if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
+    }
+
+    String poBox = currAddr.getPoBox();
+    if (!StringUtils.isEmpty(poBox)) {
+      if (!poBox.startsWith("PO BOX ")) {
+        legacyAddr.setPoBox("PO BOX " + currAddr.getPoBox());
+      } else {
+        legacyAddr.setPoBox(poBox);
+      }
     }
   }
 
@@ -145,23 +162,35 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
-
+    formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
       String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
-
       boolean isBusPr = Arrays.asList(busPrSubGrp).contains(custSubGrp);
-
       if (isBusPr) {
-        legacyCust.setAuthRemarketerInd("Y");
+        legacyCust.setAuthRemarketerInd("1");
       } else {
-        legacyCust.setAuthRemarketerInd("N");
+        legacyCust.setAuthRemarketerInd("0");
       }
 
-      legacyCust.setCeDivision(dummyHandler.messageHash.get("CEdivision"));
-      legacyCust.setCurrencyCd(dummyHandler.messageHash.get("CurrencyCode"));
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+      legacyCust.setCeDivision("2");
+      legacyCust.setCurrencyCd("SA");
+      legacyCust.setTaxCd("");
 
+    }
+
+    if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
+      legacyCust.setIbo(data.getSalesBusOffCd());
+      legacyCust.setSbo(data.getSalesBusOffCd());
+    } else {
+      legacyCust.setIbo("");
+      legacyCust.setSbo("");
+    }
+
+    if (!StringUtils.isBlank(data.getSalesTeamCd())) {
+      legacyCust.setSalesGroupRep(data.getSalesTeamCd());
+    } else {
+      legacyCust.setSalesGroupRep("");
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {
@@ -170,10 +199,42 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
+    if (!StringUtils.isBlank(data.getIbmDeptCostCenter())) {
+      if (data.getIbmDeptCostCenter().length() == 6)
+        legacyCust.setDeptCd(data.getIbmDeptCostCenter().substring(2, 6));
+    }
+
+    if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      legacyCust.setModeOfPayment(data.getCommercialFinanced());
+      if (data.getCodCondition() != null) {
+        String cod = data.getCodCondition();
+        if (cod == "Y") {
+          legacyCust.setModeOfPayment("5");
+        } else {
+          legacyCust.setModeOfPayment("");
+        }
+      }
+
+      String dataEmbargoCd = data.getEmbargoCd();
+      String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
+                                                                                            // removal-single
+      // inactivation
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && ("Y".equals(rdcEmbargoCd))) {
+          if (StringUtils.isBlank(data.getEmbargoCd())) {
+            legacyCust.setEmbargoCd("");
+          }
+        }
+      }
+    }
+
     legacyCust.setAbbrevNm(data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
-    cmrObjects.getData().setUser("");
+    legacyCust.setCustType(data.getCrosSubTyp());
+    legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+    legacyCust.setBankBranchNo("");
+
   }
 
   @Override
@@ -185,10 +246,59 @@ public class SouthAfricaTransformer extends MCOTransformer {
   public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
       CMRRequestContainer cmrObjects) {
     Admin admin = cmrObjects.getAdmin();
-
+    Data data = cmrObjects.getData();
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCustExt.setTeleCovRep("3100");
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
+      legacyCustExt.setTeleCovRep(!StringUtils.isEmpty(data.getCollBoId()) ? data.getCollBoId() : "");
     }
+  }
+
+  @Override
+  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
+      Data data, LegacyDirectObjectContainer legacyObjects) {
+
+    LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
+
+    if (!StringUtils.isBlank(muAddr.getPostCd())) {
+      legacyAddr.setZipCode(muAddr.getPostCd());
+    }
+
+    if (!StringUtils.isBlank(muAddr.getCounty())) {
+      if (muAddr.getId().getAddrType().equals("ZD01")) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCounty().trim())) {
+          legacyAddr.setAddrPhone("");
+        } else {
+          legacyAddr.setAddrPhone(muAddr.getCounty());
+        }
+      }
+    }
+    formatMassUpdateAddressLines(entityManager, legacyAddr, muAddr, false);
+    legacyObjects.addAddress(legacyAddr);
+  }
+
+  @Override
+  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust legacyCust, CMRRequestContainer cmrObjects,
+      MassUpdtData muData) {
+    LOG.debug("ZA >> Mapping default Data values..");
+    LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, legacyCust, muData);
+
+    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
+    if (muaList != null && muaList.size() > 0) {
+      for (MassUpdtAddr mua : muaList) {
+        if ("ZS01".equals(mua.getId().getAddrType())) {
+          if (!StringUtils.isBlank(mua.getCounty())) {
+            if (DEFAULT_CLEAR_NUM.equals(mua.getCounty().trim())) {
+              legacyCust.setTelNoOrVat("");
+            } else {
+              legacyCust.setTelNoOrVat(mua.getCounty());
+            }
+          }
+          break;
+        }
+      }
+    }
+
   }
 
   @Override
@@ -203,5 +313,26 @@ public class SouthAfricaTransformer extends MCOTransformer {
       generateCMRNoObj.setMin(990000);
       generateCMRNoObj.setMax(999999);
     }
+  }
+
+  @Override
+  public boolean enableTempReactOnUpdates() {
+    return true;
+  }
+
+  @Override
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    List<Addr> addresses = cmrObjects.getAddresses();
+    for (Addr addr : addresses) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+        String currPhone = addr.getCustPhone() != null ? addr.getCustPhone() : "";
+        String oldPhone = addrRdc.getCustPhone() != null ? addrRdc.getCustPhone() : "";
+        if (addrRdc == null || (addrRdc != null && !currPhone.equals(oldPhone))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

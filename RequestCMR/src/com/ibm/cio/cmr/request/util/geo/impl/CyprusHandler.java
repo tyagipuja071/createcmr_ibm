@@ -55,6 +55,7 @@ import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.MQProcessUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -152,7 +153,7 @@ public class CyprusHandler extends BaseSOFHandler {
       FindCMRRecordModel record = mainRecord;
       // name4 in rdc = Attn on SOF
       record.setCmrDept(record.getCmrName4());
-      record.setCmrName4(null);
+      // record.setCmrName4(null);
       if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
         record.setCmrStreetAddressCont(record.getCmrName4());
         record.setCmrName3(record.getCmrName3());
@@ -160,13 +161,17 @@ public class CyprusHandler extends BaseSOFHandler {
         // name3 in rdc = Address Con't on SOF
         record.setCmrStreetAddressCont(record.getCmrName3());
         record.setCmrName3(null);
+        if (record.getCmrName4().startsWith("ATT")) {
+          record.setCmrName4(LegacyCommonUtil.removeATT(record.getCmrName4()));
+        }
       }
 
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
-        if (SystemLocation.UNITED_KINGDOM.equals(record.getCmrIssuedBy()) || SystemLocation.IRELAND.equals(record.getCmrIssuedBy())) {
-          record.setCmrPOBox(record.getCmrPOBox());
-        } else {
-          record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+        String poBox = LegacyCommonUtil.doFormatPoBox(record.getCmrPOBox());
+        if (poBox.length() > 5) {
+          record.setCmrPOBox(poBox.substring(0, 5));
+        }else{
+        record.setCmrPOBox(poBox);
         }
       }
       if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
@@ -178,14 +183,12 @@ public class CyprusHandler extends BaseSOFHandler {
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
         LOG.debug("CY Nickname: " + record.getCmrName2Plain());
         record.setCmrName2Plain(record.getCmrName2Plain());
-        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
         record.setCmrDept(null);
       }
 
       if (SystemLocation.GREECE.equals(record.getCmrIssuedBy())) {
         LOG.debug("GR Nickname: " + record.getCmrName2Plain());
         record.setCmrName2Plain(record.getCmrName2Plain());
-        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
         record.setCmrDept(null);
         if (!StringUtils.isBlank(record.getCmrPOBox())) {
           record.setCmrPOBox(record.getCmrPOBox());
@@ -194,7 +197,6 @@ public class CyprusHandler extends BaseSOFHandler {
 
       if (SystemLocation.TURKEY.equals(record.getCmrIssuedBy())) {
         record.setCmrName2Plain(record.getCmrName2Plain());
-        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
         record.setCmrDept(record.getCmrCity2());
       }
 
@@ -240,7 +242,8 @@ public class CyprusHandler extends BaseSOFHandler {
 
                   addr.setCmrName2Plain(!StringUtils.isEmpty(record.getCmrName2Plain()) ? record.getCmrName2Plain() : record.getCmrName4());
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
-                    addr.setCmrPOBox(record.getCmrPOBox());
+                    String poBox = LegacyCommonUtil.doFormatPoBox(record.getCmrPOBox());
+                    addr.setCmrPOBox(poBox);
                   }
                   if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
                     addr.setCmrAddrSeq("00001");
@@ -340,8 +343,6 @@ public class CyprusHandler extends BaseSOFHandler {
               // greece/cyprus/turkey only ZS01; ZP01 and ZD01
               // from SOF directly
               continue;
-            } else {
-              record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
             }
 
             // name4 in rdc = Attn on SOF
@@ -1234,13 +1235,11 @@ public class CyprusHandler extends BaseSOFHandler {
     String street = this.currentImportValues.get(addressKey + "Address4");
     String cityAndPostCode = this.currentImportValues.get(addressKey + "Address5");
     String country = this.currentImportValues.get(addressKey + "Address6");
-    String taxOffice = this.currentImportValues.get(addressKey + "AddressT");
     String vat = this.currentImportValues.get(addressKey + "AddressU");
     String phone = this.currentImportValues.get(addressKey + "Phone");
 
     address.setCmrName1Plain(name);
     address.setCmrTaxNumber(vat);
-    address.setCmrTaxOffice(taxOffice);
 
     if (nickName == null || "*".equals(nickName)) {
       nickName = "";
@@ -1368,14 +1367,12 @@ public class CyprusHandler extends BaseSOFHandler {
     String streetCont = this.currentImportValues.get(addressKey + "Address4");
     String districtCityPostCode = this.currentImportValues.get(addressKey + "Address5");
     String country = this.currentImportValues.get(addressKey + "Address6");
-    String taxOffice = this.currentImportValues.get(addressKey + "AddressT");
     String vat = this.currentImportValues.get(addressKey + "AddressU");
     String phone = this.currentImportValues.get(addressKey + "Phone");
 
     address.setCmrName1Plain(name);
     address.setCmrName2Plain(nameCont);
     address.setCmrTaxNumber(vat);
-    address.setCmrTaxOffice(taxOffice);
     address.setCmrStreetAddress(street);
     address.setCmrStreetAddressCont(streetCont);
 
@@ -1530,16 +1527,10 @@ public class CyprusHandler extends BaseSOFHandler {
 
       // defect 1299146
       if (mainRecord.getCmrSortl() != null && mainRecord.getCmrSortl().length() >= 10) {
-        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(0, 3));
+        data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(0, 6));
+        LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
+        data.setSalesBusOffCd(mainRecord.getCmrSortl().substring(7, 10));
         LOG.trace("SBO from Sortl : " + data.getSalesBusOffCd());
-        if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4));
-          LOG.trace("Rep No from Sortl (IL) : " + data.getRepTeamMemberNo());
-        } else {
-          // defect fix 1329919 changed from 5 to 4
-          data.setRepTeamMemberNo(mainRecord.getCmrSortl().substring(4, 10));
-          LOG.trace("Rep No from Sortl : " + data.getRepTeamMemberNo());
-        }
       }
       // 1299146
       // Translate and auto-populate for next release
@@ -1592,6 +1583,10 @@ public class CyprusHandler extends BaseSOFHandler {
           || SystemLocation.IRELAND.equalsIgnoreCase(data.getCmrIssuingCntry()))) {
         data.setAbbrevLocn((this.currentImportValues.get("AbbreviatedLocation")));
         LOG.trace("AbbreviatedLocation: " + data.getAbbrevLocn());
+      }
+      if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+        data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+        data.setSalesTeamCd(legacyObjects.getCustomer().getSalesRepNo());
       }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
@@ -1711,15 +1706,16 @@ public class CyprusHandler extends BaseSOFHandler {
       address.setVat(currentRecord.getCmrTaxNumber());
       // set tax office here
 
-      address.setTaxOffice(currentRecord.getCmrTaxOffice());
       address.setVat(currentRecord.getCmrTaxNumber());
 
       if (SystemLocation.TURKEY.equals(country)) {
         address.setDept(currentRecord.getCmrDept());
       }
 
-      if (SystemLocation.GREECE.equals(country)) {
-        address.setCustNm4(currentRecord.getCmrName4());
+      if (SystemLocation.CYPRUS.equals(country)) {
+        if (currentRecord.getCmrName4() != null) {
+          address.setCustNm4(LegacyCommonUtil.removeATT(currentRecord.getCmrName4()));
+        }
         // GR - old record
         if (isOldRecordsGR) {
           address.setImportInd("N");
@@ -1766,6 +1762,7 @@ public class CyprusHandler extends BaseSOFHandler {
       data.setCustPrefLang("I");
     } else {
       data.setCustPrefLang("E");
+      data.setSalesTeamCd("000000");
     }
     data.setCmrOwner("IBM");
   }
@@ -2102,10 +2099,6 @@ public class CyprusHandler extends BaseSOFHandler {
         addr.setCustPhone("");
       }
 
-      if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
-        addr.setTaxOffice("");
-      }
-      
       if (!StringUtils.isEmpty(addr.getPoBox()) && !"ZS01".equals(addr.getId().getAddrType()) && !"ZP01".equals(addr.getId().getAddrType())) {
         addr.setPoBox("");
       }
@@ -2183,7 +2176,6 @@ public class CyprusHandler extends BaseSOFHandler {
         addressDataMap.put("postCd", addr.getPostCd());
         addressDataMap.put("stateProv", addr.getStateProv());
         addressDataMap.put("stdCityNm", addr.getStdCityNm());
-        addressDataMap.put("taxOffice", addr.getTaxOffice());
 
         for (String key : addressDataMap.keySet()) {
           for (char problematicChar : problematicCharList) {
@@ -2310,9 +2302,7 @@ public class CyprusHandler extends BaseSOFHandler {
           if (!(StringUtils.isEmpty(addressDataMap.get("stdCityNm"))) && !(addressDataMap.get("stdCityNm").equals(addr.getStdCityNm()))) {
             addr.setStdCityNm(addressDataMap.get("stdCityNm"));
           }
-          if (!(StringUtils.isEmpty(addressDataMap.get("taxOffice"))) && !(addressDataMap.get("taxOffice").equals(addr.getTaxOffice()))) {
-            addr.setTaxOffice(addressDataMap.get("taxOffice"));
-          }
+
         }
       }
 
@@ -2621,6 +2611,14 @@ public class CyprusHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
+    
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
       results.add(update);
     }
   }
@@ -3513,7 +3511,7 @@ public class CyprusHandler extends BaseSOFHandler {
         String attPerson = ""; // 13
         row = sheet.getRow(rowIndex);
         if (row == null) {
-          return; // stop immediately when row is blank
+          break; // stop immediately when row is blank
         }
         // iterate all the rows and check each column value
         currCell = row.getCell(6);
@@ -3581,6 +3579,11 @@ public class CyprusHandler extends BaseSOFHandler {
             error.addError(rowIndex, "Street Con't/PO Box",
                 "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
             validations.add(error);
+          }else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
+            LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "ATT Person/Street Con't",
+                "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
           }
         }
       }
@@ -3590,17 +3593,6 @@ public class CyprusHandler extends BaseSOFHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
-    if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry)) {
-      if (!equals(addr.getTaxOffice(), addr.getTaxOfficeOld())) {
-        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
-        update.setAddrType(addrTypeDesc);
-        update.setSapNumber(sapNumber);
-        update.setDataField(PageManager.getLabel(cmrCountry, "", "TaxOffice"));
-        update.setNewData(addr.getTaxOffice());
-        update.setOldData(addr.getTaxOfficeOld());
-        results.add(update);
-      }
-    }
 
     if (SystemLocation.UNITED_KINGDOM.equals(cmrCountry) || SystemLocation.IRELAND.equals(cmrCountry)) {
       if (!equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
@@ -3904,9 +3896,6 @@ public class CyprusHandler extends BaseSOFHandler {
     if (addrType.equals("ZP01") || addrType.equals("ZI01") || addrType.equals("ZS02")) {
       addrCopy.setCustPhone(null);
     }
-    if (!addrType.equals("ZS01")) {
-      addrCopy.setTaxOffice(null);
-    }
 
     entityManager.persist(addrCopy);
     entityManager.flush();
@@ -4004,9 +3993,6 @@ public class CyprusHandler extends BaseSOFHandler {
           }
 
           CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
-          if ("ZP01".equals(addrType) && custExt != null) {
-            newRecord.setCmrTaxOffice(custExt.getiTaxCode());
-          }
           records.add(newRecord);
         }
       }
@@ -4108,10 +4094,6 @@ public class CyprusHandler extends BaseSOFHandler {
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
         localTransAddr.setCmrPOBox(poBox);
       }
-    }
-
-    if (custExt != null) {
-      localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
     }
 
     return localTransAddr;
