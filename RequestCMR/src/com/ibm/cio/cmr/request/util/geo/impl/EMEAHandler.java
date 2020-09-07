@@ -1803,14 +1803,11 @@ public class EMEAHandler extends BaseSOFHandler {
       if (SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(data.getCmrIssuingCntry())
           || SystemLocation.IRELAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
         autoSetCompanyRegNum(mainRecord.getCmrNum(), data);
-      }
-    } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
+      } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
       String collCd = this.currentImportValues.get("CollectionCode");
       String sr = this.currentImportValues.get("SR");
       String sBO = this.currentImportValues.get("SBO");
-
-      // Story 1374616: Requirement for INAC / NAC :Mukesh
       String inac = data.getInacCd();
       if ((inac != null || !StringUtils.isEmpty(inac)) && inac.length() > 4) {
         data.setInacCd(inac.substring(0, 4));
@@ -2994,6 +2991,12 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetAbbrevLocnAfterImport(entityManager, admin, data);
     }
 
+    if (SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
+      if (isOldRecordsGR) {
+        updateImportIndicatior(entityManager, data.getId().getReqId());
+      }
+    }
+
     if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       int zi01countrdc = getaddZI01AddressCount(entityManager, data.getCmrIssuingCntry(), SystemConfiguration.getValue("MANDT"), data.getCmrNo(),
           ziType);
@@ -3022,6 +3025,12 @@ public class EMEAHandler extends BaseSOFHandler {
       autoSetHwMasterInstallFlagAfterImport(entityManager, admin, data);
     }
 
+  }
+
+  private void updateImportIndicatior(EntityManager entityManager, long reqId) {
+    PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("ADDR.UPDATE.IMPORTIND.N"));
+    query.setParameter("REQ_ID", reqId);
+    query.executeSql();
   }
 
   private void updateImportIndForTRCopyzi01Addr(EntityManager entityManager, long reqId) {
@@ -4556,14 +4565,243 @@ public class EMEAHandler extends BaseSOFHandler {
       Object[] sResult = results.get(0);
       count = sResult[0].toString();
       zi01count = Integer.parseInt(count);
+      zi01count = Integer.parseInt(count);
     }
     System.out.println("zi01count = " + zi01count);
 
     return zi01count;
   }
+  
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    XSSFRow row = null;
+    XSSFCell currCell = null;
 
-  public int getaddZD01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
-    int zd01count = 0;
+    /**
+     * currently Turkey don't need Dup Fills check, so temp skip the checking
+     * this part
+     */
+    // *abner revert begin
+    // if (SystemLocation.TURKEY.equals(country)) {
+    // return;
+    // }
+    // *abner revert end
+    for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+
+      for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+
+        String cbCity = ""; // 8
+        String localCity = ""; // 7
+        String cbPostal = ""; // 10
+        String localPostal = ""; // 9
+
+        String streetCont = ""; // 5
+        String poBox = ""; // 12
+        String attPerson = ""; // 13
+        row = sheet.getRow(rowIndex);
+        if (row == null) {
+          return; // stop immediately when row is blank
+        }
+        // iterate all the rows and check each column value
+        currCell = row.getCell(6);
+        localCity = validateColValFromCell(currCell);
+        currCell = row.getCell(7);
+        cbCity = validateColValFromCell(currCell);
+        currCell = row.getCell(8);
+        localPostal = validateColValFromCell(currCell);
+        currCell = row.getCell(9);
+        cbPostal = validateColValFromCell(currCell);
+
+        currCell = row.getCell(5);
+        streetCont = validateColValFromCell(currCell);
+        currCell = row.getCell(11);
+        poBox = validateColValFromCell(currCell);
+        currCell = row.getCell(12);
+        attPerson = validateColValFromCell(currCell);
+
+        TemplateValidation error = new TemplateValidation(name);
+
+        if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
+          LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+          error.addError(rowIndex, "Local City",
+              "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+          validations.add(error);
+        }
+
+        if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
+          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+              + "If one is populated, the other must be empty. >>");
+          error.addError(rowIndex, "Local Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+              + "If one is populated, the other must be empty.");
+          validations.add(error);
+        }
+
+        // DTN: Defect 1898300: UKI - mass updates - addresses
+        /*
+         * Adding a check that if any of the address lines values that are set
+         * as either value and both are filled out, it will throw an error
+         * message that both can not be filled out.
+         */
+        if ((!StringUtils.isEmpty(cbCity) || !StringUtils.isEmpty(cbPostal))
+            && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+          // if local
+          if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
+            LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "Street Con't/PO Box",
+                "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
+          } else if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(attPerson)) {
+            LOG.trace("Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "PO Box/ATT Person",
+                "Note that PO Box/ATT Person cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
+          } else if (!StringUtils.isEmpty(attPerson) && !StringUtils.isEmpty(streetCont)) {
+            LOG.trace("Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "ATT Person/Street Con't",
+                "Note that ATT Person/Street Con't cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
+          }
+        } else {
+          // else cross border
+          if (!StringUtils.isEmpty(streetCont) && !StringUtils.isEmpty(poBox)) {
+            LOG.trace("Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+            error.addError(rowIndex, "Street Con't/PO Box",
+                "Note that Street Con't/PO Box cannot be filled at same time. Please fix and upload the template again.");
+            validations.add(error);
+          }
+        }
+      }
+    }
+  }
+
+  @Override
+  public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
+      UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
+    if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry)) {
+      if (!equals(addr.getTaxOffice(), addr.getTaxOfficeOld())) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "", "TaxOffice"));
+        update.setNewData(addr.getTaxOffice());
+        update.setOldData(addr.getTaxOfficeOld());
+        results.add(update);
+      }
+    }
+
+    if (SystemLocation.UNITED_KINGDOM.equals(cmrCountry) || SystemLocation.IRELAND.equals(cmrCountry)) {
+      if (!equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
+        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
+        update.setAddrType(addrTypeDesc);
+        update.setSapNumber(sapNumber);
+        update.setDataField(PageManager.getLabel(cmrCountry, "", "HW Master Install Flag"));
+        update.setNewData(addr.getHwInstlMstrFlg());
+        update.setOldData(addr.getHwInstlMstrFlgOld());
+        results.add(update);
+      }
+    }
+  }
+
+  public String getaddAddressAdrnr(EntityManager entityManager, String mandt, String kunnr, String ktokd, String seq) {
+    String adrnr = "";
+    String sql = ExternalizedQuery.getSql("TR.GETADRNR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", SystemLocation.TURKEY);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("KUNNR", kunnr);
+    query.setParameter("ADDR_TYPE", ktokd);
+    query.setParameter("ADDR_SEQ", seq);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      adrnr = sResult[1].toString();
+    }
+    System.out.println("adrnr = " + adrnr);
+
+    return adrnr;
+  }
+
+  private FindCMRRecordModel mapLocalLanguageTranslationOfSoldTo(EntityManager entityManager, FindCMRRecordModel record, String cmrIssueCd)
+      throws Exception {
+    // Map local language translation of sold to value -- for greece recommit
+    CmrtAddr db2LocalTransAddr = LegacyDirectUtil.getLegacyBillingAddress(entityManager, record.getCmrNum(), cmrIssueCd);
+    CmrtCustExt custExt = getCustExt(entityManager, cmrIssueCd, record.getCmrNum());
+    FindCMRRecordModel localTransAddr = new FindCMRRecordModel();
+    PropertyUtils.copyProperties(localTransAddr, record);
+    localTransAddr.setCmrAddrSeq(db2LocalTransAddr.getId().getAddrNo());
+    localTransAddr.setCmrAddrTypeCode("ZP01");
+
+    // If not in sadr look in DB2
+    if (record.getCmrCountryLanded().equals("GR")) {
+      if (!StringUtils.isBlank(record.getCmrIntlName1())) {
+        localTransAddr.setCmrName1Plain(record.getCmrIntlName1());
+      } else {
+        localTransAddr.setCmrName1Plain(db2LocalTransAddr.getAddrLine1());
+      }
+      if (!StringUtils.isBlank(record.getCmrIntlName2())) {
+        localTransAddr.setCmrName2Plain(record.getCmrIntlName2());
+      } else {
+        localTransAddr.setCmrName2Plain(db2LocalTransAddr.getAddrLine2());
+      }
+
+      if (!StringUtils.isBlank(record.getCmrIntlName4())) {
+        localTransAddr.setCmrName4(record.getCmrIntlName4());
+      } else if (!StringUtils.isBlank(record.getCmrName4())) {
+        if (db2LocalTransAddr.getAddrLine3().startsWith("ATT")) {
+          localTransAddr.setCmrName4(db2LocalTransAddr.getAddrLine3().replaceFirst("ATT ", ""));
+        }
+      }
+
+      if (!StringUtils.isBlank(record.getCmrIntlAddress())) {
+        localTransAddr.setCmrStreetAddress(record.getCmrIntlAddress());
+      } else if (!StringUtils.isBlank(record.getCmrStreetAddress())) {
+        localTransAddr.setCmrStreetAddress(db2LocalTransAddr.getStreet());
+      }
+
+      if (!StringUtils.isBlank(record.getCmrOtherIntlAddress())) {
+        localTransAddr.setCmrStreetAddressCont(record.getCmrOtherIntlAddress());
+      } else if (!StringUtils.isBlank(record.getCmrStreetAddressCont())) {
+        if (!db2LocalTransAddr.getAddrLine3().startsWith("ATT") && !db2LocalTransAddr.getAddrLine3().startsWith("PO BOX")) {
+          localTransAddr.setCmrStreetAddressCont(db2LocalTransAddr.getAddrLine3());
+        }
+
+      }
+
+      if (!StringUtils.isBlank(record.getCmrIntlCity1())) {
+        localTransAddr.setCmrCity(record.getCmrIntlCity1());
+      } else {
+        localTransAddr.setCmrCity(db2LocalTransAddr.getCity());
+      }
+
+      if (!StringUtils.isBlank(record.getCmrState())) {
+        localTransAddr.setCmrState(db2LocalTransAddr.getItCompanyProvCd());
+      }
+      if (!StringUtils.isBlank(record.getCmrPostalCode())) {
+        localTransAddr.setCmrPostalCode(db2LocalTransAddr.getZipCode());
+      }
+
+      String poBox = db2LocalTransAddr.getPoBox();
+      if (poBox.contains("PO BOX")) {
+        poBox = poBox.substring(6).trim();
+      } else if (poBox.contains("APTO")) {
+        poBox = poBox.substring(5).trim();
+      }
+      if (!StringUtils.isBlank(record.getCmrPOBox())) {
+        localTransAddr.setCmrPOBox(poBox);
+      }
+    }
+
+    if (custExt != null) {
+      localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
+    }
+
+    return localTransAddr;
+  }
+
+  public int getaddZI01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+    int zi01count = 0;
     String count = "";
     String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -4581,6 +4819,43 @@ public class EMEAHandler extends BaseSOFHandler {
     System.out.println("zd01count = " + zd01count);
 
     return zd01count;
+  }
+
+  public Sadr getTRAddtlAddr(EntityManager entityManager, String adrnr, String mandt) {
+    Sadr sadr = new Sadr();
+    String qryAddlAddr = ExternalizedQuery.getSql("GET.TR_SADR_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, qryAddlAddr);
+    query.setParameter("ADRNR", adrnr);
+    query.setParameter("MANDT", mandt);
+    sadr = query.getSingleResult(Sadr.class);
+
+    return sadr;
+  }
+
+  private void copyAddrData(FindCMRRecordModel record, Addr addr) {
+    record.setCmrAddrTypeCode("ZP01");
+    record.setCmrAddrSeq("00002");
+    record.setCmrName1Plain(addr.getCustNm1());
+    record.setCmrName2Plain(addr.getCustNm2());
+    record.setCmrName3(addr.getCustNm3());
+    record.setCmrName4(addr.getCustNm4());
+    record.setCmrStreetAddress(addr.getAddrTxt());
+    record.setCmrCity(addr.getCity1());
+    record.setCmrCity2(addr.getCity2());
+    record.setCmrState(addr.getStateProv());
+    record.setCmrCountryLanded(addr.getLandCntry());
+    record.setCmrCountry(addr.getLandCntry());
+    record.setCmrPOBox(addr.getPoBox());
+    record.setCmrPostalCode(addr.getPostCd());
+    record.setParentCMRNo(addr.getParCmrNo());
+  }
+
+  private Addr getCurrentInstallingAddress(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("TR.GETINSTALLING");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    return query.getSingleResult(Addr.class);
   }
 
   private void autoSetAbbreviatedNameUKIIFSL(Data data, String installingName, Admin admin) {
@@ -4649,6 +4924,26 @@ public class EMEAHandler extends BaseSOFHandler {
       }
     }
 
+
+  public int getaddZD01AddressCount(EntityManager entityManager, String katr6, String mandt, String cmr_no, String ktokd) {
+    int zd01count = 0;
+    String count = "";
+    String sql = ExternalizedQuery.getSql("TR.GETRDCZI01COUNT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("KATR6", katr6);
+    query.setParameter("MANDT", mandt);
+    query.setParameter("CMR_NO", cmr_no);
+    query.setParameter("ADDR_TYPE", ktokd);
+    List<Object[]> results = query.getResults();
+
+    if (results != null && !results.isEmpty()) {
+      Object[] sResult = results.get(0);
+      count = sResult[0].toString();
+      zd01count = Integer.parseInt(count);
+    }
+    System.out.println("zd01count = " + zd01count);
+
+    return zd01count;
   }
 
 }
