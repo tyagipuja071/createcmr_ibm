@@ -420,6 +420,51 @@ span.bold {
 
       <!-- Links (to follow) -->
       
+      <!-- RDC -->
+      <table cellspacing="0" cellpadding="0" border="0" summary="RDC" class="ibm-data-table ibm-sortable-table ibm-alternating search-results">
+        <caption>
+          <em>RDC Records (KNA1)
+            <img class="exp-col" title="Expand Details" src="${resourcesPath}/images/add.png" ng-click="expRdc = true" ng-show="!expRdc">
+            <img class="exp-col" title="Collapse Details" src="${resourcesPath}/images/collapse2.png" ng-click="expRdc = false" ng-show="expRdc">
+          </em>
+        </caption>
+        <thead ng-show="expRdc">
+          <tr>
+            <th scope="col" width="6%">MANDT</th>
+            <th scope="col" width="10%">KUNNR</th>
+            <th scope="col" width="10%">Issuing Country</th>
+            <th scope="col" width="9%">CMR No.</th>
+            <th scope="col" width="*">Name 1-4</th>
+            <th scope="col" width="23%">Address</th>
+            <th scope="col" width="9%">Addr Type</th>
+            <th scope="col" width="9%">Addr Seq</th>
+            <th scope="col" width="9%">Order Block</th>
+          </tr>
+        </thead>
+        <tbody ng-show="expRdc">
+          <tr ng-repeat="rdc in rdcRecords">
+            <td>{{rdc.id.mandt}}</td>
+            <td>{{rdc.id.kunnr}}</td>
+            <td>{{rdc.katr6}}</td>
+            <td>{{rdc.zzkvCusno}}</td>
+            <td style="font-size:11px">
+              {{rdc.name1}}<br>
+              {{rdc.name2}}<br>
+              {{rdc.name3}}<br>
+              {{rdc.name4}}
+            </td>
+            <td style="font-size:11px">
+              {{rdc.stras}}<br>
+              {{rdc.ort01}}<br>
+              {{rdc.regio}}<br>
+              {{rdc.land1}} {{rdc.pstlz}}
+            </td>
+            <td>{{rdc.ktokd}}</td>
+            <td>{{rdc.zzkvSeqno}}</td>
+            <td>{{rdc.aufsd}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
   <cmr:row>

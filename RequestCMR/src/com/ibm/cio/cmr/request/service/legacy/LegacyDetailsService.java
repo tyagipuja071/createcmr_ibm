@@ -11,10 +11,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrLink;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
@@ -67,6 +69,15 @@ public class LegacyDetailsService extends BaseSimpleService<LegacyDirectObjectCo
       query.setForReadOnly(true);
       List<CmrtAddrLink> links = query.getResults(CmrtAddrLink.class);
       container.getLinks().addAll(links);
+
+      sql = ExternalizedQuery.getSql("LEGACY.SEARCH.KNA1");
+      query = new PreparedQuery(entityManager, sql);
+      query.setParameter("KATR6", country);
+      query.setParameter("CMR_NO", cmrNo);
+      query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+      query.setForReadOnly(true);
+      List<Kna1> rdc = query.getResults(Kna1.class);
+      container.getRdcRecords().addAll(rdc);
 
     }
     return container;

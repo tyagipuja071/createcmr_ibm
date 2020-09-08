@@ -1,5 +1,70 @@
 var app = angular.module('LegacySearchApp', [ 'ngRoute', 'ngSanitize' ]);
 
+app.filter('textFilter', function() {
+  return function(items, search) {
+    if (!search) {
+      return items;
+    }
+
+    return items.filter(function(record, index, array) {
+      var val = search;
+      if (!val) {
+        return true;
+      }
+      val = val.toUpperCase();
+      if (record.realCtyCd.indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.customerNo.indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.addrNo.indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.abbrevNm && record.abbrevNm.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.addrLine1 && record.addrLine1.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.addrLine2 && record.addrLine2.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.addrLine3 && record.addrLine3.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.addrLine4 && record.addrLine4.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.addrLine5 && record.addrLine5.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.addrLine6 && record.addrLine6.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.vat && record.vat.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.isuCd && record.isuCd.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.isicCd && record.isicCd.indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.salesRepNo && record.salesRepNo.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+      if (record.sbo && record.sbo.toUpperCase().indexOf(val) >= '0'){
+        return true;
+      }
+
+
+      return false;
+    });
+
+  };
+});
+
 app.controller('LegacySearchController', [
     '$scope',
     '$document',
@@ -12,6 +77,7 @@ app.controller('LegacySearchController', [
 
       $scope.crit = {};
       $scope.crit.status = 'A';
+      $scope.crit.recCount = '50';
       $scope.countries = [];
 
       $scope.getCountries = function() {
@@ -26,7 +92,6 @@ app.controller('LegacySearchController', [
             });
           });
         }
-        cmr.hideProgress();
       };
 
       $scope.search = function() {
@@ -145,7 +210,6 @@ app.controller('LegacySearchController', [
             550);
       }
 
-      cmr.showProgress('Getting country list..');
       $timeout($scope.getCountries,500);
 
     } ]);
@@ -158,6 +222,7 @@ app.controller('LegacyDetailsController', [ '$scope', '$document', '$http', '$ti
       $scope.expAddr = true;
       $scope.expExt = true;
       $scope.expLink = true;
+      $scope.expRdc = true;
 
       $scope.getParameterByName = function(name, url) {
         if (!url) {
@@ -202,6 +267,7 @@ app.controller('LegacyDetailsController', [ '$scope', '$document', '$http', '$ti
               return new Number(a.addrNo) - new Number(b.addrNo);
             });
             $scope.links = details.links;
+            $scope.rdcRecords = details.rdcRecords;
           } else {
             alert('An error occurred while processing. Please try again later.');
           }

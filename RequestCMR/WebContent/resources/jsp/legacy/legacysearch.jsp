@@ -220,6 +220,12 @@
                 <span class="to">to</span>
                 <input type="date" ng-model="crit.updateTsTo">
               </td>
+              <th scope="col">Result Count:</th>
+              <td>
+                <input ng-model="crit.recCount" type="radio" name="recCount" value="50">50
+                <input ng-model="crit.recCount" type="radio" name="recCount" value="100">100
+                <input ng-model="crit.recCount" type="radio" name="recCount" value="200">200
+              </td>
             </tr>
             <tr>
               <td colspan="4">
@@ -237,7 +243,11 @@
       <div ng-show="loaded">
         <table cellspacing="0" cellpadding="0" border="0" summary="System Parameters" class="ibm-data-table ibm-sortable-table ibm-alternating">
           <caption>
-            <em>Search Results</em>
+            <em>Search Results
+              <div class="filter" style="display:inline-block;float:right;">
+                <input ng-model="allTextFilter" placeholder="Type to filter">
+              </div>
+            </em>
           </caption>
           <thead>
             <tr>
@@ -254,7 +264,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="rec in results">
+            <tr ng-repeat="rec in results | textFilter:allTextFilter">
               <td>{{rec.realCtyCd}}</td>
               <td>
                 <a ng-click="openDetails(rec)" style="cursor:pointer" class="legacy-det-link" title="Open details of CMR No. {{rec.customerNo}}">
