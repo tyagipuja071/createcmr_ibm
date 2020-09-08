@@ -432,13 +432,14 @@ span.bold {
           <tr>
             <th scope="col" width="6%">MANDT</th>
             <th scope="col" width="10%">KUNNR</th>
-            <th scope="col" width="10%">Issuing Country</th>
+            <th scope="col" width="7%">Issuing Country</th>
             <th scope="col" width="9%">CMR No.</th>
             <th scope="col" width="*">Name 1-4</th>
-            <th scope="col" width="23%">Address</th>
-            <th scope="col" width="9%">Addr Type</th>
-            <th scope="col" width="9%">Addr Seq</th>
-            <th scope="col" width="9%">Order Block</th>
+            <th scope="col" width="18%">Address</th>
+            <th scope="col" width="8%">Addr Type</th>
+            <th scope="col" width="8%">Addr Seq</th>
+            <th scope="col" width="7%">Order Block</th>
+            <th scope="col" width="9%">Create By / Date</th>
           </tr>
         </thead>
         <tbody ng-show="expRdc">
@@ -462,6 +463,10 @@ span.bold {
             <td>{{rdc.ktokd}}</td>
             <td>{{rdc.zzkvSeqno}}</td>
             <td>{{rdc.aufsd}}</td>
+            <td>
+              {{rdc.ernam}}<br>
+              {{rdc.erdat}}
+            </td>
           </tr>
         </tbody>
       </table>
