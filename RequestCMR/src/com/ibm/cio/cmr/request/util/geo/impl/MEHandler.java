@@ -1003,6 +1003,10 @@ public class MEHandler extends BaseSOFHandler {
       if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
         data.setPhone3(this.currentImportValues.get("ICE"));
       }
+      // Type of Customer
+      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry())) {
+        data.setBpAcctTyp(this.currentImportValues.get("CustomerType"));
+      }
     }
 
     if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
@@ -1041,10 +1045,12 @@ public class MEHandler extends BaseSOFHandler {
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setPhone1(mainRecord.getCmrCustPhone());
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
-      CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
-      if (cmrtExt != null) {
-        String teleCovRep = cmrtExt.getTeleCovRep();
-        data.setBpSalesRepNo(teleCovRep);
+      if (this.legacyObjects != null) {
+        CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
+        if (cmrtExt != null) {
+          String teleCovRep = cmrtExt.getTeleCovRep();
+          data.setBpSalesRepNo(teleCovRep);
+        }
       }
     }
     // ICO field
@@ -1128,11 +1134,6 @@ public class MEHandler extends BaseSOFHandler {
     if (SystemLocation.RUSSIAN_FEDERATION.equals(data.getCmrIssuingCntry())
         && ("010101".equals(data.getAgreementSignDate()) || "123101".equals(data.getAgreementSignDate()))) {
       data.setAgreementSignDate("");
-    }
-
-    // Type of Customer
-    if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry())) {
-      data.setBpAcctTyp(this.currentImportValues.get("CustomerType"));
     }
 
     if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
