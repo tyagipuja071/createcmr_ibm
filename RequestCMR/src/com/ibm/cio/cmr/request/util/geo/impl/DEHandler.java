@@ -51,8 +51,8 @@ public class DEHandler extends GEOHandler {
   private static final Logger LOG = Logger.getLogger(DEHandler.class);
   private static final List<String> IERP_ISSUING_COUNTRY_VAL = Arrays.asList("724");
 
-  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity",
-      "CustFAX", "City2", "Affiliate", "Company", "INACType" };
+  private static final String[] DE_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1", "LocalTax2", "SitePartyID", "Division", "POBoxCity", "CustFAX",
+      "City2", "Affiliate", "Company", "INACType" };
 
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)

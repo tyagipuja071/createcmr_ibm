@@ -9,6 +9,9 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EntityResult;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,9 +24,9 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyXmlTag;
  * @author JeffZAMORA
  */
 @Entity
-@Table(
-    name = "CMRTCUST",
-    schema = "CMRDB2D")
+@Table(name = "CMRTCUST", schema = "CMRDB2D")
+@SqlResultSetMappings({ @SqlResultSetMapping(name = "LegacySearchMapping", entities = { @EntityResult(entityClass = CmrtCust.class),
+    @EntityResult(entityClass = CmrtAddr.class) }) })
 public class CmrtCust extends BaseEntity<CmrtCustPK> implements Serializable {
   private static final long serialVersionUID = 1L;
 
@@ -43,371 +46,322 @@ public class CmrtCust extends BaseEntity<CmrtCustPK> implements Serializable {
   /**
    * Real Country code
    */
-  @Column(
-      name = "REALCTY")
+  @Column(name = "REALCTY")
   private String realCtyCd;
 
   /**
    * A-active CN/C-cancelled
    */
-  @Column(
-      name = "STATUS")
+  @Column(name = "STATUS")
   @LegacyXmlTag("Status")
   private String status;
 
   /**
    * CUSTOMER NAME ABBREVIATED
    */
-  @Column(
-      name = "NCUXB")
+  @Column(name = "NCUXB")
   @LegacyXmlTag("CompanyName")
   private String abbrevNm;
 
   /**
    * Abbreviated Location
    */
-  @Column(
-      name = "LCUXB")
+  @Column(name = "LCUXB")
   @LegacyXmlTag("AbbreviatedLocation")
   private String abbrevLocn;
 
   /**
    * Location Number
    */
-  @Column(
-      name = "RLCXB")
+  @Column(name = "RLCXB")
   @LegacyXmlTag("LocationNumber")
   private String locNo;
 
   /**
    * DC Repeat Agreement
    */
-  @Column(
-      name = "CAGXB")
+  @Column(name = "CAGXB")
   @LegacyXmlTag("RepeatAgreement")
   private String dcRepeatAgreement;
 
   /**
    * CE division
    */
-  @Column(
-      name = "CCEDA")
+  @Column(name = "CCEDA")
   @LegacyXmlTag("CEdivision")
   private String ceDivision;
 
   /**
    * Alliance Type ABBREVIATED
    */
-  @Column(
-      name = "CCOXA")
+  @Column(name = "CCOXA")
   @LegacyXmlTag("AllianceType")
   private String abbrevAllianceType;
 
   /**
    * Currency Code
    */
-  @Column(
-      name = "CCRXA")
+  @Column(name = "CCRXA")
   @LegacyXmlTag("CurrencyCode")
   private String currencyCd;
 
   /**
    * Education Allowance
    */
-  @Column(
-      name = "CEAXC")
+  @Column(name = "CEAXC")
   @LegacyXmlTag("EducationAllowance")
   private String educAllowance;
 
   /**
    * Leasing Company ind.
    */
-  @Column(
-      name = "CIEDC")
+  @Column(name = "CIEDC")
   @LegacyXmlTag("LeasingCompany")
   private String leasingInd;
 
   /**
    * AUTHORISED REMARKETER IND
    */
-  @Column(
-      name = "CIEXJ")
+  @Column(name = "CIEXJ")
   @LegacyXmlTag("ARemark")
   private String authRemarketerInd;
 
   /**
    * Economic Code
    */
-  @Column(
-      name = "CIYXB")
+  @Column(name = "CIYXB")
   @LegacyXmlTag("EconomicCd")
   private String economicCd;
 
   /**
    * IMS Code
    */
-  @Column(
-      name = "IMS")
+  @Column(name = "IMS")
   @LegacyXmlTag("IMS")
   private String imsCd;
 
   /**
    * Language Code
    */
-  @Column(
-      name = "CLGXA")
+  @Column(name = "CLGXA")
   @LegacyXmlTag("LangCode")
   private String langCd;
 
   /**
    * DEPARTMENT CODE
    */
-  @Column(
-      name = "CLGXC")
+  @Column(name = "CLGXC")
   @LegacyXmlTag("DepartmentNumber")
   private String deptCd;
 
   /**
    * OVERSEAS TERRITORY
    */
-  @Column(
-      name = "CLGXD")
+  @Column(name = "CLGXD")
   @LegacyXmlTag("OverseasTerritory")
   private String overseasTerritory;
 
   /**
    * Marketing Responsibility Cd
    */
-  @Column(
-      name = "CMKDA")
+  @Column(name = "CMKDA")
   @LegacyXmlTag("MarketingResponseCode")
   private String mrcCd;
 
   /**
    * Mode Of Payment/CoF
    */
-  @Column(
-      name = "CPMXA")
+  @Column(name = "CPMXA")
   @LegacyXmlTag("ModeOfPayment")
   private String modeOfPayment;
 
   /**
    * ISU
    */
-  @Column(
-      name = "CRGAA")
+  @Column(name = "CRGAA")
   @LegacyXmlTag("ISU")
   private String isuCd;
 
   /**
    * CREDIT CODE
    */
-  @Column(
-      name = "CRDXA")
+  @Column(name = "CRDXA")
   @LegacyXmlTag("CreditCode")
   private String creditCd;
 
   /**
    * Tax Code
    */
-  @Column(
-      name = "CTXXA")
-  @LegacyXmlTag(
-      tags = { "TaxCode", "SpecialTaxCd" })
+  @Column(name = "CTXXA")
+  @LegacyXmlTag(tags = { "TaxCode", "SpecialTaxCd" })
   private String taxCd;
 
   /**
    * BRANCH OFFICE NB ENGINEERING
    */
-  @Column(
-      name = "CEBO")
+  @Column(name = "CEBO")
   @LegacyXmlTag("DPCEBO")
   private String ceBo;
 
   /**
    * BRANCH OFFICE NB INSTALLING
    */
-  @Column(
-      name = "SBO")
+  @Column(name = "SBO")
   @LegacyXmlTag("SBO")
   private String sbo;
 
   /**
    * BRANCH OFFICE NB SELLING
    */
-  @Column(
-      name = "IBO")
+  @Column(name = "IBO")
   @LegacyXmlTag("IBO")
   private String ibo;
 
   /**
    * SALESMAN NUMBER
    */
-  @Column(
-      name = "REMXA")
+  @Column(name = "REMXA")
   @LegacyXmlTag("SR")
   private String salesRepNo;
 
   /**
    * SALES GROUP REPRESENTATIVE
    */
-  @Column(
-      name = "REMXD")
+  @Column(name = "REMXD")
   @LegacyXmlTag("SRGroup")
   private String salesGroupRep;
 
   /**
    * ENTERPRISE NUMBER
    */
-  @Column(
-      name = "RENXA")
+  @Column(name = "RENXA")
   @LegacyXmlTag("EnterpriseNo")
   private String enterpriseNo;
 
   /**
    * Bank Account Number
    */
-  @Column(
-      name = "RABXA")
+  @Column(name = "RABXA")
   @LegacyXmlTag("BankAccountNo")
   private String bankAcctNo;
 
   /**
    * Bank Branch Number
    */
-  @Column(
-      name = "RBBXA")
+  @Column(name = "RBBXA")
   @LegacyXmlTag("BankBranchNo")
   private String bankBranchNo;
 
   /**
    * Bank Number
    */
-  @Column(
-      name = "RBKXA")
+  @Column(name = "RBKXA")
   @LegacyXmlTag("BankNumber")
   private String bankNo;
 
   /**
    * Collection Code
    */
-  @Column(
-      name = "CCLXA")
+  @Column(name = "CCLXA")
   @LegacyXmlTag("CollectionCode")
   private String collectionCd;
 
   /**
    * Mailing Condition
    */
-  @Column(
-      name = "CMLXA")
+  @Column(name = "CMLXA")
   @LegacyXmlTag("MailingCondition")
   private String mailingCond;
 
   /**
    * District Code
    */
-  @Column(
-      name = "CRGAC")
+  @Column(name = "CRGAC")
   @LegacyXmlTag("DistrictCode")
   private String districtCd;
 
   /**
    * ACCT ADMIN.BRANCH OFFICE
    */
-  @Column(
-      name = "RACBO")
+  @Column(name = "RACBO")
   @LegacyXmlTag("AccAdBo")
   private String accAdminBo;
 
   /**
    * Type of Customer
    */
-  @Column(
-      name = "CCUAI")
+  @Column(name = "CCUAI")
   @LegacyXmlTag("CustomerType")
   private String custType;
 
   /**
    * Embargo Code
    */
-  @Column(
-      name = "CEMXA")
+  @Column(name = "CEMXA")
   @LegacyXmlTag("EmbargoCode")
   private String embargoCd;
 
   /**
    * ISIC
    */
-  @Column(
-      name = "CIYXA")
+  @Column(name = "CIYXA")
   @LegacyXmlTag("ISIC")
   private String isicCd;
 
   /**
    * INAC
    */
-  @Column(
-      name = "RAIXA")
+  @Column(name = "RAIXA")
   @LegacyXmlTag("INAC")
   private String inacCd;
 
   /**
    * telephone number or VAT
    */
-  @Column(
-      name = "RTPNO")
+  @Column(name = "RTPNO")
   @LegacyXmlTag("PhoneOrVat")
   private String telNoOrVat;
 
   /**
    * date CN has been created
    */
-  @Column(
-      name = "CREATE_TS")
+  @Column(name = "CREATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date createTs;
 
   /**
    * date CN has been updated
    */
-  @Column(
-      name = "UPDATE_TS")
+  @Column(name = "UPDATE_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date updateTs;
 
   /**
    * date status has been updated
    */
-  @Column(
-      name = "UPDSTATUS_TS")
+  @Column(name = "UPDSTATUS_TS")
   @Temporal(TemporalType.TIMESTAMP)
   private Date updStatusTs;
 
   /**
    * VAT
    */
-  @Column(
-      name = "VAT")
+  @Column(name = "VAT")
   @LegacyXmlTag("VAT")
   private String vat;
-  
+
   /**
    * RLAXA
    */
-  @Column(
-      name = "RLAXA")
+  @Column(name = "RLAXA")
   private String leadingAccNo;
-
 
   /**
    * QUBXD
    */
-  @Column(
-      name = "QUBXD")
+  @Column(name = "QUBXD")
   private String invoiceCpyReqd;
 
-  
   public String getInvoiceCpyReqd() {
     return invoiceCpyReqd;
   }

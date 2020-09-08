@@ -3380,7 +3380,7 @@ function addLatinCharValidator() {
       checkAndAddValidator('dept', Validators.LATIN, [ 'District' ]);
     } else if (cntry == SysLoc.TURKEY) {
       checkAndAddValidator('custNm2', Validators.LATIN, [ 'Customer Name Con\'t' ]);
-      checkAndAddValidator('addrTxt2', Validators.LATIN, [ ' Address Con\'t' ]);
+      checkAndAddValidator('addrTxt2', Validators.LATIN, [ 'Street Con\'t' ]);
       checkAndAddValidator('dept', Validators.LATIN, [ 'District' ]);
     }
     checkAndAddValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
@@ -3505,7 +3505,7 @@ function addTurkishCharValidator() {
     checkAndAddValidator('custNm2', turkish, [ 'Customer Name Con\'t' ]);
     checkAndAddValidator('custNm4', turkish, [ 'Name 4' ]);
     checkAndAddValidator('addrTxt', turkish, [ 'Street Address' ]);
-    checkAndAddValidator('addrTxt2', turkish, [ ' Address Con\'t/Occupation' ]);
+    checkAndAddValidator('addrTxt2', turkish, [ 'Street Con\'t' ]);
     checkAndAddValidator('city1', turkish, [ 'City' ]);
     checkAndAddValidator('dept', turkish, [ 'District' ]);
     checkAndAddValidator('postCd', turkish, [ 'Postal Code' ]);
@@ -5582,6 +5582,11 @@ function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) 
         if (abbrevNm && abbrevNm.length > 22) {
           abbrevNm = abbrevNm.substring(0, 22);
         }
+        if ("TR" != FormManager.getActualValue("landCntry")) {
+          if(document.getElementById('landCntry') != undefined){
+            abbrevLocn = document.getElementById('landCntry').value;
+          }
+        }
         if (abbrevLocn && abbrevLocn.length > 12) {
           abbrevLocn = abbrevLocn.substring(0, 12);
         }
@@ -5592,7 +5597,7 @@ function updateAbbrevNmLocnGRCYTR(cntry, addressMode, saving, finalSave, force) 
         }
 
         FormManager.setValue('abbrevNm', abbrevNm);
-        // FormManager.setValue('abbrevLocn', abbrevLocn);
+        FormManager.setValue('abbrevLocn', abbrevLocn);
       }
     }
   }

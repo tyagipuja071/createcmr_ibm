@@ -1844,7 +1844,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     setMassUpdateListDECND(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (LAHandler.isLACountry(cmrIssuingCntry)) {
                     setMassUpdateListLA(modelList, item.getInputStream(), reqId, newIterId, filePath);
-                  } else if (PageManager.fromGeo("MCO1", cmrIssuingCntry) || PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
+                  } else if (PageManager.fromGeo("MCO", cmrIssuingCntry) || PageManager.fromGeo("MCO1", cmrIssuingCntry)
+                      || PageManager.fromGeo("MCO2", cmrIssuingCntry)) {
                     setMassUpdateListMCO(modelList, item.getInputStream(), reqId, newIterId, filePath);
                   } else if (PageManager.fromGeo("CEMEA", cmrIssuingCntry)) {
                     setMassUpdateListCEMEA(modelList, item.getInputStream(), reqId, newIterId, filePath);
@@ -5250,6 +5251,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_NM2":
         muaModel.setCustNm2(tempVal);
         break;
+      case "CUST_NM3":
+        muaModel.setCustNm3(tempVal);
+        break;
       case "CUST_NM4":
         muaModel.setCustNm4(tempVal);
         break;
@@ -5309,6 +5313,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "COUNTY":
         muaModel.setCounty(tempVal);
+        break;
+      case "DIVN":
+        muaModel.setDivn(tempVal);
         break;
       default:
         LOG.debug("Default condition was executed [nothing is saved] for DB column >> " + col.getLabel());
