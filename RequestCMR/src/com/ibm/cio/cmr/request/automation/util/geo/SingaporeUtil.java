@@ -219,7 +219,8 @@ public class SingaporeUtil extends AutomationUtil {
     CompanyRecordModel cmrData = null;
     try {
       List<CompanyRecordModel> cmrsData = CompanyFinder.findCompanies(searchModel);
-      cmrData = cmrsData.get(0);
+      if (!cmrsData.isEmpty())
+        cmrData = cmrsData.get(0);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -239,20 +240,21 @@ public class SingaporeUtil extends AutomationUtil {
         String reqNme1 = addr.getCustNm1();
         String reqNme2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
         String reqFullNme = reqNme1.concat(reqNme2);
-        String reqAddr1 = addr.getAddrTxt();
-        String reqAddr2 = addr.getAddrTxt2();
+        String reqAddr1 = StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "";
+        String reqAddr2 = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2() : "";
         String addrFullTxt = reqAddr1.concat(reqAddr2);
         String isicCd = data.getIsicCd();
 
         // collect Find CMR Data
         String findCMRNm = cmrData.getName();
-        String findCMRAddr1 = cmrData.getStreetAddress1();
-        String findCMRAddr2 = cmrData.getStreetAddress2();
+        String findCMRAddr1 = StringUtils.isNotBlank(cmrData.getStreetAddress1()) ? cmrData.getStreetAddress1() : "";
+        String findCMRAddr2 = StringUtils.isNotBlank(cmrData.getStreetAddress2()) ? cmrData.getStreetAddress2() : "";
         String findCMRFullAddr = findCMRAddr1.concat(findCMRAddr2);
         String rdcIsicCd = getIsicCdFrmRDC(cmrNo, entityManager);
 
         // compare the two data , to see if they match
-        if ((findCMRNm.equalsIgnoreCase(reqFullNme) && findCMRFullAddr.equalsIgnoreCase(addrFullTxt))) {
+        if (StringUtils.isNotBlank(findCMRNm) && StringUtils.isNotBlank(findCMRFullAddr)
+            && (findCMRNm.equalsIgnoreCase(reqFullNme) && findCMRFullAddr.equalsIgnoreCase(addrFullTxt))) {
           if (StringUtils.isNotBlank(rdcIsicCd) && isicCd.equals(rdcIsicCd)) {
             cmrdetails.put("detailsMatch", true);
           } else {
