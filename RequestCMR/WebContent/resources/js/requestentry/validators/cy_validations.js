@@ -3431,6 +3431,15 @@ function disableAddrFieldsCY(){
     FormManager.setValue('poBox', '');
     FormManager.disable('poBox');
   }
+  
+  var landCntry = FormManager.getActualValue('landCntry');
+  if(!(FormManager.getActualValue('custGrp') == 'CROSS' || isUpdateReqCrossborder()) && landCntry == 'CY' && 
+      (FormManager.getActualValue('addrType') == 'ZP01'
+    || FormManager.getActualValue('addrType') == 'ZS01') ) {
+    FormManager.readOnly('landCntry');
+  } else {
+    FormManager.enable('landCntry');
+  }
 }
 
 function setVatValidator() {
@@ -3917,12 +3926,7 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
     if ((addressMode == 'updateAddress' || addressMode == 'copyAddress') && FormManager.getActualValue('landCntry') == '') {
       FormManager.setValue('landCntry', cmr.oldlandcntry);
     }
-    // for cross border
-    if (custType == 'CROSS' && cmr.currentRequestType == 'U') {
-      FormManager.readOnly('landCntry');
-    }else if((custType != 'CROSS') && (FormManager.getActualValue('addrType') == 'ZS01')){
-      FormManager.readOnly('landCntry');
-    }
+    
     // for Turkey - cross border
     if (cntryCd == SysLoc.TURKEY && custType == 'CROSS') {
       FormManager.removeValidator('dept', Validators.REQUIRED);
@@ -3995,7 +3999,7 @@ function isUpdateReqCrossborder() {
       recordList = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
       if (_allAddressData != null && _allAddressData[i] != null) {
         if(_allAddressData[i].addrType[0] == 'ZS01') {
-          return _allAddressData[i].landCntry[0] != 'GR'; 
+          return _allAddressData[i].landCntry[0] != 'CY'; 
         }
       }
     }  
@@ -4139,6 +4143,7 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('clientTier', 'S');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '32');
+      FormManager.resetValidations('vat');
     } else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
