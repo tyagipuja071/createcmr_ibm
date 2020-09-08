@@ -432,6 +432,13 @@ public class UKIUtil extends AutomationUtil {
                 details.append("Subindustry Code  =  " + subInd).append("\n");
               }
             }
+            if (SCENARIO_INTERNAL_FSL.equals(scenario) && dnbRecord.getOrgIdDetails() != null) {
+              String crn = DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
+              if (StringUtils.isNotBlank(crn)) {
+                details.append("Overriding CRN to \'" + crn + "\'\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", data.getTaxCd1(), crn);
+              }
+            }
             results.setResults("Calculated.");
             results.setProcessOutput(overrides);
             break;
