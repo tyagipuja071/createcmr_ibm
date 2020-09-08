@@ -655,6 +655,12 @@
     <put-attribute name="title" value="CreateCMR | Legacy Search" />
     <put-attribute name="body" value="/resources/jsp/legacy/legacysearch.jsp" />
   </definition>
+
+  <definition name="legacydetails" extends="window">
+    <put-attribute name="title" value="CreateCMR | Details" />
+    <put-attribute name="body" value="/resources/jsp/windows/legacydetails.jsp" />
+  </definition>
+
   
    <!-- Single Reactivation End -->
 </tiles-definitions>

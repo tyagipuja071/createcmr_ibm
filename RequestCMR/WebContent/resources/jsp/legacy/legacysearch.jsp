@@ -13,7 +13,7 @@
 %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
-<link href="//1.www.s81c.com/common/v17e/css/data.css" rel="stylesheet" title="www" type="text/css" />
+<link href="${resourcesPath}/css/ext/data.css" rel="stylesheet" title="www" type="text/css" />
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
 <script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
@@ -82,8 +82,27 @@
    color: #555;
    margin-right: 10px;
  }
+ input[type="date"]{
+   font-family: Tahoma;
+ }
+ div.cancel {
+   border: 1px Solid Red;
+   color: Red;
+   border-radius: 3px;
+   height: 15px;
+   width: 50px;
+   font-size: 10px;
+   line-height: 15px;
+   text-align: center;
+   font-weight: bold;
+ }
+ .btn-search, .btn-reset {
+   width: 100px;
+   font-size: 13px;
+   height: 30px;
+ }
 </style>
-<div ng-app="LegacySearchApp" ng-controller="LegacySearchController">
+<div ng-app="LegacySearchApp" ng-controller="LegacySearchController" ng-cloak>
   <cmr:boxContent>
     <cmr:tabs />
 
@@ -100,7 +119,7 @@
             <tr>
               <th scope="col" width="20%"><span style="color:red">*</span> CMR Issuing Country: </th>
               <td width="30%">
-                <select ng-model="crit.realCtyCd" value=""  style="width:300px">
+                <select ng-model="crit.realCtyCd" value=""  style="width:252px">
                   <option value=""></option>
                   <option ng-repeat="country in countries"  value="{{country.id}}" >{{country.id}} - {{country.name}}</option>
                 </select>
@@ -113,7 +132,7 @@
             <tr>
               <th scope="col">Customer Name:</th>
               <td >
-                <input ng-model="crit.name" value=""  style="width:300px" maxlength="60">
+                <input ng-model="crit.name" value=""  style="width:252px" maxlength="60">
               </td>
               <th scope="col">Abbreviated Name:</th>
               <td>
@@ -123,7 +142,7 @@
             <tr>
               <th scope="col">Street:</th>
               <td >
-                <input ng-model="crit.street" value=""  style="width:300px" maxlength="60">
+                <input ng-model="crit.street" value=""  style="width:252px" maxlength="60">
               </td>
               <th scope="col">City:</th>
               <td>
@@ -169,14 +188,43 @@
                   F Address
                 </div>
                 <div class="checkinput">
-                  <input ng-model="crit.addressUseJ" ng-true-value="'G'" value="G" type="checkbox">
+                  <input ng-model="crit.addressUseG" ng-true-value="'G'" value="G" type="checkbox">
                   G Address
+                </div>
+                <div class="checkinput">
+                  <input ng-model="crit.addressUseH" ng-true-value="'H'" value="H" type="checkbox">
+                  H Address
                 </div>
               </td>
             </tr>
             <tr>
+              <th scope="col">Create Date:</th>
+              <td>
+                <input type="date" ng-model="crit.createTsFrom">
+                <span class="to">to</span>
+                <input type="date" ng-model="crit.createTsTo">
+              </td>
+              <th scope="col">CMR Status:</th>
+              <td>
+                <select ng-model="crit.status">
+                  <option value="A">Active Only</option>
+                  <option value="C">Inactive Only</option>
+                  <option value="*">All</option>
+                </select>
+              </td>
+            </tr> 
+            <tr>
+              <th scope="col">Update Date:</th>
+              <td>
+                <input type="date" ng-model="crit.updateTsFrom">
+                <span class="to">to</span>
+                <input type="date" ng-model="crit.updateTsTo">
+              </td>
+            </tr>
+            <tr>
               <td colspan="4">
-                <input type="button" value="Search" ng-click="search()"> 
+                <input type="button" class="btn-search" value="Search" style="margin-left:10px" ng-click="search()"> 
+                <input type="button" class="btn-reset" value="Reset" style="margin-left:10px" onclick="window.location.href = 'legacysearch'"> 
               </th>
             </tr>
           </thead>
@@ -208,7 +256,14 @@
           <tbody>
             <tr ng-repeat="rec in results">
               <td>{{rec.realCtyCd}}</td>
-              <td>{{rec.customerNo}}</td>
+              <td>
+                <a ng-click="openDetails(rec)" style="cursor:pointer" class="legacy-det-link" title="Open details of CMR No. {{rec.customerNo}}">
+                  {{rec.customerNo}}
+                </a>
+                <div ng-show="rec.status == 'C'" class="cancel">
+                  INACTIVE
+                </div>
+              </td>
               <td ng-bind-html="formatAddrUse(rec)">
               </td>
               <td>{{rec.addrNo}}</td>

@@ -280,13 +280,6 @@ var _allGroups = [ {
     "subType" : false,
     "parent" : 'System',
   }, {
-    "href" : cmr.CONTEXT_ROOT + '/legacysearch',
-    "name" : "DB2 (Legacy) Search",
-    "description" : "Search Records from Legacy DB2 (CMRDB2D) ",
-    "table" : "CMRDB2D",
-    "subType" : false,
-    "parent" : 'System',
-  }, {
     "href" : null,
     "name" : "Approvals",
     "description" : null,

@@ -112,17 +112,100 @@ public class LegacySearchService extends BaseSimpleService<List<LegacySearchResu
     PreparedQuery query = new PreparedQuery(entityManager, baseSql);
 
     if (!StringUtils.isBlank(crit.getRealCtyCd())) {
-      query.append(" and cust.REALCTY = :REALCTY");
+      query.append("and cust.REALCTY = :REALCTY");
       query.setParameter("REALCTY", crit.getRealCtyCd());
     }
     if (!StringUtils.isBlank(crit.getCustomerNo())) {
-      query.append(" and cust.RCUXA = :RCUXA");
+      query.append("and cust.RCUXA = :RCUXA");
       query.setParameter("RCUXA", crit.getCustomerNo());
     }
     if (!StringUtils.isBlank(crit.getAbbrevNm())) {
-      query.append(" and cust.NCUXB like :NCUXB");
-      query.setParameter("NCUXB", "%" + crit.getAbbrevNm() + "%");
+      query.append("and upper(cust.NCUXB) like :ABBREV");
+      query.setParameter("ABBREV", "%" + crit.getAbbrevNm() + "%");
     }
+    if (!StringUtils.isBlank(crit.getName())) {
+      query.append("and (upper(addr.NAME) like :NAME or upper(trim(addr.ADDRL1)||(trim(nvl(addr.ADDRL2,'')))) like :NAME)");
+      query.setParameter("NAME", "%" + crit.getName().toUpperCase() + "%");
+    }
+    if (!StringUtils.isBlank(crit.getStreet())) {
+      query.append(
+          "and ( upper(trim(nvl(addr.STREETNO,''))||trim(nvl(addr.STREET,''))) like :STREET or upper(addr.ADDRL3) like :STREET or upper(addr.ADDRL4) like :STREET or upper(addr.ADDRL5) like :STREET)");
+      query.setParameter("STREET", "%" + crit.getStreet().toUpperCase() + "%");
+    }
+    if (!StringUtils.isBlank(crit.getCity())) {
+      query.append(
+          "and ( upper(addr.CITY) like :CITY or upper(addr.ADDRL4) like :CITY or upper(addr.ADDRL5) like :CITY or upper(addr.ADDRL6) like :CITY)");
+      query.setParameter("CITY", "%" + crit.getCity().toUpperCase() + "%");
+    }
+    if (!StringUtils.isBlank(crit.getZipCode())) {
+      query.append(
+          "and ( upper(addr.ZIPCODE) like :ZIP or upper(addr.ADDRL4) like :ZIP or upper(addr.ADDRL5) like :ZIP or upper(addr.ADDRL6) like :ZIP)");
+      query.setParameter("ZIP", "%" + crit.getZipCode().toUpperCase() + "%");
+    }
+
+    if (!StringUtils.isBlank(crit.getVat())) {
+      query.append("and ( upper(cust.VAT) = :VAT or upper(cust.RTPNO) like :VAT )");
+      query.setParameter("VAT", crit.getVat().toUpperCase());
+    }
+
+    if ("A".equals(crit.getStatus())) {
+      query.append("and cust.STATUS = 'A'");
+    } else if ("C".equals(crit.getStatus())) {
+      query.append("and cust.STATUS = 'C'");
+    }
+
+    if (!StringUtils.isBlank(crit.getCreateTsFrom())) {
+      query.append("and cust.CREATE_TS  >= timestamp('" + crit.getCreateTsFrom() + "')");
+      query.setParameter("CREATE_FROM", crit.getCreateTsFrom());
+    }
+    if (!StringUtils.isBlank(crit.getCreateTsTo())) {
+      query.append("and cust.CREATE_TS  <= timestamp('" + crit.getCreateTsTo() + "')");
+      query.setParameter("CREATE_TO", crit.getCreateTsTo());
+    }
+
+    if (!StringUtils.isBlank(crit.getUpdateTsFrom())) {
+      query.append("and cust.UPDATE_TS  >= timestamp('" + crit.getUpdateTsFrom() + "')");
+      query.setParameter("UPDATE_FROM", crit.getUpdateTsFrom());
+    }
+    if (!StringUtils.isBlank(crit.getUpdateTsTo())) {
+      query.append("and cust.UPDATE_TS  <= timestamp('" + crit.getUpdateTsTo() + "')");
+      query.setParameter("UPDATE_TO", crit.getUpdateTsTo());
+    }
+
+    if (crit.getAddressUses() != null && !crit.getAddressUses().isEmpty()) {
+      for (String use : crit.getAddressUses()) {
+        switch (use) {
+        case "M":
+          query.append("and addr.ADDRMAIL = 'Y'");
+          break;
+        case "B":
+          query.append("and addr.ADDRBILL = 'Y'");
+          break;
+        case "S":
+          query.append("and addr.ADDRSHIP = 'Y'");
+          break;
+        case "I":
+          query.append("and addr.ADDRINST = 'Y'");
+          break;
+        case "E":
+          query.append("and addr.ADDREPL = 'Y'");
+          break;
+        case "L":
+          query.append("and addr.ADDRLIT = 'Y'");
+          break;
+        case "F":
+          query.append("and addr.ADDRUSEF = 'Y'");
+          break;
+        case "G":
+          query.append("and addr.ADDRUSEG = 'Y'");
+          break;
+        case "H":
+          query.append("and addr.ADDRUSEH = 'Y'");
+          break;
+        }
+      }
+    }
+
     if (crit.getRecCount() > 0) {
       query.append("fetch first " + crit.getRecCount() + " rows only");
     } else {

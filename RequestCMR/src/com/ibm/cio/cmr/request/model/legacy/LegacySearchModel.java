@@ -3,6 +3,9 @@
  */
 package com.ibm.cio.cmr.request.model.legacy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Model for Legacy Search page
  * 
@@ -39,7 +42,12 @@ public class LegacySearchModel {
   private String city;
   private String zipCode;
 
-  private String[] addressUses;
+  private String createTsFrom;
+  private String createTsTo;
+  private String updateTsFrom;
+  private String updateTsTo;
+
+  private List<String> addressUses = new ArrayList<String>();
 
   private int recCount;
 
@@ -243,14 +251,6 @@ public class LegacySearchModel {
     this.zipCode = zipCode;
   }
 
-  public String[] getAddressUses() {
-    return addressUses;
-  }
-
-  public void setAddressUses(String[] addressUses) {
-    this.addressUses = addressUses;
-  }
-
   public String getName() {
     return name;
   }
@@ -265,6 +265,46 @@ public class LegacySearchModel {
 
   public void setRecCount(int recCount) {
     this.recCount = recCount;
+  }
+
+  public List<String> getAddressUses() {
+    return addressUses;
+  }
+
+  public void setAddressUses(List<String> addressUses) {
+    this.addressUses = addressUses;
+  }
+
+  public String getCreateTsFrom() {
+    return createTsFrom;
+  }
+
+  public void setCreateTsFrom(String createTsFrom) {
+    this.createTsFrom = createTsFrom;
+  }
+
+  public String getCreateTsTo() {
+    return createTsTo;
+  }
+
+  public void setCreateTsTo(String createTsTo) {
+    this.createTsTo = createTsTo;
+  }
+
+  public String getUpdateTsFrom() {
+    return updateTsFrom;
+  }
+
+  public void setUpdateTsFrom(String updateTsFrom) {
+    this.updateTsFrom = updateTsFrom;
+  }
+
+  public String getUpdateTsTo() {
+    return updateTsTo;
+  }
+
+  public void setUpdateTsTo(String updateTsTo) {
+    this.updateTsTo = updateTsTo;
   }
 
 }

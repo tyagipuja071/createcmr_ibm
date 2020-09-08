@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -21,8 +22,10 @@ import com.ibm.cio.cmr.request.controller.BaseController;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.legacy.LegacySearchModel;
 import com.ibm.cio.cmr.request.model.legacy.LegacySearchResultModel;
+import com.ibm.cio.cmr.request.service.legacy.LegacyDetailsService;
 import com.ibm.cio.cmr.request.service.legacy.LegacySearchService;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 
 /**
  * Controller for Legacy Search Page
@@ -39,6 +42,9 @@ public class LegacySearchController extends BaseController {
 
   @Autowired
   private LegacySearchService service;
+
+  @Autowired
+  private LegacyDetailsService detailsService;
 
   /**
    * Handles the refresh page
@@ -64,6 +70,7 @@ public class LegacySearchController extends BaseController {
     }
 
     ModelAndView mv = new ModelAndView("legacysearch", "model", new LegacySearchModel());
+    setPageKeys("LSEARCH", "LSEARCH", mv);
     return mv;
   }
 
@@ -88,4 +95,26 @@ public class LegacySearchController extends BaseController {
     return map;
   }
 
+  /**
+   * Handles the refresh page
+   * 
+   * @param request
+   * @param model
+   * @return
+   * @throws CmrException
+   */
+  @RequestMapping(value = "/legacydetails/process", method = RequestMethod.GET)
+  public @ResponseBody ModelMap showLegacySearchPage(HttpServletRequest request, @RequestParam("cmrNo") String cmrNo,
+      @RequestParam("country") String country) throws CmrException {
+    LOG.debug("Processing Legacy Details for CMR No. " + cmrNo + " under " + country);
+    ModelMap map = new ModelMap();
+
+    ParamContainer params = new ParamContainer();
+    params.addParam("cmrNo", cmrNo);
+    params.addParam("country", country);
+
+    LegacyDirectObjectContainer results = detailsService.process(request, params);
+    map.addAttribute("details", results);
+    return map;
+  }
 }
