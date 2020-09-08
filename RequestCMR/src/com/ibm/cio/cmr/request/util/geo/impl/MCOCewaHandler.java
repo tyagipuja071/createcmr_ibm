@@ -132,11 +132,11 @@ public class MCOCewaHandler extends MCOHandler {
     FindCMRRecordModel record = mainRecord;
 
     if (!StringUtils.isEmpty(record.getCmrName3())) {
-      record.setCmrStreetAddressCont(record.getCmrName3());
+      record.setCmrName4(record.getCmrName4());
     }
 
     if (!StringUtils.isEmpty(record.getCmrName4())) {
-      record.setCmrName4(record.getCmrName4());
+      record.setCmrStreetAddressCont(record.getCmrName3());
     }
 
     if (!StringUtils.isBlank(record.getCmrPOBox())) {
@@ -176,8 +176,8 @@ public class MCOCewaHandler extends MCOHandler {
               LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
 
               // name3 in rdc = Address Con't on SOF
-              addr.setCmrStreetAddressCont(record.getCmrName3());
-              addr.setCmrName3(record.getCmrName3());
+              addr.setCmrStreetAddressCont(record.getCmrName4());
+              addr.setCmrName4(record.getCmrName3());
               addr.setCmrName2Plain(record.getCmrName2Plain());
               addr.setCmrSitePartyID(record.getCmrSitePartyID());
 

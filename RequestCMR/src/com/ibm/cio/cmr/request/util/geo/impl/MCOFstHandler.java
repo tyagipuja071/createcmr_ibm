@@ -5,6 +5,7 @@ package com.ibm.cio.cmr.request.util.geo.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 
 /**
  * @author Jeffrey Zamora
@@ -156,22 +158,47 @@ public class MCOFstHandler extends MCOHandler {
         mapCreateReqAddrLD(mainRecord, converted);
       } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
         mapUpdateReqAddrLD(source, converted);
+        importMailingFromDB(entityManager, mainRecord, converted);
       }
     } else {
       super.handleSOFConvertFrom(entityManager, source, reqEntry, mainRecord, converted, searchModel);
     }
   }
 
+  private boolean isOldCmrRecord(EntityManager entityManager, FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted) {
+    // Old cmrs don't have mailing
+    for (FindCMRRecordModel rec : converted) {
+      if ("ZS02".equals(rec.getCmrAddrTypeCode())) {
+        LOG.debug("FST - New cmr");
+        return false;
+      }
+    }
+    LOG.debug("FST - Old cmr");
+    return true;
+  }
+
+  private void importMailingFromDB(EntityManager entityManager, FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted) {
+    boolean isOldCmr = isOldCmrRecord(entityManager, mainRecord, converted);
+    if (isOldCmr) {
+      if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, mainRecord.getCmrIssuedBy())) {
+        FindCMRRecordModel mailingSOF = createAddress(entityManager, mainRecord.getCmrIssuedBy(), "ZS02", "Mailing",
+            new HashMap<String, FindCMRRecordModel>());
+        if (mailingSOF != null) {
+          converted.add(mailingSOF);
+        }
+      }
+    }
+  }
+
   private void mapCreateReqAddrLD(FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted) {
     // only add zs01 equivalent for create by model
     FindCMRRecordModel record = mainRecord;
-
     if (!StringUtils.isEmpty(record.getCmrName3())) {
-      record.setCmrStreetAddressCont(record.getCmrName3());
+      record.setCmrName4(record.getCmrName4());
     }
 
     if (!StringUtils.isEmpty(record.getCmrName4())) {
-      record.setCmrName4(record.getCmrName4());
+      record.setCmrStreetAddressCont(record.getCmrName3());
     }
 
     if (!StringUtils.isBlank(record.getCmrPOBox())) {
@@ -211,8 +238,8 @@ public class MCOFstHandler extends MCOHandler {
               LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
 
               // name3 in rdc = Address Con't on SOF
-              addr.setCmrStreetAddressCont(record.getCmrName3());
-              addr.setCmrName3(record.getCmrName3());
+              addr.setCmrStreetAddressCont(record.getCmrName4());
+              addr.setCmrName4(record.getCmrName3());
               addr.setCmrName2Plain(record.getCmrName2Plain());
               addr.setCmrSitePartyID(record.getCmrSitePartyID());
 
