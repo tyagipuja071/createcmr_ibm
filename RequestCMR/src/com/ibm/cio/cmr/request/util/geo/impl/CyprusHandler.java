@@ -4101,7 +4101,7 @@ public class CyprusHandler extends BaseSOFHandler {
   @Override
   public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr copyAddr, String cmrIssuingCntry) throws Exception {
     
-    if(copyAddr != null && copyAddr.getId().getAddrSeq().compareTo("00006") >= 0 && cmrIssuingCntry.equals("666")){
+    if(copyAddr != null && copyAddr.getId().getAddrSeq().compareTo("00006") >= 0){
       return true;
     }
     return false;
