@@ -1031,6 +1031,10 @@ function addAdditionalNameStreetContPOBoxValidator() {
 }
 
 function setTypeOfCustomerBehavior() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true' && FormManager.getActualValue('reqType') == 'U') {
+    FormManager.readOnly('crosSubTyp');
+    return;
+  }
 
   if (FormManager.getActualValue('reqType') == 'C') {
     FormManager.hide('CrosSubTyp', 'crosSubTyp');
