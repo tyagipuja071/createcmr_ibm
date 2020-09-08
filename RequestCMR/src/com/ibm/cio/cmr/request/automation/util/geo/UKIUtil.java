@@ -83,7 +83,7 @@ public class UKIUtil extends AutomationUtil {
     }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
-    if (!SCENARIO_THIRD_PARTY.equals(scenario)
+    if (!(SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_DATACENTER.equals(scenario))
         && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
       details.append("Third Party Scenario should be selected.").append("\n");
       engineData.addRejectionComment("OTH", "Third Party Scenario should be selected.", "", "");
@@ -94,7 +94,8 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("BILL_INSTALL_DIFF", "Billing and Installing addresses are not same.");
     }
 
-    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp())) && "Y".equals(data.getRestrictInd())) {
+    if (!(SCENARIO_PRIVATE_PERSON.equals(scenario) || "CROSS".equals(data.getCustGrp()) || SCENARIO_INTERNAL_FSL.equals(scenario)
+        || SCENARIO_INTERNAL.equals(scenario)) && "Y".equals(data.getRestrictInd())) {
       details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
@@ -119,7 +120,12 @@ public class UKIUtil extends AutomationUtil {
       }
       break;
     case SCENARIO_DATACENTER:
-      if (!customerNameZI01.toUpperCase().contains("DATACENTER") && !customerNameZI01.toUpperCase().contains("DATA CENTER")) {
+      if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+        details.append("Customer Names on installing and billing address should be different for Data Center Scenario").append("\n");
+        engineData.addRejectionComment("OTH", "Customer Names on installing and billing address should be different for Data Center Scenario", "",
+            "");
+        return false;
+      } else if (!customerNameZI01.toUpperCase().contains("DATACENTER") && !customerNameZI01.toUpperCase().contains("DATA CENTER")) {
         details.append("The request does not meet the criteria for Data Center Scenario.").append("\n");
         engineData.addRejectionComment("OTH", "The request does not meet the criteria for Data Center Scenario.", "", "");
         return false;
@@ -424,6 +430,13 @@ public class UKIUtil extends AutomationUtil {
               if (subInd != null) {
                 overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
                 details.append("Subindustry Code  =  " + subInd).append("\n");
+              }
+            }
+            if (SCENARIO_INTERNAL_FSL.equals(scenario) && dnbRecord.getOrgIdDetails() != null) {
+              String crn = DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails());
+              if (StringUtils.isNotBlank(crn)) {
+                details.append("Overriding CRN to \'" + crn + "\'\n");
+                overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "TAX_CD1", data.getTaxCd1(), crn);
               }
             }
             results.setResults("Calculated.");
