@@ -41,6 +41,7 @@ public class MCOSaHandler extends MCOHandler {
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
 
+    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
@@ -66,6 +67,11 @@ public class MCOSaHandler extends MCOHandler {
         record.setCmrAddrSeq("00001");
       } else {
         record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+      }
+
+      if (prospectCmrChosen && "ZS01".equals(record.getCmrAddrTypeCode())) {
+        LOG.debug("Mailing Address prospect CMR No. " + record.getCmrNum());
+        record.setCmrAddrSeq("00001");
       }
 
       record.setCmrName2Plain(record.getCmrName2Plain());

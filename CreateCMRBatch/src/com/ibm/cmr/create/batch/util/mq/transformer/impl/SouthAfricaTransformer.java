@@ -335,4 +335,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
     return false;
   }
+
+  @Override
+  public String getFixedAddrSeqForProspectCreation() {
+    return "00001";
+  }
 }
