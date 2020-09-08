@@ -4537,43 +4537,6 @@ public class EMEAHandler extends BaseSOFHandler {
     return zi01count;
   }
 
-  public Sadr getTRAddtlAddr(EntityManager entityManager, String adrnr, String mandt) {
-    Sadr sadr = new Sadr();
-    String qryAddlAddr = ExternalizedQuery.getSql("GET.TR_SADR_BY_ID");
-    PreparedQuery query = new PreparedQuery(entityManager, qryAddlAddr);
-    query.setParameter("ADRNR", adrnr);
-    query.setParameter("MANDT", mandt);
-    sadr = query.getSingleResult(Sadr.class);
-
-    return sadr;
-  }
-
-  private void copyAddrData(FindCMRRecordModel record, Addr addr) {
-    record.setCmrAddrTypeCode("ZP01");
-    record.setCmrAddrSeq("00002");
-    record.setCmrName1Plain(addr.getCustNm1());
-    record.setCmrName2Plain(addr.getCustNm2());
-    record.setCmrName3(addr.getCustNm3());
-    record.setCmrName4(addr.getCustNm4());
-    record.setCmrStreetAddress(addr.getAddrTxt());
-    record.setCmrCity(addr.getCity1());
-    record.setCmrCity2(addr.getCity2());
-    record.setCmrState(addr.getStateProv());
-    record.setCmrCountryLanded(addr.getLandCntry());
-    record.setCmrCountry(addr.getLandCntry());
-    record.setCmrPOBox(addr.getPoBox());
-    record.setCmrPostalCode(addr.getPostCd());
-    record.setParentCMRNo(addr.getParCmrNo());
-  }
-
-  private Addr getCurrentInstallingAddress(EntityManager entityManager, long reqId) {
-    String sql = ExternalizedQuery.getSql("TR.GETINSTALLING");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    query.setForReadOnly(true);
-    return query.getSingleResult(Addr.class);
-  }
-
   private void autoSetAbbreviatedNameUKIIFSL(Data data, String installingName, Admin admin) {
     String cntryFrmEmpId = "";
     String abbName = "";
