@@ -427,16 +427,10 @@ function afterConfigForUKI() {
         };
         var result = cmr.query('DATA.GET.CUSTSUBGRP.BY_REQID', qParams);
         var custTypeinDB = result.ret1;
-        autoSetVAT(_custType, custTypeinDB);
         autoSetSpecialTaxCdByScenario(_custType, custTypeinDB);
         autoSetCollectionCdByScenario(_custType);
         autoSetSBO(_custType, custTypeinDB);
-        // autoSetAbbrevNmOnChanageUKI();
         autoSetAbbrevLocnOnChangeUKI();
-        // DTN: Defect 1858294 : UKI: Internal FSL sub-scenario rules for
-        // abbreviated name
-        // commented bc. of new Req. CMR - 4542
-        // autoSetAbbrevNameUKIInterFSL(_custType);
         unlockINACForINTERUKI();
         autoSetISUClientTierUK();
         optionalRuleForVatUK();
@@ -457,7 +451,9 @@ function afterConfigForUKI() {
         FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        if("C" == FormManager.getActualValue('reqType')){
+          FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        }
         FormManager.enable('vat');
       }
     });
@@ -958,11 +954,16 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (PageManager.isReadOnly()) {
     return;
   }
+  
+  if(reqType != 'C'){
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+    return;
+  }
 
   if (_custType == 'SOFTL') {
     FormManager.getField('vatExempt').checked = true;
     FormManager.enable('vatExempt');
-  } else if (reqType == 'C' && _custType == 'INTER') {
+  } else if (_custType == 'INTER') {
     FormManager.getField('vatExempt').checked = true;
     if (role == 'REQUESTER') {
       FormManager.readOnly('vatExempt');
@@ -1033,7 +1034,7 @@ function autoSetSBO(value, valueInDB) {
     if (custSubGrp == '') {
       return;
     } else if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
-        || custSubGrp == 'CROSS') {
+        || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR') {
       // FormManager.enable('salesBusOffCd');
       // FormManager.enable('repTeamMemberNo');
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
@@ -1187,6 +1188,8 @@ function setClientTierValuesUKI() {
       FormManager.limitDropdownValues(FormManager.getField('clientTier'), clientTiers);
       if (clientTiers.length == 1) {
         FormManager.setValue('clientTier', clientTiers[0]);
+        FormManager.resetValidations('clientTier');
+        FormManager.readOnly('clientTier');
       }
     } else {
       FormManager.resetDropdownValues(FormManager.getField('clientTier'));
@@ -7841,6 +7844,7 @@ function validateCodiceDesIT() {
 }
 
 function setIBMFieldsMandtOptional() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   if (FormManager.getActualValue('reqType') == 'C') {
     if (role.toUpperCase() == 'REQUESTER') {
       FormManager.removeValidator('isuCd', Validators.REQUIRED);
@@ -9124,6 +9128,7 @@ dojo.addOnLoad(function() {
   // [SysLoc.ITALY]);
   GEOHandler.registerValidator(validateSBOForIT, [ SysLoc.ITALY ]);
   GEOHandler.registerValidator(validateCodiceDesIT, [ SysLoc.ITALY ], null, true);
+  GEOHandler.addAfterConfig(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.addAfterTemplateLoad(setIBMFieldsMandtOptional, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(validateCMRNumberForIT, [ SysLoc.ITALY ], null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorIT, [ SysLoc.ITALY ], null, true);
@@ -9164,5 +9169,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setCustClassCd, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterTemplateLoad(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
+  GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
 
 });
