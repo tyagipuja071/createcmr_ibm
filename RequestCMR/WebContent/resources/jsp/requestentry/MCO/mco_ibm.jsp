@@ -17,7 +17,7 @@
 %>
 <cmr:view forGEO="MCO,MCO1,MCO2">
   <cmr:row topPad="10">
-    <cmr:column span="2" containerForField="SalRepNameNo">
+    <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="780">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
           <cmr:fieldLabel fieldId="SalRepNameNo" />:
@@ -26,7 +26,7 @@
         <cmr:field fieldId="SalRepNameNo" id="repTeamMemberNo" path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
       </p>
     </cmr:column>
-    <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
+    <%-- <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
       <p>
         <cmr:label fieldId="engineeringBo">
           <cmr:fieldLabel fieldId="EngineeringBo" />:
@@ -34,7 +34,7 @@
         </cmr:label>
         <cmr:field fieldId="EngineeringBo" id="engineeringBo" path="engineeringBo" tabId="MAIN_IBM_TAB"/>
       </p>
-    </cmr:column>    
+    </cmr:column>     --%>
     <cmr:column span="2" containerForField="SalesBusOff" exceptForCountry="838">
       <p>
         <cmr:label fieldId="salesBusOffCd">
@@ -70,18 +70,7 @@
       <% } %>
     </cmr:view>
     <%-- END of SBO and Sales Rep --%>
-    <% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
-    <cmr:view forGEO="MCO1">
-      <cmr:column span="2" containerForField="CreditCd">
-        <p>
-          <cmr:label fieldId="creditCd">
-            <cmr:fieldLabel fieldId="CreditCd" />: 
-          </cmr:label>
-          <cmr:field path="creditCd" id="creditCd" fieldId="CreditCd" tabId="MAIN_IBM_TAB" />
-        </p>
-      </cmr:column>
-    </cmr:view>
-    <% } %>
+    
   </cmr:row>
   
   <cmr:view forGEO="MCO1,MCO2">
@@ -119,5 +108,8 @@
     </cmr:view>
     <% } %>      
     </cmr:row>
+  </cmr:view>
+  <cmr:view forCountry="838">
+    <form:hidden path="engineeringBo" id="engineeringBo"/>
   </cmr:view>
 </cmr:view>
