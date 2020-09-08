@@ -1003,6 +1003,10 @@ public class MEHandler extends BaseSOFHandler {
       if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
         data.setPhone3(this.currentImportValues.get("ICE"));
       }
+      // Type of Customer
+      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry())) {
+        data.setBpAcctTyp(this.currentImportValues.get("CustomerType"));
+      }
     }
 
     if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
@@ -1041,10 +1045,12 @@ public class MEHandler extends BaseSOFHandler {
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setPhone1(mainRecord.getCmrCustPhone());
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
-      CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
-      if (cmrtExt != null) {
-        String teleCovRep = cmrtExt.getTeleCovRep();
-        data.setBpSalesRepNo(teleCovRep);
+      if (this.legacyObjects != null) {
+        CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
+        if (cmrtExt != null) {
+          String teleCovRep = cmrtExt.getTeleCovRep();
+          data.setBpSalesRepNo(teleCovRep);
+        }
       }
     }
     // ICO field
@@ -1129,9 +1135,6 @@ public class MEHandler extends BaseSOFHandler {
         && ("010101".equals(data.getAgreementSignDate()) || "123101".equals(data.getAgreementSignDate()))) {
       data.setAgreementSignDate("");
     }
-
-    // Type of Customer
-    data.setBpAcctTyp(this.currentImportValues.get("BpAcctTyp"));
 
     if (SystemLocation.SERBIA.equals(data.getCmrIssuingCntry()) && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       data.setEngineeringBo("");
@@ -1440,6 +1443,15 @@ public class MEHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBpAcctTyp(), newData.getBpAcctTyp())
+        && SystemLocation.ABU_DHABI.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Type of Customer", "Type of Customer"));
+      update.setNewData(newData.getBpAcctTyp());
+      update.setOldData(oldData.getBpAcctTyp());
       results.add(update);
     }
 
