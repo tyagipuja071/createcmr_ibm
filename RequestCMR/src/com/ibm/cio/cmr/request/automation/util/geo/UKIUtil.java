@@ -83,7 +83,7 @@ public class UKIUtil extends AutomationUtil {
     }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
-    if (!SCENARIO_THIRD_PARTY.equals(scenario)
+    if (!(SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_DATACENTER.equals(scenario))
         && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
       details.append("Third Party Scenario should be selected.").append("\n");
       engineData.addRejectionComment("OTH", "Third Party Scenario should be selected.", "", "");
@@ -120,7 +120,12 @@ public class UKIUtil extends AutomationUtil {
       }
       break;
     case SCENARIO_DATACENTER:
-      if (!customerNameZI01.toUpperCase().contains("DATACENTER") && !customerNameZI01.toUpperCase().contains("DATA CENTER")) {
+      if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase())) {
+        details.append("Customer Names on installing and billing address should be different for Data Center Scenario").append("\n");
+        engineData.addRejectionComment("OTH", "Customer Names on installing and billing address should be different for Data Center Scenario", "",
+            "");
+        return false;
+      } else if (!customerNameZI01.toUpperCase().contains("DATACENTER") && !customerNameZI01.toUpperCase().contains("DATA CENTER")) {
         details.append("The request does not meet the criteria for Data Center Scenario.").append("\n");
         engineData.addRejectionComment("OTH", "The request does not meet the criteria for Data Center Scenario.", "", "");
         return false;

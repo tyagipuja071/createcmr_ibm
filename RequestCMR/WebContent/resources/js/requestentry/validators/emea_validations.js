@@ -8336,8 +8336,14 @@ function autoSetAbbrNameUKI() {
           billingCustNm = result2.ret1 + (result2.ret2 != undefined ? result2.ret2 : '');
         }
         billingCustNm = result2.ret1 != undefined ? result2.ret1 : '';
-        if (billingCustNm != '' && !abbName.includes('c/o')) {
-          FormManager.setValue('abbrevNm', (installingCustNm + ' c/o ' + billingCustNm).substring(0, 22));
+        if (billingCustNm != '') {
+          var offset = 0;
+          if (installingCustNm.length < 11) {
+            offset = 11 - installingCustNm.length;
+          }
+          var installingCustNmTrim = installingCustNm.length > 11 ? installingCustNm.substring(0, 11) : installingCustNm;
+          var billingCustNmTrim = billingCustNm.length > (offset + 10) ? billingCustNm.substring(0, offset + 10) : billingCustNm;
+          FormManager.setValue('abbrevNm', (installingCustNmTrim + ' / ' + billingCustNmTrim));
         }
       }
     }
