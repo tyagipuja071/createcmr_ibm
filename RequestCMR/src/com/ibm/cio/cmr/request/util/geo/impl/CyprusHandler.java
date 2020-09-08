@@ -4098,4 +4098,14 @@ public class CyprusHandler extends BaseSOFHandler {
     return localTransAddr;
   }
 
+  @Override
+  public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr copyAddr, String cmrIssuingCntry) throws Exception {
+    
+    if(copyAddr != null && copyAddr.getId().getAddrSeq().compareTo("00006") >= 0){
+      return true;
+    }
+    return false;
+  }
+
+  
 }
