@@ -514,18 +514,17 @@ function configureCRNForUKI() {
   var isicVal = FormManager.getActualValue('isicCd');
   var zs01LandCntry = getZS01LandCntry();
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
 
   if (reqType == 'C') {
-    if ("PRICU" == FormManager.getActualValue('custSubGrp') || "CROSS" == FormManager.getActualValue('custGrp')) {
+    if ("PRICU" == FormManager.getActualValue('custSubGrp') || "CROSS" == FormManager.getActualValue('custGrp') || 
+        FormManager.getActualValue('custSubGrp') == "INTER" || FormManager.getActualValue('custSubGrp') == "INFSL") {
       console.log(">>> Removing CRN Mandatory Validation >>>");
       FormManager.getField('restrictInd').checked = true;
       FormManager.resetValidations('taxCd1');
-      FormManager.readOnly('taxCd1');
-      FormManager.setValue('taxCd1', '');
-      FormManager.readOnly('restrictInd');
-    } else if (role == 'REQUESTER' && (FormManager.getActualValue('custSubGrp') == "INTER" || FormManager.getActualValue('custSubGrp') == "INFSL")) {
-      FormManager.getField('restrictInd').checked = true;
-      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
       FormManager.readOnly('taxCd1');
       FormManager.setValue('taxCd1', '');
       FormManager.readOnly('restrictInd');
