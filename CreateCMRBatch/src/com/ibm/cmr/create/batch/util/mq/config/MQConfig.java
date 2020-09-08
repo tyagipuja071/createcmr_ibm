@@ -3,7 +3,6 @@
  */
 package com.ibm.cmr.create.batch.util.mq.config;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,12 +11,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.persistence.Column;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cmr.create.batch.util.BatchUtil;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -46,64 +42,6 @@ public class MQConfig {
   private String inputQueue;
   private String cipher;
   private int ccsid = -1;
-
-  public static void main(String[] args) {
-
-    Map<String, String> map = new HashMap<String, String>();
-    map.put("RCYAA", "SOF Country code (RCYAA)");
-    map.put("RCUXA", "Customer Number (RCUXA)");
-    map.put("NORMABB", "Billing Adderss Name (ITALY) (NORMABB)");
-    map.put("INDABB", "Billing Adderss Street (ITALY) (INDABB)");
-    map.put("CITABB", "Billing AdderssCity (ITALY) (CITABB)");
-    map.put("CNCLA", "Nature Client (FRANCE) (CNCLA)");
-    map.put("AGIOS", "Penalties De Retard (FRANCE) (AGIOS)");
-    map.put("AFFAC", "Affacturage (FRANCE ) (AFFAC)");
-    map.put("IAN01", "INACCont (FRANCE) (IAN01)");
-    map.put("TACPA", "Code APE (FRANCE) (TACPA)");
-    map.put("CTECH", "Type De Facturation (FRANCE) (CTECH)");
-    map.put("TLSPE", "Top Liste Speciale (FRANCE) (TLSPE)");
-    map.put("TAPAR", "Tarif Particulier (FRANCE) (TAPAR)");
-    map.put("IGSNJ", "Nombre De Jours (FRANCE) (IGSNJ)");
-    map.put("TADMI", "Forme Juridique (FRANCE) (TADMI)");
-    map.put("SIRET", "Siret/Siren (SIRET)");
-    map.put("TCOVREP", "Tale Coverage Representative (TCOVREP)");
-    map.put("AECISUB", "AECISUBDate CEMA (AECISUB)");
-    map.put("CODSSV", "SSV Code (ITALY) (CODSSV)");
-    map.put("CODCC", "Billing Custom.Number(ITALY) (CODCC)");
-    map.put("CODCP", "Company Customer Number (CODCP)");
-    map.put("IDCLI", "Ident Client (IDCLI)");
-    map.put("AFFILIATE", "Affiliate Branch (AFFILIATE)");
-    map.put("CODFIS", " (CODFIS)");
-    map.put("DIC", "DIC (SLOVAKIA) (DIC)");
-    map.put("IVA", "IVA (Italy) (IVA)");
-    map.put("UPDATE_TS", " (UPDATE_TS)");
-    map.put("RACDS", "ACCOUNT ADMINISTRATOR DSC (RACDS)");
-    map.put("CODDES", "CODDICE DESTINARIO/UFICIO (CODDES)");
-    map.put("TIPOCL", "TIPO CLIENTE (TIPOCL)");
-    map.put("INDEMAIL", "PRIVAT EMAIL ADDRESS (INDEMAIL)");
-    map.put("PEC", "PEC EMAIL ADDRESS (PEC)");
-    int mod = 0;
-
-    for (Field field : CmrtCustExt.class.getDeclaredFields()) {
-      String colName = field.getName().toUpperCase();
-      Column col = field.getAnnotation(Column.class);
-      if (col != null) {
-        colName = col.name().toUpperCase();
-      }
-      if (map.containsKey(colName)) {
-        colName = map.get(colName);
-      }
-      if (mod % 3 == 0) {
-        System.out.println("          <tr>");
-      }
-      System.out.println("            <td class=\"dnb-label\">" + colName + ":</td>");
-      System.out.println("            <td ng-bind-html=\"ext." + field.getName() + "\"></td>");
-      mod++;
-      if (mod % 3 == 0) {
-        System.out.println("          </tr>");
-      }
-    }
-  }
 
   /**
    * Initializes the Configurations. This checks batch-props for configurations
