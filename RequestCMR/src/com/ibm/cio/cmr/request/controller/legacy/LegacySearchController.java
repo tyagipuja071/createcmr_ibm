@@ -105,13 +105,14 @@ public class LegacySearchController extends BaseController {
    */
   @RequestMapping(value = "/legacydetails/process", method = RequestMethod.GET)
   public @ResponseBody ModelMap showLegacySearchPage(HttpServletRequest request, @RequestParam("cmrNo") String cmrNo,
-      @RequestParam("country") String country) throws CmrException {
+      @RequestParam("country") String country, @RequestParam("realCty") String realCty) throws CmrException {
     LOG.debug("Processing Legacy Details for CMR No. " + cmrNo + " under " + country);
     ModelMap map = new ModelMap();
 
     ParamContainer params = new ParamContainer();
     params.addParam("cmrNo", cmrNo);
     params.addParam("country", country);
+    params.addParam("realCty", realCty);
 
     LegacyDirectObjectContainer results = detailsService.process(request, params);
     map.addAttribute("details", results);

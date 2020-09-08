@@ -40,11 +40,12 @@ public class LegacyDetailsController extends BaseWindowController {
       throws CmrException, JsonGenerationException, JsonMappingException, IOException {
     String country = request.getParameter("country");
     String cmrNo = request.getParameter("cmrNo");
+    String realCty = request.getParameter("realCty");
     String title = null;
     if (StringUtils.isBlank(cmrNo) && StringUtils.isBlank(country)) {
       title = "CMR No. and Country not specified.";
     } else {
-      title = "Details for CMR No. " + cmrNo + " under " + country;
+      title = "Details for CMR No. " + cmrNo + " under " + realCty;
     }
     ModelAndView mv = new ModelAndView("legacydetails");
     return getWindow(mv, title);

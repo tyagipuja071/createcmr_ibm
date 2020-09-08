@@ -34,6 +34,7 @@ public class LegacyDetailsService extends BaseSimpleService<LegacyDirectObjectCo
   protected LegacyDirectObjectContainer doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     String country = (String) params.getParam("country");
     String cmrNo = (String) params.getParam("cmrNo");
+    String realCty = (String) params.getParam("realCty");
 
     LegacyDirectObjectContainer container = new LegacyDirectObjectContainer();
     if (!StringUtils.isBlank(country) && !StringUtils.isBlank(cmrNo)) {
@@ -72,7 +73,7 @@ public class LegacyDetailsService extends BaseSimpleService<LegacyDirectObjectCo
 
       sql = ExternalizedQuery.getSql("LEGACY.SEARCH.KNA1");
       query = new PreparedQuery(entityManager, sql);
-      query.setParameter("KATR6", country);
+      query.setParameter("KATR6", realCty);
       query.setParameter("CMR_NO", cmrNo);
       query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
       query.setForReadOnly(true);
