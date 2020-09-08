@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -253,9 +254,6 @@ public class GreeceTransformer extends EMEATransformer {
       lineNo++;
     }
 
-    // tax office
-    messageHash.put(getTargetAddressType(addrData.getId().getAddrType()) + "AddressT",
-        !StringUtils.isEmpty(addrData.getTaxOffice()) ? addrData.getTaxOffice() : "");
 
     // vat
     if (!MQMsgConstants.ADDR_ZD01.equals(addrData.getId().getAddrType())) {
@@ -444,6 +442,8 @@ public class GreeceTransformer extends EMEATransformer {
         if ("ZS01".equals(addr.getId().getAddrType())) {
           if (!StringUtils.isEmpty(addr.getCustPhone())) {
             legacyCust.setTelNoOrVat(addr.getCustPhone());
+          } else {
+            legacyCust.setTelNoOrVat("");
           }
           landedCntry = addr.getLandCntry();
           break;
@@ -579,15 +579,6 @@ public class GreeceTransformer extends EMEATransformer {
     return true;
   }
 
-  @Override
-  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-      CMRRequestContainer cmrObjects) {
-    for (Addr addr : cmrObjects.getAddresses()) {
-      if (addr.getId().getAddrType().equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString()) && StringUtils.isNotBlank(addr.getTaxOffice())) {
-        legacyCustExt.setiTaxCode((addr.getTaxOffice()));
-      }
-    }
-  }
 
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
@@ -1063,43 +1054,6 @@ public class GreeceTransformer extends EMEATransformer {
   }
 
   @Override
-  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
-      MassUpdtData muData, String cmr) throws Exception {
-    // for tax office
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZP01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getFloor())) {
-            if (DEFAULT_CLEAR_CHAR.equals(mua.getFloor())) {
-              custExt.setiTaxCode("");
-            } else {
-              custExt.setiTaxCode(mua.getFloor());
-            }
-            break;
-          }
-
-        }
-      }
-    }
-    List<MassUpdtAddr> muAddrList = cmrObjects.getMassUpdateAddresses();
-    MassUpdtAddr zp01Addr = new MassUpdtAddr();
-    for (MassUpdtAddr muAddr : muAddrList) {
-      if ("ZP01".equals(muAddr.getId().getAddrType())) {
-        zp01Addr = muAddr;
-        break;
-      }
-    }
-    if (zp01Addr != null && !StringUtils.isBlank(zp01Addr.getFloor())) {
-      if ("@".equals(zp01Addr.getFloor())) {
-        custExt.setiTaxCode("");
-      } else {
-        custExt.setiTaxCode(zp01Addr.getFloor());
-      }
-    }
-  }
-
-  @Override
   public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
     if (isSharedSequence(cmrObjects, currAddr)) {
       return true;
@@ -1134,6 +1088,22 @@ public class GreeceTransformer extends EMEATransformer {
     } else {
       return false;
     }
+  }
+
+  @Override
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    List<Addr> addresses = cmrObjects.getAddresses();
+    for (Addr addr : addresses) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+        String currPhone = addr.getCustPhone() != null ? addr.getCustPhone() : "";
+        String oldPhone = addrRdc.getCustPhone() != null ? addrRdc.getCustPhone() : "";
+        if (addrRdc == null || (addrRdc != null && !currPhone.equals(oldPhone))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 }

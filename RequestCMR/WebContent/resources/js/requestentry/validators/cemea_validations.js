@@ -1355,7 +1355,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '5B') {
         clientTiers = [ '7' ];
       }
-      
+
     } else if ((SysLoc.POLAND == cntry || SysLoc.RUSSIA == cntry)
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
@@ -2912,6 +2912,28 @@ function resetVatExemptOnchange() {
   });
 }
 
+function vatExemptOnScenario() {
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var subGrp = new Array();
+  subGrp = [ 'COMME', 'GOVRN', 'BUSPR', 'THDPT', 'XCOM', 'XBP' ];
+  for (var i = 0; i < subGrp.length; i++) {
+    if (custSubType == subGrp[i]) {
+      if (dijit.byId('vatExempt').get('checked')) {
+        FormManager.getField('vatExempt').set('checked', false);
+
+      }
+      break;
+    }
+  }
+
+}
+
+function resetVatExemptOnScenario() {
+  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+    vatExemptOnScenario();
+  });
+}
+
 function lockLocationNo() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -3522,10 +3544,137 @@ function setTypeOfCustomerRequiredProcessor() {
   }
 }
 
+function setScenarioTo3PAOnAddrSave(cntry, addressMode, saving, finalSave, force) {
+  if ((finalSave || force) && cmr.addressMode) {
+    var addrType = FormManager.getActualValue('addrType');
+    var copyTypes = document.getElementsByName('copyTypes');
+    var copyingToA = false;
+    if (copyTypes != null && copyTypes.length > 0) {
+      copyTypes.forEach(function(input, i) {
+        if (input.value == 'ZS01' && input.checked) {
+          copyingToA = true;
+        }
+      });
+    }
+    if ((addrType == 'ZS01' || copyingToA)) {
+      var custNm1 = FormManager.getActualValue('custNm1');
+      var custNm2 = FormManager.getActualValue('custNm2');
+      if (custNm1.concat(custNm2).includes("c/o")) {
+        FormManager.setValue('custGrp', 'LOCAL');
+        FormManager.setValue('custSubGrp', '3PA');
+      }
+
+    }
+  }
+}
+
 function canCopyAddress(value, rowIndex, grid) {
   return false;
 }
 
+function setScenarioTo3PA() {
+  // on importing an address , this check should happen
+  var impIndc = getImportedIndcForSwiss();
+  if (impIndc != 'N') {
+    // get zs01 address from ADDR table
+    var qParams = {
+      _qall : 'Y',
+      REQ_ID : FormManager.getActualValue('reqId')
+    };
+    var results = cmr.query('AT.GET.ADDR.ZS01', qParams);
+    var custNm1 = results[0].ret1;
+    var custNm2 = results[0].ret2;
+    if (custNm1.concat(custNm2).includes("c/o")) {
+      FormManager.setValue('custGrp', 'LOCAL');
+      FormManager.setValue('custSubGrp', '3PA');
+    }
+  }
+}
+
+var _importedIndc = null;
+function getImportedIndcForSwiss() {
+  if (_importedIndc) {
+    console.log('Returning imported indc = ' + _importedIndc);
+    return _importedIndc;
+  }
+  var results = cmr.query('IMPORTED_ADDR_ZS01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  console.log('saving imported ind as ' + _importedIndc);
+  return _importedIndc;
+
+}
+
+function similarAddrCheckValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var req_id = FormManager.getActualValue('reqId');
+        var req_type = FormManager.getActualValue('reqType');
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var addrDupExists = [];
+          var custNm1 = '';
+          var custNm2 = '';
+          var addrTxt = '';
+          var city1 = '';
+          var addrTxt2 = '';
+          var stateProv = '';
+          var landCntry = '';
+          var importIndc = '';
+          var dept = '';
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            custNm1 = record.custNm1[0];
+            custNm2 = record.custNm2[0] != null ? record.custNm2[0] : '';
+            addrTxt = record.addrTxt[0];
+            city1 = record.city1[0] != null ? record.city1[0] : '';
+            stateProv = record.stateProv[0] != null ? record.stateProv[0] : '';
+            addrTxt2 = record.addrTxt2[0] != null ? record.addrTxt2[0] : '';
+            ;
+            landCntry = record.landCntry[0];
+            dept = record.dept[0] != null ? record.dept[0] : '';
+            importIndc = record.importInd[0] != null ? record.importInd[0] : '';
+
+            if (req_type == 'U' && importIndc == 'Y') {
+              continue; // skip the unique check for addresses in case of
+              // import for Update requests.
+            }
+            var qParams = {
+              REQ_ID : req_id,
+              CUST_NM1 : custNm1,
+              CUST_NM2 : custNm2,
+              ADDR_TXT : addrTxt,
+              CITY1 : city1,
+              STATE_PROV : stateProv,
+              POST_CD : postCd,
+              LAND_CNTRY : landCntry
+            };
+            var results = cmr.query('GET.SME_ADDR_RECORDS_AT', qParams);
+            if (results.ret1 > 1) {
+              addrDupExists.push(record.addrTypeText);
+            }
+          }
+          if (addrDupExists.length > 0) {
+            return new ValidationResult(null, false, 'Duplicate address details exist for Addresses ' + addrDupExists + '. Delete other addresses except Contract address.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
 function filterCmrnoForCEE() {
   var cmrNo = FormManager.getActualValue('cmrNo');
   if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {
@@ -3611,8 +3760,8 @@ function setClassificationCodeCEE() {
 
 function lockIsicCdCEE() {
   var reqType = FormManager.getActualValue('reqType');
+  var isic = FormManager.getActualValue('isicCd');
   if ('U' == reqType || FormManager.getActualValue('viewOnlyPage') == 'true') {
-    var isic = FormManager.getActualValue('isicCd');
     if ('9500' == isic || '0000' == isic) {
       var oldISIC = null;
       var requestId = FormManager.getActualValue('reqId');
@@ -3653,38 +3802,31 @@ function validateIsicCEEValidator() {
         var custSubGrp = FormManager.getActualValue('custSubGrp');
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var isic = FormManager.getActualValue('isicCd');
-        var oldISIC = null;
-        var requestId = FormManager.getActualValue('reqId');
-        qParams = {
-          REQ_ID : requestId,
-        };
-        var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
-        var oldISIC = result.ret1;
 
         if ('U' == reqType) {
-          if ('9500' == isic || '0000' == isic) {
-            if (oldISIC != '9500' && oldISIC != '0000') {
-              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-            } else {
-              return new ValidationResult(null, true);
-            }
+          var oldISIC = null;
+          var requestId = FormManager.getActualValue('reqId');
+          qParams = {
+            REQ_ID : requestId,
+          };
+          var result = cmr.query('GET.ISIC_OLD_BY_REQID', qParams);
+          var oldISIC = result.ret1;
+          if (('9500' == isic || '0000' == isic) && isic != oldISIC) {
+            return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
+          } else if ((oldISIC == '0000' || oldISIC == '9500') && isic != oldISIC) {
+            return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
           } else {
-            if (oldISIC == '9500' || oldISIC == '0000') {
-              return new ValidationResult(null, false, 'ISIC should not be changed to ' + isic + ' for this Scenario Sub-type');
-            } else {
-              // FormManager.enable('isicCd');
-              return new ValidationResult(null, true);
-            }
+            return new ValidationResult(null, true);
           }
         }
 
-        if (('C' == reqType && ('9500' == isic || '0000' == isic))
-            && !(FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER' || FormManager.getActualValue('custSubGrp') == 'CSINT'
-                || FormManager.getActualValue('custSubGrp') == 'RSXIN' || FormManager.getActualValue('custSubGrp') == 'MEINT' || FormManager.getActualValue('custSubGrp') == 'RSINT'
-                || FormManager.getActualValue('custSubGrp') == 'XPC' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'CSPC'
-                || FormManager.getActualValue('custSubGrp') == 'MEPC' || FormManager.getActualValue('custSubGrp') == 'RSXPC' || FormManager.getActualValue('custSubGrp') == 'RSPC')) {
-          FormManager.enable('isicCd');
-          return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
+        if (('C' == reqType && ('9500' == isic || '0000' == isic))) {
+          if (custSubGrp.includes('BP') || custSubGrp.includes('BUS') || custSubGrp.includes('CO') || custSubGrp.includes('TH') || custSubGrp.includes('TP')) {
+            FormManager.enable('isicCd');
+            return new ValidationResult(null, false, 'ISIC ' + isic + ' should not be used for this Scenario Sub-type');
+          } else {
+            return new ValidationResult(null, true);
+          }
         } else {
           return new ValidationResult(null, true);
         }
@@ -4012,6 +4154,7 @@ function addEmbargoCdValidatorForCEE() {
     })(), 'MAIN_IBM_TAB', 'frmCMR');
   }
 }
+
 // CMR-4606
 function checkGAddressExist() {
   FormManager.addFormValidator((function() {
@@ -4199,10 +4342,13 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setISUCTCOnIMSChange, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterConfig(lockIBMtab, [ SysLoc.AUSTRIA ]);
   GEOHandler.addAfterTemplateLoad(lockIBMtab, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterConfig(resetVatExemptOnScenario, [ SysLoc.AUSTRIA ]);
+  GEOHandler.addAfterTemplateLoad(resetVatExemptOnScenario, SysLoc.AUSTRIA);
   // CEE
   GEOHandler.addAfterConfig(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateLoadForCEE, GEOHandler.CEE);
   GEOHandler.addAfterConfig(afterConfigForCEE, GEOHandler.CEE);
+  GEOHandler.addAfterTemplateLoad(afterConfigForCEE, GEOHandler.CEE);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(validateIsicCEEValidator, GEOHandler.CEE, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorCEE, GEOHandler.CEE, null, true);

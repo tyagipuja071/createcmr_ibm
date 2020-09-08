@@ -29,6 +29,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.RequestChangeLog;
 import com.ibm.cio.cmr.request.entity.RequestChangeLogPK;
 import com.ibm.cio.cmr.request.entity.SystParameters;
@@ -231,6 +232,37 @@ public class SystemUtil {
 
     return executeFindCMR(findCMRUrl, cmrIssuingCntry, searchCountry);
   }
+  
+  /**
+   * Interfaces with Find CMR and gets the pool records
+   * 
+   * @param cmrNo
+   * @param resultRows
+   * @return
+   * @throws CmrException
+   */
+  public static FindCMRResultModel findCMRs(String cmrNo, String cmrIssuingCntry, int resultRows, String searchCountry, boolean isPoolRecord)
+      throws CmrException {
+    String findCMRUrl = SystemConfiguration.getValue("FIND_CMR_URL");
+    if (findCMRUrl == null) {
+      throw new CmrException(MessageUtil.ERROR_NO_FIND_CMR_DEFINED);
+    }
+
+    String countryToUse = StringUtils.isEmpty(searchCountry) ? cmrIssuingCntry : searchCountry;
+    findCMRUrl += "/getCMRData.json?customerNumber=" + cmrNo + "&issuingCountryCode=" + countryToUse + "&resultRows=" + resultRows;
+
+    String credentials = "&svcId=" + SystemConfiguration.getSystemProperty("service.id") + "&svcPwd="
+        + SystemConfiguration.getSystemProperty("service.password");
+
+    String showProspects = "&showProspectCMRS=Y";
+
+    findCMRUrl += credentials + showProspects;
+
+    // piece that adds the order block code
+    findCMRUrl += "&includeOrdBlk93=Y";
+
+    return executeFindCMR(findCMRUrl, cmrIssuingCntry, searchCountry);
+  }  
 
   public static FindCMRResultModel findCMRsAltLang(String cmrIssuingCntry, int resultRows, String name, String street, String city,
       String extraParams) throws CmrException, UnsupportedEncodingException {
@@ -559,5 +591,29 @@ public class SystemUtil {
       LOG.error(ex.getMessage() + "error parsing Dummy Default date.", ex);
     }
     return dateToSave;
+  }
+  /**
+   * Get Data records by id
+   * 
+   * @param reqId
+   * @return
+   */
+  public static Data getDataRecord(long reqId) {
+    try {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        String sql = ExternalizedQuery.getSql("DATA.GET.RECORD.BYID");
+        PreparedQuery query = new PreparedQuery(entityManager, sql);
+        query.setParameter("REQ_ID", reqId);
+        query.setForReadOnly(true);
+        return query.getSingleResult(Data.class);
+      } finally {
+        entityManager.clear();
+        entityManager.close();
+      }
+    } catch (Exception e) {
+      LOG.error("Cannot get Data object", e);
+      return null;
+    }
   }
 }

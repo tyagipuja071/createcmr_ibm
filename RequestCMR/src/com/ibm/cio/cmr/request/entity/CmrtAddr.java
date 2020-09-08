@@ -89,6 +89,13 @@ public class CmrtAddr extends BaseEntity<CmrtAddrPK> implements Serializable {
   private String addrLineI;
 
   /**
+   * ADDITIONAL ADDRESS LINE N
+   */
+  @Column(name = "ADDRLN")
+  @LegacyXmlTag("AddressN")
+  private String addrLineN;
+
+  /**
    * ADDITIONAL ADDRESS LINE O
    */
   @Column(name = "ADDRLO")
@@ -612,6 +619,14 @@ public class CmrtAddr extends BaseEntity<CmrtAddrPK> implements Serializable {
 
   public void setForSharedSeq(boolean forSharedSeq) {
     this.forSharedSeq = forSharedSeq;
+  }
+
+  public String getAddrLineN() {
+    return addrLineN;
+  }
+
+  public void setAddrLineN(String addrLineN) {
+    this.addrLineN = addrLineN;
   }
 
 }

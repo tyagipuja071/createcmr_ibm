@@ -14,6 +14,13 @@ function afterConfigForNL() {
     role = _pagemodel.userRole;
   }
   
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (custSubGrp == 'INTER' || custSubGrp == 'PRICU') {
+  	FormManager.removeValidator('inacCd', Validators.REQUIRED);
+  	FormManager.readOnly('inacCd');
+  	FormManager.setValue('inacCd', '');
+  }
+  
 //Set abbrevLocn for Softlayer Scenario
   var custSubType = FormManager.getActualValue('custSubGrp');
   if (custSubType == 'SOFTL') {
@@ -183,7 +190,7 @@ function addHandlersForNL() {
 
   if (_BOTeamHandler == null) {
     _BOTeamHandler = dojo.connect(FormManager.getField('engineeringBo'), 'onChange', function(value) {
-      setINACValues(value);
+      // setINACValues(value);
       setEconomicCodeValues(value);
     });
   }
@@ -972,7 +979,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForNL, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setClientTierValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setBOTeamValues, GEOHandler.NL);
-  GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.NL);
+  // GEOHandler.addAfterTemplateLoad(setINACValues, GEOHandler.NL);
   GEOHandler.addAfterTemplateLoad(setEconomicCodeValues, GEOHandler.NL);
   GEOHandler.registerValidator(addKVKLengthValidator, GEOHandler.NL, null, true);
   GEOHandler.addAfterTemplateLoad(setFieldsMandtOnSc, GEOHandler.NL);

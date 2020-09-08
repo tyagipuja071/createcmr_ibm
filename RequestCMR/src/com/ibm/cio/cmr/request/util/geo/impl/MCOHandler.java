@@ -27,6 +27,8 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
@@ -115,10 +117,14 @@ public class MCOHandler extends BaseSOFHandler {
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
         record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
       }
-      if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-        record.setCmrAddrSeq("00001");
-      } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+      if (SystemLocation.MALTA.equals(mainRecord.getCmrIssuedBy())) {
+          record.setCmrAddrSeq(StringUtils.isEmpty(record.getCmrAddrSeq()) ? "1" : record.getCmrAddrSeq());
+      }else{
+        if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+          record.setCmrAddrSeq("00001");
+        } else {
+          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+        }
       }
 
       record.setCmrName2Plain(record.getCmrName2Plain());
@@ -129,7 +135,88 @@ public class MCOHandler extends BaseSOFHandler {
         record.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
       }
       converted.add(record);
-    } else {
+    }  else {
+      
+      // Import all address from RDC Main 
+      String reqType = reqEntry.getReqType();
+      String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), reqType);
+      if (CmrConstants.PROCESSING_TYPE_RDC_MAIN.equals(processingType)) {
+
+      // customer phone is in BillingPhone
+      if (StringUtils.isEmpty(mainRecord.getCmrCustPhone())) {
+        mainRecord.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
+      }
+
+      Map<String, FindCMRRecordModel> zi01Map = new HashMap<String, FindCMRRecordModel>();
+
+      // parse the rdc records
+      String cmrCountry = mainRecord != null ? mainRecord.getCmrIssuedBy() : "";
+
+      if (source.getItems() != null) {
+        for (FindCMRRecordModel record : source.getItems()) {
+
+//          if (!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode())) {
+//            LOG.trace("Non Sold-to will be ignored. Will get from SOF");
+//            this.rdcShippingRecords.add(record);
+//            continue;
+//          }
+          if("5".equals(record.getCmrAddrSeq()) || "00005".equals(record.getCmrAddrSeq())){
+            record.setCmrAddrTypeCode("ZS02");
+            record.setCmrAddrType("EPL");
+          }
+          
+          if (!StringUtils.isEmpty(record.getCmrName4())) {
+            // name4 in rdc is street con't
+            record.setCmrStreetAddressCont(record.getCmrName4());
+            record.setCmrName4(null);
+          }
+
+          // name3 in rdc = attn on SOF
+          if (!StringUtils.isEmpty(record.getCmrName3())) {
+            record.setCmrName4(record.getCmrName3());
+            record.setCmrName3(null);
+          }
+
+          if (!StringUtils.isBlank(record.getCmrPOBox())) {
+            record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+          }
+          if (SystemLocation.MALTA.equals(mainRecord.getCmrIssuedBy())) {
+            record.setCmrAddrSeq(StringUtils.isEmpty(record.getCmrAddrSeq()) ? "1" : record.getCmrAddrSeq());
+          }
+
+          converted.add(record);
+
+        }
+      }
+
+      // add the missing records
+      if (mainRecord != null) {
+
+        FindCMRRecordModel record = null;
+
+        // import all shipping from SOF
+//        List<String> sequences = this.shippingSequences;
+//        if (sequences != null && !sequences.isEmpty()) {
+//          LOG.debug("Shipping Sequences is not empty. Importing " + sequences.size() + " shipping addresses.");
+//          for (String seq : sequences) {
+//            record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping_" + seq + "_", zi01Map);
+//            if (record != null) {
+//              converted.add(record);
+//            }
+//          }
+//        } else {
+//          LOG.debug("Shipping Sequences is empty. ");
+//          record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping", zi01Map);
+//          if (record != null) {
+//            converted.add(record);
+//          }
+//        }
+
+     //   importOtherSOFAddresses(entityManager, cmrCountry, zi01Map, converted);
+        }
+      
+        
+      }else {
 
       // import process:
       // a. Import ZS01 record from RDc, only 1
@@ -210,8 +297,8 @@ public class MCOHandler extends BaseSOFHandler {
         importOtherSOFAddresses(entityManager, cmrCountry, zi01Map, converted);
       }
     }
+    }
   }
-
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted) {
     FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(), "Installing", zi01Map);
@@ -755,4 +842,80 @@ public class MCOHandler extends BaseSOFHandler {
     return false;
   }
 
+  @Override
+ public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {  
+  if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
+  
+   String newSeq = null;   
+   String maxSeq =  getMaxSeqNumber(entityManager,addrType,reqId,cmrIssuingCntry);
+   if(maxSeq == null){
+    if("ZS01".equals(addrType)){
+      newSeq = "1";
+    }
+    if("ZP01".equals(addrType)){
+      newSeq = "2";
+    }
+    if("ZI01".equals(addrType)){
+      newSeq = "3";
+    }
+    if("ZD01".equals(addrType)){
+      newSeq = "4";
+    }
+    if("ZS02".equals(addrType)){
+      newSeq = "5";
+    }
+   }else{
+     if(Integer.parseInt(maxSeq) <=5){
+       if("ZS01".equals(addrType)){
+         newSeq = "1";
+       }
+       if("ZP01".equals(addrType)){
+         newSeq = "2";
+       }
+       if("ZI01".equals(addrType)){
+         newSeq = "3";
+       }
+       if("ZD01".equals(addrType)){
+         newSeq = "4";
+       }
+       if("ZS02".equals(addrType)){
+         newSeq = "5";
+       }
+     }else{
+//       newSeq = StringUtils.leftPad(maxSeq, 5, '0');
+       newSeq = maxSeq;
+     }
+   }
+   return newSeq;
+   }
+  return null;
+ }
+  
+  private String getMaxSeqNumber(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
+    String sql = null;
+    String maxSeq = null;
+    sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.MT_C");
+    
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setParameter("ADDR_TYPE", addrType);
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      if(result != null && result.length > 0 && result[0] != null){
+        maxSeq = (String)result[0];
+      }
+    }
+    return maxSeq;
+  }
+
+  @Override
+  public String generateModifyAddrSeqOnCopy(EntityManager entityManager, String addrType, long reqId, String oldAddrSeq, String cmrIssuingCntry) {
+    String newSeq = null;
+    if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
+      newSeq = generateAddrSeq(entityManager, addrType, reqId, cmrIssuingCntry);
+    }
+    return newSeq;
+  }
 }
