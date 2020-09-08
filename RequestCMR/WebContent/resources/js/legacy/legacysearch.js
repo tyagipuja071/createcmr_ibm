@@ -206,7 +206,7 @@ app.controller('LegacySearchController', [
       }
 
       $scope.openDetails = function(rec) {
-        WindowMgr.open('LEGACY', rec.sofCntryCode + rec.customerNo, 'legacydetails?country=' + rec.sofCntryCode + '&cmrNo=' + rec.customerNo, null,
+        WindowMgr.open('LEGACY', rec.sofCntryCode + rec.customerNo, 'legacydetails?realCty='+rec.realCtyCd+'&country=' + rec.sofCntryCode + '&cmrNo=' + rec.customerNo, null,
             550);
       }
 
@@ -243,10 +243,11 @@ app.controller('LegacyDetailsController', [ '$scope', '$document', '$http', '$ti
       $scope.getDetails = function() {
         var country = $scope.getParameterByName('country');
         var cmrNo = $scope.getParameterByName('cmrNo');
+        var realCty = $scope.getParameterByName('realCty');
 
         cmr.showProgress('Getting record details, please wait...');
         $http({
-          url : cmr.CONTEXT_ROOT + '/legacydetails/process.json?country=' + country + '&cmrNo=' + cmrNo,
+          url : cmr.CONTEXT_ROOT + '/legacydetails/process.json?realCty='+realCty+'&country=' + country + '&cmrNo=' + cmrNo,
           method : 'GET'
         }).then(function(response) {
           cmr.hideProgress();
