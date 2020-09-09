@@ -109,7 +109,7 @@ public class MCOSaHandler extends MCOHandler {
                   addr.setCmrStreetAddressCont(record.getCmrName4());
                   addr.setCmrName3(null);
                   if (record.getCmrName3() != null && record.getCmrName3().startsWith("ATT")) {
-                    addr.setCmrName4(LegacyCommonUtil.removeATT(record.getCmrName3()));
+                    addr.setCmrName4(record.getCmrName3());
                   }
 
                   if (!StringUtils.isBlank(record.getCmrPOBox())) {
@@ -369,9 +369,11 @@ public class MCOSaHandler extends MCOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
-
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
+    if (StringUtils.isBlank(address.getCustNm4())) {
+      address.setCustNm4(currentRecord.getCmrName4());
+    }
 
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
@@ -383,7 +385,10 @@ public class MCOSaHandler extends MCOHandler {
       address.getId().setAddrSeq(seq);
     }
 
-    if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())) {
+    address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+
+    if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())
+        || "ZS02".equals(address.getId().getAddrType())) {
       address.setCustPhone("");
     } else if ("ZD01".equals(address.getId().getAddrType())) {
       String phone = getShippingPhoneFromLegacy(currentRecord);
@@ -554,11 +559,11 @@ public class MCOSaHandler extends MCOHandler {
 
       handlePhoneAndAttn(line2, cmrIssuingCntry, address, addressKey);
 
-      handleStreetContAndPoBox(line3, cmrIssuingCntry, address, addressKey);
-      address.setCmrStreetAddress(address.getCmrStreetAddressCont());
-      address.setCmrStreetAddressCont(null);
+      handleStreetContAndPoBox(line4, cmrIssuingCntry, address, addressKey);
+      address.setCmrStreetAddress(line3);
+      // address.setCmrStreetAddressCont(null);
 
-      handleCityAndPostCode(line4, cmrIssuingCntry, address, addressKey);
+      handleCityAndPostCode(line5, cmrIssuingCntry, address, addressKey);
 
       if (!StringUtils.isEmpty(line5)) {
         if (StringUtils.isEmpty(address.getCmrPostalCode()) && !StringUtils.isEmpty(address.getCmrCity())) {
