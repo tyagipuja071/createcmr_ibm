@@ -401,7 +401,7 @@ function afterConfigForUKI() {
         FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-        if("C" == FormManager.getActualValue('reqType')){
+        if ("C" == FormManager.getActualValue('reqType')) {
           FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         }
         FormManager.enable('vat');
@@ -464,14 +464,14 @@ function configureCRNForUKI() {
   var isicVal = FormManager.getActualValue('isicCd');
   var zs01LandCntry = getZS01LandCntry();
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
 
   if (reqType == 'C') {
-    if ("PRICU" == FormManager.getActualValue('custSubGrp') || "CROSS" == FormManager.getActualValue('custGrp') || 
-        FormManager.getActualValue('custSubGrp') == "INTER" || FormManager.getActualValue('custSubGrp') == "INFSL") {
+    if ("PRICU" == FormManager.getActualValue('custSubGrp') || "CROSS" == FormManager.getActualValue('custGrp') || FormManager.getActualValue('custSubGrp') == "INTER"
+        || FormManager.getActualValue('custSubGrp') == "INFSL") {
       console.log(">>> Removing CRN Mandatory Validation >>>");
       FormManager.getField('restrictInd').checked = true;
       FormManager.resetValidations('taxCd1');
@@ -910,8 +910,8 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (PageManager.isReadOnly()) {
     return;
   }
-  
-  if(reqType != 'C'){
+
+  if (reqType != 'C') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     return;
   }
@@ -6910,6 +6910,23 @@ function lockCustClassUKI() {
 
 }
 
+function addCustClassValidatorBP() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var custClass = FormManager.getActualValue('custClass');
+        var custClassList = new Set([ '43', '45', '46', '49' ]);
+        if (custSubType == 'BUSPR' && !custClassList.has(custClass)) {
+          return new ValidationResult(null, false, 'Enter valid customer classification code.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function addStreetPoBoxValidatorUKI() {
   FormManager.addFormValidator((function() {
     return {
@@ -8989,6 +9006,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addValidatorForCompanyRegNum, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addCustClassValidatorBP, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
