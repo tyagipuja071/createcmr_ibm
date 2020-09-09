@@ -931,7 +931,12 @@ public class METransformer extends EMEATransformer {
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
-      legacyCust.setCustType("N");
+
+      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
+        legacyCust.setCustType(data.getBpAcctTyp());
+      } else {
+        legacyCust.setCustType("N");
+      }
 
       // extract the phone from billing as main phone
       for (Addr addr : cmrObjects.getAddresses()) {
@@ -993,7 +998,7 @@ public class METransformer extends EMEATransformer {
         legacyCust.setEnterpriseNo("");
       }
       
-      if(!StringUtils.isBlank(data.getBpAcctTyp())){
+      if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
       }
 
