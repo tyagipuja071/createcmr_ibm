@@ -308,7 +308,7 @@ public class SpainUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "ISU Code":
-      case "Client Tier Code":
+      case "Client Tier":
       case "Enterprise Number":
       case "INAC/NAC Code":
       case "Sales Rep":
