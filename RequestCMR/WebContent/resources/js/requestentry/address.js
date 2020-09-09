@@ -904,7 +904,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('addrType', 'ZP01');
     }
     if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN
-     || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+        || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
       FormManager.setValue('addrType', 'ZS01');
     }
     FormManager.clearValue('transportZone');
@@ -1766,21 +1766,21 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
-    	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {
-    		  continue;
-    	  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
-    		  continue;
-    	  } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
-    		  continue;
-    	  }
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+          continue;
+        } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+          continue;
+        } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
       }
-      
-      if(SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
-    	  if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
-    		  continue;
-    	  }
-      } 
+
+      if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
 
       if (type.ret3 == cntry) {
         useCntry = true;
@@ -1890,6 +1890,10 @@ function applyAddrChangesModal_onLoad() {
           if (reqType != 'C' && typeof (GEOHandler) != 'undefined' && !GEOHandler.canCopyAddressType(type.ret1) && !single) {
             choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (create additional only)</label><br>';
           } else if (cmr.currentAddressType && type.ret1 != cmr.currentAddressType) {
+            if (reqType == 'C'
+                && (type.ret1 == 'ZP02' || type.ret1 == 'ZP03' || type.ret1 == 'ZP04' || type.ret1 == 'ZP05' || type.ret1 == 'ZP06' || type.ret1 == 'ZP07' || type.ret1 == 'ZP08' || type.ret1 == 'ZI03')) {
+              continue;
+            }
             choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + '</label><br>';
           } else {
             choices += '<input type="checkbox" name="copyTypes" value ="' + type.ret1 + '"><label class="cmr-radio-check-label">' + type.ret2 + ' (copy only if others exist)</label><br>';
