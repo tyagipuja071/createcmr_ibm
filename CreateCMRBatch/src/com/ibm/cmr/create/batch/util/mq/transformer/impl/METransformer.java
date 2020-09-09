@@ -992,6 +992,10 @@ public class METransformer extends EMEATransformer {
       } else {
         legacyCust.setEnterpriseNo("");
       }
+      
+      if(!StringUtils.isBlank(data.getBpAcctTyp())){
+        legacyCust.setCustType(data.getBpAcctTyp());
+      }
 
       // CMR-5993
       String cntry = legacyCust.getId().getSofCntryCode().trim();
