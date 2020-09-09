@@ -58,7 +58,6 @@ function addHandlersForZA() {
 }
 
 function afterConfigForZA() {
-
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly == 'true') {
     return;
@@ -960,6 +959,94 @@ function getCommonSubgrpVal(custSubGrp) {
   return val;
 }
 
+
+function validateCMRForGMLLCScenario() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number...');
+        var requestCMR = FormManager.getActualValue('cmrNo');
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
+        var requestID = FormManager.getActualValue('reqId');
+        var landed = 'LANDED COUNTRY';
+        var subCustGrp = FormManager.getActualValue('custSubGrp');
+        var targetCntry = 'Kenya';
+
+        if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'NAELC' || subCustGrp == 'SZELC' || subCustGrp == 'LSELC')) {
+
+          if (requestCMR.length < 6) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR: ' + requestCMR + ' is invalid. Please enter valid CMR Number');
+          }
+
+          var res = cmr.query('GET_LAND_CNTRY_ZS01', {
+            REQ_ID : requestID
+          });
+
+          if (res && res.ret1) {
+            landed = res.ret1;
+          }
+
+          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+            COUNTRY : cntry,
+            CMR_NO : requestCMR,
+            MANDT : cmr.MANDT
+          });
+          if (exists && exists.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
+          } else {
+            exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+              COUNTRY : cntry,
+              CMR_NO : requestCMR,
+              MANDT : cmr.MANDT
+            });
+            if (exists && exists.ret1) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and ' + landed);
+            }
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+
+}
+
+function enableCMRNOSAGLLC() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var subCustGrp = FormManager.getActualValue('custSubGrp');
+  if (role == 'REQUESTER' && (subCustGrp == 'NAELC' || subCustGrp == 'SZELC' || subCustGrp == 'LSELC')) {
+    FormManager.enable('cmrNo');
+    FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+  } else if (role == 'REQUESTER' && (subCustGrp != 'NAELC' || subCustGrp != 'SZELC' || subCustGrp != 'LSELC')) {
+    FormManager.readOnly('cmrNo');
+    FormManager.resetValidations('cmrNo');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1006,10 +1093,13 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addIbmDeptCostCntrValidator, GEOHandler.MCO1, null, true);
   GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
-
+ 
   GEOHandler.addAfterConfig(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(setCofField, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(setCofField, GEOHandler.MCO1);
+  GEOHandler.registerValidator(validateCMRForGMLLCScenario, [ SysLoc.SOUTH_AFRICA ], null, true);
+  GEOHandler.addAfterConfig(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
+  GEOHandler.addAfterTemplateLoad(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
 
 });
