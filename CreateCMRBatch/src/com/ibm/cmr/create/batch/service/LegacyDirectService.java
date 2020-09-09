@@ -307,6 +307,7 @@ public class LegacyDirectService extends TransConnService {
     } else {
       // prepare legacy data, map to the values needed
       LegacyDirectObjectContainer legacyObjects = mapRequestDataForCreate(entityManager, cmrObjects);
+      MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
 
       LOG.info("Checking existing records with same Name and Location..");
       LOG.trace("Name: " + legacyObjects.getCustomer().getAbbrevNm() + " - Location: " + legacyObjects.getCustomer().getAbbrevLocn());
@@ -341,7 +342,8 @@ public class LegacyDirectService extends TransConnService {
       cmrObjects.getData().setCmrNo(legacyObjects.getCustomerNo());
       if (cmrObjects.getAdmin().getProspLegalInd() != null && cmrObjects.getAdmin().getProspLegalInd().equalsIgnoreCase("Y")
           && cmrObjects.getData().getOrdBlk() != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(cmrObjects.getData().getOrdBlk())) {
-        MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
+        // MessageTransformer transformer =
+        // TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
         if (transformer != null) {
           cmrObjects.getData().setProspectSeqNo(transformer.getFixedAddrSeqForProspectCreation());
         }
@@ -352,7 +354,8 @@ public class LegacyDirectService extends TransConnService {
 
       updateEntity(cmrObjects.getData(), entityManager);
 
-      completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+      // completeRecord(entityManager, admin, legacyObjects.getCustomerNo(),
+      // legacyObjects);
       if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode()) && legacyObjects.getCustomerExt() != null) {
         updateCompanyBillingChildRecordsItaly(entityManager, legacyObjects, cmrObjects);
       }
@@ -362,6 +365,14 @@ public class LegacyDirectService extends TransConnService {
         CEEProcessService theService = new CEEProcessService();
         theService.processDupCreate(entityManager, admin, cmrObjects);
       }
+
+      if (!"NA".equals(transformer.getGmllcDupCreation(data))) {
+        LegacyDirectDuplicateProcessService dupService = new LegacyDirectDuplicateProcessService();
+        dupService.processDupCreate(entityManager, admin, cmrObjects);
+      }
+
+      completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+
     }
   }
 
@@ -1126,6 +1137,9 @@ public class LegacyDirectService extends TransConnService {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
+    String cntry = data.getCmrIssuingCntry();
+    MessageTransformer transformer = TransformerManager.getTransformer(cntry);
+    String targetCountry = null;
 
     if (!StringUtils.isEmpty(cmrNo) && !"Y".equals(admin.getProspLegalInd())) {
       boolean isCMRExist = LegacyDirectUtil.checkCMRNoInLegacyDB(entityManager, data);
@@ -1135,11 +1149,14 @@ public class LegacyDirectService extends TransConnService {
         throw new Exception("CMR#" + cmrNo + " is already exist in Legacy");
       }
     } else {
-      cmrNo = generateCMRNo(entityManager, cmrObjects, data.getCmrIssuingCntry());
+      if (transformer != null) {
+        targetCountry = transformer.getGmllcDupCreation(data);
+      }
+      targetCountry = "NA".equals(targetCountry) ? data.getCmrIssuingCntry() : targetCountry;
+
+      cmrNo = generateCMRNo(entityManager, cmrObjects, data.getCmrIssuingCntry(), targetCountry);
     }
 
-    String cntry = data.getCmrIssuingCntry();
-    MessageTransformer transformer = TransformerManager.getTransformer(cntry);
     legacyObjects.setCustomerNo(cmrNo);
     legacyObjects.setSofCntryCd(cntry);
 
@@ -1799,10 +1816,11 @@ public class LegacyDirectService extends TransConnService {
    * @throws SecurityException
    * @throws NoSuchMethodException
    */
-  private String generateCMRNo(EntityManager entityManager, CMRRequestContainer cmrObjects, String cmrIssuingCntry) throws Exception {
+  private String generateCMRNo(EntityManager entityManager, CMRRequestContainer cmrObjects, String cmrIssuingCntry, String targetCountry)
+      throws Exception {
     GenerateCMRNoRequest request = new GenerateCMRNoRequest();
     request.setLoc1(cmrIssuingCntry);
-    request.setLoc2(cmrIssuingCntry);
+    request.setLoc2(targetCountry);
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     request.setSystem(GenerateCMRNoClient.SYSTEM_SOF);
 
@@ -2110,8 +2128,7 @@ public class LegacyDirectService extends TransConnService {
    * @param oldSeq
    * @param newSeq
    */
-  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
-      boolean sharedSeq) {
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -3595,7 +3612,7 @@ public class LegacyDirectService extends TransConnService {
   }
 
   // Mukesh:Story 1698123
-  private static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+  public static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
 
     for (String use : addrUse.split("")) {
       if (!StringUtils.isEmpty(use)) {
@@ -4112,7 +4129,7 @@ public class LegacyDirectService extends TransConnService {
     return legacyObjects;
   }
 
-  private String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
+  public String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
     if (entityManager == null) {
       return null;
     }
