@@ -63,12 +63,15 @@ function afterConfigForZA() {
     return;
   }
 
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
   var requestingLob = FormManager.getActualValue('requestingLob');
   var reqReason = FormManager.getActualValue('reqReason');
   var custType = FormManager.getActualValue('custGrp');
   var cntryRegion = FormManager.getActualValue('countryUse');
   var landCntry = ''; // default to South Africa
+
   if (cntryRegion != '' && cntryRegion.length > 3) {
     landCntry = cntryRegion.substring(3, 5);
   } else {
@@ -98,8 +101,21 @@ function afterConfigForZA() {
     FormManager.readOnly('commercialFinanced');
     FormManager.readOnly('codFlag');
   }
-  lobChange();
 
+  // Control for Type of Customer FIELD
+  if ((custSubGrp != 'ZAGOV' && custSubGrp != 'LSGOV' && custSubGrp != 'SZGOV' && custSubGrp != 'NAGOV' && custSubGrp != 'ZAXGO' && custSubGrp != 'LSXGO' && custSubGrp != 'SZXGO'
+      && custSubGrp != 'NAXGO' && custSubGrp != 'ZAIBM' && custSubGrp != 'LSIBM' && custSubGrp != 'SZIBM' && custSubGrp != 'NAIBM' && custSubGrp != 'ZAXIB' && custSubGrp != 'LSXIB'
+      && custSubGrp != 'SZXIB' && custSubGrp != 'NAXIB')
+      && (reqType != 'U')) {
+    FormManager.setValue('crosSubTyp', '');
+  }
+  if ((role == 'REQUESTER') && reqType != 'C') {
+    FormManager.readOnly('crosSubTyp');
+  } else {
+    FormManager.enable('crosSubTyp');
+  }
+
+  lobChange();
   setCreditCdField();
   enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
@@ -943,19 +959,6 @@ function getCommonSubgrpVal(custSubGrp) {
   return val;
 }
 
-function setTypeOfCustomerBehavior() {
-  if (FormManager.getActualValue('reqType') == 'U') {
-    FormManager.show('TypeOfCustomer', 'crosSubTyp');
-    var role = FormManager.getActualValue('userRole').toUpperCase();
-    if (role == 'REQUESTER') {
-      FormManager.readOnly('crosSubTyp');
-    } else if (role == 'PROCESSOR') {
-      FormManager.enable('crosSubTyp');
-    }
-  } else {
-    FormManager.hide('TypeOfCustomer', 'crosSubTyp');
-  }
-}
 
 function validateCMRForGMLLCScenario() {
   FormManager.addFormValidator((function() {
@@ -1090,8 +1093,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addIbmDeptCostCntrValidator, GEOHandler.MCO1, null, true);
   GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
-  GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO1);
-
+ 
   GEOHandler.addAfterConfig(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(setCofField, GEOHandler.MCO1);

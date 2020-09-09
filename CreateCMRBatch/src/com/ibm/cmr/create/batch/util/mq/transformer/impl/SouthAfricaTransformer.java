@@ -175,9 +175,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
       String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
-
       boolean isBusPr = Arrays.asList(busPrSubGrp).contains(custSubGrp);
-
       if (isBusPr) {
         legacyCust.setAuthRemarketerInd("1");
       } else {
@@ -186,6 +184,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
       legacyCust.setCeDivision("2");
       legacyCust.setCurrencyCd("SA");
+      legacyCust.setTaxCd("");
 
     }
 
@@ -243,7 +242,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setMrcCd("2");
     legacyCust.setCustType(data.getCrosSubTyp());
     legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
-    // cmrObjects.getData().setUser("");
+    legacyCust.setBankBranchNo("");
+
 
     // append GM in AbbrevName for GM LLC
     if (!StringUtils.isEmpty(data.getCustSubGrp()) && data.getCustSubGrp().endsWith("LC")) {
@@ -364,6 +364,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     return false;
+  }
+
+ @Override
+  public String getFixedAddrSeqForProspectCreation() {
+    return "00001";
   }
 
   @Override
