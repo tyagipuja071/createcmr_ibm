@@ -1167,6 +1167,59 @@ function addInternalDeptNumberValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function retainImportValues(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndc();
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged) {
+
+    if (scenario == 'COMME' || scenario == 'XCOM' || scenario == 'GOVRN' || scenario == 'XGOV' || scenario == 'THDPT' || scenario == 'XTP') {
+      var reqId = FormManager.getActualValue('reqId');
+
+      var origISU;
+      var origClientTier;
+      var origEnterprise;
+      var origInac;
+      var origSbo;
+
+      var result = cmr.query("GET.CMRINFO.IMPORTED_AFRICA", {
+        REQ_ID : reqId
+      });
+
+      if (result != null && result != '') {
+        origISU = result.ret1;
+        origClientTier = result.ret2;
+        origEnterprise = result.ret3;
+        origInac = result.ret4;
+        origSbo = result.ret5;
+
+        FormManager.setValue('isuCd', origISU);
+        FormManager.setValue('clientTier', origClientTier);
+        FormManager.setValue('salesBusOffCd', origSbo);
+        FormManager.setValue('inacCd', origInac);
+        FormManager.setValue('enterprise', origEnterprise);
+      }
+    } else {
+      FormManager.setValue('inacCd', '');
+    }
+  }
+}
+
+var _importedIndc = null;
+function getImportedIndc() {
+  if (_importedIndc) {
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED_ZS01', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  return _importedIndc;
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1186,7 +1239,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(streetAvenueValidator, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(enterpriseMalta, GEOHandler.MCO2);
+  // GEOHandler.addAfterConfig(enterpriseMalta, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO2);
@@ -1234,4 +1287,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
 
+  GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
 });
