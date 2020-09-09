@@ -3949,6 +3949,26 @@ function checkGAddressExist() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CMR-6242
+function addVATAttachValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var vat = FormManager.getActualValue('vat');
+        if (vat != null && vat != undefined && vat != '') {
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_VATD_ATTACHMENT', {
+            ID : id
+          });
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, 'VAT/TAX Documentation is mandatory, please add VAT/TAX Documentation attachment.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
@@ -4142,7 +4162,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIsicCdME, GEOHandler.ME);
   GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
-
+  GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
