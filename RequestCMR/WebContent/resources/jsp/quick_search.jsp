@@ -77,6 +77,8 @@ form.ibm-column-form .dijitTextBox INPUT {
         var cntry = value.length == 3 ? value : value.substring(0,3);
         cmr.hideNode('siret-cont');
         cmr.hideNode('restrict-cont');
+        cmr.hideNode('cRn-cont');
+        cmr.hideNode('cRn/siret-cont');
         FormManager.setValue('taxCd1','');
         FormManager.readOnly('taxCd1');
         FormManager.setValue('restrictTo','');
@@ -86,14 +88,13 @@ form.ibm-column-form .dijitTextBox INPUT {
           FormManager.enable('restrictTo');
         } else if (cntry == '706'){
           cmr.showNode('siret-cont');
+          cmr.showNode('cRn/siret-cont');
           FormManager.enable('taxCd1');
-        } 
-        if(cntry == '866' || cntry == '754'){
-        cmr.hideNode('vatFrNonUKI');
-        cmr.showNode('vatFrUKI');
-        }else{
-        cmr.hideNode('vatFrUKI');
-        cmr.showNode('vatFrNonUKI');}
+        } else if(cntry == '866' || cntry == '754'){
+        cmr.showNode('cRn-cont');
+        cmr.showNode('cRn/siret-cont');
+        FormManager.enable('taxCd1');
+        }
       }
     });
     var _landCntryHandler = dojo.connect(FormManager.getField('countryCd'), 'onChange', function(value) {
@@ -304,24 +305,13 @@ form.ibm-column-form .dijitTextBox INPUT {
         </cmr:column>
       </cmr:row>
       <cmr:row>
-       <div id="vatFrNonUKI" style="display:none">
         <cmr:column span="1" width="185">
           <p>
             <cmr:label fieldId="vat">VAT# / Business Reg #: 
             <cmr:info text="The primary tax identifier for the company. This can be VAT Number, ABN, NBN, and Tax Registration Number, to name a few. The value of this varies per country business rules on Tax."></cmr:info>
             </cmr:label>
           </p>
-        </cmr:column>
-       </div>
-        <div id="vatFrUKI" style="display:none">
-        <cmr:column span="1" width="185">
-          <p>
-            <cmr:label fieldId="vat">VAT# / Business Reg # / CRN# : 
-            <cmr:info text="The primary tax identifier for the company. This can be VAT Number, ABN, NBN, and Tax Registration Number, to name a few. The value of this varies per country business rules on Tax."></cmr:info>
-            </cmr:label>
-          </p>
-        </cmr:column>
-       </div>
+        </cmr:column>     
         <cmr:column span="2" width="250" >
           <p> 
             <form:input path="vat" placeHolder="VAT# / Business Reg #" dojoType="dijit.form.TextBox" maxlength="16"/>
@@ -335,12 +325,24 @@ form.ibm-column-form .dijitTextBox INPUT {
               </cmr:label>
             </p>
           </cmr:column>
-          <cmr:column span="2" width="250">
-            <p> 
-              <form:input path="taxCd1" placeHolder="SIRET" dojoType="dijit.form.TextBox" maxlength="14"/>
+           </div>
+            <div id="cRn-cont" style="display:none">
+          <cmr:column span="1" width="150">
+            <p>
+              <cmr:label fieldId="vat">CRN: 
+              <cmr:info text="For UKI companies only."></cmr:info>
+              </cmr:label>
             </p>
           </cmr:column>
-        </div>
+           </div>
+           <div id = "cRn/siret-cont" style="display:none">
+          <cmr:column span="2" width="250">
+            <p> 
+              <form:input path="taxCd1" placeHolder="SIRET/CRN" dojoType="dijit.form.TextBox" maxlength="14"/>
+            </p>
+          </cmr:column>
+       </div>
+         
         <div id="restrict-cont" style="display:none">
           <cmr:column span="1" width="150">
             <p>
