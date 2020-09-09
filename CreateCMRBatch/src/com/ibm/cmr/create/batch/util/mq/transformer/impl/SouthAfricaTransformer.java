@@ -22,6 +22,8 @@ import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
@@ -48,7 +50,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
   @Override
   public void formatDataLines(MQMessageHandler handler) {
-    super.formatDataLines(handler);
 
     Map<String, String> messageHash = handler.messageHash;
     messageHash.put("MarketingResponseCode", "2");
@@ -146,6 +147,14 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
 
+    if ("ZS01".equals(currAddr.getId().getAddrType())) {
+      String abbrevLoc = LandedCountryMap.getCountryName(currAddr.getLandCntry());
+      if (!StringUtils.isEmpty(abbrevLoc)) {
+        LOG.debug("Setting Abbreviated Location as parent country for GM LLC");
+        legacyCust.setAbbrevLocn(abbrevLoc);
+      }
+    }
+
     String poBox = currAddr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
       if (!poBox.startsWith("PO BOX ")) {
@@ -235,6 +244,18 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setCustType(data.getCrosSubTyp());
     legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     // cmrObjects.getData().setUser("");
+
+    // append GM in AbbrevName for GM LLC
+    if (!StringUtils.isEmpty(data.getCustSubGrp()) && data.getCustSubGrp().endsWith("LC")) {
+      String abbrevNm = data.getAbbrevNm();
+      if (!StringUtils.isEmpty(abbrevNm) && !abbrevNm.toUpperCase().endsWith(" GM")) {
+        if (abbrevNm.length() > 19) {
+          abbrevNm = abbrevNm.substring(0, 19);
+        }
+        LOG.debug("Setting Abbreviated Name for GM LLC");
+        legacyCust.setAbbrevNm(abbrevNm + " GM");
+      }
+    }
   }
 
   @Override
@@ -248,9 +269,15 @@ public class SouthAfricaTransformer extends MCOTransformer {
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      legacyCustExt.setTeleCovRep("3100");
+      legacyCustExt.setTeleCovRep("Z13100");
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      legacyCustExt.setTeleCovRep(!StringUtils.isEmpty(data.getCollBoId()) ? data.getCollBoId() : "");
+      String collBO = data.getCollBoId();
+      if (!StringUtils.isEmpty(collBO) && collBO.length() == 4) {
+        collBO = "Z1" + collBO;
+      } else if (StringUtils.isEmpty(collBO)) {
+        collBO = "";
+      }
+      legacyCustExt.setTeleCovRep(collBO);
     }
   }
 
@@ -330,9 +357,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
         String oldPhone = addrRdc.getCustPhone() != null ? addrRdc.getCustPhone() : "";
         if (addrRdc == null || (addrRdc != null && !currPhone.equals(oldPhone))) {
           return true;
-        } else if (!"ZS01".equals(addr.getId().getAddrType()) && StringUtils.isEmpty(addr.getSapNo())) {
-          return true;
         }
+      } else if (!"ZS01".equals(addr.getId().getAddrType()) && StringUtils.isEmpty(addr.getSapNo())) {
+        addr.setChangedIndc("Y");
       }
     }
 
@@ -341,10 +368,71 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
   @Override
   public String getGmllcDupCreation(Data data) {
-    List<String> validScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC");
+    List<String> validScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC");
     if (data != null && StringUtils.isNotEmpty(data.getCustSubGrp()) && validScenarios.contains(data.getCustSubGrp())) {
       return "764";
     }
     return "NA";
   }
+
+  @Override
+  public void transformLegacyDataForDupCreation(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects,
+      CMRRequestContainer cmrObjects) {
+    CmrtCust legacyCust = legacyObjects.getCustomer();
+    Data data = cmrObjects.getData();
+    List<String> bpGMLLCScenarios = Arrays.asList("NABLC", "LSBLC", "SZBLC");
+    boolean isGMLLC = false;
+    if (data != null) {
+      if (!"NA".equals(getGmllcDupCreation(data))) {
+        isGMLLC = true;
+      }
+      if (legacyCust != null && isGMLLC) {
+        if (bpGMLLCScenarios.contains(data.getCustSubGrp())) {
+          legacyCust.setIsuCd("8B7");
+          legacyCust.setSalesRepNo("DUMMY1");
+          legacyCust.setSbo("0010");
+          legacyCust.setInacCd("");
+        } else {
+          legacyCust.setIsuCd("32S");
+          legacyCust.setSalesRepNo("DUMMY1");
+          legacyCust.setSbo("0080");
+        }
+      }
+    }
+  }
+
+  @Override
+  public String mailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
+    String oldCOD = "";
+    String oldCOF = "";
+    String sql = ExternalizedQuery.getSql("GET.OLD_COD_COF_BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+
+    List<Object[]> results = query.getResults();
+    if (results != null && results.size() > 0) {
+      Object[] result = results.get(0);
+      oldCOD = result[0] != null ? (String) result[0] : "";
+      oldCOF = result[1] != null ? (String) result[0] : "";
+    }
+
+    if (StringUtils.isNotBlank(oldCOF) && StringUtils.isBlank(data.getCommercialFinanced())) {
+      return "COF";
+    } else if (StringUtils.isNotBlank(oldCOD) && StringUtils.isBlank(data.getCodCondition())) {
+      return "COD";
+    } else {
+      return "NA";
+    }
+  }
+
+  @Override
+  public String getEmailTemplateName(String type) {
+    if ("COD".equals(type)) {
+      return "cmr-email_cod.html";
+    } else {
+      return "cmr-email_cof.html";
+    }
+
+  }
+
 }

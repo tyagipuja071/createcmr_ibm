@@ -15,7 +15,6 @@ import com.ibm.cio.cmr.request.entity.CmrtCustExtPK;
 import com.ibm.cio.cmr.request.entity.CmrtCustPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -24,26 +23,46 @@ import com.ibm.cmr.create.batch.util.mq.handler.impl.SOFMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
 import com.ibm.cmr.create.batch.util.mq.transformer.TransformerManager;
 
-public class LegacyDirectDuplicateProcessService extends TransConnService {
+public class LegacyDirectDuplicateProcessService extends LegacyDirectService {
 
   private static final Logger LOG = Logger.getLogger(LegacyDirectDuplicateProcessService.class);
   public static final String LEGACY_STATUS_ACTIVE = "A";
+  LegacyDirectService legacyService = new LegacyDirectService();
 
   protected void processDupCreate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
+    LOG.debug("Started Create duplicate CMR processing of Request " + admin.getId().getReqId());
+    Data data = cmrObjects.getData();
     LegacyDirectObjectContainer legacyDupObjects = mapRequestDataForDupCreate(entityManager, cmrObjects);
-    // create entity in DB2 for kenya with required fields
+    // finally persist all data
+    CmrtCust legacyCust = legacyService.initEmpty(CmrtCust.class);
+    legacyCust = legacyDupObjects.getCustomer();
+    if (legacyCust == null) {
+      throw new Exception("Customer record cannot be created.");
+    }
+
+    LOG.info("Creating Legacy duplicate CMR Records for Request ID " + admin.getId().getReqId());
+    LOG.info(" - SOF Duplicate Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
+
+    LOG.debug("CMR No. " + data.getCmrNo() + " generated and assigned.");
+
+    // default mapping for DATA and CMRTCUST
+    LOG.debug("Mapping default Data values..");
+
+    createEntity(legacyCust, entityManager);
+    if (legacyDupObjects.getCustomerExt() != null) {
+      createEntity(legacyDupObjects.getCustomerExt(), entityManager);
+    }
+    for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
+      if (legacyAddr.isForCreate()) {
+        createEntity(legacyAddr, entityManager);
+      }
+    }
+    partialCommit(entityManager);
   }
 
   private LegacyDirectObjectContainer mapRequestDataForDupCreate(EntityManager entityManager, CMRRequestContainer cmrObjects) throws Exception {
-    /*
-     * required code as we have in mapRequestDataForCreate method and prod Logic
-     * (+ added new logic for INAC) for kenya
-     * 
-     * 
-     */
 
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
-    LegacyDirectService legacyService = new LegacyDirectService();
 
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
@@ -57,7 +76,7 @@ public class LegacyDirectDuplicateProcessService extends TransConnService {
     targetCountry = "NA".equals(targetCountry) ? data.getCmrIssuingCntry() : targetCountry;
 
     legacyObjects.setCustomerNo(cmrNo);
-    legacyObjects.setSofCntryCd(cntry);
+    legacyObjects.setSofCntryCd(targetCountry);
 
     LOG.debug("CMR No. " + cmrNo + " generated and assigned.");
     CmrtCust cust = legacyService.initEmpty(CmrtCust.class);
@@ -66,15 +85,15 @@ public class LegacyDirectDuplicateProcessService extends TransConnService {
     LOG.debug("Mapping default Data values..");
     CmrtCustPK custPk = new CmrtCustPK();
     custPk.setCustomerNo(cmrNo);
-    custPk.setSofCntryCode(cntry);
+    custPk.setSofCntryCode(targetCountry);
     cust.setId(custPk);
-    cust.setRealCtyCd(cntry);
+    cust.setRealCtyCd(targetCountry);
     cust.setStatus(LEGACY_STATUS_ACTIVE);
     cust.setAbbrevNm(data.getAbbrevNm());
     cust.setAbbrevLocn(data.getAbbrevLocn());
     cust.setLocNo(data.getLocationNumber());
     cust.setEconomicCd(data.getEconomicCd());
-    String legacyLangCdMapValue = legacyService.getLangCdLegacyMapping(entityManager, data, cntry);
+    String legacyLangCdMapValue = legacyService.getLangCdLegacyMapping(entityManager, data, targetCountry);
     cust.setLangCd(!StringUtils.isEmpty(legacyLangCdMapValue) ? legacyLangCdMapValue : "");
     cust.setMrcCd(data.getMrcCd());
     cust.setModeOfPayment(data.getModeOfPayment());
@@ -110,7 +129,7 @@ public class LegacyDirectDuplicateProcessService extends TransConnService {
     // do a dummy transfer here, reuse MQ objects for formatting
     MqIntfReqQueue dummyQueue = new MqIntfReqQueue();
     dummyQueue.setCmrNo(cmrNo);
-    dummyQueue.setCmrIssuingCntry(cntry);
+    dummyQueue.setCmrIssuingCntry(targetCountry);
     dummyQueue.setReqType(admin.getReqType());
     SOFMessageHandler dummyHandler = new SOFMessageHandler(entityManager, dummyQueue);
     dummyHandler.adminData = admin;
@@ -155,15 +174,14 @@ public class LegacyDirectDuplicateProcessService extends TransConnService {
         legacyAddr = legacyService.initEmpty(CmrtAddr.class);
         legacyAddrPk = new CmrtAddrPK();
         legacyAddrPk.setCustomerNo(cmrNo);
-        legacyAddrPk.setSofCntryCode(cntry);
+        legacyAddrPk.setSofCntryCode(targetCountry);
         String newSeqNo = StringUtils.leftPad(Integer.toString(seqNo), 5, '0');
-        // Mukesh:Story 1698123
+
         if ("00001".equals(addr.getId().getAddrSeq()))
           legacyAddrPk.setAddrNo(newSeqNo);
         else
           legacyAddrPk.setAddrNo(addr.getId().getAddrSeq());
-        // legacyAddrPk.setAddrNo(Integer.toString(nextSeq));
-        // legacyAddrPk.setAddrNo(Integer.toString(seqNo));
+
         legacyAddr.setId(legacyAddrPk);
 
         sofKey = transformer.getAddressKey(addr.getId().getAddrType());
@@ -182,11 +200,8 @@ public class LegacyDirectDuplicateProcessService extends TransConnService {
 
         legacyAddr.setStreet(addr.getAddrTxt());
 
-        // Turkey not store phone on Address level
-        if (!SystemLocation.TURKEY.equals(cntry)) {
-          if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
-          }
+        if (!StringUtils.isEmpty(addr.getCustPhone())) {
+          legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
         }
         legacyAddr.setCity(addr.getCity1());
         legacyAddr.setContact(addr.getDept());
@@ -231,7 +246,7 @@ public class LegacyDirectDuplicateProcessService extends TransConnService {
         // default mapping for ADDR and CMRTCEXT
         custExtPk = new CmrtCustExtPK();
         custExtPk.setCustomerNo(cmrNo);
-        custExtPk.setSofCntryCode(cntry);
+        custExtPk.setSofCntryCode(targetCountry);
         custExt.setId(custExtPk);
 
         if (transformer != null) {
@@ -242,6 +257,8 @@ public class LegacyDirectDuplicateProcessService extends TransConnService {
         legacyObjects.setCustomerExt(custExt);
       }
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
+      // Modify the request values for the target country specific changes
+      transformer.transformLegacyDataForDupCreation(entityManager, legacyObjects, cmrObjects);
 
     }
 

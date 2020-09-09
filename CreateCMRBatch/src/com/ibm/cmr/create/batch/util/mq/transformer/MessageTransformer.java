@@ -10,6 +10,7 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
@@ -367,6 +368,19 @@ public abstract class MessageTransformer {
 
   public String getGmllcDupCreation(Data data) {
     return "NA";
+  }
+
+  public void transformLegacyDataForDupCreation(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects,
+      CMRRequestContainer cmrObjects) {
+    // noop for default class, override
+  }
+
+  public String mailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
+    return "NA";
+  }
+
+  public String getEmailTemplateName(String type) {
+    return null;
   }
 
 }

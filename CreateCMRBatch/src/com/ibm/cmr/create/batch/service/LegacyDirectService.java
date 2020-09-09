@@ -307,6 +307,7 @@ public class LegacyDirectService extends TransConnService {
     } else {
       // prepare legacy data, map to the values needed
       LegacyDirectObjectContainer legacyObjects = mapRequestDataForCreate(entityManager, cmrObjects);
+      MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
 
       LOG.info("Checking existing records with same Name and Location..");
       LOG.trace("Name: " + legacyObjects.getCustomer().getAbbrevNm() + " - Location: " + legacyObjects.getCustomer().getAbbrevLocn());
@@ -341,7 +342,8 @@ public class LegacyDirectService extends TransConnService {
       cmrObjects.getData().setCmrNo(legacyObjects.getCustomerNo());
       if (cmrObjects.getAdmin().getProspLegalInd() != null && cmrObjects.getAdmin().getProspLegalInd().equalsIgnoreCase("Y")
           && cmrObjects.getData().getOrdBlk() != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(cmrObjects.getData().getOrdBlk())) {
-        MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
+        // MessageTransformer transformer =
+        // TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
         if (transformer != null) {
           cmrObjects.getData().setProspectSeqNo(transformer.getFixedAddrSeqForProspectCreation());
         }
@@ -352,7 +354,8 @@ public class LegacyDirectService extends TransConnService {
 
       updateEntity(cmrObjects.getData(), entityManager);
 
-      completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+      // completeRecord(entityManager, admin, legacyObjects.getCustomerNo(),
+      // legacyObjects);
       if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode()) && legacyObjects.getCustomerExt() != null) {
         updateCompanyBillingChildRecordsItaly(entityManager, legacyObjects, cmrObjects);
       }
@@ -362,6 +365,14 @@ public class LegacyDirectService extends TransConnService {
         CEEProcessService theService = new CEEProcessService();
         theService.processDupCreate(entityManager, admin, cmrObjects);
       }
+
+      if (!"NA".equals(transformer.getGmllcDupCreation(data))) {
+        LegacyDirectDuplicateProcessService dupService = new LegacyDirectDuplicateProcessService();
+        dupService.processDupCreate(entityManager, admin, cmrObjects);
+      }
+
+      completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+
     }
   }
 
