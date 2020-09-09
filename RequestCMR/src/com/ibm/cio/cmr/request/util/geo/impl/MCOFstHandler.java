@@ -76,6 +76,7 @@ public class MCOFstHandler extends MCOHandler {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
+        data.setSpecialTaxCd(legacyObjects.getCustomer().getTaxCd());
       }
     }
 
