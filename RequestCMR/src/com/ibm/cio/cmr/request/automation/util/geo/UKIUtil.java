@@ -182,8 +182,8 @@ public class UKIUtil extends AutomationUtil {
             details.append("Company Registration Number on the request matches D&B\n");
           }
         }
+        coverageFieldUpdtd++;
         break;
-      case "Company Number":
       case "ISIC":
         cmdeReview = true;
         break;
@@ -196,11 +196,11 @@ public class UKIUtil extends AutomationUtil {
       case "INAC/NAC Code":
       case "ISU Code":
       case "Client Tier":
-      case "Enterprise Number":
       case "SBO":
+      case "Sales Rep No":
         coverageFieldUpdtd++;
         break;
-      case "Sales Rep No":
+      case "Enterprise Number":
         // noop, for switch handling only
         break;
       case "Order Block Code":
