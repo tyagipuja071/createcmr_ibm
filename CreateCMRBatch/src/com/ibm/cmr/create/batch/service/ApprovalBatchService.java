@@ -158,29 +158,21 @@ public class ApprovalBatchService extends BaseBatchService {
           engine = this.requestEngines.get(request.getReqId());
           if (engine == null) {
             LOG.debug("Initializing email engine for Request " + request.getReqId());
-            // if (skip == false) {
             engine = new EmailEngine(entityManager, request.getReqId());
-            // }
             this.requestEngines.put(request.getReqId(), engine);
           } else {
             LOG.debug("Using email engine for Request " + request.getReqId());
           }
 
           if (isEROApproval(approvalType)) {
-            // if (skip == false) {
             engine.initChecklist();
-            // }
           }
           if (CmrConstants.APPROVAL_PENDING_APPROVAL.equals(request.getStatus())) {
             LOG.debug("Sending approval email for Approval Request ID " + request.getId().getApprovalId());
-            // if (skip == false) {
             mail = engine.generateMail(entityManager, request, approvalType, mailSubject, model.getRequester(), userComments);
-            // }
           } else if (CmrConstants.APPROVAL_CANCELLED.equals(request.getStatus())) {
             LOG.debug("Sending cancellation notification for Approval Request ID " + request.getId().getApprovalId());
-            // if (skip == false) {
             mail = engine.generateCancellationMail(entityManager, request, approvalType, mailSubject, model.getRequester(), userComments);
-            // }
           }
           // add the PDF attachment for the request details
           if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) || CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())
@@ -202,10 +194,8 @@ public class ApprovalBatchService extends BaseBatchService {
           // add ALL attachments to approvals
           addAttachments(entityManager, mail, request, approvalType);
 
-          // if (skip == false) {
           mail.setTo(request.getIntranetId());
           mail.send(SystemConfiguration.getValue("MAIL_HOST"));
-          // }
         }
 
         LOG.debug("Partially committing for Approval Request " + request.getId().getApprovalId());
