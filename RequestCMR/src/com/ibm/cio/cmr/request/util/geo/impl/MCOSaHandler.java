@@ -841,7 +841,8 @@ public class MCOSaHandler extends MCOHandler {
   private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {
     List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
     for (CmrtAddr cmrtAddr : cmrtAddrs) {
-      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && address.getCmrAddrSeq().equals(cmrtAddr.getId().getAddrNo())) {
+      String seqNo = (address.getCmrAddrSeq().length() != 5) ? StringUtils.leftPad(address.getCmrAddrSeq(), 5, '0') : address.getCmrAddrSeq();
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && seqNo.equals(cmrtAddr.getId().getAddrNo())) {
         return cmrtAddr.getAddrPhone();
       }
     }
