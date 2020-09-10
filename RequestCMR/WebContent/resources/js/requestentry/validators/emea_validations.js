@@ -902,7 +902,16 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
  * FormManager.setValue('abbrevLocn', _abbrevLocn); }
  */
 
-function autoSetVAT(_custType, custTypeinDB) {
+function autoSetVAT(){
+  
+  if (PageManager.isReadOnly()) {
+    return;
+  }
+  
+  var _custType = FormManager.getActualValue('custSubGrp');
+  if(!_custType || _custType == null){
+    _custType = '';
+  }
   console.log(">>> Process autoSetVAT ...>> " + _custType);
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var role = FormManager.getActualValue('userRole').toUpperCase();
