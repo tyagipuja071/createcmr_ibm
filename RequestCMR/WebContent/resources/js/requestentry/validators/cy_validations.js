@@ -3386,7 +3386,7 @@ var custType = FormManager.getActualValue('custGrp');
     });
   }
 
-  if (_gtcISRHandler == null) {
+  if (_gtcISRHandler == null && FormManager.getActualValue('reqType') != 'C') {
     dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
       setSalesBoSboIbo();
     });
