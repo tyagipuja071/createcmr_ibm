@@ -3372,7 +3372,7 @@ var custType = FormManager.getActualValue('custGrp');
     if (FormManager.getActualValue('reqType') == 'C') {
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
         if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
-          FormManager.clearValue('repTeamMemberNo', '00000');
+          FormManager.setValue('repTeamMemberNo', '000000');
           FormManager.setValue('salesBusOffCd', '000');        
         }
         setClientTierAndISR(value);
@@ -3386,7 +3386,7 @@ var custType = FormManager.getActualValue('custGrp');
     });
   }
 
-  if (_gtcISRHandler == null) {
+  if (_gtcISRHandler == null && FormManager.getActualValue('reqType') != 'C') {
     dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
       setSalesBoSboIbo();
     });
@@ -6645,17 +6645,29 @@ function addStreetAddressValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var addrTxt = FormManager.getActualValue('addrTxt');
-        var addrType = FormManager.getActualValue('addrType');
-        if ((addrType != undefined && addrType != '') && (addrType == 'ZI01' || addrType == 'ZD01' || addrType == 'ZS02')) {
-          if (addrTxt == '') {
-            return new ValidationResult({
-              id : 'addrTxt',
-              type : 'text',
-              name : 'addrTxt'
-            }, false, 'Street Address is required for Shipping\Installing\EPL address.');
+        var addrTxt = null;
+        var type = null;
+        var record = null;
+        
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            addrTxt =  record.addrTxt;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            
+            if ((type != undefined && type != '') && (type == 'ZI01' || type == 'ZD01' || type == 'ZS02')) {
+              if (addrTxt == '') {
+                return new ValidationResult(null, false, 'Street Address is required for Shipping, Installing and EPL address.');
+              }
+              return new ValidationResult(null, true);
+            }
           }
-          return new ValidationResult(null, true);
         }
         return new ValidationResult(null, true);
       }
