@@ -1132,28 +1132,17 @@ function addAddressFieldValidators() {
 }
 
 function setPreferredLang() {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if ('618' == cntry) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   FormManager.readOnly('custPrefLang');
   var custGrp = FormManager.getActualValue('custGrp');
-  if ('693' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'Q');
-  } else if ('668' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'C');
-  } else if ('820' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'L');
-  } else if ('708' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', '5');
-  } else if ('642' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
+  if ('642' == cntry && ((reqType == 'C' && custGrp != '' && custGrp != undefined && custGrp != null && custGrp != 'CROSS') || reqType == 'U')) {
     FormManager.setValue('custPrefLang', 'F');
-  } else if ('832' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
+  } else if ('832' == cntry && ((reqType == 'C' && custGrp != '' && custGrp != undefined && custGrp != null && custGrp != 'CROSS') || reqType == 'U')) {
     FormManager.setValue('custPrefLang', 'A');
-  } else if ('821' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'R');
-  } else if ('826' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', '4');
   } else {
     var preLang = FormManager.getActualValue('custPrefLang');
     if (preLang == '' || preLang == null || preLang == undefined) {
@@ -3949,6 +3938,26 @@ function checkGAddressExist() {
     };
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
+// CMR-6242
+function addVATAttachValidation() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var vat = FormManager.getActualValue('vat');
+        if (vat != null && vat != undefined && vat != '') {
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_VATD_ATTACHMENT', {
+            ID : id
+          });
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, 'VAT/TAX Documentation is mandatory, please add VAT/TAX Documentation attachment.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
 
 dojo.addOnLoad(function() {
   GEOHandler.CEMEA_COPY = [ '358', '359', '363', '603', '607', '620', '626', '644', '642', '651', '668', '677', '680', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '752',
@@ -4142,7 +4151,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(lockIsicCdME, GEOHandler.ME);
   GEOHandler.addAfterConfig(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(resetVatExemptMandatoryForLocalScenario, GEOHandler.ME);
-
+  GEOHandler.registerValidator(addVATAttachValidation, [ SysLoc.EGYPT ], null, true);
   // GEOHandler.addAfterConfig(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAfterTemplateLoad(addPrefixVat, GEOHandler.CEE);
   // GEOHandler.addAddrFunction(addPrefixVat, GEOHandler.CEE);
