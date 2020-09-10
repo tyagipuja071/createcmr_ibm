@@ -1334,6 +1334,7 @@ function autoSetAbbrevNmOnChanageUKI() {
 function autoSetAbbrevLocnOnChangeUKI() {
   var reqType = null;
   var role = null;
+  var abbrevLoc = FormManager.getActualValue('abbrevLocn');
   if (typeof (_pagemodel) != 'undefined') {
     reqType = FormManager.getActualValue('reqType');
     role = _pagemodel.userRole;
@@ -1354,7 +1355,7 @@ function autoSetAbbrevLocnOnChangeUKI() {
   // avoid Abbrev Location changing back to their default value
   // after user input a new value and save
 
-  if (custTypeinDB != null && _custType == custTypeinDB) {
+  if (custTypeinDB != null && _custType == custTypeinDB && abbrevLoc != null && abbrevLoc != '') {
     console.log(">>>> _custType == custTypeinDB, quit autoSetAbbrevLocnOnChangeUKI ");
     FormManager.setValue('abbrevLocn', _pagemodel.abbrevLocn);
     return;
