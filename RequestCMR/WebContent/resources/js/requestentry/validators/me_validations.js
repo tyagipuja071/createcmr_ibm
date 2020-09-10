@@ -1132,28 +1132,17 @@ function addAddressFieldValidators() {
 }
 
 function setPreferredLang() {
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if ('618' == cntry) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var reqType = FormManager.getActualValue('reqType');
   FormManager.readOnly('custPrefLang');
   var custGrp = FormManager.getActualValue('custGrp');
-  if ('693' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'Q');
-  } else if ('668' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'C');
-  } else if ('820' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'L');
-  } else if ('708' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', '5');
-  } else if ('642' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
+  if ('642' == cntry && ((reqType == 'C' && custGrp != '' && custGrp != undefined && custGrp != null && custGrp != 'CROSS') || reqType == 'U')) {
     FormManager.setValue('custPrefLang', 'F');
-  } else if ('832' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
+  } else if ('832' == cntry && ((reqType == 'C' && custGrp != '' && custGrp != undefined && custGrp != null && custGrp != 'CROSS') || reqType == 'U')) {
     FormManager.setValue('custPrefLang', 'A');
-  } else if ('821' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', 'R');
-  } else if ('826' == cntry && custGrp != 'CROSS' && custGrp != '' && custGrp != undefined && custGrp != null) {
-    FormManager.setValue('custPrefLang', '4');
   } else {
     var preLang = FormManager.getActualValue('custPrefLang');
     if (preLang == '' || preLang == null || preLang == undefined) {
