@@ -1141,7 +1141,7 @@ function setPreferredLang() {
   var custGrp = FormManager.getActualValue('custGrp');
   if ('642' == cntry && ((reqType == 'C' && custGrp != '' && custGrp != undefined && custGrp != null && custGrp != 'CROSS') || reqType == 'U')) {
     FormManager.setValue('custPrefLang', 'F');
-  } else if ('832' == cntry && ((reqType == 'C' && custGrp != '' && custGrp != undefined && custGrp != null && custGrp != 'CROSS') || reqType == 'U')) {
+  } else if ('832' == cntry) {
     FormManager.setValue('custPrefLang', 'A');
   } else {
     var preLang = FormManager.getActualValue('custPrefLang');
