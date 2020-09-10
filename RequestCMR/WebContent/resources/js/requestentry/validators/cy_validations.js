@@ -3372,8 +3372,8 @@ var custType = FormManager.getActualValue('custGrp');
     if (FormManager.getActualValue('reqType') == 'C') {
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
         if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
-          FormManager.clearValue('repTeamMemberNo');
-          FormManager.setValue('salesBusOffCd', '');        
+          FormManager.clearValue('repTeamMemberNo', '00000');
+          FormManager.setValue('salesBusOffCd', '000');        
         }
         setClientTierAndISR(value);
       });
@@ -3382,7 +3382,6 @@ var custType = FormManager.getActualValue('custGrp');
   }
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setSalesBoSboIbo();
       setEnterprise();
     });
   }
@@ -3396,7 +3395,7 @@ var custType = FormManager.getActualValue('custGrp');
   for (var i = 0; i < _gtcAddrTypes.length; i++) {
     _gtcAddrTypeHandler[i] = null;
     if (_gtcAddrTypeHandler[i] == null) {
-      _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value) {
+      _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value){
         disableAddrFieldsGRCYTR();
         preFillTranslationAddrWithSoldToForTR();
         if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS){
@@ -3725,7 +3724,7 @@ function setSalesBoSboIbo() {
     FormManager.setValue('salesBusOffCd', salesBoCd);
     FormManager.setValue('repTeamMemberNo', selsr);
   } else {
-    FormManager.setValue('salesBusOffCd', '');
+    FormManager.setValue('salesBusOffCd', '000');
   }
 }
 

@@ -1586,7 +1586,9 @@ public class CyprusHandler extends BaseSOFHandler {
       }
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
-        data.setSalesTeamCd(legacyObjects.getCustomer().getSalesRepNo());
+        if(CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())){
+          data.setSalesTeamCd(legacyObjects.getCustomer().getSalesRepNo());
+        }
       }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh
 
@@ -1762,6 +1764,8 @@ public class CyprusHandler extends BaseSOFHandler {
     } else {
       data.setCustPrefLang("E");
       data.setSalesTeamCd("000000");
+      data.setRepTeamMemberNo("000000");
+      data.setSalesBusOffCd("000");
     }
     data.setCmrOwner("IBM");
   }
