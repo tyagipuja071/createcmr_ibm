@@ -35,6 +35,11 @@ public class SingaporeUtil extends AutomationUtil {
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, "ZH01");
 
+  public static final String SCENARIO_BLUEMIX = "BLUMX";
+  public static final String SCENARIO_MARKETPLACE = "MKTPC";
+  public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
+  public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
+
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
@@ -142,12 +147,21 @@ public class SingaporeUtil extends AutomationUtil {
      * skipCompanyCheckForScenario(requestData, engineData,
      * Arrays.asList(scnarioList), false);
      */
-
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
+    switch (scenario) {
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+    case SCENARIO_CROSS_BLUEMIX:
+    case SCENARIO_CROSS_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    }
     return true;
   }
 
