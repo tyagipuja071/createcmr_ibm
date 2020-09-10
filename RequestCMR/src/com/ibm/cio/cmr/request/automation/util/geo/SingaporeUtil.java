@@ -248,7 +248,7 @@ public class SingaporeUtil extends AutomationUtil {
            */
         }
       } catch (Exception e) {
-        LOG.debug("");
+        LOG.debug("Error encountered while looking for CMR in FIND CMR. " + e.getMessage());
       }
       result.setDetails(details.toString());
     }
