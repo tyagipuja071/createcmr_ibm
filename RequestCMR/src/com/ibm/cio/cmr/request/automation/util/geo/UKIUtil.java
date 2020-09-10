@@ -183,7 +183,6 @@ public class UKIUtil extends AutomationUtil {
           }
         }
         break;
-      case "Company Number":
       case "ISIC":
         cmdeReview = true;
         break;
@@ -196,11 +195,12 @@ public class UKIUtil extends AutomationUtil {
       case "INAC/NAC Code":
       case "ISU Code":
       case "Client Tier":
-      case "Enterprise Number":
       case "SBO":
+      case "Sales Rep No":
+      case "Company Number":
         coverageFieldUpdtd++;
         break;
-      case "Sales Rep No":
+      case "Enterprise Number":
         // noop, for switch handling only
         break;
       case "Order Block Code":
