@@ -4128,27 +4128,50 @@ function addHandlerForCustSubTypeBpGRTRCY() {
 
 function setCustSubTypeBpGRTRCY() {
   var custType = FormManager.getActualValue('custSubGrp');
+  var _reqId = FormManager.getActualValue('reqId');
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
-    if (FormManager.getActualValue('vatExempt') != null && FormManager.getActualValue('vatExempt') != 'Y' ) {
+    
+    var city1Params = {
+        REQ_ID : _reqId,
+        ADDR_TYPE : "ZS01",
+      };
+    var city1Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city1Params);
+    var city1 = city1Result.ret1;
+    if (city1 != '' && custType != 'SAASP') {
+      if (city1 && city1.length > 12) {
+        city1 = city1.substring(0, 12);
+      }
+      FormManager.setValue('abbrevLocn', city1);
+    } else if (custType == 'SAASP') {
+      FormManager.setValue('abbrevLocn', 'SAAS');
+    }
+      
+    if (FormManager.getActualValue('vatExempt') != null && FormManager.getActualValue('vatExempt') != 'Y'
+      && (custType != 'PRICU' || custType != 'SAASP')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
     }
+    
     if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
+      FormManager.setValue('vatExempt', false);
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
     } else if (custType == 'PRICU' || custType == 'SAASP') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', 'S');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '32');
       FormManager.resetValidations('vat');
+      FormManager.setValue('vatExempt', 'Y');
     } else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+      FormManager.setValue('vatExempt', false);
     }
-  }
-
+  } 
 }
 
 function disableINACEnterpriseOnViewOnly() {
@@ -8117,8 +8140,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.CYPRUS ]);
   // CMR-2279
   // *abner revert begin
   // GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
