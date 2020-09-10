@@ -133,13 +133,15 @@ public class SingaporeUtil extends AutomationUtil {
     // CMR - 4507
     if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isNotBlank(data.getCmrNo())) {
       Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
-      Map<String, Boolean> checkResults = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), addr.getLandCntry(), entityManager, data,
+      String zs01LandCntry = addr.getLandCntry();
+      String landCntryCd = getLandCntryCode(entityManager, zs01LandCntry);
+      Map<String, Boolean> checkResults = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), landCntryCd, entityManager, data,
           requestData.getAddress(CmrConstants.RDC_SOLD_TO));
       if (!checkResults.get("cmrExists")) {
-        details.append("CMR Number field with CMR# " + data.getCmrNo() + " cleared as requested CMR does not exist.");
+        details.append("CMR# " + data.getCmrNo() + " cleared as it doesn't exist in FIND CMR.");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CMR_NO", data.getCmrNo(), "");
       } else if (checkResults.get("cmrExistsFrSG")) {
-        details.append("CMR Number field with CMR# " + data.getCmrNo() + " cleared as requested CMR is not available for processing for Singapore.");
+        details.append("CMR# " + data.getCmrNo() + " cleared as  it is not available for Singapore.");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CMR_NO", data.getCmrNo(), "");
 
       }
