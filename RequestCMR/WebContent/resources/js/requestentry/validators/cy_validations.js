@@ -3372,7 +3372,7 @@ var custType = FormManager.getActualValue('custGrp');
     if (FormManager.getActualValue('reqType') == 'C') {
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
         if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
-          FormManager.clearValue('repTeamMemberNo', '00000');
+          FormManager.setValue('repTeamMemberNo', '000000');
           FormManager.setValue('salesBusOffCd', '000');        
         }
         setClientTierAndISR(value);
