@@ -6640,6 +6640,29 @@ function addStreetPoBoxValidator() {
     };
   })(), null, 'frmCMR_addressModal');
 }
+
+function addStreetAddressValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrTxt = FormManager.getActualValue('addrTxt');
+        var addrType = FormManager.getActualValue('addrType');
+        if ((addrType != undefined && addrType != '') && (addrType == 'ZI01' || addrType == 'ZD01' || addrType == 'ZS02')) {
+          if (addrTxt == '') {
+            return new ValidationResult({
+              id : 'addrTxt',
+              type : 'text',
+              name : 'addrTxt'
+            }, false, 'Street Address is required for Shipping\Installing\EPL address.');
+          }
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(),'MAIN_NAME_TAB', 'frmCMR');
+}
+
 function addSBOSRLogicIE() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
@@ -8306,4 +8329,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(modeOfPaymentValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.addAfterConfig(disableProcpectCmrCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(disableProcpectCmrCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.registerValidator(addStreetAddressValidator, [ SysLoc.CYPRUS ], null, true);
 });
