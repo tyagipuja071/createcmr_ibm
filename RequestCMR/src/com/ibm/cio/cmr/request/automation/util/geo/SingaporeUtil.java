@@ -201,7 +201,7 @@ public class SingaporeUtil extends AutomationUtil {
                 LOG.debug("CMR# " + data.getCmrNo() + " Exists but request details do not match the details of CMR in FIND CMR.");
                 details.append("CMR# " + data.getCmrNo() + " exists but request details do not match.");
                 engineData.addNegativeCheckStatus("OTH",
-                    "CMR# " + data.getCmrNo() + " Exists but request details do not match the details of CMR in RDc.");
+                    "CMR# " + data.getCmrNo() + " exists but request details do not match the details of CMR in RDc.");
                 result.setOnError(true);
               }
             }
