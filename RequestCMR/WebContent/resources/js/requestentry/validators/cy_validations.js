@@ -6649,11 +6649,7 @@ function addStreetAddressValidator() {
         var addrType = FormManager.getActualValue('addrType');
         if ((addrType != undefined && addrType != '') && (addrType == 'ZI01' || addrType == 'ZD01' || addrType == 'ZS02')) {
           if (addrTxt == '') {
-            return new ValidationResult({
-              id : 'addrTxt',
-              type : 'text',
-              name : 'addrTxt'
-            }, false, 'Street Address is required for Shipping\Installing\EPL address.');
+            return new ValidationResult(null, false, 'Street Address is required for Shipping, Installing and EPL address.');
           }
           return new ValidationResult(null, true);
         }
