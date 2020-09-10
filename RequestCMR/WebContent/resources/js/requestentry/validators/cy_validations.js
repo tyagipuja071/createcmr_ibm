@@ -6645,13 +6645,29 @@ function addStreetAddressValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var addrTxt = FormManager.getActualValue('addrTxt');
-        var addrType = FormManager.getActualValue('addrType');
-        if ((addrType != undefined && addrType != '') && (addrType == 'ZI01' || addrType == 'ZD01' || addrType == 'ZS02')) {
-          if (addrTxt == '') {
-            return new ValidationResult(null, false, 'Street Address is required for Shipping, Installing and EPL address.');
+        var addrTxt = null;
+        var type = null;
+        var record = null;
+        
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            addrTxt =  record.addrTxt;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            
+            if ((type != undefined && type != '') && (type == 'ZI01' || type == 'ZD01' || type == 'ZS02')) {
+              if (addrTxt == '') {
+                return new ValidationResult(null, false, 'Street Address is required for Shipping, Installing and EPL address.');
+              }
+              return new ValidationResult(null, true);
+            }
           }
-          return new ValidationResult(null, true);
         }
         return new ValidationResult(null, true);
       }
