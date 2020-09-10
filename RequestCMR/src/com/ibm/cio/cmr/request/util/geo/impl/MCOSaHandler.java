@@ -338,9 +338,20 @@ public class MCOSaHandler extends MCOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
+    boolean ifUpdt = false;
+    ifUpdt = "U".equals(admin.getReqType());
+
     if (legacyObjects != null && legacyObjects.getCustomer() != null) {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
       data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
+    }
+
+    if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
+      String collBo = legacyObjects.getCustomerExt().getTeleCovRep();
+      if (StringUtils.isNotEmpty(collBo) && collBo.length() > 4) {
+        collBo = collBo.substring(2, 6);
+      }
+      data.setCollBoId(collBo);
     }
 
     /*
