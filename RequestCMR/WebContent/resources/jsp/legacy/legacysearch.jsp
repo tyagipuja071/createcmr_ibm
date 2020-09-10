@@ -197,6 +197,13 @@
                 </div>
               </td>
             </tr>
+            <tr ng-show="crit.realCtyCd == '758'">
+              <th scope="col">Fiscal Code:</th>
+              <td>
+                <input ng-model="crit.iTaxCode" style="width:120px" maxlength="30">
+              </td>
+              <th colspan="2">&nbsp;</th>
+            </tr> 
             <tr>
               <th scope="col">Create Date:</th>
               <td>
