@@ -132,6 +132,8 @@ public class LegacyDirectService extends TransConnService {
 
     if (this.devMode) {
       LOG.info("RUNNING IN DEVELOPMENT MODE");
+    } else {
+      LOG.info("RUNNING IN NON-DEVELOPMENT MODE");
     }
     LOG.info("Initializing Country Map..");
     LandedCountryMap.init(entityManager);
@@ -1832,6 +1834,8 @@ public class LegacyDirectService extends TransConnService {
 
     if (this.devMode) {
       request.setDirect("DEV");
+    } else {
+      request.setDirect("Y");
     }
     // Story 1585377: CMR No. generation for newly created CMRs
     MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
