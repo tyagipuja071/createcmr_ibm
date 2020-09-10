@@ -3372,8 +3372,8 @@ var custType = FormManager.getActualValue('custGrp');
     if (FormManager.getActualValue('reqType') == 'C') {
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
         if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
-          FormManager.clearValue('repTeamMemberNo');
-          FormManager.setValue('salesBusOffCd', '');        
+          FormManager.clearValue('repTeamMemberNo', '00000');
+          FormManager.setValue('salesBusOffCd', '000');        
         }
         setClientTierAndISR(value);
       });
@@ -3382,7 +3382,6 @@ var custType = FormManager.getActualValue('custGrp');
   }
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setSalesBoSboIbo();
       setEnterprise();
     });
   }
@@ -3396,7 +3395,7 @@ var custType = FormManager.getActualValue('custGrp');
   for (var i = 0; i < _gtcAddrTypes.length; i++) {
     _gtcAddrTypeHandler[i] = null;
     if (_gtcAddrTypeHandler[i] == null) {
-      _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value) {
+      _gtcAddrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _gtcAddrTypes[i]), 'onClick', function(value){
         disableAddrFieldsGRCYTR();
         preFillTranslationAddrWithSoldToForTR();
         if(FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS){
@@ -3725,7 +3724,7 @@ function setSalesBoSboIbo() {
     FormManager.setValue('salesBusOffCd', salesBoCd);
     FormManager.setValue('repTeamMemberNo', selsr);
   } else {
-    FormManager.setValue('salesBusOffCd', '');
+    FormManager.setValue('salesBusOffCd', '000');
   }
 }
 
@@ -4129,27 +4128,50 @@ function addHandlerForCustSubTypeBpGRTRCY() {
 
 function setCustSubTypeBpGRTRCY() {
   var custType = FormManager.getActualValue('custSubGrp');
+  var _reqId = FormManager.getActualValue('reqId');
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
-    if (FormManager.getActualValue('vatExempt') != null && FormManager.getActualValue('vatExempt') != 'Y' ) {
+    
+    var city1Params = {
+        REQ_ID : _reqId,
+        ADDR_TYPE : "ZS01",
+      };
+    var city1Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city1Params);
+    var city1 = city1Result.ret1;
+    if (city1 != '' && custType != 'SAASP') {
+      if (city1 && city1.length > 12) {
+        city1 = city1.substring(0, 12);
+      }
+      FormManager.setValue('abbrevLocn', city1);
+    } else if (custType == 'SAASP') {
+      FormManager.setValue('abbrevLocn', 'SAAS');
+    }
+      
+    if (FormManager.getActualValue('vatExempt') != null && FormManager.getActualValue('vatExempt') != 'Y'
+      && (custType != 'PRICU' || custType != 'SAASP')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
     }
+    
     if (custType == 'BUSPR' || custType == 'CRBUS' || custType == 'INTER' || custType == 'CRINT') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
+      FormManager.setValue('vatExempt', false);
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
     } else if (custType == 'PRICU' || custType == 'SAASP') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', 'S');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '32');
       FormManager.resetValidations('vat');
+      FormManager.setValue('vatExempt', 'Y');
     } else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+      FormManager.setValue('vatExempt', false);
     }
-  }
-
+  } 
 }
 
 function disableINACEnterpriseOnViewOnly() {
@@ -6618,6 +6640,29 @@ function addStreetPoBoxValidator() {
     };
   })(), null, 'frmCMR_addressModal');
 }
+
+function addStreetAddressValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrTxt = FormManager.getActualValue('addrTxt');
+        var addrType = FormManager.getActualValue('addrType');
+        if ((addrType != undefined && addrType != '') && (addrType == 'ZI01' || addrType == 'ZD01' || addrType == 'ZS02')) {
+          if (addrTxt == '') {
+            return new ValidationResult({
+              id : 'addrTxt',
+              type : 'text',
+              name : 'addrTxt'
+            }, false, 'Street Address is required for Shipping\Installing\EPL address.');
+          }
+          return new ValidationResult(null, true);
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(),'MAIN_NAME_TAB', 'frmCMR');
+}
+
 function addSBOSRLogicIE() {
   var reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
@@ -8118,8 +8163,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTRAddressTypeValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
-  GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.TURKEY ]);
-  GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.TURKEY ]);
+  GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.CYPRUS ]);
   // CMR-2279
   // *abner revert begin
   // GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
@@ -8284,4 +8329,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(modeOfPaymentValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.addAfterConfig(disableProcpectCmrCY, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(disableProcpectCmrCY, [ SysLoc.CYPRUS ]);
+  GEOHandler.registerValidator(addStreetAddressValidator, [ SysLoc.CYPRUS ], null, true);
 });
