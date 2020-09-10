@@ -286,11 +286,10 @@ public class SpainUtil extends AutomationUtil {
             details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
           }
           if (!"9".equals(change.getNewData().substring(1, 2))) {
-            cmdeReview = true;
+            // cmdeReview = true;
+            coverageFieldUpdtd++;
           }
         }
-        coverageFieldUpdtd++;
-
         break;
       case "ISIC":
       case "Currency Code":
