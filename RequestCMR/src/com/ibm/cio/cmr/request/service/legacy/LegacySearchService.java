@@ -108,7 +108,9 @@ public class LegacySearchService extends BaseSimpleService<List<LegacySearchResu
    */
   private PreparedQuery buildQueryFromParams(EntityManager entityManager, LegacySearchModel crit) {
 
-    String baseSql = "select * from CMRDB2D.CMRTCUST cust, CMRDB2D.CMRTADDR addr where cust.RCYAA = addr.RCYAA and cust.RCUXA = addr.RCUXA ";
+    String baseSql = "select * from CMRDB2D.CMRTCUST cust, CMRDB2D.CMRTADDR addr ";
+    baseSql += "left outer join CMRDB2D.CMRTCEXT ext on cust.RCYAA = ext.RCYAA and cust.RCUXA = ext.RCUXA ";
+    baseSql += "where cust.RCYAA = addr.RCYAA and cust.RCUXA = addr.RCUXA ";
     PreparedQuery query = new PreparedQuery(entityManager, baseSql);
 
     if (!StringUtils.isBlank(crit.getRealCtyCd())) {
@@ -170,6 +172,11 @@ public class LegacySearchService extends BaseSimpleService<List<LegacySearchResu
     if (!StringUtils.isBlank(crit.getUpdateTsTo())) {
       query.append("and cust.UPDATE_TS  <= timestamp('" + crit.getUpdateTsTo() + "')");
       query.setParameter("UPDATE_TO", crit.getUpdateTsTo());
+    }
+
+    if (!StringUtils.isBlank(crit.getiTaxCode())) {
+      query.append("and ext.CODFIS = :CODFIS");
+      query.setParameter("CODFIS", crit.getiTaxCode());
     }
 
     if (crit.getAddressUses() != null && !crit.getAddressUses().isEmpty()) {
