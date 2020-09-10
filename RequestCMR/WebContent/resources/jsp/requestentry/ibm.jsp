@@ -73,6 +73,19 @@ dojo.addOnLoad(function(){
              <cmr:field fieldId="CMROwner" id="cmrOwner" path="cmrOwner" tabId="MAIN_IBM_TAB" />
 		  </p>
 	  </cmr:column>
+      <cmr:view forCountry="641">
+        <cmr:column span="1" containerForField="Military">
+          <p>
+              <cmr:label fieldId="military">&nbsp;</cmr:label>
+              <cmr:field fieldId="Military" path="military" tabId="MAIN_IBM_TAB"/>
+              <cmr:label fieldId="military" forRadioOrCheckbox="true">
+                 <cmr:fieldLabel fieldId="Military" />
+                 <cmr:info text="Military Use means that the company is owned, managed, or intended to be used by the local government's Military. This is for Export Regulations."></cmr:info>
+                 <cmr:delta text="${rdcdata.military}" oldValue="${reqentry.military == 'Y' ? 'Yes' : 'No'}"/>
+              </cmr:label>
+          </p>
+        </cmr:column>
+      </cmr:view>
     </cmr:row>
     
     <!-- Defect : 1444422 -->
@@ -195,7 +208,8 @@ dojo.addOnLoad(function(){
               <cmr:delta text="${rdcdata.enterprise}" oldValue="${reqentry.enterprise}" />
           </cmr:label>
           <cmr:field id="enterprise" path="enterprise" fieldId="Enterprise" tabId="MAIN_IBM_TAB" />  
-          <cmr:view forCountry="618">
+    <!-- Austria - Removal of logic for Company number -->
+<%--           <cmr:view forCountry="618">
 			       <%
   			       if (reqentry.getReqType().equalsIgnoreCase("C")) {
   			       String findCmrJs = "onclick=\"importByEnterprise()\"";
@@ -207,7 +221,7 @@ dojo.addOnLoad(function(){
              <%
                }
              %>
-          </cmr:view>        
+          </cmr:view>  --%>       
         </p>
       </cmr:column>
       <cmr:column span="2" containerForField="Company" exceptForCountry="666,726,862,822,838,724" exceptForGEO="MCO1,MCO2,CEMEA,BELUX,NL">
@@ -352,7 +366,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column span="2" containerForField="MembLevel" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
+        <cmr:column span="2" containerForField="MembLevel" exceptForCountry="822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -361,7 +375,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column span="2" containerForField="BPRelationType" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
+        <cmr:column span="2" containerForField="BPRelationType" exceptForCountry="822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:
@@ -371,7 +385,7 @@ dojo.addOnLoad(function(){
           </p>
         </cmr:column>
 		</cmr:row>
-    <cmr:view exceptForGEO="MCO2,CN" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889">
+    <cmr:view exceptForGEO="MCO2,CN" exceptForCountry="644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,618,624,788,862">
   		<cmr:row topPad="10" addBackground="true">
         <cmr:column span="2" containerForField="SOENumber">
           <p>

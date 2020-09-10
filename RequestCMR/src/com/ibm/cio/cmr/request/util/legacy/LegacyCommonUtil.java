@@ -5,6 +5,8 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -214,6 +216,18 @@ public class LegacyCommonUtil {
       return true;
     }
     return false;
+  }
+
+  public static AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {
+    LOG.debug("Searching for Addr_RDC records for Legacy Processing " + addr.getId().getReqId());
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("SEQ", addr.getId().getAddrSeq());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setForReadOnly(true);
+    return query.getSingleResult(AddrRdc.class);
+
   }
 
 }

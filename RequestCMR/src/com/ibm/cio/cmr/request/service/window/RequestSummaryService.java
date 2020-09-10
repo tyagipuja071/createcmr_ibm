@@ -532,6 +532,14 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getMailingCondition());
               results.add(update);
             }
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CurrencyCd"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCd", "-"));
+              update.setNewData(newData.getLegacyCurrencyCd());
+              update.setOldData(oldData.getLegacyCurrencyCd());
+              results.add(update);
+            }
           }
 
           if (!"760".equals(oldData.getCmrIssuingCntry())) {
@@ -543,6 +551,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
               update.setOldData(oldData.getCreditCd());
               results.add(update);
             }
+          }
+
+          if (TYPE_IBM.equals(type) && !equals(oldData.getMilitary(), newData.getMilitary())
+              && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "Military"))) {
+            update = new UpdatedDataModel();
+            update.setDataField(PageManager.getLabel(cmrCountry, "Military", "-"));
+            update.setNewData("Y".equals(newData.getMilitary()) ? "Yes" : "");
+            update.setOldData("Y".equals(oldData.getMilitary()) ? "Yes" : "");
+            results.add(update);
           }
 
           if (geoHandler != null) {
@@ -897,15 +914,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           if (!"ZS01".equals(addr.getId().getAddrType()) && SystemLocation.TURKEY.equals(cmrCountry)) {
             // if Turkey and non sold-to address, do nothing
           } else {
-          update = new UpdatedNameAddrModel();
-          update.setAddrTypeCode(addrType);
-          update.setAddrType(addrTypeDesc);
-          update.setAddrSeq(seqNo);
-          update.setSapNumber(sapNumber);
-          update.setDataField(PageManager.getLabel(cmrCountry, "CustPhone", "-"));
-          update.setNewData(addr.getCustPhone());
-          update.setOldData(addr.getCustPhoneOld());
-          results.add(update);
+            update = new UpdatedNameAddrModel();
+            update.setAddrTypeCode(addrType);
+            update.setAddrType(addrTypeDesc);
+            update.setAddrSeq(seqNo);
+            update.setSapNumber(sapNumber);
+            update.setDataField(PageManager.getLabel(cmrCountry, "CustPhone", "-"));
+            update.setNewData(addr.getCustPhone());
+            update.setOldData(addr.getCustPhoneOld());
+            results.add(update);
           }
         }
         if (!equals(addr.getTransportZone(), addr.getTransportZoneOld())
