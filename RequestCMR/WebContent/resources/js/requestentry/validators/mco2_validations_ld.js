@@ -65,6 +65,18 @@ function lockEmbargo() {
   }
 }
 
+/*
+ * Lock CMROwner and Preferred Language
+ */
+function lockCmrOwnerPrefLang() {
+  var reqType = FormManager.getActualValue('reqType');
+  var isCmrImported = getImportedIndc();
+
+  if (reqType == 'C' && isCmrImported == 'Y') {
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('custPrefLang');
+  }
+}
 function afterConfigForMCO2() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
@@ -1244,6 +1256,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(lockCmrOwnerPrefLang, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
