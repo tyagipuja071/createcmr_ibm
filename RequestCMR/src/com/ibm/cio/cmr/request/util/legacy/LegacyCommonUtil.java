@@ -1,10 +1,20 @@
 package com.ibm.cio.cmr.request.util.legacy;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -13,7 +23,10 @@ import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * Class that contains utilities for Legacy
@@ -214,6 +227,92 @@ public class LegacyCommonUtil {
       return true;
     }
     return false;
+  }
+
+  public static String doFormatPoBox(String poBox) {
+    boolean poBoxFlag = poBox.contains("PO BOX");
+    if (poBoxFlag) {
+      return poBox.substring(6).trim();
+    } else {
+      return poBox;
+    }
+  }
+
+  public static AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {
+    LOG.debug("Searching for Addr_RDC records for Legacy Processing " + addr.getId().getReqId());
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("SEQ", addr.getId().getAddrSeq());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setForReadOnly(true);
+    return query.getSingleResult(AddrRdc.class);
+
+  }
+
+  public static void sendfieldUpdateEmailNotification(EntityManager entityManager, Admin admin, Data data, String emailTemplatetype) {
+    String emailTemplate = null;
+    String from = SystemConfiguration.getValue("MAIL_FROM");
+    String subject = SystemConfiguration.getValue("MAIL_SUBJECT");
+    String receipent = SystemConfiguration.getValue("MAIL_RECEIPENT");
+    List<Object> params = new ArrayList<>();
+    // MessageTransformer transformer =
+    // TransformerManager.getTransformer(data.getCmrIssuingCntry());
+    if (emailTemplate == null) {
+      emailTemplate = getEmailTemplate(emailTemplatetype);
+      if (emailTemplate != null) {
+        String email = new String(emailTemplate);
+        email = MessageFormat.format(email, params.toArray(new Object[0]));
+
+        String host = SystemConfiguration.getValue("MAIL_HOST");
+
+        Email mail = new Email();
+        mail.setSubject(subject);
+        mail.setTo(receipent);
+        mail.setFrom(from);
+
+        mail.setMessage(email);
+        mail.setType(MessageType.HTML);
+
+        mail.send(host);
+      }
+
+    }
+
+  }
+
+  private static String getEmailTemplate(String emailTemplatetype) {
+    StringBuilder sb = new StringBuilder();
+    try {
+      InputStream is = null;
+      if (emailTemplatetype != null) {
+        is = ConfigUtil.getResourceStream("cmr-email_batch.html");
+      } else {
+        return null;
+      }
+
+      try {
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        try {
+          BufferedReader br = new BufferedReader(isr);
+          try {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+              sb.append(line);
+            }
+          } finally {
+            br.close();
+          }
+        } finally {
+          isr.close();
+        }
+      } finally {
+        is.close();
+      }
+    } catch (Exception e) {
+      LOG.error("Error when loading Email template.", e);
+    }
+    return sb.toString();
   }
 
 }

@@ -1,9 +1,9 @@
 /* Register NORDX Javascripts */
-var _addrTypesForNORDX = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'ZP02' ];
+var _addrTypesForNORDX = ['ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02', 'ZP02'];
 var _poBOXHandler = [];
 var _MachineHandler = [];
-var _collCdArraySubTypes = [ 'INTER', 'INTSO', 'CBINT', 'CBISO' ];
-var EU_COUNTRIES = [ "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "ES", "GL", "GR", "FI", "FO", "FR", "GB", "HU", "IE", "IT", "LT", "LV", "LU", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK" ];
+var _collCdArraySubTypes = ['INTER', 'INTSO', 'CBINT', 'CBISO'];
+var EU_COUNTRIES = ["AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "ES", "GL", "GR", "FI", "FO", "FR", "GB", "HU", "IE", "IT", "LT", "LV", "LU", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"];
 var reqType = null;
 function afterConfigForNORDX() {
   reqType = FormManager.getActualValue('reqType');
@@ -27,7 +27,7 @@ function afterConfigForNORDX() {
     FormManager.resetValidations('sitePartyId');
     FormManager.resetValidations('engineeringBo');
   }
-  
+
   if (reqType == 'C') {
     FormManager.readOnly('collectionCd');
     FormManager.readOnly('capInd');
@@ -42,12 +42,12 @@ function afterConfigForNORDX() {
     }
     if (role == 'Processor') {
       FormManager.enable('abbrevNm');
-      FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
-      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
-      FormManager.addValidator('abbrevLocn', Validators.REQUIRED, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
+      FormManager.addValidator('isuCd', Validators.REQUIRED, ['ISU Code'], 'MAIN_IBM_TAB');
+      FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, ['Abbreviated Name'], 'MAIN_CUST_TAB');
+      FormManager.addValidator('abbrevLocn', Validators.REQUIRED, ['Abbreviated Location'], 'MAIN_CUST_TAB');
       if ((custSubGrp != 'LTBUS' && custSubGrp != 'EEBUS' && custSubGrp != 'LVBUS' && custSubGrp != 'CBBUS')) {
-        FormManager.addValidator('engineeringBo', Validators.REQUIRED, [ 'A/C Admin DSC' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('engineeringBo', Validators.REQUIRED, ['A/C Admin DSC'], 'MAIN_IBM_TAB');
       } else {
         FormManager.resetValidations('engineeringBo');
         FormManager.readOnly('engineeringBo');
@@ -56,14 +56,14 @@ function afterConfigForNORDX() {
   }
   if (reqType == 'C') {
     if (!(_collCdArraySubTypes.indexOf(custSubGrp) > -1) && custSubGrp.substring(2, 5) != 'INT' && custSubGrp.substring(2, 5) != 'ISO') {
-      FormManager.limitDropdownValues(FormManager.getField('collectionCd'), [ '' ]);
+      FormManager.limitDropdownValues(FormManager.getField('collectionCd'), ['']);
     } else {
-      FormManager.resetDropdownValues(FormManager.getField('collectionCd'), [ '' ]);
+      FormManager.resetDropdownValues(FormManager.getField('collectionCd'), ['']);
     }
   }
 
   if (role == 'Processor' && reqType == 'C') {
-    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, [ 'Sales Rep' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('repTeamMemberNo', Validators.REQUIRED, ['Sales Rep'], 'MAIN_IBM_TAB');
   } else {
     FormManager.removeValidator('repTeamMemberNo', Validators.REQUIRED);
   }
@@ -134,45 +134,45 @@ var _ExpediteHandler = null;
 function addHandlersForNORDX() {
 
   if (_ISUHandler == null) {
-    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function (value) {
       setClientTierValues(value);
     });
   }
 
   if (_CTCHandler == null) {
-    _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+    _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
       setSalesRepValues(value);
     });
   }
 
   if (_SalesRepHandler == null) {
-    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
+    _SalesRepHandler = dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function (value) {
       setAdminDSCValues(value);
     });
   }
 
   if (_IMSHandler == null && FormManager.getActualValue('cmrIssuingCntry')) {
-    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function(value) {
+    _IMSHandler = dojo.connect(FormManager.getField('subIndustryCd'), 'onChange', function (value) {
       setSalesRepValues();
     });
   }
 
   if (_PostalCodeHandler == null) {
-    _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+    _PostalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function (value) {
       setSBO(value);
     });
   }
 
   if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function (value) {
       setVatValidatorNORDX();
     });
   }
 
   if (_poSteertNorwayFin == null) {
     if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.NORWAY
-        || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.FINLAND && FormManager.getActualValue('countryUse') == SysLoc.FINLAND)) {
-      _poSteertNorwayFin = dojo.connect(FormManager.getField('poBox'), 'onChange', function(value) {
+      || (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.FINLAND && FormManager.getActualValue('countryUse') == SysLoc.FINLAND)) {
+      _poSteertNorwayFin = dojo.connect(FormManager.getField('poBox'), 'onChange', function (value) {
         if (FormManager.getActualValue('poBox').length > 0 && FormManager.getActualValue('importInd') != 'Y') {
           FormManager.disable('addrTxt');
           FormManager.disable('addrTxt2');
@@ -183,12 +183,12 @@ function addHandlersForNORDX() {
 
       });
 
-      _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
+      _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function (value) {
 
         if (FormManager.getActualValue('addrTxt').length > 0 && FormManager.getActualValue('importInd') != 'Y') {
           FormManager.disable('poBox');
         } else {
-          if ((FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZD01').checked) && FormManager.getActualValue('importInd') != 'Y' ) {
+          if ((FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZD01').checked) && FormManager.getActualValue('importInd') != 'Y') {
 
           } else {
             FormManager.enable('poBox');
@@ -196,7 +196,7 @@ function addHandlersForNORDX() {
         }
 
       });
-      _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt2'), 'onChange', function(value) {
+      _poSteertNorwayFin = dojo.connect(FormManager.getField('addrTxt2'), 'onChange', function (value) {
 
         if (FormManager.getActualValue('addrTxt2').length > 0 && FormManager.getActualValue('importInd') != 'Y') {
           FormManager.disable('poBox');
@@ -213,7 +213,7 @@ function addHandlersForNORDX() {
   }
 
   if (_ExpediteHandler == null) {
-    _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function(value) {
+    _ExpediteHandler = dojo.connect(FormManager.getField('expediteInd'), 'onChange', function (value) {
       setExpediteReason();
     });
   }
@@ -235,7 +235,7 @@ function setVatValidatorNORDX() {
   if (viewOnlyPage != 'true' && FormManager.getActualValue('reqType') == 'C') {
     FormManager.resetValidations('vat');
     if (!dijit.byId('vatExempt').get('checked')) {
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
+      checkAndAddValidator('vat', Validators.REQUIRED, ['VAT']);
     }
   }
 }
@@ -244,27 +244,27 @@ function setVatValidatorNORDX() {
  * Set Client Tier Value
  */
 function setClientTierValues(isuCd) {
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  
+
   isuCd = FormManager.getActualValue('isuCd');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var clientTiers = [];
   if (isuCd != '') {
     var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%'
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry,
+      ISU: '%' + isuCd + '%'
     };
     var results = cmr.query('GET.CTCLIST.BYISU', qParams);
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         clientTiers.push(results[i].ret1);
       }
       if (clientTiers != null) {
@@ -301,25 +301,25 @@ function setSBO(postCd) {
   }
 }
 
-function setSBOFORCross(){
-  
+function setSBOFORCross() {
+
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  
+
   if (cntry != SysLoc.NORWAY) {
     return;
   }
-  
+
   var custGrp = FormManager.getActualValue('custGrp');
-    if (custGrp == 'CROSS'){
-      FormManager.setValue('salesBusOffCd', '100');
-    }
+  if (custGrp == 'CROSS') {
+    FormManager.setValue('salesBusOffCd', '100');
+  }
 }
 
 /*
  * NORDX - sets Sales rep based on isuCtc
  */
 function setSalesRepValues(clientTier) {
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -327,7 +327,7 @@ function setSalesRepValues(clientTier) {
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
-  
+
   var clientTier = FormManager.getActualValue('clientTier');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var ims = FormManager.getActualValue('subIndustryCd');
@@ -343,42 +343,91 @@ function setSalesRepValues(clientTier) {
     // SalRep will be based on IMS for 32S/32T for Finland Subregion
     if (ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T') && (geoCd == 'EE' || geoCd == 'LT' || geoCd == 'LV' || geoCd == 'IS' || cntry == '806')) {
       qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        CLIENT_TIER : '%%'
+        _qall: 'Y',
+        ISSUING_CNTRY: cntry + geoCd,
+        ISU: '%' + isuCd + clientTier + '%',
+        CLIENT_TIER: '%%'
       };
       results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
     } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T') && (cntry == '846')) {
       qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
+        _qall: 'Y',
+        ISSUING_CNTRY: cntry + geoCd,
+        ISU: '%' + isuCd + clientTier + '%'
+        // George 2020-09-01 CMR-5079
+        // UPDATE_BY_ID : '%' + ims.substring(0, 1) + '%'
       };
       results = cmr.query('GET.SRLIST.SWEDEN', qParams);
     } else if (ims != '' && ims.length > 1 && (isuCtc == '32S' || isuCtc == '32T')) {
       qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
+        _qall: 'Y',
+        ISSUING_CNTRY: cntry + geoCd,
+        ISU: '%' + isuCd + clientTier + '%',
+        CLIENT_TIER: '%%'
       };
       results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
     } else {
       qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
+        _qall: 'Y',
+        ISSUING_CNTRY: cntry + geoCd,
+        ISU: '%' + isuCd + clientTier + '%',
       };
       results = cmr.query('GET.SRLIST.BYISU', qParams);
     }
 
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         salesReps.push(results[i].ret1);
       }
       FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
+
+      // 2020-08-27 George CMR-5079 2H20 Coverage - NORDICS (change of LOVs &
+      // Logic)
+
+      // DK/FO/GL
+      var MSD996 = "A,K,F,N,S";
+      var MSD992 = "G,Y,E,H,X,Y,U";
+      var MSD993 = "D,T";
+      var MSD302 = "V,J,P,L,M,W,R,B,C,Z";
+      // Sweden
+      var INS003 = "A,U,J,L,M,P,V,E,G,H,X,Y,Z,B,C,D,K,R,T,W,F,N,S";
+      var MSS596 = "B,C,D,R,T,W";
+      var MSS599 = "F,J,L,M,N,P,S,V";
+      var MSS315 = "A,E,G,H,K,U,X,Y";
+      // Finland
+      var MSF109 = "A,K,U,J,L,M,P,V,E,G,H,X,Y,Z";
+      var MSF107 = "B,C,D,R,T,W,F,N,S";
+      var NOREP0 = INS003;
+
+      var ind = ims.substring(0, 1);
+      // DK/FO/GL 678
+      if (cntry == '678') {
+        if (MSD996.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSD996");
+        if (MSD992.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSD992");
+        if (MSD993.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSD993");
+        if (MSD302.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSD302");
+      }
+      // Sweden 846
+      if (cntry == '846') {
+        if (MSS596.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSS596");
+        if (MSS599.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSS599");
+        if (MSS315.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSS315");
+      }
+      // Finland 702
+      if (cntry == '702') {
+        if (MSF109.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSF109");
+        if (MSF107.indexOf(ind) >= 0)
+          FormManager.setValue('repTeamMemberNo', "MSF107");
+      }
+
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
       }
@@ -409,7 +458,7 @@ function setAdminDSCValues(repTeamMemberNo) {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  
+
   if (FormManager.getActualValue('reqType') != 'C') {
     return;
   }
@@ -424,19 +473,19 @@ function setAdminDSCValues(repTeamMemberNo) {
 
   if (repTeamMemberNo != '') {
     var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry + geoCd,
-      ISU : '%' + isuCd + clientTier + '%',
-      REP_TEAM_CD : '%' + repTeamMemberNo + '%'
+      _qall: 'Y',
+      ISSUING_CNTRY: cntry + geoCd,
+      ISU: '%' + isuCd + clientTier + '%',
+      REP_TEAM_CD: '%' + repTeamMemberNo + '%'
     };
     var results = cmr.query('GET.DSCLIST.BYSR', qParams);
     if (results != null) {
-      for ( var i = 0; i < results.length; i++) {
+      for (var i = 0; i < results.length; i++) {
         adminDSC.push(results[i].ret1);
       }
       if (adminDSC != null) {
         FormManager.limitDropdownValues(FormManager.getField('engineeringBo'), adminDSC);
-        if (adminDSC.length == 1) {
+        if (adminDSC.length >= 1) {
           FormManager.setValue('engineeringBo', adminDSC[0]);
         }
       }
@@ -492,8 +541,8 @@ function setTaxCdValuesCROSS() {
   var countryUse = FormManager.getActualValue('countryUse');
   var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var qParams = {
-    REQ_ID : reqId,
-    ADDR_TYPE : 'ZS01',
+    REQ_ID: reqId,
+    ADDR_TYPE: 'ZS01',
   };
   var _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
   var landCntry = _result.ret2;
@@ -543,7 +592,7 @@ function setAbbrevName(cntry, addressMode, saving, finalSave, force) {
     var copyTypes = document.getElementsByName('copyTypes');
     var copyingToA = false;
     if (copyTypes != null && copyTypes.length > 0) {
-      copyTypes.forEach(function(input, i) {
+      copyTypes.forEach(function (input, i) {
         if (input.value == 'ZS01' && input.checked) {
           copyingToA = true;
         }
@@ -591,23 +640,23 @@ function setAbbrevName(cntry, addressMode, saving, finalSave, force) {
 }
 
 function machineValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var reqId = FormManager.getActualValue('reqId');
         var reqParam = {
-          _qall : 'Y',
-          REQ_ID : reqId,
-          ADDR_TYPE : "ZP02",
+          _qall: 'Y',
+          REQ_ID: reqId,
+          ADDR_TYPE: "ZP02",
         };
         var results = cmr.query('GET_ZP02_COUNT', reqParam);
         if (results != null) {
-          for ( var i = 0; i < results.length; i++) {
+          for (var i = 0; i < results.length; i++) {
             var ADDR_SEQ1 = results[i].ret1;
             var reqParam1 = {
-              REQ_ID : reqId,
-              ADDR_TYPE : "ZP02",
-              ADDR_SEQ : ADDR_SEQ1,
+              REQ_ID: reqId,
+              ADDR_TYPE: "ZP02",
+              ADDR_SEQ: ADDR_SEQ1,
             };
             var newResults = cmr.query('ZP02_SEARCH_MACHINES', reqParam1);
             if (newResults.ret1 == '0') {
@@ -645,9 +694,9 @@ function handleMahcineModel() {
  * at) *Mailing - not flowing into RDC!!
  */
 function addNORDXAddressTypeValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
           return new ValidationResult(null, false, 'Mailing, Billing address are mandatory. Only one address for each address type should be defined when sending for processing.');
         }
@@ -660,7 +709,7 @@ function addNORDXAddressTypeValidator() {
           var shippingCnt = 0;
           var eplCnt = 0;
 
-          for ( var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
             record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
             if (record == null && _allAddressData != null && _allAddressData[i] != null) {
               record = _allAddressData[i];
@@ -701,22 +750,22 @@ function addNORDXAddressTypeValidator() {
 }
 
 function addNORDXInstallingShipping() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var shippingBool = true;
         var installBool = true;
         var reqId = FormManager.getActualValue('reqId');
         var addr = 'ZD01';
         var qParams = {
-          _qall : 'Y',
-          REQID : reqId,
-          ADDR_TYPE : addr
+          _qall: 'Y',
+          REQID: reqId,
+          ADDR_TYPE: addr
         };
 
         var results = cmr.query('GET_STREET_ADDRSEQ', qParams);
         if (results != null) {
-          for ( var i = 0; i < results.length; i++) {
+          for (var i = 0; i < results.length; i++) {
             if (results[i].ret1.length < 1) {
               shippingBool = false;
             }
@@ -724,14 +773,14 @@ function addNORDXInstallingShipping() {
         }
         addr = 'ZI01';
         qParams = {
-          _qall : 'Y',
-          REQID : reqId,
-          ADDR_TYPE : addr
+          _qall: 'Y',
+          REQID: reqId,
+          ADDR_TYPE: addr
         };
 
         results = cmr.query('GET_STREET_ADDRSEQ', qParams);
         if (results != null) {
-          for ( var i = 0; i < results.length; i++) {
+          for (var i = 0; i < results.length; i++) {
             if (results[i].ret1.length < 1) {
               installBool = false;
             }
@@ -754,15 +803,15 @@ function addNORDXInstallingShipping() {
 }
 
 function addAbbrevNmLengthValidator() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var _abbrevName = FormManager.getActualValue('abbrevNm');
         if (reqType != 'U' && role == 'Requester' && _abbrevName.length > 22) {
           return new ValidationResult({
-            id : 'abbrevNm',
-            type : 'text',
-            name : 'abbrevNm'
+            id: 'abbrevNm',
+            type: 'text',
+            name: 'abbrevNm'
           }, false, 'The length for Abbreviated Name  should be 22 characters.');
         } else {
           return new ValidationResult(null, true);
@@ -779,8 +828,8 @@ function addISUClientMandatory() {
     return;
   }
   if (role == 'Processor') {
-    FormManager.addValidator('isuCd', Validators.REQUIRED, [ 'ISU Code' ], 'MAIN_IBM_TAB');
-    FormManager.addValidator('clientTier', Validators.REQUIRED, [ 'Client Tier' ], 'MAIN_IBM_TAB');
+    FormManager.addValidator('isuCd', Validators.REQUIRED, ['ISU Code'], 'MAIN_IBM_TAB');
+    FormManager.addValidator('clientTier', Validators.REQUIRED, ['Client Tier'], 'MAIN_IBM_TAB');
   }
 }
 
@@ -791,11 +840,11 @@ function handleMachineType() {
   }
   if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
     cmr.hideNode("machineSerialDiv");
-    for ( var i = 0; i < _addrTypesForNORDX.length; i++) {
+    for (var i = 0; i < _addrTypesForNORDX.length; i++) {
       _MachineHandler[i] = null;
       if (_MachineHandler[i] == null) {
         var xx = FormManager.getField('addrType_ZP02');
-        _MachineHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function(value) {
+        _MachineHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function (value) {
           if (FormManager.getField('addrType_ZI01').checked || FormManager.getField('addrType_ZP02').checked) {
             cmr.showNode("machineSerialDiv");
             cmr.hideNode('addMachineButton');
@@ -821,12 +870,12 @@ function handleMachineType() {
 
 function hidePOBoxandHandleStreet() {
   if (cmr.addressMode == 'newAddress' || cmr.addressMode == 'copyAddress') {
-    for ( var i = 0; i < _addrTypesForNORDX.length; i++) {
+    for (var i = 0; i < _addrTypesForNORDX.length; i++) {
       _poBOXHandler[i] = null;
       if (_poBOXHandler[i] == null) {
         var poValue = FormManager.getActualValue('poBox');
         var phValue = FormManager.getActualValue('custPhone');
-        _poBOXHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function(value) {
+        _poBOXHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForNORDX[i]), 'onClick', function (value) {
           setPOBOXandSteet(poValue);
           setPhone(phValue);
         });
@@ -839,7 +888,7 @@ function hidePOBoxandHandleStreet() {
       FormManager.setValue('poBox', '');
       var cntryRegion = FormManager.getActualValue('countryUse');
       if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion == SysLoc.DENMARK)) {
-        FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
+        FormManager.addValidator('addrTxt', Validators.REQUIRED, ['Street'], '');
       }
     } else {
       FormManager.enable('poBox');
@@ -861,7 +910,7 @@ function setPOBOXandSteet(value) {
     FormManager.setValue('poBox', '');
     var cntryRegion = FormManager.getActualValue('countryUse');
     if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion == SysLoc.DENMARK)) {
-      FormManager.addValidator('addrTxt', Validators.REQUIRED, [ 'Street' ], '');
+      FormManager.addValidator('addrTxt', Validators.REQUIRED, ['Street'], '');
     }
 
   } else {
@@ -887,9 +936,9 @@ function validateNORDXCopy(addrType, arrayOfTargetTypes) {
 }
 
 function addAddressFieldValidators() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (cntry == SysLoc.NORWAY || cntry == SysLoc.SWEDEN) {
           var addrTxt = FormManager.getActualValue('addrTxt');
@@ -913,9 +962,9 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // city and postal code length
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var city = FormManager.getActualValue('city1');
         var postCd = FormManager.getActualValue('postCd');
 
@@ -936,23 +985,18 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // Name Con't and Attention person ( 1 out of 2) Defect 1609336 fix
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var showError = false;
-        
-        if (FormManager.getActualValue('custNm1') != ''
-          && FormManager.getActualValue('custNm2') != ''
-          && FormManager.getActualValue('custNm4') != ''
-          && FormManager.getActualValue('addrTxt') != ''
-            && FormManager.getActualValue('poBox') != ''
-              && FormManager.getActualValue('postCd') != ''
-                  && FormManager.getActualValue('city1') != '') {
+
+        if (FormManager.getActualValue('custNm1') != '' && FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('custNm4') != '' && FormManager.getActualValue('addrTxt') != ''
+          && FormManager.getActualValue('poBox') != '' && FormManager.getActualValue('postCd') != '' && FormManager.getActualValue('city1') != '') {
           showError = true;
-        }else{
+        } else {
           showError = false;
         }
-        
+
         var cntryRegion = FormManager.getActualValue('countryUse');
         if (cntryRegion != '' && (cntryRegion == '678FO' || cntryRegion == '678GL' || cntryRegion == '678IS' || cntryRegion == '702EE' || cntryRegion == '702LT' || cntryRegion == '702LV')) {
 
@@ -997,9 +1041,9 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // Street and PO BOX DENMARK and FO
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         if (cntry == SysLoc.DENMARK || cntry == SysLoc.FINLAND) {
@@ -1013,13 +1057,11 @@ function addAddressFieldValidators() {
             if (FormManager.getActualValue('addrTxt') != '') {
               addrFldCnt++;
             }
-            /*if (dojo.byId('poBox').getAttribute('aria-readonly') == 'true') {
-              if (addrFldCnt < 1) {
-                return new ValidationResult({
-                  id : 'addrTxt',
-                }, false, '');
-              }
-            }*/
+            /*
+             * if (dojo.byId('poBox').getAttribute('aria-readonly') == 'true') {
+             * if (addrFldCnt < 1) { return new ValidationResult({ id :
+             * 'addrTxt', }, false, ''); } }
+             */
             if (addrFldCnt < 1) {
               return new ValidationResult(null, false, 'For Street and PostBox, atleast one should be filled.');
             }
@@ -1031,9 +1073,9 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // ALL NORDICS POBOX
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         var cntry = FormManager.getActualValue('landCntry');
         if (cntry != '') {
@@ -1050,18 +1092,18 @@ function addAddressFieldValidators() {
   })(), null, 'frmCMR_addressModal');
 
   // Machine Type and Serial Number
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
 
         if (FormManager.getActualValue('machineTyp').length == 0 && FormManager.getActualValue('machineSerialNo').length == 0) {
           if (cmr.addressMode == 'updateAddress') {
             if (FormManager.getActualValue('addrType') == 'ZP02') {
               var qParams = {
-                _qall : 'Y',
-                REQ_ID : FormManager.getActualValue('reqId'),
-                ADDR_TYPE : FormManager.getActualValue('addrType'),
-                ADDR_SEQ : FormManager.getActualValue('addrSeq'),
+                _qall: 'Y',
+                REQ_ID: FormManager.getActualValue('reqId'),
+                ADDR_TYPE: FormManager.getActualValue('addrType'),
+                ADDR_SEQ: FormManager.getActualValue('addrSeq'),
               };
               var results = cmr.query('SEARCH_MACHINES', qParams);
               if (results != null) {
@@ -1069,12 +1111,12 @@ function addAddressFieldValidators() {
                   return new ValidationResult(null, true);
                 } else {
                   return new ValidationResult({
-                    id : 'machineTyp',
+                    id: 'machineTyp',
                   }, false, 'Machine Type and Serial Number are Mandatory.');
                 }
               } else {
                 return new ValidationResult({
-                  id : 'machineTyp',
+                  id: 'machineTyp',
                 }, false, 'Machine Type and Serial Number are Mandatory.');
               }
             } else {
@@ -1088,7 +1130,7 @@ function addAddressFieldValidators() {
             // FormManager.addValidator('machineSerialNo', Validators.REQUIRED,
             // [ 'Machine Serial Number' ], '');
             return new ValidationResult({
-              id : 'machineTyp',
+              id: 'machineTyp',
             }, false, 'Machine Type and Serial Number are Mandatory.');
           }
 
@@ -1097,17 +1139,17 @@ function addAddressFieldValidators() {
 
           if (FormManager.getActualValue('machineTyp').length != 4 && FormManager.getActualValue('machineSerialNo').length != 7) {
             return new ValidationResult({
-              id : 'machineTyp',
+              id: 'machineTyp',
             }, false, 'Machine Type and Serial number should be 4 and 7 characters long.');
           }
           if (FormManager.getActualValue('machineTyp').length != 4) {
             return new ValidationResult({
-              id : 'machineTyp',
+              id: 'machineTyp',
             }, false, 'Machine Type should be 4 characters long.');
           }
           if (FormManager.getActualValue('machineSerialNo').length != 7) {
             return new ValidationResult({
-              id : 'machineSerialNo',
+              id: 'machineSerialNo',
             }, false, 'Machine Serial Number should be 7 characters long.');
           }
         }
@@ -1117,9 +1159,9 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var reqId = FormManager.getActualValue('reqId');
         var addrType = FormManager.getActualValue('addrType');
         var reqType = FormManager.getActualValue('reqType');
@@ -1127,9 +1169,9 @@ function addAddressFieldValidators() {
 
         if (addrSeq != null && addrType == 'ZP02' && reqType != 'C') {
           var reqParam = {
-            REQ_ID : reqId,
-            ADDR_TYPE : "ZP02",
-            ADDR_SEQ : addrSeq,
+            REQ_ID: reqId,
+            ADDR_TYPE: "ZP02",
+            ADDR_SEQ: addrSeq,
           };
           var results = cmr.query('ZP02_SEARCH_MACHINES', reqParam);
           if (results.ret1 == '0') {
@@ -1173,9 +1215,9 @@ function updateAddrTypeList(cntry, addressMode) {
 }
 
 function addCrossBorderValidatorNORS() {
-  FormManager.addFormValidator((function() {
+  FormManager.addFormValidator((function () {
     return {
-      validate : function() {
+      validate: function () {
         var reqType = FormManager.getActualValue('reqType');
         // only Create type will be validated
         if (reqType != 'C') {
@@ -1196,7 +1238,7 @@ function addCrossBorderValidatorNORS() {
         if (cntryRegion.length > cntry.length) {
           var defaultcntry = cntryRegion.substring(3, 5);
           var result = cmr.query('VALIDATOR.CROSSBORDER', {
-            REQID : reqId
+            REQID: reqId
           });
           if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultcntry != '' && result.ret1 != defaultcntry && scenario != 'CRO') {
             return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultcntry + '\' for Non Cross-Border customers.');
@@ -1207,7 +1249,7 @@ function addCrossBorderValidatorNORS() {
         } else {
           var defaultLandCntry = FormManager.getActualValue('defaultLandedCountry');
           var result = cmr.query('VALIDATOR.CROSSBORDER', {
-            REQID : reqId
+            REQID: reqId
           });
           if (result != null && result.ret1 != '' && result.ret1 != undefined && defaultLandCntry != '' && result.ret1 != defaultLandCntry && scenario != 'CROSS') {
             return new ValidationResult(null, false, 'Landed Country value of the Sold-to (Main) Address should be \'' + defaultLandCntry + '\' for Non Cross-Border customers.');
@@ -1233,8 +1275,8 @@ function setAbbrvNmLoc() {
   var reqId = FormManager.getActualValue('reqId');
   if (reqId != null) {
     reqParam = {
-      REQ_ID : reqId,
-      ADDR_TYPE : "ZS01",
+      REQ_ID: reqId,
+      ADDR_TYPE: "ZS01",
     };
   }
   var custNm = cmr.query('ADDR.GET.CUSTNM1.BY_REQID', reqParam);
@@ -1376,7 +1418,7 @@ function doRemoveFromMachineList(machineTyp, machineSerialNo) {
 }
 
 function addPhoneValidatorNORDX() {
-  FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
+  FormManager.addValidator('custPhone', Validators.DIGIT, ['Phone #']);
 }
 
 /**
@@ -1390,63 +1432,61 @@ function actualRemoveFromMachineList() {
   dojo.byId('machineSerialNo').value = '';
 }
 
-
 function setAddrDetailsForView(addrType, addrSeq) {
-	var reqId = FormManager.getActualValue('reqId');
-	var reqType = FormManager.getActualValue('reqType');
-	var machType = [];
-	var serialNo = [];
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var machType = [];
+  var serialNo = [];
 
-	var reqParam1 = {
-		_qall : 'Y',
-		REQ_ID : reqId,
-		ADDR_TYPE : addrType,
-		ADDR_SEQ : addrSeq,
-	};
-	var newResults = cmr.query('ZP02_GET_MACHINES', reqParam1);
-	if (newResults != null && reqType != 'C') {
-		for ( var l = 0; l < newResults.length; l++) {
-			machType.push(newResults[l].ret2);
-			serialNo.push(newResults[l].ret1);
-		}
-	}
+  var reqParam1 = {
+    _qall: 'Y',
+    REQ_ID: reqId,
+    ADDR_TYPE: addrType,
+    ADDR_SEQ: addrSeq,
+  };
+  var newResults = cmr.query('ZP02_GET_MACHINES', reqParam1);
+  if (newResults != null && reqType != 'C') {
+    for (var l = 0; l < newResults.length; l++) {
+      machType.push(newResults[l].ret2);
+      serialNo.push(newResults[l].ret1);
+    }
+  }
 
-	addDataToAddrDetailsTbl(machType, serialNo);
+  addDataToAddrDetailsTbl(machType, serialNo);
 
 }
 
 function addDataToAddrDetailsTbl(machType, serialNo) {
-	var colHeader = new Array();
-	var table = document.createElement("TABLE");
-	var machineDetails = new Array();
-	var columnCount = 2;
-	table.border = "1";
+  var colHeader = new Array();
+  var table = document.createElement("TABLE");
+  var machineDetails = new Array();
+  var columnCount = 2;
+  table.border = "1";
 
-	colHeader.push([ "Machine Type" ], [ "Serial Number" ]);
-	for ( var i = 0; i < machType.length; i++) {
-		machineDetails.push([ machType[i], serialNo[i] ]);
-	}
-	var row = table.insertRow(-1);
-	for ( var i = 0; i < columnCount; i++) {
-		var headerCell = document.createElement("TH");
-		headerCell.innerHTML = colHeader[i];
-		headerCell.style.fontSize = "smaller";
-		row.appendChild(headerCell);
-	}
+  colHeader.push(["Machine Type"], ["Serial Number"]);
+  for (var i = 0; i < machType.length; i++) {
+    machineDetails.push([machType[i], serialNo[i]]);
+  }
+  var row = table.insertRow(-1);
+  for (var i = 0; i < columnCount; i++) {
+    var headerCell = document.createElement("TH");
+    headerCell.innerHTML = colHeader[i];
+    headerCell.style.fontSize = "smaller";
+    row.appendChild(headerCell);
+  }
 
-	for ( var i = 0; i < machineDetails.length; i++) {
-		row = table.insertRow(-1);
-		for ( var j = 0; j < columnCount; j++) {
-			var cell = row.insertCell(-1);
-			cell.innerHTML = machineDetails[i][j];
-		}
-	}
+  for (var i = 0; i < machineDetails.length; i++) {
+    row = table.insertRow(-1);
+    for (var j = 0; j < columnCount; j++) {
+      var cell = row.insertCell(-1);
+      cell.innerHTML = machineDetails[i][j];
+    }
+  }
 
-	var dvTable = document.getElementById("dvTable");
-	dvTable.innerHTML = "";
-	dvTable.appendChild(table);
+  var dvTable = document.getElementById("dvTable");
+  dvTable.innerHTML = "";
+  dvTable.appendChild(table);
 }
-
 
 function _assignAddrDetailsValue(queryId, value) {
   var result = dojo.query(queryId);
@@ -1456,8 +1496,8 @@ function _assignAddrDetailsValue(queryId, value) {
 }
 
 function norwayCustomVATValidator(cntry, tabName, formName, aType) {
-  return function() {
-    FormManager.addFormValidator((function() {
+  return function () {
+    FormManager.addFormValidator((function () {
       var landCntry = cntry;
       var addrType = aType;
       var role = null;
@@ -1465,7 +1505,7 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
         role = _pagemodel.userRole;
       }
       return {
-        validate : function() {
+        validate: function () {
           var reqType = FormManager.getActualValue('reqType');
           var vat = FormManager.getActualValue('vat');
 
@@ -1475,20 +1515,20 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
             // vat deletion for updates
             return new ValidationResult(null, true);
           }
-          
+
           if (role == 'Requester' && !vat.match("NO\\d{9}MVA")) {
             return new ValidationResult({
-            id : 'vat',
-            type : 'text',
-            name : 'vat'
+              id: 'vat',
+              type: 'text',
+              name: 'vat'
             }, false, 'Invalid format of VAT for NO. Format should be NO999999999MVA');
           }
 
           var zs01Cntry = landCntry;
 
           var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
-            REQID : FormManager.getActualValue('reqId'),
-            TYPE : addrType ? addrType : 'ZS01'
+            REQID: FormManager.getActualValue('reqId'),
+            TYPE: addrType ? addrType : 'ZS01'
           });
           if (ret && ret.ret1 && ret.ret1 != '') {
             zs01Cntry = ret.ret1;
@@ -1499,16 +1539,16 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
           if (result && !result.success) {
             if (result.errorPattern == null) {
               return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
+                id: 'vat',
+                type: 'text',
+                name: 'vat'
               }, false, result.errorMessage + '.');
             } else {
               var msg = result.errorMessage + '. Format should be ' + result.errorPattern.formatReadable;
               return new ValidationResult({
-                id : 'vat',
-                type : 'text',
-                name : 'vat'
+                id: 'vat',
+                type: 'text',
+                name: 'vat'
               }, false, msg);
             }
           } else {
@@ -1520,8 +1560,8 @@ function norwayCustomVATValidator(cntry, tabName, formName, aType) {
   };
 }
 
-dojo.addOnLoad(function() {
-  GEOHandler.NORDX = [ '846', '806', '702', '678' ];
+dojo.addOnLoad(function () {
+  GEOHandler.NORDX = ['846', '806', '702', '678'];
 
   console.log('adding NORDX functions...');
   GEOHandler.setRevertIsicBehavior(false);
@@ -1541,7 +1581,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.NORDX, null, true);
   GEOHandler.addAddrFunction(hidePOBoxandHandleStreet, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMachineType, GEOHandler.NORDX);
-  GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, [ 'ZD01', 'ZP02' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.NORDX, validateNORDXCopy, ['ZD01', 'ZP02']);
   GEOHandler.addAddrFunction(updateAddrTypeList, GEOHandler.NORDX);
   GEOHandler.registerValidator(addCrossBorderValidatorNORS, GEOHandler.NORDX, null, true);
   GEOHandler.addAfterConfig(setClientTierValues, GEOHandler.NORDX);
@@ -1558,8 +1598,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.NORDX);
   GEOHandler.registerValidator(addNORDXAddressTypeValidator, GEOHandler.NORDX, null, true);
   GEOHandler.registerValidator(addNORDXInstallingShipping, GEOHandler.NORDX, null, true);
-  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN ], null, true);
-  GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [ SysLoc.NORWAY ], null, true);
+  GEOHandler.registerValidator(addGenericVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [SysLoc.DENMARK, SysLoc.FINLAND, SysLoc.SWEDEN], null, true);
+  GEOHandler.registerValidator(norwayCustomVATValidator('', 'MAIN_CUST_TAB', 'frmCMR', 'ZS01'), [SysLoc.NORWAY], null, true);
   GEOHandler.addAddrFunction(disableLandCntry, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(loadMachinesList, GEOHandler.NORDX);
   GEOHandler.addAddrFunction(handleMahcineModel, GEOHandler.NORDX);
@@ -1570,6 +1610,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.NORDX, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(setSBO, GEOHandler.NORDX);
   GEOHandler.addAfterTemplateLoad(setSBO, GEOHandler.NORDX);
-
 
 });

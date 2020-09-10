@@ -95,7 +95,7 @@
       <a class="translate" href="javascript: cmr.openTranslateWindow('iw','en', ['custNm1', 'addrTxt', 'poBox', 'city1', 'dept'])" >to English</a>
     </p>
   </cmr:column>
-  <cmr:column span="2" forCountry="726">
+  <cmr:column span="2" forCountry="726,666">
     <p>
     <cmr:label fieldId="custNm4">
       <cmr:fieldLabel fieldId="CustomerName4" />: 
@@ -277,22 +277,13 @@
     </p>
   </cmr:column>
   
-  <cmr:column span="2" containerForField="Department" exceptForCountry="726">
+  <cmr:column span="2" containerForField="Department" exceptForCountry="726,666">
     <p>
       <cmr:label fieldId="dept">
         <cmr:fieldLabel fieldId="Department" />:
              <cmr:delta text="-" id="delta-dept" />
       </cmr:label>
       <cmr:field fieldId="Department" id="dept" path="dept" />
-    </p>
-  </cmr:column>
-
-  <cmr:column span="2" containerForField="TaxOffice" forCountry="726,666">
-    <p>
-      <cmr:label fieldId="taxOffice">
-        <cmr:fieldLabel fieldId="TaxOffice" />:
-      </cmr:label>
-      <cmr:field fieldId="TaxOffice" id="taxOffice" path="taxOffice" />
     </p>
   </cmr:column>
 

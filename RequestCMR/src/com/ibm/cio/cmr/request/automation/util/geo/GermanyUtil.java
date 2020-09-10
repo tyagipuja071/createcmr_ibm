@@ -103,7 +103,6 @@ public class GermanyUtil extends AutomationUtil {
     // skipAllChecks(engineData); // remove after BP is enabled
     // } else
     if (StringUtils.isNotBlank(scenario)) {
-
       switch (scenario) {
       case "PRIPE":
       case "IBMEM":
@@ -687,15 +686,14 @@ public class GermanyUtil extends AutomationUtil {
       } else {
         for (Addr addr : addressList) {
           if ("Y".equals(addr.getImportInd())) {
-            if (changes.isAddressFieldChanged(addr.getId().getAddrType(), "Department") && isOnlyDeptUpdated(changes)
-                && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
+            if (isRelevantAddressFieldUpdated(changes) && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
               validation.setSuccess(true);
-              LOG.debug("Department/Attn is found to be updated.Updates verified.");
+              LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
               detail.append("Updates to relevant addresses found but have been marked as Verified.");
               validation.setMessage("Validated");
               isNegativeCheckNeedeed = false;
               break;
-            } else if (!isOnlyDeptUpdated(changes)) {
+            } else if (!isRelevantAddressFieldUpdated(changes)) {
               isNegativeCheckNeedeed = true;
             }
           }
@@ -743,26 +741,23 @@ public class GermanyUtil extends AutomationUtil {
     return false;
   }
 
-  private boolean isOnlyDeptUpdated(RequestChangeContainer changes) {
-    boolean isOnlyDeptUpdated = true;
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes) {
     List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-    String[] addressFields = { "Customer Name 1", "Customer Name 2", "Floor", "Building", "Office", "Country (Landed)", "State/Province", "County",
-        "Street Address", "PostBox", "Postal Code", "City", "Phone #", "Transport Zone" };
+    String[] addressFields = { "Building", "Floor", "Office", "Department", "Customer Name 2", "Phone #", "PostBox", "State/Province" };
     List<String> relevantFieldNames = Arrays.asList(addressFields);
     for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
       String fieldId = updatedAddrModel.getDataField();
       if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
-        isOnlyDeptUpdated = false;
-        break;
+        return true;
       }
     }
 
-    return isOnlyDeptUpdated;
+    return false;
   }
 
   private boolean isOnlyDnBRelevantFieldUpdated(RequestChangeContainer changes, String addrTypeCode) {
     boolean isDnBRelevantFieldUpdated = false;
-    String[] addressFields = { "Customer Name 1", "Customer Name 2", "Country (Landed)", "State/Province", "Street Address", "Postal Code", "City" };
+    String[] addressFields = { "Customer Name 1", "Country (Landed)", "Street Address", "Postal Code", "City" };
     List<String> relevantFieldNames = Arrays.asList(addressFields);
     for (String fieldId : relevantFieldNames) {
       UpdatedNameAddrModel addressChange = changes.getAddressChange(addrTypeCode, fieldId);
@@ -773,4 +768,5 @@ public class GermanyUtil extends AutomationUtil {
     }
     return isDnBRelevantFieldUpdated;
   }
+
 }
