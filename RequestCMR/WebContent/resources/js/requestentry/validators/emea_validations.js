@@ -451,7 +451,7 @@ function afterConfigForUKI() {
         FormManager.readOnly('vat');
       } else {
         console.log(">>> Process vatExempt add * >> ");
-        if("C" == FormManager.getActualValue('reqType')){
+        if ("C" == FormManager.getActualValue('reqType')) {
           FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         }
         FormManager.enable('vat');
@@ -514,14 +514,14 @@ function configureCRNForUKI() {
   var isicVal = FormManager.getActualValue('isicCd');
   var zs01LandCntry = getZS01LandCntry();
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  
+
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
 
   if (reqType == 'C') {
-    if ("PRICU" == FormManager.getActualValue('custSubGrp') || "CROSS" == FormManager.getActualValue('custGrp') || 
-        FormManager.getActualValue('custSubGrp') == "INTER" || FormManager.getActualValue('custSubGrp') == "INFSL") {
+    if ("PRICU" == FormManager.getActualValue('custSubGrp') || "CROSS" == FormManager.getActualValue('custGrp') || FormManager.getActualValue('custSubGrp') == "INTER"
+        || FormManager.getActualValue('custSubGrp') == "INFSL") {
       console.log(">>> Removing CRN Mandatory Validation >>>");
       FormManager.getField('restrictInd').checked = true;
       FormManager.resetValidations('taxCd1');
@@ -953,8 +953,8 @@ function autoSetVAT(_custType, custTypeinDB) {
   if (PageManager.isReadOnly()) {
     return;
   }
-  
-  if(reqType != 'C'){
+
+  if (reqType != 'C') {
     FormManager.removeValidator('vat', Validators.REQUIRED);
     return;
   }
@@ -6998,6 +6998,23 @@ function lockCustClassUKI() {
 
 }
 
+function addCustClassValidatorBP() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubType = FormManager.getActualValue('custSubGrp');
+        var custClass = FormManager.getActualValue('custClass');
+        var custClassList = new Set([ '43', '45', '46', '49' ]);
+        if (custSubType == 'BUSPR' && !custClassList.has(custClass)) {
+          return new ValidationResult(null, false, 'Enter valid customer classification code.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function addStreetPoBoxValidatorUKI() {
   FormManager.addFormValidator((function() {
     return {
@@ -7245,7 +7262,7 @@ function autoSetAbbrevLocUKI() {
   if (_custGrp == 'CROSS') {
     if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
       _addrType = 'ZS01';
-    } else if (_custType == 'XINTR' || _custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS') {
+    } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
       _addrType = 'ZI01';
     }
     var qParams = {
@@ -7369,7 +7386,7 @@ function autoSetABLocnAddr(_addrType) {
   var _abbrevLocn = null;
   var _result = null;
   if (_custGrp == 'CROSS') {
-    if (_addrType == 'ZS01' && (_custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS')) {
+    if (_addrType == 'ZS01' && (_custType == 'XBSPR' || _custType == 'XGOVR' || _custType == 'XPRIC' || _custType == 'CROSS' || _custType == 'XIGF')) {
       _abbrevLocn = FormManager.getActualValue('landCntry');
     }
   } else {
@@ -8465,9 +8482,22 @@ function autoSetAbbrNameUKI() {
     if (result.ret1 != undefined && result.ret1 != '') {
       FormManager.setValue('abbrevNm', result.ret1);
     }
+  } else {
+    var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
+      REQ_ID : reqId,
+      ADDR_TYPE : 'ZS01'
+    });
+    if (result.ret1 != undefined) {
+      {
+        var _abbrevNmValue = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
+        if (_abbrevNmValue != null && _abbrevNmValue.length > 22) {
+          _abbrevNmValue = _abbrevNmValue.substr(0, 22);
+        }
+        FormManager.setValue('abbrevNm', _abbrevNmValue);
+      }
+    }
   }
 }
-
 function autoSetUIFieldsOnScnrioUKI() {
   var reqType = FormManager.getActualValue('reqType');
   var custGrp = FormManager.getActualValue('custGrp');
@@ -9136,6 +9166,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(requestingLOBCheckFrIFSL, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.registerValidator(addValidatorForCompanyRegNum, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
+  GEOHandler.registerValidator(addCustClassValidatorBP, [ SysLoc.IRELAND, SysLoc.UK ], null, true);
 
   GEOHandler.addAfterConfig(addAfterConfigItaly, [ SysLoc.ITALY ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadItaly, [ SysLoc.ITALY ]);
