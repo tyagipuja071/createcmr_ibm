@@ -277,7 +277,7 @@ public class SingaporeUtil extends AutomationUtil {
         String isicCd = data.getIsicCd();
 
         // collect Find CMR Data
-        String findCMRNm = cmrData.getName();
+        String findCMRNm = StringUtils.isNotBlank(cmrData.getName()) ? cmrData.getName().replace("@", "") : "";
         String findCMRAddr1 = StringUtils.isNotBlank(cmrData.getStreetAddress1()) ? cmrData.getStreetAddress1() : "";
         String findCMRAddr2 = StringUtils.isNotBlank(cmrData.getStreetAddress2()) ? cmrData.getStreetAddress2() : "";
         String findCMRFullAddr = findCMRAddr1.concat(findCMRAddr2);
