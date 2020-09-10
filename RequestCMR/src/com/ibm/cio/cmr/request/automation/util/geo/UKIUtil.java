@@ -182,7 +182,6 @@ public class UKIUtil extends AutomationUtil {
             details.append("Company Registration Number on the request matches D&B\n");
           }
         }
-        coverageFieldUpdtd++;
         break;
       case "ISIC":
         cmdeReview = true;
@@ -198,6 +197,7 @@ public class UKIUtil extends AutomationUtil {
       case "Client Tier":
       case "SBO":
       case "Sales Rep No":
+      case "Company Number":
         coverageFieldUpdtd++;
         break;
       case "Enterprise Number":
