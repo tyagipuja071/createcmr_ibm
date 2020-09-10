@@ -1047,6 +1047,17 @@ function enableCMRNOSAGLLC() {
   }
 }
 
+function enableCmrForProcessor() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType != 'C') {
+    return;
+  }
+  if(role == "PROCESSOR") {
+    FormManager.enable('cmrNo');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1101,5 +1112,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCMRForGMLLCScenario, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.addAfterConfig(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
   GEOHandler.addAfterTemplateLoad(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
+  GEOHandler.addAfterConfig(enableCmrForProcessor, [ SysLoc.SOUTH_AFRICA ]);
 
 });
