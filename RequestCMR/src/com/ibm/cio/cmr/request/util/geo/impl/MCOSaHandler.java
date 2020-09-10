@@ -338,9 +338,20 @@ public class MCOSaHandler extends MCOHandler {
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
     super.setDataValuesOnImport(admin, data, results, mainRecord);
+    boolean ifUpdt = false;
+    ifUpdt = "U".equals(admin.getReqType());
+
     if (legacyObjects != null && legacyObjects.getCustomer() != null) {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
       data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
+    }
+
+    if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
+      String collBo = legacyObjects.getCustomerExt().getTeleCovRep();
+      if (StringUtils.isNotEmpty(collBo) && collBo.length() > 4) {
+        collBo = collBo.substring(2, 6);
+      }
+      data.setCollBoId(collBo);
     }
 
     /*
@@ -830,7 +841,8 @@ public class MCOSaHandler extends MCOHandler {
   private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {
     List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
     for (CmrtAddr cmrtAddr : cmrtAddrs) {
-      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && address.getCmrAddrSeq().equals(cmrtAddr.getId().getAddrNo())) {
+      String seqNo = (address.getCmrAddrSeq().length() != 5) ? StringUtils.leftPad(address.getCmrAddrSeq(), 5, '0') : address.getCmrAddrSeq();
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && seqNo.equals(cmrtAddr.getId().getAddrNo())) {
         return cmrtAddr.getAddrPhone();
       }
     }
