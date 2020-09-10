@@ -59,6 +59,9 @@ public class GermanyUtil extends AutomationUtil {
   private static final String POSTAL_CD_RANGE = "postalCdRange";
   private static final String SORTL = "SORTL";
 
+  private static final List<String> NON_RELEVANT_ADDRESS_FIELDS = Arrays.asList("Building", "Floor", "Office", "Department", "Customer Name 2",
+      "Phone #", "PostBox", "State/Province");
+
   @SuppressWarnings("unchecked")
   public GermanyUtil() {
     if (GermanyUtil.sortlMappings.isEmpty()) {
@@ -499,7 +502,8 @@ public class GermanyUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
     Addr soldTo = requestData.getAddress("ZS01");
-    StringBuilder detail = new StringBuilder();
+    String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
+    StringBuilder detail = new StringBuilder(details);
     String duns = null;
     boolean isNegativeCheckNeedeed = false;
     if (changes != null && changes.hasDataChanges()) {
@@ -594,7 +598,8 @@ public class GermanyUtil extends AutomationUtil {
     Addr installAt = requestData.getAddress("ZI01");
     Addr billTo = requestData.getAddress("ZP01");
     Addr shipTo = requestData.getAddress("ZD01");
-    StringBuilder detail = new StringBuilder();
+    String details = StringUtils.isNotBlank(output.getDetails()) ? output.getDetails() : "";
+    StringBuilder detail = new StringBuilder(details);
     long reqId = requestData.getAdmin().getId().getReqId();
     if (changes != null && changes.hasAddressChanges()) {
       if (StringUtils.isNotEmpty(data.getCustClass()) && ("81".equals(data.getCustClass()) || "85".equals(data.getCustClass()))
@@ -688,14 +693,14 @@ public class GermanyUtil extends AutomationUtil {
       } else {
         for (Addr addr : addressList) {
           if ("Y".equals(addr.getImportInd())) {
-            if (isRelevantAddressFieldUpdated(changes) && engineData.getNegativeCheckStatus("UPDT_REVIEW_NEEDED") == null) {
+            if (!isRelevantAddressFieldUpdated(changes, addr)) {
               validation.setSuccess(true);
               LOG.debug("Updates to relevant addresses fields is found.Updates verified.");
               detail.append("Updates to relevant addresses found but have been marked as Verified.");
               validation.setMessage("Validated");
               isNegativeCheckNeedeed = false;
               break;
-            } else if (!isRelevantAddressFieldUpdated(changes)) {
+            } else if (isRelevantAddressFieldUpdated(changes, addr)) {
               isNegativeCheckNeedeed = true;
             }
           }
@@ -710,8 +715,8 @@ public class GermanyUtil extends AutomationUtil {
         } else {
           LOG.debug("Address changes don't need review");
           if (changes.hasAddressChanges()) {
-            validation.setMessage("Address changes were found and validated. No further review required.");
-            detail.append("Address changes were found and validated. No further review required.");
+            validation.setMessage("Address changes were found. No further review required.");
+            detail.append("Address changes were found. No further review required.");
           } else {
             validation.setMessage("No Address changes found on the request.");
             detail.append("No Address changes found on the request.");
@@ -743,17 +748,16 @@ public class GermanyUtil extends AutomationUtil {
     return false;
   }
 
-  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes) {
-    List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
-    String[] addressFields = { "Building", "Floor", "Office", "Department", "Customer Name 2", "Phone #", "PostBox", "State/Province" };
-    List<String> relevantFieldNames = Arrays.asList(addressFields);
-    for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
-      String fieldId = updatedAddrModel.getDataField();
-      if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
+  private boolean isRelevantAddressFieldUpdated(RequestChangeContainer changes, Addr addr) {
+    List<UpdatedNameAddrModel> addrChanges = changes.getAddressChanges(addr.getId().getAddrType(), addr.getId().getAddrSeq());
+    if (addrChanges == null) {
+      return false;
+    }
+    for (UpdatedNameAddrModel change : addrChanges) {
+      if (!NON_RELEVANT_ADDRESS_FIELDS.contains(change.getDataField())) {
         return true;
       }
     }
-
     return false;
   }
 
