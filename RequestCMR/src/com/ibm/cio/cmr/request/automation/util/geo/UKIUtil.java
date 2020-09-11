@@ -408,18 +408,7 @@ public class UKIUtil extends AutomationUtil {
       return results;
     }
 
-    List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210", "7221", "7229", "7250", "7123", "9802");
-    if (!(SCENARIO_INTERNAL.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_BUSINESS_PARTNER.equals(scenario))) {
-      if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && isicList.contains(data.getIsicCd())) {
-        details.append("Setting Client Tier to 'N' for ISIC: " + data.getIsicCd()).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
-        results.setResults("Calculated.");
-      } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && !isicList.contains(data.getIsicCd())) {
-        details.append("Setting Client Tier to 'S' for ISIC: " + data.getIsicCd()).append("\n");
-        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
-        results.setResults("Calculated.");
-      }
-    }
+    String isicCd = data.getIsicCd();
 
     if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) {
       Addr zi01 = requestData.getAddress("ZI01");
@@ -440,6 +429,7 @@ public class UKIUtil extends AutomationUtil {
             if (dnbData != null) {
               overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), dnbData.getIbmIsic());
               details.append("ISIC =  " + dnbData.getIbmIsic() + " (" + dnbData.getIbmIsicDesc() + ")").append("\n");
+              isicCd = dnbData.getIbmIsic();
               String subInd = RequestUtils.getSubIndustryCd(entityManager, dnbData.getIbmIsic(), data.getCmrIssuingCntry());
               if (subInd != null) {
                 overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
@@ -487,11 +477,28 @@ public class UKIUtil extends AutomationUtil {
           results.setResults("IBM Department/Cost Center " + dept + " validated successfully.");
         }
       }
-    } else if (details.toString().length() == 0) {
+    }
+
+    List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210", "7221", "7229", "7250", "7123", "9802");
+    if (!(SCENARIO_INTERNAL.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_BUSINESS_PARTNER.equals(scenario))) {
+      if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd) && isicList.contains(isicCd)) {
+        details.append("Setting Client Tier to 'N' for ISIC: " + data.getIsicCd()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
+        results.setResults("Calculated.");
+      } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd)
+          && !isicList.contains(data.getIsicCd())) {
+        details.append("Setting Client Tier to 'S' for ISIC: " + data.getIsicCd()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
+        results.setResults("Calculated.");
+      }
+    }
+
+    if (details.toString().length() == 0) {
       details.append("No specific fields to calculate.");
       results.setResults("Skipped.");
       results.setProcessOutput(overrides);
     }
+
     results.setDetails(details.toString());
     LOG.debug(results.getDetails());
     return results;
