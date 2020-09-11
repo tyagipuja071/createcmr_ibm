@@ -1013,7 +1013,7 @@
         <div id="divn_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view forGEO="NORDX,BELUX,NL,SWISS">
+    <cmr:view forGEO="NORDX,BELUX,NL,SWISS,MCO1">
       <cmr:column span="1">
         <cmr:label fieldId="custPhone_view">
           <span class="lbl-CustPhone">${ui.phone}</span>:</cmr:label>

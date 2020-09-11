@@ -199,6 +199,12 @@ function lockRequireFieldsZA() {
   if (reqType == 'U' && role == GEOHandler.ROLE_REQUESTER) {
     FormManager.readOnly('specialTaxCd');
   }
+  FormManager.readOnly('cmrOwner');
+  FormManager.readOnly('custPrefLang');
+  FormManager.addValidator('custPrefLang', Validators.REQUIRED, [ 'Preferred Language' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('cmrOwner', Validators.REQUIRED, [ 'CMR Owner' ], 'MAIN_IBM_TAB');
+  
+
 }
 
 function disableAddrFieldsZA() {
@@ -694,6 +700,8 @@ function lockAbbrv() {
     if (role == 'REQUESTER') {
       FormManager.readOnly('abbrevLocn');
       FormManager.readOnly('abbrevNm');
+    }else if(role == 'PROCESSOR'){
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     }
   }
 }
