@@ -147,6 +147,8 @@
       </cmr:column>
       
 	<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
+		<!-- Type Of Customer for MCO,MCO1 -->
+		<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
 			<c:if test="${reqentry.reqType != 'C'}">
 				<cmr:column span="2" containerForField="TypeOfCustomer">
 					<p>
