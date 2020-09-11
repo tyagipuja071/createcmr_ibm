@@ -408,6 +408,19 @@ public class UKIUtil extends AutomationUtil {
       return results;
     }
 
+    List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210", "7221", "7229", "7250", "7123", "9802");
+    if (!(SCENARIO_INTERNAL.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_BUSINESS_PARTNER.equals(scenario))) {
+      if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && isicList.contains(data.getIsicCd())) {
+        details.append("Setting Client Tier to 'N' for ISIC: " + data.getIsicCd()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
+        results.setResults("Calculated.");
+      } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && !isicList.contains(data.getIsicCd())) {
+        details.append("Setting Client Tier to 'S' for ISIC: " + data.getIsicCd()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
+        results.setResults("Calculated.");
+      }
+    }
+
     if (SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) {
       Addr zi01 = requestData.getAddress("ZI01");
       boolean highQualityMatchExists = false;
@@ -474,7 +487,7 @@ public class UKIUtil extends AutomationUtil {
           results.setResults("IBM Department/Cost Center " + dept + " validated successfully.");
         }
       }
-    } else {
+    } else if (details.toString().length() == 0) {
       details.append("No specific fields to calculate.");
       results.setResults("Skipped.");
       results.setProcessOutput(overrides);
@@ -563,9 +576,9 @@ public class UKIUtil extends AutomationUtil {
       UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU_CD", isuCd);
+      query.setParameter("ISU_CD", "%" + isuCd + "%");
       query.setParameter("ISIC_CD", isicCd);
-      query.setParameter("CLIENT_TIER", clientTier);
+      query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults();
       if (results != null && results.size() == 1) {
