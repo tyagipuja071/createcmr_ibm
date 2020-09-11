@@ -1588,6 +1588,10 @@ public class CyprusHandler extends BaseSOFHandler {
         data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
         if(CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())){
           data.setSalesTeamCd(legacyObjects.getCustomer().getSalesRepNo());
+          data.setRepTeamMemberNo(legacyObjects.getCustomer().getSalesGroupRep());
+        }else{
+          data.setSalesTeamCd("000000");
+          data.setRepTeamMemberNo("000000");
         }
       }
     } else { // Story 1389065: SBO and Sales rep auto-population : Mukesh

@@ -3372,6 +3372,7 @@ var custType = FormManager.getActualValue('custGrp');
     if (FormManager.getActualValue('reqType') == 'C') {
       _gtcISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
         if(FormManager.getActualValue('cmrIssuingCntry') != SysLoc.TURKEY){
+          FormManager.setValue('salesTeamCd', '000000');
           FormManager.setValue('repTeamMemberNo', '000000');
           FormManager.setValue('salesBusOffCd', '000');        
         }
@@ -3383,12 +3384,6 @@ var custType = FormManager.getActualValue('custGrp');
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
       setEnterprise();
-    });
-  }
-
-  if (_gtcISRHandler == null && FormManager.getActualValue('reqType') != 'C') {
-    dojo.connect(FormManager.getField('salesTeamCd'), 'onChange', function(value) {
-      setSalesBoSboIbo();
     });
   }
 
@@ -3492,7 +3487,9 @@ function setClientTierAndISR(value) {
   } else {
     FormManager.resetDropdownValues(FormManager.getField('clientTier'));
   }
-  
+  FormManager.setValue('salesTeamCd', '000000');
+  FormManager.setValue('repTeamMemberNo', '000000');
+  FormManager.setValue('salesBusOffCd', '000');    
 }
 
 function setISRValuesGR() {
@@ -4208,15 +4205,7 @@ function viewOnlyAddressDetails() {
 
 function salesSRforUpdate() {
   if (FormManager.getActualValue('reqType') == 'U') {
-    setSalesBoSboIbo();
-  }
-}
-
-function salesSRforUpdateOnChange() {
-  if (FormManager.getActualValue('reqType') == 'U') {
-    dojo.connect(FormManager.getField('repTeamMemberNo'), 'onChange', function(value) {
-      setSalesBoSboIbo();
-    });
+    FormManager.setValue('salesBusOffCd', '000');
   }
 }
 
@@ -8176,7 +8165,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TURKEY, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TURKEY ], null, true);
   GEOHandler.registerValidator(addDistrictPostCodeCityValidator, [ SysLoc.TURKEY ], null, true);
   GEOHandler.addAfterConfig(salesSRforUpdate, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAfterConfig(salesSRforUpdateOnChange, [ SysLoc.CYPRUS ]);
   // CMR-2279
   // *abner revert begin
   // GEOHandler.addAfterConfig(setSBOValuesForIsuCtc, [ SysLoc.TURKEY ]);
