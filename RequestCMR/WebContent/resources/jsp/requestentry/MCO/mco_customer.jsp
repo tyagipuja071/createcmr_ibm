@@ -145,11 +145,12 @@
           <cmr:field path="paymentMode" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      
-	<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
+     </cmr:row>
+  </cmr:view>
 		<!-- Type Of Customer for MCO,MCO1 -->
 		<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
 			<c:if test="${reqentry.reqType != 'C'}">
+			<cmr:row addBackground="true">
 				<cmr:column span="2" containerForField="TypeOfCustomer">
 					<p>
 						<cmr:label fieldId="crosSubTyp">
@@ -159,12 +160,10 @@
 							fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
 					</p>
 				</cmr:column>
+				</cmr:row>
 			</c:if>
 		</cmr:view>
-	
-	</cmr:row>
-	</cmr:view>
-
+		
   <cmr:view forCountry="822">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="DistrictCd">
