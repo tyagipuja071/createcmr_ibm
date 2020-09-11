@@ -125,7 +125,8 @@ public class UKIUtil extends AutomationUtil {
         engineData.addRejectionComment("OTH", "Customer Names on installing and billing address should be different for Data Center Scenario", "",
             "");
         return false;
-      } else if (!customerNameZI01.toUpperCase().contains("DATACENTER") && !customerNameZI01.toUpperCase().contains("DATA CENTER")) {
+      } else if (!customerNameZI01.toUpperCase().contains("DATACENTER") && !customerNameZI01.toUpperCase().contains("DATA CENTER")
+          && !customerNameZI01.toUpperCase().contains("DATACENTRE") && !customerNameZI01.toUpperCase().contains("DATA CENTRE")) {
         details.append("The request does not meet the criteria for Data Center Scenario.").append("\n");
         engineData.addRejectionComment("OTH", "The request does not meet the criteria for Data Center Scenario.", "", "");
         return false;
