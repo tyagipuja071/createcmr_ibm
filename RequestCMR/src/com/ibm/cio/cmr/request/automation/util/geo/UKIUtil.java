@@ -575,9 +575,9 @@ public class UKIUtil extends AutomationUtil {
       UkiFieldsContainer container = new UkiFieldsContainer();
       String sql = ExternalizedQuery.getSql("QUERY.UK.GET.SBOSR_FOR_ISIC");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("ISU_CD", isuCd);
+      query.setParameter("ISU_CD", "%" + isuCd + "%");
       query.setParameter("ISIC_CD", isicCd);
-      query.setParameter("CLIENT_TIER", clientTier);
+      query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults();
       if (results != null && results.size() == 1) {
