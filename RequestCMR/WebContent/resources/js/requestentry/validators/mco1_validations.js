@@ -51,7 +51,7 @@ function addHandlersForZA() {
 
   if (_reqReasonHandler == null) {
     _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
-      setCreditCdField();
+      // setCreditCdField();
     });
   }
 
@@ -162,20 +162,20 @@ function setCodFieldOnChange() {
   var cof = FormManager.getActualValue('commercialFinanced');
   var cod = FormManager.getActualValue('codFlag');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER') {
-    if (cod != null && cod != "" && (cof == 'R' || cof == 'S' || cof == 'T')) {
-      FormManager.setValue('codFlag', '');
-    }
+  // if (role == 'REQUESTER') {
+  if (cod != null && cod != "" && (cof == 'R' || cof == 'S' || cof == 'T')) {
+    FormManager.setValue('codFlag', 'N');
+    // }
   }
 }
 function setCofFieldOnChange() {
   var cof = FormManager.getActualValue('commercialFinanced');
   var cod = FormManager.getActualValue('codFlag');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER') {
-    if (cof != null && cof != "" && (cod == 'Y' || cod == 'N')) {
-      FormManager.setValue('commercialFinanced', '');
-    }
+  // if (role == 'REQUESTER') {
+  if (cof != null && cof != "" && cod == 'Y') {
+    FormManager.setValue('commercialFinanced', '');
+    // }
   }
 }
 
@@ -959,7 +959,6 @@ function getCommonSubgrpVal(custSubGrp) {
   return val;
 }
 
-
 function validateCMRForGMLLCScenario() {
   FormManager.addFormValidator((function() {
     return {
@@ -1093,7 +1092,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addCrossLandedCntryFormValidator, GEOHandler.MCO1, null, true);
   GEOHandler.registerValidator(addIbmDeptCostCntrValidator, GEOHandler.MCO1, null, true);
   GEOHandler.addAfterTemplateLoad(retainImportedValues, GEOHandler.MCO1);
- 
+
   GEOHandler.addAfterConfig(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onLobchange, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(setCofField, GEOHandler.MCO1);

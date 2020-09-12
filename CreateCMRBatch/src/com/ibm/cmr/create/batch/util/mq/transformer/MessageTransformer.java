@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
@@ -375,7 +376,7 @@ public abstract class MessageTransformer {
     // noop for default class, override
   }
 
-  public String mailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
+  public String getMailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
     return "NA";
   }
 
@@ -383,4 +384,11 @@ public abstract class MessageTransformer {
     return null;
   }
 
+  public BatchEmailModel getMailFormatParams(EntityManager entityManager, CMRRequestContainer cmrObjects, String type) {
+    return null;
+  }
+
+  public String getReqStatusForSendingMail(String mailFlag) {
+    return null;
+  }
 }
