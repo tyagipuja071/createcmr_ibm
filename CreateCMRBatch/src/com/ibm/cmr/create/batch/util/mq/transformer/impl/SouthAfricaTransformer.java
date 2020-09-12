@@ -246,6 +246,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setCustType(data.getCrosSubTyp());
     legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     legacyCust.setBankBranchNo("");
+    legacyCust.setCreditCd("");
 
     // append GM in AbbrevName for GM LLC
     if (!StringUtils.isEmpty(data.getCustSubGrp()) && data.getCustSubGrp().endsWith("LC")) {
