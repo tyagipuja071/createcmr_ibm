@@ -221,10 +221,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       legacyCust.setModeOfPayment(data.getCommercialFinanced());
       if (data.getCodCondition() != null) {
-        String cod = data.getCodCondition();
-        if (cod == "Y") {
+        String cod = data.getCreditCd();
+        if ("Y".equals(cod)) {
           legacyCust.setModeOfPayment("5");
-        } else {
+        } else if ("N".equals(cod)) {
           legacyCust.setModeOfPayment("");
         }
       }
