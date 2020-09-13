@@ -125,7 +125,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   private boolean hasAttnPrefix(String attnPerson) {
-    String[] attPersonPrefix = { "Att:", "Att", "Attention Person" };
+    String[] attPersonPrefix = { "Att:", "Att", "Attention Person", "ATT:" };
     boolean isPrefixFound = false;
 
     for (String prefix : attPersonPrefix) {
@@ -171,10 +171,12 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
+    List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC");
     formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
       String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
+
       boolean isBusPr = Arrays.asList(busPrSubGrp).contains(custSubGrp);
       if (isBusPr) {
         legacyCust.setAuthRemarketerInd("1");
@@ -244,9 +246,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     legacyCust.setBankBranchNo("");
 
-
     // append GM in AbbrevName for GM LLC
-    if (!StringUtils.isEmpty(data.getCustSubGrp()) && data.getCustSubGrp().endsWith("LC")) {
+    if (!StringUtils.isEmpty(data.getCustSubGrp()) && gmllcScenarios.contains(data.getCustSubGrp())) {
       String abbrevNm = data.getAbbrevNm();
       if (!StringUtils.isEmpty(abbrevNm) && !abbrevNm.toUpperCase().endsWith(" GM")) {
         if (abbrevNm.length() > 19) {
@@ -366,7 +367,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     return false;
   }
 
- @Override
+  @Override
   public String getFixedAddrSeqForProspectCreation() {
     return "00001";
   }

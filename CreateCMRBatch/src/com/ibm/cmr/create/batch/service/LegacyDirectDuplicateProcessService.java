@@ -32,6 +32,7 @@ public class LegacyDirectDuplicateProcessService extends LegacyDirectService {
   protected void processDupCreate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Create duplicate CMR processing of Request " + admin.getId().getReqId());
     Data data = cmrObjects.getData();
+    String parCountry = data.getCmrIssuingCntry();
     LegacyDirectObjectContainer legacyDupObjects = mapRequestDataForDupCreate(entityManager, cmrObjects);
     // finally persist all data
     CmrtCust legacyCust = legacyService.initEmpty(CmrtCust.class);
@@ -58,6 +59,8 @@ public class LegacyDirectDuplicateProcessService extends LegacyDirectService {
       }
     }
     partialCommit(entityManager);
+    // reverting back to issuing cntry for further processing
+    data.setCmrIssuingCntry(parCountry);
   }
 
   private LegacyDirectObjectContainer mapRequestDataForDupCreate(EntityManager entityManager, CMRRequestContainer cmrObjects) throws Exception {
@@ -68,12 +71,14 @@ public class LegacyDirectDuplicateProcessService extends LegacyDirectService {
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
     String cntry = data.getCmrIssuingCntry();
-    MessageTransformer transformer = TransformerManager.getTransformer(cntry);
+    MessageTransformer parentTransformer = TransformerManager.getTransformer(cntry);
     String targetCountry = null;
-    if (transformer != null) {
-      targetCountry = transformer.getGmllcDupCreation(data);
+    if (parentTransformer != null) {
+      targetCountry = parentTransformer.getGmllcDupCreation(data);
     }
     targetCountry = "NA".equals(targetCountry) ? data.getCmrIssuingCntry() : targetCountry;
+    // Process using target country mappings
+    MessageTransformer transformer = TransformerManager.getTransformer(targetCountry);
 
     legacyObjects.setCustomerNo(cmrNo);
     legacyObjects.setSofCntryCd(targetCountry);
@@ -258,7 +263,7 @@ public class LegacyDirectDuplicateProcessService extends LegacyDirectService {
       }
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
       // Modify the request values for the target country specific changes
-      transformer.transformLegacyDataForDupCreation(entityManager, legacyObjects, cmrObjects);
+      parentTransformer.transformLegacyDataForDupCreation(entityManager, legacyObjects, cmrObjects);
 
     }
 
