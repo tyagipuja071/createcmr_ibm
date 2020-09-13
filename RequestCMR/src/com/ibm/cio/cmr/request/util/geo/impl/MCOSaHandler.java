@@ -343,7 +343,7 @@ public class MCOSaHandler extends MCOHandler {
 
     if (legacyObjects != null && legacyObjects.getCustomer() != null) {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
-      data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
+      // data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
     }
 
     if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
@@ -354,12 +354,20 @@ public class MCOSaHandler extends MCOHandler {
       data.setCollBoId(collBo);
     }
 
-    /*
-     * String mop = legacyObjects.getCustomer().getModeOfPayment(); if (mop ==
-     * "R" || mop == "S" || mop == "T") { data.setCommercialFinanced(mop); }
-     * else if (mop == "5") { data.setCodCondition(mop); } else {
-     * data.setCodCondition("N"); data.setCommercialFinanced(""); }
-     */
+    if (ifUpdt) {
+      String mop = legacyObjects.getCustomer().getModeOfPayment();
+      if (StringUtils.isNotBlank(mop) && ("R".equals(mop) || "S".equals(mop) || "T".equals(mop))) {
+        data.setCommercialFinanced(mop);
+        data.setCreditCd("N");
+      } else if (StringUtils.isNotBlank(mop) && "5".equals(mop)) {
+        data.setCreditCd("Y");
+        data.setCommercialFinanced("");
+      } else {
+        data.setCreditCd("");
+        data.setCommercialFinanced("");
+      }
+    }
+
   }
 
   @Override
@@ -466,7 +474,7 @@ public class MCOSaHandler extends MCOHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE", "MODE_OF_PAYMENT", "ENTERPRISE", "COMMERCIAL_FINANCED", "COLL_BO_ID", "COD_CONDITION", "IBM_DEPT_COST_CENTER"));
+        "BP_REL_TYPE", "MODE_OF_PAYMENT", "ENTERPRISE", "COMMERCIAL_FINANCED", "COLL_BO_ID", "CREDIT_CD", "IBM_DEPT_COST_CENTER"));
     return fields;
   }
 

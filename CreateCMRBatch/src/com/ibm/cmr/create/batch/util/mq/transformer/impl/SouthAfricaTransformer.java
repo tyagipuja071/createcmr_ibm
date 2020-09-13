@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -22,9 +23,11 @@ import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -245,6 +248,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setCustType(data.getCrosSubTyp());
     legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     legacyCust.setBankBranchNo("");
+    legacyCust.setCreditCd("");
 
     // append GM in AbbrevName for GM LLC
     if (!StringUtils.isEmpty(data.getCustSubGrp()) && gmllcScenarios.contains(data.getCustSubGrp())) {
@@ -410,7 +414,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   @Override
-  public String mailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
+  public String getMailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
     String oldCOD = "";
     String oldCOF = "";
     String sql = ExternalizedQuery.getSql("GET.OLD_COD_COF_BY_REQID");
@@ -426,7 +430,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     if (StringUtils.isNotBlank(oldCOF) && StringUtils.isBlank(data.getCommercialFinanced())) {
       return "COF";
-    } else if (StringUtils.isNotBlank(oldCOD) && StringUtils.isBlank(data.getCodCondition())) {
+    } else if (StringUtils.isNotBlank(oldCOD) && StringUtils.isBlank(data.getCreditCd())) {
       return "COD";
     } else {
       return "NA";
@@ -441,6 +445,50 @@ public class SouthAfricaTransformer extends MCOTransformer {
       return "cmr-email_cof.html";
     }
 
+  }
+
+  @Override
+  public BatchEmailModel getMailFormatParams(EntityManager entityManager, CMRRequestContainer cmrObjects, String type) {
+    BatchEmailModel params = new BatchEmailModel();
+    Data data = cmrObjects.getData();
+    Admin admin = cmrObjects.getAdmin();
+    String directUrlLink = SystemConfiguration.getValue("APPLICATION_URL") + "/login?r=" + admin.getId().getReqId();
+    directUrlLink = "Click <a href=\"" + directUrlLink + "\">Here</a>";
+    params.setRequesterName(admin.getRequesterNm());
+    params.setRequesterId(admin.getRequesterId());
+    params.setRequestId(Long.toString(admin.getId().getReqId()));
+    String custNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? ("" + admin.getMainCustNm2()) : "");
+    params.setCustNm(custNm.trim());
+    params.setIssuingCountry(data.getCmrIssuingCntry());
+    params.setCmrNumber(data.getCmrNo());
+    String subregion = data.getCountryUse();
+    subregion = StringUtils.isNotBlank(subregion) && subregion.length() > 3 ? subregion.substring(3, 5) : "";
+    params.setSubregion(subregion);
+    params.setDirectUrlLink(directUrlLink);
+    String receipent = "";
+    String mailSubject = "";
+    if ("COD".equals(type)) {
+      mailSubject = SystemParameters.getString("COD_MAIL_SUBJECT");
+      receipent = SystemParameters.getString("COD_MAIL_RECIEVER");
+    } else if ("COF".equals(type)) {
+      mailSubject = SystemParameters.getString("COF_MAIL_SUBJECT");
+      receipent = SystemParameters.getString("COF_MAIL_RECIEVER");
+    }
+    params.setReceipent(receipent);
+    params.setMailSubject(mailSubject);
+    params.setStringToReplace("xxxxxx");
+    params.setValToBeReplaceBy(data.getCmrNo());
+    return params;
+  }
+
+  @Override
+  public String getReqStatusForSendingMail(String mailFlag) {
+    if ("COD".equals(mailFlag)) {
+      return "PCO";
+    } else if ("COF".equals(mailFlag)) {
+      return "COM";
+    }
+    return null;
   }
 
 }
