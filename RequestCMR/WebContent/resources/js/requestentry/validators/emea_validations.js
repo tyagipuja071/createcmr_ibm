@@ -902,14 +902,14 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
  * FormManager.setValue('abbrevLocn', _abbrevLocn); }
  */
 
-function autoSetVAT(){
-  
+function autoSetVAT() {
+
   if (PageManager.isReadOnly()) {
     return;
   }
-  
+
   var _custType = FormManager.getActualValue('custSubGrp');
-  if(!_custType || _custType == null){
+  if (!_custType || _custType == null) {
     _custType = '';
   }
   console.log(">>> Process autoSetVAT ...>> " + _custType);
@@ -999,7 +999,7 @@ function autoSetSBO(value, valueInDB) {
     if (custSubGrp == '') {
       return;
     } else if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
-        || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR') {
+        || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR' || custSubGrp == 'INFSL') {
       // FormManager.enable('salesBusOffCd');
       // FormManager.enable('repTeamMemberNo');
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
