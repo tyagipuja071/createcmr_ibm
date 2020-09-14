@@ -243,11 +243,12 @@
 		</cmr:row>
 	</cmr:view>
 
-	<cmr:view forCountry="754,866">
+	<cmr:view forCountry="866,754">
 		<cmr:row addBackground="true">
 			<cmr:column span="2" containerForField="CustClass">
 				<p>
-					<label for="custClass"> <cmr:fieldLabel fieldId="CustClass" />:
+					<label for="custClass">
+						<cmr:fieldLabel fieldId="CustClass" />:
 						<cmr:view>
 							<span id="info">
 								<cmr:info text="${ui.info.custClass}" />
