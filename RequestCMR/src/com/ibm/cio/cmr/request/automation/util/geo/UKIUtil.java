@@ -493,8 +493,7 @@ public class UKIUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
         results.setProcessOutput(overrides);
         results.setResults("Calculated.");
-      } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd)
-          && !isicList.contains(data.getIsicCd())) {
+      } else if ("32".equals(data.getIsuCd()) && "N".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd) && !isicList.contains(isicCd)) {
         details.append("Setting ISU-CTC to '32S' for ISIC: " + isicCd).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
