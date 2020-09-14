@@ -488,15 +488,17 @@ public class UKIUtil extends AutomationUtil {
     List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210", "7221", "7229", "7250", "7123", "9802");
     if (!(SCENARIO_INTERNAL.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_BUSINESS_PARTNER.equals(scenario))) {
       if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd) && isicList.contains(isicCd)) {
-        details.append("Setting ISU-CTC to '32N' for ISIC: " + data.getIsicCd()).append("\n");
+        details.append("Setting ISU-CTC to '32N' for ISIC: " + isicCd).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
+        results.setProcessOutput(overrides);
         results.setResults("Calculated.");
       } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd)
           && !isicList.contains(data.getIsicCd())) {
-        details.append("Setting ISU-CTC to '32S' for ISIC: " + data.getIsicCd()).append("\n");
+        details.append("Setting ISU-CTC to '32S' for ISIC: " + isicCd).append("\n");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
+        results.setProcessOutput(overrides);
         results.setResults("Calculated.");
       }
     }

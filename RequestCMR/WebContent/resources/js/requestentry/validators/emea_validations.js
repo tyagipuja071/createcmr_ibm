@@ -1047,7 +1047,7 @@ function autoSetSBO(value, valueInDB) {
     if (custSubGrp == '') {
       return;
     } else if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
-        || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR' || custSubGrp == 'INFSL') {
+        || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR' || custSubGrp == 'INFSL' || custSubGrp == 'DC') {
       // FormManager.enable('salesBusOffCd');
       // FormManager.enable('repTeamMemberNo');
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
@@ -1222,7 +1222,8 @@ function autoSetSboSrOnAddrSaveUK() {
     var isuCd = FormManager.getActualValue('isuCd');
     var custSubGrp = FormManager.getActualValue('custSubGrp');
 
-    if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT') {
+    if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
+      || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR' || custSubGrp == 'INFSL' || custSubGrp == 'DC') {
       FormManager.enable('salesBusOffCd');
       FormManager.enable('repTeamMemberNo');
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
