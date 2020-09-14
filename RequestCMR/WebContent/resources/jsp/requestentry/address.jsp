@@ -325,11 +325,6 @@ visibility: hidden !IMPORTANT;
 			<cmr:gridCol width="100px" field="dept" header="TIN#"></cmr:gridCol>  		    	
         </cmr:view>
         
-         <!-- ICE# -->
-        <cmr:view forCountry="642">
-			<cmr:gridCol width="100px" field="dept" header="ICE#"></cmr:gridCol>  		    	
-        </cmr:view> 
-        
         <!-- Story : 1830918 -->
         
         <cmr:view forCountry="848">

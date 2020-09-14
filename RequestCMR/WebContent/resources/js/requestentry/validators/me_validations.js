@@ -1322,10 +1322,17 @@ function setVatRequired(value) {
     if (!value && !dijit.byId('vatExempt')) {
       window.setTimeout('setVatRequired()', 500);
     } else {
+      var cntry = FormManager.getActualValue('cmrIssuingCntry');
       FormManager.resetValidations('vat');
+      if (cntry == '642') {
+        FormManager.resetValidations('phone3');
+      }
+
       if (!dijit.byId('vatExempt').get('checked')) {
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
         cemeaCustomVATMandatory();
+        if (cntry == '642') {
+          initICEField();
+        }
       }
     }
   }
