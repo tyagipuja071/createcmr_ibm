@@ -1202,6 +1202,14 @@ public class METransformer extends EMEATransformer {
       }
     }
 
+    if (SystemLocation.ABU_DHABI.equals(cust.getId().getSofCntryCode()) && !StringUtils.isBlank(muData.getCurrencyCd())) {
+      if ("@".equals(muData.getCurrencyCd())) {
+        cust.setCustType("");
+      } else {
+        cust.setCustType(muData.getCurrencyCd());
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       cust.setLocNo(cust.getId().getSofCntryCode() + muData.getSubIndustryCd());
     }
