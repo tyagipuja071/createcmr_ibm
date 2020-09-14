@@ -282,18 +282,18 @@ public class SingaporeUtil extends AutomationUtil {
         cmrdetails.put("cmrExistsFrSG", false);
 
         // collect Req Data
-        String reqNme1 = addr.getCustNm1();
-        String reqNme2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
+        String reqNme1 = StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm1().replaceAll("\\s", "") : "";
+        String reqNme2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2().replaceAll("\\s", "") : "";
         String reqFullNme = reqNme1.concat(reqNme2);
-        String reqAddr1 = StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt() : "";
-        String reqAddr2 = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2() : "";
+        String reqAddr1 = StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().replaceAll("\\s", "") : "";
+        String reqAddr2 = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2().replaceAll("\\s", "") : "";
         String addrFullTxt = reqAddr1.concat(reqAddr2);
         String isicCd = data.getIsicCd();
 
         // collect Find CMR Data
-        String findCMRNm = StringUtils.isNotBlank(cmrData.getName()) ? cmrData.getName().replace("@", "") : "";
-        String findCMRAddr1 = StringUtils.isNotBlank(cmrData.getStreetAddress1()) ? cmrData.getStreetAddress1() : "";
-        String findCMRAddr2 = StringUtils.isNotBlank(cmrData.getStreetAddress2()) ? cmrData.getStreetAddress2() : "";
+        String findCMRNm = StringUtils.isNotBlank(cmrData.getName()) ? cmrData.getName().replace("@", "").replaceAll("\\s", "") : "";
+        String findCMRAddr1 = StringUtils.isNotBlank(cmrData.getStreetAddress1()) ? cmrData.getStreetAddress1().replaceAll("\\s", "") : "";
+        String findCMRAddr2 = StringUtils.isNotBlank(cmrData.getStreetAddress2()) ? cmrData.getStreetAddress2().replaceAll("\\s", "") : "";
         String findCMRFullAddr = findCMRAddr1.concat(findCMRAddr2);
         String rdcIsicCd = getIsicCdFrmRDC(cmrNo, entityManager, issuinglandCntryCd);
 
