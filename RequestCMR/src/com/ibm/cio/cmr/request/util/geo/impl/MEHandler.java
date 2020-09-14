@@ -1001,7 +1001,7 @@ public class MEHandler extends BaseSOFHandler {
       }
       LOG.trace("TelephoneNo: " + data.getPhone1());
       if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
-        data.setPhone3(this.currentImportValues.get("ICE"));
+        data.setPhone3(this.currentImportValues.get("Shipping_00002_AddressI"));
       }
       // Type of Customer
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry())) {
@@ -1452,6 +1452,15 @@ public class MEHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Type of Customer", "Type of Customer"));
       update.setNewData(newData.getBpAcctTyp());
       update.setOldData(oldData.getBpAcctTyp());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getPhone3(), newData.getPhone3())
+        && SystemLocation.MOROCCO.equals(cmrCountry)) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ICE#", "ICE#"));
+      update.setNewData(newData.getPhone3());
+      update.setOldData(oldData.getPhone3());
       results.add(update);
     }
 
