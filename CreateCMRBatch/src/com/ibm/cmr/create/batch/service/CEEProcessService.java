@@ -87,7 +87,8 @@ public class CEEProcessService extends LegacyDirectService {
         }
       }
       partialCommit(entityManager);
-      //completeRecord(entityManager, admin, legacyDupObjects.getCustomerNo(), legacyDupObjects);
+      // completeRecord(entityManager, admin, legacyDupObjects.getCustomerNo(),
+      // legacyDupObjects);
     }
   }
 
@@ -350,7 +351,8 @@ public class CEEProcessService extends LegacyDirectService {
 
   }
 
-  private String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
+  @Override
+  public String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
     if (entityManager == null) {
       return null;
     }
@@ -370,8 +372,8 @@ public class CEEProcessService extends LegacyDirectService {
     return res;
   }
 
-  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
-      boolean sharedSeq) {
+  @Override
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -394,7 +396,7 @@ public class CEEProcessService extends LegacyDirectService {
     }
   }
 
-  private static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+  public static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
 
     for (String use : addrUse.split("")) {
       if (!StringUtils.isEmpty(use)) {
