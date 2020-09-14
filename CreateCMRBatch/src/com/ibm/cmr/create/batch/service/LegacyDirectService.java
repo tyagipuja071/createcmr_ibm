@@ -55,6 +55,7 @@ import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
+import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -372,7 +373,7 @@ public class LegacyDirectService extends TransConnService {
         dupService.processDupCreate(entityManager, admin, cmrObjects);
       }
 
-      completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+      completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects, cmrObjects);
 
     }
   }
@@ -544,7 +545,7 @@ public class LegacyDirectService extends TransConnService {
          * for (CmrtAddrUse legacyAddrUse : legacyObjects.getUses()) {
          * createEntity(legacyAddrUse, entityManager); }
          */
-        completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
+        completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects, cmrObjects);
 
         // CMR-1025 Legacy processing failed when updated Billing seq 0000B
         if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode())) {
@@ -954,9 +955,17 @@ public class LegacyDirectService extends TransConnService {
     partialCommit(entityManager);
   }
 
-  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)
-      throws CmrException, SQLException {
+  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects,
+      CMRRequestContainer cmrObjects) throws CmrException, SQLException {
     LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
+    String cntry = cmrObjects.getData().getCmrIssuingCntry();
+    MessageTransformer transformer = TransformerManager.getTransformer(cntry);
+    boolean hasDupCreates = false;
+    String targetCntry = transformer.getGmllcDupCreation(cmrObjects.getData());
+    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) && !"NA".equals(targetCntry)) {
+      hasDupCreates = true;
+    }
+
     admin.setLockBy(null);
     admin.setLockByNm(null);
     admin.setLockInd("N");
@@ -1022,9 +1031,25 @@ public class LegacyDirectService extends TransConnService {
       }
       message = message.trim();
     }
+
+    if (hasDupCreates) {
+      message += "\n" + "Records created successfully on the Legacy Database. CMR No. " + cmrNo + " assigned for country " + targetCntry;
+    }
+
     WfHist hist = createHistory(entityManager, message, "PCO", "Legacy Processing", admin.getId().getReqId());
     createComment(entityManager, message, admin.getId().getReqId());
     RequestUtils.sendEmailNotifications(entityManager, admin, hist, false, true);
+
+    String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(), admin, entityManager);
+    if (!"NA".equals(mailFlag)) {
+      String mailTemplate = transformer.getEmailTemplateName(mailFlag);
+      String statusForMailSend = transformer.getReqStatusForSendingMail(mailFlag);
+      if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
+        BatchEmailModel mailParams = transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
+        LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager, mailParams, mailTemplate);
+      }
+    }
+
     partialCommit(entityManager);
   }
 
@@ -3187,6 +3212,17 @@ public class LegacyDirectService extends TransConnService {
           RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
               "RDc  Processing has been completed. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
               "COM".equals(admin.getReqStatus()));
+        }
+
+        // email Notify
+        String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(), admin, entityManager);
+        if (!"NA".equals(mailFlag)) {
+          String mailTemplate = transformer.getEmailTemplateName(mailFlag);
+          String statusForMailSend = transformer.getReqStatusForSendingMail(mailFlag);
+          if (statusForMailSend != null && "COM".equals(statusForMailSend)) {
+            BatchEmailModel mailParams = transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
+            LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager, mailParams, mailTemplate);
+          }
         }
 
         partialCommit(entityManager);
