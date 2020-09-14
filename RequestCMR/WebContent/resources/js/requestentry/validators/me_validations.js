@@ -1861,6 +1861,13 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
         if (abbrevLocn && abbrevLocn.length > 12) {
           abbrevLocn = abbrevLocn.substring(0, 12);
         }
+        var custGrp = FormManager.getActualValue('custGrp');
+        if (CEMEA_EXCL.has(cntry) && (custGrp == 'GBM' || custGrp == 'SBM')) {
+          if (abbrevLocn && abbrevLocn.length > 8) {
+            abbrevLocn = abbrevLocn.substring(0, 8);
+          }
+          abbrevLocn = abbrevLocn + ' EXC';
+        }
         FormManager.setValue('abbrevNm', abbrevNm);
         FormManager.setValue('abbrevLocn', abbrevLocn);
 
@@ -1900,19 +1907,16 @@ function setAbbrvNmLoc() {
     if (abbrevLocn && abbrevLocn.length > 12) {
       abbrevLocn = abbrevLocn.substring(0, 12);
     }
-
-    // CMR-4606 set up abbrvNm for Russia CIS dup CMR
-    if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
-      if (abbrvNm && abbrvNm.length > 18) {
-        abbrvNm = abbrvNm.substring(0, 18).trim() + ' CIS';
-      } else {
-        abbrvNm = abbrvNm + ' CIS';
-      }
-    }
-
   }
 
   if (abbrevLocn != null) {
+    var custGrp = FormManager.getActualValue('custGrp');
+    if (CEMEA_EXCL.has(cntry) && (custGrp == 'GBM' || custGrp == 'SBM')) {
+      if (abbrevLocn && abbrevLocn.length > 8) {
+        abbrevLocn = abbrevLocn.substring(0, 8);
+      }
+      abbrevLocn = abbrevLocn + ' EXC';
+    }
     FormManager.setValue('abbrevLocn', abbrevLocn);
   }
   if (abbrvNm != null) {
@@ -3984,6 +3988,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addVatExemptHandler, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(addCISHandler, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.CEMEA);
+  GEOHandler.addAfterTemplateLoad(setAbbrvNmLoc, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.CEMEA);
   // CMR-801:comment out to unlock embargo code
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.CEMEA);
