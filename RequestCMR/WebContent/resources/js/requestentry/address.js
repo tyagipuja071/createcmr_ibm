@@ -1750,9 +1750,12 @@ function applyAddrChangesModal_onLoad() {
 
       // update TR
       // Rollback TR change
-      // if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01')
-      // {
-     
+      /* Removed for Cyprus
+       * if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01')
+         {
+          break;
+         }
+       */     
       
       // update For TR
 
