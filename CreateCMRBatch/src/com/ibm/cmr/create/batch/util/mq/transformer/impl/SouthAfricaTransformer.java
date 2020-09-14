@@ -128,7 +128,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   private boolean hasAttnPrefix(String attnPerson) {
-    String[] attPersonPrefix = { "Att:", "Att", "Attention Person" };
+    String[] attPersonPrefix = { "Att:", "Att", "Attention Person", "ATT:" };
     boolean isPrefixFound = false;
 
     for (String prefix : attPersonPrefix) {
@@ -174,10 +174,12 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
+    List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC");
     formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
       String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
+
       boolean isBusPr = Arrays.asList(busPrSubGrp).contains(custSubGrp);
       if (isBusPr) {
         legacyCust.setAuthRemarketerInd("1");
@@ -218,11 +220,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       legacyCust.setModeOfPayment(data.getCommercialFinanced());
-      if (StringUtils.isNotBlank(data.getCreditCd())) {
+      if (data.getCodCondition() != null) {
         String cod = data.getCreditCd();
         if ("Y".equals(cod)) {
           legacyCust.setModeOfPayment("5");
-        } else if ("N".equals(cod) && StringUtils.isBlank(data.getModeOfPayment())) {
+        } else if ("N".equals(cod)) {
           legacyCust.setModeOfPayment("");
         }
       }
@@ -249,7 +251,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setCreditCd("");
 
     // append GM in AbbrevName for GM LLC
-    if (!StringUtils.isEmpty(data.getCustSubGrp()) && data.getCustSubGrp().endsWith("LC")) {
+    if (!StringUtils.isEmpty(data.getCustSubGrp()) && gmllcScenarios.contains(data.getCustSubGrp())) {
       String abbrevNm = data.getAbbrevNm();
       if (!StringUtils.isEmpty(abbrevNm) && !abbrevNm.toUpperCase().endsWith(" GM")) {
         if (abbrevNm.length() > 19) {
@@ -398,12 +400,14 @@ public class SouthAfricaTransformer extends MCOTransformer {
         if (bpGMLLCScenarios.contains(data.getCustSubGrp())) {
           legacyCust.setIsuCd("8B7");
           legacyCust.setSalesRepNo("DUMMY1");
-          legacyCust.setSbo("0010");
+          legacyCust.setSbo("0010000");
+          legacyCust.setIbo("0010000");
           legacyCust.setInacCd("");
         } else {
           legacyCust.setIsuCd("32S");
           legacyCust.setSalesRepNo("DUMMY1");
-          legacyCust.setSbo("0080");
+          legacyCust.setSbo("0080000");
+          legacyCust.setIbo("0080000");
         }
       }
     }
