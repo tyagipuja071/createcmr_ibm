@@ -83,7 +83,7 @@ public class UKIUtil extends AutomationUtil {
     }
     LOG.info("Starting scenario validations for Request ID " + data.getId().getReqId());
     LOG.debug("Scenario to check: " + scenario);
-    if (!(SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_DATACENTER.equals(scenario))
+    if ((SCENARIO_COMMERCIAL.equals(scenario) || SCENARIO_GOVERNMENT.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario))
         && (!customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) || customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$"))) {
       details.append("Third Party Scenario should be selected.").append("\n");
       engineData.addRejectionComment("OTH", "Third Party Scenario should be selected.", "", "");
