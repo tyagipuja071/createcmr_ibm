@@ -262,12 +262,14 @@
 		<cmr:row addBackground="true">
 			<cmr:column span="2" containerForField="CustClass">
 				<p>
-					<cmr:label fieldId="custClass">
-						<cmr:fieldLabel fieldId="CustClass" /> :  
-				    <div id="info">
-							<cmr:info text="${ui.info.custClass}"></cmr:info>
-						</div>
-					</cmr:label>
+					<label for="custClass">
+						<cmr:fieldLabel fieldId="CustClass" />:
+						<cmr:view>
+							<span id="info">
+								<cmr:info text="${ui.info.custClass}" />
+							</span>
+						</cmr:view>
+					</label>
 					<cmr:field fieldId="CustClass" id="custClass" path="custClass"
 						tabId="MAIN_IBM_TAB" />
 				</p>
