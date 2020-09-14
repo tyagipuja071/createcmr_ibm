@@ -1748,21 +1748,16 @@ function applyAddrChangesModal_onLoad() {
         break;
       }
 
-      if (SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
-        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
-          continue;
-        } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
-          continue;
-        } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
-          continue;
-        }
-      }
-
+      // update TR
+      // Rollback TR change
+      /* Removed for Cyprus
+       * if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01')
+         {
+          break;
+         }
+       */     
+      
       // update For TR
-
-      if ((SysLoc.CYPRUS == cntry) && reqType == 'C' && type.ret1 == 'ZD01') {
-        break;
-      }
 
       if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
