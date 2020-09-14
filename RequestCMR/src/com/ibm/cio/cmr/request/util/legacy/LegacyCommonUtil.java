@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
@@ -250,47 +251,64 @@ public class LegacyCommonUtil {
 
   }
 
-  public static void sendfieldUpdateEmailNotification(EntityManager entityManager, Admin admin, Data data, String emailTemplatetype) {
+  public static void sendfieldUpdateEmailNotification(EntityManager entityManager, BatchEmailModel params, String emailTemplatename) {
     String emailTemplate = null;
     String from = SystemConfiguration.getValue("MAIL_FROM");
-    String subject = SystemConfiguration.getValue("MAIL_SUBJECT");
-    String receipent = SystemConfiguration.getValue("MAIL_RECEIPENT");
-    List<Object> params = new ArrayList<>();
-    // MessageTransformer transformer =
-    // TransformerManager.getTransformer(data.getCmrIssuingCntry());
-    if (emailTemplate == null) {
-      emailTemplate = getEmailTemplate(emailTemplatetype);
-      if (emailTemplate != null) {
-        String email = new String(emailTemplate);
-        email = MessageFormat.format(email, params.toArray(new Object[0]));
+    String host = SystemConfiguration.getValue("MAIL_HOST");
+    if (params != null) {
+      String subject = params.getMailSubject();
+      String receipent = params.getReceipent();
+      if (StringUtils.isBlank(receipent)) {
+        LOG.debug("Email subject is empty ,hence no email config is supported");
+        return;
+      } else if (StringUtils.isBlank(subject)) {
+        LOG.debug("Email receipent is empty ,hence no email config is supported");
+        return;
+      }
+      List<Object> mailparams = new ArrayList<>();
+      if (emailTemplatename != null) {
+        emailTemplate = getEmailTemplate(emailTemplatename);
+        if (emailTemplate != null && StringUtils.isNotBlank(emailTemplate)) {
+          String email = new String(emailTemplate);
 
-        String host = SystemConfiguration.getValue("MAIL_HOST");
+          // adding params
+          mailparams.add(params.getRequestId());
+          mailparams.add(params.getRequesterName());
+          mailparams.add(params.getRequesterId());
+          mailparams.add(params.getIssuingCountry());
+          mailparams.add(params.getSubregion());
+          mailparams.add(params.getCustNm());
+          mailparams.add(params.getCmrNumber());
+          mailparams.add(params.getDirectUrlLink());
 
-        Email mail = new Email();
-        mail.setSubject(subject);
-        mail.setTo(receipent);
-        mail.setFrom(from);
-
-        mail.setMessage(email);
-        mail.setType(MessageType.HTML);
-
-        mail.send(host);
+          email = StringUtils.replace(email, params.getStringToReplace(), params.getValToBeReplaceBy());
+          email = MessageFormat.format(email, mailparams.toArray(new Object[0]));
+          Email mail = new Email();
+          mail.setSubject(subject);
+          mail.setTo(receipent);
+          mail.setFrom(from);
+          mail.setMessage(email);
+          mail.setType(MessageType.HTML);
+          mail.send(host);
+        }
+      } else {
+        LOG.debug("Email cannot be generated as no params are found");
+        return;
       }
 
     }
 
   }
 
-  private static String getEmailTemplate(String emailTemplatetype) {
+  private static String getEmailTemplate(String mailTemplate) {
     StringBuilder sb = new StringBuilder();
     try {
       InputStream is = null;
-      if (emailTemplatetype != null) {
-        is = ConfigUtil.getResourceStream("cmr-email_batch.html");
+      if (mailTemplate != null) {
+        is = ConfigUtil.getResourceStream(mailTemplate);
       } else {
         return null;
       }
-
       try {
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         try {
