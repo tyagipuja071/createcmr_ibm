@@ -100,6 +100,11 @@ public class UKIUtil extends AutomationUtil {
       engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
 
+    if (SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+    }
+
     switch (scenario) {
     case SCENARIO_BUSINESS_PARTNER:
       return doBusinessPartnerChecks(engineData, data.getPpsceid(), details);
@@ -452,6 +457,7 @@ public class UKIUtil extends AutomationUtil {
       if (!highQualityMatchExists && "C".equals(admin.getReqType())) {
         details.append("No high quality matches found for Installing Address, setting ISIC to 7499.");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISIC_CD", data.getIsicCd(), "7499");
+        isicCd = "7499";
         String subInd = RequestUtils.getSubIndustryCd(entityManager, "7499", data.getCmrIssuingCntry());
         if (subInd != null) {
           overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), subInd);
@@ -482,12 +488,14 @@ public class UKIUtil extends AutomationUtil {
     List<String> isicList = Arrays.asList("7230", "7240", "7290", "7210", "7221", "7229", "7250", "7123", "9802");
     if (!(SCENARIO_INTERNAL.equals(scenario) || SCENARIO_PRIVATE_PERSON.equals(scenario) || SCENARIO_BUSINESS_PARTNER.equals(scenario))) {
       if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd) && isicList.contains(isicCd)) {
-        details.append("Setting Client Tier to 'N' for ISIC: " + data.getIsicCd()).append("\n");
+        details.append("Setting ISU-CTC to '32N' for ISIC: " + data.getIsicCd()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "N");
         results.setResults("Calculated.");
       } else if ("32".equals(data.getIsuCd()) && "S".equals(data.getClientTier()) && StringUtils.isNotBlank(isicCd)
           && !isicList.contains(data.getIsicCd())) {
-        details.append("Setting Client Tier to 'S' for ISIC: " + data.getIsicCd()).append("\n");
+        details.append("Setting ISU-CTC to '32S' for ISIC: " + data.getIsicCd()).append("\n");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "ISU_CD", data.getIsuCd(), "32");
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CLIENT_TIER", data.getClientTier(), "S");
         results.setResults("Calculated.");
       }
@@ -544,7 +552,7 @@ public class UKIUtil extends AutomationUtil {
     String scenario = data.getCustSubGrp();
 
     if ((!isCoverageCalculated
-        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") != null))
+        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") == null))
         && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       details.setLength(0);
       overrides.clearOverrides();
