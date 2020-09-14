@@ -395,6 +395,11 @@ function afterConfigForUKI() {
   }
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+      
+      if (PageManager.isReadOnly()) {
+        return;
+      }
+      
       if (dijit.byId('vatExempt').get('checked')) {
         console.log(">>> Process vatExempt remove * >> ");
         FormManager.resetValidations('vat');
@@ -8418,10 +8423,10 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.setValue('custClass', '33');
   }
 
-  if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU') && !dijit.byId('restrictInd').get('checked')) {
-    FormManager.getField('restrictInd').checked = false;
-    FormManager.enable('restrictInd');
-  }
+//  if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU') && !dijit.byId('restrictInd').get('checked')) {
+//    FormManager.getField('restrictInd').checked = false;
+//    FormManager.enable('restrictInd');
+//  }
 
 }
 function requestingLOBCheckFrIFSL() {
