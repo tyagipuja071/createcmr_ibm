@@ -23,7 +23,7 @@ var _addrTypesForOnChange = [ 'ZS01', 'ZP01', 'ZD01', 'ZI01' ];
 
 var SCOTLAND_POST_CD = [ 'AB', 'KA', 'DD', 'KW', 'DG', 'KY', 'EH', 'ML', 'FK', 'PA', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'PH', 'TD', 'IV' ];
 var NORTHERN_IRELAND_POST_CD = [ 'BT' ];
-var UK_LANDED_CNTRY = [ 'AI', 'BM', 'IO', 'VG', 'KY', 'FK', 'GI', 'MS', 'PN', 'SH', 'TC', 'GS', 'GG', 'JE', 'IM' ];
+var UK_LANDED_CNTRY = [ 'AI', 'BM', 'IO', 'VG', 'KY', 'FK', 'GI', 'MS', 'PN', 'SH', 'TC', 'GS', 'GG', 'JE', 'IM', 'AO' ];
 var _addrTypeITHandler = [];
 var _streetITHandler = null;
 var _custNameITHandler = null;
@@ -7277,6 +7277,7 @@ function optionalRulePostalCodeUK() {
 
 function optionalRuleForVatUK() {
 
+  var reqType = FormManager.getActualValue('reqType');
   if (reqType != 'C') {
     return;
   }
@@ -9109,7 +9110,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
-  
+
   GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 
 });
