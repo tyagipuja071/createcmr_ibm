@@ -133,7 +133,7 @@ public class MEHandler extends BaseSOFHandler {
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department", "MembLevel", "BPRelationType" };
+      "Floor", "Building", "County", "City2", "Department", "MembLevel", "BPRelationType", "SpecialTaxCd" };
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
@@ -1000,9 +1000,6 @@ public class MEHandler extends BaseSOFHandler {
         }
       }
       LOG.trace("TelephoneNo: " + data.getPhone1());
-      if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
-        data.setPhone3(this.currentImportValues.get("Shipping_00002_AddressI"));
-      }
       // Type of Customer
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry())) {
         data.setBpAcctTyp(this.currentImportValues.get("CustomerType"));
@@ -1050,6 +1047,10 @@ public class MEHandler extends BaseSOFHandler {
         if (cmrtExt != null) {
           String teleCovRep = cmrtExt.getTeleCovRep();
           data.setBpSalesRepNo(teleCovRep);
+          if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
+            String ice = cmrtExt.getiTaxCode();
+            data.setPhone3(ice);
+          }
         }
       }
     }
