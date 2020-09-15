@@ -116,8 +116,4 @@
   	<mktgDepartmentAR>672</mktgDepartmentAR>
     <svcOfficeAR>IKE</svcOfficeAR>
   </mapping>
-  <mapping>
-  	<mktgDepartmentAR>1SD</mktgDepartmentAR>
-    <svcOfficeAR>IKE</svcOfficeAR>
-  </mapping>
 </mappings>
