@@ -272,21 +272,36 @@ public class SingaporeUtil extends AutomationUtil {
         String reqNme1 = StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm1().replaceAll("\\s", "") : "";
         String reqNme2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2().replaceAll("\\s", "") : "";
         String reqFullNme = reqNme1.concat(reqNme2);
+
         String reqAddr1 = StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().replaceAll("\\s", "") : "";
         String reqAddr2 = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2().replaceAll("\\s", "") : "";
-        String addrFullTxt = reqAddr1.concat(reqAddr2);
+        String reqCity = StringUtils.isNotBlank(addr.getCity1()) ? addr.getCity1().replaceAll("\\s", "") : "";
+        String reqDept = StringUtils.isNotBlank(addr.getDept()) ? addr.getDept().replaceAll("\\s", "") : "";
+
+        String reqAddrFullTxt = reqAddr1 + reqAddr2 + reqCity + reqDept;
         String isicCd = data.getIsicCd();
 
-        // collect Find CMR Data
-        String findCMRNm = StringUtils.isNotBlank(cmrData.getName()) ? cmrData.getName().replace("@", "").replaceAll("\\s", "") : "";
-        String findCMRAddr1 = StringUtils.isNotBlank(cmrData.getStreetAddress1()) ? cmrData.getStreetAddress1().replaceAll("\\s", "") : "";
-        String findCMRAddr2 = StringUtils.isNotBlank(cmrData.getStreetAddress2()) ? cmrData.getStreetAddress2().replaceAll("\\s", "") : "";
-        String findCMRFullAddr = findCMRAddr1.concat(findCMRAddr2);
-        String rdcIsicCd = getIsicCdFrmRDC(cmrNo, entityManager, issuinglandCntryCd);
+        // collect RDC data
+        Kna1 kna1 = getDataAddrDetailsFrmRDC(cmrNo, entityManager, issuinglandCntryCd);
+        String rdcName1 = StringUtils.isNotBlank(kna1.getName1()) ? kna1.getName1().replace("@", "").replaceAll("\\s", "") : "";
+        String rdcName2 = StringUtils.isNotBlank(kna1.getName2()) ? kna1.getName2().replaceAll("\\s", "") : "";
+        String rdcFullName = rdcName1 + rdcName2;
+        String rdcIsicCd = kna1.getZzkvSic();
 
+        String rdcAddr1 = StringUtils.isNotBlank(kna1.getName3()) ? kna1.getName3().replaceAll("\\s", "") : "";
+        String rdcAddr2 = StringUtils.isNotBlank(kna1.getName4()) ? kna1.getName4().replaceAll("\\s", "") : "";
+        String rdcAddr3 = StringUtils.isNotBlank(kna1.getStras()) ? kna1.getStras().replaceAll("\\s", "") : "";
+        String rdcAddr4 = StringUtils.isNotBlank(kna1.getOrt01()) ? kna1.getOrt01().replaceAll("\\s", "") : "";
+        String rdcAddr5 = StringUtils.isNotBlank(kna1.getOrt02()) ? kna1.getOrt02().replaceAll("\\s", "") : "";
+
+        // city and dept are reversed in RDC sometimes
+        String rdcFullAddrTxt1 = rdcAddr1 + rdcAddr2 + rdcAddr3 + rdcAddr5 + rdcAddr4;
+        String rdcFullAddrTxt2 = rdcAddr1 + rdcAddr2 + rdcAddr3 + rdcAddr4 + rdcAddr5;
+        
         // compare the two data , to see if they match
-        if (StringUtils.isNotBlank(findCMRNm) && StringUtils.isNotBlank(findCMRFullAddr)
-            && (findCMRNm.equalsIgnoreCase(reqFullNme) && findCMRFullAddr.equalsIgnoreCase(addrFullTxt))) {
+        if (StringUtils.isNotBlank(rdcFullName) && StringUtils.isNotBlank(rdcFullAddrTxt1) && StringUtils.isNotBlank(rdcFullAddrTxt2)
+            && rdcFullName.equalsIgnoreCase(reqFullNme)
+            && (rdcFullAddrTxt1.equalsIgnoreCase(reqAddrFullTxt) || rdcFullAddrTxt2.equalsIgnoreCase(reqAddrFullTxt))) {
           if (StringUtils.isNotBlank(rdcIsicCd) && isicCd.equals(rdcIsicCd)) {
             cmrdetails.put("detailsMatch", true);
           } else {
@@ -305,6 +320,18 @@ public class SingaporeUtil extends AutomationUtil {
     }
 
     return cmrdetails;
+  }
+
+  private Kna1 getDataAddrDetailsFrmRDC(String cmrNo, EntityManager entityManager, String issuinglandCntry) {
+    String sqlRDC = ExternalizedQuery.getSql("KNA1.CHECK_IF_CMR_EXISTS");
+    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+    queryRDC.setParameter("KATR6", issuinglandCntry);
+
+    Kna1 kna1 = queryRDC.getSingleResult(Kna1.class);
+    return kna1;
+
   }
 
   private boolean checkifCMRNumExistsSG(String cmrNo, EntityManager entityManager) {
@@ -334,17 +361,6 @@ public class SingaporeUtil extends AutomationUtil {
     }
     entityManager.flush();
     return issuingCntryCd;
-  }
-
-  private String getIsicCdFrmRDC(String cmrNo, EntityManager entityManager, String issuinglandCntryCd) {
-    String sqlRDC = ExternalizedQuery.getSql("KNA1.GET_ISIC");
-    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
-    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
-    queryRDC.setParameter("CMR_NO", cmrNo);
-    queryRDC.setParameter("KATR6", issuinglandCntryCd);
-
-    String isicCd = queryRDC.getSingleResult(String.class);
-    return isicCd;
   }
 
   /**
