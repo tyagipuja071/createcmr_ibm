@@ -1853,7 +1853,6 @@ function addMailingConditionValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -1915,7 +1914,7 @@ function addMailingConditionValidator() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
-/* End 1430539 */
+
 
 function setFieldsCharForScenarios() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
