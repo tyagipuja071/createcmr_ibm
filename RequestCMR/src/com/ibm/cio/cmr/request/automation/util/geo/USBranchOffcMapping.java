@@ -97,9 +97,6 @@ public class USBranchOffcMapping {
     stateMktgDepMap.put("S6G", Arrays.asList(STATE_S6G));
   }
 
-  private static final String PAYGO_MKT_ARBO = "1SD";
-  private static final String PAYGO_SVC_ARBO = "IKE";
-
   private String scenario;
   private String csoSite;
   private String mktgDept;
@@ -316,6 +313,7 @@ public class USBranchOffcMapping {
         }
       }
       break;
+
     default:
       calculatedMtkgArDept = StringUtils.isBlank(mtkgArDept) ? "" : mtkgArDept;
       break;
