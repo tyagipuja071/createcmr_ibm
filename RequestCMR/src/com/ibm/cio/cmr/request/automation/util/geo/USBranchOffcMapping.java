@@ -280,8 +280,6 @@ public class USBranchOffcMapping {
         } else if (BluePagesHelper.getPerson(admin.getRequesterId()) != null) {
           calculatedMtkgArDept = "7NZ";
         }
-      } else if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedMtkgArDept = PAYGO_SVC_ARBO;
       } else {
         if (data != null && StringUtils.isNotBlank(data.getEnterprise())) {
           LOG.debug("Getting Marketing A/R BO with highest CMR count belonging to the enterprise=" + data.getEnterprise());
@@ -319,11 +317,7 @@ public class USBranchOffcMapping {
       }
       break;
     default:
-      if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedMtkgArDept = PAYGO_MKT_ARBO;
-      } else {
-        calculatedMtkgArDept = StringUtils.isBlank(mtkgArDept) ? "" : mtkgArDept;
-      }
+      calculatedMtkgArDept = StringUtils.isBlank(mtkgArDept) ? "" : mtkgArDept;
       break;
     }
     LOG.debug("Calculated MktgARBO=" + calculatedMtkgArDept);
@@ -342,7 +336,6 @@ public class USBranchOffcMapping {
   public String getSvcArOffice(EntityManager entityManager, RequestData requestData) throws Exception {
     String calculatedSvcArOffice = "";
     Data data = requestData.getData();
-    Admin admin = requestData.getAdmin();
     switch (svcArOffice) {
     case REQUEST:
       calculatedSvcArOffice = StringUtils.isBlank(data.getSvcArOffice()) ? "" : data.getSvcArOffice();
@@ -359,11 +352,7 @@ public class USBranchOffcMapping {
       }
       break;
     default:
-      if ("Y".equals(admin.getPaygoProcessIndc())) {
-        calculatedSvcArOffice = PAYGO_SVC_ARBO;
-      } else {
-        calculatedSvcArOffice = StringUtils.isBlank(svcArOffice) ? "" : svcArOffice;
-      }
+      calculatedSvcArOffice = StringUtils.isBlank(svcArOffice) ? "" : svcArOffice;
       break;
     }
     return calculatedSvcArOffice;
