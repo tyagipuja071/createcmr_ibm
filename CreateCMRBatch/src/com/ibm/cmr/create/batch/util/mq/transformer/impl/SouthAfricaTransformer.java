@@ -125,6 +125,13 @@ public class SouthAfricaTransformer extends MCOTransformer {
         lineNo++;
       }
     }
+
+    if (lineNo == 5) {
+      messageHash.put(addrKey + "Address5", null);
+      messageHash.put(addrKey + "Address6", null);
+    } else if (lineNo == 6) {
+      messageHash.put(addrKey + "Address6", null);
+    }
   }
 
   private boolean hasAttnPrefix(String attnPerson) {
