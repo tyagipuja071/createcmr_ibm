@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
@@ -214,6 +215,10 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassUpdateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapUpdate.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }
@@ -230,6 +235,10 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassCreateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapCreate.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }
