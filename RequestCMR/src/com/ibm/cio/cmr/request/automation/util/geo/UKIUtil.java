@@ -117,9 +117,6 @@ public class UKIUtil extends AutomationUtil {
         return false;
       }
       break;
-    case SCENARIO_INTERNAL_FSL:
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_DNB);
-      break;
     case SCENARIO_THIRD_PARTY:
       if (customerName.toUpperCase().equals(customerNameZI01.toUpperCase()) && !customerNameZI01.toUpperCase().matches("^VR[0-9]{3}.+$")) {
         details.append("The request does not meet the criteria for Third Party Scenario.").append("\n");

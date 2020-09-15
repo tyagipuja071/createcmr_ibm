@@ -68,14 +68,6 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
-    // added flow to skip dnb matching
-    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_DNB)) {
-      result.setDetails("DNB Matching skipped due to previous element execution results.");
-      result.setResults("Skipped");
-      result.setProcessOutput(output);
-      return result;
-    }
-
     if (soldTo != null)
 
     {

@@ -395,11 +395,11 @@ function afterConfigForUKI() {
   }
   if (_vatExemptHandler == null) {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      
+
       if (PageManager.isReadOnly()) {
         return;
       }
-      
+
       if (dijit.byId('vatExempt').get('checked')) {
         console.log(">>> Process vatExempt remove * >> ");
         FormManager.resetValidations('vat');
@@ -1180,7 +1180,7 @@ function autoSetSboSrOnAddrSaveUK() {
     var custSubGrp = FormManager.getActualValue('custSubGrp');
 
     if (custSubGrp == 'COMME' || custSubGrp == 'IGF' || custSubGrp == 'XIGF' || custSubGrp == 'COMLC' || custSubGrp == 'COOEM' || custSubGrp == 'SOFTL' || custSubGrp == 'THDPT'
-      || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR' || custSubGrp == 'INFSL' || custSubGrp == 'DC') {
+        || custSubGrp == 'CROSS' || custSubGrp == 'XGOVR' || custSubGrp == 'INFSL' || custSubGrp == 'DC') {
       FormManager.enable('salesBusOffCd');
       FormManager.enable('repTeamMemberNo');
       FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
@@ -6809,6 +6809,43 @@ function validateCompanyNoForUKI() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function validateVATForINFSLScenarioUKI() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var vat = FormManager.getActualValue('vat');
+        var country = "";
+        if (SysLoc.IRELAND == FormManager.getActualValue('cmrIssuingCntry')) {
+          country = "IE";
+        } else if (SysLoc.UK == FormManager.getActualValue('cmrIssuingCntry')) {
+          country = "GB";
+        }
+
+        if (custSubGrp == 'INFSL' && country != '') {
+          if (vat == '') {
+            return new ValidationResult(null, true);
+          } else {
+            var vatRet = cmr.validateVATUsingVies(country, vat);
+            if (!vatRet.success) {
+              return new ValidationResult({
+                id : 'vat',
+                type : 'text',
+                name : 'vat'
+              }, false, vatRet.errorMessage);
+            } else {
+              return new ValidationResult(null, true);
+            }
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 function lockRequireFieldsUKI() {
   var reqType = FormManager.getActualValue('reqType').toUpperCase();
   var vat = FormManager.getActualValue('vat');
@@ -8424,10 +8461,11 @@ function autoSetUIFieldsOnScnrioUKI() {
     FormManager.setValue('custClass', '33');
   }
 
-//  if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU') && !dijit.byId('restrictInd').get('checked')) {
-//    FormManager.getField('restrictInd').checked = false;
-//    FormManager.enable('restrictInd');
-//  }
+  // if (reqType == 'C' && !(custGrp == 'CROSS' || custSubGrp == 'PRICU') &&
+  // !dijit.byId('restrictInd').get('checked')) {
+  // FormManager.getField('restrictInd').checked = false;
+  // FormManager.enable('restrictInd');
+  // }
 
 }
 function requestingLOBCheckFrIFSL() {
@@ -9071,5 +9109,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(configureCRNForUKI, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterTemplateLoad(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
   GEOHandler.addAfterConfig(autoSetVAT, [ SysLoc.UK, SysLoc.IRELAND ]);
+  
+  GEOHandler.registerValidator(validateVATForINFSLScenarioUKI, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
 
 });
