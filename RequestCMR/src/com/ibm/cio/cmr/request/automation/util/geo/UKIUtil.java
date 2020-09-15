@@ -102,7 +102,7 @@ public class UKIUtil extends AutomationUtil {
 
     if (SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
     }
 
     switch (scenario) {
