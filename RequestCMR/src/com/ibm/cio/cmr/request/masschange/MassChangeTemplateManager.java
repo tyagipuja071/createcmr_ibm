@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.masschange.obj.MassChangeTemplate;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateColumn;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateTab;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * Initializes and manages the templates from the XML configurations
@@ -30,6 +31,7 @@ public class MassChangeTemplateManager {
   private static Map<String, String> templateMapCreate = new HashMap<String, String>();
   private static Map<String, String> templateMapUpdate = new HashMap<String, String>();
   private static Map<String, ValueValidator> validators = new HashMap<String, ValueValidator>();
+  private static Map<String, String> configCountryMap = new HashMap<String, String>();
   private static Map<String, String> configList = new HashMap<String, String>();
   static {
     configList.put("838", "config.838.xml");
@@ -41,7 +43,7 @@ public class MassChangeTemplateManager {
     configList.put("693", "config.693.xml");
     configList.put("695", "config.695.xml");
     configList.put("707", "config.707.xml");
-    
+
     configList.put("358", "config.358.xml");
     configList.put("359", "config.359.xml");
     configList.put("363", "config.363.xml");
@@ -96,7 +98,7 @@ public class MassChangeTemplateManager {
   public static void initTemplatesAndValidators(String issuingCntry) throws IOException, SAXException {
     templateMapCreate.clear();
     templateMapUpdate.clear();
-    init(configList.get(issuingCntry));
+    init(configList.get(issuingCntry), issuingCntry);
   }
 
   /**
@@ -108,7 +110,7 @@ public class MassChangeTemplateManager {
   public static void initTemplatesAndValidatorsSwiss() throws IOException, SAXException {
     templateMapCreate.clear();
     templateMapUpdate.clear();
-    init("config.SWISS.xml");
+    init("config.SWISS.xml", SystemLocation.SWITZERLAND);
   }
 
   /**
@@ -118,7 +120,7 @@ public class MassChangeTemplateManager {
    * @throws IOException
    * @throws SAXException
    */
-  private static void init(String configName) throws IOException, SAXException {
+  private static void init(String configName, String issuingCountry) throws IOException, SAXException {
     try (InputStream is = ConfigUtil.getResourceStream(configName)) {
       MassChangeTemplateDigester digester = new MassChangeTemplateDigester();
       MassChangeTemplate template = (MassChangeTemplate) digester.parse(is);
@@ -126,8 +128,10 @@ public class MassChangeTemplateManager {
         if (hasCmrNoOnAllTabs(template)) {
           if (CmrConstants.REQ_TYPE_MASS_UPDATE.equals(template.getType())) {
             templateMapUpdate.put(template.getId(), configName);
+            configCountryMap.put(issuingCountry, template.getId());
           } else if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(template.getType())) {
             templateMapCreate.put(template.getId(), configName);
+            configCountryMap.put(issuingCountry, template.getId());
           }
         } else {
           LOG.warn("Configuration " + configName + " is missing CMR No. on one of the tabs.");
@@ -170,6 +174,9 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassUpdateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapUpdate.get(templateId);
+    if (configName == null) {
+      configName = configCountryMap.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }
