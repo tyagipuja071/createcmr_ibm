@@ -693,15 +693,16 @@ public class PortugalTransformer extends MessageTransformer {
       legacyAddr.setZipCode(addr.getPostCd());
     }
 
-    if (!StringUtils.isBlank(addr.getCounty())) {
-      if (addr.getId().getAddrType().equals("ZD01")) {
-        if (DEFAULT_CLEAR_NUM.equals(addr.getCounty().trim())) {
+    if ("ZD01".equals(addr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(addr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
           legacyAddr.setAddrPhone("");
         } else {
-          legacyAddr.setAddrPhone(addr.getCounty());
+          legacyAddr.setAddrPhone(addr.getCustPhone());
         }
       }
     }
+
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
   }
@@ -775,10 +776,11 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
-        (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : "") };
+        (line4 != null ? line4.trim() : ""), (line5 != null ? line5.trim() : ""), (line6 != null ? line6.trim() : "") };
     int lineNo = 1;
     LOG.debug("Lines: " + (line1 != null ? line1.trim() : "") + " | " + (line2 != null ? line2.trim() : "") + " | "
-        + (line3 != null ? line3.trim() : "") + " | " + (line4 != null ? line4.trim() : "") + " | " + (line5 != null ? line5.trim() : ""));
+        + (line3 != null ? line3.trim() : "") + " | " + (line4 != null ? line4.trim() : "") + " | " + (line5 != null ? line5.trim() : "") + " | "
+        + (line6 != null ? line6.trim() : ""));
 
     for (String line : lines) {
       messageHash.put(getAddressKey((massUpdtAddr.getId().getAddrType()) + "Address" + lineNo).toString(), line);
