@@ -2892,17 +2892,6 @@ public class LegacyDirectService extends TransConnService {
         isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
         MessageTransformer transformer = TransformerManager.getTransformer(data.getCmrIssuingCntry());
 
-        if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry()) && !isDataUpdated) {
-          for (Addr addr : addresses) {
-            if ("ZS01".equals(addr.getId().getAddrType())) {
-              AddrRdc addrRdc = getAddrRdcRecord(entityManager, addr);
-              if (addrRdc == null || (addrRdc != null && !addr.getCustPhone().equals(addrRdc.getCustPhone()))) {
-                isDataUpdated = true;
-              }
-            }
-          }
-        }
-
         if (transformer.isUpdateNeededOnAllAddressType(entityManager, cmrObjects)) {
           isDataUpdated = true;
         }

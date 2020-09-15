@@ -14,6 +14,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrLink;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
+import com.ibm.cio.cmr.request.entity.Kna1;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
@@ -53,6 +54,8 @@ public class LegacyDirectObjectContainer {
 
   private List<CmrtCust> customersIT = new ArrayList<CmrtCust>();
   private List<CmrtCustExt> customersextIT = new ArrayList<CmrtCustExt>();
+
+  private final List<Kna1> rdcRecords = new ArrayList<Kna1>();
 
   /**
    * Finds the address pertaining to the given sequence no
@@ -345,6 +348,10 @@ public class LegacyDirectObjectContainer {
 
   public void setCustomersextIT(List<CmrtCustExt> customersextIT) {
     this.customersextIT = customersextIT;
+  }
+
+  public List<Kna1> getRdcRecords() {
+    return rdcRecords;
   }
 
 }
