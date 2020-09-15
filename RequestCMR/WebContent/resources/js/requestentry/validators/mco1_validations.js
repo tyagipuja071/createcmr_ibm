@@ -28,8 +28,9 @@ function lockEmbargo() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER') {
+  if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('embargoCd');
   } else {
     FormManager.enable('embargoCd');
@@ -203,7 +204,6 @@ function lockRequireFieldsZA() {
   FormManager.readOnly('custPrefLang');
   FormManager.addValidator('custPrefLang', Validators.REQUIRED, [ 'Preferred Language' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('cmrOwner', Validators.REQUIRED, [ 'CMR Owner' ], 'MAIN_IBM_TAB');
-  
 
 }
 
@@ -700,7 +700,7 @@ function lockAbbrv() {
     if (role == 'REQUESTER') {
       FormManager.readOnly('abbrevLocn');
       FormManager.readOnly('abbrevNm');
-    }else if(role == 'PROCESSOR'){
+    } else if (role == 'PROCESSOR') {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     }
   }
@@ -1060,7 +1060,7 @@ function enableCmrForProcessor() {
   if (reqType != 'C') {
     return;
   }
-  if(role == "PROCESSOR") {
+  if (role == "PROCESSOR") {
     FormManager.enable('cmrNo');
   }
 }
