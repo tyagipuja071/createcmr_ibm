@@ -90,7 +90,13 @@ function addAddressRecordTypeValidator() {
               invoiceToCnt++;
             }
           }
-          if (installAtCnt != 1 || CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 2) {
+          // if (installAtCnt != 1 || CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >
+          // 2) {
+          // return new ValidationResult(null, false, 'The request should
+          // contain exactly one Install At address and one optional Invoice To
+          // address.');
+          // }
+          if (installAtCnt != 1 || invoiceToCnt > 1) {
             return new ValidationResult(null, false, 'The request should contain exactly one Install At address and one optional Invoice To address.');
           } else {
             return new ValidationResult(null, true);
@@ -189,6 +195,7 @@ function addUSAddressHandler(cntry, addressMode, saving) {
 }
 
 function toggleAddrTypesForUS(cntry, addressMode, details) {
+  var reqType = FormManager.getActualValue('reqType');
   if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
     if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
       var firstRecord = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(0);
@@ -210,6 +217,12 @@ function toggleAddrTypesForUS(cntry, addressMode, details) {
       cmr.showNode('radiocont_ZS01');
       cmr.hideNode('radiocont_ZI01');
     }
+  }
+  // CMR - 6072
+  if (reqType == 'U' && (cmr.addressMode == 'updateAddress' || cmr.addressMode == 'copyAddress')) {
+    cmr.showNode('radiocont_ZP01');
+  } else {
+    cmr.hideNode('radiocont_ZP01');
   }
 }
 
@@ -243,6 +256,55 @@ function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
     }
   } else {
     FormManager.readOnly('isicCd');
+  }
+}
+
+function canUpdateAddress(value, rowIndex, grid) {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  console.log(value + ' - ' + rowIndex);
+  var rowData = grid.getItem(0);
+  if (rowData == null) {
+    return '';
+  }
+  rowData = grid.getItem(rowIndex);
+  var addrType = rowData.addrType;
+  if (addrType == 'ZP01' && reqType == 'U' && role == 'REQUESTER') {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+function canCopyAddress(value, rowIndex, grid) {
+  var reqType = FormManager.getActualValue('reqType');
+  console.log(value + ' - ' + rowIndex);
+  var rowData = grid.getItem(0);
+  if (rowData == null) {
+    return '';
+  }
+  rowData = grid.getItem(rowIndex);
+  var addrType = rowData.addrType;
+  if (addrType == 'ZP01' && reqType == 'U') {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+function canRemoveAddress(value, rowIndex, grid) {
+  var reqType = FormManager.getActualValue('reqType');
+  console.log(value + ' - ' + rowIndex);
+  var rowData = grid.getItem(0);
+  if (rowData == null) {
+    return '';
+  }
+  rowData = grid.getItem(rowIndex);
+  var addrType = rowData.addrType;
+  if (addrType == 'ZP01' && reqType == 'U') {
+    return false;
+  } else {
+    return true;
   }
 }
 

@@ -3,7 +3,9 @@ package com.ibm.cio.cmr.request.automation.util.geo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -11,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -19,10 +22,17 @@ import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Kna1;
+import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
@@ -34,6 +44,11 @@ public class SingaporeUtil extends AutomationUtil {
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
       CmrConstants.RDC_INSTALL_AT, "ZH01");
+
+  public static final String SCENARIO_BLUEMIX = "BLUMX";
+  public static final String SCENARIO_MARKETPLACE = "MKTPC";
+  public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
+  public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -70,27 +85,28 @@ public class SingaporeUtil extends AutomationUtil {
       details.append("Default cluster not used.\n");
     }
 
-    String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
-    LOG.debug("IfClusterSalesmanIsValid" + validRes);
+    if (!"SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
+      String validRes = checkIfClusterSalesmanIsValid(entityManager, requestData);
+      LOG.debug("IfClusterSalesmanIsValid" + validRes);
 
-    if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
-      LOG.debug("Salesman check skipped for private and allowed scenarios.");
-      details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
-    } else {
+      if ("9500".equals(data.getIsicCd()) || ALLOW_DEFAULT_SCENARIOS.contains(data.getCustSubGrp())) {
+        LOG.debug("Salesman check skipped for private and allowed scenarios.");
+        details.append("\nSalesman check skipped for this scenario (Private/Marketplace/Bluemix).\n");
+      } else {
 
-      if (validRes != null && validRes.equals("INVALID")) {
-        details.append("The combination of Salesman No. and Cluster is not valid.\n");
-        engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
-        // eleResults.append("Invalid Salesman No.\n");
-        results.setOnError(true);
-      } else if (validRes != null && validRes.equals("VALID")) {
-        details.append("The combination of Salesman No. and Cluster is valid.\n");
-      } else if (validRes != null && validRes.equals("NO_RESULTS")) {
-        details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+        if (validRes != null && validRes.equals("INVALID")) {
+          details.append("The combination of Salesman No. and Cluster is not valid.\n");
+          engineData.addRejectionComment("OTH", "The combination of Salesman No. and Cluster is not valid.", "", "");
+          // eleResults.append("Invalid Salesman No.\n");
+          results.setOnError(true);
+        } else if (validRes != null && validRes.equals("VALID")) {
+          details.append("The combination of Salesman No. and Cluster is valid.\n");
+        } else if (validRes != null && validRes.equals("NO_RESULTS")) {
+          details.append("The combination of Salesman No. and Cluster doesn't exist for country.\n");
+        }
+
       }
-
     }
-
     if (govType != null && govType.equals("Y")) {
       // eleResults.append("Government Organization" + "\n");
       details.append("Processor review is needed as customer is a Government Organization" + "\n");
@@ -119,6 +135,23 @@ public class SingaporeUtil extends AutomationUtil {
       details.append("ISIC is valid" + "\n");
     }
 
+    // CMR - 4507
+    if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp()) && StringUtils.isNotBlank(data.getCmrNo())) {
+      Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+      String zs01LandCntry = addr.getLandCntry();
+      String landCntryCd = getLandCntryCode(entityManager, zs01LandCntry);
+      Map<String, Boolean> checkResults = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), landCntryCd, entityManager, data,
+          requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+      if (!checkResults.get("cmrExists")) {
+        details.append("CMR# " + data.getCmrNo() + " cleared as it doesn't exist in FIND CMR.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CMR_NO", data.getCmrNo(), "");
+      } else if (checkResults.get("cmrExistsFrSG")) {
+        details.append("CMR# " + data.getCmrNo() + " cleared as  it is not available for Singapore.");
+        overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "CMR_NO", data.getCmrNo(), "");
+
+      }
+    }
+
     if (!results.isOnError()) {
       // eleResults.append("Successful Exceution");
       details.append("Field Computation completed successfully." + "\n");
@@ -142,13 +175,189 @@ public class SingaporeUtil extends AutomationUtil {
      * skipCompanyCheckForScenario(requestData, engineData,
      * Arrays.asList(scnarioList), false);
      */
-
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
+    switch (scenario) {
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+    case SCENARIO_CROSS_BLUEMIX:
+    case SCENARIO_CROSS_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    }
+    // CMR - 4507
+    if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
+      Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
+      String zs01LandCntry = addr.getLandCntry();
+      String issuinglandCntryCd = getLandCntryCode(entityManager, zs01LandCntry);
+      try {
+        if (StringUtils.isNotBlank(data.getCmrIssuingCntry()) && StringUtils.isNotBlank(issuinglandCntryCd)) {
+          Map<String, Boolean> checkresult = checkifCMRNumExistsNDetailsMatch(data.getCmrNo(), issuinglandCntryCd, entityManager, data,
+              requestData.getAddress(CmrConstants.RDC_SOLD_TO));
+          boolean cmrExists = checkresult.get("cmrExists");
+          boolean cmrExistsFrSG = checkresult.get("cmrExistsFrSG");
+          boolean detailsMatch = checkresult.get("detailsMatch");
+
+          if (cmrExists) {
+            LOG.debug("CMR#" + data.getCmrNo() + " exists in FIND CMR for -> " + issuinglandCntryCd);
+            if (cmrExistsFrSG) {
+              LOG.debug("Requested CMR No. " + data.getCmrNo() + " is not available, CMR No. will automatically be generated by the system.");
+              details.append("CMR#. " + data.getCmrNo() + " unavailable & will be generated by system.");
+            } else {
+              if (detailsMatch) {
+                LOG.debug("CMR exists and Details Match , Hence proceeding with automating the request.");
+                details.append("CMR exists & Details Match,proceeding with automating the request.");
+              } else {
+                LOG.debug("CMR# " + data.getCmrNo() + " Exists but request details do not match the details of CMR in FIND CMR.");
+                details.append("CMR# " + data.getCmrNo() + " exists but request details do not match.");
+                engineData.addNegativeCheckStatus("OTH",
+                    "CMR# " + data.getCmrNo() + " exists but request details do not match the details of CMR in RDc.");
+                result.setOnError(true);
+              }
+            }
+          } else {
+            LOG.debug("CMR# " + data.getCmrNo() + " does not exist in FIND CMR.");
+            details.append("CMR# " + data.getCmrNo() + " does not exist in FIND CMR.");
+            engineData.addNegativeCheckStatus("OTH", "CMR# " + data.getCmrNo() + " does not exist in FIND CMR.");
+            result.setOnError(true);
+          }
+
+          /*
+           * if (!cmrExists) { details.append("CMR# " + data.getCmrNo() +
+           * " does not exist in RDc.");
+           * engineData.addNegativeCheckStatus("OTH", "CMR# " + data.getCmrNo()
+           * + " does not exist in RDc."); result.setOnError(true); } else if
+           * (cmrExistsFrSG) { details.append("Requested CMR No. " +
+           * data.getCmrNo() +
+           * " is not available, CMR No. will automatically be generated by the system."
+           * ); } else if (cmrExists && !detailsMatch) { details.append("CMR# "
+           * + data.getCmrNo() +
+           * " Exists but request details do not match the details of CMR in RDc."
+           * ); engineData.addNegativeCheckStatus("OTH", "CMR# " +
+           * data.getCmrNo() +
+           * " Exists but request details do not match the details of CMR in RDc."
+           * ); result.setOnError(true); } else if (cmrExists && detailsMatch) {
+           * details.
+           * append("Details Match , Hence proceeding with automating the request."
+           * ); }
+           */
+        }
+      } catch (Exception e) {
+        LOG.debug("Error on searching for CMR in FIND CMR." + e.getMessage());
+      }
+      result.setDetails(details.toString());
+    }
     return true;
+  }
+
+  private Map<String, Boolean> checkifCMRNumExistsNDetailsMatch(String cmrNo, String issuinglandCntryCd, EntityManager entityManager, Data data,
+      Addr addr) {
+    Map<String, Boolean> cmrdetails = new HashMap<String, Boolean>();
+    CompanyRecordModel searchModel = new CompanyRecordModel();
+    searchModel.setCmrNo(cmrNo);
+    searchModel.setIssuingCntry(issuinglandCntryCd);
+    CompanyRecordModel cmrData = null;
+    try {
+      List<CompanyRecordModel> cmrsData = CompanyFinder.findCompanies(searchModel);
+      if (!cmrsData.isEmpty())
+        cmrData = cmrsData.get(0);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    if (cmrData != null) {
+      LOG.debug("CMR No. exists in FIND CMR > " + cmrNo);
+      cmrdetails.put("cmrExists", true);
+
+      // if cmr exists,check if available for processing under 834
+      boolean cmrExistsFrSG = checkifCMRNumExistsSG(cmrNo, entityManager);
+
+      // if cmr does not exist in 834 , check for name , address and isic
+      if (!cmrExistsFrSG) {
+        LOG.debug("CMR No. does not exist in RDC Db for SG and hence can be used for processing > " + cmrNo);
+        cmrdetails.put("cmrExistsFrSG", false);
+
+        // collect Req Data
+        String reqNme1 = StringUtils.isNotBlank(addr.getCustNm1()) ? addr.getCustNm1().replaceAll("\\s", "") : "";
+        String reqNme2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2().replaceAll("\\s", "") : "";
+        String reqFullNme = reqNme1.concat(reqNme2);
+        String reqAddr1 = StringUtils.isNotBlank(addr.getAddrTxt()) ? addr.getAddrTxt().replaceAll("\\s", "") : "";
+        String reqAddr2 = StringUtils.isNotBlank(addr.getAddrTxt2()) ? addr.getAddrTxt2().replaceAll("\\s", "") : "";
+        String addrFullTxt = reqAddr1.concat(reqAddr2);
+        String isicCd = data.getIsicCd();
+
+        // collect Find CMR Data
+        String findCMRNm = StringUtils.isNotBlank(cmrData.getName()) ? cmrData.getName().replace("@", "").replaceAll("\\s", "") : "";
+        String findCMRAddr1 = StringUtils.isNotBlank(cmrData.getStreetAddress1()) ? cmrData.getStreetAddress1().replaceAll("\\s", "") : "";
+        String findCMRAddr2 = StringUtils.isNotBlank(cmrData.getStreetAddress2()) ? cmrData.getStreetAddress2().replaceAll("\\s", "") : "";
+        String findCMRFullAddr = findCMRAddr1.concat(findCMRAddr2);
+        String rdcIsicCd = getIsicCdFrmRDC(cmrNo, entityManager, issuinglandCntryCd);
+
+        // compare the two data , to see if they match
+        if (StringUtils.isNotBlank(findCMRNm) && StringUtils.isNotBlank(findCMRFullAddr)
+            && (findCMRNm.equalsIgnoreCase(reqFullNme) && findCMRFullAddr.equalsIgnoreCase(addrFullTxt))) {
+          if (StringUtils.isNotBlank(rdcIsicCd) && isicCd.equals(rdcIsicCd)) {
+            cmrdetails.put("detailsMatch", true);
+          } else {
+            cmrdetails.put("detailsMatch", false);
+          }
+        } else {
+          cmrdetails.put("detailsMatch", false);
+        }
+      } else {
+        cmrdetails.put("cmrExistsFrSG", true);
+        LOG.debug("CMR No. already exists in RDC Db for Singapore and hence cannot be used for processing > " + cmrNo);
+      }
+    } else {
+      cmrdetails.put("cmrExists", false);
+      LOG.debug("CMR No. details mentioned in the request do not exist in FIND CMR for the landed cntry > " + issuinglandCntryCd);
+    }
+
+    return cmrdetails;
+  }
+
+  private boolean checkifCMRNumExistsSG(String cmrNo, EntityManager entityManager) {
+    LOG.debug("Checking if CMR exists or not in Singapore and available for procesing...");
+    String sqlRDC = ExternalizedQuery.getSql("KNA1.CHECK_IF_CMR_EXISTS");
+    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC.setParameter("ZZKV_CUSNO", cmrNo);
+    queryRDC.setParameter("KATR6", SystemLocation.SINGAPORE);
+
+    Kna1 kna1 = queryRDC.getSingleResult(Kna1.class);
+    if (kna1 != null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private String getLandCntryCode(EntityManager entityManager, String landCntryCd) {
+    String issuingCntryCd = null;
+    String sql = ExternalizedQuery.getSql("GET.CNTRYCD_FRM_LANDCNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("LAND_CNTRY", landCntryCd);
+    List<String> results = query.getResults(String.class);
+    if (results != null && !results.isEmpty()) {
+      issuingCntryCd = results.get(0);
+    }
+    entityManager.flush();
+    return issuingCntryCd;
+  }
+
+  private String getIsicCdFrmRDC(String cmrNo, EntityManager entityManager, String issuinglandCntryCd) {
+    String sqlRDC = ExternalizedQuery.getSql("KNA1.GET_ISIC");
+    PreparedQuery queryRDC = new PreparedQuery(entityManager, sqlRDC);
+    queryRDC.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    queryRDC.setParameter("CMR_NO", cmrNo);
+    queryRDC.setParameter("KATR6", issuinglandCntryCd);
+
+    String isicCd = queryRDC.getSingleResult(String.class);
+    return isicCd;
   }
 
   /**

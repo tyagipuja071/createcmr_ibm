@@ -171,12 +171,6 @@
           <width>18</width>
           <length>23</length>
         </column>
-        <column>
-          <label>Tax Office</label>
-          <!-- used FLOOR to store tax office -->
-          <dbColumn>FLOOR</dbColumn>
-          <length>30</length>
-        </column>
       </columns>
     </tab>
     <tab name="Sold To Address" type="Address" typeCode="ZS01">

@@ -16,6 +16,7 @@ import java.util.zip.ZipFile;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -29,6 +30,7 @@ import com.ibm.cio.cmr.request.model.approval.ApprovalResponseModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.pdf.RequestToPDFConverter;
@@ -138,7 +140,18 @@ public class ApprovalBatchService extends BaseBatchService {
         updateEntity(request, entityManager);
 
         model.setComments("(system generated status change)");
-        service.sendGenericMail(entityManager, approvalType, model, admin);
+
+        String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+        String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+        boolean skip = false;
+
+        if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+          skip = true;
+        }
+
+        if (skip == false) {
+          service.sendGenericMail(entityManager, approvalType, model, admin);
+        }
 
         if (CmrConstants.APPROVAL_PENDING_APPROVAL.equals(request.getStatus()) || CmrConstants.APPROVAL_CANCELLED.equals(request.getStatus())) {
           // need to prepare engine
