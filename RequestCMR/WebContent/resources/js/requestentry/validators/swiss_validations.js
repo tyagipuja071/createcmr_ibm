@@ -1,6 +1,8 @@
 /* Register SWISS Javascripts */
 function addAfterConfigForSWISS() {
-
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
