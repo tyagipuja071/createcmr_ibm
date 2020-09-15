@@ -67,7 +67,18 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
-    if (soldTo != null) {
+
+    // added flow to skip dnb matching
+    if (engineData.hasPositiveCheckStatus(AutomationEngineData.SKIP_DNB)) {
+      result.setDetails("DNB Matching skipped due to previous element execution results.");
+      result.setResults("Skipped");
+      result.setProcessOutput(output);
+      return result;
+    }
+
+    if (soldTo != null)
+
+    {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
       MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
