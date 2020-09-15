@@ -347,6 +347,9 @@ public class AutomationEngine {
         if (moveForPayGo) {
           createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
           admin.setPaygoProcessIndc("Y");
+          data.setSubIndustryCd("ZZ");
+          data.setUsSicmen("8888");
+          data.setIsicCd("8888");
         } else {
           if (!actionsOnError.isEmpty()) {
             // an error has occurred
