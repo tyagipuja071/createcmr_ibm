@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
@@ -31,7 +32,6 @@ public class MassChangeTemplateManager {
   private static Map<String, String> templateMapCreate = new HashMap<String, String>();
   private static Map<String, String> templateMapUpdate = new HashMap<String, String>();
   private static Map<String, ValueValidator> validators = new HashMap<String, ValueValidator>();
-  private static Map<String, String> configCountryMap = new HashMap<String, String>();
   private static Map<String, String> configList = new HashMap<String, String>();
   static {
     configList.put("838", "config.838.xml");
@@ -108,10 +108,8 @@ public class MassChangeTemplateManager {
         if (hasCmrNoOnAllTabs(template)) {
           if (CmrConstants.REQ_TYPE_MASS_UPDATE.equals(template.getType())) {
             templateMapUpdate.put(template.getId(), configName);
-            configCountryMap.put(issuingCountry, template.getId());
           } else if (CmrConstants.REQ_TYPE_MASS_CREATE.equals(template.getType())) {
             templateMapCreate.put(template.getId(), configName);
-            configCountryMap.put(issuingCountry, template.getId());
           }
         } else {
           LOG.warn("Configuration " + configName + " is missing CMR No. on one of the tabs.");
@@ -154,8 +152,9 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassUpdateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapUpdate.get(templateId);
-    if (configName == null) {
-      configName = configCountryMap.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
     }
     if (configName != null) {
       return initTemplate(configName);
@@ -173,6 +172,10 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassCreateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapCreate.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }
