@@ -294,7 +294,7 @@ public class SingaporeUtil extends AutomationUtil {
         String rdcAddr4 = StringUtils.isNotBlank(kna1.getOrt01()) ? kna1.getOrt01().replaceAll("\\s", "") : "";
         String rdcAddr5 = StringUtils.isNotBlank(kna1.getOrt02()) ? kna1.getOrt02().replaceAll("\\s", "") : "";
 
-        // city and dept are reversed in RDC sometimes
+        // city and dept are interchanged in RDC sometimes
         String rdcFullAddrTxt1 = rdcAddr1 + rdcAddr2 + rdcAddr3 + rdcAddr5 + rdcAddr4;
         String rdcFullAddrTxt2 = rdcAddr1 + rdcAddr2 + rdcAddr3 + rdcAddr4 + rdcAddr5;
         
