@@ -141,7 +141,7 @@ function addHandlersForNORDX() {
 
   if (_CTCHandler == null) {
     _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function (value) {
-      setSalesRepValues(value);
+      // setSalesRepValues(value);
     });
   }
 
@@ -384,50 +384,56 @@ function setSalesRepValues(clientTier) {
       // 2020-08-27 George CMR-5079 2H20 Coverage - NORDICS (change of LOVs &
       // Logic)
 
-      // DK/FO/GL
-      var MSD996 = "A,K,F,N,S";
-      var MSD992 = "G,Y,E,H,X,Y,U";
-      var MSD993 = "D,T";
-      var MSD302 = "V,J,P,L,M,W,R,B,C,Z";
-      // Sweden
-      var INS003 = "A,U,J,L,M,P,V,E,G,H,X,Y,Z,B,C,D,K,R,T,W,F,N,S";
-      var MSS596 = "B,C,D,R,T,W";
-      var MSS599 = "F,J,L,M,N,P,S,V";
-      var MSS315 = "A,E,G,H,K,U,X,Y";
-      // Finland
-      var MSF109 = "A,K,U,J,L,M,P,V,E,G,H,X,Y,Z";
-      var MSF107 = "B,C,D,R,T,W,F,N,S";
-      var NOREP0 = INS003;
+      // 2020-09-15 George CMR-5079 fix the value of rep team member changed
+      // onced request saved.
+      console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
+      console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
+      if (clientTier != '' && FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp) {
 
-      var ind = ims.substring(0, 1);
-      // DK/FO/GL 678
-      if (cntry == '678') {
-        if (MSD996.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSD996");
-        if (MSD992.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSD992");
-        if (MSD993.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSD993");
-        if (MSD302.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSD302");
-      }
-      // Sweden 846
-      if (cntry == '846') {
-        if (MSS596.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSS596");
-        if (MSS599.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSS599");
-        if (MSS315.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSS315");
-      }
-      // Finland 702
-      if (cntry == '702') {
-        if (MSF109.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSF109");
-        if (MSF107.indexOf(ind) >= 0)
-          FormManager.setValue('repTeamMemberNo', "MSF107");
-      }
+        // DK/FO/GL
+        var MSD996 = "A,K,F,N,S";
+        var MSD992 = "G,Y,E,H,X,Y,U";
+        var MSD993 = "D,T";
+        var MSD302 = "V,J,P,L,M,W,R,B,C,Z";
+        // Sweden
+        var INS003 = "A,U,J,L,M,P,V,E,G,H,X,Y,Z,B,C,D,K,R,T,W,F,N,S";
+        var MSS596 = "B,C,D,R,T,W";
+        var MSS599 = "F,J,L,M,N,P,S,V";
+        var MSS315 = "A,E,G,H,K,U,X,Y";
+        // Finland
+        var MSF109 = "A,K,U,J,L,M,P,V,E,G,H,X,Y,Z";
+        var MSF107 = "B,C,D,R,T,W,F,N,S";
+        var NOREP0 = INS003;
 
+        var ind = ims.substring(0, 1);
+        // DK/FO/GL 678
+        if (cntry == '678') {
+          if (MSD996.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSD996");
+          if (MSD992.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSD992");
+          if (MSD993.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSD993");
+          if (MSD302.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSD302");
+        }
+        // Sweden 846
+        if (cntry == '846') {
+          if (MSS596.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSS596");
+          if (MSS599.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSS599");
+          if (MSS315.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSS315");
+        }
+        // Finland 702
+        if (cntry == '702') {
+          if (MSF109.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSF109");
+          if (MSF107.indexOf(ind) >= 0)
+            FormManager.setValue('repTeamMemberNo', "MSF107");
+        }
+      }
       if (salesReps.length == 1) {
         FormManager.setValue('repTeamMemberNo', salesReps[0]);
       }
