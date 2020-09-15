@@ -2,7 +2,6 @@ package com.ibm.cmr.create.batch.service;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -57,11 +56,6 @@ public class CEEProcessService extends LegacyDirectService {
   private static final String ADDRESS_USE_COUNTRY_H = "H";
   private static final String ADDRESS_USE_EXISTS = "Y";
   private static final String ADDRESS_USE_NOT_EXISTS = "N";
-  private static final List<String> CEE_COUNTRY_LIST = Arrays.asList(SystemLocation.SLOVAKIA, SystemLocation.KYRGYZSTAN, SystemLocation.SERBIA,
-      SystemLocation.ARMENIA, SystemLocation.AZERBAIJAN, SystemLocation.TURKMENISTAN, SystemLocation.TAJIKISTAN, SystemLocation.ALBANIA,
-      SystemLocation.BELARUS, SystemLocation.BULGARIA, SystemLocation.GEORGIA, SystemLocation.KAZAKHSTAN, SystemLocation.BOSNIA_AND_HERZEGOVINA,
-      SystemLocation.MACEDONIA, SystemLocation.SLOVENIA, SystemLocation.HUNGARY, SystemLocation.UZBEKISTAN, SystemLocation.MOLDOVA,
-      SystemLocation.POLAND, SystemLocation.RUSSIAN_FEDERATION, SystemLocation.ROMANIA, SystemLocation.UKRAINE, SystemLocation.CROATIA);
 
   protected void processDupCreate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Create duplicate CMR processing of Request " + admin.getId().getReqId());
@@ -357,7 +351,8 @@ public class CEEProcessService extends LegacyDirectService {
 
   }
 
-  private String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
+  @Override
+  public String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
     if (entityManager == null) {
       return null;
     }
@@ -377,8 +372,8 @@ public class CEEProcessService extends LegacyDirectService {
     return res;
   }
 
-  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
-      boolean sharedSeq) {
+  @Override
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -401,7 +396,7 @@ public class CEEProcessService extends LegacyDirectService {
     }
   }
 
-  private static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+  public static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
 
     for (String use : addrUse.split("")) {
       if (!StringUtils.isEmpty(use)) {
@@ -735,17 +730,8 @@ public class CEEProcessService extends LegacyDirectService {
             } else {
               newAddrSeq = addr.getId().getAddrSeq();
             }
-            // Fix for CEE Dup IGF seqno
-            if (CEE_COUNTRY_LIST.contains(cntry)) {
-              if ("598".equals(addr.getId().getAddrSeq()) || "599".equals(addr.getId().getAddrSeq())) {
-                newAddrSeq = addr.getId().getAddrSeq();
-              } else {
-                newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
-              }
-            } else {
-              newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
-            }
-            // Fix end
+
+            newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
             legacyAddrPk.setAddrNo(newAddrSeq);
