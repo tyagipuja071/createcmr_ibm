@@ -47,6 +47,12 @@ public class LegacySearchModel {
   private String updateTsFrom;
   private String updateTsTo;
 
+  // italy
+  private String iTaxCode;
+
+  // france
+  private String siret;
+  
   private List<String> addressUses = new ArrayList<String>();
 
   private int recCount;
@@ -305,6 +311,22 @@ public class LegacySearchModel {
 
   public void setUpdateTsTo(String updateTsTo) {
     this.updateTsTo = updateTsTo;
+  }
+
+  public String getiTaxCode() {
+    return iTaxCode;
+  }
+
+  public void setiTaxCode(String iTaxCode) {
+    this.iTaxCode = iTaxCode;
+  }
+
+  public String getSiret() {
+    return siret;
+  }
+
+  public void setSiret(String siret) {
+    this.siret = siret;
   }
 
 }
