@@ -447,14 +447,12 @@ public class TransConnService extends BaseBatchService {
         admin.setLockBy(BATCH_USER_ID);
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
-
         sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
 
         Data data = query.getSingleResult(Data.class);
         entityManager.detach(data);
-
         // Query FindCMR using filter on configuration file
         CompanyRecordModel search = new CompanyRecordModel();
         search.setName(SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
@@ -599,22 +597,26 @@ public class TransConnService extends BaseBatchService {
           newData.setId(dataPk);
           newData.setCustGrp(null);
           newData.setCustSubGrp(null);
-          if (data.getAffiliate() == null || data.getAffiliate().equals(""))
+          if (data.getAffiliate() == null || data.getAffiliate().equals("")) {
             newData.setAffiliate(record.getCmrNo());
-          if (data.getEnterprise() == null || data.getEnterprise().equals(""))
+          }
+          if (data.getEnterprise() == null || data.getEnterprise().equals("")) {
             newData.setEnterprise(record.getCmrNo());
-
+          }
           updateEntity(newData, entityManager);
 
           PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           addrQuery.setParameter("ADDR_TYPE", "ZS01");
           Addr addr = addrQuery.getSingleResult(Addr.class);
-
           PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
           Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
+          PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
+          zp01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+          zp01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
+          List<Addr> zp01Addrs = zp01AddrQuery.getResults(Addr.class);
 
           PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
           newAddrQuery.setParameter("REQ_ID", reqId);
@@ -642,6 +644,31 @@ public class TransConnService extends BaseBatchService {
             newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
             newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
             updateEntity(newAddr, entityManager);
+          }
+
+          if (zp01Addrs != null && !zp01Addrs.isEmpty()) {
+            // copy zp01 addresses
+            for (Addr zp01 : zp01Addrs) {
+              Addr newAddr = new Addr();
+              AddrPK addrPK = new AddrPK();
+              addrPK.setAddrSeq(zp01.getId().getAddrSeq());
+              addrPK.setReqId(reqId);
+              addrPK.setAddrType("ZP01");
+              copyValuesToEntity(zp01, newAddr);
+              newAddr.setSapNo(null);
+              newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+              newAddr.setChangedIndc(null);
+              newAddr.setId(addrPK);
+              newAddr.setAddrStdResult("X");
+              newAddr.setAddrStdAcceptInd(null);
+              newAddr.setAddrStdRejReason(null);
+              newAddr.setAddrStdRejCmt(null);
+              newAddr.setAddrStdTs(null);
+              newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+              newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+              updateEntity(newAddr, entityManager);
+              break;
+            }
           }
 
           newAdmin.setReqStatus("PCP");
@@ -1187,9 +1214,17 @@ public class TransConnService extends BaseBatchService {
     addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
 
     if ("897".equals(data.getCmrIssuingCntry())) {
-      // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
-      // the ZI01 address
-      addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      if ("ZP01".equals(record.getAddressType()) && record.getSeqNo() != null && Integer.parseInt(record.getSeqNo()) >= 200) {
+        // If additional bill to handle accordingly
+        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
+        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+        addrQuery.setParameter("ADDR_TYPE", "ZP01");
+        addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
+      } else {
+        // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
+        // the ZI01 address
+        addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      }
     } else {
       addrQuery.setParameter("ADDR_TYPE", record.getAddressType());
     }
@@ -1356,13 +1391,15 @@ public class TransConnService extends BaseBatchService {
           if (isCompletedSuccessfully(resultCode)) {
 
             addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
-            updateEntity(addr, entityManager);
 
             if (response.getRecords() != null) {
               comment = comment.append("\nRDc processing successfully updated KUNNR(s): ");
               if (response.getRecords() != null && response.getRecords().size() != 0) {
                 for (int i = 0; i < response.getRecords().size(); i++) {
                   comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
+                  if (StringUtils.isBlank(addr.getSapNo())) {
+                    addr.setSapNo(response.getRecords().get(i).getSapNo());
+                  }
                 }
               }
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
@@ -1376,6 +1413,7 @@ public class TransConnService extends BaseBatchService {
               }
             }
 
+            updateEntity(addr, entityManager);
           } else {
             if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
               comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")

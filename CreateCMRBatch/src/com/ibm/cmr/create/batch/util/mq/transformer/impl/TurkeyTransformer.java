@@ -20,7 +20,6 @@ import org.jdom.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -32,7 +31,6 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
-import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
@@ -1918,23 +1916,5 @@ public class TurkeyTransformer extends EMEATransformer {
     return shareAddrSeq;
   }
 
-  @Override
-  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
-    List<Addr> addresses = cmrObjects.getAddresses();
-    for (Addr addr : addresses) {
-      if ("ZS01".equals(addr.getId().getAddrType())) {
-        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
-        if (addrRdc == null) {
-          return true;
-        }
-        String currPhone = addr.getCustPhone() != null ? addr.getCustPhone() : "";
-        String oldPhone = addrRdc.getCustPhone() != null ? addrRdc.getCustPhone() : "";
-        if (addrRdc != null && !currPhone.equals(oldPhone)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
 
 }

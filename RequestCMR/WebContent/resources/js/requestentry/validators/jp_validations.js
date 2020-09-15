@@ -854,11 +854,10 @@ function toggleAddrTypesForJP(cntry, addressMode) {
     }
   }
 
-
   if (FormManager.getActualValue('reqType') == 'C') {
     if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-      //cmr.hideNode('radiocont_ZI02');
-      //cmr.hideNode('radiocont_ZI01');
+      // cmr.hideNode('radiocont_ZI02');
+      // cmr.hideNode('radiocont_ZI01');
       cmr.hideNode('radiocont_ZI03');
       cmr.hideNode('radiocont_ZP02');
       cmr.hideNode('radiocont_ZP03');
