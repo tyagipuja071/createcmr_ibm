@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
@@ -17,6 +18,7 @@ import com.ibm.cio.cmr.request.masschange.obj.MassChangeTemplate;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateColumn;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateTab;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * Initializes and manages the templates from the XML configurations
@@ -119,7 +121,7 @@ public class MassChangeTemplateManager {
   public static void initTemplatesAndValidators(String issuingCntry) throws IOException, SAXException {
     templateMapCreate.clear();
     templateMapUpdate.clear();
-    init(configList.get(issuingCntry));
+    init(configList.get(issuingCntry), issuingCntry);
   }
 
   /**
@@ -131,7 +133,7 @@ public class MassChangeTemplateManager {
   public static void initTemplatesAndValidatorsSwiss() throws IOException, SAXException {
     templateMapCreate.clear();
     templateMapUpdate.clear();
-    init("config.SWISS.xml");
+    init("config.SWISS.xml", SystemLocation.SWITZERLAND);
   }
 
   /**
@@ -141,7 +143,7 @@ public class MassChangeTemplateManager {
    * @throws IOException
    * @throws SAXException
    */
-  private static void init(String configName) throws IOException, SAXException {
+  private static void init(String configName, String issuingCountry) throws IOException, SAXException {
     try (InputStream is = ConfigUtil.getResourceStream(configName)) {
       MassChangeTemplateDigester digester = new MassChangeTemplateDigester();
       MassChangeTemplate template = (MassChangeTemplate) digester.parse(is);
@@ -193,6 +195,10 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassUpdateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapUpdate.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }
@@ -209,6 +215,10 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassCreateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapCreate.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }
