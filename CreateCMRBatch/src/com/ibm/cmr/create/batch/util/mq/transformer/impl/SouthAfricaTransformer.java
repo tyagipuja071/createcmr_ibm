@@ -175,7 +175,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
     List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC");
-    formatDataLines(dummyHandler);
+    // formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
       String[] busPrSubGrp = { "LSBP", "SZBP", "ZABP", "NABP", "ZAXBP", "NAXBP", "LSXBP", "SZXBP" };
@@ -189,7 +189,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
       legacyCust.setCeDivision("2");
       legacyCust.setCurrencyCd("SA");
-      legacyCust.setTaxCd("");
+      legacyCust.setTaxCd(data.getSpecialTaxCd());
+      legacyCust.setMrcCd("2");
+      legacyCust.setCollectionCd("00001");
 
     }
 
