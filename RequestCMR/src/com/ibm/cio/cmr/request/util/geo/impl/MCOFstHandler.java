@@ -15,15 +15,22 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * @author Jeffrey Zamora
@@ -75,11 +82,81 @@ public class MCOFstHandler extends MCOHandler {
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
-        data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
-        data.setSpecialTaxCd(legacyObjects.getCustomer().getTaxCd());
+        CmrtCust legacyCust = legacyObjects.getCustomer();
+
+        if (legacyCust.getCustType() != null)
+          data.setCrosSubTyp(legacyCust.getCustType());
+
+        if (legacyCust.getTaxCd() != null)
+          data.setSpecialTaxCd(legacyCust.getTaxCd());
+
       }
+
+      String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
+      data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
+
     }
 
+  }
+
+  private String getKunnrSapr3Kna1(String cmrNo, String cntry) throws Exception {
+    String kunnr = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
+
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_CUSNO");
+
+    LOG.debug("Getting existing KUNNR value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      kunnr = record.get("KUNNR") != null ? record.get("KUNNR").toString() : "";
+      LOG.debug("***RETURNING KUNNR > " + kunnr);
+    }
+    return kunnr;
+  }
+
+  private String getDepartment(String kunnr) throws Exception {
+    String department = "";
+
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYKUNNR");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
+    String dbId = QueryClient.RDC_APP_ID;
+
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.addField("KUNNR");
+    query.addField("ZZKV_DEPT");
+
+    LOG.debug("Getting existing ZZKV_DEPT value from RDc DB..");
+
+    QueryClient client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    QueryResponse response = client.executeAndWrap(dbId, query, QueryResponse.class);
+
+    if (response.isSuccess() && response.getRecords() != null && response.getRecords().size() != 0) {
+      List<Map<String, Object>> records = response.getRecords();
+      Map<String, Object> record = records.get(0);
+      department = record.get("ZZKV_DEPT") != null ? record.get("ZZKV_DEPT").toString() : "";
+      LOG.debug("***RETURNING ZZKV_DEPT > " + department + " WHERE KUNNR IS > " + kunnr);
+    }
+    return department;
   }
 
   @Override
