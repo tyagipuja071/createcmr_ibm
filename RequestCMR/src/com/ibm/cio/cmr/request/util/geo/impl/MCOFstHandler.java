@@ -90,41 +90,24 @@ public class MCOFstHandler extends MCOHandler {
         if (legacyCust.getTaxCd() != null)
           data.setSpecialTaxCd(legacyCust.getTaxCd());
 
-        if (legacyCust.getCollectionCd() != null)
-          data.setCollectionCd(legacyCust.getCollectionCd());
-
-        if (legacyCust.getIsuCd() != null)
-          data.setIsuCd(legacyCust.getIsuCd().substring(0, 2));
-
-        if (legacyCust.getInacCd() != null)
-          data.setInacCd(legacyCust.getInacCd());
-
-        if (legacyCust.getEnterpriseNo() != null)
-          data.setEnterprise(legacyCust.getEnterpriseNo());
-
-        data.setBgId(mainRecord.getCmrBuyingGroup());
-        data.setGbgId(mainRecord.getCmrGlobalBuyingGroup());
-        data.setBgRuleId(mainRecord.getCmrLde());
-        data.setCovId(mainRecord.getCmrCoverage());
-        data.setGeoLocationCd(mainRecord.getCmrGeoLocCd());
-        data.setDunsNo(mainRecord.getCmrDuns());
-        data.setPpsceid(mainRecord.getCmrPpsceid());
       }
-      String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), mainRecord.getCmrOrderBlock());
+
+      String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
       data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
+
     }
 
   }
 
-  private String getKunnrSapr3Kna1(String cmrNo, String ordBlk) throws Exception {
+  private String getKunnrSapr3Kna1(String cmrNo, String cntry) throws Exception {
     String kunnr = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.KNA1.KUNNR_U");
+    String sql = ExternalizedQuery.getSql("GET.ZS01.KUNNR");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
-    sql = StringUtils.replace(sql, ":AUFSD", "'" + ordBlk + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + cntry + "'");
 
     String dbId = QueryClient.RDC_APP_ID;
 
@@ -159,8 +142,8 @@ public class MCOFstHandler extends MCOHandler {
 
     QueryRequest query = new QueryRequest();
     query.setSql(sql);
-    query.addField("ZZKV_DEPT");
     query.addField("KUNNR");
+    query.addField("ZZKV_DEPT");
 
     LOG.debug("Getting existing ZZKV_DEPT value from RDc DB..");
 
