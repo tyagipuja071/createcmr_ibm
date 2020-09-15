@@ -7,7 +7,7 @@
 <%@ taglib uri="/tags/cmr" prefix="cmr"%>
 <script>
   dojo.addOnLoad(function() {
-    FilteringDropdown.loadItems('docContent', 'docContent_spinner', 'lov', 'fieldId=DocContent&cmrIssuingCntry=_cmrIssuingCntry');
+    FilteringDropdown.loadItems('docContent', 'docContent_spinner', 'lov', 'fieldId=DocContent');
     FormManager.addValidator('filename', Validators.REQUIRED, [ '${ui.filename}' ]);
     FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ]);
   });
