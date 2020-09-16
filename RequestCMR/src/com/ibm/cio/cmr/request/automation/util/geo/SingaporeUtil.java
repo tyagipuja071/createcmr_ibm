@@ -43,7 +43,12 @@ public class SingaporeUtil extends AutomationUtil {
   private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
 
   private static final List<String> RELEVANT_ADDRESSES = Arrays.asList(CmrConstants.RDC_SOLD_TO, CmrConstants.RDC_BILL_TO,
-      CmrConstants.RDC_INSTALL_AT, CmrConstants.RDC_SHIPPING);
+      CmrConstants.RDC_INSTALL_AT, "ZH01");
+
+  public static final String SCENARIO_BLUEMIX = "BLUMX";
+  public static final String SCENARIO_MARKETPLACE = "MKTPC";
+  public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
+  public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -171,6 +176,7 @@ public class SingaporeUtil extends AutomationUtil {
      * Arrays.asList(scnarioList), false);
      */
     Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
@@ -238,6 +244,13 @@ public class SingaporeUtil extends AutomationUtil {
         LOG.debug("Error on searching for CMR in FIND CMR." + e.getMessage());
       }
       result.setDetails(details.toString());
+    switch (scenario) {
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+    case SCENARIO_CROSS_BLUEMIX:
+    case SCENARIO_CROSS_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
     }
     return true;
   }

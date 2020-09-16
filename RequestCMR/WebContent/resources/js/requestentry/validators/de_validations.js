@@ -176,10 +176,8 @@ function setISUValues(value) {
     } else {
       FormManager.resetDropdownValues(FormManager.getField('isuCd'));
     }
-  } else if (_custSubGrp == 'IBMEM') {
+  } else if (_custSubGrp == 'IBMEM' || _custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
     FormManager.readOnly('isuCd');
-  } else if (_custSubGrp == 'COMME' || _custSubGrp == '3PADC') {
-    FormManager.enable('isuCd');
   } else if (_custSubGrp == 'CROSS' && _pagemodel.userRole.toUpperCase() != "PROCESSOR") {
     FormManager.readOnly('isuCd');
   }
@@ -655,7 +653,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
               showDuplicateIGFBillToError = Number(addCount) >= 1 && addressType == 'ZP02';
               if (showDuplicateIGFBillToError) {
                 return new ValidationResult(null, false,
-                    'Only one IGF Bill-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+                    'Only one IGF Bill-To address is allowed.');
               }
             }
 
@@ -663,7 +661,7 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
               showDuplicateIGFInstallAtToError = Number(addCount) >= 1 && addressType == 'ZD02';
               if (showDuplicateIGFInstallAtToError) {
                 return new ValidationResult(null, false,
-                    'Only one IGF Ship-To address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+                    'Only one IGF Ship-To address is allowed.');
               }
             }
 
@@ -680,6 +678,38 @@ function unlockCustGrpSubGrp() {
   if (reqStatus != 'Processing Create/Upd Pending' && viewMode != true) {
     FormManager.enable('custGrp');
     FormManager.enable('custSubGrp');
+  }
+}
+
+function lockIBMTabForDE() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('searchTerm');
+    FormManager.readOnly('enterprise');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('dunsNo');
+    if (custSubType != 'BUSPR') {
+      FormManager.readOnly('ppsceid');
+    } else {
+      FormManager.enable('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    if (custSubType != 'INTIN' && custSubType != 'INTSO' && custSubType != 'INTAM') {
+      FormManager.readOnly('ibmDeptCostCenter');
+    } else {
+      FormManager.enable('ibmDeptCostCenter');
+    }
+    FormManager.readOnly('custClass');
   }
 }
 
@@ -719,4 +749,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addOrderBlockValidator, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(addReqReasonValidator, GEOHandler.DE, null, true);
   GEOHandler.registerValidator(restrictDuplicateAddr, GEOHandler.DE, null, true);
+  GEOHandler.addAfterConfig(lockIBMTabForDE, GEOHandler.DE);
+  GEOHandler.addAfterTemplateLoad(lockIBMTabForDE, GEOHandler.DE);
 });

@@ -41,18 +41,21 @@ import com.ibm.cio.cmr.request.entity.listeners.TrimListener;
         @EntityResult(entityClass = Data.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"), @ColumnResult(name = "REQ_TYPE_TEXT"),
             @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"), @ColumnResult(name = "COUNTRY_DESC"),
             @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
-            @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS") }),
+            @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS"), @ColumnResult(name = "C_REQ_ID"),
+            @ColumnResult(name = "C_REQ_STATUS") }),
 
     @SqlResultSetMapping(name = "WorkflowRejectedRequestsMapping", entities = { @EntityResult(entityClass = Admin.class),
         @EntityResult(entityClass = Data.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"), @ColumnResult(name = "REQ_TYPE_TEXT"),
             @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "OWNER_DESC"), @ColumnResult(name = "COUNTRY_DESC"),
             @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"), @ColumnResult(name = "CAN_CLAIM_ALL"),
-            @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS"), @ColumnResult(name = "REJ_REASON") }),
+            @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "PENDING_APPROVALS"), @ColumnResult(name = "REJ_REASON"),
+            @ColumnResult(name = "C_REQ_ID"), @ColumnResult(name = "C_REQ_STATUS") }),
     @SqlResultSetMapping(name = "SearchWithCustomerMapping", entities = { @EntityResult(entityClass = Admin.class),
         @EntityResult(entityClass = Data.class), @EntityResult(entityClass = Addr.class) }, columns = { @ColumnResult(name = "OVERALL_STATUS"),
             @ColumnResult(name = "CLAIM_FIELD"), @ColumnResult(name = "REQ_TYPE_TEXT"), @ColumnResult(name = "OWNER_DESC"),
             @ColumnResult(name = "COUNTRY_DESC"), @ColumnResult(name = "PROCESSING_STATUS"), @ColumnResult(name = "CAN_CLAIM"),
-            @ColumnResult(name = "CAN_CLAIM_ALL"), @ColumnResult(name = "TYPE_DESCRIPTION") }),
+            @ColumnResult(name = "CAN_CLAIM_ALL"), @ColumnResult(name = "TYPE_DESCRIPTION"), @ColumnResult(name = "C_REQ_ID"),
+            @ColumnResult(name = "C_REQ_STATUS") }),
     @SqlResultSetMapping(name = "BatchServiceMapping", entities = { @EntityResult(entityClass = Admin.class), @EntityResult(entityClass = Data.class),
         @EntityResult(entityClass = WfHist.class, fields = { @FieldResult(column = "REQ_STATUS1", name = "reqStatus"),
             @FieldResult(column = "CMT1", name = "cmt") }) }, columns = {}),
@@ -301,6 +304,12 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
 
   @Column(name = "CHILD_REQ_ID")
   private long childReqId;
+
+  @Column(name = "PAYGO_PROCESS_INDC")
+  private String paygoProcessIndc;
+
+  @Column(name = "POOL_CMR_INDC")
+  private String poolCmrIndc;
 
   public String getRequesterId() {
     return this.requesterId;
@@ -740,6 +749,22 @@ public class Admin extends BaseEntity<AdminPK> implements Serializable {
 
   public void setChildReqId(long childReqId) {
     this.childReqId = childReqId;
+  }
+
+  public String getPaygoProcessIndc() {
+    return paygoProcessIndc;
+  }
+
+  public void setPaygoProcessIndc(String paygoProcessIndc) {
+    this.paygoProcessIndc = paygoProcessIndc;
+  }
+
+  public String getPoolCmrIndc() {
+    return poolCmrIndc;
+  }
+
+  public void setPoolCmrIndc(String poolCmrIndc) {
+    this.poolCmrIndc = poolCmrIndc;
   }
 
 }
