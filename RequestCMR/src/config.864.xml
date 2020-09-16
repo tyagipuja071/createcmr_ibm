@@ -96,6 +96,11 @@
 					<length>1</length>
 					<lovId>EmbargoCode</lovId>
 				</column>
+				<column number="true" exactLength="false">
+          <label>Phone #</label>
+          <dbColumn>RESTRICT_TO</dbColumn>
+          <length>16</length>
+        </column>
 				<column number="false">
 					<label>VAT</label>
 					<dbColumn>VAT</dbColumn>
