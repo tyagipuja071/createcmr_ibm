@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.NotifList;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.mail.Email;
 import com.ibm.cio.cmr.request.util.mail.MessageType;
 
@@ -122,8 +123,18 @@ public class NPSService extends BaseBatchService {
               mail.setMessage(npsMail.toString());
               mail.setType(MessageType.HTML);
 
-              LOG.info("Sending NPS survey to " + admin.getRequesterId() + " for Request " + admin.getId().getReqId());
-              mail.send(SystemConfiguration.getValue("MAIL_HOST"));
+              String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+              String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+              boolean skip = false;
+
+              if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+                skip = true;
+              }
+
+              if (skip == false) {
+                LOG.info("Sending NPS survey to " + admin.getRequesterId() + " for Request " + admin.getId().getReqId());
+                mail.send(SystemConfiguration.getValue("MAIL_HOST"));
+              }
 
               admin.setWaitRevInd("Y");
               // } else {
