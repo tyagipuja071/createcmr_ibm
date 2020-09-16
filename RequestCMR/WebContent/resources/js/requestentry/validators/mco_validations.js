@@ -2129,6 +2129,7 @@ function addMailingConditionValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
 
 function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
