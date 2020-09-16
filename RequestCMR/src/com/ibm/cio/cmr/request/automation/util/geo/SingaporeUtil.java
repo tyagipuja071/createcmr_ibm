@@ -49,6 +49,7 @@ public class SingaporeUtil extends AutomationUtil {
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
   public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
   public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
+  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -178,6 +179,10 @@ public class SingaporeUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
+    Addr soldTo = requestData.getAddress("ZS01");
+    String custNm1 = soldTo.getCustNm1();
+    String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
+    String customerName = custNm1 + custNm2;
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
@@ -251,6 +256,9 @@ public class SingaporeUtil extends AutomationUtil {
     case SCENARIO_CROSS_MARKETPLACE:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
+    case SCENARIO_PRIVATE_CUSTOMER:
+      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details,
+          SCENARIO_PRIVATE_CUSTOMER.equals(scenario), requestData);
     }
     result.setDetails(details.toString());
     return true;
@@ -549,5 +557,11 @@ public class SingaporeUtil extends AutomationUtil {
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
+  }
+
+  @Override
+  protected List<String> getCountryLegalEndings() {
+    return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
+        "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
 }
