@@ -98,7 +98,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     String streetContPoBox = addrData.getAddrTxt2();
     if (StringUtils.isNotBlank(streetContPoBox) && StringUtils.isNotBlank(addrData.getPoBox())) {
-      streetContPoBox += ",PO BOX " + addrData.getPoBox();
+      streetContPoBox += ", PO BOX " + addrData.getPoBox();
     } else if (StringUtils.isBlank(streetContPoBox) && StringUtils.isNotBlank(addrData.getPoBox())) {
       streetContPoBox = "PO BOX " + addrData.getPoBox();
     }
