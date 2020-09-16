@@ -187,6 +187,9 @@ public class UKIUtil extends AutomationUtil {
           } else {
             details.append("Company Registration Number on the request matches D&B\n");
           }
+        } else if (!StringUtils.isBlank(change.getOldData()) && StringUtils.isBlank(change.getNewData())) {
+          cmdeReview = true;
+          details.append("Company Registration Number removed from the request.\n");
         }
         break;
       case "ISIC":
@@ -232,12 +235,6 @@ public class UKIUtil extends AutomationUtil {
           details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
         }
       }
-    }
-
-    if (!"9500".equals(data.getIsicCd()) && !"GB".equals(soldTo.getLandCntry()) && !"IE".equals(soldTo.getLandCntry())
-        && "Y".equals(data.getRestrictInd())) {
-      details.append("Request has been marked as CRN Exempt. Processor Review will be required.\n");
-      engineData.addNegativeCheckStatus("_crnExempt", "Request has been marked as CRN Exempt.");
     }
 
     if (resultCodes.contains("R")) {
