@@ -13,7 +13,7 @@ var _postalCodeHandler = null;
 var _ISICHandler = null;
 
 function afterConfigPT() {
-  FormManager.enable('vat'); 
+  FormManager.enable('vat');
   FormManager.readOnly('subIndustryCd');
 }
 
@@ -239,12 +239,11 @@ function afterConfigForPT() {
 
   if (role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
-  } else if(role == 'PROCESSOR' && reqType != 'U'){
+  } else if (role == 'PROCESSOR' && reqType != 'U') {
     FormManager.enable('cmrNo');
-  }else {
+  } else {
     FormManager.readOnly('cmrNo');
   }
-  
 
 }
 
@@ -1088,7 +1087,7 @@ function abbrvNmProcessorMandatory() {
         FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'AbbrevName' ], 'MAIN_CUST_TAB');
       } else {
         FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-        if(FormManager.getActualValue('reqType') != 'U'){
+        if (FormManager.getActualValue('reqType') != 'U') {
           FormManager.readOnly('abbrevNm');
           FormManager.readOnly('abbrevLocn');
         }
@@ -1103,7 +1102,7 @@ function abbrvNmProcessorMandatoryOnChange() {
     if (role != 'REQUESTER' && FormManager.getActualValue('reqType') != 'U') {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'AbbrevName' ], 'MAIN_CUST_TAB');
     } else {
-      if(FormManager.getActualValue('reqType') != 'U'){
+      if (FormManager.getActualValue('reqType') != 'U') {
         FormManager.readOnly('abbrevNm');
         FormManager.readOnly('abbrevLocn');
       }
@@ -2130,55 +2129,6 @@ function addMailingConditionValidator() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 
-function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
-  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
-    if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
-      FormManager.resetValidations('vat');
-      FormManager.setValue('vatExempt', true);
-    }
-  }
-}
-
-function addAbbrevNmValidatorPT() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var _abbrevNm = FormManager.getActualValue('abbrevNm');
-        var reg = /^[-_ a-zA-Z0-9]+$/;
-        if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
-          return new ValidationResult({
-            id : 'abbrevNm',
-            type : 'text',
-            name : 'abbrevNm'
-          }, false, 'The value for Abbreviated name is invalid. Only ALPHANUMERIC characters are allowed.');
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
-function addAbbrevLocationValidatorPT() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var _abbrevLocn = FormManager.getActualValue('abbrevLocn');
-        var reg = /^[-_ a-zA-Z0-9]+$/;
-        if (_abbrevLocn != '' && (_abbrevLocn.length > 0 && !_abbrevLocn.match(reg))) {
-          return new ValidationResult({
-            id : 'abbrevLocn',
-            type : 'text',
-            name : 'abbrevLocn'
-          }, false, 'The value for Abbreviated Location is invalid. Only ALPHANUMERIC characters are allowed.');
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -2517,7 +2467,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
-  
+
   GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
