@@ -187,14 +187,6 @@ public class SingaporeUtil extends AutomationUtil {
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
-    switch (scenario) {
-    case SCENARIO_BLUEMIX:
-    case SCENARIO_MARKETPLACE:
-    case SCENARIO_CROSS_BLUEMIX:
-    case SCENARIO_CROSS_MARKETPLACE:
-      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
-      break;
-    }
     // CMR - 4507
     if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
       Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
