@@ -269,7 +269,7 @@ function canUpdateAddress(value, rowIndex, grid) {
   }
   rowData = grid.getItem(rowIndex);
   var addrType = rowData.addrType;
-  if (addrType == 'ZP01' && reqType == 'U' && role == 'REQUESTER') {
+  if (addrType == 'ZP01' && role == 'REQUESTER') {
     return false;
   } else {
     return true;
@@ -285,7 +285,7 @@ function canCopyAddress(value, rowIndex, grid) {
   }
   rowData = grid.getItem(rowIndex);
   var addrType = rowData.addrType;
-  if (addrType == 'ZP01' && reqType == 'U') {
+  if (addrType == 'ZP01') {
     return false;
   } else {
     return true;
@@ -301,7 +301,7 @@ function canRemoveAddress(value, rowIndex, grid) {
   }
   rowData = grid.getItem(rowIndex);
   var addrType = rowData.addrType;
-  if (addrType == 'ZP01' && reqType == 'U') {
+  if (addrType == 'ZP01') {
     return false;
   } else {
     return true;
