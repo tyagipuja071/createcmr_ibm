@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
@@ -39,6 +40,12 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 public class MCOFstHandler extends MCOHandler {
 
   protected static final Logger LOG = Logger.getLogger(MCOFstHandler.class);
+
+  private static final List<String> FST_COUNTRY_LIST = Arrays.asList(SystemLocation.MAURITIUS, SystemLocation.MALI, SystemLocation.EQUATORIAL_GUINEA,
+      SystemLocation.SENEGAL, SystemLocation.IVORY_COAST, SystemLocation.GABON, SystemLocation.DEMOCRATIC_CONGO, SystemLocation.CONGO_BRAZZAVILLE,
+      SystemLocation.DJIBOUTI, SystemLocation.GUINEA_CONAKRY, SystemLocation.CAMEROON, SystemLocation.MADAGASCAR, SystemLocation.MAURITANIA,
+      SystemLocation.TOGO, SystemLocation.GAMBIA, SystemLocation.CENTRAL_AFRICAN_REPUBLIC, SystemLocation.BENIN, SystemLocation.BURKINA_FASO,
+      SystemLocation.SEYCHELLES, SystemLocation.GUINEA_BISSAU, SystemLocation.NIGER, SystemLocation.CHAD);
 
   @Override
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
@@ -351,6 +358,14 @@ public class MCOFstHandler extends MCOHandler {
       return "ZI01";
     }
     return null;
+  }
+
+  @Override
+  public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
+    if (FST_COUNTRY_LIST.contains(issuingCountry)) {
+      return true;
+    }
+    return false;
   }
 
 }

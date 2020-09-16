@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -39,6 +40,12 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 public class MCOCewaHandler extends MCOHandler {
 
   protected static final Logger LOG = Logger.getLogger(MCOCewaHandler.class);
+
+  private static final List<String> CEWA_COUNTRY_LIST = Arrays.asList(SystemLocation.ANGOLA, SystemLocation.BOTSWANA, SystemLocation.BURUNDI,
+      SystemLocation.CAPE_VERDE_ISLAND, SystemLocation.ETHIOPIA, SystemLocation.GHANA, SystemLocation.ERITREA, SystemLocation.KENYA,
+      SystemLocation.MALAWI_CAF, SystemLocation.LIBERIA, SystemLocation.MOZAMBIQUE, SystemLocation.NIGERIA, SystemLocation.ZIMBABWE,
+      SystemLocation.SAO_TOME_ISLANDS, SystemLocation.RWANDA, SystemLocation.SIERRA_LEONE, SystemLocation.SOMALIA, SystemLocation.SOUTH_SUDAN,
+      SystemLocation.TANZANIA, SystemLocation.UGANDA, SystemLocation.ZAMBIA);
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
@@ -291,4 +298,13 @@ public class MCOCewaHandler extends MCOHandler {
     }
     return null;
   }
+
+  @Override
+  public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
+    if (CEWA_COUNTRY_LIST.contains(issuingCountry)) {
+      return true;
+    }
+    return false;
+  }
+
 }
