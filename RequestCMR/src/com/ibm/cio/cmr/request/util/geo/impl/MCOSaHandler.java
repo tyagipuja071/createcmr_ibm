@@ -394,6 +394,10 @@ public class MCOSaHandler extends MCOHandler {
       address.setCustNm4(currentRecord.getCmrName4());
     }
 
+    if (StringUtils.isBlank(address.getAddrTxt2())) {
+      address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+    }
+
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
       address.getId().setAddrSeq(seq);
@@ -474,7 +478,7 @@ public class MCOSaHandler extends MCOHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "SPECIAL_TAX_CD", "VAT", "ISIC_CD", "EMBARGO_CD", "COLLECTION_CD", "ABBREV_NM",
         "SENSITIVE_FLAG", "CLIENT_TIER", "COMPANY", "INAC_TYPE", "INAC_CD", "ISU_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "MEM_LVL",
-        "BP_REL_TYPE", "MODE_OF_PAYMENT", "ENTERPRISE", "COMMERCIAL_FINANCED", "COLL_BO_ID", "CREDIT_CD", "IBM_DEPT_COST_CENTER"));
+        "BP_REL_TYPE", "MODE_OF_PAYMENT", "ENTERPRISE", "COMMERCIAL_FINANCED", "COLL_BO_ID", "CREDIT_CD", "IBM_DEPT_COST_CENTER", "CROS_SUB_TYP"));
     return fields;
   }
 
@@ -855,6 +859,79 @@ public class MCOSaHandler extends MCOHandler {
       }
     }
     return null;
+  }
+
+  @Override
+  public Map<String, String> getUIFieldIdMap() {
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("##OriginatorName", "originatorNm");
+    map.put("##SensitiveFlag", "sensitiveFlag");
+    map.put("##INACType", "inacType");
+    map.put("##ISU", "isuCd");
+    map.put("##CMROwner", "cmrOwner");
+    map.put("##SalesBusOff", "salesBusOffCd");
+    map.put("##PPSCEID", "ppsceid");
+    map.put("##CustLang", "custPrefLang");
+    map.put("##GlobalBuyingGroupID", "gbgId");
+    map.put("##CoverageID", "covId");
+    map.put("##OriginatorID", "originatorId");
+    map.put("##BPRelationType", "bpRelType");
+    map.put("##CAP", "capInd");
+    map.put("##RequestReason", "reqReason");
+    map.put("##SpecialTaxCd", "specialTaxCd");
+    map.put("##POBox", "poBox");
+    map.put("##LandedCountry", "landCntry");
+    map.put("##CMRIssuingCountry", "cmrIssuingCntry");
+    map.put("##INACCode", "inacCd");
+    map.put("##CustPhone", "custPhone");
+    map.put("##VATExempt", "vatExempt");
+    map.put("##CustomerScenarioType", "custGrp");
+    map.put("##City1", "city1");
+    map.put("##StateProv", "stateProv");
+    map.put("##InternalDept", "ibmDeptCostCenter");
+    map.put("##RequestingLOB", "requestingLob");
+    map.put("##AddrStdRejectReason", "addrStdRejReason");
+    map.put("##ExpediteReason", "expediteReason");
+    map.put("##VAT", "vat");
+    map.put("##CollectionCd", "collectionCd");
+    map.put("##CMRNumber", "cmrNo");
+    map.put("##Subindustry", "subIndustryCd");
+    map.put("##EnterCMR", "enterCMRNo");
+    map.put("##DisableAutoProcessing", "disableAutoProc");
+    map.put("##Expedite", "expediteInd");
+    map.put("##Affiliate", "affiliate");
+    map.put("##BGLDERule", "bgRuleId");
+    map.put("##ProspectToLegalCMR", "prospLegalInd");
+    map.put("##ClientTier", "clientTier");
+    map.put("##AbbrevLocation", "abbrevLocn");
+    map.put("##SalRepNameNo", "repTeamMemberNo");
+    map.put("##SAPNumber", "sapNo");
+    map.put("##Department", "dept");
+    map.put("##StreetAddress2", "addrTxt2");
+    map.put("##Company", "company");
+    map.put("##StreetAddress1", "addrTxt");
+    map.put("##AbbrevName", "abbrevNm");
+    map.put("##EmbargoCode", "embargoCd");
+    map.put("##CustomerName1", "custNm1");
+    map.put("##ISIC", "isicCd");
+    map.put("##CustomerName2", "custNm2");
+    map.put("##Enterprise", "enterprise");
+    map.put("##PostalCode", "postCd");
+    map.put("##SOENumber", "soeReqNo");
+    map.put("##DUNS", "dunsNo");
+    map.put("##BuyingGroupID", "bgId");
+    map.put("##RequesterID", "requesterId");
+    map.put("##GeoLocationCode", "geoLocationCd");
+    map.put("##MembLevel", "memLvl");
+    map.put("##RequestType", "reqType");
+    map.put("##CustomerScenarioSubType", "custSubGrp");
+    map.put("##EngineeringBo", "engineeringBo");
+    map.put("##CodFlag", "creditCd");
+    map.put("##ISR", "repTeamMemberNo");
+    // *abner revert begin
+    // map.put("##CommercialFinanced", "commercialFinanced");
+    // *abner revert end
+    return map;
   }
 
 }
