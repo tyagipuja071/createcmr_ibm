@@ -547,28 +547,10 @@ function configureCRNForUKI() {
       FormManager.enable('restrictInd');
     }
   } else if (reqType == 'U') {
-    // if (role.toUpperCase() == 'REQUESTER') {
-    if (isicVal != '9500' && (zs01LandCntry == '' || (zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))
-        && "81" != FormManager.getActualValue('custClass') && "33" != FormManager.getActualValue('custClass')) {
-      if (!dijit.byId('restrictInd').get('checked')) {
-        console.log(">>> Adding CRN Mandatory Validation >>>");
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
-        FormManager.enable('taxCd1');
-      } else {
-        console.log(">>> Removing CRN Mandatory Validation >>>");
-        FormManager.resetValidations('taxCd1');
-        FormManager.readOnly('taxCd1');
-        FormManager.setValue('taxCd1', '');
-      }
-      FormManager.enable('restrictInd');
-    } else {
       console.log(">>> Removing CRN Mandatory Validation >>>");
-      FormManager.getField('restrictInd').checked = true;
+      FormManager.getField('restrictInd').checked = false;
       FormManager.resetValidations('taxCd1');
-      FormManager.readOnly('taxCd1');
       FormManager.readOnly('restrictInd');
-      FormManager.setValue('taxCd1', '');
-    }
   }
 }
 
