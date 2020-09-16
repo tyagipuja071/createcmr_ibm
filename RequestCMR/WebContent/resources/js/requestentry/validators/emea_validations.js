@@ -498,7 +498,8 @@ function configureCRNForUKI() {
     }
   } else if (reqType == 'U') {
     // if (role.toUpperCase() == 'REQUESTER') {
-    if (isicVal != '9500' && (zs01LandCntry == '' || (zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))) {
+    if (isicVal != '9500' && (zs01LandCntry == '' || (zs01LandCntry == 'GB' && issuingCntry == SysLoc.UK) || (zs01LandCntry == 'IE' && issuingCntry == SysLoc.IRELAND))
+        && "81" != FormManager.getActualValue('custClass') && "33" != FormManager.getActualValue('custClass')) {
       if (!dijit.byId('restrictInd').get('checked')) {
         console.log(">>> Adding CRN Mandatory Validation >>>");
         FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'Company Registration Number' ], 'MAIN_CUST_TAB');
