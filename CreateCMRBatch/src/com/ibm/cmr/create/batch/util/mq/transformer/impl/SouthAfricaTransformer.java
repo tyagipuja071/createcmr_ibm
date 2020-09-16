@@ -305,12 +305,12 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyAddr.setZipCode(muAddr.getPostCd());
     }
 
-    if (!StringUtils.isBlank(muAddr.getCounty())) {
-      if (muAddr.getId().getAddrType().equals("ZD01")) {
-        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCounty().trim())) {
+    if ("ZD01".equals(muAddr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(muAddr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
           legacyAddr.setAddrPhone("");
         } else {
-          legacyAddr.setAddrPhone(muAddr.getCounty());
+          legacyAddr.setAddrPhone(muAddr.getCustPhone());
         }
       }
     }
@@ -324,19 +324,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("ZA >> Mapping default Data values..");
     LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, legacyCust, muData);
 
-    List<MassUpdtAddr> muaList = cmrObjects.getMassUpdateAddresses();
-    if (muaList != null && muaList.size() > 0) {
-      for (MassUpdtAddr mua : muaList) {
-        if ("ZS01".equals(mua.getId().getAddrType())) {
-          if (!StringUtils.isBlank(mua.getCounty())) {
-            if (DEFAULT_CLEAR_NUM.equals(mua.getCounty().trim())) {
-              legacyCust.setTelNoOrVat("");
-            } else {
-              legacyCust.setTelNoOrVat(mua.getCounty());
-            }
-          }
-          break;
-        }
+    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
+        legacyCust.setTelNoOrVat("");
+      } else {
+        legacyCust.setTelNoOrVat(muData.getRestrictTo());
       }
     }
 
