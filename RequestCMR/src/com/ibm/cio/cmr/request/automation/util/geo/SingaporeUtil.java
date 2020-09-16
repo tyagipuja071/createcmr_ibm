@@ -243,7 +243,7 @@ public class SingaporeUtil extends AutomationUtil {
       } catch (Exception e) {
         LOG.debug("Error on searching for CMR in FIND CMR." + e.getMessage());
       }
-      result.setDetails(details.toString());
+    }
     switch (scenario) {
     case SCENARIO_BLUEMIX:
     case SCENARIO_MARKETPLACE:
@@ -252,6 +252,7 @@ public class SingaporeUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
     }
+    result.setDetails(details.toString());
     return true;
   }
 
@@ -310,7 +311,7 @@ public class SingaporeUtil extends AutomationUtil {
         // city and dept are interchanged in RDC sometimes
         String rdcFullAddrTxt1 = rdcAddr1 + rdcAddr2 + rdcAddr3 + rdcAddr5 + rdcAddr4;
         String rdcFullAddrTxt2 = rdcAddr1 + rdcAddr2 + rdcAddr3 + rdcAddr4 + rdcAddr5;
-        
+
         // compare the two data , to see if they match
         if (StringUtils.isNotBlank(rdcFullName) && StringUtils.isNotBlank(rdcFullAddrTxt1) && StringUtils.isNotBlank(rdcFullAddrTxt2)
             && rdcFullName.equalsIgnoreCase(reqFullNme)
