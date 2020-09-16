@@ -1065,6 +1065,22 @@ function enableCmrForProcessor() {
   }
 }
 
+function mandatoryForBusinessPartner() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType == 'C') {
+    var _custType = FormManager.getActualValue('custSubGrp');
+    if (_custType == 'LSBP' || _custType == 'SZBP' || _custType == 'ZABP' || _custType == 'NABP' || _custType == 'ZAXBP' || _custType == 'NAXBP' || _custType == 'LSXBP' || _custType == 'SZXBP'
+        || _custType == 'LSBLC' || _custType == 'SZBLC' || _custType == 'NABLC') {
+      FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPS CEID' ], 'MAIN_IBM_TAB');
+    } else {
+      FormManager.resetValidations('ppsceid');
+    }
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1120,5 +1136,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
   GEOHandler.addAfterTemplateLoad(enableCMRNOSAGLLC, SysLoc.SOUTH_AFRICA);
   GEOHandler.addAfterConfig(enableCmrForProcessor, [ SysLoc.SOUTH_AFRICA ]);
+  GEOHandler.addAfterConfig(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
+  GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
 
 });
