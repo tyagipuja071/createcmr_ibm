@@ -6640,6 +6640,8 @@ function addStreetAddressValidator() {
         var addrTxt = null;
         var type = null;
         var record = null;
+        var reqType = FormManager.getActualValue('reqType').toUpperCase();
+        var changedInd = null;
         
         if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
           for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
@@ -6649,15 +6651,17 @@ function addStreetAddressValidator() {
             }
             type = record.addrType;
             addrTxt =  record.addrTxt;
+            changedInd = record.updateInd;
             if (typeof (type) == 'object') {
               type = type[0];
             }
             
             if ((type != undefined && type != '') && (type == 'ZI01' || type == 'ZD01' || type == 'ZS02')) {
-              if (addrTxt == '') {
+              if (addrTxt == '' && reqType != 'U') {
+                return new ValidationResult(null, false, 'Street Address is required for Shipping, Installing and EPL address.');
+              }else if(addrTxt == '' && reqType == 'U' && (changedInd == 'U' || changedInd == 'N')){
                 return new ValidationResult(null, false, 'Street Address is required for Shipping, Installing and EPL address.');
               }
-              return new ValidationResult(null, true);
             }
           }
         }
