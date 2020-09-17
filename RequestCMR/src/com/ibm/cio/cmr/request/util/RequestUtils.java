@@ -558,7 +558,17 @@ public class RequestUtils {
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
 
-    mail.send(host);
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
 
   }
 
@@ -829,7 +839,14 @@ public class RequestUtils {
     entityManager.persist(hist);
     entityManager.flush();
 
-    if (sendMail) {
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (sendMail && (skip == false)) {
       sendEmailNotifications(entityManager, admin, hist);
     }
 
@@ -994,7 +1011,19 @@ public class RequestUtils {
     mail.setFrom(from);
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
-    mail.send(host);
+
+    Admin admin = new Admin();
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
     batchemailTemplate = null;
     refresh();
   }

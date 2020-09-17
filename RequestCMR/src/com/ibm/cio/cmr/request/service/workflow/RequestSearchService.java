@@ -213,6 +213,9 @@ public class RequestSearchService extends BaseService<RequestSearchCriteriaModel
       String canClaimAll = null;
       String typeDesc = null;
       String pendingAppr = null;
+      long childRequestId = 0;
+      String childRequestStatus = null;
+
       for (CompoundEntity entity : rs) {
         a = entity.getEntity(Admin.class);
         addr = entity.getEntity(Addr.class);
@@ -227,6 +230,8 @@ public class RequestSearchService extends BaseService<RequestSearchCriteriaModel
         canClaimAll = (String) entity.getValue("CAN_CLAIM_ALL");
         typeDesc = (String) entity.getValue("TYPE_DESCRIPTION");
         pendingAppr = (String) entity.getValue("PENDING_APPROVALS");
+        childRequestId = entity.getValue("C_REQ_ID") != null ? (long) entity.getValue("C_REQ_ID") : 0;
+        childRequestStatus = (String) entity.getValue("C_REQ_STATUS");
 
         requestSearchCriteriaModel = new RequestSearchCriteriaModel();
         if (a != null) {
@@ -257,6 +262,8 @@ public class RequestSearchService extends BaseService<RequestSearchCriteriaModel
         requestSearchCriteriaModel.setProspect(a.getProspLegalInd());
         requestSearchCriteriaModel.setIterationId(a.getIterationId());
         requestSearchCriteriaModel.setPendingAppr(pendingAppr);
+        requestSearchCriteriaModel.setChildRequestId(childRequestId);
+        requestSearchCriteriaModel.setChildRequestStatus(childRequestStatus);
 
         results.add(requestSearchCriteriaModel);
       }

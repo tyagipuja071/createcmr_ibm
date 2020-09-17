@@ -33,6 +33,9 @@ public class AustraliaUtil extends AutomationUtil {
 
   private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
 
+  public static final String SCENARIO_BLUEMIX = "BLUMX";
+  public static final String SCENARIO_MARKETPLACE = "MKTPC";
+
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
       StringBuilder details, OverrideOutput overrides, RequestData requestData, AutomationEngineData engineData) throws Exception {
@@ -147,9 +150,17 @@ public class AustraliaUtil extends AutomationUtil {
     // skipCompanyCheckForScenario(requestData, engineData,
     // Arrays.asList(scnarioList), true);
     // scenario check for normal and ESOSW
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     String scenarioList[] = { "NRML", "ESOSW" };
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scenarioList));
     processSkipCompanyChecks(engineData, requestData, details);
+    switch (scenario) {
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    }
     return true;
   }
 
