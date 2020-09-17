@@ -549,8 +549,8 @@ public class UKIUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
 
-    if ((!isCoverageCalculated
-        || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario)) && engineData.get("ZI01_DNB_MATCH") == null))
+    if ((!isCoverageCalculated || ((SCENARIO_THIRD_PARTY.equals(scenario) || SCENARIO_INTERNAL_FSL.equals(scenario))
+        && (engineData.get("ZI01_DNB_MATCH") == null || CalculateCoverageElement.COV_VAT.equals(covFrom))))
         && !SCENARIOS_TO_SKIP_COVERAGE.contains(scenario)) {
       details.setLength(0);
       overrides.clearOverrides();
