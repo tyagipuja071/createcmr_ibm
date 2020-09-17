@@ -19,6 +19,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.model.BatchEmailModel;
@@ -331,6 +332,23 @@ public class LegacyCommonUtil {
       LOG.error("Error when loading Email template.", e);
     }
     return sb.toString();
+  }
+
+  public static DataRdc getOldData(EntityManager entityManager, String reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    DataRdc oldData = new DataRdc();
+
+    if (records != null && records.size() > 0) {
+      oldData = records.get(0);
+    } else {
+      oldData = null;
+    }
+
+    return oldData;
   }
 
 }
