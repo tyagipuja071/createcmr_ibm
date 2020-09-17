@@ -1174,7 +1174,7 @@ public class FRHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
   
   private void setAbbrevNameOnDataSave(EntityManager entityManager, Data data){
