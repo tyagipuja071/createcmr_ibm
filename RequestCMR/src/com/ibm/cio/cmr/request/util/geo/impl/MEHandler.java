@@ -1042,15 +1042,18 @@ public class MEHandler extends BaseSOFHandler {
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry())) {
       data.setPhone1(mainRecord.getCmrCustPhone());
       data.setTaxCd2(mainRecord.getCmrEnterpriseNumber());
+      if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
+        data.setPhone3(mainRecord.getCmrBusinessReg());
+      }
       if (this.legacyObjects != null) {
         CmrtCustExt cmrtExt = this.legacyObjects.getCustomerExt();
         if (cmrtExt != null) {
           String teleCovRep = cmrtExt.getTeleCovRep();
           data.setBpSalesRepNo(teleCovRep);
-          if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
-            String ice = cmrtExt.getiTaxCode();
-            data.setPhone3(ice);
-          }
+          // if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
+          // String ice = cmrtExt.getiTaxCode();
+          // data.setPhone3(ice);
+          // }
         }
       }
     }
