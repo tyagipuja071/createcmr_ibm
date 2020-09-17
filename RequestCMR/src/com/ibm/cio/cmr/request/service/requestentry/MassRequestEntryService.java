@@ -47,6 +47,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
+import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
@@ -1705,7 +1706,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         processLegacyDirectMassFile(entityManager, request, reqId, token, items);
         return;
       }
-
+      if (cmrIssuingCntry != null && FranceUtil.isCountryFREnabled(entityManager, cmrIssuingCntry)) {
+        processLegacyDirectMassFile(entityManager, request, reqId, token, items);
+        return;
+      }
       if (cmrIssuingCntry.equalsIgnoreCase("631")) {
         scoring = addrService.getScorecardRecord(entityManager, reqId);
       }
