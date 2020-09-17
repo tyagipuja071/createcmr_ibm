@@ -1609,19 +1609,32 @@ function setMESBO(repTeamMemberNo) {
   var role = FormManager.getActualValue('userRole');
   var custGrp = FormManager.getActualValue('custGrp');
   var reqType = FormManager.getActualValue('reqType');
-  if (ME_INCL.has(cntry) && (reqType == 'C' || reqType == 'U')) {
+  var reqSBO = FormManager.getActualValue('salesBusOffCd');
+  if (ME_INCL.has(cntry) && (reqType == 'C')) {
     if (GBM_SBM_INCL.has(cntry) && custGrp != null && (custGrp == 'GBM' || custGrp == 'SBM')) {
       FormManager.setValue('salesBusOffCd', '530');
+      FormManager.setValue('repTeamMemberNo', '530530');
     } else {
       FormManager.setValue('salesBusOffCd', cntry);
+      FormManager.setValue('repTeamMemberNo', cntry + cntry);
     }
-    // FormManager.setValue('repTeamMemberNo', cntry + cntry);
     if (role != GEOHandler.ROLE_PROCESSOR) {
       disableSBO();
     }
     return;
   }
 
+  if (ME_INCL.has(cntry) && (reqType == 'U')) {
+
+    if (reqSBO == null || reqSBO == '') {
+      FormManager.setValue('salesBusOffCd', cntry);
+    }
+
+    if (role != GEOHandler.ROLE_PROCESSOR) {
+      disableSBO();
+    }
+    return;
+  }
 }
 
 // CMR-5993 SBO is required for processor
@@ -1699,15 +1712,16 @@ function dupCMRExistCheck() {
         if (ME_DUP_INCL.has(cntry) && dijit.byId('dupCmrIndc').get('checked')) {
 
           var dupCEBO = cntry + '0000';
-          var qParamsDup = {
-            CMRNO : cmrNo,
-            CEBO : dupCEBO
-          };
-          var resultsD = cmr.query('CHECK.ME.DUP.EXIST.DB2', qParamsDup);
-          if (resultsD.ret1 != null && resultsD.ret1 > 0) {
-            return new ValidationResult(null, true);
-          } else {
-            return new ValidationResult(null, false, 'This CMR Number for ' + cntry + ' do not have duplicate 675.');
+          var resultsD = cmr.query('CHECK.ME.DUP.EXIST.DB2', {
+            CMRNO : cmrNo
+          });
+          if (resultsD.ret1 != null) {
+            var existDupCEBO = resultsD.ret1;
+            if (resultsD.ret1 == dupCEBO) {
+              return new ValidationResult(null, true);
+            } else {
+              return new ValidationResult(null, false, 'There have a exist dup 675 data under this CMR for country code:' + existDupCEBO.substring(0, 3));
+            }
           }
         }
         return new ValidationResult(null, true);

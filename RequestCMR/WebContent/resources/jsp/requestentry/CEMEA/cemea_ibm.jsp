@@ -30,10 +30,19 @@
 || reqentry.getCmrIssuingCntry().equalsIgnoreCase("820") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("821")
 || reqentry.getCmrIssuingCntry().equalsIgnoreCase("826") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("889")
 || reqentry.getCmrIssuingCntry().equalsIgnoreCase("358") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("359")
-|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("363")){ %>
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("363") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("620")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("642") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("675")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("677") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("680")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("752") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("762")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("767") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("768")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("772") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("805")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("808") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("823")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("832") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("849")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("850") || reqentry.getCmrIssuingCntry().equalsIgnoreCase("865")
+|| reqentry.getCmrIssuingCntry().equalsIgnoreCase("729")){ %>
       <form:hidden path="repTeamMemberNo" id="repTeamMemberNo"/>
     <%} else { %>
-    <cmr:column span="2" containerForField="SalRepNameNo" exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,823,832,849,850,865,729">
+    <cmr:column span="2" containerForField="SalRepNameNo">
       <p>
         <cmr:label fieldId="repTeamMemberNo">
           <cmr:fieldLabel fieldId="SalRepNameNo" />:

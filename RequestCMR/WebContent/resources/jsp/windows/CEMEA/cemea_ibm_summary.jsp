@@ -21,12 +21,14 @@
    <cmr:row addBackground="true">
       <cmr:column span="1" width="127">
       </cmr:column>
+      <cmr:view exceptForCountry="620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
       <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="SalRepNameNo" />: </label>
       </cmr:column>
       <cmr:column span="1" width="240">
         ${summary.data.repTeamMemberNo}
       </cmr:column>
+      </cmr:view>
       <cmr:view exceptForCountry="618">
         <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="EngineeringBo" />: </label>

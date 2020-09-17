@@ -133,11 +133,11 @@ public class MEHandler extends BaseSOFHandler {
 
   private static final String[] CEEME_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department", "MembLevel", "BPRelationType" };
+      "Floor", "Building", "County", "City2", "Department", "MembLevel", "BPRelationType", "SpecialTaxCd" };
 
   private static final String[] AUSTRIA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
-      "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department" };
+      "CustClassCode", "CurrencyCode", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX",
+      "TransportZone", "Office", "Floor", "Building", "County", "City2", "Department" };
 
   public static final List<String> CEMEA_POSTAL_FORMAT = Arrays.asList("603", "607", "644", "651", "740", "705", "708", "626", "694", "695", "826",
       "821", "363", "359", "741", "699", "704", "707", "707", "889", "668", "693", "787", "820", "358");
@@ -1000,9 +1000,6 @@ public class MEHandler extends BaseSOFHandler {
         }
       }
       LOG.trace("TelephoneNo: " + data.getPhone1());
-      if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
-        data.setPhone3(this.currentImportValues.get("Shipping_00002_AddressI"));
-      }
       // Type of Customer
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry())) {
         data.setBpAcctTyp(this.currentImportValues.get("CustomerType"));
@@ -1050,6 +1047,10 @@ public class MEHandler extends BaseSOFHandler {
         if (cmrtExt != null) {
           String teleCovRep = cmrtExt.getTeleCovRep();
           data.setBpSalesRepNo(teleCovRep);
+          if (SystemLocation.MOROCCO.equals(data.getCmrIssuingCntry())) {
+            String ice = cmrtExt.getiTaxCode();
+            data.setPhone3(ice);
+          }
         }
       }
     }
@@ -1478,7 +1479,8 @@ public class MEHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getAgreementSignDate(), "AECISubDate", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd()) && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getLegacyCurrencyCd(), newData.getLegacyCurrencyCd())
+        && !SystemLocation.AUSTRIA.equals(cmrCountry)) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CurrencyCode", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getLegacyCurrencyCd(), "CurrencyCode", cmrCountry));
@@ -2380,17 +2382,15 @@ public class MEHandler extends BaseSOFHandler {
   // CMR-6019
   private boolean checkMEDupCMRExist(String cntry, String cmrNo) {
     EntityManager entityManager = JpaManager.getEntityManager();
-    String countME = null;
     String CEBO = cntry + "0000";
     String sql = ExternalizedQuery.getSql("QUERY.CHECK.ME.DUP.EXIST.DB2");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("CMRNO", cmrNo);
-    query.setParameter("CEBO", CEBO);
     List<Object[]> results = query.getResults();
     if (results != null && results.size() > 0) {
       Object[] result = results.get(0);
-      countME = result[0].toString();
-      if (!countME.equals("0")) {
+      String dupCEBO = result[0].toString();
+      if (CEBO.equals(dupCEBO)) {
         return true;
       }
     }

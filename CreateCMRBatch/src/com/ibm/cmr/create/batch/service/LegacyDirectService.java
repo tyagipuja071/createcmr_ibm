@@ -375,7 +375,6 @@ public class LegacyDirectService extends TransConnService {
       }
 
       completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects, cmrObjects);
-
     }
   }
 
