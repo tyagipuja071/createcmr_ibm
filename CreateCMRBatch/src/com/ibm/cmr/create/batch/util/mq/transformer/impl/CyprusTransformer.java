@@ -677,11 +677,8 @@ public class CyprusTransformer extends EMEATransformer {
         if (addrRdc == null || (addrRdc != null && !currPhone.equals(oldPhone))) {
           return true;
         }
-      } else if (!"ZS01".equals(addr.getId().getAddrType()) && StringUtils.isEmpty(addr.getSapNo())) {
-        addr.setChangedIndc("Y");
       }
     }
-
     return false;
   }
 }
