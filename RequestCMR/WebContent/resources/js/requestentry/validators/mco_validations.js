@@ -720,6 +720,9 @@ function setEnterpriseValues(clientTier) {
 
 function setSBOAndEBO() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (cntry == SysLoc.PORTUGAL) {
     // Portugal: SBO - based on SalesRep selected
     var custSubGroup = FormManager.getActualValue('custSubGrp');
