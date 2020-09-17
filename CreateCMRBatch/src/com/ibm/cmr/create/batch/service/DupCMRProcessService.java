@@ -23,6 +23,8 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtAddrPK;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
+import com.ibm.cio.cmr.request.entity.CmrtCustExtPK;
 import com.ibm.cio.cmr.request.entity.CmrtCustPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
@@ -109,35 +111,107 @@ public class DupCMRProcessService extends LegacyDirectService {
   protected void processDupUpdate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Update processing of Request " + admin.getId().getReqId());
     Data data = cmrObjects.getData();
+    boolean dupExist = false;
+    String cmrNo = data.getCmrNo();
+    String cntry = data.getCmrIssuingCntry();
 
     if (ME_DUPCOUNTRY_LIST.contains(data.getCmrIssuingCntry().trim())) {
       String dupCntry = "675";
-      LegacyDirectObjectContainer legacyDupObjects = mapRequestDupDataForUpdate(entityManager, cmrObjects, dupCntry);
 
-      CmrtCust legacyCust = legacyDupObjects.getCustomer();
+      dupExist = checkIfDupExistinCust(entityManager, cmrNo, dupCntry);
+      if (dupExist) {
+        LegacyDirectObjectContainer legacyDupObjects = mapRequestDupDataForUpdate(entityManager, cmrObjects, dupCntry);
 
-      if (legacyCust == null) {
-        throw new Exception("Customer record cannot be updated.");
-      }
+        CmrtCust legacyCust = legacyDupObjects.getCustomer();
 
-      LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
-      LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
+        if (legacyCust == null) {
 
-      updateEntity(legacyCust, entityManager);
+          throw new Exception("Customer record cannot be updated.");
+        } else {
+          LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
+          LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
 
-      if (legacyDupObjects.getCustomerExt() != null) {
-        updateEntity(legacyDupObjects.getCustomerExt(), entityManager);
-      }
-      for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
-        if (legacyAddr.isForUpdate()) {
+          updateEntity(legacyCust, entityManager);
+
+          if (legacyDupObjects.getCustomerExt() != null) {
+            updateEntity(legacyDupObjects.getCustomerExt(), entityManager);
+          }
+          for (CmrtAddr legacyAddr : legacyDupObjects.getAddresses()) {
+            if (legacyAddr.isForUpdate()) {
+              legacyAddr.setUpdateTs(SystemUtil.getCurrentTimestamp());
+              updateEntity(legacyAddr, entityManager);
+            } else if (legacyAddr.isForCreate()) {
+              createEntity(legacyAddr, entityManager);
+            }
+          }
+          // completeRecord(entityManager, admin,
+          // legacyDupObjects.getCustomerNo(),
+          // legacyDupObjects);
+        }
+      } else {
+        LOG.info("Dup 675 Legacy Records for Request ID " + admin.getId().getReqId());
+        LOG.info(" - SOF Country: " + cntry + " CMR No.: " + cmrNo + " not exist, New record creating");
+
+        MessageTransformer transformer = TransformerManager.getTransformer(data.getCmrIssuingCntry());
+        CmrtCust custDup = initEmpty(CmrtCust.class);
+
+        LegacyDirectObjectContainer legacyObjects = LegacyDirectUtil.getLegacyDBValues(entityManager, cntry, cmrNo, false,
+            transformer.hasAddressLinks());
+
+        custDup = legacyObjects.getCustomer();
+        if (custDup == null) {
+          throw new Exception("Customer record cannot be created.");
+        }
+        LOG.debug("CMR No. " + cmrNo + " generated and assigned.");
+
+        // default mapping for DATA and CMRTCUST
+        LOG.debug("Mapping default dup Data values..");
+        CmrtCustPK custPk = new CmrtCustPK();
+        custPk.setCustomerNo(cmrNo);
+        custPk.setSofCntryCode(dupCntry);
+        custDup.setId(custPk);
+        custDup.setRealCtyCd(dupCntry);
+        custDup.setStatus(LEGACY_STATUS_ACTIVE);
+        custDup.setCeBo(cntry + "0000");
+        if (!"5300000".equals(custDup.getSbo())) {
+          custDup.setSbo("6750000");
+          custDup.setIbo("6750000");
+          custDup.setSalesGroupRep("675675");
+          custDup.setSalesRepNo("675675");
+        }
+        custDup.setCreateTs(SystemUtil.getCurrentTimestamp());
+        custDup.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        custDup.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+
+        createEntity(custDup, entityManager);
+
+        if (legacyObjects.getCustomerExt() != null) {
+          CmrtCustExt custExt = legacyObjects.getCustomerExt();
+          CmrtCustExtPK custExtPK = new CmrtCustExtPK();
+          custExtPK.setCustomerNo(cmrNo);
+          custExtPK.setSofCntryCode(dupCntry);
+          custExt.setId(custExtPK);
+          custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          createEntity(custExt, entityManager);
+        }
+
+        LOG.info("Dup 675 Legacy Address Records create for Request ID " + admin.getId().getReqId());
+        LOG.info(" - SOF Country: " + dupCntry + " CMR No.: " + cmrNo);
+
+        for (CmrtAddr legacyAddr : legacyObjects.getAddresses()) {
+          CmrtAddrPK legacyAddrPk = null;
+          legacyAddrPk = new CmrtAddrPK();
+          legacyAddrPk.setCustomerNo(cmrNo);
+          legacyAddrPk.setSofCntryCode(dupCntry);
+          legacyAddrPk.setAddrNo(legacyAddr.getId().getAddrNo());
+          legacyAddr.setId(legacyAddrPk);
+          legacyAddr.setCreateTs(SystemUtil.getCurrentTimestamp());
           legacyAddr.setUpdateTs(SystemUtil.getCurrentTimestamp());
-          updateEntity(legacyAddr, entityManager);
-        } else if (legacyAddr.isForCreate()) {
+
           createEntity(legacyAddr, entityManager);
         }
+        partialCommit(entityManager);
       }
-      // completeRecord(entityManager, admin, legacyDupObjects.getCustomerNo(),
-      // legacyDupObjects);
     }
   }
 
@@ -386,7 +460,8 @@ public class DupCMRProcessService extends LegacyDirectService {
   }
 
   @Override
-  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
+      boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -968,6 +1043,22 @@ public class DupCMRProcessService extends LegacyDirectService {
     List<String> rdcSequences = query.getResults(String.class);
     LOG.debug("RDC sequences =" + rdcSequences);
     return rdcSequences;
+  }
+
+  private boolean checkIfDupExistinCust(EntityManager entityManager, String cmrNo, String cntry) {
+    LOG.debug("Searching for DATA_RDC records for Legacy Processing ");
+    // CMRTCUST
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETCUST");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", cntry);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setForReadOnly(false);
+    CmrtCust cust = query.getSingleResult(CmrtCust.class);
+    if (cust == null) {
+      return false;
+    }
+    return true;
+
   }
 
   private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)

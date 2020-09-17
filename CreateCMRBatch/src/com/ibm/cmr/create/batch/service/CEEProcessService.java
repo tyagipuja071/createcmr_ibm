@@ -737,7 +737,9 @@ public class CEEProcessService extends LegacyDirectService {
               newAddrSeq = addr.getId().getAddrSeq();
             }
             // Fix for CEE Dup IGF seqno
+
             if (CEE_COUNTRY_LIST.contains(cntry)) {
+              newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
               if ("598".equals(addr.getId().getAddrSeq()) || "599".equals(addr.getId().getAddrSeq())) {
                 newAddrSeq = addr.getId().getAddrSeq();
               } else {
@@ -747,6 +749,7 @@ public class CEEProcessService extends LegacyDirectService {
               newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
             }
             // Fix end
+
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
             legacyAddrPk.setAddrNo(newAddrSeq);
