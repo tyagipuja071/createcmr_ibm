@@ -266,6 +266,26 @@
 		</p>
 	  </cmr:column>
 	</cmr:row>
+	  <c:if test="${reqentry.reqType != 'C'}">	
+	  <cmr:row addBackground="false">
+	    <cmr:column span="2" containerForField="CommercialFinanced">
+	      <p>
+	          <cmr:label fieldId="commercialFinanced">
+	          <cmr:fieldLabel fieldId="CommercialFinanced" />:
+	          </cmr:label>
+	          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    <cmr:column span="2" containerForField="CodFlag">
+	      <p>
+	          <cmr:label fieldId="codFlag">
+	          <cmr:fieldLabel fieldId="CodFlag" />:
+	          </cmr:label>
+	          <cmr:field path="creditCd" id="codFlag" fieldId="CodFlag" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    </cmr:row>
+	    </c:if>
   </cmr:view>  
     
   <form:hidden path="economicCd" id="economicCd"/>

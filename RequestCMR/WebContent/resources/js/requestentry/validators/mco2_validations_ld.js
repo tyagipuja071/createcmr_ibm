@@ -19,6 +19,10 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
 var _ISUHandler = null;
 var _CTCHandler = null;
 var _SalesRepHandler = null;
+var _reqLobHandler = null;
+var _reqReasonHandler = null;
+var _codHandler = null;
+var _cofHandler = null;
 
 function addHandlersForMCO2() {
 
@@ -34,6 +38,64 @@ function addHandlersForMCO2() {
     });
   }
 
+  if (FormManager.getActualValue('reqType') == 'U') {
+    if (_reqLobHandler == null) {
+      _reqLobHandler = dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
+        setCodFieldBehavior();
+        setCofFieldBehavior();
+      });
+    }
+
+    if (_reqReasonHandler == null) {
+      _reqReasonHandler = dojo.connect(FormManager.getField('reqReason'), 'onChange', function(value) {
+        setCodFieldBehavior();
+        setCofFieldBehavior();
+      });
+    }
+
+    if (_codHandler == null) {
+      _codHandler = dojo.connect(FormManager.getField('codFlag'), 'onChange', function(value) {
+        setCofValueByCod();
+      });
+    }
+
+    if (_cofHandler == null) {
+      _cofHandler = dojo.connect(FormManager.getField('commercialFinanced'), 'onChange', function(value) {
+        setCodValueByCof();
+      });
+    }
+
+  }
+}
+
+function setCodFieldBehavior() {
+  if (FormManager.getActualValue('requestingLob') == 'AR' && FormManager.getActualValue('reqReason') == 'COD') {
+    FormManager.enable('codFlag');
+  } else {
+    FormManager.readOnly('codFlag');
+  }
+}
+
+function setCofFieldBehavior() {
+  if (FormManager.getActualValue('requestingLob') == 'IGF' && FormManager.getActualValue('reqReason') == 'COPT') {
+    FormManager.enable('commercialFinanced');
+  } else {
+    FormManager.readOnly('commercialFinanced');
+  }
+}
+
+function setCodValueByCof() {
+  var cof = FormManager.getActualValue('commercialFinanced');
+  if (cof == 'R' || cof == 'S' || cof == 'T') {
+    FormManager.setValue('codFlag', 'N');
+  }
+}
+
+function setCofValueByCod() {
+  var cod = FormManager.getActualValue('codFlag');
+  if (cod == 'Y') {
+    FormManager.setValue('commercialFinanced', '');
+  }
 }
 
 var _addrTypesForCEWA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
@@ -98,6 +160,11 @@ function lockRequireFieldsMCO2() {
     // FormManager.readOnly('repTeamMemberNo');
     // FormManager.readOnly('isuCd');
     // FormManager.readOnly('clientTier');
+  }
+
+  if (reqType = 'U') {
+    setCodFieldBehavior();
+    setCofFieldBehavior();
   }
 }
 

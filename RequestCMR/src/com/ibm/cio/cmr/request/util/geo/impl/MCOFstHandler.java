@@ -104,6 +104,17 @@ public class MCOFstHandler extends MCOHandler {
       String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
       data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
 
+      String modeOfPayment = legacyObjects.getCustomer().getModeOfPayment();
+      if (StringUtils.isNotBlank(modeOfPayment) && ("R".equals(modeOfPayment) || "S".equals(modeOfPayment) || "T".equals(modeOfPayment))) {
+        data.setCommercialFinanced(modeOfPayment);
+        data.setCreditCd("N");
+      } else if (StringUtils.isNotBlank(modeOfPayment) && "5".equals(modeOfPayment)) {
+        data.setCreditCd("Y");
+        data.setCommercialFinanced("");
+      } else {
+        data.setCreditCd("");
+        data.setCommercialFinanced("");
+      }
     }
 
   }
@@ -281,11 +292,11 @@ public class MCOFstHandler extends MCOHandler {
     // only add zs01 equivalent for create by model
     FindCMRRecordModel record = mainRecord;
     if (!StringUtils.isEmpty(record.getCmrName3())) {
-      record.setCmrName4(record.getCmrName4());
+      record.setCmrName4(record.getCmrName3());
     }
 
     if (!StringUtils.isEmpty(record.getCmrName4())) {
-      record.setCmrStreetAddressCont(record.getCmrName3());
+      record.setCmrStreetAddressCont(record.getCmrName4());
     }
 
     if (!StringUtils.isBlank(record.getCmrPOBox())) {
