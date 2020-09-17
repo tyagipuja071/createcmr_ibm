@@ -387,20 +387,22 @@ function setAccountTeamNumberValues(clientTier) {
   var geoCd = FormManager.getActualValue('countryUse').substring(3, 5);
 
   var accountTeamNumber = [];
+  var selectedAaccountTeamNumber = [];
   if (isuCd != '') {
     var isuCtc = isuCd + clientTier;
     var qParams = null;
     var results = null;
+    var selectedResult = null;
 
     // Account Team Number will be based on IMS for 32S
     if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
       qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
+        ISU : '%' + isuCd + clientTier + '%'
+      // CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
       };
-      results = cmr.query('GET.SRLIST.BYISUCTC', qParams);
+      results = cmr.query('GET.SRLIST.BYISU', qParams);
     } else {
       qParams = {
         _qall : 'Y',
@@ -410,14 +412,36 @@ function setAccountTeamNumberValues(clientTier) {
       results = cmr.query('GET.SRLIST.BYISU', qParams);
     }
 
-    if (results != null) {
+    if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+      qParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry + geoCd,
+        ISU : '%' + isuCd + clientTier + '%',
+        CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
+      };
+      selectedResult = cmr.query('GET.SRLIST.BYISUCTC', qParams);
+    }
+
+    if (results != null || selectedResult != null) {
       for (var i = 0; i < results.length; i++) {
         accountTeamNumber.push(results[i].ret1);
       }
+      for (var i = 0; i < selectedResult.length; i++) {
+        selectedAaccountTeamNumber.push(selectedResult[i].ret1);
+      }
+
       FormManager.limitDropdownValues(FormManager.getField('searchTerm'), accountTeamNumber);
       if (accountTeamNumber.length == 1) {
         FormManager.setValue('searchTerm', accountTeamNumber[0]);
       }
+
+      // 2020-09-17 CMR-4992
+      console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
+      console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
+
+      if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp)
+        FormManager.setValue('searchTerm', selectedAaccountTeamNumber);
+
     }
 
     var custGrp = FormManager.getActualValue('custGrp');
