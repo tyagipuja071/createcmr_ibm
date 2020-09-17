@@ -13,8 +13,37 @@ var _postalCodeHandler = null;
 var _ISICHandler = null;
 
 function afterConfigPT() {
-  FormManager.enable('vat');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var reqType = FormManager.getActualValue('reqType');
+
+  FormManager.readOnly('custPrefLang');
   FormManager.readOnly('subIndustryCd');
+
+  // Control Type Of Customer
+  if ((custSubGrp != 'GOVRN' && custSubGrp != 'INTER' && custSubGrp != 'INTSO' && custSubGrp != 'XGOV' && custSubGrp != 'XBP') && (reqType != 'U')) {
+    FormManager.setValue('crosSubTyp', '');
+  }
+
+  if ((role == 'REQUESTER') && reqType != 'C') {
+    FormManager.readOnly('vat');
+    FormManager.readOnly('crosSubTyp');
+  } else {
+    FormManager.enable('vat');
+    FormManager.enable('crosSubTyp');
+  }
+
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+  } else if (role == 'PROCESSOR' && reqType != 'U') {
+    FormManager.enable('cmrNo');
+  } else {
+    FormManager.readOnly('cmrNo');
+  }
+
 }
 
 function afterTemplateLoadPT() {
@@ -167,13 +196,9 @@ function lockEmbargo() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
-  // Unlock EmbargoCode field for Spain
-  if (SysLoc.SPAIN == FormManager.getActualValue('cmrIssuingCntry') && FormManager.getActualValue('reqType') == 'U') {
-    FormManager.enable('embargoCd');
-    return;
-  }
+  var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER') {
+  if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('embargoCd');
   } else {
     FormManager.enable('embargoCd');
@@ -204,6 +229,30 @@ function addEmbargoCodeValidatorSpain() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addEmbargoCodeValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+
+        if (embargoCd != '' && embargoCd.length > 0) {
+          embargoCd = embargoCd.trim();
+          if ((embargoCd != '' && embargoCd.length == 1) && (embargoCd == 'Y' || embargoCd == 'J')) {
+            return new ValidationResult(null, true);
+          } else {
+            return new ValidationResult({
+              id : 'embargoCd',
+              type : 'text',
+              name : 'embargoCd'
+            }, false, 'Please use valid value for Embargo code field. (Y,J or Blank)');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function afterConfigForMCO() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
@@ -211,39 +260,6 @@ function afterConfigForMCO() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.readOnly('cmrOwner');
-
-}
-
-function afterConfigForPT() {
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var reqType = FormManager.getActualValue('reqType');
-
-  FormManager.readOnly('custPrefLang');
-
-  // Control Type Of Customer
-  if ((custSubGrp != 'GOVRN' && custSubGrp != 'INTER' && custSubGrp != 'INTSO' && custSubGrp != 'XGOV' && custSubGrp != 'XBP') && (reqType != 'U')) {
-    FormManager.setValue('crosSubTyp', '');
-  }
-
-  if ((role == 'REQUESTER') && reqType != 'C') {
-    FormManager.readOnly('crosSubTyp');
-  } else {
-    FormManager.enable('crosSubTyp');
-  }
-
-  if (role == 'REQUESTER') {
-    FormManager.readOnly('cmrNo');
-  } else if (role == 'PROCESSOR' && reqType != 'U') {
-    FormManager.enable('cmrNo');
-  } else {
-    FormManager.readOnly('cmrNo');
-  }
 
 }
 
@@ -704,6 +720,9 @@ function setEnterpriseValues(clientTier) {
 
 function setSBOAndEBO() {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (cntry == SysLoc.PORTUGAL) {
     // Portugal: SBO - based on SalesRep selected
     var custSubGroup = FormManager.getActualValue('custSubGrp');
@@ -953,7 +972,7 @@ function changeAbbrevNmLocnPortugal(cntry, addressMode, saving, finalSave, force
     }
     var reqType = FormManager.getActualValue('reqType');
     var addrType = FormManager.getActualValue('addrType');
-    if (reqType == 'C' && addrType == 'ZS01' || copyingToA || reqType == 'U') {
+    if (reqType == 'C' && addrType == 'ZS01' || copyingToA) {
       // generate Abbreviated Name/Location
       var role = FormManager.getActualValue('userRole').toUpperCase();
       var abbrevNm = FormManager.getActualValue('custNm1');
@@ -2328,6 +2347,9 @@ function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged)
     if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
       FormManager.resetValidations('vat');
       FormManager.setValue('vatExempt', true);
+    } else {
+      FormManager.setValue('vatExempt', false);
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ]);
     }
   }
 }
@@ -2385,7 +2407,6 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
   GEOHandler.addAddrFunction(addPhoneValidatorEMEA, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
-  GEOHandler.addAfterConfig(afterConfigForPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(afterConfigForMCO, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(addHandlersForPTES, [ SysLoc.PORTUGAL, SysLoc.SPAIN ]);
 
@@ -2478,5 +2499,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(configureVATExemptOnScenariosPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.registerValidator(addAbbrevNmValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
 
 });

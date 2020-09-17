@@ -3668,6 +3668,10 @@ function setISRValues() {
 
 var _oldEnterpriseValue = '';
 function setEnterprise() {
+  
+  if(FormManager.getActualValue('reqType') == 'U'){
+    return;
+  }
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
   var repTeam = FormManager.getActualValue('salesTeamCd');
@@ -8163,6 +8167,24 @@ function crossborderScenariosAbbrvLocOnChange() {
   });
 }
 
+function validateSalesRepISR() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var salRep = FormManager.getActualValue('salesTeamCd');
+        var isr = FormManager.getActualValue('repTeamMemberNo');
+        if (salRep.length >= 1 && salRep.length != 6) {
+            return new ValidationResult(null, false, 'Sales Rep should be 6 digit long.');
+        }else if(isr.length >= 1 && isr.length != 6){
+            return new ValidationResult(null, false, 'ISR should be 6 digit long.');
+         }
+        return new ValidationResult(null, true);
+       }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+} 
+
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8413,4 +8435,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addStreetAddressValidator, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLocOnChange, [ SysLoc.CYPRUS ]);
+  GEOHandler.registerValidator(validateSalesRepISR, [ SysLoc.CYPRUS ], null, true);
 });
