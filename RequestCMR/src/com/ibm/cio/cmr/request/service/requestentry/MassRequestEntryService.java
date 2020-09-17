@@ -4523,6 +4523,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
 
   }
 
+
   public boolean validateSWISSMassUpdateFile(String path, Data data, Admin admin) throws Exception {
     List<Boolean> isErr = new ArrayList<Boolean>();
     try (FileInputStream fis = new FileInputStream(path)) {
@@ -4775,6 +4776,11 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                   } else if (ATUtil.isCountryATEnabled(entityManager, data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
                     if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry()) && !validateATMassUpdateFile(filePath, data, admin)) {
+                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    }
+                  } else if (FranceUtil.isCountryFREnabled(entityManager, data.getCmrIssuingCntry())) {
+                    fis = new FileInputStream(filePath);
+                    if (SystemLocation.FRANCE.equals(data.getCmrIssuingCntry()) && !validateFRMassUpdateFile(filePath, data, admin)) {
                       throw new CmrException(MessageUtil.ERROR_MASS_FILE);
                     }
                   } else {
@@ -5612,6 +5618,64 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       return true;
     } else {
       return false;
+    }
+
+  }
+
+  public boolean validateFRMassUpdateFile(String path, Data data, Admin admin) throws Exception {
+    List<Boolean> isErr = new ArrayList<Boolean>();
+    try (FileInputStream fis = new FileInputStream(path)) {
+      MassChangeTemplateManager.initTemplatesAndValidators(SystemLocation.FRANCE);
+      MassChangeTemplate template = MassChangeTemplateManager.getMassUpdateTemplate(SystemLocation.FRANCE);
+
+      EntityManager em = JpaManager.getEntityManager();
+      try {
+        String country = data.getCmrIssuingCntry();
+        LOG.debug("Validating " + path);
+        byte[] bookBytes = template.cloneStream(fis);
+
+        List<TemplateValidation> validations = null;
+        StringBuilder errTxt = new StringBuilder();
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          validations = template.validate(em, is, country, 2000);
+          LOG.debug(new ObjectMapper().writeValueAsString(validations));
+          for (TemplateValidation validation : validations) {
+            for (ValidationRow row : validation.getRows()) {
+              if (!row.isSuccess()) {
+                if (StringUtils.isEmpty(errTxt.toString())) {
+                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
+                } else {
+                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
+                }
+              }
+            }
+          }
+        }
+
+        if (!StringUtils.isEmpty(errTxt.toString())) {
+          throw new Exception(new ObjectMapper().writeValueAsString(errTxt.toString()));
+        }
+
+        try (InputStream is = new ByteArrayInputStream(bookBytes)) {
+          try (FileOutputStream fos = new FileOutputStream(path)) {
+            LOG.debug("Merging..");
+            template.merge(validations, is, fos, 2000);
+          }
+        }
+        // modify the country for testing
+      } catch (Exception e) {
+        LOG.error("An error occurred in validating FR Mass Update File.");
+        return false;
+      } finally {
+        em.close();
+      }
+    }
+
+    if (isErr.contains(false)) {
+      return false;
+    } else {
+      return true;
     }
 
   }
