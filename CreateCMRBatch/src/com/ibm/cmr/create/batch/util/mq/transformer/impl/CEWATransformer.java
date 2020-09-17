@@ -235,8 +235,12 @@ public class CEWATransformer extends MCOTransformer {
   @Override
   public String getMailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
     DataRdc oldData = LegacyCommonUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
-    String oldCOD = oldData.getCreditCd();
-    String oldCOF = oldData.getCommercialFinanced();
+    String oldCOD = "";
+    String oldCOF = "";
+    if (oldData != null) {
+      oldCOD = oldData.getCreditCd();
+      oldCOF = oldData.getCommercialFinanced();
+    }
 
     if (StringUtils.isNotBlank(oldCOF) && StringUtils.isBlank(data.getCommercialFinanced())) {
       return "COF";
