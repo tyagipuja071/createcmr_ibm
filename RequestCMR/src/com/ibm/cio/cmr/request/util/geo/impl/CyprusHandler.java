@@ -1691,6 +1691,11 @@ public class CyprusHandler extends BaseSOFHandler {
           address.setCustPhone("");
         }
       }
+      
+      if ("ZD01".equals(address.getId().getAddrType())) {
+        String phone = getShippingPhoneFromLegacy(currentRecord);
+        address.setCustPhone(phone != null ? phone : "");
+      }
 
       address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
       // if (StringUtils.isNotBlank(currentRecord.getCmrCountryLanded())
@@ -4029,6 +4034,16 @@ public class CyprusHandler extends BaseSOFHandler {
       return "ZD01";
     case "5":
       return "ZI01";
+    }
+    return null;
+  }
+  
+  private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {
+    List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
+    for (CmrtAddr cmrtAddr : cmrtAddrs) {
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && address.getCmrAddrSeq().equals(cmrtAddr.getId().getAddrNo())) {
+        return cmrtAddr.getAddrPhone();
+      }
     }
     return null;
   }
