@@ -13,6 +13,10 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -23,6 +27,7 @@ import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
@@ -1174,7 +1179,7 @@ public class FRHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
   
   private void setAbbrevNameOnDataSave(EntityManager entityManager, Data data){
@@ -1215,5 +1220,42 @@ public class FRHandler extends BaseSOFHandler {
       }
     }
     return isNameUpdated;
+  }
+
+  public static void validateFRMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };
+    for (String name : sheetNames) {
+      XSSFSheet sheet = book.getSheet(name);
+      LOG.debug("validating name 3 for sheet " + name);
+      for (Row row : sheet) {
+        if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+          Cell cmrCell1 = row.getCell(4);
+          if (cmrCell1 != null) {
+            String name3 = "";
+            switch (cmrCell1.getCellTypeEnum()) {
+            case STRING:
+              name3 = cmrCell1.getStringCellValue();
+              break;
+            case NUMERIC:
+              double nvalue = cmrCell1.getNumericCellValue();
+              if (nvalue > 0) {
+                name3 = "" + nvalue;
+                break;
+              }
+            default:
+              continue;
+            }
+            if (name3.length() > 30) {
+              LOG.debug("Total computed length of name3 should not exeed 30. Sheet: " + name + ", Row: " + row.getRowNum() + ", Name3:" + name3);
+              TemplateValidation error = new TemplateValidation(name);
+              error.addError(row.getRowNum(), "building", "Total computed length of customer name3 should not exeed 30");
+              validations.add(error);
+            }
+          } 
+        }
+      }
+    }
+    HashMap<String, String> hwFlagMap = new HashMap<>();
+  
   }
 }
