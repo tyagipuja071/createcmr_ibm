@@ -97,6 +97,8 @@ public class MCOFstHandler extends MCOHandler {
         if (legacyCust.getTaxCd() != null)
           data.setSpecialTaxCd(legacyCust.getTaxCd());
 
+        if (legacyCust.getEnterpriseNo() != null)
+          data.setEnterprise(legacyCust.getEnterpriseNo());
       }
 
       String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
