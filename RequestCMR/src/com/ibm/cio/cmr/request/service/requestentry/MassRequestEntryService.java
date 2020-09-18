@@ -4782,8 +4782,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
                     }
                   } else if (FranceUtil.isCountryFREnabled(entityManager, data.getCmrIssuingCntry())) {
                     fis = new FileInputStream(filePath);
-                    if (SystemLocation.FRANCE.equals(data.getCmrIssuingCntry()) && !validateFRMassUpdateFile(filePath, data, admin)) {
-                      throw new CmrException(MessageUtil.ERROR_MASS_FILE);
+                    try {
+                      if (SystemLocation.FRANCE.equals(data.getCmrIssuingCntry())) {
+                        validateFRMassUpdateFile(filePath, data, admin);
+                      }
+                    } catch (Exception e) {
+                      throw new CmrException(e);
                     }
                   } else {
                     if (!validateMassUpdateFile(item.getInputStream())) {
@@ -5735,9 +5739,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         }
 
         if (!StringUtils.isEmpty(errTxt.toString())) {
-          throw new Exception(new ObjectMapper().writeValueAsString(errTxt.toString()));
+          // LOG.debug(errTxt);
+          throw new Exception(errTxt.toString());
         }
-
         try (InputStream is = new ByteArrayInputStream(bookBytes)) {
           try (FileOutputStream fos = new FileOutputStream(path)) {
             LOG.debug("Merging..");
@@ -5747,7 +5751,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         // modify the country for testing
       } catch (Exception e) {
         LOG.error("An error occurred in validating FR Mass Update File.");
-        return false;
+        throw new Exception(e.getMessage());
       } finally {
         em.close();
       }
