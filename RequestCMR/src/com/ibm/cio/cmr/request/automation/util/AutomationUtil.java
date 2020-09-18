@@ -567,8 +567,17 @@ public abstract class AutomationUtil {
       }
     }
     if (legalEndingExists) {
-      engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
-      details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
+      String commentSpecific = "Commercial.";
+      String commentGeneric = "Changed.";
+      String[] arrCntries = { "834", "616" };
+      List<String> genericCmtCntries = Arrays.asList(arrCntries);
+      if (genericCmtCntries.contains(country)) {
+        engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentGeneric, "", "");
+        details.append("Scenario chosen is incorrect, should be " + commentGeneric).append("\n");
+      } else {
+        engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentSpecific, "", "");
+        details.append("Scenario chosen is incorrect, should be " + commentSpecific).append("\n");
+      }
       return false;
     }
 
