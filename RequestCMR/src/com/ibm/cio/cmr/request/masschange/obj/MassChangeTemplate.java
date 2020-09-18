@@ -208,6 +208,10 @@ public class MassChangeTemplate {
         }
       } else if (FranceUtil.isCountryFREnabled(entityManager, country)) {
         FRHandler.validateFRMassUpdateTemplateDupFills(validations, book, maxRows, country);
+        for (TemplateTab tab : this.tabs) {
+          validations.add(tab.validate(entityManager, book, country, maxRows));
+        }
+
       } else if (ATUtil.isCountryATEnabled(entityManager, country)) {// CMR-800
         String[] sheetNames = { "Sold To", "Mail to", "Bill To", "Ship To", "Install At" };// CMR-2065
                                                                                     // installing
