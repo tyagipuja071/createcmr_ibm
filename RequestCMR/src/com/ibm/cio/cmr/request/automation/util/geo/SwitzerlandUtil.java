@@ -130,6 +130,7 @@ public class SwitzerlandUtil extends AutomationUtil {
       case SCENARIO_COMMERCIAL:
         break;
       case SCENARIO_PRIVATE_CUSTOMER:
+        engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       case SCENARIO_IBM_EMPLOYEE:
         return doPrivatePersonChecks(engineData, SystemLocation.SWITZERLAND, soldTo.getLandCntry(), customerName, details,
             SCENARIO_IBM_EMPLOYEE.equals(actualScenario));
