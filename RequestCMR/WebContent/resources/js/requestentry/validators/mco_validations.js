@@ -125,7 +125,7 @@ function getImportedIndcForPT() {
     console.log('Returning imported indc = ' + _importedIndc);
     return _importedIndc;
   }
-  var results = cmr.query('VALIDATOR.IMPORTED_PT', {
+  var results = cmr.query('VALIDATOR.IMPORTED', {
     REQID : FormManager.getActualValue('reqId')
   });
   if (results != null && results.ret1) {
@@ -2394,6 +2394,38 @@ function addAbbrevLocationValidatorPT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndcForPT();
+  var reqId = FormManager.getActualValue('reqId');
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'THDPT')) {
+    var origISU;
+    var origClientTier;
+    var origRepTeam;
+    var origSbo;
+    var origInac;
+    var origEnterprise;
+
+    var result = cmr.query("GET.CMRINFO.IMPORTED_PT", {
+      REQ_ID : reqId
+    });
+
+    if (result != null && result != '') {
+      origISU = result.ret1;
+      origClientTier = result.ret2;
+      origInac = result.ret5;
+      origEnterprise = result.ret6;
+
+      FormManager.setValue('isuCd', origISU);
+      FormManager.setValue('clientTier', origClientTier);
+      FormManager.setValue('inacCd', origInac);
+      FormManager.setValue('enterprise', origEnterprise);
+    }
+  } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y') {
+    FormManager.setValue('inacCd', '');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
@@ -2502,5 +2534,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAbbrevNmValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
+  GEOHandler.addAfterTemplateLoad(retainImportValuesPT, [ SysLoc.PORTUGAL ]);
 
 });
