@@ -3528,7 +3528,7 @@ function getImportedIndcForCyprus() {
   if (_importedIndc) {
     return _importedIndc;
   }
-  var results = cmr.query('VALIDATOR.IMPORTED_GR', {
+  var results = cmr.query('VALIDATOR.IMPORTED', {
     REQID : FormManager.getActualValue('reqId')
   });
   if (results != null && results.ret1) {
