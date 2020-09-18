@@ -224,6 +224,7 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
  */
 function AddressDetailsModal_onLoad() {
   var details = cmr.addrdetails;
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   dojo.byId('dplChkResult_view').innerHTML = '';
   dojo.byId('dplChkInfo_view').innerHTML = '';
   _assignDetailsValue('#AddressDetailsModal #custNm1_view', details.ret4);
@@ -251,8 +252,12 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #custFax_view', details.ret22);
   _assignDetailsValue('#AddressDetailsModal #custPhone_view', details.ret23);
 
-  if (FormManager.getActualValue('cmrIssuingCntry') == '897' && details.ret2 != 'ZI01' && details.ret2 != 'ZS01' && details.ret2 != 'ZP01') {
-    cmr.hideNode('updateButtonFromView');
+  if (FormManager.getActualValue('cmrIssuingCntry') == '897' && details.ret2 != 'ZI01' && details.ret2 != 'ZS01') {
+    if (details.ret2 == 'ZP01' && role == 'PROCESSOR') {
+      cmr.showNode('updateButtonFromView');
+    } else {
+      cmr.hideNode('updateButtonFromView');
+    }
   } else {
     cmr.showNode('updateButtonFromView');
   }
