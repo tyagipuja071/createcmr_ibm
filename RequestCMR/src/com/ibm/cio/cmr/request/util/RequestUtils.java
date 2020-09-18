@@ -704,7 +704,7 @@ public class RequestUtils {
     return sb.toString();
   }
 
-  private static String getExternalEmailTemplate(String sourceSystId) {
+  public static String getExternalEmailTemplate(String sourceSystId) {
     try {
       InputStream is = ConfigUtil.getResourceStream((sourceSystId.toLowerCase()) + ".html");
 
