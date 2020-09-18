@@ -100,9 +100,9 @@ public class MCOFstHandler extends MCOHandler {
         if (legacyCust.getEnterpriseNo() != null)
           data.setEnterprise(legacyCust.getEnterpriseNo());
 
-        if (legacyCust.getCollectionCd() != null)
-          data.setCollectionCd(legacyCust.getCollectionCd());
       }
+
+      data.setDunsNo(mainRecord.getCmrDuns());
 
       String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
       data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
