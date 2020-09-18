@@ -251,7 +251,7 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #custFax_view', details.ret22);
   _assignDetailsValue('#AddressDetailsModal #custPhone_view', details.ret23);
 
-  if (FormManager.getActualValue('cmrIssuingCntry') == '897' && details.ret2 != 'ZI01' && details.ret2 != 'ZS01') {
+  if (FormManager.getActualValue('cmrIssuingCntry') == '897' && details.ret2 != 'ZI01' && details.ret2 != 'ZS01' && details.ret2 != 'ZP01') {
     cmr.hideNode('updateButtonFromView');
   } else {
     cmr.showNode('updateButtonFromView');
