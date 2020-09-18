@@ -369,7 +369,7 @@ public class LegacyDirectService extends TransConnService {
         theService.processDupCreate(entityManager, admin, cmrObjects);
       }
 
-      // Add to build duplicate CMR data for ME countries -CMR6019
+      // Add to build duplicate 675 CMR data for ME countries -CMR6019
       if ("Y".equals(cmrObjects.getData().getDupCmrIndc())) {
         DupCMRProcessService theService = new DupCMRProcessService();
         theService.processDupCreate(entityManager, admin, cmrObjects);
