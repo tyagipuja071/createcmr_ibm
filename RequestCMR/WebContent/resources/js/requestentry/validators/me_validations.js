@@ -1255,6 +1255,33 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '5B') {
         clientTiers = [ '7' ];
       }
+    } else if ((SysLoc.TUNISIA == cntry)// CMR-6057
+        && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
+            || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU')) {
+      if (isuCd == '34') {
+        clientTiers = [ 'V' ];
+      } else if (isuCd == '32') {
+        clientTiers = [ 'S', 'N', 'T', 'C' ];
+      }
+    } else if ('808' == cntry) {// 808(Afganistan/Pakistan)
+      if (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
+          || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU') {
+        if (isuCd == '34') {
+          clientTiers = [ 'V', 'A' ];
+        } else if (isuCd == '32') {
+          clientTiers = [ 'C', 'T', 'N' ];
+        }
+      } else if (FormManager.getActualValue('custSubGrp') == 'PKTP' || FormManager.getActualValue('custSubGrp') == 'PKXTP' || FormManager.getActualValue('custSubGrp') == 'PKCOM'
+          || FormManager.getActualValue('custSubGrp') == 'PKXCO' || FormManager.getActualValue('custSubGrp') == 'PKPC') {
+
+        if (isuCd == '34') {
+          clientTiers = [ 'V' ];
+        } else if (isuCd == '32') {
+          clientTiers = [ 'S', 'T', 'N' ];
+        }
+      } else {
+        clientTiers = [ '7' ];
+      }// End of CMR6057
     } else {
       var qParams = {
         _qall : 'Y',
@@ -1701,7 +1728,9 @@ function dupCMRExistCheck() {
       validate : function() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var cmrNo = FormManager.getActualValue('cmrNo');
-        if (FormManager.getActualValue('reqType') != 'U') {
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+
+        if (!(FormManager.getActualValue('reqType') == 'U' && (role == 'REQUESTER' || role == 'PROCESSOR')) && !(FormManager.getActualValue('reqType') == 'C' && role == 'PROCESSOR')) {
           return new ValidationResult(null, true);
         }
 
@@ -1720,7 +1749,8 @@ function dupCMRExistCheck() {
             if (resultsD.ret1 == dupCEBO) {
               return new ValidationResult(null, true);
             } else {
-              return new ValidationResult(null, false, 'There have a exist dup 675 data under this CMR for country code:' + existDupCEBO.substring(0, 3));
+              return new ValidationResult(null, false, 'There have exist dup 675 data under this CMR for country code:' + existDupCEBO.substring(0, 3))
+                  + ',please use another cmrno or uncheck the dup 675 box.';
             }
           }
         }
@@ -4150,13 +4180,12 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setMESBO, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(setMESBO, GEOHandler.ME);
   GEOHandler.registerValidator(dupCMRExistCheck, GEOHandler.ME, null, true);
-  // CMR-4606 DupCMR exist
+
   GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
-  // GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
-  // GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
