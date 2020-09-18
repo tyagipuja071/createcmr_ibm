@@ -1753,7 +1753,7 @@ public class FRService extends TransConnService {
 
     try {
       // 1. Get request to process
-      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.MA.GET.MASS_UPDT"));
+      PreparedQuery query = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.FR.GET.MASS_UPDT"));
       query.setParameter("REQ_ID", admin.getId().getReqId());
       query.setParameter("ITER_ID", admin.getIterationId());
 
