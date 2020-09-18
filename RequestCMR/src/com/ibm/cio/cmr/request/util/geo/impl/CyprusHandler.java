@@ -3558,6 +3558,19 @@ public class CyprusHandler extends BaseSOFHandler {
               + "If one is populated, the other must be empty.");
           validations.add(error);
         }
+        
+        if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localPostal)) {
+          LOG.trace("Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+          error.addError(rowIndex, "Local Postal Code",
+              "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+          validations.add(error);
+        }
+        if (!StringUtils.isEmpty(localCity) && !StringUtils.isEmpty(cbPostal)) {
+          LOG.trace("Local City and Cross Border Postal Cod must not be populated at the same time. If one is populated, the other must be empty.");
+          error.addError(rowIndex, "Local City",
+              "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+          validations.add(error);
+        }
 
         // DTN: Defect 1898300: UKI - mass updates - addresses
         /*
