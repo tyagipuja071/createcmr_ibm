@@ -63,6 +63,9 @@ public class MCOCewaHandler extends MCOHandler {
 
         if (legacyCust.getEnterpriseNo() != null)
           data.setEnterprise(legacyCust.getEnterpriseNo());
+
+        if (legacyCust.getCollectionCd() != null)
+          data.setCollectionCd(legacyCust.getCollectionCd());
       }
 
       String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
