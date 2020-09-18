@@ -264,7 +264,7 @@ function fstAddressValidator(zp01Cnt, zs01Cnt, zs02Cnt) {
   } else if (zs02Cnt > 1) {
     return new ValidationResult(null, false, 'Only one Mail-to address is allowed.');
   } else if (zs01Cnt > 1) {
-    return new ValidationResult(null, false, 'Only one Install-at address is allowed.');
+    return new ValidationResult(null, false, 'Only one Sold-to address is allowed.');
   } else {
     return new ValidationResult(null, true);
   }
