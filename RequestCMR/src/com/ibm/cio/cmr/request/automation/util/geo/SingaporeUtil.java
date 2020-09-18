@@ -257,7 +257,7 @@ public class SingaporeUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
-      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details,
+      return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details,
           SCENARIO_PRIVATE_CUSTOMER.equals(scenario), requestData);
     }
     result.setDetails(details.toString());
