@@ -280,7 +280,12 @@ var DB_DATA_FIELDS = [ {
 }, {
   id : 'AnyProlifChecklistItem',
   name : 'PROLIF_CHECKLIST.ANY'
-} ];
+}, {
+  id : 'RequestingLOB',
+  name : 'ADMIN.REQUESTING_LOB'
+}
+
+];
 DB_DATA_FIELDS.sort(function(a, b) {
   if (a.id > b.id) {
     return 1;
