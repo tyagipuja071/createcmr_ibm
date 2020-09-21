@@ -498,7 +498,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       if (cntry2 == null) {
         cntry2 = country;
       }
-      if (SystemLocation.PORTUGAL.equals(cntry)) {
+      if (SystemLocation.PORTUGAL.equals(cntry) || "754".equals(cntry2)) {
         query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
         query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
       }

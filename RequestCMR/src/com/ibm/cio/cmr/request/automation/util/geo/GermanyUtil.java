@@ -106,7 +106,6 @@ public class GermanyUtil extends AutomationUtil {
     // skipAllChecks(engineData); // remove after BP is enabled
     // } else
     if (StringUtils.isNotBlank(scenario)) {
-
       switch (scenario) {
       case "PRIPE":
       case "IBMEM":
