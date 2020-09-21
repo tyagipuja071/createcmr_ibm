@@ -188,7 +188,6 @@ public class SingaporeUtil extends AutomationUtil {
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
     processSkipCompanyChecks(engineData, requestData, details);
-
     // CMR - 4507
     if ("SPOFF".equalsIgnoreCase(data.getCustSubGrp())) {
       Addr addr = requestData.getAddress(CmrConstants.RDC_SOLD_TO);
