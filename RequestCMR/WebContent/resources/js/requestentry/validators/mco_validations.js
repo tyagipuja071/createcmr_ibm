@@ -606,11 +606,11 @@ function setClientTierValues(value) {
   var tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL) {
     if (value == '32') {
-      tierValues = [ 'B', 'S', 'Z', 'M', 'N' ];
+      tierValues = ['S', 'M', 'N' ];
     } else if (value == '21' || value == '60') {
       tierValues = [ '7' ];
     } else if (value == '34') {
-      tierValues = [ 'V', '6', 'A', 'Z' ];
+      tierValues = [ 'V', '6', 'A'];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
