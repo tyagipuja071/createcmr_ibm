@@ -423,13 +423,16 @@ function setAccountTeamNumberValues(clientTier) {
     }
 
     if (results != null || selectedResult != null) {
-      for (var i = 0; i < results.length; i++) {
-        accountTeamNumber.push(results[i].ret1);
+      if (results != null){
+        for (var i = 0; i < results.length; i++) {
+          accountTeamNumber.push(results[i].ret1);
+        }
       }
-      for (var i = 0; i < selectedResult.length; i++) {
-        selectedAaccountTeamNumber.push(selectedResult[i].ret1);
+      if (selectedResult != null) {
+        for (var i = 0; i < selectedResult.length; i++) {
+          selectedAaccountTeamNumber.push(selectedResult[i].ret1);
+        }
       }
-
       FormManager.limitDropdownValues(FormManager.getField('searchTerm'), accountTeamNumber);
       if (accountTeamNumber.length == 1) {
         FormManager.setValue('searchTerm', accountTeamNumber[0]);

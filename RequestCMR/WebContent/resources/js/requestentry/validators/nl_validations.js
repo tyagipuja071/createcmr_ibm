@@ -308,12 +308,17 @@ function setBOTeamValues(clientTier) {
     }
 
     if (results != null || selectedResults != null) {
-      for (var i = 0; i < results.length; i++) {
-        boTeam.push(results[i].ret1);
+
+      if (results != null) {
+        for (var i = 0; i < results.length; i++) {
+          boTeam.push(results[i].ret1);
+        }
       }
 
-      for (var i = 0; i < selectedResults.length; i++) {
-        selectedBoTeam.push(selectedResults[i].ret1);
+      if (selectedResults != null) {
+        for (var i = 0; i < selectedResults.length; i++) {
+          selectedBoTeam.push(selectedResults[i].ret1);
+        }
       }
 
       FormManager.limitDropdownValues(FormManager.getField('engineeringBo'), boTeam);
