@@ -168,7 +168,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     String poBox = currAddr.getPoBox();
-    if (!StringUtils.isEmpty(poBox)) {
+    if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
       if (!poBox.startsWith("PO BOX ")) {
         legacyAddr.setPoBox("PO BOX " + currAddr.getPoBox());
       } else {
@@ -201,6 +201,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyCust.setTaxCd(data.getSpecialTaxCd());
       legacyCust.setMrcCd("2");
       legacyCust.setCollectionCd("00001");
+      legacyCust.setCreditCd(""); // blank on new creates
 
     }
 
@@ -231,7 +232,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       legacyCust.setModeOfPayment(data.getCommercialFinanced());
-      if (data.getCodCondition() != null) {
+      if (data.getCreditCd() != null) {
         String cod = data.getCreditCd();
         if ("Y".equals(cod)) {
           legacyCust.setModeOfPayment("5");
@@ -259,7 +260,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setCustType(data.getCrosSubTyp());
     legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     legacyCust.setBankBranchNo("");
-    legacyCust.setCreditCd("");
 
     // append GM in AbbrevName for GM LLC
     if (!StringUtils.isEmpty(data.getCustSubGrp()) && gmllcScenarios.contains(data.getCustSubGrp())) {
