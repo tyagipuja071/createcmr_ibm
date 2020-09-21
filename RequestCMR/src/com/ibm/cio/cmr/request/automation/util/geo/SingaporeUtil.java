@@ -50,6 +50,7 @@ public class SingaporeUtil extends AutomationUtil {
   public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
   public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
   private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
+  private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -256,8 +257,9 @@ public class SingaporeUtil extends AutomationUtil {
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
     case SCENARIO_PRIVATE_CUSTOMER:
+    case SCENARIO_CROSS_PRIVATE_CUSTOMER:
       return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details,
-          SCENARIO_PRIVATE_CUSTOMER.equals(scenario), requestData);
+          (SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_CROSS_PRIVATE_CUSTOMER.equals(scenario)), requestData);
     }
     result.setDetails(details.toString());
     return true;
