@@ -13,6 +13,10 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -20,11 +24,15 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
@@ -46,6 +54,9 @@ public class MCOFstHandler extends MCOHandler {
       SystemLocation.DJIBOUTI, SystemLocation.GUINEA_CONAKRY, SystemLocation.CAMEROON, SystemLocation.MADAGASCAR, SystemLocation.MAURITANIA,
       SystemLocation.TOGO, SystemLocation.GAMBIA, SystemLocation.CENTRAL_AFRICAN_REPUBLIC, SystemLocation.BENIN, SystemLocation.BURKINA_FASO,
       SystemLocation.SEYCHELLES, SystemLocation.GUINEA_BISSAU, SystemLocation.NIGER, SystemLocation.CHAD);
+
+  protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mail-to Address", "Bill-to Address", "Sold-to Address", "Ship-to Address",
+      "Install-at", "Data" };
 
   @Override
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
@@ -382,6 +393,147 @@ public class MCOFstHandler extends MCOHandler {
       return true;
     }
     return false;
+  }
+
+  @Override
+  public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+      if (!StringUtils.isEmpty(data.getSalesBusOffCd())) {
+        data.setSearchTerm(data.getSalesBusOffCd());
+      }
+    }
+  }
+
+  @Override
+  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
+      List<UpdatedDataModel> results) {
+    UpdatedDataModel update = null;
+    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Type of Customer", "Type of Customer"));
+      update.setNewData(service.getCodeAndDescription(newData.getCrosSubTyp(), "Type of Customer", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCrosSubTyp(), "Type of Customer", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SBO/ Search Term (SORTL):", "SBO/ Search Term (SORTL):"));
+      update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SBO/ Search Term (SORTL):", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSalesBusOffCd(), "SBO/ Search Term (SORTL):", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSpecialTaxCd(), newData.getSpecialTaxCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Tax Code", "Tax Code"));
+      update.setNewData(service.getCodeAndDescription(newData.getSpecialTaxCd(), "Tax Code", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSpecialTaxCd(), "Tax Code", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Collection Code", "Collection Code"));
+      update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "Collection Code", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCollectionCd(), "Collection Code", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Sales Rep", "Sales Rep"));
+      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "Sales Rep", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "Sales Rep", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CoF (Commercial Financed)", "CoF (Commercial Financed)"));
+      update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CoF (Commercial Financed)", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CoF (Commercial Financed)", cmrCountry));
+      results.add(update);
+    }
+
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    XSSFCell currCell = null;
+    for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      if (sheet != null) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String cmrNo = "";
+            String embargo = ""; // 9
+            String cof = ""; // 10
+            String cod = ""; // 11
+            String vat = ""; // 12
+            String deptNo = ""; // 14
+            String city = "";
+            String postalcd = "";
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              embargo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              cof = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              cod = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(12);
+              vat = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(14);
+              deptNo = validateColValFromCell(currCell);
+              LOG.debug("embargo : " + embargo);
+              LOG.debug("cof : " + cof);
+              LOG.debug("cod : " + cod);
+              LOG.debug("vat : " + vat);
+              LOG.debug("deptNo : " + deptNo);
+              LOG.debug("cod len : " + cod.length());
+              LOG.debug("cof len : " + cof.length());
+            }
+
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(8);
+              postalcd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              city = validateColValFromCell(currCell);
+            }
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            TemplateValidation error = new TemplateValidation(name);
+
+            if (cod.length() > 0 && cof.length() > 0) {
+              LOG.trace("Note that COF and COD flag cannot be filled at same time.");
+              error.addError(row.getRowNum(), "COF/COD",
+                  "Note that COF and COD flag cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            if (city.length() == 0 && postalcd.length() != 0) {
+              LOG.trace("Note that city should be filled if postal is filled");
+              error.addError(row.getRowNum(), "City/Postal Code",
+                  "Note that city should be filled if postal is filled. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(deptNo)) {
+              LOG.trace("Internal Department Number should start with 99");
+              error.addError(row.getRowNum(), "Internal Department Number",
+                  "Internal Department Number should start with 99. Please fix and upload the template again.");
+              validations.add(error);
+            }
+          }
+        }
+      }
+    }
   }
 
 }
