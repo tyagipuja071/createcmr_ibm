@@ -389,6 +389,17 @@ public abstract class AutomationUtil {
   }
 
   /**
+   * Hooks to be able to manipulate the data to be sent to DNB Matching services
+   * 
+   * @param request
+   * @param requestData
+   * @param engineData
+   */
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    // NOOP
+  }
+
+  /**
    * Tells {@link DnBMatchingElement} if it needs to use TaxCd1 for
    * orgIdMatching instead of VAT
    * 
@@ -1086,4 +1097,5 @@ public abstract class AutomationUtil {
     String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
     return custNm1 + custNm2 + custNm3 + custNm4;
   }
+
 }

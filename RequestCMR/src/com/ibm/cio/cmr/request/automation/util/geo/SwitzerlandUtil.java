@@ -35,6 +35,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  * {@link AutomationUtil} for Switzwerland/LI country specific validations
@@ -154,6 +155,14 @@ public class SwitzerlandUtil extends AutomationUtil {
   @Override
   protected List<String> getCountryLegalEndings() {
     return Arrays.asList("GMBH", "KLG", "AG", "Sàrl", "SARL", "SA", "S.A.", "SAGL");
+  }
+
+  @Override
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Data data = requestData.getData();
+    if (StringUtils.isNotBlank(data.getVat()) && SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
+      request.setOrgId(data.getVat().split("\\s")[0]);
+    }
   }
 
   @SuppressWarnings("unchecked")

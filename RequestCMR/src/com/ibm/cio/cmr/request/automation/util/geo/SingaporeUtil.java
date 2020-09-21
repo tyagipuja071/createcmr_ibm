@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class SingaporeUtil extends AutomationUtil {
@@ -405,6 +406,14 @@ public class SingaporeUtil extends AutomationUtil {
         exc.setSkipCompanyVerification(true);
         engineData.put("SCENARIO_EXCEPTIONS", exc);
       }
+    }
+  }
+
+  @Override
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Data data = requestData.getData();
+    if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+      request.setCity("SINGAPORE");
     }
   }
 
