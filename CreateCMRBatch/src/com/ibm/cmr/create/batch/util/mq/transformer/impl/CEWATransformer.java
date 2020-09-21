@@ -354,12 +354,12 @@ public class CEWATransformer extends MCOTransformer {
       legacyAddr.setZipCode(muAddr.getPostCd());
     }
 
-    if (!StringUtils.isBlank(muAddr.getCounty())) {
+    if (!StringUtils.isBlank(muAddr.getCustPhone())) {
       if (muAddr.getId().getAddrType().equals("ZD01")) {
-        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCounty().trim())) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone().trim())) {
           legacyAddr.setAddrPhone("");
         } else {
-          legacyAddr.setAddrPhone(muAddr.getCounty());
+          legacyAddr.setAddrPhone(muAddr.getCustPhone());
         }
       }
     }
