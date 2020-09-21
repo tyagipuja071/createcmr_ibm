@@ -368,6 +368,7 @@ function afterConfigForUKI() {
   if (reqType == 'C') {
     autoSetAbbrNameUKI();
   }
+
   if (_customerTypeHandler == null) {
     var _custType = null;
     _customerTypeHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
@@ -6917,7 +6918,7 @@ function lockRequireFieldsUKI() {
   }
 
   if (reqType == 'U' && role == 'REQUESTER') {
-    FormManager.readOnly('abbrevNm');
+    FormManager.enable('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
     FormManager.readOnly('abbrevLocn');
     FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
@@ -8369,46 +8370,6 @@ function mandatoryForBusinessPartnerCY() {
   }
 }
 
-function updateAbbrNameUKI() {
-  var reqType = FormManager.getActualValue('reqType');
-  var addrType = FormManager.getActualValue('addrType');
-  var newCustName1 = FormManager.getActualValue("custNm1");
-  var newCustName2 = FormManager.getActualValue("custNm2");
-  var abbrevNmValue = (newCustName1 != undefined ? newCustName1 : '') + (newCustName2 != undefined ? newCustName2 : '');
-  if (reqType != 'U') {
-    return;
-  }
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  if ("ZS01" != addrType) {
-    return;
-  }
-
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : zs01ReqId,
-    ADDR_TYPE : "ZS01",
-  };
-  var oldAddrName = null;
-  var result = cmr.query('ADDR.GET.OLDCUSTNM1.BY_REQID', qParams);
-
-  if (result.ret1 != undefined) {
-
-    oldAddrName = result.ret1 + (result.ret2 != undefined ? result.ret2 : '');
-
-    if (oldAddrName != abbrevNmValue) {
-
-      if (abbrevNmValue != null && abbrevNmValue.length > 22) {
-        abbrevNmValue = abbrevNmValue.substr(0, 22);
-      }
-      FormManager.setValue('abbrevNm', abbrevNmValue);
-    }
-
-  }
-
-}
-
 function autoSetAbbrNameUKI() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var billingCustNm = '';
@@ -8918,7 +8879,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnlyUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   GEOHandler.registerValidator(validateInternalDeptNumberLength, [ SysLoc.UK, SysLoc.IRELAND ], null, true);
   GEOHandler.addAddrFunction(autoSetAbbrevLocnOnAddSaveUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
-  GEOHandler.addAddrFunction(updateAbbrNameUKI, [ SysLoc.IRELAND, SysLoc.UK ]);
   // Israel Specific
   GEOHandler.addAfterConfig(afterConfigForIsrael, [ SysLoc.ISRAEL ]);
   GEOHandler.addAfterConfig(addILClientTierISULogic, [ SysLoc.ISRAEL ]);
