@@ -423,7 +423,7 @@ function setAccountTeamNumberValues(clientTier) {
     }
 
     if (results != null || selectedResult != null) {
-      if (results != null){
+      if (results != null) {
         for (var i = 0; i < results.length; i++) {
           accountTeamNumber.push(results[i].ret1);
         }
@@ -441,8 +441,11 @@ function setAccountTeamNumberValues(clientTier) {
       // 2020-09-17 CMR-4992
       console.log('custSubGrp==' + FormManager.getActualValue('custSubGrp'));
       console.log('pagemodel custSubGrp==' + _pagemodel.custSubGrp);
+      console.log('subIndustryCd==' + FormManager.getActualValue('subIndustryCd'));
+      console.log('pagemodel subIndustryCd==' + _pagemodel.subIndustryCd);
 
-      if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp)
+      if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
+          || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd))
         FormManager.setValue('searchTerm', selectedAaccountTeamNumber);
 
     }
