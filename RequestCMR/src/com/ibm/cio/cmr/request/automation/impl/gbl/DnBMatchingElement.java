@@ -68,12 +68,10 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
-    if (soldTo != null)
-
-    {
+    if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();

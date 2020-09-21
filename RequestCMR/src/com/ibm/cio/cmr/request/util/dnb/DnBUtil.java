@@ -15,6 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
@@ -594,7 +595,8 @@ public class DnBUtil {
    * @return
    * @throws Exception
    */
-  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, String addrType) throws Exception {
+  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, String addrType)
+      throws Exception {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -613,21 +615,13 @@ public class DnBUtil {
         request.setOrgId(data.getTaxCd1());
       } else if (!isTaxCdMatch) {
         if (StringUtils.isNotBlank(data.getVat())) {
-          if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-            request.setOrgId(data.getVat().split("\\s")[0]);
-          } else {
-            request.setOrgId(data.getVat());
-          }
+          request.setOrgId(data.getVat());
         } else if (StringUtils.isNotBlank(addr.getVat())) {
           request.setOrgId(addr.getVat());
         }
       }
 
       request.setCity(addr.getCity1());
-      if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-        // here for now, find a way to move to common class
-        request.setCity("SINGAPORE");
-      }
       request.setCustomerName(getCustomerName(handler, admin, addr));
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(addr.getAddrTxt2());
@@ -635,6 +629,12 @@ public class DnBUtil {
       request.setPostalCode(addr.getPostCd());
       request.setStateProv(addr.getStateProv());
       request.setMinConfidence("4");
+
+      if (countryUtil != null) {
+        // Allow flexibility to tweak the request before matching
+        countryUtil.tweakDnBMatchingRequest(request, requestData, engineData);
+      }
+
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           MatchingServiceClient.class);
       client.setReadTimeout(1000 * 60 * 5);
