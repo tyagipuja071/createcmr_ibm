@@ -329,9 +329,7 @@ public class CyprusTransformer extends EMEATransformer {
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       for (Addr addr : cmrObjects.getAddresses()) {
         if ("ZS01".equals(addr.getId().getAddrType())) {
-          if (!StringUtils.isEmpty(addr.getCustPhone())) {
-            legacyCust.setTelNoOrVat(addr.getCustPhone());
-          }
+          legacyCust.setTelNoOrVat(addr.getCustPhone());
           landedCntry = addr.getLandCntry();
           break;
         }
