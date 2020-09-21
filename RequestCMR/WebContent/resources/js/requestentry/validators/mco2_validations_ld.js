@@ -154,7 +154,7 @@ function lockRequireFieldsMCO2() {
   var role = FormManager.getActualValue('userRole');
 
   // fields locked for Requester
-  if (reqType == 'C' && role == GEOHandler.ROLE_REQUESTER) {
+  if (role == GEOHandler.ROLE_REQUESTER) {
     FormManager.readOnly('specialTaxCd');
     // FormManager.readOnly('salesBusOffCd');
     // FormManager.readOnly('repTeamMemberNo');

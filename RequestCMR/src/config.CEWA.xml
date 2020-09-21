@@ -39,7 +39,7 @@
 					<width>20</width>
 					<length>4</length>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>INAC/NAC</label>
 					<dbColumn>INAC_CD</dbColumn>
 					<length>4</length>
@@ -91,7 +91,7 @@
         		</column>
         		<column>
 					<label>Internal Department Number</label>
-					<dbColumn>IBM_DEPT_COST_CENTER</dbColumn>
+					<dbColumn>AFFILIATE</dbColumn>
 					<width>25</width>
 					<length>6</length>
 				</column>				
