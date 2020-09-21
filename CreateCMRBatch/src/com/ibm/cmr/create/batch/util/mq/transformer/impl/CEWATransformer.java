@@ -3,6 +3,10 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,9 +20,14 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
+import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
+import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.model.BatchEmailModel;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.geo.impl.MCOHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -32,6 +41,12 @@ import com.ibm.cmr.services.client.cmrno.GenerateCMRNoRequest;
 public class CEWATransformer extends MCOTransformer {
 
   private static final Logger LOG = Logger.getLogger(CEWATransformer.class);
+  private static final String DEFAULT_CLEAR_NUM = "0";
+  private static final List<String> CEWA_COUNTRY_LIST = Arrays.asList(SystemLocation.ANGOLA, SystemLocation.BOTSWANA, SystemLocation.BURUNDI,
+      SystemLocation.CAPE_VERDE_ISLAND, SystemLocation.ETHIOPIA, SystemLocation.GHANA, SystemLocation.ERITREA, SystemLocation.KENYA,
+      SystemLocation.MALAWI_CAF, SystemLocation.LIBERIA, SystemLocation.MOZAMBIQUE, SystemLocation.NIGERIA, SystemLocation.ZIMBABWE,
+      SystemLocation.SAO_TOME_ISLANDS, SystemLocation.RWANDA, SystemLocation.SIERRA_LEONE, SystemLocation.SOMALIA, SystemLocation.SOUTH_SUDAN,
+      SystemLocation.TANZANIA, SystemLocation.UGANDA, SystemLocation.ZAMBIA);
 
   public CEWATransformer(String cmrIssuingCntry) {
     super(cmrIssuingCntry);
@@ -301,4 +316,146 @@ public class CEWATransformer extends MCOTransformer {
     }
     return null;
   }
+
+  @Override
+  public void transformLegacyCustomerDataMassUpdate(EntityManager entityManager, CmrtCust legacyCust, CMRRequestContainer cmrObjects,
+      MassUpdtData muData) {
+    LOG.debug("CEWA mass update >> Mapping default Data values..");
+    LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, legacyCust, muData);
+
+    if (!StringUtils.isBlank(muData.getRestrictTo())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
+        legacyCust.setTelNoOrVat("");
+      } else {
+        legacyCust.setTelNoOrVat(muData.getRestrictTo());
+      }
+    }
+
+    if (!StringUtils.isBlank(muData.getAffiliate())) {
+      String deptCd = muData.getAffiliate().substring(2);
+      legacyCust.setDeptCd(deptCd);
+    }
+
+    if (!StringUtils.isBlank(muData.getCustNm1())) {
+      String formatSBO = muData.getCustNm1() + "000";
+      legacyCust.setIbo(formatSBO);
+      legacyCust.setSbo(formatSBO);
+    }
+  }
+
+  @Override
+  public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
+      Data data, LegacyDirectObjectContainer legacyObjects) {
+    LOG.debug("CEWA mass update >> Mapping address lines..");
+    legacyAddr.setForUpdate(true);
+    LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
+
+    if (!StringUtils.isBlank(muAddr.getPostCd())) {
+      legacyAddr.setZipCode(muAddr.getPostCd());
+    }
+
+    if (!StringUtils.isBlank(muAddr.getCustPhone())) {
+      if (muAddr.getId().getAddrType().equals("ZD01")) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone().trim())) {
+          legacyAddr.setAddrPhone("");
+        } else {
+          legacyAddr.setAddrPhone(muAddr.getCustPhone());
+        }
+      }
+    }
+
+    formatMassUpdateAddressLines(entityManager, legacyAddr, muAddr, false);
+    legacyObjects.addAddress(legacyAddr);
+  }
+
+  @Override
+  public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
+    LOG.debug("Start CEWA formatMassUpdateAddressLines...");
+    boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
+    LOG.debug("isCrossBorderForMass : " + crossBorder);
+
+    String line1 = legacyAddr.getAddrLine1();
+    String line2 = legacyAddr.getAddrLine2();
+    String line3 = legacyAddr.getAddrLine3();
+    String line4 = legacyAddr.getAddrLine4();
+    String line5 = legacyAddr.getAddrLine5();
+    String line6 = legacyAddr.getAddrLine6();
+
+    if (!StringUtils.isBlank(massUpdtAddr.getCounty())) {
+      line3 = massUpdtAddr.getCounty();
+    }
+
+    if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt())) {
+      line4 = massUpdtAddr.getAddrTxt();
+    }
+
+    if (crossBorder) {
+      if (StringUtils.isNotBlank(massUpdtAddr.getCity1())) {
+        String cityPostalCode = massUpdtAddr.getCity1();
+        if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
+          cityPostalCode += ", " + massUpdtAddr.getPostCd();
+        }
+        line5 = cityPostalCode;
+      }
+
+      if (!StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
+        line6 = massUpdtAddr.getLandCntry();
+      }
+    } else {
+
+      if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) && !StringUtils.isBlank(massUpdtAddr.getPoBox())) {
+        line5 = massUpdtAddr.getAddrTxt2() + ", " + "PO BOX " + massUpdtAddr.getPoBox();
+      } else if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
+        line5 = massUpdtAddr.getAddrTxt2();
+      } else if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
+        line5 = "PO BOX " + massUpdtAddr.getPoBox();
+      }
+
+      if (StringUtils.isNotBlank(massUpdtAddr.getCity1())) {
+        String cityPostalCode = massUpdtAddr.getCity1();
+        if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
+          cityPostalCode += ", " + massUpdtAddr.getPostCd();
+        }
+        line6 = cityPostalCode;
+      }
+
+    }
+
+    legacyAddr.setAddrLine1(line1);
+    legacyAddr.setAddrLine2(line2);
+    legacyAddr.setAddrLine3(line3);
+    legacyAddr.setAddrLine4(line4);
+    legacyAddr.setAddrLine5(line5);
+    legacyAddr.setAddrLine6(line6);
+
+    LOG.debug("End CEWA formatMassUpdateAddressLines...");
+
+  }
+
+  @Override
+  public boolean isCrossBorderForMass(MassUpdtAddr addr, CmrtAddr legacyAddr) {
+    boolean countryFound = false;
+    String cd = MCOHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry());
+    List<String> listCountryNames = new ArrayList<String>();
+    for (String countryCode : CEWA_COUNTRY_LIST) {
+      String cd1 = MCOHandler.LANDED_CNTRY_MAP.get(countryCode);
+      String countryName = LandedCountryMap.getCountryName(cd1);
+      listCountryNames.add(countryName);
+    }
+    for (String names : listCountryNames) {
+      if (names.toUpperCase().equals(legacyAddr.getAddrLine6().toUpperCase())) {
+        countryFound = true;
+        break;
+      }
+    }
+    String countryName = LandedCountryMap.getCountryName(cd);
+    boolean isCrossBorder = false;
+    if (!StringUtils.isEmpty(addr.getLandCntry()) && !cd.equals(addr.getLandCntry())) {
+      isCrossBorder = true;
+    } else if (!StringUtils.isEmpty(legacyAddr.getAddrLine6()) && countryFound && !legacyAddr.getAddrLine6().equals(countryName)) {
+      isCrossBorder = true;
+    }
+    return isCrossBorder;
+  }
+
 }
