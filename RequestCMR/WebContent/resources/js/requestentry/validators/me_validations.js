@@ -1578,14 +1578,12 @@ function setSBO(repTeamMemberNo) {
     return;
   }
 
-  // CEE cunrrently just for SK, if create req, set SBO as 000000, rep as
-  // 0999998
-  if (CEE_INCL.has(cntry) && FormManager.getActualValue('reqType') == 'C') {
+  if (ME_INCL.has(cntry) && FormManager.getActualValue('reqType') == 'C') {
     if (FormManager.getField('templatevalue-repTeamMemberNo') != undefined) {
       FormManager.getField('templatevalue-repTeamMemberNo').style.display = 'none';
     }
-    FormManager.setValue('salesBusOffCd', '0000000');
-    FormManager.setValue('repTeamMemberNo', '099998');
+    // FormManager.setValue('salesBusOffCd', '0000000');
+    // FormManager.setValue('repTeamMemberNo', '099998');
     return;
   }
 
