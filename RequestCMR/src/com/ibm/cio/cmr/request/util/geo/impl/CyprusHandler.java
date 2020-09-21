@@ -1842,141 +1842,17 @@ public class CyprusHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-    if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
-      doSetInFSLAbbrevName(data);
-      String postCdLandcntry = getPostalCd_LandedCntry(entityManager, data);
-      if (postCdLandcntry != null && postCdLandcntry.contains("@")) {
-        String[] postCdLandcntryVal = postCdLandcntry.split("@");
-        String lndedCntry = postCdLandcntryVal[0];
-        String postalCd = postCdLandcntryVal[1];
-        if (!"GB".equals(lndedCntry)) {
-          data.setEngineeringBo("554");
-          data.setAcAdminBo("HO");
-        } else {
-          if (!"*".equals(postalCd) && postalCd.indexOf(" ") > 0) {
-            postalCd = postalCd.substring(0, postalCd.indexOf(" "));
-            setEngBoAndAdminBo(data, entityManager, postalCd);
-          } else {
-            data.setEngineeringBo("");
-            data.setAcAdminBo("");
-          }
-        }
-      }
-
-    }
-    if (cmrIssuingCntry.equals("866") && data.getInacCd() != null) {
-      int count = 0;
-      for (int i = 0; i < NAC_VALUES.length; i++) {
-        if (data.getInacCd().equals(NAC_VALUES[i])) {
-          count = 1;
-          break;
-        }
-      }
-      if (count == 1 || data.getInacCd().matches("[a-zA-Z]{1}[a-zA-Z0-9]{3}")) {
-        data.setInacType("N");
-        count = 0;
-      } else if (count == 0 && data.getInacCd().matches("[0-9]{1}[a-zA-Z0-9]{3}")) {
-        data.setInacType("I");
-
-      } else if (data.getInacCd().equals("")) {
-        data.setInacType("");
-      } else {
-        data.setInacType("N");
-      }
-
-    } else if ((SystemLocation.IRELAND.equals(data.getCmrIssuingCntry()) || SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry()))
-        && data.getInacCd() != null) {
-      if (data.getInacCd().matches("[0-9]{1}[a-zA-Z0-9]{3}")) {
-        data.setInacType("I");
-      } else {
-        data.setInacType("N");
-      }
-    }
-
-    if ((SystemLocation.UNITED_KINGDOM.equalsIgnoreCase(cmrIssuingCntry) || SystemLocation.IRELAND.equalsIgnoreCase(cmrIssuingCntry))
-        && CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
-      // 1. Get old data
-      DataRdc rdcData = null;
-      rdcData = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
-
+        
+    
+    DataRdc rdcData = null;
+    rdcData = getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
       if (rdcData != null) {
-        // ISU CD
-        if (StringUtils.isEmpty(data.getIsuCd()) && !StringUtils.isEmpty(rdcData.getIsuCd())) {
-          data.setIsuCd(rdcData.getIsuCd());
-        }
-
-        if (StringUtils.isEmpty(data.getIsicCd()) && !StringUtils.isEmpty(rdcData.getIsicCd())) {
-          data.setIsicCd(rdcData.getIsicCd());
-        }
-
-        if (StringUtils.isEmpty(data.getSubIndustryCd()) && !StringUtils.isEmpty(rdcData.getSubIndustryCd())) {
-          data.setSubIndustryCd(rdcData.getSubIndustryCd());
-        }
-
-        // Defect 1887938 - UKI - INAC removal - update requests start
-        // if (StringUtils.isEmpty(data.getInacCd()) &&
-        // !StringUtils.isEmpty(rdcData.getInacCd())) {
-        // data.setInacCd(rdcData.getInacCd());
-        // }
-        // Defect 1887938 - UKI - INAC removal - update requests end
-
-        if (StringUtils.isEmpty(data.getCollectionCd()) && !StringUtils.isEmpty(rdcData.getCollectionCd())) {
-          data.setCollectionCd(rdcData.getCollectionCd());
-        }
-
-        if (StringUtils.isEmpty(data.getSpecialTaxCd()) && !StringUtils.isEmpty(rdcData.getSpecialTaxCd())) {
-          data.setSpecialTaxCd(rdcData.getSpecialTaxCd());
-        }
-
-        if (StringUtils.isEmpty(data.getClientTier()) && !StringUtils.isEmpty(rdcData.getClientTier())) {
-          data.setClientTier(rdcData.getClientTier());
-        }
-
-        // sales rep
-        if (StringUtils.isEmpty(data.getRepTeamMemberNo()) && !StringUtils.isEmpty(rdcData.getRepTeamMemberNo())) {
-          data.setRepTeamMemberNo(rdcData.getRepTeamMemberNo());
-        }
-
-        if (StringUtils.isEmpty(data.getSalesBusOffCd()) && !StringUtils.isEmpty(rdcData.getSalesBusOffCd())) {
-          data.setSalesBusOffCd(rdcData.getSalesBusOffCd());
-        }
+        data.setInacType(rdcData.getInacType());
       }
     }
-
-    if (SystemLocation.ISRAEL.equals(data.getCmrIssuingCntry())) {
-      // Auto-populate SBO, IBO field based on Sales rep number
-      // jz: this is an israel requirement, so adding check
-      if (data.getRepTeamMemberNo() != null && data.getRepTeamMemberNo().length() > 0) {
-        StringBuffer sboIBO = new StringBuffer("00");
-
-        char[] salesRepCode = data.getRepTeamMemberNo().toCharArray();
-        int salesRepIndex = -1;
-
-        for (int i = 0; i < salesRepCode.length; i++) {
-          if (Character.isDigit(salesRepCode[i]) && salesRepCode[i] != '0') {
-            salesRepIndex = i;
-            break;
-          }
-        }
-
-        if (salesRepIndex >= 0) {
-          sboIBO.append(salesRepCode[salesRepIndex]);
-          data.setSalesBusOffCd(sboIBO.toString());
-          data.setInstallBranchOff(sboIBO.toString());
-        }
-      }
-
-      if (data.getSubIndustryCd() != null) {
-        data.setEconomicCd("0" + data.getSubIndustryCd());
-      }
-    }
-
-    if (SystemLocation.CYPRUS.equals(data.getCmrIssuingCntry()) || SystemLocation.GREECE.equals(data.getCmrIssuingCntry())) {
-      data.setInstallBranchOff(data.getSalesBusOffCd());
-    } else if (SystemLocation.TURKEY.equals(data.getCmrIssuingCntry())) {
-      data.setInstallBranchOff(data.getSalesBusOffCd());
-      data.setEngineeringBo(data.getSalesBusOffCd());
-    }
+    
+    data.setInstallBranchOff(data.getSalesBusOffCd());
   }
 
   @Override
