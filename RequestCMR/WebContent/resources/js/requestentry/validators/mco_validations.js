@@ -115,7 +115,7 @@ function addHandlersForPT() {
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      isuAndCtcBasedOnISIC();
+      isuCtcBasedOnISIC();
     });
   }
 }
@@ -2082,7 +2082,10 @@ function getOldFieldValues() {
   _oldOrdBlk = FormManager.getActualValue('ordBlk');
 }
 
-function isuAndCtcBasedOnISIC() {
+function isuCtcBasedOnISIC() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'XBP') {
     return;
   }
