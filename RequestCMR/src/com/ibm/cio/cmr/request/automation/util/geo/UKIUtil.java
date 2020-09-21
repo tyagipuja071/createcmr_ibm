@@ -663,7 +663,7 @@ public class UKIUtil extends AutomationUtil {
   @Override
   public GBGFinderRequest createRequest(Admin admin, Data data, Addr addr, Boolean isOrgIdMatchOnly) {
     GBGFinderRequest request = super.createRequest(admin, data, addr, isOrgIdMatchOnly);
-    if (SCENARIO_THIRD_PARTY.equals(data.getCustSubGrp()) || SCENARIO_INTERNAL_FSL.equals(data.getCustSubGrp())) {
+    if (SCENARIO_THIRD_PARTY.equals(data.getCustSubGrp())) {
       String custNmTrimmed = getCustomerFullName(addr);
       if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}\\.+$") || custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}/.+$")) {
         custNmTrimmed = custNmTrimmed.substring(6);
@@ -681,4 +681,16 @@ public class UKIUtil extends AutomationUtil {
     return true;
   }
 
+  @Override
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Data data = requestData.getData();
+    if (SCENARIO_THIRD_PARTY.equals(data.getCustSubGrp())) {
+      String custName = request.getCustomerName();
+      if (custName.toUpperCase().matches("^.+VR[0-9]{3}.*$")) {
+        custName = custName.split("VR[0-9]{3}")[0];
+        LOG.info("Using Cust name without VR999 section for DnB matching --> " + custName);
+        request.setCustomerName(custName);
+      }
+    }
+  }
 }
