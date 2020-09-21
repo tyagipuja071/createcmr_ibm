@@ -689,6 +689,9 @@ public class PortugalTransformer extends MessageTransformer {
     legacyAddr.setForUpdate(true);
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
 
+    if (!StringUtils.isBlank(addr.getCounty())) {
+      legacyAddr.setAddrLine3(addr.getCounty());
+    }
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
     }
