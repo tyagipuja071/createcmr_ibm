@@ -482,4 +482,30 @@ public class CEWATransformer extends MCOTransformer {
     }
     return false;
   }
+
+  @Override
+  public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    return shouldUpdateSequence(entityManager, cmrObjects, currAddr);
+  }
+
+  private boolean shouldUpdateSequence(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr) {
+    if (cmrObjects != null && cmrObjects.getAdmin() != null) {
+      boolean update = "U".equals(cmrObjects.getAdmin().getReqType());
+      if (update) {
+        boolean isNew = isSequenceNewlyAdded(entityManager, currAddr);
+        if (isNew) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private boolean isSequenceNewlyAdded(EntityManager entityManager, Addr currAddr) {
+    AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, currAddr);
+    if (addrRdc != null) {
+      return false;
+    }
+    return true;
+  }
 }
