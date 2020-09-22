@@ -3945,15 +3945,15 @@ function validatorsDIGITForDupField() {
   }
 }
 
-function addEmbargoCdValidatorForCEE() {
+function addEmbargoCdValidatorForME() {
   var role = FormManager.getActualValue('userRole');
   if (role == GEOHandler.ROLE_PROCESSOR) {
     FormManager.addFormValidator((function() {
       return {
         validate : function() {
           var embargoCd = FormManager.getActualValue('embargoCd');
-          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'R' || embargoCd == '')) {
-            return new ValidationResult(null, false, 'Embargo Code should only E, R, Blank allowed');
+          if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == '')) {
+            return new ValidationResult(null, false, 'Embargo Code should only E, S, Blank allowed');
           }
           return new ValidationResult(null, true);
         }
@@ -4081,7 +4081,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(cmrNoEnableForME, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(cmrNoEnableForME, GEOHandler.ME);
   GEOHandler.registerValidator(addCmrNoValidatorForME, GEOHandler.ME);
-  GEOHandler.registerValidator(addEmbargoCdValidatorForCEE, GEOHandler.CEE);
+  GEOHandler.registerValidator(addEmbargoCdValidatorForME, GEOHandler.ME);
 
   GEOHandler.addAfterTemplateLoad(afterConfigForCEMEA, GEOHandler.CEMEA);
   GEOHandler.addAfterConfig(setCountryDuplicateFields, SysLoc.RUSSIA);
