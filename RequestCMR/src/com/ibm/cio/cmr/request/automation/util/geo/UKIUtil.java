@@ -557,6 +557,8 @@ public class UKIUtil extends AutomationUtil {
       UkiFieldsContainer fields = null;
       if (SystemLocation.UNITED_KINGDOM.equals(data.getCmrIssuingCntry())) {
         fields = calculate32SValuesForUK(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd());
+      } else if (SystemLocation.IRELAND.equals(data.getCmrIssuingCntry())) {
+        fields = calculate32SValuesForIE(entityManager, data.getIsuCd(), data.getClientTier(), data.getIsicCd());
       }
       if (fields != null) {
         details.append("Coverage calculated successfully using 32S logic.").append("\n");
@@ -591,6 +593,27 @@ public class UKIUtil extends AutomationUtil {
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("ISU_CD", "%" + isuCd + "%");
       query.setParameter("ISIC_CD", isicCd);
+      query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
+      query.setForReadOnly(true);
+      List<Object[]> results = query.getResults();
+      if (results != null && results.size() == 1) {
+        String sbo = (String) results.get(0)[0];
+        String salesRep = (String) results.get(0)[1];
+        container.setSbo(sbo);
+        container.setSalesRep(salesRep);
+        return container;
+      }
+    }
+    return null;
+
+  }
+
+  private UkiFieldsContainer calculate32SValuesForIE(EntityManager entityManager, String isuCd, String clientTier, String isicCd) {
+    if ("32".equals(isuCd) && StringUtils.isNotBlank(clientTier) && StringUtils.isNotBlank(isicCd)) {
+      UkiFieldsContainer container = new UkiFieldsContainer();
+      String sql = ExternalizedQuery.getSql("QUERY.GET.SALESREPSBO.IRELAND");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISU_CD", "%" + isuCd + "%");
       query.setParameter("CLIENT_TIER", "%" + clientTier + "%");
       query.setForReadOnly(true);
       List<Object[]> results = query.getResults();
