@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
@@ -390,19 +391,22 @@ public class CEWATransformer extends MCOTransformer {
     }
 
     if (crossBorder) {
+      LOG.debug("performing crossBorder setup");
       if (StringUtils.isNotBlank(massUpdtAddr.getCity1())) {
         String cityPostalCode = massUpdtAddr.getCity1();
         if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
           cityPostalCode += ", " + massUpdtAddr.getPostCd();
         }
         line5 = cityPostalCode;
+      } else {
+        if (StringUtils.isNotBlank(line6))
+          line5 = line6;
       }
-
       if (!StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
-        line6 = massUpdtAddr.getLandCntry();
+        line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry().toUpperCase());
       }
     } else {
-
+      LOG.debug("performing local setup");
       if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) && !StringUtils.isBlank(massUpdtAddr.getPoBox())) {
         line5 = massUpdtAddr.getAddrTxt2() + ", " + "PO BOX " + massUpdtAddr.getPoBox();
       } else if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
@@ -410,15 +414,15 @@ public class CEWATransformer extends MCOTransformer {
       } else if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
         line5 = "PO BOX " + massUpdtAddr.getPoBox();
       }
-
       if (StringUtils.isNotBlank(massUpdtAddr.getCity1())) {
         String cityPostalCode = massUpdtAddr.getCity1();
         if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
           cityPostalCode += ", " + massUpdtAddr.getPostCd();
         }
         line6 = cityPostalCode;
+      } else {
+        line6 = legacyAddr.getAddrLine6();
       }
-
     }
 
     legacyAddr.setAddrLine1(line1);
@@ -458,4 +462,24 @@ public class CEWATransformer extends MCOTransformer {
     return isCrossBorder;
   }
 
+  @Override
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    List<Addr> addresses = cmrObjects.getAddresses();
+    boolean isPhoneUpdated = false;
+    for (Addr addr : addresses) {
+      if ("ZS01".equals(addr.getId().getAddrType())) {
+        AddrRdc addrRdc = LegacyCommonUtil.getAddrRdcRecord(entityManager, addr);
+        String currPhone = addr.getCustPhone() != null ? addr.getCustPhone() : "";
+        String oldPhone = addrRdc.getCustPhone() != null ? addrRdc.getCustPhone() : "";
+        if (addrRdc == null || (addrRdc != null && !currPhone.equals(oldPhone))) {
+          isPhoneUpdated = true;
+          return true;
+        }
+      }
+      if (!"ZS01".equals(addr.getId().getAddrType()) && isPhoneUpdated) {
+        addr.setChangedIndc("Y");
+      }
+    }
+    return false;
+  }
 }
