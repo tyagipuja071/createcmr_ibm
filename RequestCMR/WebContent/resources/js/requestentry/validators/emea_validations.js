@@ -440,7 +440,6 @@ function afterConfigForUKI() {
         autoSetAbbrNameUKI();
         autoSetUIFieldsOnScnrioUKI();
       }
-      ;
     });
   }
   if (_customerTypeHandler && _customerTypeHandler[0]) {
@@ -1063,6 +1062,7 @@ function autoSetSBO(value, valueInDB) {
 
 function set32SBOLogicOnISIC() {
 
+  var reqType = FormManager.getActualValue('reqType');
   var isuCdValue = FormManager.getActualValue('isuCd');
   var isicCdValue = FormManager.getActualValue('isicCd');
   var tierValue = FormManager.getActualValue('clientTier');
@@ -1083,7 +1083,7 @@ function set32SBOLogicOnISIC() {
       var salesRep = result.ret2;
       FormManager.setValue('salesBusOffCd', sbo);
       FormManager.setValue('repTeamMemberNo', salesRep);
-      if (role == 'Requester') {
+      if (role == 'Requester' && reqType == 'C') {
         FormManager.readOnly('repTeamMemberNo');
         FormManager.readOnly('salesBusOffCd');
       }
@@ -6927,9 +6927,9 @@ function lockRequireFieldsUKI() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-  if (cntry == SysLoc.IRELAND) {
-    FormManager.readOnly('salesBusOffCd');
-  }
+//  if (cntry == SysLoc.IRELAND) {
+//    FormManager.readOnly('salesBusOffCd');
+//  }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
