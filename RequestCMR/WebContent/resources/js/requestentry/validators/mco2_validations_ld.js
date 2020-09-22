@@ -69,6 +69,11 @@ function addHandlersForMCO2() {
 }
 
 function setCodFieldBehavior() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
   if (FormManager.getActualValue('requestingLob') == 'AR' && FormManager.getActualValue('reqReason') == 'COD') {
     FormManager.enable('codFlag');
   } else {
@@ -77,6 +82,11 @@ function setCodFieldBehavior() {
 }
 
 function setCofFieldBehavior() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
   if (FormManager.getActualValue('requestingLob') == 'IGF' && FormManager.getActualValue('reqReason') == 'COPT') {
     FormManager.enable('commercialFinanced');
   } else {
