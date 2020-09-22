@@ -606,7 +606,7 @@ public class METransformer extends EMEATransformer {
     }
 
     // Dept + Postal code + City
-    line5 = addrData.getPostCd() + " " + addrData.getCity1();
+    line5 = addrData.getPostCd() == null ? "" : addrData.getPostCd() + " " + addrData.getCity1() == null ? "" : addrData.getCity1();
 
     // if (!StringUtils.isBlank(addrData.getPoBox())) {
       legacyAddr.setPoBox(addrData.getPoBox());
@@ -647,7 +647,11 @@ public class METransformer extends EMEATransformer {
       // }
       // } else {
       if (!StringUtils.isBlank(addrData.getLandCntry())) {
-        line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+        if ("ZP02".equals(addrData.getId().getAddrType()))
+          line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+        else {
+          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+        }
       } else {
         line6 = "";
         // }
