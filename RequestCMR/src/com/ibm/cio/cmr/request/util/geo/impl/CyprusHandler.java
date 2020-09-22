@@ -83,7 +83,7 @@ public class CyprusHandler extends BaseSOFHandler {
 
   private static final String[] GREECE_CYPRUS_TURKEY_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "Company", "CAP", "CMROwner", "CustClassCode",
       "LocalTax1", "LocalTax2", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office",
-      "Floor", "Building", "County", "City2", "Department" };
+      "Floor", "Building", "County", "City2", "Department", "INACType", "SalRepNameNo" };
 
   private static final List<String> EMEA_COUNTRY_VAL = Arrays.asList(SystemLocation.UNITED_KINGDOM, SystemLocation.IRELAND, SystemLocation.ISRAEL,
       SystemLocation.TURKEY, SystemLocation.GREECE, SystemLocation.CYPRUS, SystemLocation.ITALY);
@@ -2507,6 +2507,29 @@ public class CyprusHandler extends BaseSOFHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
       update.setNewData(service.getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "ISR", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "ISR", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getRepTeamMemberNo(), "ISR", cmrCountry));
+      results.add(update);
+    }
+    
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesTeamCd(), newData.getSalesTeamCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalesSR", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getSalesTeamCd(), "SalesSR", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getSalesTeamCd(), "SalesSR", cmrCountry));
+      results.add(update);
+    }
+    
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TypeOfCustomer", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCrosSubTyp(), "TypeOfCustomer", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCrosSubTyp(), "TypeOfCustomer", cmrCountry));
       results.add(update);
     }
   }
