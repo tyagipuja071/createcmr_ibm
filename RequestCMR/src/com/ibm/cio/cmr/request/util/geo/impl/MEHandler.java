@@ -1449,6 +1449,13 @@ public class MEHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBpSalesRepNo(), newData.getBpSalesRepNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TeleCoverageRep", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getBpSalesRepNo(), "TeleCoverageRep", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getBpSalesRepNo(), "TeleCoverageRep", cmrCountry));
+      results.add(update);
+    }
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBpAcctTyp(), newData.getBpAcctTyp())
         && SystemLocation.ABU_DHABI.equals(cmrCountry)) {
