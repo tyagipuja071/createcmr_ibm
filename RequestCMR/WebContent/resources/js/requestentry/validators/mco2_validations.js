@@ -1028,6 +1028,11 @@ function addAfterConfigMalta() {
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
+  if(scenarioChanged){
+    if(FormManager.getActualValue('custPrefLang')==''){
+      FormManager.setValue('custPrefLang', 'E');
+    }
+  }
   mandatoryForBusinessPartnerMT();
   setEntpMaltaValues();
 }
@@ -1063,14 +1068,14 @@ function disableEnableFieldsForMT(){
   var reqType = FormManager.getActualValue('reqType');
   
     if (reqType == 'C'){
-      
-      FormManager.readOnly('custPrefLang');
       FormManager.readOnly('cmrOwner');
       FormManager.readOnly('sensitiveFlag');
       if(role == 'REQUESTER') {
         FormManager.readOnly('specialTaxCd');
+        FormManager.readOnly('custPrefLang');
       }else{
         FormManager.enable('specialTaxCd');
+        FormManager.enable('custPrefLang');
       }
     }
 }
