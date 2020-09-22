@@ -1614,14 +1614,13 @@ public class METransformer extends EMEATransformer {
 
   @Override
   public boolean hasCmrtCustExt() {
-    return true;
-    // if ("SK".equals(DEFAULT_LANDED_COUNTRY) ||
-    // "BG".equals(DEFAULT_LANDED_COUNTRY) ||
-    // "RU".equals(DEFAULT_LANDED_COUNTRY)) {
-    // return true;
-    // } else {
-    // return false;
-    // }
+    if ("BH".equals(DEFAULT_LANDED_COUNTRY) || "MA".equals(DEFAULT_LANDED_COUNTRY) || "AE".equals(DEFAULT_LANDED_COUNTRY)
+        || "KW".equals(DEFAULT_LANDED_COUNTRY) || "OM".equals(DEFAULT_LANDED_COUNTRY) || "QA".equals(DEFAULT_LANDED_COUNTRY)
+        || "SA".equals(DEFAULT_LANDED_COUNTRY) || "GC".equals(DEFAULT_LANDED_COUNTRY)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Override
