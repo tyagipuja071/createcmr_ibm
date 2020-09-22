@@ -79,6 +79,7 @@ public class CEWATransformer extends MCOTransformer {
           legacyCust.setModeOfPayment("");
         }
       }
+      legacyCust.setCreditCd("");
     }
 
     legacyCust.setAccAdminBo("");
@@ -258,9 +259,13 @@ public class CEWATransformer extends MCOTransformer {
       oldCOF = oldData.getCommercialFinanced();
     }
 
-    if (StringUtils.isNotBlank(oldCOF) && StringUtils.isBlank(data.getCommercialFinanced())) {
+    String currentCOF = data.getCommercialFinanced();
+    String currentCOD = data.getCreditCd();
+    boolean currCOFHasValidValue = "R".equals(currentCOF) || "S".equals(currentCOF) || "T".equals(currentCOF);
+    
+    if (StringUtils.isBlank(oldCOF) && currCOFHasValidValue) {
       return "COF";
-    } else if (StringUtils.isNotBlank(oldCOD) && (StringUtils.isBlank(data.getCreditCd()) || "N".equals(data.getCreditCd()))) {
+    } else if ((StringUtils.isBlank(oldCOD) || "N".equals(oldCOD)) && "Y".equals(currentCOD)) {
       return "COD";
     } else {
       return "NA";
