@@ -7089,8 +7089,9 @@ function addEmbargoCodeValidatorUKI() {
       validate : function() {
         var embargoCd = FormManager.getActualValue('embargoCd');
         var reqType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
 
-        if (reqType != 'U' && reqType != 'X') {
+        if (role == 'REQUESTER' && reqType == 'C') {
           return new ValidationResult(null, true);
         }
 
