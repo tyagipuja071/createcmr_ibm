@@ -84,8 +84,8 @@ public class SpainTransformer extends MessageTransformer {
     // trim VAT prefix for Local Defect 1481070 fix: change cross border based
     // on billing only
     if (!zs01CrossBorder(handler)) {
-      if (!StringUtils.isEmpty(vat) && vat.matches("^[A-Z]{2}.*")) {
-        messageHash.put("VAT", vat.substring(2, vat.length()));
+      if (!StringUtils.isEmpty(vat)) {
+        messageHash.put("VAT", vat);
       }
     }
 
