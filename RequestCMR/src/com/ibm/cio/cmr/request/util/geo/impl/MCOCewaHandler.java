@@ -21,6 +21,7 @@ import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
@@ -173,6 +174,10 @@ public class MCOCewaHandler extends MCOHandler {
       address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
       if (!("ZS01".equals(address.getId().getAddrType()) || "ZD01".equals(address.getId().getAddrType()))) {
         address.setCustPhone("");
+      }
+      if ("ZD01".equals(address.getId().getAddrType())) {
+        String phone = getShippingPhoneFromLegacy(currentRecord);
+        address.setCustPhone(phone != null ? phone : "");
       }
     }
   }
@@ -474,4 +479,15 @@ public class MCOCewaHandler extends MCOHandler {
       }
     }
   }
+
+  private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {
+    List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
+    for (CmrtAddr cmrtAddr : cmrtAddrs) {
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && address.getCmrAddrSeq().equals(cmrtAddr.getId().getAddrNo())) {
+        return cmrtAddr.getAddrPhone();
+      }
+    }
+    return null;
+  }
+
 }
