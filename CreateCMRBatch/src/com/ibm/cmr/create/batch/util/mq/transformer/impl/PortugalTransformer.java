@@ -672,12 +672,6 @@ public class PortugalTransformer extends MessageTransformer {
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
       legacyCust.setImsCd(subInd);
-      String firstChar = String.valueOf(subInd.charAt(0));
-      StringBuilder builder = new StringBuilder();
-      builder.append(firstChar);
-      builder.append(subInd);
-      LOG.debug("***Auto setting Economic code as > " + builder.toString());
-      legacyCust.setEconomicCd(builder.toString());
     }
     legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     legacyCust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
@@ -689,6 +683,9 @@ public class PortugalTransformer extends MessageTransformer {
     legacyAddr.setForUpdate(true);
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
 
+    if (!StringUtils.isBlank(addr.getCounty())) {
+      legacyAddr.setAddrLine3(addr.getCounty());
+    }
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
     }

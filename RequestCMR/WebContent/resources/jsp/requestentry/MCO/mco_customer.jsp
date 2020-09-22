@@ -35,19 +35,16 @@
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    <cmr:column span="2" containerForField="SpecialTaxCd" forCountry="822">
-      <p>
-        <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
+    <cmr:view forGEO="MCO,MCO1,MCO2">
+      <cmr:column span="2" containerForField="SpecialTaxCd">
+        <p>
+        <label for="specialTaxCd"> 
+        	<cmr:fieldLabel fieldId="SpecialTaxCd" />: 
+        	<cmr:delta text="${rdcdata.specialTaxCd}" oldValue="${reqentry.specialTaxCd}" />
+        </label>
         <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:view forGEO="MCO1,MCO2">
-      <cmr:column span="2" containerForField="SpecialTaxCd">
-        <p>
-          <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
-          <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
     </cmr:view>
     <cmr:column span="2" containerForField="AbbrevLocation">
       <p>
@@ -175,12 +172,6 @@
 	
   <cmr:view forCountry="838">
     <cmr:row addBackground="false">
-      <cmr:column span="2" containerForField="SpecialTaxCd">
-        <p>
-          <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
-          <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
       <cmr:column span="2" containerForField="CurrencyCode">
         <p>
           <cmr:label fieldId="legacyCurrencyCd">

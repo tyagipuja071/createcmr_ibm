@@ -70,7 +70,7 @@ function getImportedIndcForGreece() {
   if (_importedIndc) {
     return _importedIndc;
   }
-  var results = cmr.query('VALIDATOR.IMPORTED_GR', {
+  var results = cmr.query('VALIDATOR.IMPORTED', {
     REQID : FormManager.getActualValue('reqId')
   });
   if (results != null && results.ret1) {
@@ -3473,9 +3473,9 @@ function setClientTierAndISR(value) {
   tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
-      tierValues = [ 'V', '6', 'A', 'Z' ];
+      tierValues = [ 'V', '6'];
     } else if (value == '32') {
-      tierValues = [ 'B', 'N', 'S', 'Z', 'M' ];
+      tierValues = ['N', 'S'];
     } else if (value == '21') {
       tierValues = [ '7' ];
     }
@@ -3524,13 +3524,28 @@ function setISRValuesGROnUpdate() {
   }
 }
 
+function getImportedIndcForCyprus() {
+  if (_importedIndc) {
+    return _importedIndc;
+  }
+  var results = cmr.query('VALIDATOR.IMPORTED', {
+    REQID : FormManager.getActualValue('reqId')
+  });
+  if (results != null && results.ret1) {
+    _importedIndc = results.ret1;
+  } else {
+    _importedIndc = 'N';
+  }
+  return _importedIndc;
+}
+
 var _isScenarioChanged = false;
 function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
   _isScenarioChanged = scenarioChanged;
 }
 
 function retainImportValues(fromAddress, scenario, scenarioChanged) {
-  var isCmrImported = getImportedIndcForGreece();
+  var isCmrImported = getImportedIndcForCyprus();
   var reqId = FormManager.getActualValue('reqId');
   
   if(FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' 
@@ -3550,16 +3565,12 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
    if(result != null && result != '') {
      origISU = result.ret1;
      origClientTier = result.ret2;
-     origRepTeam = result.ret3;
-     origSbo = result.ret4;
      origInac = result.ret5;
      origEnterprise = result.ret6;
      
-     FormManager.setValue('isuCd', origISU);
+     FormManager.setValue('isuCd',origISU);
      FormManager.setValue('clientTier', origClientTier);
-     FormManager.setValue('repTeamMemberNo', origRepTeam);
-     FormManager.setValue('salesBusOffCd', origSbo);
-     FormManager.setValue('inacCd', origInac);
+     FormManager.setValue('inacCd',origInac);
      FormManager.setValue('enterprise', origEnterprise);
    }
  } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' ) {
@@ -3685,22 +3696,49 @@ function setEnterprise() {
     valueChanged = _oldEnterpriseValue != value;  
   }
 
-  if(_subindustryChanged || valueChanged || _isScenarioChanged) {
+  if(valueChanged || _isScenarioChanged) {
     shouldSetEnterprise = true;
   }
     
   enterpriseLov = [];
-  if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
-    enterpriseLov= ['822805'];
-    FormManager.setValue('enterprise',  enterpriseLov[0]);
-    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-  } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
-    enterpriseLov = [ '822835', '822836' ];
-    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+  if(shouldSetEnterprise){
+    if (getImportedIndcForCyprus() == 'Y' && FormManager.getActualValue('reqType') == 'C'
+      && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN')) {
+        if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
+          enterpriseLov= ['822805'];
+          FormManager.setValue('enterprise',  enterpriseLov[0]);
+        } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
+          enterpriseLov = [ '822835', '822836' ];
+        }
+        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+        FormManager.setValue('enterprise', _pagemodel.enterprise);
+       }else{ 
+          if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
+            enterpriseLov= ['822805'];
+            FormManager.setValue('enterprise',  enterpriseLov[0]);
+          } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
+            enterpriseLov = [ '822835', '822836' ];
+          }
+          FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+        }
+      }else{ 
+        if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
+          enterpriseLov= ['822805'];
+          FormManager.setValue('enterprise',  enterpriseLov[0]);
+        } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
+          enterpriseLov = [ '822835', '822836' ];
+        }
+        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+      }
+    
+  if(getImportedIndcForCyprus() == 'Y' && FormManager.getActualValue('reqType') == 'C'
+      && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN')){
+    _oldEnterpriseValue = _pagemodel.enterprise;
+    retainImportValues(null, FormManager.getActualValue('custSubGrp'), true);
   }else{
-    FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
+    _oldEnterpriseValue = value;
   }
-   
+  
 }
 
 function hideCollectionCd() {
@@ -8173,18 +8211,29 @@ function validateSalesRepISR() {
     return {
       validate : function() {
         var salRep = FormManager.getActualValue('salesTeamCd');
-        var isr = FormManager.getActualValue('repTeamMemberNo');
         if (salRep.length >= 1 && salRep.length != 6) {
             return new ValidationResult(null, false, 'Sales Rep should be 6 digit long.');
-        }else if(isr.length >= 1 && isr.length != 6){
-            return new ValidationResult(null, false, 'ISR should be 6 digit long.');
-         }
+        }
         return new ValidationResult(null, true);
        }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 } 
 
+function validateISR() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isr = FormManager.getActualValue('repTeamMemberNo');
+        if(isr.length >= 1 && isr.length != 6){
+            return new ValidationResult(null, false, 'ISR should be 6 digit long.');
+        }
+        return new ValidationResult(null, true);
+       }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+} 
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8279,6 +8328,7 @@ dojo.addOnLoad(function() {
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierAndISR, [ SysLoc.CYPRUS]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
   // Customer Type behaviour for CY
@@ -8300,8 +8350,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(retainLandCntryValuesOnCopy, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(setEnterprise, [ SysLoc.CYPRUS ]);
-  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.GREECE ]);
-  GEOHandler.addAfterTemplateLoad(retainImportValues, [ SysLoc.GREECE ]);
+
   
   
   // GEOHandler.registerValidator(addPostalCodeLenForTurGreCypValidator, [
@@ -8436,4 +8485,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLocOnChange, [ SysLoc.CYPRUS ]);
   GEOHandler.registerValidator(validateSalesRepISR, [ SysLoc.CYPRUS ], null, true);
+  GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.CYPRUS ]);
+  GEOHandler.addAfterTemplateLoad(retainImportValues, [ SysLoc.CYPRUS ]);
+  GEOHandler.registerValidator(validateISR, [ SysLoc.CYPRUS ], null, true);
 });

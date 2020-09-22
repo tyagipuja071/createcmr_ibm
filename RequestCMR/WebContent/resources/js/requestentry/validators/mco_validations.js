@@ -115,7 +115,7 @@ function addHandlersForPT() {
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
-      isuAndCtcBasedOnISIC();
+      isuCtcBasedOnISIC();
     });
   }
 }
@@ -125,7 +125,7 @@ function getImportedIndcForPT() {
     console.log('Returning imported indc = ' + _importedIndc);
     return _importedIndc;
   }
-  var results = cmr.query('VALIDATOR.IMPORTED_PT', {
+  var results = cmr.query('VALIDATOR.IMPORTED', {
     REQID : FormManager.getActualValue('reqId')
   });
   if (results != null && results.ret1) {
@@ -606,11 +606,11 @@ function setClientTierValues(value) {
   var tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL) {
     if (value == '32') {
-      tierValues = [ 'B', 'S', 'Z', 'M', 'N' ];
+      tierValues = ['S', 'M', 'N' ];
     } else if (value == '21' || value == '60') {
       tierValues = [ '7' ];
     } else if (value == '34') {
-      tierValues = [ 'V', '6', 'A', 'Z' ];
+      tierValues = [ 'V', '6', 'A'];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
@@ -2082,7 +2082,10 @@ function getOldFieldValues() {
   _oldOrdBlk = FormManager.getActualValue('ordBlk');
 }
 
-function isuAndCtcBasedOnISIC() {
+function isuCtcBasedOnISIC() {
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
   if (FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'XBP') {
     return;
   }
@@ -2394,6 +2397,38 @@ function addAbbrevLocationValidatorPT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
+  var isCmrImported = getImportedIndcForPT();
+  var reqId = FormManager.getActualValue('reqId');
+
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'THDPT')) {
+    var origISU;
+    var origClientTier;
+    var origRepTeam;
+    var origSbo;
+    var origInac;
+    var origEnterprise;
+
+    var result = cmr.query("GET.CMRINFO.IMPORTED_PT", {
+      REQ_ID : reqId
+    });
+
+    if (result != null && result != '') {
+      origISU = result.ret1;
+      origClientTier = result.ret2;
+      origInac = result.ret5;
+      origEnterprise = result.ret6;
+
+      FormManager.setValue('isuCd', origISU);
+      FormManager.setValue('clientTier', origClientTier);
+      FormManager.setValue('inacCd', origInac);
+      FormManager.setValue('enterprise', origEnterprise);
+    }
+  } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y') {
+    FormManager.setValue('inacCd', '');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
@@ -2502,5 +2537,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAbbrevNmValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
+  GEOHandler.addAfterTemplateLoad(retainImportValuesPT, [ SysLoc.PORTUGAL ]);
 
 });
