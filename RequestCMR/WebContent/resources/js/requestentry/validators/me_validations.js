@@ -3953,12 +3953,12 @@ function addEmbargoCdValidatorForME() {
         validate : function() {
           var embargoCd = FormManager.getActualValue('embargoCd');
           if (embargoCd && !(embargoCd == 'E' || embargoCd == 'S' || embargoCd == '')) {
-            return new ValidationResult(null, false, 'Embargo Code should only E, S, Blank allowed');
+            return new ValidationResult(null, false, 'Order Block Code should be only E, S, Blank allowed');
           }
           return new ValidationResult(null, true);
         }
       };
-    })(), 'MAIN_IBM_TAB', 'frmCMR');
+    })(), 'MAIN_CUST_TAB', 'frmCMR');
   }
 }
 // CMR-4606
