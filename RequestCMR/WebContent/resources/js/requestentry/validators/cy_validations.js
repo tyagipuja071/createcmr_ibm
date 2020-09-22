@@ -8211,10 +8211,21 @@ function validateSalesRepISR() {
     return {
       validate : function() {
         var salRep = FormManager.getActualValue('salesTeamCd');
-        var isr = FormManager.getActualValue('repTeamMemberNo');
         if (salRep.length >= 1 && salRep.length != 6) {
             return new ValidationResult(null, false, 'Sales Rep should be 6 digit long.');
         }
+        return new ValidationResult(null, true);
+       }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+} 
+
+function validateISR() {
+
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var isr = FormManager.getActualValue('repTeamMemberNo');
         if(isr.length >= 1 && isr.length != 6){
             return new ValidationResult(null, false, 'ISR should be 6 digit long.');
         }
@@ -8223,7 +8234,6 @@ function validateSalesRepISR() {
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 } 
-
 dojo.addOnLoad(function() {
   GEOHandler.EMEA = [ SysLoc.UK, SysLoc.IRELAND, SysLoc.ISRAEL, SysLoc.TURKEY, SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.ITALY ];
   console.log('adding EMEA functions...');
@@ -8477,4 +8487,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateSalesRepISR, [ SysLoc.CYPRUS ], null, true);
   GEOHandler.addAfterTemplateLoad(checkScenarioChanged, [ SysLoc.CYPRUS ]);
   GEOHandler.addAfterTemplateLoad(retainImportValues, [ SysLoc.CYPRUS ]);
+  GEOHandler.registerValidator(validateISR, [ SysLoc.CYPRUS ], null, true);
 });
