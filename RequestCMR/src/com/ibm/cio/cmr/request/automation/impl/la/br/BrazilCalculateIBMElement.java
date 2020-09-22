@@ -603,6 +603,9 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
             details.append("Market Responsibility Code (MRC) = " + sboMSP.getMrcCd() + "\n");
             overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sboMSP.getMrcCd());
+
+            details.append("Country Use = " + sboMSP.getMrcCd() + "\n");
+            overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sboMSP.getMrcCd());
           }
 
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_COLLECTOR_FROM_STATE");

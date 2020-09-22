@@ -222,7 +222,7 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX">
+      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,MCO2">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>

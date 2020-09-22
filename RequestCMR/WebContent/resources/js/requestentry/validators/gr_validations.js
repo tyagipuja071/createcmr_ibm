@@ -70,7 +70,7 @@ function getImportedIndcForGreece() {
   if (_importedIndc) {
     return _importedIndc;
   }
-  var results = cmr.query('VALIDATOR.IMPORTED_GR', {
+  var results = cmr.query('VALIDATOR.IMPORTED', {
     REQID : FormManager.getActualValue('reqId')
   });
   if (results != null && results.ret1) {
@@ -1721,7 +1721,6 @@ function addNonLatinCharValidator() {
       checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.NON_LATIN, [ 'Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'District' ]);
-      checkAndAddValidator('taxOffice', Validators.NON_LATIN, [ 'Tax Office' ]);
       checkAndAddValidator('custNm4', Validators.NON_LATIN, [ 'Att. Person' ]);
     }
     checkAndAddValidator('addrTxt', Validators.NON_LATIN, [ 'Street Address' ]);
@@ -1744,8 +1743,7 @@ function addNonLatinCharValidator() {
     FormManager.removeValidator('dept', Validators.NON_LATIN);
     FormManager.removeValidator('poBox', Validators.NON_LATIN);
     // FormManager.removeValidator('custPhone', Validators.NON_LATIN);
-    FormManager.removeValidator('taxOffice', Validators.NON_LATIN);
-  }
+   }
 }
 
 /**
@@ -3808,7 +3806,7 @@ function convertToUpperCaseGR(cntry, addressMode, saving) {
   }
 
   // Greek address - block lowercase
-  var addrFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'postCd', 'custPhone', 'sapNo', 'taxOffice', 'custNm4' ];
+  var addrFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'postCd', 'custPhone', 'sapNo', 'custNm4' ];
   if (FormManager.getActualValue('addrType') == 'ZP01') {
     for (var i = 0; i < addrFields.length; i++) {
       dojo.byId(addrFields[i]).style.textTransform = 'uppercase';
@@ -3905,12 +3903,6 @@ function addrFunctionForGRCYTR(cntry, addressMode, saving) {
     if (custType == 'CROSS' && cmr.currentRequestType == 'U') {
       FormManager.readOnly('landCntry');
     }
-    // for Turkey - cross border or update request
-    if (cntryCd == SysLoc.TURKEY && (custType == 'CROSS' || cmr.currentRequestType == 'U')) {
-      FormManager.removeValidator('taxOffice', Validators.REQUIRED);
-    } else if (cntryCd == SysLoc.TURKEY) {
-      checkAndAddValidator('taxOffice', Validators.REQUIRED, [ 'Tax Office' ]);
-    }
     // for Turkey - cross border
     if (cntryCd == SysLoc.TURKEY && custType == 'CROSS') {
       FormManager.removeValidator('dept', Validators.REQUIRED);
@@ -3929,14 +3921,6 @@ function retainLandCntryValuesOnCopy() {
 
 function disableAddrFieldsGRCYTR() {
   var cntryCd = FormManager.getActualValue('cmrIssuingCntry');
-
-  // Tax Office - for mailing/billing address only
-  if (cntryCd == SysLoc.GREECE && FormManager.getActualValue('addrType') != 'ZP01') {
-    FormManager.setValue('taxOffice', '');
-    FormManager.disable('taxOffice');
-  } else {
-    FormManager.enable('taxOffice');
-  }
 
   // Phone - for mailing/billing address only
   if ((cntryCd == SysLoc.GREECE || cntryCd == SysLoc.TURKEY) && FormManager.getActualValue('addrType') != 'ZP01') {
@@ -3957,13 +3941,6 @@ function disableAddrFieldsGRCYTR() {
 }
 
 function disableAddrFieldsGR() {
-  if (FormManager.getActualValue('addrType') != 'ZP01') {
-    FormManager.setValue('taxOffice', '');
-    FormManager.disable('taxOffice');
-  } else {
-    FormManager.enable('taxOffice');
-  }
-
   // GR - Phone - for Sold-to and Ship-to
   if ((FormManager.getActualValue('addrType') == 'ZS01' || FormManager.getActualValue('addrType') == 'ZD01')) {
     FormManager.enable('custPhone');

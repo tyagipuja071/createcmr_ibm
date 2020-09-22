@@ -106,13 +106,13 @@ public class TemplateColumn {
       // add number validator
       if (this.length > 0) {
         // do a range of values
-        String min = 1 + "";
+        String min = 0 + "";
         String max = StringUtils.leftPad("", this.length, '9');
         constraint = (XSSFDataValidationConstraint) helper.createNumericConstraint(ValidationType.INTEGER, OperatorType.BETWEEN, min, max);
         errorMsg = "Please input only numbers from " + min + " to " + max + ".";
       } else {
         // generic values, use 9 as numer length limit
-        String min = 1 + "";
+        String min = 0 + "";
         String max = StringUtils.leftPad("", 9, '9');
         constraint = (XSSFDataValidationConstraint) helper.createNumericConstraint(ValidationType.INTEGER, OperatorType.BETWEEN, min, max);
         errorMsg = "Please input numbers only.";
@@ -254,10 +254,12 @@ public class TemplateColumn {
       // LOG.debug(">> cbCity > " + cbCity);
       // LOG.debug(">> localCity > " + localCity);
       // if (!StringUtils.isEmpty(cbCity) && !StringUtils.isEmpty(localCity)) {
-      // LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> "
+      // LOG.trace("Cross Border City and Local City must not be populated at
+      // the same time. If one is populated, the other must be empty. >> "
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+      // "Cross Border City and Local City must not be populated at the same
+      // time. If one is populated, the other must be empty.");
       // }
       // }
       //
@@ -267,10 +269,13 @@ public class TemplateColumn {
       //
       // if (!StringUtils.isEmpty(cbPostal) &&
       // !StringUtils.isEmpty(localPostal)) {
-      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+      // LOG.trace("Cross Border Postal Code and Local Postal Code must not be
+      // populated at the same time. If one is populated, the other must be
+      // empty. >>"
       // + this.label);
       // validation.addError(rowIndex, this.label,
-      // "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+      // "Cross Border Postal Code and Local Postal Code must not be populated
+      // at the same time. If one is populated, the other must be empty.");
       // }
       // }
 
@@ -287,16 +292,18 @@ public class TemplateColumn {
       // }
       //
       // if (markedColumnsAsDups != null && markedColumnsAsDups.size() > 1) {
-      // LOG.trace("There are fields dually marked on the template. This will be returned as an error");
+      // LOG.trace("There are fields dually marked on the template. This will be
+      // returned as an error");
       // validation.addError(rowIndex, this.label,
-      // "There are fields dually marked on the template. This will be returned as an error");
+      // "There are fields dually marked on the template. This will be returned
+      // as an error");
       // }
     }
   }
 
   @SuppressWarnings("deprecation")
-  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country,
-      int colNo, int maxRows, HashMap<String, String> hwFlagMap) {
+  public void validateSwiss(EntityManager entityManager, TemplateValidation validation, XSSFWorkbook book, XSSFSheet sheet, String country, int colNo,
+      int maxRows, HashMap<String, String> hwFlagMap) {
     XSSFRow row = null;
     XSSFCell currCell = null;
     String value = null;
@@ -380,8 +387,9 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-              + this.label);
+          LOG.trace(
+              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+                  + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
@@ -511,8 +519,9 @@ public class TemplateColumn {
         LOG.debug(">> localPostal > " + localPostal);
 
         if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
-          LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
-              + this.label);
+          LOG.trace(
+              "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty. >>"
+                  + this.label);
           validation.addError(rowIndex, this.label,
               "Cross Border Postal Code and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
         }
