@@ -3473,9 +3473,9 @@ function setClientTierAndISR(value) {
   tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.CYPRUS) {
     if (value == '34') {
-      tierValues = [ 'V', '6', 'A', 'Z' ];
+      tierValues = [ 'V', '6'];
     } else if (value == '32') {
-      tierValues = [ 'B', 'N', 'S', 'Z', 'M' ];
+      tierValues = ['N', 'S'];
     } else if (value == '21') {
       tierValues = [ '7' ];
     }
@@ -8214,9 +8214,10 @@ function validateSalesRepISR() {
         var isr = FormManager.getActualValue('repTeamMemberNo');
         if (salRep.length >= 1 && salRep.length != 6) {
             return new ValidationResult(null, false, 'Sales Rep should be 6 digit long.');
-        }else if(isr.length >= 1 && isr.length != 6){
+        }
+        if(isr.length >= 1 && isr.length != 6){
             return new ValidationResult(null, false, 'ISR should be 6 digit long.');
-         }
+        }
         return new ValidationResult(null, true);
        }
     };
@@ -8317,6 +8318,7 @@ dojo.addOnLoad(function() {
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
+  GEOHandler.addAfterTemplateLoad(setClientTierAndISR, [ SysLoc.CYPRUS]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
   // Customer Type behaviour for CY
