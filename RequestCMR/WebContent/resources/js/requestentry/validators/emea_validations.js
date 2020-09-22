@@ -6927,9 +6927,9 @@ function lockRequireFieldsUKI() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-//  if (cntry == SysLoc.IRELAND) {
-//    FormManager.readOnly('salesBusOffCd');
-//  }
+  // if (cntry == SysLoc.IRELAND) {
+  // FormManager.readOnly('salesBusOffCd');
+  // }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
@@ -7008,7 +7008,7 @@ function lockRequireFieldsUKI() {
   if (reqType == 'U' && role == 'REQUESTER') {
     FormManager.enable('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
-    FormManager.readOnly('abbrevLocn');
+    FormManager.enable('abbrevLocn');
     FormManager.removeValidator('abbrevLocn', Validators.REQUIRED);
   } else if (role == 'PROCESSOR') {
     FormManager.enable('abbrevNm');
@@ -7194,20 +7194,22 @@ function addEmbargoCodeValidatorUKI() {
       validate : function() {
         var embargoCd = FormManager.getActualValue('embargoCd');
         var reqType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
 
-        if (reqType != 'U' || reqType != 'X') {
+        if (role == 'REQUESTER' && reqType == 'C') {
           return new ValidationResult(null, true);
         }
+
         if (embargoCd != '' && embargoCd.length > 0) {
           embargoCd = embargoCd.trim();
-          if ((embargoCd != '' && embargoCd.length == 1) && (embargoCd == 'E' || embargoCd == 'C' || embargoCd == 'J')) {
+          if ((embargoCd != '' && embargoCd.length == 1) && (embargoCd == 'D' || embargoCd == 'C')) {
             return new ValidationResult(null, true);
           } else {
             return new ValidationResult({
               id : 'embargoCd',
               type : 'text',
               name : 'embargoCd'
-            }, false, 'Embargo Code value should be only E or C or J.');
+            }, false, 'Embargo Code value should be only D ,C or Blank.');
           }
         }
         return new ValidationResult(null, true);
@@ -8770,6 +8772,63 @@ function validateSingleReactParentCMR() {
             return new ValidationResult(null, true);
           }
         }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+function addValidatorForCollectionCdUpdateUKI() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var reqId = FormManager.getActualValue('reqId');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (reqType == 'U' && role == 'REQUESTER') {
+          var requestingLOB = FormManager.getActualValue('requestingLob');
+          var collectionCd = FormManager.getActualValue('collectionCd');
+          var result = cmr.query('GETDATARDCVALUESIT', {
+            REQ_ID : reqId
+          });
+          var collCdOld = null;
+          if (result && result.ret1 != null) {
+            collCdOld = result.ret1;
+          }
+          if (collCdOld != null && collCdOld != collectionCd && requestingLOB != 'AR') {
+            return new ValidationResult({
+              id : 'requestingLob',
+              name : 'Requesting LOB'
+            }, false, 'Requesting LOB should be \'Accounts Receivable\' only, if Collection Code is updated.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+}
+
+function addValidatorForCompanyRegNum() {
+  // CRN
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var companyNum = FormManager.getActualValue('taxCd1');
+        var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+        if (companyNum != null && companyNum != undefined && companyNum != '') {
+          if (issuingCntry == SysLoc.IRELAND && ((companyNum.length != 4 && companyNum.length != 5 && companyNum.length != 6) || !companyNum.match("^[0-9a-zA-Z]*$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 4 ,5 or 6 alphanumeric characters.');
+          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8 || !companyNum.match("^[0-9a-zA-Z]*$"))) {
+            return new ValidationResult(null, false, 'Company Registartion Number should be of 8 alphanumeric characters.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        } else {
+          return new ValidationResult(null, true);
+        }
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
@@ -8921,62 +8980,6 @@ function disableSitePartyIdTR() {
 
 function afterConfigForTR() {
   disableSitePartyIdTR();
-}
-
-function addValidatorForCollectionCdUpdateUKI() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        var reqId = FormManager.getActualValue('reqId');
-        var role = FormManager.getActualValue('userRole').toUpperCase();
-        if (reqType == 'U' && role == 'REQUESTER') {
-          var requestingLOB = FormManager.getActualValue('requestingLob');
-          var collectionCd = FormManager.getActualValue('collectionCd');
-          var result = cmr.query('GETDATARDCVALUESIT', {
-            REQ_ID : reqId
-          });
-          var collCdOld = null;
-          if (result && result.ret1 != null) {
-            collCdOld = result.ret1;
-          }
-          if (collCdOld != null && collCdOld != collectionCd && requestingLOB != 'AR') {
-            return new ValidationResult({
-              id : 'requestingLob',
-              name : 'Requesting LOB'
-            }, false, 'Requesting LOB should be \'Accounts Receivable\' only, if Collection Code is updated.');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-}
-
-function addValidatorForCompanyRegNum() {
-  // CRN
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var companyNum = FormManager.getActualValue('taxCd1');
-        var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-        if (companyNum != null && companyNum != undefined && companyNum != '') {
-          if (issuingCntry == SysLoc.IRELAND && (companyNum.length != 6 || !companyNum.match("^[0-9a-zA-Z]*$"))) {
-            return new ValidationResult(null, false, 'Company Registartion Number should be of 6 alphanumeric characters.');
-          } else if (issuingCntry == SysLoc.UK && (companyNum.length != 8 || !companyNum.match("^[0-9a-zA-Z]*$"))) {
-            return new ValidationResult(null, false, 'Company Registartion Number should be of 8 alphanumeric characters.');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
 dojo.addOnLoad(function() {
