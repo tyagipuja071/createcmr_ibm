@@ -25,18 +25,6 @@
   <form:hidden path="sitePartyId" />
   <form:hidden path="searchTerm" />
 
-<cmr:row addBackground="true">
-        <cmr:column span="1" containerForField="VATExempt" forCountry="780">
-          <p>
-            <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
-            <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
-            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
-              <cmr:fieldLabel fieldId="VATExempt" />
-              <cmr:delta text="${rdcdata.vatExempt}" oldValue="${reqentry.vatExempt == 'Y' ? 'Yes' : 'No'}" />
-            </cmr:label>
-          </p>
-        </cmr:column>
-</cmr:row>
   <cmr:row addBackground="false">
 <%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
