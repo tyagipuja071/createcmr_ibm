@@ -14,6 +14,11 @@ import javax.persistence.EntityManager;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -47,6 +52,9 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 public class MCOPtEsHandler extends MCOHandler {
 
   private static final Logger LOG = Logger.getLogger(MCOPtEsHandler.class);
+
+  protected static final String[] PT_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
+      "Shipping Address (Update)", "EPL Address" };
 
   private static final String[] SPAIN_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "LocalTax1" };
 
@@ -1129,6 +1137,167 @@ public class MCOPtEsHandler extends MCOHandler {
       return false;
     }
 
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    XSSFCell currCell = null;
+    for (String name : PT_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      if (sheet != null) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            String cmrNo = ""; // 0
+            String seqNo = "";// 1
+            String localCity = ""; // 7
+            String crossCity = ""; // 8
+            String localPostal = ""; // 9
+            String cbPostal = ""; // 10
+            String street = ""; // 4
+            String addressCont = ""; // 5
+            String poBox = ""; // 12
+            String attPerson = ""; // 11
+            String poBox1 = ""; // 12
+            String phoneNo = ""; // 12
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              // iterate all the rows and check each column value
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(1);
+              seqNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              addressCont = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(6);
+              poBox = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              attPerson = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              localPostal = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              localCity = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              crossCity = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(11);
+              cbPostal = validateColValFromCell(currCell);
+            }
+
+            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                poBox1 = df.formatCellValue(row.getCell(6));
+              }
+            }
+
+            if ("Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(12);
+              phoneNo = validateColValFromCell(currCell);
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                phoneNo = df.formatCellValue(row.getCell(12));
+              }
+            }
+
+            TemplateValidation error = new TemplateValidation(name);
+            if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
+              LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+              error.addError(row.getRowNum(), "City",
+                  "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
+              validations.add(error);
+            }
+            if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
+              LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                  + "If one is populated, the other must be empty. >>");
+              error.addError(row.getRowNum(), "Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                  + "If one is populated, the other must be empty.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(cbPostal)) {
+              int maxlengthcomputed = crossCity.length() + cbPostal.length();
+              if (maxlengthcomputed > 32) {
+                LOG.trace("Crossborder city and crossborder postal code should have a maximun of 30 characters.");
+                error.addError(row.getRowNum(), "Crossborder City/Postal",
+                    "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
+                validations.add(error);
+              }
+            }
+
+            if (!StringUtils.isEmpty(localPostal) && !localPostal.matches("-?\\d+(\\.\\d+)?")) {
+              LOG.trace("Local postal code should have numeric values only.");
+              error.addError(row.getRowNum(), "Local Postal Code", "Only numeric values are allowed.");
+              validations.add(error);
+            }
+
+            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox)) {
+                LOG.trace("Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Street/PO Box",
+                    "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
+                validations.add(error);
+              }
+              if (!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
+                LOG.trace("Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Address Con't/Att. Person",
+                    "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
+                validations.add(error);
+              }
+
+              if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Address Sequence No.",
+                    "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+                validations.add(error);
+              }
+
+              if (poBox1.contains("+")) {
+                LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
+                validations.add(error);
+              }
+            }
+
+            if ("Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (phoneNo.contains("+")) {
+                LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                validations.add(error);
+              }
+            }
+
+            if (localCity.contains("@") && localCity.length() > 0) {
+              LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Local City", "Field contains invalid character. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (crossCity.contains("@") && crossCity.length() > 0) {
+              LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Cross Border City", "Field contains invalid character. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (localPostal.contains("@") && localPostal.length() > 0) {
+              LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Local Postal Code", "Field contains invalid character. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (cbPostal.contains("@") && cbPostal.length() > 0) {
+              LOG.trace("Field contains invalid character. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Cross Border Postal Code",
+                  "Field contains invalid character. Please fix and upload the template again.");
+              validations.add(error);
+            }
+          }
+        }
+      }
+    }
   }
 
 }
