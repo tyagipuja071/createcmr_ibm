@@ -246,10 +246,15 @@ public class CEWATransformer extends MCOTransformer {
 
   @Override
   public String getGmllcDupCreation(Data data) {
+    if ("764".equals(data.getCmrIssuingCntry())) {
+      return "NA";
+    }
+
     List<String> validScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC", "LLC", "LLCBP");
     if (data != null && StringUtils.isNotEmpty(data.getCustSubGrp()) && validScenarios.contains(data.getCustSubGrp())) {
       return "764";
     }
+
     return "NA";
   }
 
@@ -305,7 +310,7 @@ public class CEWATransformer extends MCOTransformer {
     String currentCOF = data.getCommercialFinanced();
     String currentCOD = data.getCreditCd();
     boolean currCOFHasValidValue = "R".equals(currentCOF) || "S".equals(currentCOF) || "T".equals(currentCOF);
-    
+
     if (StringUtils.isBlank(oldCOF) && currCOFHasValidValue) {
       return "COF";
     } else if ((StringUtils.isBlank(oldCOD) || "N".equals(oldCOD)) && "Y".equals(currentCOD)) {
