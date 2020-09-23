@@ -62,6 +62,8 @@ public class DupCMRProcessService extends LegacyDirectService {
   private static final List<String> ME_DUPCOUNTRY_LIST = Arrays.asList(SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI,
       SystemLocation.BAHRAIN, SystemLocation.SAUDI_ARABIA, SystemLocation.OMAN, SystemLocation.KUWAIT, SystemLocation.QATAR, SystemLocation.JORDAN,
       SystemLocation.LEBANON, SystemLocation.LIBYA, SystemLocation.YEMEN);
+  private static final List<String> ME_CUSTEXT_LIST = Arrays.asList(SystemLocation.UNITED_ARAB_EMIRATES, SystemLocation.ABU_DHABI,
+      SystemLocation.BAHRAIN, SystemLocation.SAUDI_ARABIA, SystemLocation.OMAN, SystemLocation.KUWAIT, SystemLocation.QATAR, SystemLocation.GULF);
 
   protected void processDupCreate(EntityManager entityManager, Admin admin, CMRRequestContainer cmrObjects) throws Exception {
     LOG.debug("Started Create duplicate CMR processing of Request " + admin.getId().getReqId());
@@ -144,9 +146,6 @@ public class DupCMRProcessService extends LegacyDirectService {
               createEntity(legacyAddr, entityManager);
             }
           }
-          // completeRecord(entityManager, admin,
-          // legacyDupObjects.getCustomerNo(),
-          // legacyDupObjects);
         }
       } else {
         LOG.info("Dup 675 Legacy Records for Request ID " + admin.getId().getReqId());
@@ -173,12 +172,6 @@ public class DupCMRProcessService extends LegacyDirectService {
         custDup.setRealCtyCd(dupCntry);
         custDup.setStatus(LEGACY_STATUS_ACTIVE);
         custDup.setCeBo(cntry + "0000");
-        if (!"5300000".equals(custDup.getSbo())) {
-          custDup.setSbo("6750000");
-          custDup.setIbo("6750000");
-          custDup.setSalesGroupRep("675675");
-          custDup.setSalesRepNo("675675");
-        }
         custDup.setCreateTs(SystemUtil.getCurrentTimestamp());
         custDup.setUpdateTs(SystemUtil.getCurrentTimestamp());
         custDup.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
@@ -233,10 +226,6 @@ public class DupCMRProcessService extends LegacyDirectService {
     String cmrNo = data.getCmrNo();
     String cntry = data.getCmrIssuingCntry().trim();
     data.setDupIssuingCntryCd(dupCntry);
-
-    String sales_RepBK = data.getSalesTeamCd();// need to check
-    String SBOBK = data.getSalesBusOffCd();
-    data.setSalesBusOffCd("6750000");
 
     LOG.debug("Issued country. " + dupCntry + " duplicate issued country used to generated and assigned.");
 
@@ -306,11 +295,13 @@ public class DupCMRProcessService extends LegacyDirectService {
     // CMR-6019 special field for ME dup cntry -675
     if ("675".equals(dupCntry)) {
       cust.setCeBo(cntry + "0000");
+      String SBO = cntry + "0000";
+      String salesReq = cntry + cntry;
       if (!"5300000".equals(cust.getSbo())) {
-        cust.setSbo("6750000");
-        cust.setIbo("6750000");
-        cust.setSalesGroupRep("675675");
-        cust.setSalesRepNo("675675");
+        cust.setSbo(SBO);
+        cust.setIbo(SBO);
+        cust.setSalesGroupRep(salesReq);
+        cust.setSalesRepNo(salesReq);
       }
     }
 
@@ -404,34 +395,29 @@ public class DupCMRProcessService extends LegacyDirectService {
           seqNo++;
         }
       }
-      // Mark as Comment due custExt not used for CIS duplicate countries for
-      // now
-      // CmrtCustExt custExt = null;
-      // CmrtCustExtPK custExtPk = null;
 
-      // boolean isCustExt = transformer.hasCmrtCustExt();
-      // if (isCustExt) {
-      // LOG.debug("Mapping default Data values with Legacy CmrtCustExt
-      // table.....");
-      // Initialize the object
-      // custExt = initEmpty(CmrtCustExt.class);
-      // default mapping for ADDR and CMRTCEXT
-      // custExtPk = new CmrtCustExtPK();
-      // custExtPk.setCustomerNo(cmrNo);
-      // custExtPk.setSofCntryCode(cntry);
-      // custExt.setId(custExtPk);
+      CmrtCustExt custExt = null;
+      CmrtCustExtPK custExtPk = null;
 
-      // if (transformer != null) {
-      // transformer.transformLegacyCustomerExtData(entityManager, dummyHandler,
-      // custExt, cmrObjects);
-      // }
-      // custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-      // custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-      // legacyObjects.setCustomerExt(custExt);
-      // }
+      boolean isCustExt = transformer.hasCmrtCustExt();
+      if (isCustExt && ME_CUSTEXT_LIST.contains(cntry)) {
+        LOG.debug("Mapping default Data values with Legacy CmrtCustExt table.....");
+        // Initialize the object
+        custExt = initEmpty(CmrtCustExt.class);
+        // default mapping for ADDR and CMRTCEXT
+        custExtPk = new CmrtCustExtPK();
+        custExtPk.setCustomerNo(cmrNo);
+        custExtPk.setSofCntryCode(dupCntry);
+        custExt.setId(custExtPk);
+
+        if (transformer != null) {
+          transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+        }
+        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+        legacyObjects.setCustomerExt(custExt);
+      }
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
-      data.setSalesTeamCd(sales_RepBK);// need to check
-      data.setSalesBusOffCd(SBOBK);
     }
 
     return legacyObjects;
@@ -460,8 +446,7 @@ public class DupCMRProcessService extends LegacyDirectService {
   }
 
   @Override
-  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
-      boolean sharedSeq) {
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -592,6 +577,7 @@ public class DupCMRProcessService extends LegacyDirectService {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
+    String cntry = data.getCmrIssuingCntry();
 
     MessageTransformer transformer = TransformerManager.getTransformer(dupCntry);
 
@@ -713,12 +699,14 @@ public class DupCMRProcessService extends LegacyDirectService {
     }
     // CMR-6019 special field for ME dup cntry -675
     if ("675".equals(dupCntry)) {
-      cust.setCeBo(data.getCmrIssuingCntry() + "0000");
+      String SBO = cntry + "0000";
+      String salesReq = cntry + cntry;
+      cust.setCeBo(SBO);
       if (!"5300000".equals(cust.getSbo())) {
-        cust.setSbo("6750000");
-        cust.setIbo("6750000");
-        cust.setSalesGroupRep("675675");
-        cust.setSalesRepNo("675675");
+        cust.setSbo(SBO);
+        cust.setIbo(SBO);
+        cust.setSalesGroupRep(salesReq);
+        cust.setSalesRepNo(salesReq);
       }
     }
 
@@ -970,20 +958,16 @@ public class DupCMRProcessService extends LegacyDirectService {
         }
       }
 
-      // Mark as Comment due custExt not used for CIS duplicate countries for
-      // now
-      // Mukesh :Dev for custExt tab
-      // boolean isCustExt = transformer.hasCmrtCustExt();
-      // if (isCustExt) {
-      // CmrtCustExt custExt = legacyObjects.getCustomerExt();
-      // if (transformer != null) {
-      // transformer.transformLegacyCustomerExtData(entityManager, dummyHandler,
-      // custExt, cmrObjects);
-      // }
-      // custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-      // custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-      // legacyObjects.setCustomerExt(custExt);
-      // }
+      boolean isCustExt = transformer.hasCmrtCustExt();
+      if (isCustExt && ME_CUSTEXT_LIST.contains(cntry)) {
+        CmrtCustExt custExt = legacyObjects.getCustomerExt();
+        if (transformer != null) {
+          transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+        }
+        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+        legacyObjects.setCustomerExt(custExt);
+      }
       // rebuild the address use table
 
       data.setDupSalesBoCd(data.getSalesBusOffCd());

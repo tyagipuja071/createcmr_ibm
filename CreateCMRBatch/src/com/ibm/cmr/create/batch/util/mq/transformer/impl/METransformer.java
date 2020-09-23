@@ -606,7 +606,7 @@ public class METransformer extends EMEATransformer {
     }
 
     // Dept + Postal code + City
-    line5 = addrData.getPostCd() == null ? "" : addrData.getPostCd() + " " + addrData.getCity1() == null ? "" : addrData.getCity1();
+    line5 = (addrData.getPostCd() == null ? "" : addrData.getPostCd()) + " " + (addrData.getCity1() == null ? "" : addrData.getCity1());
 
     // if (!StringUtils.isBlank(addrData.getPoBox())) {
       legacyAddr.setPoBox(addrData.getPoBox());
