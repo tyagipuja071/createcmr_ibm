@@ -3573,7 +3573,7 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
      FormManager.setValue('inacCd',origInac);
      FormManager.setValue('enterprise', origEnterprise);
    }
- } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' ) {
+ } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged) {
    FormManager.setValue('inacCd', '');
  }
 }
@@ -3685,60 +3685,30 @@ function setEnterprise() {
   }
   var isu = FormManager.getActualValue('isuCd');
   var ctc = FormManager.getActualValue('clientTier');
-  var repTeam = FormManager.getActualValue('salesTeamCd');
-  var sbo = FormManager.getActualValue('salesBusOffCd');
-  var value = FormManager.getActualValue('enterprise');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var valueChanged = false;
-  var shouldSetEnterprise = false;
-  var enterpriseLov = null;
-
-  if(cmr.currentTab == 'IBM_REQ_TAB') { 
-    valueChanged = _oldEnterpriseValue != value;  
-  }
-
-  if(valueChanged || _isScenarioChanged) {
-    shouldSetEnterprise = true;
-  }
-    
-  enterpriseLov = [];
-  if(shouldSetEnterprise){
-    if (getImportedIndcForCyprus() == 'Y' && FormManager.getActualValue('reqType') == 'C'
-      && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN')) {
-        if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
-          enterpriseLov= ['822805'];
-          FormManager.setValue('enterprise',  enterpriseLov[0]);
-        } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
-          enterpriseLov = [ '822835', '822836' ];
-        }
-        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-        FormManager.setValue('enterprise', _pagemodel.enterprise);
-       }else{ 
-          if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
-            enterpriseLov= ['822805'];
-            FormManager.setValue('enterprise',  enterpriseLov[0]);
-          } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
-            enterpriseLov = [ '822835', '822836' ];
-          }
-          FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-        }
-      }else{ 
-        if (isu == '34' && ctc == 'V' && repTeam == '000000' && sbo =='000') {
-          enterpriseLov= ['822805'];
-          FormManager.setValue('enterprise',  enterpriseLov[0]);
-        } else if(isu == '34' && ctc == '6' && repTeam == '000000' && sbo =='000'){
-          enterpriseLov = [ '822835', '822836' ];
-        }
-        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterpriseLov);
-      }
-    
-  if(getImportedIndcForCyprus() == 'Y' && FormManager.getActualValue('reqType') == 'C'
-      && (FormManager.getActualValue('custSubGrp') == 'COMME' || FormManager.getActualValue('custSubGrp') == 'GOVRN')){
-    _oldEnterpriseValue = _pagemodel.enterprise;
-    retainImportValues(null, FormManager.getActualValue('custSubGrp'), true);
-  }else{
-    _oldEnterpriseValue = value;
-  }
+  var enterprises = [];
   
+  if (isu != '' && ctc != '') {
+    var qParams = {
+      _qall : 'Y',
+      ISSUING_CNTRY : cntry,
+      ISU : '%' + isu + ctc + '%'
+    };
+    var results = cmr.query('GET.ENTLIST.BYISU', qParams);
+    if (results != null) {
+      FormManager.resetDropdownValues(FormManager.getField('enterprise'));
+      for (var i = 0; i < results.length; i++) {
+        enterprises.push(results[i].ret1);
+      }
+      if (enterprises != null) {
+        FormManager.limitDropdownValues(FormManager.getField('enterprise'), enterprises);
+        if (enterprises.length == 1) {
+          FormManager.setValue('enterprise', enterprises[0]);
+        }
+      }
+    }
+  }
 }
 
 function hideCollectionCd() {
@@ -4200,7 +4170,7 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('isuCd', '21');
       FormManager.setValue('vatExempt', false);
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
-    } else if (custType == 'PRICU' || custType == 'SAASP') {
+    } else if (custType == 'SAASP') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', 'S');
       FormManager.readOnly('isuCd');
@@ -8328,7 +8298,6 @@ dojo.addOnLoad(function() {
   // Greece
   GEOHandler.addAfterConfig(addHandlersForGRCYTR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
   GEOHandler.addAfterConfig(setClientTierAndISR, [ SysLoc.GREECE, SysLoc.CYPRUS, SysLoc.TURKEY ]);
-  GEOHandler.addAfterTemplateLoad(setClientTierAndISR, [ SysLoc.CYPRUS]);
   GEOHandler.addAfterConfig(addVATDisabler, [ SysLoc.GREECE ]);
   GEOHandler.addAfterConfig(hideMOPAFieldForGR, [ SysLoc.GREECE ]);
   // Customer Type behaviour for CY
