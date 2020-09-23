@@ -606,11 +606,11 @@ function setClientTierValues(value) {
   var tierValues = null;
   if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL) {
     if (value == '32') {
-      tierValues = ['S', 'M', 'N' ];
+      tierValues = [ 'S', 'M', 'N' ];
     } else if (value == '21' || value == '60') {
       tierValues = [ '7' ];
     } else if (value == '34') {
-      tierValues = [ 'V', '6', 'A'];
+      tierValues = [ 'V', '6', 'A' ];
     }
   } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN) {
     if (value == '34') {
@@ -2416,16 +2416,21 @@ function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
     if (result != null && result != '') {
       origISU = result.ret1;
       origClientTier = result.ret2;
+      origRepTeam = result.ret3;
+      origSbo = result.ret4;
       origInac = result.ret5;
       origEnterprise = result.ret6;
 
       FormManager.setValue('isuCd', origISU);
       FormManager.setValue('clientTier', origClientTier);
+      FormManager.setValue('repTeamMemberNo', origRepTeam);
+      FormManager.setValue('salesBusOffCd', origSbo);
       FormManager.setValue('inacCd', origInac);
       FormManager.setValue('enterprise', origEnterprise);
     }
   } else if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y') {
     FormManager.setValue('inacCd', '');
+    FormManager.setValue('enterprise', '');
   }
 }
 
