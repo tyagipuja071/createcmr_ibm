@@ -1194,7 +1194,7 @@ public class MCOPtEsHandler extends MCOHandler {
               }
             }
 
-            if ("Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(12);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
@@ -1234,7 +1234,7 @@ public class MCOPtEsHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Local Lang translation Sold-to".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox)) {
                 LOG.trace("Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Street/PO Box",
@@ -1262,7 +1262,7 @@ public class MCOPtEsHandler extends MCOHandler {
               }
             }
 
-            if ("Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
