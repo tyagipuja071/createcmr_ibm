@@ -2421,6 +2421,12 @@ function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
       origInac = result.ret5;
       origEnterprise = result.ret6;
 
+      FormManager.resetDropdownValues(FormManager.getField('isuCd'));
+      FormManager.resetDropdownValues(FormManager.getField('clientTier'));
+      FormManager.resetDropdownValues(FormManager.getField('repTeamMemberNo'));
+      FormManager.resetDropdownValues(FormManager.getField('salesBusOffCd'));
+      FormManager.resetDropdownValues(FormManager.getField('inacCd'));
+      FormManager.resetDropdownValues(FormManager.getField('enterprise'));
       FormManager.setValue('isuCd', origISU);
       FormManager.setValue('clientTier', origClientTier);
       FormManager.setValue('repTeamMemberNo', origRepTeam);
