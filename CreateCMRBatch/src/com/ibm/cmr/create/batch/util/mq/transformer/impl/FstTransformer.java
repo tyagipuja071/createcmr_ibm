@@ -139,22 +139,23 @@ public class FstTransformer extends MCOTransformer {
     }
   }
 
-  @Override
-  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-      CMRRequestContainer cmrObjects) {
-    Data data = cmrObjects.getData();
-
-    if ("700".equals(cmrIssuingCntry)) {
-      if (StringUtils.isNotBlank(data.getBusnType())) {
-        legacyCustExt.setiTaxCode(data.getBusnType());
-      }
-    }
-  }
-
-  @Override
-  public boolean hasCmrtCustExt() {
-    return true;
-  }
+  // @Override
+  // public void transformLegacyCustomerExtData(EntityManager entityManager,
+  // MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+  // CMRRequestContainer cmrObjects) {
+  // Data data = cmrObjects.getData();
+  //
+  // if ("700".equals(cmrIssuingCntry)) {
+  // if (StringUtils.isNotBlank(data.getBusnType())) {
+  // legacyCustExt.setiTaxCode(data.getBusnType());
+  // }
+  // }
+  // }
+  //
+  // @Override
+  // public boolean hasCmrtCustExt() {
+  // return true;
+  // }
 
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
@@ -448,7 +449,7 @@ public class FstTransformer extends MCOTransformer {
     String currentCOF = data.getCommercialFinanced();
     String currentCOD = data.getCreditCd();
     boolean currCOFHasValidValue = "R".equals(currentCOF) || "S".equals(currentCOF) || "T".equals(currentCOF);
-    
+
     if (StringUtils.isBlank(oldCOF) && currCOFHasValidValue) {
       return "COF";
     } else if ((StringUtils.isBlank(oldCOD) || "N".equals(oldCOD)) && "Y".equals(currentCOD)) {
