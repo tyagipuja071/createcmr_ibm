@@ -253,7 +253,7 @@ public class MCOFstHandler extends MCOHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "MODE_OF_PAYMENT", "VAT", "ISIC_CD", "EMBARGO_CD", "MAILING_COND", "ABBREV_NM",
         "LOCN_NO", "CLIENT_TIER", "ENGINEERING_BO", "ENTERPRISE", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "COLLECTION_CD", "SPECIAL_TAX_CD",
-        "SEARCH_TERM", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER", "COMMERCIAL_FINANCED", "CREDIT_CD", "LONG_TAX_ ID"));
+        "SEARCH_TERM", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER", "COMMERCIAL_FINANCED", "CREDIT_CD", "BUSN_TYP"));
     return fields;
   }
 
@@ -437,6 +437,16 @@ public class MCOFstHandler extends MCOHandler {
       update.setNewData(service.getCodeAndDescription(newData.getSpecialTaxCd(), "Tax Code", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getSpecialTaxCd(), "Tax Code", cmrCountry));
       results.add(update);
+    }
+
+    if ("700".equals(oldData.getCmrIssuingCntry())) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnTyp(), newData.getBusnType())) {
+        update = new UpdatedDataModel();
+        update.setDataField(PageManager.getLabel(cmrCountry, "Numero Statistique du Client", "Numero Statistique du Client"));
+        update.setNewData(service.getCodeAndDescription(newData.getBusnType(), "Numero Statistique du Client", cmrCountry));
+        update.setOldData(service.getCodeAndDescription(oldData.getBusnTyp(), "Numero Statistique du Client", cmrCountry));
+        results.add(update);
+      }
     }
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
