@@ -1292,7 +1292,78 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
     }
   }
 }
+function requireTaxRegistrationForLocalScenario(fromAddress, scenario, scenarioChanged) {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole');
+  var taxReg = FormManager.getActualValue('busnType');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
+  if (reqType == 'C') {
+    // Creates (by model and by scratch) both requester and processor
+    // Mandatory for Local Scenarios except IBM employee and Private Customer
+    // (for those 2 optional)
+    if (scenario == 'BUSPR' || scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'INTER' || scenario == 'THDPT') {
+      FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+    } else {
+      // Optional for all Cross-border Scenarios
+      FormManager.removeValidator('busnType', Validators.REQUIRED);
+    }
+  } else {
+    // Locked on requester side if field has value
+    if (role == 'REQUESTER') {
+      if (taxReg != null && taxReg != '') {
+        FormManager.readOnly('busnType');
+      } else {
+        // If field is blank, then editable.
+        FormManager.enable('busnType');
+      }
+    } else if (role == 'PROCESSOR') {
+
+      // On Processor side editable in all instances
+      FormManager.enable('busnType');
+    }
+  }
+  if (scenarioChanged && scenario != null && scenario != '') {
+    FormManager.clearValue('busnType');
+  }
+}
+function addTaxRegFormatValidationMadagascar() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var taxReg = FormManager.getActualValue('busnType');
+
+        if (taxReg.length > 0 && !taxReg.match("([0-9]{5} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{5})") && taxReg.length < 21) {
+          return new ValidationResult({
+            id : 'busnType',
+            type : 'text',
+            name : 'busnType'
+          }, false, 'Invalid format of Numero Statistique du Client. Format should be NNNNN NN NNNN N NNNNN.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+function addAttachmentValidatorOnTaxRegMadagascar() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var taxCd1 = FormManager.getActualValue('busnType');
+        var reqId = FormManager.getActualValue('reqId');
+        var ret = cmr.query('CHECK_VATD_ATTACHMENT', {
+          ID : reqId
+        });
+        if (taxCd1.length > 0) {
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, 'VAT/TAX Documentation has not been attached to the request. This is required since Numero Statistique du Client is filled out.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR');
+}
 var _importedIndc = null;
 function getImportedIndc() {
   if (_importedIndc) {
@@ -1376,6 +1447,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
-
+  GEOHandler.addAfterTemplateLoad(requireTaxRegistrationForLocalScenario, GEOHandler.MCO2);
+  GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
+  GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
 });
