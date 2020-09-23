@@ -8418,6 +8418,9 @@ function autoSetAbbrNameUKI() {
     if (result.ret1 != undefined && result.ret1 != '') {
       FormManager.setValue('abbrevNm', result.ret1);
     }
+  } else if (('INTER' == custSubGrp) && (SysLoc.IRELAND == cmrCntry)) {
+    // Defect-6793
+    autoSetAbbrevNmFrmDept();
   } else {
     var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
       REQ_ID : reqId,
@@ -8430,6 +8433,7 @@ function autoSetAbbrNameUKI() {
           _abbrevNmValue = _abbrevNmValue.substr(0, 22);
         }
         FormManager.setValue('abbrevNm', _abbrevNmValue);
+        FormManager.readOnly('abbrevNm');
       }
     }
   }
