@@ -1264,8 +1264,7 @@ function setClientTierValues(isuCd) {
         clientTiers = [ 'S', 'N', 'T', 'C' ];
       }
     } else if ('808' == cntry) {// 808(Afganistan/Pakistan)
-      if (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
-          || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU') {
+      if (FormManager.getActualValue('custSubGrp') == 'AFTP' || FormManager.getActualValue('custSubGrp') == 'AFPC' || FormManager.getActualValue('custSubGrp') == 'AFCOM') {
         if (isuCd == '34') {
           clientTiers = [ 'V', 'A' ];
         } else if (isuCd == '32') {
@@ -1719,6 +1718,17 @@ function setSBO2(dupSalesRepNo) {
   }
 }
 
+/**
+ * ME dup - sets default value for ME Duplicate country CMR-6019
+ */
+function setMEDupValue() {
+  if (FormManager.getActualValue('reqType') == 'C') {
+    if (dijit.byId('dupCmrIndc').get('checked')) {
+      FormManager.setValue('dupIssuingCntryCd', '675');
+    }
+  }
+}
+
 // CMR-6019 add cmr exist check for duplicate issued country
 function dupCMRExistCheck() {
   FormManager.addFormValidator((function() {
@@ -1744,7 +1754,7 @@ function dupCMRExistCheck() {
           });
           if (resultsD.ret1 != null) {
             var existDupCEBO = resultsD.ret1;
-            if (resultsD.ret1 == dupCEBO) {
+            if (resultsD.ret1 == dupCEBO && FormManager.getActualValue('reqType') == 'U') {
               return new ValidationResult(null, true);
             } else {
               return new ValidationResult(null, false, 'There have exist dup 675 data under this CMR for country code:' + existDupCEBO.substring(0, 3))
@@ -4174,10 +4184,12 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateIsicMEValidator, GEOHandler.ME, null, true);
   GEOHandler.registerValidator(addAddressTypeValidatorME, GEOHandler.ME, null, true);
   // CMR-5993
-  GEOHandler.registerValidator(validateSBO, GEOHandler.ME, GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateMESBO, GEOHandler.ME, GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.addAfterConfig(setMESBO, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(setMESBO, GEOHandler.ME);
   GEOHandler.registerValidator(dupCMRExistCheck, GEOHandler.ME, null, true);
+  GEOHandler.addAfterConfig(setMEDupValue, [ '677', '680', '620', '832', '805', '767', '823', '675', '762', '768', '772', '849' ]);
+  GEOHandler.addAfterTemplateLoad(setMEDupValue, [ '677', '680', '620', '832', '805', '767', '823', '675', '762', '768', '772', '849' ]);
 
   GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
