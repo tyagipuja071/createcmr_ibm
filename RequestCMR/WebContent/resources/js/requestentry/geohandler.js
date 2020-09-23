@@ -110,8 +110,8 @@ var SysLoc = (function() {
     MACEDONIA : '705',
     UZBEKISTAN : '741',
     MOLDOVA : '787',
-    BOSNIA_HERZEGOVINA : '699'
-
+    BOSNIA_HERZEGOVINA : '699',
+		MADAGASCAR : '700'
   };
 })();
 

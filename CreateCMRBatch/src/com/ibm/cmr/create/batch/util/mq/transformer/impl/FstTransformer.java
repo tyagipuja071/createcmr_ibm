@@ -19,6 +19,7 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
@@ -65,6 +66,7 @@ public class FstTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData FST Africa transformer...");
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
+    List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC", "LLC", "LLCBP");
 
     String custType = data.getCustSubGrp();
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
@@ -130,23 +132,29 @@ public class FstTransformer extends MCOTransformer {
       String deptCd = data.getIbmDeptCostCenter().substring(2);
       legacyCust.setDeptCd(deptCd);
     }
+
+    if (!StringUtils.isEmpty(data.getCustSubGrp()) && gmllcScenarios.contains(data.getCustSubGrp())) {
+      legacyCust.setIsuCd("32");
+      legacyCust.setSbo("0080");
+    }
   }
 
-  // @Override
-  // public void transformLegacyCustomerExtData(EntityManager entityManager,
-  // MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-  // CMRRequestContainer cmrObjects) {
-  // for (Addr addr : cmrObjects.getAddresses()) {
-  // if ("700".equals(cmrIssuingCntry)) {
-  // legacyCustExt.setiTaxCode(addr.getTaxOffice());
-  // }
-  // }
-  // }
+  @Override
+  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+      CMRRequestContainer cmrObjects) {
+    Data data = cmrObjects.getData();
 
-  // @Override
-  // public boolean hasCmrtCustExt() {
-  // return true;
-  // }
+    if ("700".equals(cmrIssuingCntry)) {
+      if (StringUtils.isNotBlank(data.getBusnType())) {
+        legacyCustExt.setiTaxCode(data.getBusnType());
+      }
+    }
+  }
+
+  @Override
+  public boolean hasCmrtCustExt() {
+    return true;
+  }
 
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
@@ -376,6 +384,43 @@ public class FstTransformer extends MCOTransformer {
       return "Mailing";
     default:
       return "";
+    }
+  }
+
+  @Override
+  public String getGmllcDupCreation(Data data) {
+    List<String> validScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC", "LLC", "LLCBP");
+    if (data != null && StringUtils.isNotEmpty(data.getCustSubGrp()) && validScenarios.contains(data.getCustSubGrp())) {
+      return "764";
+    }
+    return "NA";
+  }
+
+  @Override
+  public void transformLegacyDataForDupCreation(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects,
+      CMRRequestContainer cmrObjects) {
+    CmrtCust legacyCust = legacyObjects.getCustomer();
+    Data data = cmrObjects.getData();
+    List<String> bpGMLLCScenarios = Arrays.asList("NABLC", "LSBLC", "SZBLC");
+    boolean isGMLLC = false;
+    if (data != null) {
+      if (!"NA".equals(getGmllcDupCreation(data))) {
+        isGMLLC = true;
+      }
+      if (legacyCust != null && isGMLLC) {
+        if (bpGMLLCScenarios.contains(data.getCustSubGrp())) {
+          legacyCust.setIsuCd("8B7");
+          legacyCust.setSalesRepNo("DUMMY1");
+          legacyCust.setSbo("0010000");
+          legacyCust.setIbo("0010000");
+          legacyCust.setInacCd("");
+        } else {
+          legacyCust.setIsuCd("32S");
+          legacyCust.setSalesRepNo("DUMMY1");
+          legacyCust.setSbo("0080000");
+          legacyCust.setIbo("0080000");
+        }
+      }
     }
   }
 
