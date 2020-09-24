@@ -25,16 +25,16 @@
   <form:hidden path="sitePartyId" />
   <form:hidden path="searchTerm" />
 
-  <cmr:row addBackground="true">
-	<cmr:view forCountry="700">
-	  <cmr:column span="2" containerForField="BusinessType">
+  <cmr:view forCountry="700">
+  	<cmr:row addBackground="true">
+  	  <cmr:column span="2" containerForField="BusinessType">
         <p>
           <cmr:label fieldId="busnType"> <cmr:fieldLabel fieldId="BusinessType" />: </cmr:label>
           <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-    </cmr:view>
-  </cmr:row>
+  	</cmr:row>
+  </cmr:view>
   <cmr:row addBackground="false">
 <%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
