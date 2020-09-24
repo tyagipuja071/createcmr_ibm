@@ -1149,16 +1149,15 @@ public class MCOPtEsHandler extends MCOHandler {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = ""; // 0
             String seqNo = "";// 1
-            String localCity = ""; // 7
-            String crossCity = ""; // 8
-            String localPostal = ""; // 9
-            String cbPostal = ""; // 10
             String street = ""; // 4
             String addressCont = ""; // 5
-            String poBox = ""; // 12
-            String attPerson = ""; // 11
-            String poBox1 = ""; // 12
+            String attPerson = ""; // 6
+            String localPostal = ""; // 7
+            String localCity = ""; // 8
+            String crossCity = ""; // 9
+            String cbPostal = ""; // 10
             String phoneNo = ""; // 12
+            String poBox = ""; // 13
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -1167,30 +1166,42 @@ public class MCOPtEsHandler extends MCOHandler {
               // iterate all the rows and check each column value
               currCell = (XSSFCell) row.getCell(0);
               cmrNo = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(1);
               seqNo = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(4);
               street = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(5);
               addressCont = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(6);
-              poBox = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(7);
               attPerson = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(8);
+
+              currCell = (XSSFCell) row.getCell(7);
               localPostal = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(9);
+
+              currCell = (XSSFCell) row.getCell(8);
               localCity = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(10);
+
+              currCell = (XSSFCell) row.getCell(9);
               crossCity = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(11);
+
+              currCell = (XSSFCell) row.getCell(10);
               cbPostal = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(12);
+              phoneNo = validateColValFromCell(currCell);
+
+              poBox = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(13);
             }
 
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                poBox1 = df.formatCellValue(row.getCell(6));
+                poBox = df.formatCellValue(row.getCell(13));
               }
             }
 
@@ -1255,14 +1266,22 @@ public class MCOPtEsHandler extends MCOHandler {
                 validations.add(error);
               }
 
-              if (poBox1.contains("+")) {
+              if (poBox.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
 
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+              if (phoneNo.contains("+")) {
+                LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                validations.add(error);
+              }
+            }
+
+            if ("Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
