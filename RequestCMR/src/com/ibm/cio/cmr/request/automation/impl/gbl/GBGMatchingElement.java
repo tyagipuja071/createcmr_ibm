@@ -164,9 +164,25 @@ public class GBGMatchingElement extends MatchingElement {
           gbgMatches = gbgMatches.subList(0, 4);
           details.append("Showing top 5 matches only.");
         }
-        int itemNo = 0;
+        boolean domesticGBGFound = false;
         for (GBGResponse gbg : gbgMatches) {
           if (gbg.isDomesticGBG()) {
+            domesticGBGFound = true;
+            break;
+          }
+        }
+        if (!domesticGBGFound) {
+          LOG.debug("Non-Local gbg found");
+          details.append("\n")
+              .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
+          engineData.addRejectionComment("GBG",
+              "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.", "", "");
+          result.setOnError(true);
+        }
+
+        int itemNo = 0;
+        for (GBGResponse gbg : gbgMatches) {
+          if (gbg.isDomesticGBG() || !domesticGBGFound) {
             itemNo++;
             details.append("\n");
             if (gbg.isDnbMatch()) {
@@ -194,26 +210,22 @@ public class GBGMatchingElement extends MatchingElement {
               details.append("\n").append("GU DUNS: " + gbg.getGuDunsNo() + "\nDUNS: " + gbg.getDunsNo());
             }
 
-            if (itemNo == 1) {
+            if (itemNo == 1 && gbg.isDomesticGBG()) {
               engineData.put(AutomationEngineData.GBG_MATCH, gbg);
             }
           }
         }
 
-        if (itemNo == 0) {
-          LOG.debug("Non-Local gbg found");
-          details.append("\n")
-              .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
-          engineData.addNegativeCheckStatus("_nonLocalGBGFound",
-              "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
-        } 
-//         else if (itemNo > 1) {
-//           LOG.debug("Multiple matches for Global Buying Groups retrieved");
-//           details.append("\n").append(
-//               "Mutilple matches for Global Buying Groups retrieved. Using the highest quality match for further calculations. CMDE review will be required.");
-//           engineData.addNegativeCheckStatus("_nonLocalGBGFound", "Mutiple matches for Global Buying Groups retrieved.");
+        // else if (itemNo > 1) {
+        // LOG.debug("Multiple matches for Global Buying Groups retrieved");
+        // details.append("\n").append(
+        // "Mutilple matches for Global Buying Groups retrieved. Using the
+        // highest quality match for further calculations. CMDE review will be
+        // required.");
+        // engineData.addNegativeCheckStatus("_nonLocalGBGFound", "Mutiple
+        // matches for Global Buying Groups retrieved.");
 
-//         }
+        // }
 
         result.setProcessOutput(output);
         result.setDetails(details.toString());
