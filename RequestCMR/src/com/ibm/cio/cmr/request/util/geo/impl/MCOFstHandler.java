@@ -511,19 +511,12 @@ public class MCOFstHandler extends MCOHandler {
               vat = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(14);
               deptNo = validateColValFromCell(currCell);
-              LOG.debug("embargo : " + embargo);
-              LOG.debug("cof : " + cof);
-              LOG.debug("cod : " + cod);
-              LOG.debug("vat : " + vat);
-              LOG.debug("deptNo : " + deptNo);
-              LOG.debug("cod len : " + cod.length());
-              LOG.debug("cof len : " + cof.length());
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(8);
+              currCell = (XSSFCell) row.getCell(7);
               postalcd = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(9);
+              currCell = (XSSFCell) row.getCell(6);
               city = validateColValFromCell(currCell);
             }
 

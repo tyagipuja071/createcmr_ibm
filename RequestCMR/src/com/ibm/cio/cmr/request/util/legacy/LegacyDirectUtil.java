@@ -27,7 +27,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.ibm.cio.cmr.request.CmrException;
-import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -42,7 +41,6 @@ import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
-import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -89,6 +87,7 @@ public class LegacyDirectUtil {
     FIELDS_CLEAR_LIST.add("CommercialFinanced");
     FIELDS_CLEAR_LIST.add("EmbargoCode");
     FIELDS_CLEAR_LIST.add("Enterprise");
+    FIELDS_CLEAR_LIST.add("CodFlag");
 
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }
@@ -258,8 +257,8 @@ public class LegacyDirectUtil {
 
   }
 
-  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo,
-      MassUpdtData muData, boolean readOnly) throws CmrException {
+  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo, MassUpdtData muData,
+      boolean readOnly) throws CmrException {
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
     // DENNIS: Grab first the CMRTCEXT record of the CMR
@@ -1348,8 +1347,9 @@ public class LegacyDirectUtil {
 
     return isFisCodeUsed;
   }
+
   public static List<CmrtAddr> checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
-    
+
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("COUNTRY", country);
@@ -1361,5 +1361,5 @@ public class LegacyDirectUtil {
     }
     return addresses;
   }
-    
+
 }
