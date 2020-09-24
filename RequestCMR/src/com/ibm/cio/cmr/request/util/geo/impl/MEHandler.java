@@ -1301,6 +1301,12 @@ public class MEHandler extends BaseSOFHandler {
         changeZP01AddrUpdate(entityManager, data.getId().getReqId());
       }
     }
+    // CMR-6019
+    if (GULF_ORIGINAL_COUNTRIES.contains(data.getCmrIssuingCntry()) && "Y".equals(data.getDupCmrIndc())) {
+      data.setDupIssuingCntryCd("675");
+    } else {
+      data.setDupIssuingCntryCd("");
+    }
   }
 
   @Override
