@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
@@ -102,6 +103,7 @@ public class MCOFstHandler extends MCOHandler {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         CmrtCust legacyCust = legacyObjects.getCustomer();
+        CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
 
         if (legacyCust.getCustType() != null)
           data.setCrosSubTyp(legacyCust.getCustType());
@@ -111,6 +113,9 @@ public class MCOFstHandler extends MCOHandler {
 
         if (legacyCust.getEnterpriseNo() != null)
           data.setEnterprise(legacyCust.getEnterpriseNo());
+
+        if ("700".equals(data.getCmrIssuingCntry()) && legacyCustExt != null && legacyCustExt.getiTaxCode() != null)
+          data.setBusnType(legacyCustExt.getiTaxCode());
 
       }
 
