@@ -2301,6 +2301,7 @@ function addSBOSalesRepLogicIreland() {
     return;
   }
   FormManager.setValue('salesBusOffCd', '090');
+  FormManager.readOnly('salesBusOffCd');
   FormManager.limitDropdownValues(FormManager.getField('salesBusOffCd'), [ '', '090' ]);
   _clientTier = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
     if (!value) {
@@ -6927,9 +6928,9 @@ function lockRequireFieldsUKI() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-  // if (cntry == SysLoc.IRELAND) {
-  // FormManager.readOnly('salesBusOffCd');
-  // }
+   if (cntry == SysLoc.IRELAND) {
+    FormManager.readOnly('salesBusOffCd');
+   }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
