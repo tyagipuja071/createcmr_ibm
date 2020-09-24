@@ -1,7 +1,7 @@
 <template id="FST" for="UPDATE">
 	<tabs>
 		<tab name="Data" type="Data">
-						<columns>
+		<columns>
 				<column exactLength="true">
 					<label>CMR. No</label>
 					<dbColumn>CMR_NO</dbColumn>
@@ -23,17 +23,17 @@
 				<column>
 					<label>ISIC</label>
 					<dbColumn>ISIC_CD</dbColumn>
-					<width>20</width>
+					<width>16</width>
 					<bdsId>ISIC</bdsId>
 				</column>
 				<column>
 					<label>Collection Code</label>
 					<dbColumn>COLLECTION_CD</dbColumn>
-					<width>30</width>
+					<width>16</width>
 					<lovId>CollectionCd</lovId>
 					<length>6</length>
 				</column>
-				<column>
+				<column number="true" exactLength="false">
 					<label>SBO/Search Term</label>
 					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>20</width>
@@ -43,7 +43,7 @@
 					<label>INAC/NAC</label>
 					<dbColumn>INAC_CD</dbColumn>
 					<length>4</length>
-					<width>20</width>
+					<width>16</width>
 				</column>
 				<column>
 					<label>Industry Solution Unit (ISU)</label>
@@ -54,28 +54,27 @@
 				<column>
 					<label>Client Tier</label>
 					<dbColumn>CLIENT_TIER</dbColumn>
-					<width>25</width>
+					<width>15</width>
 					<bdsId>ClientTier</bdsId>
 				</column>
 				<column>
 					<label>Embargo Code</label>
 					<dbColumn>EMBARGO_CD</dbColumn>
-					<width>10</width>
+					<width>15</width>
 					<length>1</length>
 					<lovId>EmbargoCode</lovId>
 				</column>
 				<column>
 					<label>CoF</label>
-					<!-- CMR-1728:there is CoF in masUpd Data, so temp use this column instead -->
 					<dbColumn>RESTRICT_TO</dbColumn>
 					<length>1</length>
-					<width>20</width>
+					<width>15</width>
 					<lovId>CommercialFinanced</lovId>
 				</column>
 				<column>
 					<label>COD Flag</label>
 					<dbColumn>COD_CONDITION</dbColumn>
-					<width>30</width>
+					<width>15</width>
 					<lovId>CodFlag</lovId>
 				</column>				
 				<column number="false">
@@ -92,7 +91,7 @@
         		<column>
 					<label>Internal Department Number</label>
 					<dbColumn>AFFILIATE</dbColumn>
-					<width>25</width>
+					<width>20</width>
 					<length>6</length>
 				</column>				
 			</columns>
@@ -135,17 +134,11 @@
 					<width>40</width>
 					<length>30</length>
 				</column>
-				<column number="true">
-					<label>PO Box</label>
-					<dbColumn>PO_BOX</dbColumn>
-					<width>18</width>
-					<length>30</length>
-				</column>
 				<column>
-					<label>Additional Name/Address Information</label>
-					<dbColumn>COUNTY</dbColumn>
-					<width>18</width>
-					<length>30</length>
+					<label>City</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>40</width>
+					<length>21</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -154,16 +147,22 @@
 					<length>8</length>
 				</column>
 				<column>
-					<label>City</label>
-					<dbColumn>CITY1</dbColumn>
-					<width>40</width>
-					<length>21</length>
-				</column>
-				<column>
 					<label>Landed Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column>
+					<label>Additional Name/Address Information</label>
+					<dbColumn>COUNTY</dbColumn>
+					<width>25</width>
+					<length>30</length>
+				</column>
+				<column number="true">
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>18</width>
+					<length>30</length>
 				</column>
 			</columns>
 		</tab>
@@ -205,17 +204,11 @@
 					<width>40</width>
 					<length>30</length>
 				</column>
-				<column number="true">
-					<label>PO Box</label>
-					<dbColumn>PO_BOX</dbColumn>
-					<width>18</width>
-					<length>20</length>
-				</column>
 				<column>
-					<label>Additional Name/Address Information</label>
-					<dbColumn>COUNTY</dbColumn>
-					<width>18</width>
-					<length>30</length>
+					<label>City</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>40</width>
+					<length>24</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -224,16 +217,22 @@
 					<length>8</length>
 				</column>
 				<column>
-					<label>City</label>
-					<dbColumn>CITY1</dbColumn>
-					<width>40</width>
-					<length>24</length>
-				</column>
-				<column>
 					<label>Landed Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column>
+					<label>Additional Name/Address Information</label>
+					<dbColumn>COUNTY</dbColumn>
+					<width>25</width>
+					<length>30</length>
+				</column>
+				<column number="true">
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>18</width>
+					<length>20</length>
 				</column>
 			</columns>
 		</tab>
@@ -276,10 +275,10 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Additional Name/Address Information</label>
-					<dbColumn>COUNTY</dbColumn>
-					<width>18</width>
-					<length>30</length>
+					<label>City</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>40</width>
+					<length>21</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -288,16 +287,16 @@
 					<length>8</length>
 				</column>
 				<column>
-					<label>City</label>
-					<dbColumn>CITY1</dbColumn>
-					<width>40</width>
-					<length>21</length>
-				</column>
-				<column>
 					<label>Landed Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column>
+					<label>Additional Name/Address Information</label>
+					<dbColumn>COUNTY</dbColumn>
+					<width>25</width>
+					<length>30</length>
 				</column>
 			</columns>
 		</tab>
@@ -340,10 +339,10 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Additional Name/Address Information</label>
-					<dbColumn>COUNTY</dbColumn>
-					<width>18</width>
-					<length>30</length>
+					<label>City</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>40</width>
+					<length>21</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -352,16 +351,16 @@
 					<length>8</length>
 				</column>
 				<column>
-					<label>City</label>
-					<dbColumn>CITY1</dbColumn>
-					<width>40</width>
-					<length>21</length>
-				</column>
-				<column>
 					<label>Landed Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column>
+					<label>Additional Name/Address Information</label>
+					<dbColumn>COUNTY</dbColumn>
+					<width>25</width>
+					<length>30</length>
 				</column>
 				<column number="true" exactLength="false">
           			<label>Phone #</label>
@@ -409,10 +408,10 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Additional Name/Address Information</label>
-					<dbColumn>COUNTY</dbColumn>
-					<width>18</width>
-					<length>30</length>
+					<label>City</label>
+					<dbColumn>CITY1</dbColumn>
+					<width>40</width>
+					<length>21</length>
 				</column>
 				<column>
 					<label>Postal Code</label>
@@ -421,16 +420,16 @@
 					<length>8</length>
 				</column>
 				<column>
-					<label>City</label>
-					<dbColumn>CITY1</dbColumn>
-					<width>40</width>
-					<length>21</length>
-				</column>
-				<column>
 					<label>Landed Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column>
+					<label>Additional Name/Address Information</label>
+					<dbColumn>COUNTY</dbColumn>
+					<width>25</width>
+					<length>30</length>
 				</column>
 			</columns>
 		</tab>
