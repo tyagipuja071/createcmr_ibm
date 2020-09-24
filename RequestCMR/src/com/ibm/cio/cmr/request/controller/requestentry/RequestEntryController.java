@@ -650,18 +650,21 @@ public class RequestEntryController extends BaseController {
 
       FindCMRRecordModel record = results.getItems().get(0);
       String dunsNo = record.getCmrDuns();
+      String dnBname = "";
+      dnBname = record.getCmrName1Plain() + " " + record.getCmrName2Plain();
+
       // do a fresh check on details for proper formatting
       record = DnBUtil.extractRecordFromDnB(reqModel.getCmrIssuingCntry(), dunsNo, record.getCmrPostalCode());
       if (record != null) {
         results.setItems(new ArrayList<FindCMRRecordModel>());
         results.getItems().add(record);
       }
-
       ParamContainer params = new ParamContainer();
       params.addParam("reqId", reqId);
       params.addParam("results", results);
       params.addParam("system", model.getSystem());
       params.addParam("model", reqModel);
+      params.addParam("dnBname", dnBname);
       ImportCMRModel retModel = dnbService.process(request, params);
       long reqIdNew = retModel.getReqId();
       mv = new ModelAndView("redirect:/request" + (reqIdNew > 0 ? "/" + reqIdNew : newParams), "cmr", new ImportCMRModel());
