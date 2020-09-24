@@ -471,8 +471,8 @@ public class DnBUtil {
           && StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
         return false;
       }
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6
-          && StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6 && (altCompareName == null
+          || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6)) {
         // do a comparison of common words first
         List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
         List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
@@ -485,11 +485,13 @@ public class DnBUtil {
           }
         }
         if (!foundMinimal) {
-          List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
-          for (String phraseA : altCommonA) {
-            for (String phraseB : commonB) {
-              if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
-                foundMinimal = true;
+          if (altCompareName != null) {
+            List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
+            for (String phraseA : altCommonA) {
+              for (String phraseB : commonB) {
+                if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                  foundMinimal = true;
+                }
               }
             }
           }
