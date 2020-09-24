@@ -405,7 +405,7 @@ public class FstTransformer extends MCOTransformer {
       CMRRequestContainer cmrObjects) {
     CmrtCust legacyCust = legacyObjects.getCustomer();
     Data data = cmrObjects.getData();
-    List<String> bpGMLLCScenarios = Arrays.asList("NABLC", "LSBLC", "SZBLC");
+    List<String> bpGMLLCScenarios = Arrays.asList("NABLC", "LSBLC", "SZBLC", "LLCBP");
     boolean isGMLLC = false;
     if (data != null) {
       if (!"NA".equals(getGmllcDupCreation(data))) {
