@@ -2347,7 +2347,7 @@ function autoSetVatExemptFrPriCust() {
 
 function configureVATExemptOnScenariosPT(fromAddress, scenario, scenarioChanged) {
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
-    if (scenario == 'SAAPA' || scenario == 'SOFTL' || scenario == 'PRICU') {
+    if (scenario == 'SAAPA' || scenario == 'CRPRI' || scenario == 'PRICU') {
       FormManager.resetValidations('vat');
       FormManager.setValue('vatExempt', true);
     } else {
