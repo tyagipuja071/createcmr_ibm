@@ -132,7 +132,7 @@ public class PortugalTransformer extends MessageTransformer {
 
     line3 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
     if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
-      line3 = "ATT: " + line3;
+      line3 = "ATT " + line3;
     }
     if (line3.length() > 30) {
       line3 = line3.substring(0, 30);
