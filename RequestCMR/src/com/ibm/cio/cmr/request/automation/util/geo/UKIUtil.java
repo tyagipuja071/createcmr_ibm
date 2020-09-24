@@ -293,19 +293,25 @@ public class UKIUtil extends AutomationUtil {
               }
             }
             if (CmrConstants.RDC_INSTALL_AT.equals(addrType)) {
-              if (null == changes.getAddressChange("ZS01", "Customer Name") && null == changes.getAddressChange("ZS01", "Customer Name Con't")) {
+              String installAtName = getCustomerFullName(addr);
+              String billToName = "";
+              Addr zs01 = requestData.getAddress("ZS01");
+              if (zs01 != null) {
+                billToName = getCustomerFullName(zs01);
+              }
+              if (installAtName.equals(billToName)) {
                 if (addressExists(entityManager, addr)) {
                   LOG.debug(" - Duplicates found for " + addrType + "(" + addr.getId().getAddrSeq() + ")");
                   checkDetails.append("Address " + addrType + "(" + addr.getId().getAddrSeq() + ") provided matches an existing address.\n");
                   resultCodes.add("R");
                 } else {
                   LOG.debug("Addition of " + addrType + "(" + addr.getId().getAddrSeq() + ")");
-                  checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") address skipped in the checks.\n");
+                  checkDetails.append("Addition of new address (" + addr.getId().getAddrSeq() + ") validated.\n");
                 }
               } else {
                 LOG.debug("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") needs to be verified");
-                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") has Sold-To name changed \n");
-                resultCodes.add("R");
+                checkDetails.append("New address " + addrType + "(" + addr.getId().getAddrSeq() + ") has different customer name than sold-to.\n");
+                resultCodes.add("D");
               }
             }
           } else if ("Y".equals(addr.getChangedIndc())) {
@@ -364,7 +370,7 @@ public class UKIUtil extends AutomationUtil {
     } else if (resultCodes.contains("D")) {
       validation.setSuccess(false);
       validation.setMessage("Not Validated");
-      engineData.addNegativeCheckStatus("_atCheckFailed", "Updated to Installing Address cannot be checked automatically.");
+      engineData.addNegativeCheckStatus("_atCheckFailed", "Updates to addresses cannot be checked automatically.");
     } else {
       validation.setSuccess(true);
       validation.setMessage("Successful");
