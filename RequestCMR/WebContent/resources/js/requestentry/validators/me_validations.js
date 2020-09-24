@@ -1718,17 +1718,6 @@ function setSBO2(dupSalesRepNo) {
   }
 }
 
-/**
- * ME dup - sets default value for ME Duplicate country CMR-6019
- */
-function setMEDupValue() {
-  if (FormManager.getActualValue('reqType') == 'C') {
-    if (dijit.byId('dupCmrIndc').get('checked')) {
-      FormManager.setValue('dupIssuingCntryCd', '675');
-    }
-  }
-}
-
 // CMR-6019 add cmr exist check for duplicate issued country
 function dupCMRExistCheck() {
   FormManager.addFormValidator((function() {
@@ -4188,8 +4177,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setMESBO, GEOHandler.ME);
   GEOHandler.addAfterTemplateLoad(setMESBO, GEOHandler.ME);
   GEOHandler.registerValidator(dupCMRExistCheck, GEOHandler.ME, null, true);
-  GEOHandler.addAfterConfig(setMEDupValue, [ '677', '680', '620', '832', '805', '767', '823', '675', '762', '768', '772', '849' ]);
-  GEOHandler.addAfterTemplateLoad(setMEDupValue, [ '677', '680', '620', '832', '805', '767', '823', '675', '762', '768', '772', '849' ]);
 
   GEOHandler.registerValidator(checkGAddressExist, [ SysLoc.RUSSIA ], null, true);
   GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
