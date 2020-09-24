@@ -173,8 +173,7 @@ public class GBGMatchingElement extends MatchingElement {
         }
         if (!domesticGBGFound) {
           LOG.debug("Non-Local gbg found");
-          details.append("\n")
-              .append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.");
+          details.append("Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.\n");
           engineData.addRejectionComment("GBG",
               "Matches for Global Buying Groups retrieved but no domestic Global Buying Group was found during the matching.", "", "");
           result.setOnError(true);
