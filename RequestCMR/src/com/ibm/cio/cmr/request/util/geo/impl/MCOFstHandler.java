@@ -103,7 +103,6 @@ public class MCOFstHandler extends MCOHandler {
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       if (legacyObjects != null && legacyObjects.getCustomer() != null) {
         CmrtCust legacyCust = legacyObjects.getCustomer();
-        CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
 
         if (legacyCust.getCustType() != null)
           data.setCrosSubTyp(legacyCust.getCustType());
@@ -113,9 +112,6 @@ public class MCOFstHandler extends MCOHandler {
 
         if (legacyCust.getEnterpriseNo() != null)
           data.setEnterprise(legacyCust.getEnterpriseNo());
-
-        if ("700".equals(data.getCmrIssuingCntry()) && legacyCustExt != null && legacyCustExt.getiTaxCode() != null)
-          data.setBusnType(legacyCustExt.getiTaxCode());
 
       }
 
@@ -136,7 +132,12 @@ public class MCOFstHandler extends MCOHandler {
         data.setCommercialFinanced("");
       }
     }
+    if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+      CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
+      if ("700".equals(data.getCmrIssuingCntry()) && legacyCustExt != null && legacyCustExt.getiTaxCode() != null)
+        data.setBusnType(legacyCustExt.getiTaxCode());
 
+    }
   }
 
   private String getKunnrSapr3Kna1(String cmrNo, String cntry) throws Exception {
@@ -510,19 +511,12 @@ public class MCOFstHandler extends MCOHandler {
               vat = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(14);
               deptNo = validateColValFromCell(currCell);
-              LOG.debug("embargo : " + embargo);
-              LOG.debug("cof : " + cof);
-              LOG.debug("cod : " + cod);
-              LOG.debug("vat : " + vat);
-              LOG.debug("deptNo : " + deptNo);
-              LOG.debug("cod len : " + cod.length());
-              LOG.debug("cof len : " + cof.length());
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(8);
+              currCell = (XSSFCell) row.getCell(7);
               postalcd = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(9);
+              currCell = (XSSFCell) row.getCell(6);
               city = validateColValFromCell(currCell);
             }
 
