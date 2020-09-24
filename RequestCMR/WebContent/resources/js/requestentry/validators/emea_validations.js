@@ -7097,14 +7097,14 @@ function addEmbargoCodeValidatorUKI() {
 
         if (embargoCd != '' && embargoCd.length > 0) {
           embargoCd = embargoCd.trim();
-          if ((embargoCd != '' && embargoCd.length == 1) && (embargoCd == 'D' || embargoCd == 'C')) {
+          if ((embargoCd != '' && embargoCd.length == 1) && (embargoCd == 'E' || embargoCd == 'C')) {
             return new ValidationResult(null, true);
           } else {
             return new ValidationResult({
               id : 'embargoCd',
               type : 'text',
               name : 'embargoCd'
-            }, false, 'Embargo Code value should be only D ,C or Blank.');
+            }, false, 'Embargo Code value should be only E,C or Blank.');
           }
         }
         return new ValidationResult(null, true);
