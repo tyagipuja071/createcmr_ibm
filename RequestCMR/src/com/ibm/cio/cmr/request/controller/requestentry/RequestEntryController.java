@@ -651,8 +651,9 @@ public class RequestEntryController extends BaseController {
       FindCMRRecordModel record = results.getItems().get(0);
       String dunsNo = record.getCmrDuns();
       String dnBname = "";
-      dnBname = record.getCmrName1Plain() + " " + record.getCmrName2Plain();
-
+      if(record != null && StringUtils.isNotBlank(record.getCmrName1Plain())){
+        dnBname = record.getCmrName1Plain() + (StringUtils.isNotBlank(record.getCmrName2Plain())? " " + record.getCmrName2Plain() : "");
+      }
       // do a fresh check on details for proper formatting
       record = DnBUtil.extractRecordFromDnB(reqModel.getCmrIssuingCntry(), dunsNo, record.getCmrPostalCode());
       if (record != null) {
