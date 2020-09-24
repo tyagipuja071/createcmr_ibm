@@ -467,8 +467,8 @@ public class DnBUtil {
     String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
 
     if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12
-          && StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12 && (altCompareName == null
+          || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12)) {
         return false;
       }
       if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6 && (altCompareName == null

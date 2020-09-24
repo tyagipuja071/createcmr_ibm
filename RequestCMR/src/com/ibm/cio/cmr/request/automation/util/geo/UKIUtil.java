@@ -484,8 +484,15 @@ public class UKIUtil extends AutomationUtil {
       if (response != null && response.size() > 0) {
         // actions to be performed only when matches with high confidence are
         // found
+        String custNmTrimmed = getCustomerFullName(zi01);
+        if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}\\.+$") || custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}/.+$")) {
+          custNmTrimmed = custNmTrimmed.substring(6);
+        } else if (custNmTrimmed.toUpperCase().matches("^VR[0-9]{3}.+$")) {
+          custNmTrimmed = custNmTrimmed.substring(5);
+        }
+
         for (DnBMatchingResponse dnbRecord : response) {
-          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord);
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord, custNmTrimmed);
           if (closelyMatches) {
             engineData.put("ZI01_DNB_MATCH", dnbRecord);
             highQualityMatchExists = true;
