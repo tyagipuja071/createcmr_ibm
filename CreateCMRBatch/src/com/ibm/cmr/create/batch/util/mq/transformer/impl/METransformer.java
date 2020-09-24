@@ -935,6 +935,14 @@ public class METransformer extends EMEATransformer {
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
       legacyCust.setAuthRemarketerInd("0");
+      legacyCust.setCeDivision("2");
+      legacyCust.setLangCd("");
+      legacyCust.setDeptCd("");
+      legacyCust.setCurrencyCd("");
+      legacyCust.setTaxCd("");
+      legacyCust.setOverseasTerritory("");
+      legacyCust.setInvoiceCpyReqd("");
+      legacyCust.setCustType("");
 
       if (SystemLocation.ABU_DHABI.equals(data.getCmrIssuingCntry()) && !StringUtils.isBlank(data.getBpAcctTyp())) {
         legacyCust.setCustType(data.getBpAcctTyp());
