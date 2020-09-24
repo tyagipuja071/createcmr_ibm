@@ -1206,7 +1206,7 @@ public class LegacyDirectService extends TransConnService {
 
       // CMR-6019
       if (null != data.getDupIssuingCntryCd() && !data.getDupIssuingCntryCd().equals("")
-          && ("Y" == data.getCisServiceCustIndc() || "Y" == data.getDupCmrIndc())) {
+          && ("Y".equals(data.getCisServiceCustIndc()) || "Y".equals(data.getDupCmrIndc()))) {
         targetCountry = data.getDupIssuingCntryCd();
       }
 
