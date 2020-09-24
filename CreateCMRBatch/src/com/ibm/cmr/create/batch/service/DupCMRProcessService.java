@@ -961,12 +961,15 @@ public class DupCMRProcessService extends LegacyDirectService {
       boolean isCustExt = transformer.hasCmrtCustExt();
       if (isCustExt && ME_CUSTEXT_LIST.contains(cntry)) {
         CmrtCustExt custExt = legacyObjects.getCustomerExt();
-        if (transformer != null) {
-          transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+
+        if (custExt != null) {
+          if (transformer != null) {
+            transformer.transformLegacyCustomerExtData(entityManager, dummyHandler, custExt, cmrObjects);
+          }
+          custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+          custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+          legacyObjects.setCustomerExt(custExt);
         }
-        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-        legacyObjects.setCustomerExt(custExt);
       }
       // rebuild the address use table
 
