@@ -178,6 +178,19 @@ public class DnBUtil {
       String[] parts = geoHandler.doSplitName(company.getCompanyName(), "", splitLength, splitLength2);
       cmrRecord.setCmrName1Plain(parts[0]);
       cmrRecord.setCmrName2Plain(parts[1]);
+      String completeNameAfterSplit = parts[0] + (StringUtils.isNotBlank(parts[1]) ? " " + parts[1] : "");
+      if (!company.getCompanyName().equals(completeNameAfterSplit)) {
+        if (company.getCompanyName().length() > splitLength) {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, splitLength).toUpperCase());
+          if (company.getCompanyName().length() > splitLength + splitLength2) {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength, splitLength + splitLength2).toUpperCase());
+          } else {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength).toUpperCase());
+          }
+        } else {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().toUpperCase());
+        }
+      }
     } else {
       if (company.getCompanyName().length() > 30) {
         cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, 30).toUpperCase());
@@ -453,6 +466,12 @@ public class DnBUtil {
     String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
 
     if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
+      // CMR-6689
+      // If D&B name is longer than Name 1 + Name 2 allowable length pend to
+      // CMDE
+      if (handler != null && dnbRecord.getDnbName().length() > handler.getName1Length() + handler.getName2Length()) {
+        return false;
+      }
       if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
         return false;
       }
