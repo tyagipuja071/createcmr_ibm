@@ -178,6 +178,19 @@ public class DnBUtil {
       String[] parts = geoHandler.doSplitName(company.getCompanyName(), "", splitLength, splitLength2);
       cmrRecord.setCmrName1Plain(parts[0]);
       cmrRecord.setCmrName2Plain(parts[1]);
+      String completeNameAfterSplit = parts[0] + (StringUtils.isNotBlank(parts[1]) ? " " + parts[1] : "");
+      if (!company.getCompanyName().equals(completeNameAfterSplit)) {
+        if (company.getCompanyName().length() > splitLength) {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, splitLength).toUpperCase());
+          if (company.getCompanyName().length() > splitLength + splitLength2) {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength, splitLength + splitLength2).toUpperCase());
+          } else {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength).toUpperCase());
+          }
+        } else {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().toUpperCase());
+        }
+      }
     } else {
       if (company.getCompanyName().length() > 30) {
         cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, 30).toUpperCase());
@@ -451,12 +464,15 @@ public class DnBUtil {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
 
     String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+    String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
 
     if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12
+          && StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
         return false;
       }
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6
+          && StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
         // do a comparison of common words first
         List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
         List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
@@ -469,7 +485,17 @@ public class DnBUtil {
           }
         }
         if (!foundMinimal) {
-          return false;
+          List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
+          for (String phraseA : altCommonA) {
+            for (String phraseB : commonB) {
+              if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                foundMinimal = true;
+              }
+            }
+          }
+          if (!foundMinimal) {
+            return false;
+          }
         }
       } else {
         LOG.debug("Name " + compareName + " close to " + dnbRecord.getDnbName());
@@ -549,6 +575,25 @@ public class DnBUtil {
       customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
     } else {
       customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
+    }
+    return customerName;
+  }
+
+  /**
+   * returns concatenated customerName from admin or address as per country
+   * settings
+   *
+   * @param handler
+   * @param admin
+   * @param soldTo
+   * @return
+   */
+  private static String getAltCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
+    String customerName = null;
+    if (handler != null && !handler.customerNamesOnAddress()) {
+      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : admin.getMainCustNm2());
+    } else {
+      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : soldTo.getCustNm2());
     }
     return customerName;
   }
