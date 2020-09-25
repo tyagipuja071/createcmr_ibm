@@ -99,7 +99,7 @@ function afterTemplateLoadPT() {
   var custNm2 = custNm1Result2.ret1;
 
   if (custNm1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
-    FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " " + custNm2.substring(0, 9));
+    FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " " + custNm1.substring(0, 9));
   } else {
     FormManager.setValue('abbrevNm', custNm2);
   }
@@ -2438,6 +2438,7 @@ function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('inacCd', '');
     FormManager.setValue('enterprise', '');
   }
+  disableAddrFieldsPTES();
 }
 
 /* End 1430539 */
