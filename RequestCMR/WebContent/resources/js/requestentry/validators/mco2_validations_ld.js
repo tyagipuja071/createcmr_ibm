@@ -1380,6 +1380,94 @@ function getImportedIndc() {
   return _importedIndc;
 }
 
+function validateCMRForMCO2GMLLCScenario() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number...');
+        var requestCMR = FormManager.getActualValue('cmrNo');
+        var reqType = FormManager.getActualValue('reqType');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
+        var requestID = FormManager.getActualValue('reqId');
+        var landed = 'LANDED COUNTRY';
+        var subCustGrp = FormManager.getActualValue('custSubGrp');
+        var targetCntry = 'Kenya';
+
+        if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'LLCEX' || subCustGrp == 'XLLCX')) {
+          if (requestCMR.length < 6) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR: ' + requestCMR + ' is invalid. Please enter valid CMR Number');
+          }
+
+          var res = cmr.query('GET_LAND_CNTRY_ZS01', {
+            REQ_ID : requestID
+          });
+
+          if (res && res.ret1) {
+            landed = res.ret1;
+          }
+
+          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+            COUNTRY : cntry,
+            CMR_NO : requestCMR,
+            MANDT : cmr.MANDT
+          });
+          if (exists && exists.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
+          } else {
+            exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+              COUNTRY : cntry,
+              CMR_NO : requestCMR,
+              MANDT : cmr.MANDT
+            });
+            if (exists && exists.ret1) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and ' + landed);
+            }
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+
+}
+
+function enableCMRNOMCO2GLLC() {
+  console.log('enabling/disabling cmr no...');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var subCustGrp = FormManager.getActualValue('custSubGrp');
+
+  if (role == 'REQUESTER' && (subCustGrp == 'LLCEX' || subCustGrp == 'XLLCX')) {
+    FormManager.enable('cmrNo');
+    FormManager.addValidator('cmrNo', Validators.REQUIRED, [ 'CMR Number' ], 'MAIN_IBM_TAB');
+  } else if (role == 'REQUESTER' && (subCustGrp != 'LLCEX' || subCustGrp != 'XLLCX')) {
+    FormManager.readOnly('cmrNo');
+    FormManager.resetValidations('cmrNo');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1451,4 +1539,8 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
+
+  GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
+  GEOHandler.addAfterConfig(enableCMRNOMCO2GLLC, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(enableCMRNOMCO2GLLC, GEOHandler.MCO2);
 });
