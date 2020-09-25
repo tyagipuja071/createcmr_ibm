@@ -363,6 +363,7 @@ public class PortugalTransformer extends MessageTransformer {
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       legacyCust.setDcRepeatAgreement("0"); // CAGXB
       legacyCust.setLeasingInd("0"); // CIEDC
+      legacyCust.setCeBo("00A0811"); // ceBo
 
       // CeDivision
       legacyCust.setCeDivision("3");
