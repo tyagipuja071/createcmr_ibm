@@ -19,6 +19,7 @@ import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
+import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
@@ -131,21 +132,25 @@ public class CEWATransformer extends MCOTransformer {
     }
   }
 
-  // @Override
-  // public void transformLegacyCustomerExtData(EntityManager entityManager,
-  // MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
-  // CMRRequestContainer cmrObjects) {
-  // for (Addr addr : cmrObjects.getAddresses()) {
-  // if ("851".equals(cmrIssuingCntry)) {
-  // legacyCustExt.setiTaxCode(addr.getTaxOffice());
-  // }
-  // }
-  // }
+  @Override
+  public void transformLegacyCustomerExtData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCustExt legacyCustExt,
+      CMRRequestContainer cmrObjects) {
+    Data data = cmrObjects.getData();
 
-  // @Override
-  // public boolean hasCmrtCustExt() {
-  // return true;
-  // }
+    if (SystemLocation.TANZANIA.equals(cmrIssuingCntry)) {
+      if (StringUtils.isNotBlank(data.getTaxCd1())) {
+        legacyCustExt.setiTaxCode(data.getTaxCd1());
+      }
+    }
+  }
+
+  @Override
+  public boolean hasCmrtCustExt() {
+    if (SystemLocation.TANZANIA.equals(cmrIssuingCntry)) {
+      return true;
+    }
+    return false;
+  }
 
   @Override
   public void transformLegacyAddressData(EntityManager entityManager, MQMessageHandler dummyHandler, CmrtCust legacyCust, CmrtAddr legacyAddr,
