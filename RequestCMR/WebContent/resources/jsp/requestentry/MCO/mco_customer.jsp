@@ -24,6 +24,16 @@
   <form:hidden path="sitePartyId" />
   <form:hidden path="searchTerm" />
 
+  <cmr:view forCountry="851">
+  	<cmr:row addBackground="true">
+  	  <cmr:column span="2" containerForField="LocalTax1">
+        <p>
+          <cmr:label fieldId="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: </cmr:label>
+          <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+  	</cmr:row>
+  </cmr:view>
   <cmr:view forCountry="700">
   	<cmr:row addBackground="true">
   	  <cmr:column span="2" containerForField="BusinessType">
