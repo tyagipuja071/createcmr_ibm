@@ -855,7 +855,8 @@ public class RequestEntryController extends BaseController {
   @RequestMapping(
       value = "/request/dnb/matchlist")
   public ModelMap getDnBMatchList(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
-    long reqId = (Long) request.getSession().getAttribute("lastReqId");
+    String reqIdString = request.getParameter("reqId");
+    long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
     List<AutoDNBDataModel> results = service.getDnBMatchList(model, reqId);
     return wrapAsSearchResult(results);
   }

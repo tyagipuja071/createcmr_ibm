@@ -1262,6 +1262,10 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     List<AutoDNBDataModel> resultList = new ArrayList<AutoDNBDataModel>();
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
+      if (reqId == 0) {
+        return new ArrayList<AutoDNBDataModel>();
+      }
+
       RequestData requestData = new RequestData(entityManager, reqId);
       Addr soldTo = requestData.getAddress("ZS01");
       if (soldTo != null) {

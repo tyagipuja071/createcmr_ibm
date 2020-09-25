@@ -1199,7 +1199,7 @@ function dnbAutoChk() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Rejected' && findDnbResult != 'Accepted' && userRole != 'Viewer') {
-    cmr.showModal('DnbAutoCheckModal');
+    showDnBMatchModal();
   }
 }
 
@@ -1239,7 +1239,7 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matches will be overriden. Proceed?', 'Warning', null, null);
+  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?', 'Warning', null, null);
 }
 
 /**
@@ -1254,7 +1254,12 @@ function doOverrideDnBMatch() {
 function autoDnbImportActFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   if (rowData) {
-    return '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var dunsNo = rowData.autoDnbDunsNo[0];
+    if (dunsNo) {
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dunsNo.trim() + '\')">';
+    }
+    return formattedString;
   } else {
     return '';
   }
@@ -1419,7 +1424,7 @@ function checkIfFinalDnBCheckRequired() {
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
   if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-      && !isSkipDnbMatching() && matchOverrideIndc != 'D' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
+      && !isSkipDnbMatching() && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
     // currently Enabled Only For US
     return true;
   }
@@ -1435,6 +1440,7 @@ function matchDnBForAutomationCountries() {
     cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
     return;
   }
+  cmr.showProgress('Checking request data with D&B...');
   dojo.xhrGet({
     url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
     handleAs : 'json',
@@ -1445,12 +1451,13 @@ function matchDnBForAutomationCountries() {
     timeout : 50000,
     sync : false,
     load : function(data, ioargs) {
+      cmr.hideProgress();
       console.log(data);
       if (data && data.success) {
         if(data.match){
           cmr.showModal('addressVerificationModal');
         } else {
-          cmr.showModal('DnbAutoCheckModal');
+          showDnBMatchModal();
         }
       } else {
         // continue
