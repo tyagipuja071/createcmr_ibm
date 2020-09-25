@@ -691,6 +691,16 @@ public class PortugalTransformer extends MessageTransformer {
       legacyAddr.setZipCode(addr.getPostCd());
     }
 
+    if ("ZS01".equals(addr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(addr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(addr.getCustPhone());
+        }
+      }
+    }
+
     if ("ZD01".equals(addr.getId().getAddrType())) {
       if (!StringUtils.isBlank(addr.getCustPhone())) {
         if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
@@ -700,9 +710,9 @@ public class PortugalTransformer extends MessageTransformer {
         }
       }
     }
-
     formatMassUpdateAddressLines(entityManager, legacyAddr, addr, false);
     legacyObjects.addAddress(legacyAddr);
+
   }
 
   @Override
