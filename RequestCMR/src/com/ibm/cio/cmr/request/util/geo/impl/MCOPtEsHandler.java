@@ -517,12 +517,14 @@ public class MCOPtEsHandler extends MCOHandler {
         address.setCustPhone("");
       }
     }
-
+    if ("822".equals(currentRecord.getCmrIssuedBy()) && "ZD01".equals(address.getId().getAddrType())) {
+      String phone = getShippingPhoneFromLegacy(currentRecord);
+      address.setCustPhone(phone != null ? phone : "");
+    }
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
       address.getId().setAddrSeq(seq);
     }
-
     if (!StringUtils.isEmpty(currentRecord.getCmrStreetAddress()) && currentRecord.getCmrStreetAddress().length() > 30) {
       address.setAddrTxt(currentRecord.getCmrStreetAddress().substring(0, 30));
     }
@@ -538,6 +540,17 @@ public class MCOPtEsHandler extends MCOHandler {
     String custPhone = address.getCustPhone().trim();
     custPhone = custPhone.startsWith("TF") ? custPhone.substring(2) : custPhone;
     address.setCustPhone(custPhone);
+  }
+
+  private String getShippingPhoneFromLegacy(FindCMRRecordModel address) {
+    List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
+    for (CmrtAddr cmrtAddr : cmrtAddrs) {
+      String seqNo = (address.getCmrAddrSeq().length() != 5) ? StringUtils.leftPad(address.getCmrAddrSeq(), 5, '0') : address.getCmrAddrSeq();
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && seqNo.equals(cmrtAddr.getId().getAddrNo())) {
+        return cmrtAddr.getAddrPhone();
+      }
+    }
+    return null;
   }
 
   private void setFAddressFromLegacy(FindCMRRecordModel address) {
