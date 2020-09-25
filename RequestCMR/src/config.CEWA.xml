@@ -66,15 +66,14 @@
 				</column>
 				<column>
 					<label>CoF</label>
-					<!-- CMR-1728:there is CoF in masUpd Data, so temp use this column instead -->
-					<dbColumn>RESTRICT_TO</dbColumn>
+					<dbColumn>OUT_CITY_LIMIT</dbColumn>
 					<length>1</length>
 					<width>15</width>
 					<lovId>CommercialFinanced</lovId>
 				</column>
 				<column>
 					<label>COD Flag</label>
-					<dbColumn>COD_CONDITION</dbColumn>
+					<dbColumn>ENTP_UPDT_TYP</dbColumn>
 					<width>15</width>
 					<lovId>CodFlag</lovId>
 				</column>				
@@ -163,7 +162,7 @@
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
-					<length>23</length>
+					<length>20</length>
 				</column>				
 				
 			</columns>
@@ -234,7 +233,7 @@
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
-					<length>23</length>
+					<length>20</length>
 				</column>				
 			</columns>
 		</tab>
