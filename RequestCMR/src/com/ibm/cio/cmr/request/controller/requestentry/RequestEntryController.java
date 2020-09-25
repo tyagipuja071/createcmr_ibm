@@ -861,6 +861,21 @@ public class RequestEntryController extends BaseController {
   }
 
   @RequestMapping(
+      value = "/request/dnb/checkMatch")
+  public ModelMap checkIfMatchesDnB(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
+    ModelMap map = new ModelMap();
+    try {
+      String reqIdString = request.getParameter("reqId");
+      long reqId = reqIdString != null ? Long.parseLong(reqIdString) : 0L;
+      map = service.isDnBMatch(model, reqId);
+    } catch (Exception e) {
+      LOG.error("Error occured in D&B matching", e);
+      map.put("success", false);
+    }
+    return map;
+  }
+
+  @RequestMapping(
       value = "/request/dnb/matchlist/importrecord")
   public ModelMap importMatchIntoRequest(HttpServletRequest request, HttpServletResponse response, AutoDNBDataModel model) throws Exception {
     CmrClientService dnbService = new CmrClientService();
