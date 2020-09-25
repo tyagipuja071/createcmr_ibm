@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -497,6 +498,10 @@ public class MCOFstHandler extends MCOHandler {
             String deptNo = ""; // 14
             String city = "";
             String postalcd = "";
+            String phoneNo = "";
+            String stcont = ""; // 5
+            String addnameinfo = ""; // 9
+            String poBox = "";// 10
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -511,13 +516,34 @@ public class MCOFstHandler extends MCOHandler {
               vat = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(14);
               deptNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(13);
+              phoneNo = validateColValFromCell(currCell);
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                phoneNo = df.formatCellValue(row.getCell(13));
+              }
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(7);
-              postalcd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              stcont = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               city = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(7);
+              postalcd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(9);
+              addnameinfo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(10);
+              poBox = validateColValFromCell(currCell);
+            }
+
+            if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(10);
+              phoneNo = validateColValFromCell(currCell);
+              if (currCell != null) {
+                DataFormatter df = new DataFormatter();
+                phoneNo = df.formatCellValue(row.getCell(10));
+              }
             }
 
             if (row.getRowNum() == 2001) {
@@ -539,10 +565,16 @@ public class MCOFstHandler extends MCOHandler {
               validations.add(error);
             }
             if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(deptNo)) {
-              LOG.trace("Internal Department Number should start with 99");
-              error.addError(row.getRowNum(), "Internal Department Number",
-                  "Internal Department Number should start with 99. Please fix and upload the template again.");
+              LOG.trace("CMR No. should start with 99 if internal department no. is filled.");
+              error.addError(row.getRowNum(), "Internal Department No.", "CMR No. should start with 99 if internal department no. is filled.");
               validations.add(error);
+            }
+            if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (phoneNo.contains("+")) {
+                LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
+                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                validations.add(error);
+              }
             }
           }
         }

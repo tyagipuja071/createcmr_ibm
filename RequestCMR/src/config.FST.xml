@@ -66,14 +66,14 @@
 				</column>
 				<column>
 					<label>CoF</label>
-					<dbColumn>RESTRICT_TO</dbColumn>
+					<dbColumn>OUT_CITY_LIMIT</dbColumn>
 					<length>1</length>
 					<width>15</width>
 					<lovId>CommercialFinanced</lovId>
 				</column>
 				<column>
 					<label>COD Flag</label>
-					<dbColumn>COD_CONDITION</dbColumn>
+					<dbColumn>ENTP_UPDT_TYP</dbColumn>
 					<width>15</width>
 					<lovId>CodFlag</lovId>
 				</column>				
@@ -162,7 +162,7 @@
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
-					<length>30</length>
+					<length>20</length>
 				</column>
 			</columns>
 		</tab>
@@ -297,6 +297,12 @@
 					<dbColumn>COUNTY</dbColumn>
 					<width>25</width>
 					<length>30</length>
+				</column>
+				<column number="true">
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>18</width>
+					<length>20</length>
 				</column>
 			</columns>
 		</tab>

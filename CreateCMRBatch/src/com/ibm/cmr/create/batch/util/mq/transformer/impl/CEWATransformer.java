@@ -395,6 +395,20 @@ public class CEWATransformer extends MCOTransformer {
       legacyCust.setIbo(formatSBO);
       legacyCust.setSbo(formatSBO);
     }
+
+    if (StringUtils.isNotBlank(muData.getOutCityLimit())) {
+      legacyCust.setModeOfPayment(muData.getOutCityLimit());
+    }
+
+    if (StringUtils.isNotBlank(muData.getEntpUpdtTyp())) {
+      String cod = muData.getEntpUpdtTyp();
+      if ("Y".equals(cod)) {
+        legacyCust.setModeOfPayment("5");
+      } else if ("N".equals(cod)) {
+        legacyCust.setModeOfPayment("");
+      }
+    }
+
   }
 
   @Override
@@ -435,6 +449,7 @@ public class CEWATransformer extends MCOTransformer {
     String line5 = legacyAddr.getAddrLine5();
     String line6 = legacyAddr.getAddrLine6();
 
+    // Additional name/additional info
     if (!StringUtils.isBlank(massUpdtAddr.getCounty())) {
       line3 = massUpdtAddr.getCounty();
     }
@@ -445,6 +460,16 @@ public class CEWATransformer extends MCOTransformer {
 
     if (crossBorder) {
       LOG.debug("performing crossBorder setup");
+
+      // StreetCont, POBox || Additional name/additional info
+      if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) && !StringUtils.isBlank(massUpdtAddr.getPoBox())) {
+        line3 = massUpdtAddr.getAddrTxt2() + ", " + "PO BOX " + massUpdtAddr.getPoBox();
+      } else if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2())) {
+        line3 = massUpdtAddr.getAddrTxt2();
+      } else if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
+        line3 = "PO BOX " + massUpdtAddr.getPoBox();
+      }
+
       if (StringUtils.isNotBlank(massUpdtAddr.getCity1())) {
         String cityPostalCode = massUpdtAddr.getCity1();
         if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
