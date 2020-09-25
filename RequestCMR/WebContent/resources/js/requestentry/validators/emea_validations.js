@@ -337,6 +337,7 @@ function afterConfigForUKI() {
   var issuingCntry = FormManager.getActualValue('cmrIssuingCntry');
   var companyNum = FormManager.getActualValue('taxCd1');
   var isicCd = FormManager.getActualValue('isicCd');
+  var custSubType = FormManager.getActualValue('custSubGrp');
   var zs01LandCntry = getZS01LandCntry();
 
   if (typeof (_pagemodel) != 'undefined') {
@@ -365,7 +366,7 @@ function afterConfigForUKI() {
     _isicCdCRNHandler[0].onChange();
   }
 
-  if (reqType == 'C') {
+  if (reqType == 'C' && (custSubType != '' && custSubType != undefined)) {
     autoSetAbbrNameUKI();
   }
 
@@ -6840,9 +6841,9 @@ function lockRequireFieldsUKI() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-   if (cntry == SysLoc.IRELAND) {
+  if (cntry == SysLoc.IRELAND) {
     FormManager.readOnly('salesBusOffCd');
-   }
+  }
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('abbrevNm');
     FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
@@ -8423,6 +8424,7 @@ function autoSetAbbrNameUKI() {
     // Defect-6793
     autoSetAbbrevNmFrmDept();
   } else {
+
     var result = cmr.query('GET.CUSTNM1_ADDR_UKI', {
       REQ_ID : reqId,
       ADDR_TYPE : 'ZS01'
