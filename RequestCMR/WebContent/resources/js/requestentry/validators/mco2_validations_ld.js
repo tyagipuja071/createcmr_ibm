@@ -1327,6 +1327,49 @@ function requireTaxRegistrationForLocalScenario(fromAddress, scenario, scenarioC
     FormManager.clearValue('busnType');
   }
 }
+function setTinNumberBehaviorForTz(fromAddress, scenario, scenarioChanged) {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole');
+  var tinNo = FormManager.getActualValue('taxCd1');
+  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
+
+  if (reqType == 'U') {
+    if (role == 'REQUESTER') {
+      if (tinNo != null && tinNo != '') {
+        FormManager.readOnly('taxCd1');
+      } else {
+        // If field is blank, then editable.
+        FormManager.enable('taxCd1');
+      }
+    } else if (role == 'PROCESSOR') {
+
+      // On Processor side editable in all instances
+      FormManager.enable('taxCd1');
+    }
+  }
+
+  if (scenarioChanged && scenario != null && scenario != '') {
+    FormManager.clearValue('taxCd1');
+  }
+}
+function addTinNumberValidationTz() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var tinNumber = FormManager.getActualValue('taxCd1');
+
+        if (tinNumber.length > 0 && tinNumber.length < 11) {
+          return new ValidationResult({
+            id : 'taxCd1',
+            type : 'text',
+            name : 'taxCd1'
+          }, false, 'Invalid Tin number length for TZ. Tin number should be 11 characters long.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
 function addTaxRegFormatValidationMadagascar() {
   FormManager.addFormValidator((function() {
     return {
@@ -1535,9 +1578,11 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
-  GEOHandler.addAfterTemplateLoad(requireTaxRegistrationForLocalScenario, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(requireTaxRegistrationForLocalScenario, SysLoc.MADAGASCAR);
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
+  GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
+  GEOHandler.addAfterTemplateLoad(setTinNumberBehaviorForTz, SysLoc.TANZANIA);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
