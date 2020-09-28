@@ -1212,6 +1212,8 @@ public class MCOPtEsHandler extends MCOHandler {
             }
 
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(13);
+              poBox = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
                 poBox = df.formatCellValue(row.getCell(13));
