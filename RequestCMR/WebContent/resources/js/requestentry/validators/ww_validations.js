@@ -920,8 +920,12 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR);
 
   // For Legacy PT,CY,GR
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE,'373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670',
+      '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876',
+      '879', '880', '881', '883' ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE,'373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670',
+      '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876',
+      '879', '880', '881', '883' ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(doubleByteCharacterValidator, [ SysLoc.CHINA ], null, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);

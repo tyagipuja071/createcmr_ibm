@@ -1511,6 +1511,20 @@ function enableCMRNOMCO2GLLC() {
   }
 }
 
+function enableCmrNumForProcessor() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType != 'C') {
+    return;
+  }
+
+  if (role == "PROCESSOR") {
+    FormManager.enable('cmrNo');
+  } else {
+    FormManager.readOnly('cmrNo');
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1588,4 +1602,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
   GEOHandler.addAfterConfig(enableCMRNOMCO2GLLC, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(enableCMRNOMCO2GLLC, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
 });
