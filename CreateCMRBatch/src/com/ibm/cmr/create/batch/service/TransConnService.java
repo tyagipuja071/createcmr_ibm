@@ -624,6 +624,9 @@ public class TransConnService extends BaseBatchService {
           addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           addrQuery.setParameter("ADDR_TYPE", "ZS01");
           Addr addr = addrQuery.getSingleResult(Addr.class);
+          addr.setSapNo(kna1.getId().getKunnr());
+          updateEntity(addr, entityManager);
+
           PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
