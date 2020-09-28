@@ -250,7 +250,7 @@ public class MEHandler extends BaseSOFHandler {
                 String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String gAddrSeq = "";
-                if (!StringUtils.isEmpty(legacyGaddrSeq)) {
+                if (!StringUtils.isEmpty(legacyGaddrSeq) && !"00001".equals(legacyGaddrSeq)) {
                   gAddrSeq = legacyGaddrSeq;
                 } else {
                   gAddrSeq = maxSeq;
@@ -1289,7 +1289,7 @@ public class MEHandler extends BaseSOFHandler {
       String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       String zp02updateinit = getZP02UpdateInit(entityManager, data.getId().getReqId());
       String zp02importinit = getZP02importInit(entityManager, data.getId().getReqId());
-      if (StringUtils.isBlank(legacyGaddrSeq)) {
+      if (StringUtils.isBlank(legacyGaddrSeq) || "00001".equals(legacyGaddrSeq)) {
         changeZP02AddrNew(entityManager, data.getId().getReqId());
       }
       if ("Y".equals(zp02updateinit)) {
