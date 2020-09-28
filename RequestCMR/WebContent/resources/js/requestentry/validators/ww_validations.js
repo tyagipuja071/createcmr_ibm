@@ -893,6 +893,9 @@ dojo.addOnLoad(function() {
       '760', '613', '655', '663', '681', '683', '731', '735', '781', '799', '811', '813', '829', '869', '871', '358', '359', '363', '603', '607', '626', '644', '651', '668', '693', '694', '695',
       '699', '704', '705', '707', '708', '740', '741', '787', '820', '821', '826', '889', '618' ];
 
+  GEOHandler.AFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
+       '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
+
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
   // Story 1185886 : Address Standardization is not required for LA countries
@@ -913,19 +916,16 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ], GEOHandler.ROLE_PROCESSOR, true, true);
   GEOHandler.registerValidator(addDPLCheckValidator, [ '862', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821',
       '826', '889', '358', '359', '363', '666', '726', '822', '373', '382', '383', '635', '637', '656', '662', '667', '670', '691', '692', '700', '717', '718', '753', '810', '840', '841', '876',
-      '879', '880', '881','610', '636', '645', '669', '698', '725', '745', '764', '769', '770', '782', '804', '825', '827', '831', '833', '835', '842', '851', '857', '883' ], GEOHandler.ROLE_PROCESSOR, true, true);
+      '879', '880', '881', '610', '636', '645', '669', '698', '725', '745', '764', '769', '770', '782', '804', '825', '827', '831', '833', '835', '842', '851', '857', '883' ],
+      GEOHandler.ROLE_PROCESSOR, true, true);
 
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
   // For Legacy PT,CY,GR
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE,'373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670',
-      '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876',
-      '879', '880', '881', '883' ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE,'373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670',
-      '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770', '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876',
-      '879', '880', '881', '883' ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE, ...GEOHandler.AFRICA], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE, ...GEOHandler.AFRICA], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(doubleByteCharacterValidator, [ SysLoc.CHINA ], null, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
