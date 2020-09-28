@@ -44,7 +44,7 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
- * Handler for MCO Spain And Portugal
+ * o Handler for MCO Spain And Portugal
  * 
  * @author Jeffrey Zamora
  * 
@@ -1250,12 +1250,6 @@ public class MCOPtEsHandler extends MCOHandler {
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 validations.add(error);
               }
-            }
-
-            if (!StringUtils.isEmpty(localPostal) && !localPostal.matches("-?\\d+(\\.\\d+)?")) {
-              LOG.trace("Local postal code should have numeric values only.");
-              error.addError(row.getRowNum(), "Local Postal Code", "Only numeric values are allowed.");
-              validations.add(error);
             }
 
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
