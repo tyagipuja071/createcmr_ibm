@@ -6,18 +6,21 @@ package com.ibm.cio.cmr.request.util.pdf.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.ibm.cio.cmr.request.automation.dpl.DPLSearchItem;
 import com.ibm.cio.cmr.request.automation.dpl.DPLSearchResult;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cmr.services.client.dpl.DPLRecord;
+import com.ibm.cmr.services.client.dpl.DPLSearchResults;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -33,7 +36,7 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
 
   private static final Logger LOG = Logger.getLogger(DnBPDFConverter.class);
 
-  private List<DPLSearchResult> dplResults;
+  private List<DPLSearchResults> dplResults;
   private String user;
   private long searchTs;
   private String companyName;
@@ -42,7 +45,7 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
    * @throws IOException
    * 
    */
-  public DPLSearchPDFConverter(String user, long searchTs, String companyName, List<DPLSearchResult> dplResults) throws IOException {
+  public DPLSearchPDFConverter(String user, long searchTs, String companyName, List<DPLSearchResults> dplResults) throws IOException {
     super(null);
     this.user = user;
     this.searchTs = searchTs;
@@ -74,44 +77,65 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
             document.add(section);
             document.add(blankLine());
 
-            for (DPLSearchResult result : this.dplResults) {
+            for (DPLSearchResults result : this.dplResults) {
+              if (result.getDeniedPartyRecords() == null) {
+                result.setDeniedPartyRecords(new ArrayList<DPLRecord>());
+              }
               document.add(blankLine());
               document.add(blankLine());
-              document.add(createSubHeader("Search Details - " + result.getName().toUpperCase()));
+              document.add(createSubHeader("Search Details - " + result.getSearchArgument().toUpperCase()));
               section = createDetailsTable(new float[] { 30, 70 });
               section.addCell(createLabelCell("Searching For:"));
-              section.addCell(createValueCell(result.getName().toUpperCase()));
-              section.addCell(createLabelCell("DPL Result ID:"));
-              section.addCell(createValueCell(result.getResultId()));
+              section.addCell(createValueCell(result.getSearchArgument().toUpperCase()));
               section.addCell(createLabelCell("Records Found:"));
-              section.addCell(createValueCell(result.getItems().size() + ""));
+              section.addCell(createValueCell(result.getDeniedPartyRecords().size() + ""));
               section.addCell(createLabelCell("Exact Match Found:"));
-              section.addCell(createValueCell(result.exactMatchFound() ? "Yes" : "No"));
+              section.addCell(createValueCell(DPLSearchResult.exactMatchFound(result) ? "Yes" : "No"));
               section.addCell(createLabelCell("Partial Match Found:"));
-              section.addCell(createValueCell(result.partialMatchFound() ? "Yes" : "No"));
+              section.addCell(createValueCell(DPLSearchResult.partialMatchFound(result) ? "Yes" : "No"));
               section.addCell(createLabelCell("Closest Name Matches:"));
               StringBuilder closest = new StringBuilder();
-              for (DPLSearchItem closestItem : result.getTopMatches()) {
+              for (DPLRecord closestItem : DPLSearchResult.getTopMatches(result)) {
+                String dplName = closestItem.getCompanyName();
+                boolean person = false;
+                if (StringUtils.isBlank(dplName) && !StringUtils.isBlank(closestItem.getCustomerLastName())) {
+                  dplName = closestItem.getCustomerFirstName() + " " + closestItem.getCustomerLastName();
+                  person = true;
+                }
+                if (dplName == null) {
+                  dplName = "";
+                }
                 closest.append(closest.length() > 0 ? "\n" : "");
-                closest.append(" - " + closestItem.getPartyName());
+                closest.append(" - " + dplName + " (" + (person ? "Individual" : "Company") + ")");
               }
               section.addCell(createValueCell(closest.toString()));
               document.add(section);
               document.add(blankLine());
 
               document.add(createSubHeader("Results"));
-              section = createDetailsTable(new float[] { 10, 20, 70 });
+              section = createDetailsTable(new float[] { 10, 10, 40, 40 });
               section.addCell(createLabelCell("Item"));
               section.addCell(createLabelCell("Denial Code Country"));
-              section.addCell(createLabelCell("Denied Party Name"));
-              if (result.getItems() == null || result.getItems().isEmpty()) {
+              section.addCell(createLabelCell("Entity Name"));
+              section.addCell(createLabelCell("Entity Address"));
+              if (result.getDeniedPartyRecords() == null || result.getDeniedPartyRecords().isEmpty()) {
                 section.addCell(createValueCell("No matches found", 1, 3));
               } else {
                 int itemNo = 1;
-                for (DPLSearchItem item : result.getItems()) {
+                for (DPLRecord item : result.getDeniedPartyRecords()) {
+                  String dplName = item.getCompanyName();
+                  boolean person = false;
+                  if (StringUtils.isBlank(dplName) && !StringUtils.isBlank(item.getCustomerLastName())) {
+                    dplName = item.getCustomerFirstName() + " " + item.getCustomerLastName();
+                    person = true;
+                  }
+                  if (dplName == null) {
+                    dplName = "";
+                  }
                   section.addCell(createValueCell(itemNo + ""));
                   section.addCell(createValueCell(item.getCountryCode()));
-                  section.addCell(createValueCell(item.getPartyName()));
+                  section.addCell(createValueCell(dplName + " (" + (person ? "Individual" : "Company") + ")"));
+                  section.addCell(createValueCell(item.getEntityAddress()));
                   itemNo++;
                 }
               }
@@ -134,11 +158,11 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
     }
   }
 
-  public List<DPLSearchResult> getDplResults() {
+  public List<DPLSearchResults> getDplResults() {
     return dplResults;
   }
 
-  public void setDplResults(List<DPLSearchResult> dplResults) {
+  public void setDplResults(List<DPLSearchResults> dplResults) {
     this.dplResults = dplResults;
   }
 
