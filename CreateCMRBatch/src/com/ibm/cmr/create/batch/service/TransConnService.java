@@ -17,6 +17,9 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.ibm.ci.search.client.IndexServiceClient;
+import com.ibm.ci.search.client.impl.index.DeleteFromIndexRequest;
+import com.ibm.ci.search.client.impl.index.IndexResponse;
 import com.ibm.cio.cmr.create.entity.NotifyReq;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -2222,6 +2225,8 @@ public class TransConnService extends BaseBatchService {
       query.setForReadOnly(true);
       List<String> kunnrs = query.getResults(String.class);
       if (!kunnrs.isEmpty()) {
+
+        IndexServiceClient client = new IndexServiceClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"));
         for (String kunnr : kunnrs) {
           LOG.debug("Got KUNNR: " + kunnr);
           LOG.debug("Deleting RDc records for KATR6: " + country + " and CMR No.: " + cmrNo);
@@ -2233,6 +2238,22 @@ public class TransConnService extends BaseBatchService {
             query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
             query.setParameter("KUNNR", kunnr);
             query.executeSql();
+
+            try {
+              DeleteFromIndexRequest deleteReq = new DeleteFromIndexRequest("index");
+              deleteReq.setDelete(true);
+              deleteReq.setKunnr(kunnr);
+              deleteReq.setMandt(SystemConfiguration.getValue("MANDT"));
+
+              IndexResponse response = client.sendRequest(deleteReq);
+              if (response.isSuccess()) {
+                LOG.debug("KUNNR " + kunnr + " deleted from Index");
+              } else {
+                LOG.warn("Error when deleting KUNNR " + kunnr + " from Index: " + response.getMsg());
+              }
+            } catch (Exception e) {
+              LOG.warn("Cannot delete from KUNNR " + kunnr + " from Index", e);
+            }
           }
         }
         partialCommit(entityManager);
