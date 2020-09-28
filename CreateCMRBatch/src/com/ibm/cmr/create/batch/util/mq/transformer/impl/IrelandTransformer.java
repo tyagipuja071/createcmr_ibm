@@ -1255,6 +1255,10 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
       CMRRequestContainer cmrObjects) {
     Data data = cmrObjects.getData();
 
+    if (cmrIssuingCntry.equals("754")) {
+      legacyCustExt.getId().setSofCntryCode("866");
+    }
+
     // Customer Tab
     legacyCustExt.setiTaxCode(!StringUtils.isBlank(data.getTaxCd1()) ? data.getTaxCd1() : "");
   }
