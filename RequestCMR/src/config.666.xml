@@ -159,13 +159,13 @@
 					<dbColumn>COUNTY</dbColumn>
 					<length>30</length>
 				</column>
+				<column number="true" exactLength="false">
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>18</width>
+					<length>23</length>
+				</column>
 			</columns>
-			<column number="true" exactLength="false">
-				<label>PO Box</label>
-				<dbColumn>PO_BOX</dbColumn>
-				<width>18</width>
-				<length>23</length>
-			</column>
 		</tab>
 		<tab name="Billing Address" type="Address" typeCode="ZP01">
 			<columns>
@@ -246,13 +246,14 @@
 					<dbColumn>COUNTY</dbColumn>
 					<length>30</length>
 				</column>
+				<column number="true" exactLength="false">
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>18</width>
+					<length>23</length>
+				</column>
 			</columns>
-			<column number="true" exactLength="false">
-				<label>PO Box</label>
-				<dbColumn>PO_BOX</dbColumn>
-				<width>18</width>
-				<length>23</length>
-			</column>
+			
 		</tab>
 		<tab name="Installing Address" type="Address" typeCode="ZI01">
 			<columns>
