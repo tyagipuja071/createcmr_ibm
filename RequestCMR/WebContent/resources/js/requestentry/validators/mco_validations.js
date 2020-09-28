@@ -65,20 +65,17 @@ function afterTemplateLoadPT() {
     var city2Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city2Params);
     var city1 = city2Result.ret1;
     if (city1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
-      FormManager.setValue('abbrevLocn', city1);
+      FormManager.setValue('abbrevLocn', city1.substring(0, 12));
     }
-  } else if (subCustGrp != 'INTSO' || subCustGrp != 'THDPT') {
+  } else if (subCustGrp != 'INTSO' || subCustGrp != 'THDPT' || subCustGrp != 'SAAPA') {
     var city1Params = {
       REQ_ID : _reqId,
       ADDR_TYPE : "ZS01",
     };
     var city1Result = cmr.query('ADDR.GET.CITY.BY_REQID_ADDRTYP', city1Params);
     var city1 = city1Result.ret1;
-    if (city1 != '' && subCustGrp != 'SAAPA') {
-      if (city1 && city1.length > 12) {
-        city1 = city1.substring(0, 12);
-      }
-      FormManager.setValue('abbrevLocn', city1);
+    if (city1 != null) {
+      FormManager.setValue('abbrevLocn', city1.substring(0, 12));
     } else if (subCustGrp == 'SAAPA') {
       FormManager.setValue('abbrevLocn', 'SAAS');
     }
@@ -99,7 +96,7 @@ function afterTemplateLoadPT() {
   var custNm2 = custNm1Result2.ret1;
 
   if (custNm1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
-    FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " " + custNm1.substring(0, 9));
+    FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " c/o " + custNm1.substring(0, 9));
   } else {
     FormManager.setValue('abbrevNm', custNm2);
   }
@@ -2362,19 +2359,20 @@ function addAbbrevNmValidatorPT() {
     return {
       validate : function() {
         var _abbrevNm = FormManager.getActualValue('abbrevNm');
-        var reg = /^[-_ a-zA-Z0-9]+$/;
+        var reg = /^[-_ a-zA-Z0-9_/]+$/;
         if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
           return new ValidationResult({
             id : 'abbrevNm',
             type : 'text',
             name : 'abbrevNm'
-          }, false, 'The value for Abbreviated name is invalid. Only ALPHANUMERIC characters are allowed.');
+          }, false, 'The value for Abbreviated name is invalid. Only ALPHANUMERIC and (/) Special characters are allowed.');
         } else {
           return new ValidationResult(null, true);
         }
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+
 }
 
 function addAbbrevLocationValidatorPT() {
