@@ -1171,6 +1171,7 @@ public class MCOPtEsHandler extends MCOHandler {
             String cbPostal = ""; // 10
             String phoneNo = ""; // 12
             String poBox = ""; // 13
+            String landCountry = ""; //11
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -1207,8 +1208,11 @@ public class MCOPtEsHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(12);
               phoneNo = validateColValFromCell(currCell);
 
-              poBox = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
+              poBox = validateColValFromCell(currCell);
+              
+              currCell = (XSSFCell) row.getCell(11);
+              landCountry = validateColValFromCell(currCell);
             }
 
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1250,6 +1254,18 @@ public class MCOPtEsHandler extends MCOHandler {
                 LOG.trace("Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 error.addError(row.getRowNum(), "Crossborder City/Postal",
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
+                validations.add(error);
+              }
+            }
+            
+            if (!StringUtils.isEmpty(landCountry)) {
+              if (!("PT").equals(landCountry) && ( !StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+                LOG.trace("Landed Country should be PT for Local Scenario.");
+                error.addError(row.getRowNum(), "Landed Country", "Landed Country should be PT for Local Scenario.");
+                validations.add(error);
+              }else if(("PT").equals(landCountry) && ( !StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))){
+                LOG.trace("Landed Country shouldn't be PT for Cross borders.");
+                error.addError(row.getRowNum(), "Landed Country", "Landed Country shouldn't be PT for Cross Borders.");
                 validations.add(error);
               }
             }
