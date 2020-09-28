@@ -139,7 +139,7 @@ public class SpainUtil extends AutomationUtil {
       Addr zi01 = requestData.getAddress("ZI01");
       boolean hasValidMatches = false;
       boolean highQualityMatchExists = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZI01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
       if (response != null && response.getMatched()) {
         List<DnBMatchingResponse> dnbMatches = response.getMatches();
@@ -235,6 +235,7 @@ public class SpainUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    int coverageFieldUpdtd = 0;
     if (handlePrivatePersonRecord(entityManager, admin, output, validation, engineData)) {
       return true;
     }
@@ -285,11 +286,11 @@ public class SpainUtil extends AutomationUtil {
             details.append("Requester is not allowed to submit updates to " + change.getDataField() + " field. \n");
           }
           if (!"9".equals(change.getNewData().substring(1, 2))) {
-            cmdeReview = true;
+            // cmdeReview = true;
+            coverageFieldUpdtd++;
           }
         }
         break;
-      case "INAC/NAC Code":
       case "ISIC":
       case "Currency Code":
         cmdeReview = true;
@@ -306,16 +307,11 @@ public class SpainUtil extends AutomationUtil {
         // noop, for switch handling only
         break;
       case "ISU Code":
-        // noop, for switch handling only
-        break;
-      case "Client Tier Code":
-        // noop, for switch handling only
-        break;
+      case "Client Tier":
       case "Enterprise Number":
-        // noop, for switch handling only
-        break;
+      case "INAC/NAC Code":
       case "Sales Rep":
-        // noop, for switch handling only
+        coverageFieldUpdtd++;
         break;
       case "Order Block Code":
         if ("E".equals(change.getOldData()) || "E".equals(change.getNewData())) {
@@ -325,6 +321,18 @@ public class SpainUtil extends AutomationUtil {
       default:
         ignoredUpdates.add(change.getDataField());
         break;
+      }
+    }
+    if (coverageFieldUpdtd > 0) {
+      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
+      if (StringUtils.isNotBlank(managerID)) {
+        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+        if (!managerCheck) {
+          details.append("Updates to coverage fields cannot be validated. An approval will be required.\n");
+        } else {
+          details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
+          admin.setScenarioVerifiedIndc("Y");
+        }
       }
     }
     if (resultCodes.contains("D")) {

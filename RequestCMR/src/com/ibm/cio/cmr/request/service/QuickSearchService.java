@@ -3,6 +3,7 @@ package com.ibm.cio.cmr.request.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
@@ -116,7 +117,9 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     }
     importModel.setCmrNum(model.getCmrNo());
     importModel.setSystem("cmr");
-    importModel.setQuickSearchData(formatSearchParams(model));
+    if (!StringUtils.isBlank(model.getName())) {
+      importModel.setQuickSearchData(formatSearchParams(model));
+    }
     importModel.setPoolRecord(model.isPoolRecord());
 
     LOG.debug("Creating request from CMR " + model.getCmrNo() + " under " + model.getIssuingCntry());
@@ -406,7 +409,13 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
       sb.append("\nVAT: " + searchParams.getVat().toUpperCase());
     }
     if (!StringUtils.isBlank(searchParams.getTaxCd1())) {
-      sb.append("\nSIRET: " + searchParams.getTaxCd1().toUpperCase());
+      String[] cRNCntries = { "IE", "GB" };
+      List<String> cRNCntriesList = Arrays.asList(cRNCntries);
+      String label = "SIRET: ";
+      if (cRNCntriesList.contains(searchParams.getCountryCd())) {
+        label = "CRN: ";
+      }
+      sb.append("\n" + label + searchParams.getTaxCd1().toUpperCase());
     }
     return sb.toString();
   }

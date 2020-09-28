@@ -48,13 +48,18 @@ boolean approver = user != null && user.isApprover();
                 <a href="javascript: goToUrl('${contextPath}/myappr')">Approvals</a>
               </li>
             <%} %>
+            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
+                <li id="LSEARCH_TAB">
+                    <a href="javascript: goToUrl('${contextPath}/legacysearch')">Search</a>
+                </li>
+            <%}%>  
   
   					<%if (SystemConfiguration.isAdmin(request) || (user != null && user.isCmde())){%>
                 <li id="ADMIN_TAB">
                   <%if (SystemConfiguration.isAdmin(request)){%>
-                    <a href="javascript: goToUrl('${contextPath}/systemParameters')">System Administration</a>
+                    <a href="javascript: goToUrl('${contextPath}/systemParameters')">Admin</a>
                   <%} else  {%>
-                    <a href="javascript: goToUrl('${contextPath}/code')">System Administration</a>
+                    <a href="javascript: goToUrl('${contextPath}/code')">Admin</a>
                   <%} %>
                 </li>
             <%}%>

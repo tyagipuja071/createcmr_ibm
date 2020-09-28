@@ -1,19 +1,34 @@
 package com.ibm.cio.cmr.request.util.legacy;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
+import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
+import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * Class that contains utilities for Legacy
@@ -214,6 +229,126 @@ public class LegacyCommonUtil {
       return true;
     }
     return false;
+  }
+
+  public static String doFormatPoBox(String poBox) {
+    boolean poBoxFlag = poBox.contains("PO BOX");
+    if (poBoxFlag) {
+      return poBox.substring(6).trim();
+    } else {
+      return poBox;
+    }
+  }
+
+  public static AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {
+    LOG.debug("Searching for Addr_RDC records for Legacy Processing " + addr.getId().getReqId());
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", addr.getId().getReqId());
+    query.setParameter("SEQ", addr.getId().getAddrSeq());
+    query.setParameter("ADDR_TYPE", addr.getId().getAddrType());
+    query.setForReadOnly(true);
+    return query.getSingleResult(AddrRdc.class);
+
+  }
+
+  public static void sendfieldUpdateEmailNotification(EntityManager entityManager, BatchEmailModel params, String emailTemplatename) {
+    String emailTemplate = null;
+    String from = SystemConfiguration.getValue("MAIL_FROM");
+    String host = SystemConfiguration.getValue("MAIL_HOST");
+    if (params != null) {
+      String subject = params.getMailSubject();
+      String receipent = params.getReceipent();
+      if (StringUtils.isBlank(receipent)) {
+        LOG.debug("Email subject is empty ,hence no email config is supported");
+        return;
+      } else if (StringUtils.isBlank(subject)) {
+        LOG.debug("Email receipent is empty ,hence no email config is supported");
+        return;
+      }
+      List<Object> mailparams = new ArrayList<>();
+      if (emailTemplatename != null) {
+        emailTemplate = getEmailTemplate(emailTemplatename);
+        if (emailTemplate != null && StringUtils.isNotBlank(emailTemplate)) {
+          String email = new String(emailTemplate);
+
+          // adding params
+          mailparams.add(params.getRequestId());
+          mailparams.add(params.getRequesterName());
+          mailparams.add(params.getRequesterId());
+          mailparams.add(params.getIssuingCountry());
+          mailparams.add(params.getSubregion());
+          mailparams.add(params.getCustNm());
+          mailparams.add(params.getCmrNumber());
+          mailparams.add(params.getDirectUrlLink());
+
+          email = StringUtils.replace(email, params.getStringToReplace(), params.getValToBeReplaceBy());
+          email = MessageFormat.format(email, mailparams.toArray(new Object[0]));
+          Email mail = new Email();
+          mail.setSubject(subject);
+          mail.setTo(receipent);
+          mail.setFrom(from);
+          mail.setMessage(email);
+          mail.setType(MessageType.HTML);
+          mail.send(host);
+        }
+      } else {
+        LOG.debug("Email cannot be generated as no params are found");
+        return;
+      }
+
+    }
+
+  }
+
+  private static String getEmailTemplate(String mailTemplate) {
+    StringBuilder sb = new StringBuilder();
+    try {
+      InputStream is = null;
+      if (mailTemplate != null) {
+        is = ConfigUtil.getResourceStream(mailTemplate);
+      } else {
+        return null;
+      }
+      try {
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        try {
+          BufferedReader br = new BufferedReader(isr);
+          try {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+              sb.append(line);
+            }
+          } finally {
+            br.close();
+          }
+        } finally {
+          isr.close();
+        }
+      } finally {
+        is.close();
+      }
+    } catch (Exception e) {
+      LOG.error("Error when loading Email template.", e);
+    }
+    return sb.toString();
+  }
+
+  public static DataRdc getOldData(EntityManager entityManager, String reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    DataRdc oldData = new DataRdc();
+
+    if (records != null && records.size() > 0) {
+      oldData = records.get(0);
+    } else {
+      oldData = null;
+    }
+
+    return oldData;
   }
 
 }
