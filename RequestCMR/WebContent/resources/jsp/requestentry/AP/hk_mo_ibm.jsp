@@ -438,7 +438,7 @@ dojo.addOnLoad(function(){
 	        </cmr:column>
         
 		</cmr:row>
- <!--  CMR-3869 <cmr:view exceptForGEO="MCO2,CN">
+ <%--  CMR-3869 <cmr:view exceptForGEO="MCO2,CN">
   		<cmr:row topPad="10">
         <cmr:column span="2" containerForField="SOENumber">
           <p>
@@ -450,7 +450,7 @@ dojo.addOnLoad(function(){
         </cmr:column>
   		</cmr:row>
     </cmr:view>
-    -->
+   --%>
 		</cmr:view>
      
 	</cmr:section>
