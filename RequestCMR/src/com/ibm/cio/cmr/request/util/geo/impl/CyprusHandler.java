@@ -3424,13 +3424,13 @@ public class CyprusHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(6);
               attPerson = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(7);
+              currCell = (XSSFCell) row.getCell(9);
               localPostal = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(8);
+              currCell = (XSSFCell) row.getCell(7);
               localCity = validateColValFromCell(currCell);
 
-              currCell = (XSSFCell) row.getCell(9);
+              currCell = (XSSFCell) row.getCell(8);
               crossCity = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(10);
