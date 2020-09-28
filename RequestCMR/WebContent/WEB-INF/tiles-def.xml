@@ -661,6 +661,11 @@
     <put-attribute name="body" value="/resources/jsp/windows/legacydetails.jsp" />
   </definition>
 
+  <definition name="dplrequest" extends="window">
+    <put-attribute name="title" value="CreateCMR | DPL Search" />
+    <put-attribute name="body" value="/resources/jsp/windows/dplrequest.jsp" />
+  </definition>
+
   
    <!-- Single Reactivation End -->
 </tiles-definitions>
