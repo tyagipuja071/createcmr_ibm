@@ -17,6 +17,9 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.ibm.ci.search.client.IndexServiceClient;
+import com.ibm.ci.search.client.impl.index.DeleteFromIndexRequest;
+import com.ibm.ci.search.client.impl.index.IndexResponse;
 import com.ibm.cio.cmr.create.entity.NotifyReq;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -101,7 +104,7 @@ public class TransConnService extends BaseBatchService {
   protected ProcessClient serviceClient;
   private MassProcessClient massServiceClient;
   private UpdateByEntClient updtByEntClient;
-  
+
   private SimpleDateFormat ERDAT_FORMATTER = new SimpleDateFormat("yyyyMMdd");
 
   private static final List<String> SINGLE_REQUEST_TYPES = Arrays.asList(CmrConstants.REQ_TYPE_CREATE, CmrConstants.REQ_TYPE_UPDATE);
@@ -131,7 +134,7 @@ public class TransConnService extends BaseBatchService {
       LOG.info("Processing Completed Manual records...");
       monitorDisAutoProcRec(entityManager);
 
-      if("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
+      if ("Y".equals(SystemParameters.getString("POOL.CMR.STATUS"))) {
         LOG.info("Processing Pending if Host is Down...");
         monitorLegacyPending(entityManager);
       }
@@ -421,9 +424,10 @@ public class TransConnService extends BaseBatchService {
       }
     }
   }
-  
+
   private void monitorLegacyPending(EntityManager entityManager) {
-	//  Search the records with Status PCP and check if current timestamp falls within host down outage 
+    // Search the records with Status PCP and check if current timestamp falls
+    // within host down outage
     String sql = ExternalizedQuery.getSql("BATCH.MONITOR_LEGACY_PENDING");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("PROC_TYPE", SystemConfiguration.getValue("BATCH_CMR_POOL_PROCESSING_TYPE"));
@@ -431,7 +435,7 @@ public class TransConnService extends BaseBatchService {
     // jz: temporary, so that only Commercial REGULAR will be done for now until
     // cm: scenario will be hardcoded for now for REGULAR and PRIV
     // CMR-5564 is implemented
-//	    query.setParameter("SCENARIO", "REGULAR");
+    // query.setParameter("SCENARIO", "REGULAR");
     List<Admin> pvcRecords = query.getResults(Admin.class);
     LOG.debug("Size of PVC Records : " + pvcRecords.size());
 
@@ -596,8 +600,10 @@ public class TransConnService extends BaseBatchService {
           newData.setId(dataPk);
           newData.setCustGrp(null);
           newData.setCustSubGrp(null);
-          if(data.getAffiliate() == null || data.getAffiliate().equals("")) newData.setAffiliate(record.getCmrNo());
-          if(data.getEnterprise() == null || data.getEnterprise().equals("")) newData.setEnterprise(record.getCmrNo());
+          if (data.getAffiliate() == null || data.getAffiliate().equals(""))
+            newData.setAffiliate(record.getCmrNo());
+          if (data.getEnterprise() == null || data.getEnterprise().equals(""))
+            newData.setEnterprise(record.getCmrNo());
 
           updateEntity(newData, entityManager);
 
@@ -609,7 +615,7 @@ public class TransConnService extends BaseBatchService {
           PreparedQuery zi01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
-          Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);         
+          Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
 
           PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
           newAddrQuery.setParameter("REQ_ID", reqId);
@@ -617,17 +623,17 @@ public class TransConnService extends BaseBatchService {
 
           for (Addr newAddr : newAddresses) {
             AddrPK addrPK = newAddr.getId();
-            if(zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
+            if (zi01Addr != null && addrPK.getAddrType().equals("ZI01")) {
               copyValuesToEntity(zi01Addr, newAddr);
-          	  newAddr.setSapNo(null);
+              newAddr.setSapNo(null);
               newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
               newAddr.setChangedIndc(null);
             } else {
-          	  copyValuesToEntity(addr, newAddr);
-          	  newAddr.setSapNo(kna1.getId().getKunnr());
+              copyValuesToEntity(addr, newAddr);
+              newAddr.setSapNo(kna1.getId().getKunnr());
               newAddr.setImportInd(CmrConstants.YES_NO.Y.toString());
               newAddr.setChangedIndc(CmrConstants.YES_NO.Y.toString());
-            }            
+            }
             newAddr.setId(addrPK);
             newAddr.setAddrStdResult("X");
             newAddr.setAddrStdAcceptInd(null);
@@ -2160,6 +2166,8 @@ public class TransConnService extends BaseBatchService {
       query.setForReadOnly(true);
       List<String> kunnrs = query.getResults(String.class);
       if (!kunnrs.isEmpty()) {
+
+        IndexServiceClient client = new IndexServiceClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"));
         for (String kunnr : kunnrs) {
           LOG.debug("Got KUNNR: " + kunnr);
           LOG.debug("Deleting RDc records for KATR6: " + country + " and CMR No.: " + cmrNo);
@@ -2171,6 +2179,22 @@ public class TransConnService extends BaseBatchService {
             query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
             query.setParameter("KUNNR", kunnr);
             query.executeSql();
+
+            try {
+              DeleteFromIndexRequest deleteReq = new DeleteFromIndexRequest("index");
+              deleteReq.setDelete(true);
+              deleteReq.setKunnr(kunnr);
+              deleteReq.setMandt(SystemConfiguration.getValue("MANDT"));
+
+              IndexResponse response = client.sendRequest(deleteReq);
+              if (response.isSuccess()) {
+                LOG.debug("KUNNR " + kunnr + " deleted from Index");
+              } else {
+                LOG.warn("Error when deleting KUNNR " + kunnr + " from Index: " + response.getMsg());
+              }
+            } catch (Exception e) {
+              LOG.warn("Cannot delete from KUNNR " + kunnr + " from Index", e);
+            }
           }
         }
         partialCommit(entityManager);
