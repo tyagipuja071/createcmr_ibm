@@ -3404,6 +3404,7 @@ public class CyprusHandler extends BaseSOFHandler {
             String cbPostal = ""; // 10
             String phoneNo = ""; // 12
             String poBox = ""; // 13
+            String landCountry = ""; //11
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -3440,8 +3441,11 @@ public class CyprusHandler extends BaseSOFHandler {
               currCell = (XSSFCell) row.getCell(12);
               phoneNo = validateColValFromCell(currCell);
 
-              poBox = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
+              poBox = validateColValFromCell(currCell);
+              
+              currCell = (XSSFCell) row.getCell(11);
+              landCountry = validateColValFromCell(currCell);
             }
 
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
@@ -3481,6 +3485,18 @@ public class CyprusHandler extends BaseSOFHandler {
                 LOG.trace("Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 error.addError(row.getRowNum(), "Crossborder City/Postal",
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
+                validations.add(error);
+              }
+            }
+            
+            if (!StringUtils.isEmpty(landCountry)) {
+              if (!("CY").equals(landCountry) && ( !StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+                LOG.trace("Landed Country should be CY for Local Scenario.");
+                error.addError(row.getRowNum(), "Landed Country", "Landed Country should be CY for Local Scenario.");
+                validations.add(error);
+              }else if(("CY").equals(landCountry) && ( !StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))){
+                LOG.trace("Landed Country shouldn't be CY for Cross Borders.");
+                error.addError(row.getRowNum(), "Landed Country", "Landed Country shouldn't be CY for Cross Borders.");
                 validations.add(error);
               }
             }
