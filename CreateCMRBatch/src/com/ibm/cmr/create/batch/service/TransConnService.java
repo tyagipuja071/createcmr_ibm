@@ -1358,13 +1358,15 @@ public class TransConnService extends BaseBatchService {
           if (isCompletedSuccessfully(resultCode)) {
 
             addr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
-            updateEntity(addr, entityManager);
 
             if (response.getRecords() != null) {
               comment = comment.append("\nRDc processing successfully updated KUNNR(s): ");
               if (response.getRecords() != null && response.getRecords().size() != 0) {
                 for (int i = 0; i < response.getRecords().size(); i++) {
                   comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
+                  if (StringUtils.isBlank(addr.getSapNo())) {
+                    addr.setSapNo(response.getRecords().get(i).getSapNo());
+                  }
                 }
               }
               if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
@@ -1378,6 +1380,7 @@ public class TransConnService extends BaseBatchService {
               }
             }
 
+            updateEntity(addr, entityManager);
           } else {
             if (CmrConstants.RDC_STATUS_ABORTED.equals(resultCode) && CmrConstants.RDC_STATUS_ABORTED.equals(processingStatus)) {
               comment = comment.append("\nRDc update processing for KUNNR " + (request.getSapNo() != null ? request.getSapNo() : "(not generated)")
