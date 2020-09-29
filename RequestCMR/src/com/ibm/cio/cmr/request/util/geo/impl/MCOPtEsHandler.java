@@ -1171,7 +1171,7 @@ public class MCOPtEsHandler extends MCOHandler {
             String cbPostal = ""; // 10
             String phoneNo = ""; // 12
             String poBox = ""; // 13
-            String landCountry = ""; //11
+            String landCountry = ""; // 11
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -1210,7 +1210,7 @@ public class MCOPtEsHandler extends MCOHandler {
 
               currCell = (XSSFCell) row.getCell(13);
               poBox = validateColValFromCell(currCell);
-              
+
               currCell = (XSSFCell) row.getCell(11);
               landCountry = validateColValFromCell(currCell);
             }
@@ -1234,6 +1234,11 @@ public class MCOPtEsHandler extends MCOHandler {
             }
 
             TemplateValidation error = new TemplateValidation(name);
+            if (StringUtils.isEmpty(street) && !StringUtils.isEmpty(addressCont)) {
+              LOG.trace("Address Continuation cannot be filled if Street is empty. >> ");
+              error.addError(row.getRowNum(), "Address Continuation", "Address Continuation cannot be filled if Street is empty.");
+              validations.add(error);
+            }
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
               LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
               error.addError(row.getRowNum(), "City",
@@ -1257,13 +1262,13 @@ public class MCOPtEsHandler extends MCOHandler {
                 validations.add(error);
               }
             }
-            
+
             if (!StringUtils.isEmpty(landCountry)) {
-              if (!("PT").equals(landCountry) && ( !StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
+              if (!("PT").equals(landCountry) && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
                 LOG.trace("Landed Country should be PT for Local Scenario.");
                 error.addError(row.getRowNum(), "Landed Country", "Landed Country should be PT for Local Scenario.");
                 validations.add(error);
-              }else if(("PT").equals(landCountry) && ( !StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))){
+              } else if (("PT").equals(landCountry) && (!StringUtils.isEmpty(crossCity) || !StringUtils.isEmpty(cbPostal))) {
                 LOG.trace("Landed Country shouldn't be PT for Cross borders.");
                 error.addError(row.getRowNum(), "Landed Country", "Landed Country shouldn't be PT for Cross Borders.");
                 validations.add(error);
