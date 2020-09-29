@@ -1269,7 +1269,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       RequestData requestData = new RequestData(entityManager, reqId);
       Addr soldTo = requestData.getAddress("ZS01");
       if (soldTo != null) {
-        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
+        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
         if (response != null && response.getMatched()) {
           List<DnBMatchingResponse> dnbMatches = response.getMatches();
           this.log.debug("DnB Response recieved and no. of matches found. = " + dnbMatches.size());
@@ -1346,7 +1346,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Data data = requestData.getData();
         Admin admin = requestData.getAdmin();
         Addr zs01 = requestData.getAddress("ZS01");
-        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
+        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
         if (response != null && response.getSuccess()) {
           map.put("success", true);
           boolean match = false;
