@@ -736,12 +736,17 @@ public class PortugalTransformer extends MessageTransformer {
     String line5 = legacyAddr.getAddrLine5();
     String line6 = legacyAddr.getAddrLine6();
 
-    line1 = StringUtils.isNotEmpty(legacyAddr.getAddrLine1()) ? legacyAddr.getAddrLine1() : line1;
+    line1 = StringUtils.isNotEmpty(massUpdtAddr.getCustNm1()) ? massUpdtAddr.getCustNm1() : line1;
 
     if (!StringUtils.isBlank(massUpdtAddr.getCustNm2())) {
       line2 = massUpdtAddr.getCustNm2();
     } else {
       line2 = !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) ? massUpdtAddr.getAddrTxt2() : line2;
+    }
+
+    if (!StringUtils.isEmpty(massUpdtAddr.getCounty()) && !StringUtils.isEmpty(line2)
+        && (line2.toUpperCase().startsWith("ATT ") || line2.toUpperCase().startsWith("ATT:"))) {
+      line2 = "";
     }
 
     line3 = !StringUtils.isEmpty(massUpdtAddr.getCounty()) ? massUpdtAddr.getCounty().trim() : line3;
@@ -755,13 +760,17 @@ public class PortugalTransformer extends MessageTransformer {
       line3 = !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) ? massUpdtAddr.getAddrTxt2() : line3;
     }
 
-    line4 = !StringUtils.isEmpty(massUpdtAddr.getAddrTxt()) ? massUpdtAddr.getAddrTxt() : line4;
-    String poBox = !StringUtils.isEmpty(massUpdtAddr.getPoBox()) ? massUpdtAddr.getPoBox() : "";
-    if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
-      poBox = " APTO " + poBox;
+    if (!StringUtils.isEmpty(massUpdtAddr.getAddrTxt()) || !StringUtils.isEmpty(massUpdtAddr.getPoBox())) {
+      line4 = !StringUtils.isEmpty(massUpdtAddr.getAddrTxt()) ? massUpdtAddr.getAddrTxt() : "";
+      String poBox = !StringUtils.isEmpty(massUpdtAddr.getPoBox()) ? massUpdtAddr.getPoBox() : "";
+      if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
+        poBox = " APTO " + poBox;
+      }
+      line4 = StringUtils.isEmpty(poBox) ? line4 : (line4 + poBox);
+      if (!StringUtils.isEmpty(poBox)) {
+        legacyAddr.setPoBox(poBox);
+      }
     }
-
-    line4 = StringUtils.isEmpty(poBox) ? line4 : (line4 + poBox);
 
     if (!StringUtils.isEmpty(massUpdtAddr.getPostCd()) || !StringUtils.isEmpty(massUpdtAddr.getCity1())) {
       line5 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() + " " : "")
@@ -788,16 +797,27 @@ public class PortugalTransformer extends MessageTransformer {
         + (line6 != null ? line6.trim() : ""));
 
     for (String line : lines) {
-      messageHash.put(getAddressKey((massUpdtAddr.getId().getAddrType()) + "Address" + lineNo).toString(), line);
-      lineNo++;
+      if (StringUtils.isNotBlank(line)) {
+        messageHash.put((addrKey + "Address" + lineNo).toString(), line.trim());
+        lineNo++;
+      }
     }
 
-    legacyAddr.setAddrLine1(line1 != null ? line1.trim() : "");
-    legacyAddr.setAddrLine2(line2 != null ? line2.trim() : "");
-    legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
-    legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
-    legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
-    legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
+    legacyAddr.setAddrLine1(messageHash.get(addrKey + "Address1") != null ? messageHash.get(addrKey + "Address1") : "");
+    legacyAddr.setAddrLine2(messageHash.get(addrKey + "Address2") != null ? messageHash.get(addrKey + "Address2") : "");
+    legacyAddr.setAddrLine3(messageHash.get(addrKey + "Address3") != null ? messageHash.get(addrKey + "Address3") : "");
+    legacyAddr.setAddrLine4(messageHash.get(addrKey + "Address4") != null ? messageHash.get(addrKey + "Address4") : "");
+    legacyAddr.setAddrLine5(messageHash.get(addrKey + "Address5") != null ? messageHash.get(addrKey + "Address5") : "");
+    legacyAddr.setAddrLine6(messageHash.get(addrKey + "Address6") != null ? messageHash.get(addrKey + "Address6") : "");
+
+    /*
+     * legacyAddr.setAddrLine1(line1 != null ? line1.trim() : "");
+     * legacyAddr.setAddrLine2(line2 != null ? line2.trim() : "");
+     * legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
+     * legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
+     * legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
+     * legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
+     */
   }
 
   @Override
