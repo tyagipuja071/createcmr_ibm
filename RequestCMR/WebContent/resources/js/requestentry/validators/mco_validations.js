@@ -2398,7 +2398,8 @@ function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndcForPT();
   var reqId = FormManager.getActualValue('reqId');
 
-  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged && (scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'THDPT' || scenario == 'CRGOV')) {
+  if (FormManager.getActualValue('reqType') == 'C' && isCmrImported == 'Y' && scenarioChanged
+      && (scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'THDPT' || scenario == 'XCRO' || scenario == 'CRGOV')) {
     var origISU;
     var origClientTier;
     var origRepTeam;
