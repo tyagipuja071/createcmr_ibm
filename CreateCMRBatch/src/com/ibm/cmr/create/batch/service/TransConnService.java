@@ -2181,7 +2181,7 @@ public class TransConnService extends BaseBatchService {
             query.executeSql();
 
             try {
-              DeleteFromIndexRequest deleteReq = new DeleteFromIndexRequest("index");
+              DeleteFromIndexRequest deleteReq = new DeleteFromIndexRequest("cmr");
               deleteReq.setDelete(true);
               deleteReq.setKunnr(kunnr);
               deleteReq.setMandt(SystemConfiguration.getValue("MANDT"));
