@@ -577,9 +577,7 @@ div#ibm-content-main {
 
 <%if (!newEntry) {%>
   <jsp:include page="commentLog.jsp" />
-   <c:if test="${reqentry.findDnbResult != 'Accepted'}">
   <jsp:include page="dnbautocheck.jsp" />
-  </c:if>
 <%} %>
 
 <cmr:section alwaysShown="true">

@@ -131,11 +131,15 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      if (cmrCntry == '821') {
-        executeBeforeSubmit();
+      if (checkIfFinalDnBCheckRequired()) {
+        matchDnBForAutomationCountries();
       } else {
-        // if there are no errors, show the Address Verification modal window
-        cmr.showModal('addressVerificationModal');
+        if (cmrCntry == '821') {
+          executeBeforeSubmit();
+        } else {
+          // if there are no errors, show the Address Verification modal window
+          cmr.showModal('addressVerificationModal');
+        }
       }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
@@ -996,23 +1000,27 @@ function connectToCmrServices() {
         errorMsg += (showError ? ', ' : '') + 'DUNS No.';
         showError = true;
       } else {
-//        var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
-//        var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
-//            SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA, SysLoc.JAPAN ];
-//        if (COUNTRIES.indexOf(sysLocCd) == -1) {
-//          FormManager.setValue('dunsNo', data.dunsNo);
-//        } else {
-          var dunsNo = FormManager.getActualValue('dunsNo');
+        // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
+        // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
+        // SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA,
+        // SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
+        // SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA,
+        // SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY,
+        // SysLoc.VENEZUELA, SysLoc.JAPAN ];
+        // if (COUNTRIES.indexOf(sysLocCd) == -1) {
+        // FormManager.setValue('dunsNo', data.dunsNo);
+        // } else {
+        var dunsNo = FormManager.getActualValue('dunsNo');
 
-          if (dunsNo == '' && data.dunsNo != '') {
-            FormManager.setValue('dunsNo', data.dunsNo);
-          } else {
-            if (dunsNo && data.dunsNo){
-              cmr.showAlert('DUNS '+data.dunsNo+' was retrieved but an existing DUNS '+dunsNo+' was found. The value was not overwritten.');
-            }
+        if (dunsNo == '' && data.dunsNo != '') {
+          FormManager.setValue('dunsNo', data.dunsNo);
+        } else {
+          if (dunsNo && data.dunsNo) {
+            cmr.showAlert('DUNS ' + data.dunsNo + ' was retrieved but an existing DUNS ' + dunsNo + ' was found. The value was not overwritten.');
           }
+        }
 
-//        }
+        // }
       }
       if (showError) {
         if (covError) {
@@ -1237,7 +1245,7 @@ function dnbAutoChk() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Rejected' && findDnbResult != 'Accepted' && userRole != 'Viewer') {
-    cmr.showModal('DnbAutoCheckModal');
+    showDnBMatchModal();
   }
 }
 
@@ -1277,7 +1285,7 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matches will be overriden. Proceed?', 'Warning', null, null);
+  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?', 'Warning', null, null);
 }
 
 /**
@@ -1292,7 +1300,12 @@ function doOverrideDnBMatch() {
 function autoDnbImportActFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   if (rowData) {
-    return '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var dunsNo = rowData.autoDnbDunsNo[0];
+    if (dunsNo) {
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dunsNo.trim() + '\')">';
+    }
+    return formattedString;
   } else {
     return '';
   }
@@ -1447,4 +1460,62 @@ function handleRequiredDnBSearch() {
       }
     });
   }
+}
+
+function checkIfFinalDnBCheckRequired() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+  var findDnbResult = FormManager.getActualValue('findDnbResult');
+  var userRole = FormManager.getActualValue('userRole');
+  var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+      && !isSkipDnbMatching() && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
+    // currently Enabled Only For US
+    return true;
+  }
+  return false;
+}
+
+function matchDnBForAutomationCountries() {
+  var reqId = FormManager.getActualValue('reqId');
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo.xhrGet({
+    url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+    handleAs : 'json',
+    method : 'GET',
+    content : {
+      'reqId' : reqId
+    },
+    timeout : 50000,
+    sync : false,
+    load : function(data, ioargs) {
+      cmr.hideProgress();
+      console.log(data);
+      if (data && data.success) {
+        if(data.match){
+          cmr.showModal('addressVerificationModal');
+        } else {
+          showDnBMatchModal();
+        }
+      } else {
+        // continue
+        console.log("An error occurred while matching dnb.");
+        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+          OK : 'Yes',
+          CANCEL : 'No'
+        });
+      }
+    },
+    error : function(error, ioargs) {
+    }
+  });
 }

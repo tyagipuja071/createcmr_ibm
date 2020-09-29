@@ -122,6 +122,29 @@ function addDnBSearchValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addDnBMatchingAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+          // FOR US Temporary
+          var show = false;
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+            ID : id
+          });
+          if (SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry') && (ret == null || ret.ret1 == null)) {
+            return new ValidationResult(null, false, "Please provide the supporting documentation for D&B Match Override, such as client's official website, " +
+            		"Secretary of State business registration proof, client's confirmation email, signed PO and etc. Please note that the sources " +
+            		"from Wikipedia, Linked In and social medias are not acceptable.");
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 /**
  * Method to check whether for a scenario dnb matching is allowed or not
  */
@@ -899,6 +922,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
+  GEOHandler.registerWWValidator(addDnBMatchingAttachmentValidator);
   // Story 1185886 : Address Standardization is not required for LA countries
   // and Israel
   GEOHandler.skipTGMEForCountries(GEOHandler.NO_ADDR_STD);
