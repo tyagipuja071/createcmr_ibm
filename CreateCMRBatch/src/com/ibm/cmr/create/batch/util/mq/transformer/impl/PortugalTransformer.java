@@ -547,15 +547,6 @@ public class PortugalTransformer extends MessageTransformer {
       legacyAddr.setAddrLineT("");
     }
 
-    if (!StringUtils.isBlank(currAddr.getPoBox()) && (CmrConstants.ADDR_TYPE.ZP01.toString().equals(currAddr.getId().getAddrType())
-        || CmrConstants.ADDR_TYPE.ZS01.toString().equals(currAddr.getId().getAddrType()))) {
-      String poBox = currAddr.getPoBox();
-      if (!poBox.toUpperCase().startsWith("APTO")) {
-        poBox = " APTO " + poBox;
-      }
-      legacyAddr.setPoBox(poBox);
-    }
-
   }
 
   @Override
