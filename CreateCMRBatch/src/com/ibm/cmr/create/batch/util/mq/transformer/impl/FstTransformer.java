@@ -133,10 +133,11 @@ public class FstTransformer extends MCOTransformer {
       legacyCust.setDeptCd(deptCd);
     }
 
-    if (!StringUtils.isEmpty(data.getCustSubGrp()) && gmllcScenarios.contains(data.getCustSubGrp())) {
-      legacyCust.setIsuCd("32");
-      legacyCust.setSbo("0080");
-    }
+    // if (!StringUtils.isEmpty(data.getCustSubGrp()) &&
+    // gmllcScenarios.contains(data.getCustSubGrp())) {
+    // legacyCust.setIsuCd("32");
+    // legacyCust.setSbo("0080");
+    // }
   }
 
   @Override
