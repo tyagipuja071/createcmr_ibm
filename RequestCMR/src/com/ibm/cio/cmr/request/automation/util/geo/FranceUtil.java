@@ -42,6 +42,7 @@ import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
@@ -786,6 +787,8 @@ public class FranceUtil extends AutomationUtil {
         case "iERP Site Party ID":
           // SKIP THESE FIELDS
           break;
+        case "Abbreviated Name (TELX1)":
+          break;
         default:
           // Set Negative check status for any other fields updated.
           failedChecks.put(field, field + " updated.");
@@ -826,7 +829,8 @@ public class FranceUtil extends AutomationUtil {
     Addr billing = requestData.getAddress("ZP01");
     Addr installing = requestData.getAddress("ZS01");
     Addr payment = requestData.getAddress("ZP02");
-    StringBuilder detail = new StringBuilder();
+    String dataDetails = output.getDetails() != null ? output.getDetails() : "";
+    StringBuilder detail = new StringBuilder(dataDetails);
     Map<String, String> failedChecks = new HashMap<String, String>();
     DataRdc rdc = getDataRdc(entityManager, admin);
     if ("9500".equals(rdc.getIsicCd())) {
@@ -881,20 +885,37 @@ public class FranceUtil extends AutomationUtil {
 
       for (Addr addr : addrsToChk) {
         if ("Y".equals(addr.getImportInd())) {
-          if ((changes.isAddressFieldChanged(addr.getId().getAddrType(), "Contact Person")
-              || changes.isAddressFieldChanged(addr.getId().getAddrType(), "Phone #")) && isOnlyFieldUpdated(changes)
-              && engineData.getNegativeCheckStatus("RESTRICED_DATA_UPDATED") == null && failedChecks.isEmpty()) {
+          if (!isRelevantFieldUpdated(changes) && engineData.getNegativeCheckStatus("RESTRICED_DATA_UPDATED") == null && failedChecks.isEmpty()) {
             validation.setSuccess(true);
-            LOG.debug("Contact Person/Phone# is found to be updated.Updates verified.");
-            detail.append("Updates to relevant addresses found but have been marked as Verified.");
+            LOG.debug("Updates to " + ("ZS01".equals(addr.getId().getAddrType()) ? "Installing" : "Payment") + " have been verified.");
+            detail.append("Updates to " + ("ZS01".equals(addr.getId().getAddrType()) ? "Installing" : "Payment") + " have been verified.");
             validation.setMessage("Validated");
             hasNegativeCheck = false;
-            break;
-          }
-
-          else if (!isOnlyFieldUpdated(changes)) {
+          } else if (isRelevantFieldUpdated(changes) && changes.isAddressChanged("ZS01")) {
+            LOG.debug("Installing address updated");
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installing, false);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              for (DnBMatchingResponse dnb : matches) {
+                boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, dnb);
+                String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
+                if (closelyMatches && StringUtils.isNotBlank(siret) && data.getTaxCd1().equalsIgnoreCase(siret)) {
+                  matchesDnb = true;
+                  break;
+                }
+              }
+              if (matchesDnb) {
+                detail.append("Updates to Installing address have been verified.\n");
+                validation.setMessage("Validated");
+                hasNegativeCheck = false;
+              } else {
+                hasNegativeCheck = true;
+                failedChecks.put("INSTALLING_UPDATED", "Updates to Installing address need verification as it does not match D&B.");
+              }
+            }
+          } else if (isRelevantFieldUpdated(changes) && (changes.isAddressChanged("ZP02"))) {
             hasNegativeCheck = true;
-            failedChecks.put("ADDR_FIELDS_UPDTD", "Installing / Payment addresses cannot be modified.");
+            failedChecks.put("ADDR_FIELDS_UPDTD", "Payment addresses cannot be modified.");
           }
 
         }
@@ -914,6 +935,7 @@ public class FranceUtil extends AutomationUtil {
       validation.setMessage("Review needed.");
       validation.setSuccess(false);
       output.setDetails(details.toString());
+      output.setDetails(detail.toString());
     } else {
       validation.setSuccess(true);
       detail.append("Updates to relevant addresses found but have been marked as Verified.");
@@ -923,8 +945,8 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
-  private boolean isOnlyFieldUpdated(RequestChangeContainer changes) {
-    boolean isOnlyFieldUpdated = true;
+  private boolean isRelevantFieldUpdated(RequestChangeContainer changes) {
+    boolean isRelevantFieldUpdated = false;
     List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
     String[] addressFields = { "Customer Name", "Customer Name Continuation", "Customer Name/ Additional Address Information", "Country (Landed)",
         "Street", "Street Continuation", "Postal Code", "City", "PostBox" };
@@ -932,11 +954,11 @@ public class FranceUtil extends AutomationUtil {
     for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
       String fieldId = updatedAddrModel.getDataField();
       if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
-        isOnlyFieldUpdated = false;
+        isRelevantFieldUpdated = true;
         break;
       }
     }
 
-    return isOnlyFieldUpdated;
+    return isRelevantFieldUpdated;
   }
 }

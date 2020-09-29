@@ -83,7 +83,7 @@
 </cmr:row>
 
 <cmr:row addBackground="true">
-  <cmr:column span="4" forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+  <cmr:column span="4" forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729,675">
     <cmr:label fieldId="custNm4">
       <cmr:fieldLabel fieldId="CustomerName4" />: 
       <cmr:view>
@@ -179,9 +179,9 @@
         <cmr:field fieldId="LocalLangCountryName" id="bldg" path="bldg" />
       </p>
     </cmr:column>
-    
+    <!-- Remove ICE to customer tab -->
       <!-- We are using for ICE Field -->
-  <div id="ice">
+  <!-- <div id="ice">
   <cmr:column span="2" containerForField="Department" forCountry="642">
     <p>
       <cmr:label fieldId="dept">
@@ -191,7 +191,7 @@
       <cmr:field fieldId="Department" id="dept" path="dept"/>
     </p>
   </cmr:column>
-  </div> 
+  </div> -->
        
   </cmr:row>
 </cmr:view>

@@ -101,6 +101,7 @@ public class OverrideOutput implements AutomationOutput {
     Data dataObj = requestData.getData();
     Admin adminObj = requestData.getAdmin();
     AutomationData dataRecord = null;
+    List<Addr> modifiedAddresses = new ArrayList<Addr>();
     for (FieldResultKey fieldKey : this.data.keySet()) {
       fieldResult = this.data.get(fieldKey);
       if (fieldResult != null) {
@@ -116,6 +117,7 @@ public class OverrideOutput implements AutomationOutput {
           Addr addr = requestData.getAddress(addrType);
           if (addr != null) {
             setEntityValue(addr, fieldResult.getFieldName(), fieldResult.getNewValue());
+            modifiedAddresses.add(addr);
           }
         }
         if (dataRecord != null) {
@@ -137,6 +139,10 @@ public class OverrideOutput implements AutomationOutput {
 
     Data data = requestData.getData();
     entityManager.merge(data);
+
+    for (Addr addr : modifiedAddresses) {
+      entityManager.merge(addr);
+    }
 
   }
 
@@ -219,10 +225,11 @@ public class OverrideOutput implements AutomationOutput {
               set.invoke(entity, value);
             }
           } catch (Exception e) {
+            LOG.trace("Field " + fieldName + " cannot be set vis method.", e);
             field.set(entity, value);
           }
         } catch (Exception e) {
-          LOG.trace("Field " + fieldName + " cannot be assigned. Error: " + e.getMessage());
+          LOG.trace("Field " + fieldName + " cannot be assigned. ", e);
         }
       }
     }

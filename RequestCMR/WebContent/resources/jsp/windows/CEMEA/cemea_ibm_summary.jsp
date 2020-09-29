@@ -21,12 +21,14 @@
    <cmr:row addBackground="true">
       <cmr:column span="1" width="127">
       </cmr:column>
+      <cmr:view exceptForCountry="620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
       <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="SalRepNameNo" />: </label>
       </cmr:column>
       <cmr:column span="1" width="240">
         ${summary.data.repTeamMemberNo}
       </cmr:column>
+      </cmr:view>
       <cmr:view exceptForCountry="618">
         <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="EngineeringBo" />: </label>
@@ -35,14 +37,14 @@
           ${summary.data.engineeringBo}
         </cmr:column>
       </cmr:view>
-      <cmr:view forCountry="618">
+      <%-- <cmr:view forCountry="618">
         <cmr:column span="1" width="130">
           <label><cmr:fieldLabel fieldId="CreditCd" />: </label>
         </cmr:column>
         <cmr:column span="1" width="240">
           ${summary.data.creditCd}
         </cmr:column>
-      </cmr:view>
+      </cmr:view> --%>
    </cmr:row>
    <cmr:row addBackground="true">
      <cmr:column span="1" width="127">
@@ -53,7 +55,7 @@
       <cmr:column span="1" width="240">
        ${summary.data.salesBusOffCd}
       </cmr:column>
-      <cmr:view forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+      <cmr:view forCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
         <cmr:column span="1" width="130">
          <label><cmr:fieldLabel fieldId="LocalTax2" />: </label>
         </cmr:column>
@@ -73,14 +75,14 @@
    <cmr:row addBackground="true">
       <cmr:column span="1" width="127">
       </cmr:column>
-      <cmr:view forCountry="618">
+      <%-- <cmr:view forCountry="618">
         <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="CurrencyCd" />: </label>
         </cmr:column>
         <cmr:column span="1" width="240">
           ${summary.data.legacyCurrencyCd}
         </cmr:column>
-      </cmr:view>
+      </cmr:view> --%>
       <cmr:view exceptForCountry="620,642,675,677,680,752,762,762,767,768,772,805,808,808,823,832,849,850,865,618,758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,826,889,358,359,363">
         <cmr:column span="1" width="130">
             <label><cmr:fieldLabel fieldId="AECISubDate" />: </label>
