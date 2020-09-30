@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.geo.impl.MCOHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -47,12 +48,15 @@ public class FstTransformer extends MCOTransformer {
   protected static final String[] ADDRESS_ORDER = { "ZI01", "ZP01", "ZS01", "ZD01", "ZS02" };
   protected static final String[] ADDRESS_ORDER_LD = { "ZS02", "ZP01", "ZS01", "ZD01", "ZI01" };
   private static final String DEFAULT_CLEAR_NUM = "0";
-
   private static final List<String> FST_COUNTRY_LIST = Arrays.asList(SystemLocation.MAURITIUS, SystemLocation.MALI, SystemLocation.EQUATORIAL_GUINEA,
       SystemLocation.SENEGAL, SystemLocation.IVORY_COAST, SystemLocation.GABON, SystemLocation.DEMOCRATIC_CONGO, SystemLocation.CONGO_BRAZZAVILLE,
       SystemLocation.DJIBOUTI, SystemLocation.GUINEA_CONAKRY, SystemLocation.CAMEROON, SystemLocation.MADAGASCAR, SystemLocation.MAURITANIA,
       SystemLocation.TOGO, SystemLocation.GAMBIA, SystemLocation.CENTRAL_AFRICAN_REPUBLIC, SystemLocation.BENIN, SystemLocation.BURKINA_FASO,
       SystemLocation.SEYCHELLES, SystemLocation.GUINEA_BISSAU, SystemLocation.NIGER, SystemLocation.CHAD);
+
+  private static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
+  private static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  private static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   private boolean isLDEnabled = true;
 
@@ -89,6 +93,32 @@ public class FstTransformer extends MCOTransformer {
         }
       }
       legacyCust.setCreditCd("");
+
+      String dataEmbargoCd = data.getEmbargoCd();
+      String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
+                                                                                            // removal-single
+      // inactivation
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && ("Y".equals(rdcEmbargoCd))) {
+          if (StringUtils.isBlank(data.getEmbargoCd())) {
+            legacyCust.setEmbargoCd("");
+          }
+        }
+      } // Support temporary reactivation
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd("");
+        blankOrdBlockFromData(entityManager, data);
+      }
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd(rdcEmbargoCd);
+        resetOrdBlockToData(entityManager, data);
+      }
     }
 
     legacyCust.setAccAdminBo("");
@@ -138,6 +168,18 @@ public class FstTransformer extends MCOTransformer {
     // legacyCust.setIsuCd("32");
     // legacyCust.setSbo("0080");
     // }
+  }
+
+  private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("");
+    entityManager.merge(data);
+    entityManager.flush();
+  }
+
+  private void resetOrdBlockToData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("88");
+    entityManager.merge(data);
+    entityManager.flush();
   }
 
   @Override
