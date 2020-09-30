@@ -314,7 +314,7 @@
     <cmr:buttonsRow>
       <input style="height:40px" type="button" class="ibm-btn-cancel-sec ibm-btn-small" value="Back to Search Home" onclick="backToCodeMaintHome()">
     </cmr:buttonsRow>
-    <br>
+    <br> 
   </cmr:section>
 </div>
 <script src="${resourcesPath}/js/legacy/legacysearch.js?${cmrv}"></script>
