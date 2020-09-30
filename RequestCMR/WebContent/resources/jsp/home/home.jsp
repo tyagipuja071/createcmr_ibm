@@ -3,6 +3,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
+<script src="${resourcesPath}/js/system/chart.bundle.js?${cmrv}" type="text/javascript"></script>
 <style>
 div.cmr-alert {
  border:1px Solid #FF7777; 
@@ -24,7 +25,98 @@ dojo.addOnLoad(function(){
     msg += 'Some functions of the application may not work correctly until you update to the required version.';
     cmr.showAlert(msg);
   }
+  window.setTimeout('generateCharts()', 500);
 });
+
+function generateCharts(){
+  var creates = cmr.query('VISUAL.DAILY_CREATES', {MANDT : cmr.MANDT, _qall : 'Y'});
+  var ctx = dojo.byId("canvas").getContext("2d");
+  
+  var dataSet = [];
+  var labelSet = [];
+  var colorSet = [];
+  var totals = 0;
+  creates.forEach(function(item, i){
+    dataSet.push(Number(item.ret2));
+    labelSet.push(item.ret1.trim());
+    colorSet.push(getRandomColor());
+    totals += Number(item.ret2);
+  });
+  var ctx = dojo.byId("canvas").getContext("2d");
+  
+  var chart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labelSet,
+      datasets: [{
+        backgroundColor: colorSet,
+        data: dataSet
+      }]
+    },
+    options : {
+      title : {
+        display : true,
+        text : 'Total Requests Created Today (GMT): '+totals
+      },
+      tooltips : {
+        mode : 'index',
+        intersect : false
+      },
+      legend : {
+        display : false
+      },
+      responsive : true
+    }
+  });
+
+  var completes = cmr.query('VISUAL.DAILY_COMPLETES', {MANDT : cmr.MANDT, _qall : 'Y'});
+  var ctx2 = dojo.byId("canvas2").getContext("2d");
+  
+  var dataSet2 = [];
+  var labelSet2 = [];
+  var colorSet2 = [];
+  var totals2 = 0;
+  completes.forEach(function(item, i){
+    dataSet2.push(Number(item.ret2));
+    labelSet2.push(item.ret1.trim());
+    colorSet2.push(getRandomColor());
+    totals2 += Number(item.ret2);
+  });
+  var ctx2 = dojo.byId("canvas2").getContext("2d");
+  
+  var chart2 = new Chart(ctx2, {
+    type: 'pie',
+    data: {
+      labels: labelSet2,
+      datasets: [{
+        backgroundColor: colorSet2,
+        data: dataSet2
+      }]
+    },
+    options : {
+      title : {
+        display : true,
+        text : 'Total Requests Completed Today (GMT): '+totals2
+      },
+      tooltips : {
+        mode : 'index',
+        intersect : false
+      },
+      legend : {
+        display : false
+      },
+      responsive : true
+    }
+  });
+  
+}
+
+function getRandomColor() {
+  var r = Math.floor(Math.random() * 255);
+  var g = Math.floor(Math.random() * 255);
+  var b = Math.floor(Math.random() * 255);
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
 </script>
 <%
   String alert = SystemConfiguration.getValue("ALERT",null); 
@@ -82,19 +174,15 @@ dojo.addOnLoad(function(){
 				<div class="ibm-col-1-1">
 							
 					<div class="ibm-columns">
-						<div class="ibm-col-4-3">
+						<div class="ibm-col-4-2">
 							<div id="welcome_note_id">
 								<%=home%>
 							</div>
 													
 						</div>
-						<div class="ibm-col-4-1">
-             <div class="news-header">News</div>
-             <div class="news-content">
-               <ul>
-                      <%=info%>
-               </ul>
-             </div>
+						<div class="ibm-col-4-2">
+              <canvas id="canvas" style="height:20px"></canvas>
+              <canvas id="canvas2" style="height:20px"></canvas>
 						</div>
 					</div>
 					
