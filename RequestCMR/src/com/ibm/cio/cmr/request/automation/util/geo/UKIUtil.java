@@ -231,6 +231,7 @@ public class UKIUtil extends AutomationUtil {
         if (!managerCheck) {
           if (changes.isDataChanged("INAC/NAC Code") || changes.isDataChanged("Company Number")) {
             cmdeReview = true;
+            admin.setScenarioVerifiedIndc("Y");
           } else {
             details.append("'Updates to coverage fields cannot be validated.\n");
           }
