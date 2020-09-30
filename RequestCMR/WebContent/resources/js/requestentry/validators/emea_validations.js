@@ -8420,7 +8420,7 @@ function autoSetAbbrNameUKI() {
     if (result.ret1 != undefined && result.ret1 != '') {
       FormManager.setValue('abbrevNm', result.ret1);
     }
-  } else if (('INTER' == custSubGrp) && (SysLoc.IRELAND == cmrCntry)) {
+  } else if (('INTER' == custSubGrp)) {
     // Defect-6793
     autoSetAbbrevNmFrmDept();
   } else {
