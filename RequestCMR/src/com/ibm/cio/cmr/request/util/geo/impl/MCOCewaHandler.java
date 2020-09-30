@@ -343,7 +343,7 @@ public class MCOCewaHandler extends MCOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
-    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType())) {
+    if (CmrConstants.REQ_TYPE_UPDATE.equalsIgnoreCase(admin.getReqType()) || CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
       if (!StringUtils.isEmpty(data.getSalesBusOffCd())) {
         data.setSearchTerm(data.getSalesBusOffCd());
       }

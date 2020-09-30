@@ -30,6 +30,7 @@ import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.geo.impl.MCOHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
+import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
@@ -49,6 +50,10 @@ public class CEWATransformer extends MCOTransformer {
       SystemLocation.MALAWI_CAF, SystemLocation.LIBERIA, SystemLocation.MOZAMBIQUE, SystemLocation.NIGERIA, SystemLocation.ZIMBABWE,
       SystemLocation.SAO_TOME_ISLANDS, SystemLocation.RWANDA, SystemLocation.SIERRA_LEONE, SystemLocation.SOMALIA, SystemLocation.SOUTH_SUDAN,
       SystemLocation.TANZANIA, SystemLocation.UGANDA, SystemLocation.ZAMBIA);
+
+  private static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
+  private static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  private static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   public CEWATransformer(String cmrIssuingCntry) {
     super(cmrIssuingCntry);
@@ -82,6 +87,32 @@ public class CEWATransformer extends MCOTransformer {
         }
       }
       legacyCust.setCreditCd("");
+
+      String dataEmbargoCd = data.getEmbargoCd();
+      String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
+                                                                                            // removal-single
+      // inactivation
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
+        if (!StringUtils.isBlank(rdcEmbargoCd) && ("Y".equals(rdcEmbargoCd))) {
+          if (StringUtils.isBlank(data.getEmbargoCd())) {
+            legacyCust.setEmbargoCd("");
+          }
+        }
+      } // Support temporary reactivation
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd("");
+        blankOrdBlockFromData(entityManager, data);
+      }
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd(rdcEmbargoCd);
+        resetOrdBlockToData(entityManager, data);
+      }
     }
 
     legacyCust.setAccAdminBo("");
@@ -131,6 +162,18 @@ public class CEWATransformer extends MCOTransformer {
     // legacyCust.setIsuCd("32");
     // legacyCust.setSbo("0080");
     // }
+  }
+
+  private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("");
+    entityManager.merge(data);
+    entityManager.flush();
+  }
+
+  private void resetOrdBlockToData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("88");
+    entityManager.merge(data);
+    entityManager.flush();
   }
 
   @Override
