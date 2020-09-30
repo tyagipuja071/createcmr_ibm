@@ -1363,7 +1363,7 @@ function addTinNumberValidationTz() {
             id : 'taxCd1',
             type : 'text',
             name : 'taxCd1'
-          }, false, 'Invalid Tin number length for TZ. Tin number should be 11 characters long.');
+          }, false, 'Invalid format of Tin Number. Format should be NNN-NNN-NNN.');
         }
         return new ValidationResult(null, true);
       }
