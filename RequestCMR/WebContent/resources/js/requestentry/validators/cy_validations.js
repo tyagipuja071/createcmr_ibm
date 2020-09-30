@@ -4136,7 +4136,7 @@ function addHandlerForCustSubTypeBpGRTRCY() {
   }
 }
 
-function setCustSubTypeBpGRTRCY() {
+function setCustSubTypeBpGRTRCY(fromAddress, scenario, scenarioChanged) {
   var custType = FormManager.getActualValue('custSubGrp');
   var _reqId = FormManager.getActualValue('reqId');
   
@@ -4168,18 +4168,36 @@ function setCustSubTypeBpGRTRCY() {
       FormManager.setValue('clientTier', '7');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '21');
-      FormManager.setValue('vatExempt', false);
-      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+      if(scenarioChanged){
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+        FormManager.setValue('vatExempt', false);
+      }
     } else if (custType == 'SAASP') {
       FormManager.readOnly('clientTier');
       FormManager.setValue('clientTier', 'S');
       FormManager.readOnly('isuCd');
       FormManager.setValue('isuCd', '32');
-      FormManager.resetValidations('vat');
-      FormManager.setValue('vatExempt', 'Y');
-    } else {
+      if(scenarioChanged){
+        FormManager.resetValidations('vat');
+        FormManager.setValue('vatExempt', 'Y');
+      }
+     }else if (custType == 'PRICU') {
+       FormManager.enable('clientTier');
+       FormManager.enable('isuCd');
+       if(scenarioChanged){
+         FormManager.resetValidations('vat');
+         FormManager.setValue('vatExempt', 'Y');
+       }
+     }else {
       FormManager.enable('clientTier');
       FormManager.enable('isuCd');
+      if(scenarioChanged){
+        checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
+        FormManager.setValue('vatExempt', false);
+      }
+    }
+    
+    if (undefined != dijit.byId('vatExempt') && !dijit.byId('vatExempt').get('checked')) {
       checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ],'MAIN_CUST_TAB');
       FormManager.setValue('vatExempt', false);
     }
