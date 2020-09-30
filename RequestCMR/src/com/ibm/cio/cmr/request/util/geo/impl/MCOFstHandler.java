@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -502,6 +503,7 @@ public class MCOFstHandler extends MCOHandler {
             String stcont = ""; // 5
             String addnameinfo = ""; // 9
             String poBox = "";// 10
+            String numero = "";// 15
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
@@ -522,6 +524,8 @@ public class MCOFstHandler extends MCOHandler {
                 DataFormatter df = new DataFormatter();
                 phoneNo = df.formatCellValue(row.getCell(13));
               }
+              currCell = (XSSFCell) row.getCell(15);
+              numero = validateColValFromCell(currCell);
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -573,6 +577,15 @@ public class MCOFstHandler extends MCOHandler {
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
+                validations.add(error);
+              }
+            }
+            if (numero.length() != 0 && numero.length() == 21) {
+              boolean isMatch = Pattern.matches("\\d{5}\\s\\d{2}\\s\\d{4}\\s\\d\\s\\d{5}$", numero);
+              if (!isMatch) {
+                LOG.trace("Invalid format for Numero Statistique du Client.");
+                error.addError(row.getRowNum(), "Numero Statistique du Client",
+                    "Invalid format for Numero Statistique du Client. Format should be NNNNN NN NNNN N NNNNN");
                 validations.add(error);
               }
             }

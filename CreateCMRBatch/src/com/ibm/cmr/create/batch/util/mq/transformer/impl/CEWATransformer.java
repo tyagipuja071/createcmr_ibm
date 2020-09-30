@@ -592,4 +592,15 @@ public class CEWATransformer extends MCOTransformer {
     }
     return true;
   }
+
+  @Override
+  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
+      MassUpdtData muData, String cmr) throws Exception {
+    if (!StringUtils.isBlank(muData.getCompany())) {
+      if (SystemLocation.TANZANIA.equals(cmrIssuingCntry)) {
+        custExt.setiTaxCode(muData.getCompany());
+      }
+    }
+  }
+
 }
