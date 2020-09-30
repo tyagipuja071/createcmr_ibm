@@ -82,10 +82,10 @@ public class MassChangeTemplateManager {
     configList.put("825", "config.CEWA.xml");
     configList.put("827", "config.CEWA.xml");
     configList.put("831", "config.CEWA.xml");
-    configList.put("833", "config.CEWA.xml");
+    configList.put("833", "config.833.xml");
     configList.put("835", "config.CEWA.xml");
     configList.put("842", "config.CEWA.xml");
-    configList.put("851", "config.CEWA.xml");
+    configList.put("851", "config.851.xml");
     configList.put("857", "config.CEWA.xml");
     configList.put("883", "config.CEWA.xml");
     configList.put("373", "config.FST.xml");
@@ -99,7 +99,7 @@ public class MassChangeTemplateManager {
     configList.put("670", "config.FST.xml");
     configList.put("691", "config.FST.xml");
     configList.put("692", "config.FST.xml");
-    configList.put("700", "config.FST.xml");
+    configList.put("700", "config.700.xml");
     configList.put("717", "config.FST.xml");
     configList.put("718", "config.FST.xml");
     configList.put("753", "config.FST.xml");

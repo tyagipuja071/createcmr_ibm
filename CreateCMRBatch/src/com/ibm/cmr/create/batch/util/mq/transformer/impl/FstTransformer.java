@@ -145,7 +145,7 @@ public class FstTransformer extends MCOTransformer {
       CMRRequestContainer cmrObjects) {
     Data data = cmrObjects.getData();
 
-    if ("700".equals(cmrIssuingCntry)) {
+    if (SystemLocation.MADAGASCAR.equals(cmrIssuingCntry)) {
       if (StringUtils.isNotBlank(data.getBusnType())) {
         legacyCustExt.setiTaxCode(data.getBusnType());
       }
@@ -153,8 +153,18 @@ public class FstTransformer extends MCOTransformer {
   }
 
   @Override
+  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
+      MassUpdtData muData, String cmr) throws Exception {
+    if (!StringUtils.isBlank(muData.getNewEntpName1())) {
+      if (SystemLocation.MADAGASCAR.equals(cmrIssuingCntry)) {
+        custExt.setiTaxCode(muData.getNewEntpName1());
+      }
+    }
+  }
+
+  @Override
   public boolean hasCmrtCustExt() {
-    if ("700".equals(cmrIssuingCntry)) {
+    if (SystemLocation.MADAGASCAR.equals(cmrIssuingCntry)) {
       return true;
     } else {
       return false;
