@@ -32,8 +32,8 @@ public class DPLSearchController extends BaseWindowController {
     String reqId = request.getParameter("reqId");
 
     if (!StringUtils.isNumeric(reqId)) {
-      mv.addObject("reqId", 0);
       mv.addObject("error", true);
+      mv.addObject("reqId", 0);
       mv.addObject("msg", "Invalid Request ID. Request " + reqId + " does not exist.");
     } else {
       mv.addObject("reqId", Long.parseLong(reqId));
