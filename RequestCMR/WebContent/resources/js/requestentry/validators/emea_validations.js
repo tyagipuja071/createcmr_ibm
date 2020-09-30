@@ -8507,7 +8507,8 @@ function requestingLOBCheckFrIFSL() {
         return new ValidationResult(null, true);
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -8527,7 +8528,7 @@ function requestingLOBCheckFrIFSL() {
         return new ValidationResult(null, true);
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 function addALPHANUMValidatorForEnterpriseNumber() {
   FormManager.addFormValidator((function() {
