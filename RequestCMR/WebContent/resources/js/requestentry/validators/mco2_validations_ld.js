@@ -1399,13 +1399,13 @@ function addAttachmentValidatorOnTaxRegMadagascar() {
         });
         if (taxCd1.length > 0) {
           if (ret == null || ret.ret1 == null) {
-            return new ValidationResult(null, false, 'VAT/TAX Documentation has not been attached to the request. This is required since Numero Statistique du Client is filled out.');
+            return new ValidationResult(null, false, 'VAT/TAX Documentation has not been attached to the request.');
           }
         }
         return new ValidationResult(null, true);
       }
     };
-  })(), null, 'frmCMR');
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
 }
 var _importedIndc = null;
 function getImportedIndc() {
