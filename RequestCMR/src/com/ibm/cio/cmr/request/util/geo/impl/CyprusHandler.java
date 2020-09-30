@@ -3404,6 +3404,8 @@ public class CyprusHandler extends BaseSOFHandler {
             String phoneNo = ""; // 12
             String poBox = ""; // 13
             String landCountry = ""; //11
+            List<String> checkList = null;
+            long count = 0;
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -3447,14 +3449,17 @@ public class CyprusHandler extends BaseSOFHandler {
               landCountry = validateColValFromCell(currCell);
             }
 
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+            checkList = Arrays.asList(street, addressCont, poBox, attPerson);
+            count = checkList.stream().filter(field -> !field.isEmpty()).count();
+            
+            if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
                 poBox = df.formatCellValue(row.getCell(13));
               }
             }
 
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(12);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
@@ -3487,6 +3492,25 @@ public class CyprusHandler extends BaseSOFHandler {
                 validations.add(error);
               }
             }
+            if(count > 2){
+              LOG.trace("Out of Street, Address Con't, PO BOX and Att Person only 2 can be filled at the same time .");
+              error.addError(row.getRowNum(), "Address Con't/PO BOX",
+                  "Out of Street, Address Con't, PO BOX and Att Person only 2 can be filled at the same time . ");
+              validations.add(error);
+              count = 0;
+            }
+            if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localPostal)) {
+              LOG.trace("Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+              error.addError(row.getRowNum(), "Local Postal Code",
+                  "Cross Border City and Local Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+              validations.add(error);
+            }
+            if (!StringUtils.isEmpty(localCity) && !StringUtils.isEmpty(cbPostal)) {
+              LOG.trace("Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+              error.addError(row.getRowNum(), "Local City",
+                  "Local City and Cross Border Postal Code must not be populated at the same time. If one is populated, the other must be empty.");
+              validations.add(error);
+            }
             
             if (!StringUtils.isEmpty(landCountry)) {
               if (!("CY").equals(landCountry) && ( !StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
@@ -3506,36 +3530,49 @@ public class CyprusHandler extends BaseSOFHandler {
               validations.add(error);
             }
 
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox)) {
                 LOG.trace("Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Street/PO Box",
                     "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
                 validations.add(error);
               }
-              if (!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
-                LOG.trace("Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Address Con't/Att. Person",
-                    "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              }
-
-              if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
-                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Address Sequence No.",
-                    "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              }
-
               if (poBox.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
             }
+            if (StringUtils.isEmpty(street) && !StringUtils.isEmpty(addressCont)) {
+              LOG.trace("Address Con't cannot be filled if Street is empty .Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Street/Address Con't",
+                  "Address Con't cannot be filled if Street is empty .Please fix and upload the template again.");
+              validations.add(error);
+            }
+            
+            if (!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
+              LOG.trace("Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Con't/Att. Person",
+                  "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            
+            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            
+            if (StringUtils.isEmpty(cmrNo) ) {
+              LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "CMR No.",
+                  "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              validations.add(error);
+            }
 
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
-              if (phoneNo.contains("+")) {
+            if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Shipping Address (Update)".equalsIgnoreCase(sheet.getSheetName())) {
+              if (phoneNo.contains("+") || ( !StringUtils.isEmpty(phoneNo)  && !phoneNo.matches("-?\\d+(\\.\\d+)?"))) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
