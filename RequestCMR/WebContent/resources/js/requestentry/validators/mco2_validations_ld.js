@@ -1358,7 +1358,7 @@ function addTinNumberValidationTz() {
       validate : function() {
         var tinNumber = FormManager.getActualValue('taxCd1');
 
-        if (tinNumber.length > 0 && tinNumber.length < 11) {
+        if (tinNumber.length > 0 && !tinNumber.match("([0-9]{3}-[0-9]{3}-[0-9]{3})")) {
           return new ValidationResult({
             id : 'taxCd1',
             type : 'text',
