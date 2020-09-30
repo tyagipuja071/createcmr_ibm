@@ -234,6 +234,7 @@ public class UKIUtil extends AutomationUtil {
             admin.setScenarioVerifiedIndc("Y");
           } else {
             details.append("'Updates to coverage fields cannot be validated.\n");
+            admin.setScenarioVerifiedIndc("N");
           }
         } else {
           admin.setScenarioVerifiedIndc("Y");
