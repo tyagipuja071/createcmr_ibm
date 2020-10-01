@@ -503,23 +503,19 @@ public class MCOPtEsHandler extends MCOHandler {
     }
     address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     address.setTransportZone("Z000000001");
-    if ("ZD01".equals(address.getId().getAddrType()) && address.getCustPhone() != null) {
-      removeTFFromShipingAddr(address);
-    }
-    if ("822".equals(currentRecord.getCmrIssuedBy()) && address.getCustPhone() != null) {
-      removeTFFromShipingAddr(address);
-    }
     address.setDept("");
 
-    if (!StringUtils.isEmpty(address.getCustPhone())) {
-      if (!"ZS01".equals(address.getId().getAddrType()) && !"ZD01".equals(address.getId().getAddrType())
-          && !"ZP02".equals(address.getId().getAddrType())) {
-        address.setCustPhone("");
-      }
-    }
-    if ("822".equals(currentRecord.getCmrIssuedBy()) && "ZD01".equals(address.getId().getAddrType())) {
+    if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())
+        || "ZS02".equals(address.getId().getAddrType())) {
+      address.setCustPhone("");
+    } else if ("ZD01".equals(address.getId().getAddrType())) {
       String phone = getShippingPhoneFromLegacy(currentRecord);
       address.setCustPhone(phone != null ? phone : "");
+    } else if ("ZS01".equals(address.getId().getAddrType())) {
+      address.setCustPhone(currentRecord.getCmrCustPhone());
+    }
+    if (("ZD01".equals(address.getId().getAddrType()) || ("ZS01".equals(address.getId().getAddrType()))) && address.getCustPhone() != null) {
+      removeTFFromShipingAddr(address);
     }
     if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
@@ -1234,6 +1230,13 @@ public class MCOPtEsHandler extends MCOHandler {
             }
 
             TemplateValidation error = new TemplateValidation(name);
+
+            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
             if (StringUtils.isEmpty(street) && !StringUtils.isEmpty(addressCont)) {
               LOG.trace("Address Continuation cannot be filled if Street is empty. >> ");
               error.addError(row.getRowNum(), "Address Continuation", "Address Continuation cannot be filled if Street is empty.");
@@ -1252,7 +1255,6 @@ public class MCOPtEsHandler extends MCOHandler {
                   + "If one is populated, the other must be empty.");
               validations.add(error);
             }
-
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(cbPostal)) {
               int maxlengthcomputed = crossCity.length() + cbPostal.length();
               if (maxlengthcomputed > 32) {
@@ -1262,7 +1264,6 @@ public class MCOPtEsHandler extends MCOHandler {
                 validations.add(error);
               }
             }
-
             if (!StringUtils.isEmpty(landCountry)) {
               if (!("PT").equals(landCountry) && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
                 LOG.trace("Landed Country should be PT for Local Scenario.");
@@ -1274,19 +1275,11 @@ public class MCOPtEsHandler extends MCOHandler {
                 validations.add(error);
               }
             }
-
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox)) {
                 LOG.trace("Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Street/PO Box",
                     "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              }
-
-              if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
-                LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Address Sequence No.",
-                    "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                 validations.add(error);
               }
 
