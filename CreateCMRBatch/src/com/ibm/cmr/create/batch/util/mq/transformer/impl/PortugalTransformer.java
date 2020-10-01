@@ -152,7 +152,7 @@ public class PortugalTransformer extends MessageTransformer {
       line3 = addrData.getAddrTxt2();
     }
 
-    if (line3.length() > 30) {
+    if (!StringUtils.isEmpty(line3) && line3.length() > 30) {
       line3 = line3.substring(0, 30);
     }
 
