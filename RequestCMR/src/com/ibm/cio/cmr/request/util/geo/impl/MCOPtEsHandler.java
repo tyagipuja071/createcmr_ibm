@@ -1282,12 +1282,6 @@ public class MCOPtEsHandler extends MCOHandler {
                     "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
                 validations.add(error);
               }
-              if (!StringUtils.isEmpty(addressCont) && !StringUtils.isEmpty(attPerson)) {
-                LOG.trace("Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Address Con't/Att. Person",
-                    "Note that Address Con't/Att. Person cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              }
 
               if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
                 LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
