@@ -2358,6 +2358,10 @@ function addAbbrevNmValidatorPT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var isCmrImported = getImportedIndcForPT();
+        if (isCmrImported == 'Y') {
+          return;
+        }
         var _abbrevNm = FormManager.getActualValue('abbrevNm');
         var reg = /^[-_ a-zA-Z0-9_/]+$/;
         if (_abbrevNm != '' && (_abbrevNm.length > 0 && !_abbrevNm.match(reg))) {
@@ -2378,6 +2382,10 @@ function addAbbrevLocationValidatorPT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
+        var isCmrImported = getImportedIndcForPT();
+        if (isCmrImported == 'Y') {
+          return;
+        }
         var _abbrevLocn = FormManager.getActualValue('abbrevLocn');
         var reg = /^[-_ a-zA-Z0-9]+$/;
         if (_abbrevLocn != '' && (_abbrevLocn.length > 0 && !_abbrevLocn.match(reg))) {
