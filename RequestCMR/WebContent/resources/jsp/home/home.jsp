@@ -11,6 +11,13 @@ div.cmr-alert {
  padding-left: 20px;
  border-radius: 10px;
 }
+
+img.logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  border: 1px Solid #AAA;
+}
 </style>
 <script>
 dojo.addOnLoad(function(){
@@ -149,6 +156,19 @@ function getRandomColor() {
   div.news-content ul {
     list-style: inside;
   }
+  div.logo {
+   width: 100px;
+   height: 100px;
+   display: inline-block;
+   padding-right: 10px;
+  }
+  div.logo-text {
+   display: inline-block;
+   width: 370px;
+   vertical-align: top;
+   padding-bottom: 20px;
+  }
+  
 </style>
 <div class="ibm-columns">
 
@@ -174,74 +194,51 @@ function getRandomColor() {
 				<div class="ibm-col-1-1">
 							
 					<div class="ibm-columns">
-						<div class="ibm-col-4-2">
+						<div class="ibm-col-4-2" style="width:500px">
 							<div id="welcome_note_id">
-								<%=home%>
+                 <div class="logo">
+                   <img src="${resourcesPath}/images/CreateCMRLogo.png" class="logo">
+                 </div>
+                 <div class="logo-text">
+                   <ul>
+                     <li>
+                     CreateCMR is part of the CMR Suite of Applications and supports the creation 
+                     and update of Customer Master Records (CMRs) at IBM. 
+                     </li>
+                     <li>
+                     The application also provides Web Service APIs for external systems to be able
+                     to directly create requests without using the user interface. 
+                     Specifications can be found <a href="https://w3-connections.ibm.com/files/app/file/5a2ff1b0-0534-44fd-9abb-52ab4be41d72">here</a>.
+                     </li>
+                   </ul>
+                 </div>
 							</div>
+
+              <div id="welcome_note_id">
+                 <div class="logo">
+                   <img src="${resourcesPath}/images/cmde.png" class="logo">
+                 </div>
+                 <div class="logo-text">
+                   <ul>
+                     <li>
+                     The Client Master Data Execution (CMDE) teams support the processing of requests created 
+                     within CreateCMR.  There are 3 major centers for CMDE: Kuala Lumpur, Bratislava, and Dalian.
+                     Specific teams handle requests from different countries.
+                     </li>
+                     <li>
+                     To know more about the CMDE teams and processes, please visit the <a href="https://w3.ibm.com/w3publisher/cmde-cmr">CMDE Site</a>.
+                     </li>
+                   </ul>
+                 </div>
+              </div>
 													
 						</div>
-						<div class="ibm-col-4-2">
+						<div class="ibm-col-4-2" style="width:400px">
               <canvas id="canvas" style="height:20px"></canvas>
               <canvas id="canvas2" style="height:20px"></canvas>
 						</div>
 					</div>
 					
-<!-- 					<div class="ibm-columns">
-						<div class="ibm-col-1-1">
-							<div class="ibm-container ibm-show-hide ibm-alternate">
-								<h2>
-									<a class="" href="#" style="">Sales Leaders</a>
-								</h2>
-								<div class="ibm-container-body" style="overflow: hidden; height: 1px; display: none;">
-									<div class="ibm-columns">
-										<div class="ibm-col-4-3" id="sales_leader_id">
-										</div>
-										<div class="ibm-col-4-1" id="sales_leader_bookmark_id">
-											<h2 style="border-top: 0px !important;">Userful bookmarks for Sales Leaders</h2>
-										</div>
-									</div>	
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="ibm-columns">
-						<div class="ibm-col-1-1">
-							<div class="ibm-container ibm-show-hide ibm-alternate">
-								<h2>
-									<a class="" href="#">IMT/GMT Quota Teams</a>
-								</h2>
-								<div class="ibm-container-body" style="overflow: hidden; height: 1px; display: none;">
-									<div class="ibm-columns">
-										<div class="ibm-col-4-3" id="quota_team_id">
-										</div>
-										<div class="ibm-col-4-1" id="quota_team_bookmark_id">
-											<h2 style="border-top: 0px !important;">Userful bookmarks for Quota Teams</h2>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>	
-					
-					<div class="ibm-columns">	
-						<div class="ibm-col-1-1">
-							<div class="ibm-container ibm-show-hide">
-								<h2>
-									<a class="ibm-show-active" href="#show-hide">Quota calendar and support</a>
-								</h2>
-								<div class="ibm-container-body" style="overflow: hidden; height: auto; display: block;">
-									<div class="ibm-columns">
-										<div class="ibm-col-4-3" id="calendar_id">
-										</div>
-										<div class="ibm-col-4-1" id="support_id">
-											<h2 style="border-top: 0px !important;">Support</h2>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>					
-					</div>	 -->									
 				</div>
 			</div>
 			
