@@ -60,8 +60,12 @@
   <script src="${resourcesPath}/js/requestentry/validators/mco1_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
-<cmr:view forGEO="MCO2">
+<cmr:view forGEO="MCO2" exceptForCountry="780">
   <script src="${resourcesPath}/js/requestentry/validators/mco2_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+
+<cmr:view forGEO="MCO2" forCountry="780">
+  <script src="${resourcesPath}/js/requestentry/validators/malta_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
 <cmr:view forGEO="FR">
