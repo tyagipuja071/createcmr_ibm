@@ -127,19 +127,33 @@ public class PortugalTransformer extends MessageTransformer {
 
     line1 = addrData.getCustNm1();
     line2 = addrData.getCustNm2();
+
+    if (StringUtils.isEmpty(line2)) {
+      line2 = addrData.getCustNm4().trim();
+      if (!StringUtils.isEmpty(addrData.getCustNm4()) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+        line2 = "ATT " + line2;
+      }
+    }
+
     if (StringUtils.isEmpty(line2)) {
       line2 = addrData.getAddrTxt2();
     }
 
-    line3 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
-    if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
-      line3 = "ATT " + line3;
+    if (!StringUtils.isEmpty(line2) && (!line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT: "))
+        && !StringUtils.isEmpty(addrData.getCustNm4())) {
+      line3 = !StringUtils.isEmpty(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
+      if (!StringUtils.isEmpty(line3) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
+        line3 = "ATT " + line3;
+      }
     }
+
+    if ((StringUtils.isEmpty(line3) && !StringUtils.isEmpty(addrData.getCustNm2()))
+        || (!StringUtils.isEmpty(line2) && line2.toUpperCase().startsWith("ATT ") && line2.toUpperCase().startsWith("ATT:"))) {
+      line3 = addrData.getAddrTxt2();
+    }
+
     if (line3.length() > 30) {
       line3 = line3.substring(0, 30);
-    }
-    if (StringUtils.isEmpty(line3) && !StringUtils.isEmpty(addrData.getCustNm2())) {
-      line3 = addrData.getAddrTxt2();
     }
 
     line4 = addrData.getAddrTxt();
@@ -165,8 +179,10 @@ public class PortugalTransformer extends MessageTransformer {
     int lineNo = 1;
     LOG.debug("Lines: " + line1 + " | " + line2 + " | " + line3 + " | " + line4 + " | " + line5 + " | " + line6);
     for (String line : lines) {
-      messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Address" + lineNo, line);
-      lineNo++;
+      if (StringUtils.isNotBlank(line)) {
+        messageHash.put(getAddressKey(addrData.getId().getAddrType()) + "Address" + lineNo, line);
+        lineNo++;
+      }
     }
 
     /*
@@ -685,9 +701,6 @@ public class PortugalTransformer extends MessageTransformer {
     legacyAddr.setForUpdate(true);
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data);
 
-    if (!StringUtils.isBlank(addr.getCounty())) {
-      legacyAddr.setAddrLine3(addr.getCounty());
-    }
     if (!StringUtils.isBlank(addr.getPostCd())) {
       legacyAddr.setZipCode(addr.getPostCd());
     }
@@ -740,24 +753,33 @@ public class PortugalTransformer extends MessageTransformer {
 
     if (!StringUtils.isBlank(massUpdtAddr.getCustNm2())) {
       line2 = massUpdtAddr.getCustNm2();
+    } else if (!StringUtils.isEmpty(massUpdtAddr.getCounty())) {
+      line2 = massUpdtAddr.getCounty().trim();
+      if (!StringUtils.isEmpty(massUpdtAddr.getCounty()) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
+        line2 = "ATT " + line2;
+      }
     } else {
       line2 = !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) ? massUpdtAddr.getAddrTxt2() : line2;
     }
 
-    if (!StringUtils.isEmpty(massUpdtAddr.getCounty()) && !StringUtils.isEmpty(line2)
-        && (line2.toUpperCase().startsWith("ATT ") || line2.toUpperCase().startsWith("ATT:"))) {
-      line2 = "";
+    if (!StringUtils.isEmpty(line2) && (!line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT: "))
+        && !StringUtils.isEmpty(massUpdtAddr.getCounty())) {
+      line3 = massUpdtAddr.getCounty().trim();
+      if (!StringUtils.isEmpty(massUpdtAddr.getCounty()) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
+        line3 = "ATT " + line3;
+      }
     }
 
-    line3 = !StringUtils.isEmpty(massUpdtAddr.getCounty()) ? massUpdtAddr.getCounty().trim() : line3;
-    if (!StringUtils.isEmpty(massUpdtAddr.getCounty()) && !line3.toUpperCase().startsWith("ATT ") && !line3.toUpperCase().startsWith("ATT:")) {
-      line3 = "ATT " + line3;
+    if ((StringUtils.isEmpty(massUpdtAddr.getCounty()) && !StringUtils.isEmpty(massUpdtAddr.getCustNm2()))
+        || (!StringUtils.isEmpty(massUpdtAddr.getCounty()) && (line2.toUpperCase().startsWith("ATT ") || line2.toUpperCase().startsWith("ATT:")))) {
+      line3 = !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) ? massUpdtAddr.getAddrTxt2() : line3;
+      if (StringUtils.isEmpty(massUpdtAddr.getAddrTxt2()) && line3.toUpperCase().startsWith("ATT ") && line3.toUpperCase().startsWith("ATT:")) {
+        line3 = "";
+      }
     }
+
     if (line3.length() > 30) {
       line3 = line3.substring(0, 30);
-    }
-    if (StringUtils.isEmpty(massUpdtAddr.getCounty()) && !StringUtils.isEmpty(massUpdtAddr.getCustNm2())) {
-      line3 = !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) ? massUpdtAddr.getAddrTxt2() : line3;
     }
 
     if (!StringUtils.isEmpty(massUpdtAddr.getAddrTxt()) || !StringUtils.isEmpty(massUpdtAddr.getPoBox())) {
@@ -769,6 +791,9 @@ public class PortugalTransformer extends MessageTransformer {
       line4 = StringUtils.isEmpty(poBox) ? line4 : (line4 + poBox);
       if (!StringUtils.isEmpty(poBox)) {
         legacyAddr.setPoBox(poBox);
+        legacyAddr.setStreet("");
+      } else if (!StringUtils.isEmpty(massUpdtAddr.getAddrTxt())) {
+        legacyAddr.setPoBox("");
       }
     }
 
