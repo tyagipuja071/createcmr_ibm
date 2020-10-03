@@ -1168,6 +1168,8 @@ public class MCOPtEsHandler extends MCOHandler {
             String phoneNo = ""; // 12
             String poBox = ""; // 13
             String landCountry = ""; // 11
+            List<String> checkList = null;
+            long count = 0;
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -1211,6 +1213,9 @@ public class MCOPtEsHandler extends MCOHandler {
               landCountry = validateColValFromCell(currCell);
             }
 
+            checkList = Arrays.asList(addressCont, poBox, attPerson);
+            count = checkList.stream().filter(field -> !field.isEmpty()).count();
+
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(13);
               poBox = validateColValFromCell(currCell);
@@ -1252,10 +1257,24 @@ public class MCOPtEsHandler extends MCOHandler {
                   "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
+            if (!StringUtils.isEmpty(localPostal) && !StringUtils.isEmpty(crossCity)) {
+              LOG.trace(
+                  "Local Postal code and Cross Border City must not be populated at the same time. If one is populated, the other must be empty. >> ");
+              error.addError(row.getRowNum(), "Local Postal Code",
+                  "Local Postal code and Cross Border City must not be populated at the same time. If one is populated, the other must be empty.");
+              validations.add(error);
+            }
             if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
               LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty. >>");
               error.addError(row.getRowNum(), "Postal Code", "Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
+                  + "If one is populated, the other must be empty.");
+              validations.add(error);
+            }
+            if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localCity)) {
+              LOG.trace("Cross Border Postal Code and Local City must not be populated at the same time. "
+                  + "If one is populated, the other must be empty. >>");
+              error.addError(row.getRowNum(), "CB Postal Code", "Cross Border Postal Code and Local City must not be populated at the same time. "
                   + "If one is populated, the other must be empty.");
               validations.add(error);
             }
@@ -1267,6 +1286,13 @@ public class MCOPtEsHandler extends MCOHandler {
                     "Crossborder city and crossborder postal code should have a maximun of 30 characters.");
                 validations.add(error);
               }
+            }
+            if (count > 2) {
+              LOG.trace("Out of Address Con't, PO BOX and Att Person only 2 can be filled at the same time .");
+              error.addError(row.getRowNum(), "Address Con't/PO BOX",
+                  "Out of Address Con't, PO BOX and Att Person only 2 can be filled at the same time . ");
+              validations.add(error);
+              count = 0;
             }
             if (!StringUtils.isEmpty(landCountry)) {
               if (!("PT").equals(landCountry) && (!StringUtils.isEmpty(localCity) || !StringUtils.isEmpty(localPostal))) {
