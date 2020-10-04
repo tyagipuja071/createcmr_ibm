@@ -1282,7 +1282,7 @@ public class MCOPtEsHandler extends MCOHandler {
             if (count > 1) {
               LOG.trace("Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time .");
               error.addError(row.getRowNum(), "Address Con't/PO BOX/Att Person",
-                  "Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time . ");
+                  "Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time. ");
               validations.add(error);
               count = 0;
             }
