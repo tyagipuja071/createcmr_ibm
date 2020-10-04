@@ -1279,10 +1279,10 @@ public class MCOPtEsHandler extends MCOHandler {
               }
             }
 
-            if (count > 2) {
-              LOG.trace("Out of Address Con't, PO BOX and Att Person only 2 can be filled at the same time .");
-              error.addError(row.getRowNum(), "Address Con't/PO BOX",
-                  "Out of Address Con't, PO BOX and Att Person only 2 can be filled at the same time . ");
+            if (count > 1) {
+              LOG.trace("Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time .");
+              error.addError(row.getRowNum(), "Address Con't/PO BOX/Att Person",
+                  "Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time. ");
               validations.add(error);
               count = 0;
             }
@@ -1316,21 +1316,11 @@ public class MCOPtEsHandler extends MCOHandler {
             }
 
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
-              if (!StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox)) {
-                LOG.trace("Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Street/PO Box",
-                    "Note that Street/PO Box cannot be filled at same time. Please fix and upload the template again.");
-                validations.add(error);
-              }
-
               if (poBox.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "PO Box", "Please input value in numeric format. Please fix and upload the template again.");
                 validations.add(error);
               }
-            }
-
-            if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (phoneNo.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
