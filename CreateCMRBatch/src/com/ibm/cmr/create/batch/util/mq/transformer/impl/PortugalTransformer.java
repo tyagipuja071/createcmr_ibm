@@ -692,7 +692,7 @@ public class PortugalTransformer extends MessageTransformer {
       legacyCust.setImsCd(subInd);
     }
     legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    legacyCust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // legacyCust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
 
   @Override
