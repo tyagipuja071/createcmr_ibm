@@ -482,13 +482,21 @@ function addAddrValidatorMCO2() {
   FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
   FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer Name Continuation' ]);
   FormManager.addValidator('custNm4', Validators.LATIN, [ 'Additional Name or Address Information' ]);
+  FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Street' ]);
   FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
   FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
-  FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Abbreviated Name' ]);
-  FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ]);
-
+  FormManager.addValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+  
   FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO BOX' ]);
+}
+
+function addAbbrvNmAndLocValidator() {
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (role == 'PROCESSOR') {
+    FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Abbreviated Name' ]);
+    FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ]);
+  }
 }
 
 function streetAvenueValidator() {
@@ -1632,4 +1640,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(registerMCO2VatValidator, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);  
 });
