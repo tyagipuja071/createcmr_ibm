@@ -35,19 +35,16 @@
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    <cmr:column span="2" containerForField="SpecialTaxCd" forCountry="822">
-      <p>
-        <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
+    <cmr:view forGEO="MCO,MCO1,MCO2">
+      <cmr:column span="2" containerForField="SpecialTaxCd">
+        <p>
+        <label for="specialTaxCd"> 
+        	<cmr:fieldLabel fieldId="SpecialTaxCd" />: 
+        	<cmr:delta text="${rdcdata.specialTaxCd}" oldValue="${reqentry.specialTaxCd}" />
+        </label>
         <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    <cmr:view forGEO="MCO1,MCO2">
-      <cmr:column span="2" containerForField="SpecialTaxCd">
-        <p>
-          <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
-          <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
     </cmr:view>
     <cmr:column span="2" containerForField="AbbrevLocation">
       <p>
@@ -58,7 +55,7 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-     <cmr:view forGEO="MCO,MCO1,MCO2">
+     <cmr:view forGEO="MCO,MCO1,MCO2" exceptForCountry="780">
       <cmr:column span="2" containerForField="EmbargoCode">
       <p>
         <cmr:label fieldId="embargoCd">
@@ -81,6 +78,26 @@
     </cmr:column>
     </cmr:view>
   </cmr:row>
+  <%--New Fields for Malta --%> 
+ <cmr:row addBackground="false">
+	<cmr:column span="2" containerForField="OrdBlk" forCountry="780">
+      <p>
+        <cmr:label fieldId="ordBlk">
+          <cmr:fieldLabel fieldId="OrdBlk" />:
+            <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
+        </cmr:label>
+        <cmr:field path="ordBlk" id="ordBlk" fieldId="OrdBlk" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
+  <cmr:column span="2" containerForField="CustClass" forCountry="780">
+        <p>
+          <cmr:label fieldId="custClass">
+            <cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+          <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
+        </p>
+    </cmr:column>
+   </cmr:row>
 
   <cmr:view forCountry="XXXX">
     <cmr:row addBackground="false">
@@ -104,8 +121,8 @@
       </cmr:column>
     </cmr:row>
   </cmr:view>
-   
-  <cmr:view forCountry="822,838">
+
+	<cmr:view forCountry="822,838">
     <cmr:row addBackground="true">
       <cmr:column span="2" containerForField="CollectionCd">
         <p>
@@ -125,9 +142,23 @@
           <cmr:field path="paymentMode" id="modeOfPayment" fieldId="ModeOfPayment" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-    </cmr:row>
-  </cmr:view>
-  
+      
+	<cmr:view forCountry="822">
+		<c:if test="${reqentry.reqType != 'C'}">
+			<cmr:column span="2" containerForField="TypeOfCustomer">
+        		<p>
+          			<cmr:label fieldId="crosSubTyp">
+						<cmr:fieldLabel fieldId="TypeOfCustomer" />:
+					</cmr:label>
+          			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
+        		</p>
+      		</cmr:column>
+		</c:if>
+	</cmr:view>
+	
+	</cmr:row>
+	</cmr:view>
+
   <cmr:view forCountry="822">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="DistrictCd">
@@ -141,12 +172,6 @@
 	
   <cmr:view forCountry="838">
     <cmr:row addBackground="false">
-      <cmr:column span="2" containerForField="SpecialTaxCd">
-        <p>
-          <label for="specialTaxCd"> <cmr:fieldLabel fieldId="SpecialTaxCd" />: </label>
-          <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
-        </p>
-      </cmr:column>
       <cmr:column span="2" containerForField="CurrencyCode">
         <p>
           <cmr:label fieldId="legacyCurrencyCd">
@@ -191,6 +216,11 @@
   <cmr:view forCountry="838">
     <form:hidden path="acAdminBo" id="acAdminBo"/>
     <form:hidden path="locationNo" id="locationNumber"/>
+  </cmr:view>
+  <cmr:view forCountry="822">
+  	<c:if test="${reqentry.reqType == 'C'}">
+    	<form:hidden path="crosSubTyp" id="crosSubTyp"/>
+    </c:if>
   </cmr:view>
     
   <form:hidden path="economicCd" id="economicCd"/>
