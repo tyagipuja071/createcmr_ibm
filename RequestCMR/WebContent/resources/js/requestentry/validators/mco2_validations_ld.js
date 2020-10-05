@@ -485,7 +485,8 @@ function addAddrValidatorMCO2() {
   FormManager.addValidator('addrTxt', Validators.LATIN, [ 'Street' ]);
   FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
   FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
-
+  FormManager.addValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+  
   FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO BOX' ]);
 }
