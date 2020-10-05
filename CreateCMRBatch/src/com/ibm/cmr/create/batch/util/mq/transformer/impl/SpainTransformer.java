@@ -634,11 +634,12 @@ public class SpainTransformer extends MessageTransformer {
   @Override
   public String handleVatMassUpdateChanges(String newStartingLetter, String legacyVat) {
     String fullVat = "";
-    String locLegacyVat = !StringUtils.isEmpty(legacyVat) ? legacyVat.substring(1, legacyVat.length()) : "";
+    String locLegacyVat = !StringUtils.isEmpty(legacyVat) && legacyVat.length() > 2 ? legacyVat.replace(legacyVat.substring(2, 3), newStartingLetter)
+        : "";
 
     if (!StringUtils.isEmpty(locLegacyVat)) {
-      // if what is parsed is not empty, concat with new starting String char
-      fullVat = newStartingLetter + locLegacyVat;
+      // if what is parsed is not empty, return with new replaced value
+      fullVat = locLegacyVat;
     } else {
       // if what is parsed is coming up as empty, use the param as defaulted
       // value

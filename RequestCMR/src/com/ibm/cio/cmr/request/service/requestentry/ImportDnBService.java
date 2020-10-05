@@ -360,6 +360,13 @@ public class ImportDnBService extends BaseSimpleService<ImportCMRModel> {
       if (!StringUtils.isBlank(quickSearchData)) {
         comment = "DUNS No. " + mainRecord.getCmrDuns() + " imported into the request from D&B via Quick Search. Search Params:\n" + quickSearchData;
       }
+
+      String dnBname = (String) params.getParam("dnBname") != null ? (String) params.getParam("dnBname") : "";
+      if (geoHandler != null && dnBname.length() > (geoHandler.getName1Length() + geoHandler.getName2Length())) {
+
+        comment += "\n Imported name length is greater than the combined length of Customer Name1 and Customer Name2.Hence name will be trimmed.";
+      }
+
       createCommentLog(reqEntryService, entityManager, "CreateCMR", reqIdToUse, comment);
 
       CmrInternalTypes type = RequestUtils.computeInternalType(entityManager, admin.getReqType(), data.getCmrIssuingCntry(), reqIdToUse);

@@ -17,6 +17,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.ibm.cio.cmr.request.util.LegacyMQRecord;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Address;
 import com.ibm.cio.cmr.request.util.wtaas.WtaasQueryKeys.Data;
 import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
@@ -25,7 +26,7 @@ import com.ibm.cmr.services.client.wtaas.WtaasQueryResponse;
  * @author JeffZAMORA
  * 
  */
-public class WtaasRecord {
+public class WtaasRecord implements LegacyMQRecord {
 
   private String cmrNo;
   private String country;

@@ -18,6 +18,7 @@ import org.codehaus.jackson.type.TypeReference;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
@@ -29,8 +30,8 @@ import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
-import com.ibm.cio.cmr.request.automation.util.geo.UnitedKingdomUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -96,7 +97,8 @@ public abstract class AutomationUtil {
       put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
       put(SystemLocation.AUSTRIA, AustriaUtil.class);
       put(SystemLocation.SPAIN, SpainUtil.class);
-      put(SystemLocation.UNITED_KINGDOM, UnitedKingdomUtil.class);
+      put(SystemLocation.UNITED_KINGDOM, UKIUtil.class);
+      put(SystemLocation.IRELAND, UKIUtil.class);
 
     }
   };
@@ -384,6 +386,28 @@ public abstract class AutomationUtil {
    */
   public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     // NOOP
+  }
+
+  /**
+   * Hooks to be able to manipulate the data to be sent to DNB Matching services
+   * 
+   * @param request
+   * @param requestData
+   * @param engineData
+   */
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    // NOOP
+  }
+
+  /**
+   * Tells {@link DnBMatchingElement} if it needs to use TaxCd1 for
+   * orgIdMatching instead of VAT
+   * 
+   * @param requestData
+   * @return
+   */
+  public boolean useTaxCd1ForDnbMatch(RequestData requestData) {
+    return false;
   }
 
   /**
@@ -1073,4 +1097,5 @@ public abstract class AutomationUtil {
     String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
     return custNm1 + custNm2 + custNm3 + custNm4;
   }
+
 }

@@ -2034,6 +2034,20 @@ public class LAHandler extends GEOHandler {
       data.setInstallBranchOff(data.getSalesBusOffCd());
     }
 
+    if (!StringUtils.isBlank(cmrIssuingCntry) && isBRIssuingCountry(cmrIssuingCntry)) {
+      String sql = ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO_ZS01");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", admin.getId().getReqId());
+      Addr soldToAddr = query.getSingleResult(Addr.class);
+      if (soldToAddr != null) {
+        AddressService addrService = new AddressService();
+        Map<String, Object> hwBoRepTeam = addrService.getHWBranchOffRepTeam(soldToAddr.getStateProv());
+        if (hwBoRepTeam == null || hwBoRepTeam.isEmpty()) {
+          addrService.updateDataForBRCreate(entityManager, null, soldToAddr);
+        }
+      }
+    }
+
     if ("Y".equals(data.getFunc()) && CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       boolean laReactivateCapable = PageManager.laReactivateEnabled(issuingCntry, "U");
       if (laReactivateCapable) {

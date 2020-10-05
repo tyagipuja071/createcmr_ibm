@@ -667,5 +667,16 @@
   </definition>
 
   
+  <definition name="searchhome" extends="base">
+    <put-attribute name="title" value="CreateCMR | Search" />
+    <put-attribute name="body" value="/resources/jsp/legacy/searchhome.jsp" />
+  </definition>
+
+  <definition name="mqsearch" extends="base">
+    <put-attribute name="title" value="CreateCMR | Search SOF/WTAAS" />
+    <put-attribute name="body" value="/resources/jsp/legacy/mqsearch.jsp" />
+  </definition>
+
+  
    <!-- Single Reactivation End -->
 </tiles-definitions>
