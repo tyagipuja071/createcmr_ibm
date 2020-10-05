@@ -98,7 +98,7 @@ function afterTemplateLoadPT() {
   if (custNm1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
     FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " c/o " + custNm1.substring(0, 9));
   } else {
-    FormManager.setValue('abbrevNm', custNm2);
+    FormManager.setValue('abbrevNm', custNm2.substring(0, 22));
   }
   crossborderScenariosAbbrvLocOnChange();
 }
@@ -418,8 +418,9 @@ function addAddressFieldValidators() {
             }
           }
         } else if (cntry == SysLoc.PORTUGAL) {
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('custNm4') != '') {
-            return new ValidationResult(null, false, 'For Customer Name Con\'t, Address Con\'t, and Attention Person, only two can be filled.');
+          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('custNm4') != '' && FormManager.getActualValue('addrTxt') != '' && FormManager.getActualValue('addrTxt2') != ''
+              && FormManager.getActualValue('poBox') != '') {
+            return new ValidationResult(null, false, 'For Customer Name Con\'t, Street, Address Con\'t, Attention Person, and PO Box only 3 can be filled.');
           }
         }
 
