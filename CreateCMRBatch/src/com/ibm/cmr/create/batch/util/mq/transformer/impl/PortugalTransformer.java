@@ -121,7 +121,7 @@ public class PortugalTransformer extends MessageTransformer {
 
     String vat = !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat() : "";
     String vatDigit = vat;
-    if (vat.matches("^[A-Z]{2}.*")) {
+    if (!StringUtils.isEmpty(cmrData.getVat()) && vat.matches("^[A-Z]{2}.*")) {
       vatDigit = vat.substring(2, vat.length());
     }
 
@@ -129,7 +129,7 @@ public class PortugalTransformer extends MessageTransformer {
     line2 = addrData.getCustNm2();
 
     if (StringUtils.isEmpty(line2)) {
-      line2 = addrData.getCustNm4().trim();
+      line2 = !StringUtils.isBlank(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
       if (!StringUtils.isEmpty(addrData.getCustNm4()) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
         line2 = "ATT " + line2;
       }
