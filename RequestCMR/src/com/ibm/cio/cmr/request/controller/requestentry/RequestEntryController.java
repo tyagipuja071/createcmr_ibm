@@ -49,7 +49,6 @@ import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 
@@ -245,10 +244,7 @@ public class RequestEntryController extends BaseController {
         LOG.debug("Country " + country + " has requester automation enabled. Redirecting to CreateCMR2.0 requester page..");
         return new ModelAndView("redirect:/autoreq?cmrIssuingCntry=" + country + "&reqType=" + reqType, "reqentry", model);
       }
-
-      // TODO QUERY here for enabling Quicksearch first
-      boolean showQuickSearchFirst = SystemLocation.UNITED_STATES.equals(country);
-      if (showQuickSearchFirst && ("C".equals(reqType) || "U".equals(reqType))) {
+      if (RequestUtils.isQuickSearchFirstEnabled(country) && ("C".equals(reqType) || "U".equals(reqType))) {
         LOG.debug("Country " + country + " has enabled quick search as first interface. Redirecting to Quick Search page..");
         return new ModelAndView("redirect:/quick_search?issuingCntry=" + country
             + "&infoMessage=Quick Search should be done for CMR being requested for or updated before creating a request.", "reqentry", model);
