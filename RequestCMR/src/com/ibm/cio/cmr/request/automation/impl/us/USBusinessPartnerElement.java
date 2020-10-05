@@ -1183,26 +1183,34 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
         overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
+        details.append("\nUpdated Division to " + nameParts[0]);
+        details.append("\nUpdated Department to " + nameParts[1]);
       }
 
       if (!StringUtils.equals(installAt.getAddrTxt(), streetAddress1)) {
         overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), streetAddress1);
+        details.append("\nUpdated Street Address1 to " + streetAddress1);
       }
       if (!StringUtils.equals(installAt.getAddrTxt2(), streetAddress2)) {
         overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT2", installAt.getAddrTxt2(), streetAddress2);
+        details.append("\nUpdated Street Address2 to " + streetAddress2);
       }
       if (!StringUtils.equals(installAt.getCity1(), city1)) {
         overrides.addOverride(getProcessCode(), "ZS01", "CITY1", installAt.getCity1(), city1);
+        details.append("\nUpdated City to " + city1);
       }
       if (!StringUtils.equals(installAt.getPostCd(), postalCd)) {
         overrides.addOverride(getProcessCode(), "ZS01", "POST_CD", installAt.getPostCd(), postalCd);
+        details.append("\nUpdated Postal Code to " + postalCd);
       }
       if (!StringUtils.equals(installAt.getStateProv(), stateProv)) {
         overrides.addOverride(getProcessCode(), "ZS01", "STATE_PROV", installAt.getStateProv(), stateProv);
+        details.append("\nUpdated State/Prov to " + postalCd);
       }
       if (!StringUtils.equals(installAt.getCounty(), county)) {
         overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), county);
         overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NM", installAt.getCountyName(), county);
+        details.append("\nUpdated County to " + county);
       }
     }
 
