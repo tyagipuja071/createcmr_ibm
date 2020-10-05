@@ -121,7 +121,7 @@ public class PortugalTransformer extends MessageTransformer {
 
     String vat = !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat() : "";
     String vatDigit = vat;
-    if (vat.matches("^[A-Z]{2}.*")) {
+    if (!StringUtils.isEmpty(cmrData.getVat()) && vat.matches("^[A-Z]{2}.*")) {
       vatDigit = vat.substring(2, vat.length());
     }
 
