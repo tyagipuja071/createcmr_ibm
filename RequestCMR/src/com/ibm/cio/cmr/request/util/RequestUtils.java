@@ -1351,6 +1351,18 @@ public class RequestUtils {
   }
 
   /**
+   * Checks whether quick search is configued as first interface for a
+   * particular country or not
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static boolean isQuickSearchFirstEnabled(EntityManager entityManager, String country) {
+    return SystemLocation.UNITED_STATES.equals(country);
+  }
+
+  /**
    * Gets the processing center where the request will be sent to
    * 
    * @param entityManager
@@ -1383,6 +1395,28 @@ public class RequestUtils {
       }
     } catch (Exception e) {
       LOG.warn("Status of requester automation cannot be determined", e);
+      return false;
+    }
+  }
+
+  /**
+   * Checks whether quick search is configued as first interface for a
+   * particular country or not
+   * 
+   * @param country
+   * @return
+   */
+  public static boolean isQuickSearchFirstEnabled(String country) {
+    try {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        return isQuickSearchFirstEnabled(entityManager, country);
+      } finally {
+        entityManager.clear();
+        entityManager.close();
+      }
+    } catch (Exception e) {
+      LOG.warn("Status of Quick Search cannot be determined", e);
       return false;
     }
   }
