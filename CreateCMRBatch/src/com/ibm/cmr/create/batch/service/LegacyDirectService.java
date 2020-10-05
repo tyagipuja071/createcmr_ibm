@@ -1449,7 +1449,7 @@ public class LegacyDirectService extends TransConnService {
     // Mukesh:Defect 1703041: FVT: Update_TS is not getting updated for Update
     // requests in Legacy DB
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
     // Setting status=A in case of single reactivation requests
     if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && CMR_REACTIVATION_REQUEST_REASON.equals(admin.getReqReason())) {
@@ -3292,6 +3292,7 @@ public class LegacyDirectService extends TransConnService {
                 cust.setStatus(LEGACY_STATUS_CANCELLED);
 
               cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+              cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
             }
           } else if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(record.getStatus())) {
             if (cust != null) {
@@ -3303,6 +3304,7 @@ public class LegacyDirectService extends TransConnService {
                 cust.setStatus(LEGACY_STATUS_CANCELLED);
 
               cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+              cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
             }
           }
           LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
@@ -4015,7 +4017,7 @@ public class LegacyDirectService extends TransConnService {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
