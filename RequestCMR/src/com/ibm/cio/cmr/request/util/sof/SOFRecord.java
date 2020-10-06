@@ -10,11 +10,13 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ibm.cio.cmr.request.util.LegacyMQRecord;
+
 /**
  * @author Jeffrey Zamora
  * 
  */
-public class SOFRecord {
+public class SOFRecord implements LegacyMQRecord {
 
   private Map<String, SOFAttribute> dataElements = new LinkedHashMap<String, SOFAttribute>();
   private List<SOFAddress> addresses = new ArrayList<SOFAddress>();

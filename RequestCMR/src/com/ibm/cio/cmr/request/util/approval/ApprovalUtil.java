@@ -293,9 +293,9 @@ public class ApprovalUtil {
       break;
     case "CHG":
       if (fieldName.equals("ADMIN.MAIN_CUST_NM1")) {
-        sql = sql.append(fieldName + " <> ADMIN.OLD_CUST_NM1");
+        sql = sql.append("nvl(curr." + fieldName + ",'') <> nvl(ADMIN.OLD_CUST_NM1,'')");
       } else if (fieldName.equals("ADMIN.MAIN_CUST_NM2")) {
-        sql = sql.append(fieldName + " <> ADMIN.OLD_CUST_NM2");
+        sql = sql.append("nvl(curr." + fieldName + ",'') <> nvl(ADMIN.OLD_CUST_NM2,'')");
       } else {
         sql = sql.append("nvl(curr." + fieldName + ",'') <> nvl(old." + fieldName + ",'')");
       }

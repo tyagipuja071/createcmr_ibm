@@ -838,7 +838,7 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
                                              */
 
       // auto set UKI Abbrev Location on address save
-      // autoSetAbbrevLocnOnAddSaveUKI();
+      autoSetAbbrevLocnOnAddSaveUKI();
 
       // 1482148 - add Scotland and Northern Ireland Logic
       autoSetSboSrOnAddrSaveUK();
@@ -846,7 +846,7 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
 
     if (_cityUKHandler == null) {
       _cityUKHandler = dojo.connect(FormManager.getField('city1'), 'onChange', function(value) {
-        autoPopulateABLocnUK();
+    	  autoSetAbbrevLocUKI();
       });
     }
 
@@ -856,7 +856,7 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
 
     if (_postalCdUKHandler == null) {
       _postalCdUKHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
-        autoPopulateABLocnUK();
+    	  autoSetAbbrevLocUKI();
       });
     }
 
@@ -870,46 +870,36 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
   var reqType = null;
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
-    reqType = FormManager.getActualValue('reqType');
-    role = _pagemodel.userRole;
+		reqType = FormManager.getActualValue('reqType');
+		role = _pagemodel.userRole;
   }
   if (reqType != 'C') {
-    return;
+		return;
   }
-  if (role != 'Requester') {
-    return;
-  }
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-  var _custType = FormManager.getActualValue('custSubGrp');
-  var addressTyp = FormManager.getActualValue('addrType');
-  var _zs01ReqId = FormManager.getActualValue('reqId');
-  var abbrevLocnDB = null;
-  var qParams = {
-    REQ_ID : _zs01ReqId,
-  };
-  var res = cmr.query('GET_ABBREV_LOCN_DB', qParams);
-  abbrevLocnDB = res.ret1;
+	if (role != 'Requester') {
+	  return;
+	}
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+	  return;
+	}
+	var _custType = FormManager.getActualValue('custSubGrp');
+	var addressTyp = FormManager.getActualValue('addrType');
+	var _zs01ReqId = FormManager.getActualValue('reqId');
+	var copyTypes = document.getElementsByName('copyTypes');
+	var copyingToA = false;
+	if (copyTypes != null && copyTypes.length > 0) {
+	  copyTypes.forEach(function(input, i) {
+	    if ((input.value == 'ZI01' || input.value == 'ZS01') && input.checked) {
+	        copyingToA = true;
+	    }
+	  });
+	}
 
-  if (abbrevLocnDB == undefined || abbrevLocnDB == '') {
-    var copyTypes = document.getElementsByName('copyTypes');
-    var copyingToA = false;
-    if (copyTypes != null && copyTypes.length > 0) {
-      copyTypes.forEach(function(input, i) {
-        if ((input.value == 'ZI01' || input.value == 'ZS01') && input.checked) {
-          copyingToA = true;
-        }
-      });
-    }
+	if (finalSave || force || copyingToA) {
 
-    if (finalSave || force || copyingToA) {
-
-      if ((addressTyp == 'ZI01') || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
-        autoSetAbbrevLocUKI();
-      }
-
-    }
+	  if ((addressTyp == 'ZI01') || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
+	    autoSetAbbrevLocUKIOnAddrChange();
+	  }
   }
 }
 /*
@@ -1304,6 +1294,42 @@ function validateInternalDeptNumberLength() {
       }
     };
   })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function autoSetAbbrevLocUKIOnAddrChange() {
+	var _custType = FormManager.getActualValue('custSubGrp');
+	var _custGrp = FormManager.getActualValue('custGrp');
+	var _zs01ReqId = FormManager.getActualValue('reqId');
+	var _abbrevLocn = null;
+	var _addrType = null;
+	var _result = null;
+	if (_custGrp == 'CROSS') {
+	  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
+	    _addrType = 'ZS01';
+	  } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
+	    _addrType = 'ZI01';
+	  }
+	 var qParams = {
+	    REQ_ID : _zs01ReqId,
+	 	  ADDR_TYPE : _addrType,
+	  };
+	  _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
+	  _abbrevLocn = _result.ret1;
+	} else {
+	  if (_custType == 'SOFTL') {
+	    _abbrevLocn = "SOFTLAYER";
+	  } else {
+	    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
+	      _abbrevLocn = FormManager.getActualValue('postCd');
+	    } else {
+	      _abbrevLocn = FormManager.getActualValue('city1');
+	    }
+	  }
+	}
+	if (_abbrevLocn != null && _abbrevLocn.length > 12) {
+	  _abbrevLocn = _abbrevLocn.substr(0, 12);
+	}
+	FormManager.setValue('abbrevLocn', _abbrevLocn);
 }
 
 function autoSetAbbrevNmOnChanageUKI() {
@@ -8526,7 +8552,7 @@ function autoSetAbbrNameUKI() {
     if (result.ret1 != undefined && result.ret1 != '') {
       FormManager.setValue('abbrevNm', result.ret1);
     }
-  } else if (('INTER' == custSubGrp) && (SysLoc.IRELAND == cmrCntry)) {
+  } else if (('INTER' == custSubGrp)) {
     // Defect-6793
     autoSetAbbrevNmFrmDept();
   } else {
@@ -8587,7 +8613,8 @@ function requestingLOBCheckFrIFSL() {
         return new ValidationResult(null, true);
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
+
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -8607,7 +8634,7 @@ function requestingLOBCheckFrIFSL() {
         return new ValidationResult(null, true);
       }
     };
-  })(), 'MAIN_NAME_TAB', 'frmCMR');
+  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 function addALPHANUMValidatorForEnterpriseNumber() {
   FormManager.addFormValidator((function() {

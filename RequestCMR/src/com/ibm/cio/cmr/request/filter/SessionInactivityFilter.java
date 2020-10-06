@@ -335,7 +335,8 @@ public class SessionInactivityFilter implements Filter {
     HttpServletRequest req = (HttpServletRequest) request;
     String path = req.getRequestURI();
 
-    if (path.toLowerCase().endsWith("css") || path.toLowerCase().endsWith("js") || path.toLowerCase().endsWith("jpg")) {
+    if (path.toLowerCase().endsWith("css") || path.toLowerCase().endsWith("js") || path.toLowerCase().endsWith("jpg")
+        || path.toLowerCase().endsWith("png")) {
       return false;
     }
 
