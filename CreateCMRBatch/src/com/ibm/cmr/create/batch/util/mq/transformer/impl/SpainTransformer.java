@@ -84,8 +84,8 @@ public class SpainTransformer extends MessageTransformer {
     // trim VAT prefix for Local Defect 1481070 fix: change cross border based
     // on billing only
     if (!zs01CrossBorder(handler)) {
-      if (!StringUtils.isEmpty(vat) && vat.matches("^[A-Z]{2}.*")) {
-        messageHash.put("VAT", vat.substring(2, vat.length()));
+      if (!StringUtils.isEmpty(vat)) {
+        messageHash.put("VAT", vat);
       }
     }
 
@@ -634,11 +634,12 @@ public class SpainTransformer extends MessageTransformer {
   @Override
   public String handleVatMassUpdateChanges(String newStartingLetter, String legacyVat) {
     String fullVat = "";
-    String locLegacyVat = !StringUtils.isEmpty(legacyVat) ? legacyVat.substring(1, legacyVat.length()) : "";
+    String locLegacyVat = !StringUtils.isEmpty(legacyVat) && legacyVat.length() > 2 ? legacyVat.replace(legacyVat.substring(2, 3), newStartingLetter)
+        : "";
 
     if (!StringUtils.isEmpty(locLegacyVat)) {
-      // if what is parsed is not empty, concat with new starting String char
-      fullVat = newStartingLetter + locLegacyVat;
+      // if what is parsed is not empty, return with new replaced value
+      fullVat = locLegacyVat;
     } else {
       // if what is parsed is coming up as empty, use the param as defaulted
       // value

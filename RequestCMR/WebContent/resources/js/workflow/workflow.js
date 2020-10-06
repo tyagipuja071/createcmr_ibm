@@ -131,18 +131,25 @@ function overallStatusFormatter(value, rowIndex) {
     custName = custName[0].replace(/'/gi, '~');
   }
   var imgloc = cmr.CONTEXT_ROOT + '/resources/images/';
+  var img = '';
   if (pendingAppr == 'Y') {
-    var img = '<img src="' + imgloc + 'pending.png"  class="pending-icon" title = "Pending Approvals">';
-    return '<a title="Open Workflow History for ' + reqId + '" href="javascript: openWorkflowHistory(\'' + reqId + '\', \'' + reqType + '\',\'' + custName + '\',\'' + expediteInd + '\')">' + value
-        + '</a>' + img;
+    img = '<img src="' + imgloc + 'pending.png"  class="pending-icon" title = "Pending Approvals">';
   }
   if (pendingAppr == 'Y1') {
-    var img = '<img src="' + imgloc + 'pending-red.png"  class="pending-icon" title = "Pending Approvals (more than 1 day)">';
-    return '<a title="Open Workflow History for ' + reqId + '" href="javascript: openWorkflowHistory(\'' + reqId + '\', \'' + reqType + '\',\'' + custName + '\',\'' + expediteInd + '\')">' + value
-        + '</a>' + img;
+    img = '<img src="' + imgloc + 'pending-red.png"  class="pending-icon" title = "Pending Approvals (more than 1 day)">';
   }
-  return '<a title="Open Workflow History for ' + reqId + '" href="javascript: openWorkflowHistory(\'' + reqId + '\', \'' + reqType + '\',\'' + custName + '\',\'' + expediteInd + '\')">' + value
-      + '</a>';
+  var html =  '<a title="Open Workflow History for ' + reqId + '" href="javascript: openWorkflowHistory(\'' + reqId + '\', \'' + reqType + '\',\'' + custName + '\',\'' + expediteInd + '\')">' + value
+      + '</a>' + img;
+  
+  var childReqId = rowData.childRequestId;
+  console.log('child: '+childReqId);
+  var childReqStatus = rowData.childRequestStatus;
+  var childHtml = '';
+  if (childReqId && childReqId != '0'){
+    childHtml = '<br><br><span style="font-size:9px;font-weight:bold">CHILD REQUEST</span>:<br><a class="reqIdLink" reqid="' + childReqId + '" title="Open Request Details for Child Request ' + childReqId + '" href="' + cmr.CONTEXT_ROOT + '/request/' + childReqId + '">' + childReqId +' ('+childReqStatus+')'+ '</a>';
+  }
+
+  return html + childHtml;
 }
 
 /**

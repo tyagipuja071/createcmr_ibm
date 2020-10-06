@@ -10,14 +10,12 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
-import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
@@ -367,28 +365,4 @@ public abstract class MessageTransformer {
     return false;
   }
 
-  public String getGmllcDupCreation(Data data) {
-    return "NA";
-  }
-
-  public void transformLegacyDataForDupCreation(EntityManager entityManager, LegacyDirectObjectContainer legacyObjects,
-      CMRRequestContainer cmrObjects) {
-    // noop for default class, override
-  }
-
-  public String getMailSendingFlag(Data data, Admin admin, EntityManager entityManager) {
-    return "NA";
-  }
-
-  public String getEmailTemplateName(String type) {
-    return null;
-  }
-
-  public BatchEmailModel getMailFormatParams(EntityManager entityManager, CMRRequestContainer cmrObjects, String type) {
-    return null;
-  }
-
-  public String getReqStatusForSendingMail(String mailFlag) {
-    return null;
-  }
 }

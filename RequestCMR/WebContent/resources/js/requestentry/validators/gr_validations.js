@@ -1717,8 +1717,8 @@ function addNonLatinCharValidator() {
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'Attention Person' ]);
       checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
     } else if (cntry == SysLoc.GREECE) {
-      checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
-      checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
+      //checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
+      //checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.NON_LATIN, [ 'Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'District' ]);
       checkAndAddValidator('taxOffice', Validators.NON_LATIN, [ 'Tax Office' ]);
@@ -4942,14 +4942,21 @@ function autoSetSBOOnSRValueIT() {
 
 function enableCMRNUMForPROCESSOR() {
   var isProspect = FormManager.getActualValue('prospLegalInd');
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (reqType != 'C') {
+    return;
+  }
   if (dijit.byId('prospLegalInd')) {
     isProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
   }
   console.log("validateCMRNumberForLegacy ifProspect:" + isProspect);
   if ('Y' == isProspect) {
     FormManager.readOnly('cmrNo');
-  } else {
+  } else if(role == "PROCESSOR") {
     FormManager.enable('cmrNo');
+  } else {
+    FormManager.readOnly('cmrNo');
   }
 }
 

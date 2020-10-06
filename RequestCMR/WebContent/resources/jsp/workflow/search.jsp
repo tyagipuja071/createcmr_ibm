@@ -1,3 +1,4 @@
+<%@page import="com.ibm.cio.cmr.request.model.workflow.RequestSearchCriteriaModel"%>
 <%@page import="org.codehaus.jackson.map.ObjectMapper"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -26,6 +27,7 @@
       FormManager.addValidator('lastActDateFrom', Validators.DATE('YYYY-MM-DD'), ['${ui.lastActionDate} ${ui.from}']);
       FormManager.addValidator('lastActDateTo', Validators.DATE('YYYY-MM-DD'), ['${ui.lastActionDate} ${ui.to}']);
       FormManager.ready();
+      window.setTimeout('FormManager.setValue("cmrOwnerCriteria", "")', 500);
     }
   });
 </script>
@@ -52,33 +54,6 @@
       </cmr:row>
       <cmr:row>
         <cmr:column span="2">
-          <p>
-            <cmr:label fieldId="wfProcCentre">
-							${ui.wfProcCentre}:
-							<cmr:spinner fieldId="wfProcCentre" />
-
-            </cmr:label>
-            <form:select dojoType="dijit.form.FilteringSelect" id="wfProcCentre" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="wfProcCentre" placeHolder="${ui.procCenterNmPH}">
-            </form:select>
-          </p>
-        </cmr:column>
-        <cmr:column span="2">
-          <p>
-            <label for="wfReqName">${ui.wfReqName}: </label>
-            <cmr:bluepages model="requestSearchCriteriaModel" namePath="wfReqName" idPath="wfReqId" showId="true"/>
-          </p>
-        </cmr:column>
-        <cmr:column span="2">
-          <p>
-            <label for="processedBy">${ui.processedBy}: 
-            <cmr:info text="${ui.info.processedBy}"></cmr:info>
-            </label>
-            <cmr:bluepages model="requestSearchCriteriaModel" namePath="processedByName" idPath="processedBy" showId="true"/>
-          </p>
-        </cmr:column>
-        </cmr:row>
-        <cmr:row>
-        <cmr:column span="2">
               <p>
               <cmr:label fieldId="cmrIssuingCountry">
                 ${ui.cmrIssuingCntry}:
@@ -90,36 +65,23 @@
         </cmr:column>
         <cmr:column span="2">
           <p>
-            <label for="wfOrgName">${ui.wfOrgName}: </label>
-            <cmr:bluepages model="requestSearchCriteriaModel" namePath="wfOrgName" idPath="wfOrgId" showId="true"/>
-          </p>
-        </cmr:column>
-        </cmr:row>
-        <cmr:row>
-        <cmr:column span="2">
-              <p>
-              <cmr:label fieldId="cmrOwnerCriteria">
-                ${ui.cmrOwner}:
-                <cmr:spinner fieldId="cmrOwnerCriteria" />
-              </cmr:label>
-              <form:select dojoType="dijit.form.FilteringSelect" id="cmrOwnerCriteria" searchAttr="name" style="display: block;" maxHeight="200" path="cmrOwnerCriteria" placeHolder="">
-              </form:select>
-              </p>
-        </cmr:column>
-        <cmr:column span="2">
-          <p>
-            <label for="wfClaimByName">${ui.wfClaimByName}: </label>
-            <cmr:bluepages model="requestSearchCriteriaModel" namePath="wfClaimByName" idPath="wfClaimById" showId="true"/>
-          </p>
-        </cmr:column>
-      </cmr:row>
-      <cmr:row>
-        <cmr:column span="2">
-          <p>
             <label for="cmrNoCriteria">${ui.cmrnum}: <cmr:info text="${ui.info.cmrnum}" /></label>
             <form:input size="30" id="cmrNoCriteria" path="cmrNoCriteria" />
           </p>
         </cmr:column>
+        <cmr:column span="2">
+          <p>
+            <cmr:label fieldId="wfProcCentre">
+							${ui.wfProcCentre}:
+							<cmr:spinner fieldId="wfProcCentre" />
+
+            </cmr:label>
+            <form:select dojoType="dijit.form.FilteringSelect" id="wfProcCentre" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="wfProcCentre" placeHolder="${ui.procCenterNmPH}">
+            </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row>
         <cmr:column span="2">
           <p>
             <cmr:label fieldId="requestType">
@@ -130,8 +92,6 @@
             </form:select>
           </p>
         </cmr:column>
-      </cmr:row>
-      <cmr:row>
       <cmr:column span="2">
           <p>
             <cmr:label fieldId="requestStatus">
@@ -143,7 +103,6 @@
             </form:select>
           </p>
         </cmr:column>
-       
         <cmr:column span="2">
           <p>
             <label for="requestId">${ui.requestId}: </label>
@@ -163,6 +122,42 @@
           </p>
         </cmr:column>
         <cmr:column span="2">
+          <p>
+            <cmr:label fieldId="procStatus">
+              ${ui.procStatus}:
+              <cmr:spinner fieldId="procStatus" />
+            </cmr:label>
+            <form:select dojoType="dijit.form.FilteringSelect" id="procStatus" searchAttr="name" style="display: block;" maxHeight="200" path="procStatus" placeHolder="">
+            </form:select>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+              <p>
+              <cmr:label fieldId="cmrOwnerCriteria">
+                ${ui.cmrOwner}:
+                <cmr:spinner fieldId="cmrOwnerCriteria" />
+              </cmr:label>
+              <form:select dojoType="dijit.form.FilteringSelect" id="cmrOwnerCriteria" searchAttr="name" style="display: block;" maxHeight="200" path="cmrOwnerCriteria" placeHolder="">
+              </form:select>
+              </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row>
+        <cmr:column span="2">
+          <p>
+            <label for="wfReqName">${ui.wfReqName}: </label>
+            <cmr:bluepages model="requestSearchCriteriaModel" namePath="wfReqName" idPath="wfReqId" showId="true"/>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+          <p>
+            <label for="processedBy">${ui.processedBy}: 
+            <cmr:info text="${ui.info.processedBy}"></cmr:info>
+            </label>
+            <cmr:bluepages model="requestSearchCriteriaModel" namePath="processedByName" idPath="processedBy" showId="true"/>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
           <br />
           <label for="expediteChk" style="display: inline"> ${ui.expediteChk }:&nbsp; </label>
           <form:checkbox id="expediteChk" path="expediteChk" value="Y" />
@@ -171,12 +166,14 @@
       <cmr:row>
         <cmr:column span="2">
           <p>
-            <cmr:label fieldId="procStatus">
-              ${ui.procStatus}:
-              <cmr:spinner fieldId="procStatus" />
-            </cmr:label>
-            <form:select dojoType="dijit.form.FilteringSelect" id="procStatus" searchAttr="name" style="display: block;" maxHeight="200" path="procStatus" placeHolder="">
-            </form:select>
+            <label for="wfClaimByName">${ui.wfClaimByName}: </label>
+            <cmr:bluepages model="requestSearchCriteriaModel" namePath="wfClaimByName" idPath="wfClaimById" showId="true"/>
+          </p>
+        </cmr:column>
+        <cmr:column span="2">
+          <p>
+            <label for="wfOrgName">${ui.wfOrgName}: </label>
+            <cmr:bluepages model="requestSearchCriteriaModel" namePath="wfOrgName" idPath="wfOrgId" showId="true"/>
           </p>
         </cmr:column>
         <cmr:column span="2">
