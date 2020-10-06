@@ -2692,8 +2692,9 @@ public class LegacyDirectService extends TransConnService {
             ProcessResponse response = null;
             String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
-            boolean isDataUpdated = false;
-            isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+            // boolean isDataUpdated = false;
+            // isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc,
+            // data.getCmrIssuingCntry());
 
             for (Addr addr : addresses) {
               entityManager.detach(addr);
@@ -2703,6 +2704,11 @@ public class LegacyDirectService extends TransConnService {
                * LOG.warn("Address Type: " + addr.getId().getAddrType() +
                * "  Skipping all address except ZS01 address."); continue; }
                */
+
+              if (StringUtils.isEmpty(addr.getSapNo())) {
+                LOG.warn("Address Type: " + addr.getId().getAddrType() + "  Skipping as SAP no is blank.");
+                continue;
+              }
 
               request.setSapNo(addr.getSapNo());
 
