@@ -10,14 +10,12 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
-import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
 import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
@@ -367,6 +365,7 @@ public abstract class MessageTransformer {
     return false;
   }
 
+<<<<<<< HEAD
   public String getGmllcDupCreation(Data data) {
     return "NA";
   }
@@ -391,4 +390,6 @@ public abstract class MessageTransformer {
   public String getReqStatusForSendingMail(String mailFlag) {
     return null;
   }
+=======
+>>>>>>> refs/remotes/origin/master_yellow_clone
 }

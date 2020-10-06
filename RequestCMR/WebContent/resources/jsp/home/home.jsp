@@ -3,12 +3,20 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
+<script src="${resourcesPath}/js/system/chart.bundle.js?${cmrv}" type="text/javascript"></script>
 <style>
 div.cmr-alert {
  border:1px Solid #FF7777; 
  padding:10px;
  padding-left: 20px;
  border-radius: 10px;
+}
+
+img.logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  border: 1px Solid #AAA;
 }
 </style>
 <script>
@@ -24,7 +32,98 @@ dojo.addOnLoad(function(){
     msg += 'Some functions of the application may not work correctly until you update to the required version.';
     cmr.showAlert(msg);
   }
+  window.setTimeout('generateCharts()', 500);
 });
+
+function generateCharts(){
+  var creates = cmr.query('VISUAL.DAILY_CREATES', {MANDT : cmr.MANDT, _qall : 'Y'});
+  var ctx = dojo.byId("canvas").getContext("2d");
+  
+  var dataSet = [];
+  var labelSet = [];
+  var colorSet = [];
+  var totals = 0;
+  creates.forEach(function(item, i){
+    dataSet.push(Number(item.ret2));
+    labelSet.push(item.ret1.trim());
+    colorSet.push(getRandomColor());
+    totals += Number(item.ret2);
+  });
+  var ctx = dojo.byId("canvas").getContext("2d");
+  
+  var chart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labelSet,
+      datasets: [{
+        backgroundColor: colorSet,
+        data: dataSet
+      }]
+    },
+    options : {
+      title : {
+        display : true,
+        text : 'Total Requests Created Today (GMT): '+totals
+      },
+      tooltips : {
+        mode : 'index',
+        intersect : false
+      },
+      legend : {
+        display : false
+      },
+      responsive : true
+    }
+  });
+
+  var completes = cmr.query('VISUAL.DAILY_COMPLETES', {MANDT : cmr.MANDT, _qall : 'Y'});
+  var ctx2 = dojo.byId("canvas2").getContext("2d");
+  
+  var dataSet2 = [];
+  var labelSet2 = [];
+  var colorSet2 = [];
+  var totals2 = 0;
+  completes.forEach(function(item, i){
+    dataSet2.push(Number(item.ret2));
+    labelSet2.push(item.ret1.trim());
+    colorSet2.push(getRandomColor());
+    totals2 += Number(item.ret2);
+  });
+  var ctx2 = dojo.byId("canvas2").getContext("2d");
+  
+  var chart2 = new Chart(ctx2, {
+    type: 'pie',
+    data: {
+      labels: labelSet2,
+      datasets: [{
+        backgroundColor: colorSet2,
+        data: dataSet2
+      }]
+    },
+    options : {
+      title : {
+        display : true,
+        text : 'Total Requests Completed Today (GMT): '+totals2
+      },
+      tooltips : {
+        mode : 'index',
+        intersect : false
+      },
+      legend : {
+        display : false
+      },
+      responsive : true
+    }
+  });
+  
+}
+
+function getRandomColor() {
+  var r = Math.floor(Math.random() * 255);
+  var g = Math.floor(Math.random() * 255);
+  var b = Math.floor(Math.random() * 255);
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
 </script>
 <%
   String alert = SystemConfiguration.getValue("ALERT",null); 
@@ -57,6 +156,19 @@ dojo.addOnLoad(function(){
   div.news-content ul {
     list-style: inside;
   }
+  div.logo {
+   width: 100px;
+   height: 100px;
+   display: inline-block;
+   padding-right: 10px;
+  }
+  div.logo-text {
+   display: inline-block;
+   width: 370px;
+   vertical-align: top;
+   padding-bottom: 20px;
+  }
+  
 </style>
 <div class="ibm-columns">
 
@@ -82,78 +194,51 @@ dojo.addOnLoad(function(){
 				<div class="ibm-col-1-1">
 							
 					<div class="ibm-columns">
-						<div class="ibm-col-4-3">
+						<div class="ibm-col-4-2" style="width:500px">
 							<div id="welcome_note_id">
-								<%=home%>
+                 <div class="logo">
+                   <img src="${resourcesPath}/images/CreateCMRLogo.png" class="logo">
+                 </div>
+                 <div class="logo-text">
+                   <ul>
+                     <li>
+                     CreateCMR is part of the CMR Suite of Applications and supports the creation 
+                     and update of Customer Master Records (CMRs) at IBM. 
+                     </li>
+                     <li>
+                     The application also provides Web Service APIs for external systems to be able
+                     to directly create requests without using the user interface. 
+                     Specifications can be found <a href="https://w3-connections.ibm.com/files/app/file/5a2ff1b0-0534-44fd-9abb-52ab4be41d72">here</a>.
+                     </li>
+                   </ul>
+                 </div>
 							</div>
+
+              <div id="welcome_note_id">
+                 <div class="logo">
+                   <img src="${resourcesPath}/images/cmde.png" class="logo">
+                 </div>
+                 <div class="logo-text">
+                   <ul>
+                     <li>
+                     The Client Master Data Execution (CMDE) teams support the processing of requests created 
+                     within CreateCMR.  There are 3 major centers for CMDE: Kuala Lumpur, Bratislava, and Dalian.
+                     Specific teams handle requests from different countries.
+                     </li>
+                     <li>
+                     To know more about the CMDE teams and processes, please visit the <a href="https://w3.ibm.com/w3publisher/cmde-cmr">CMDE Site</a>.
+                     </li>
+                   </ul>
+                 </div>
+              </div>
 													
 						</div>
-						<div class="ibm-col-4-1">
-             <div class="news-header">News</div>
-             <div class="news-content">
-               <ul>
-                      <%=info%>
-               </ul>
-             </div>
+						<div class="ibm-col-4-2" style="width:400px">
+              <canvas id="canvas" style="height:20px"></canvas>
+              <canvas id="canvas2" style="height:20px"></canvas>
 						</div>
 					</div>
 					
-<!-- 					<div class="ibm-columns">
-						<div class="ibm-col-1-1">
-							<div class="ibm-container ibm-show-hide ibm-alternate">
-								<h2>
-									<a class="" href="#" style="">Sales Leaders</a>
-								</h2>
-								<div class="ibm-container-body" style="overflow: hidden; height: 1px; display: none;">
-									<div class="ibm-columns">
-										<div class="ibm-col-4-3" id="sales_leader_id">
-										</div>
-										<div class="ibm-col-4-1" id="sales_leader_bookmark_id">
-											<h2 style="border-top: 0px !important;">Userful bookmarks for Sales Leaders</h2>
-										</div>
-									</div>	
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="ibm-columns">
-						<div class="ibm-col-1-1">
-							<div class="ibm-container ibm-show-hide ibm-alternate">
-								<h2>
-									<a class="" href="#">IMT/GMT Quota Teams</a>
-								</h2>
-								<div class="ibm-container-body" style="overflow: hidden; height: 1px; display: none;">
-									<div class="ibm-columns">
-										<div class="ibm-col-4-3" id="quota_team_id">
-										</div>
-										<div class="ibm-col-4-1" id="quota_team_bookmark_id">
-											<h2 style="border-top: 0px !important;">Userful bookmarks for Quota Teams</h2>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>	
-					
-					<div class="ibm-columns">	
-						<div class="ibm-col-1-1">
-							<div class="ibm-container ibm-show-hide">
-								<h2>
-									<a class="ibm-show-active" href="#show-hide">Quota calendar and support</a>
-								</h2>
-								<div class="ibm-container-body" style="overflow: hidden; height: auto; display: block;">
-									<div class="ibm-columns">
-										<div class="ibm-col-4-3" id="calendar_id">
-										</div>
-										<div class="ibm-col-4-1" id="support_id">
-											<h2 style="border-top: 0px !important;">Support</h2>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>					
-					</div>	 -->									
 				</div>
 			</div>
 			
