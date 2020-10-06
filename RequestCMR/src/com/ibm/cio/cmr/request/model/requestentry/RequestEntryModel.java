@@ -416,6 +416,9 @@ public class RequestEntryModel extends BaseModel {
   private String matchOverrideIndc;
   private String dupCmrReason;
 
+  // CMR-5910 - military flag
+  private String military;
+
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -3003,6 +3006,14 @@ public class RequestEntryModel extends BaseModel {
 
   public void setAddrStdTs(Date addrStdTs) {
     this.addrStdTs = addrStdTs;
+  }
+
+  public String getMilitary() {
+    return military;
+  }
+
+  public void setMilitary(String military) {
+    this.military = military;
   }
 
 }

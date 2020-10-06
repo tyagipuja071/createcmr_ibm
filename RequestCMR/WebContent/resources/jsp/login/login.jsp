@@ -6,7 +6,13 @@
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
-
+<style>
+  img.key {
+    width : 20px;
+    height: 20px;
+    vertical-align: sub;
+  }
+</style>
 <script src="${resourcesPath}/js/login.js?${cmrv}" type="text/javascript"></script>
 
 <!-- start main content -->
@@ -34,22 +40,37 @@
               </span>
             </p>
             <!-- Submit button -->
+          <p>
+            <input id="cmr-login-btn" type="button" style="display: none" value="Login" class="ibm-btn-arrow-pri ibm-btn-small"
+              title="Click to login to Create CMR" onclick="login.validateAndSubmit();" />
+          </p>
           </div>
           <div class="ibm-col-2-1">
             <div id="forgotpwd">
-              <p>
-                Site secured by <br> 
-                <a class="ibm-secure-link" href="https://w3.ibm.com/profile/update/password/en-us/index.html" alt="">
-                  IBM Intranet Password
+              <div class="login-info" style="padding-bottom:10px">
+                <img src="${resourcesPath}/images/lock.png" class="key">
+                  Site secured by <a href="https://w3.ibm.com/profile/update/password/en-us/index.html">IBM Intranet Password</a>
                 </a>
-              </p>
-              <br>
+              </div>
+              <div class="login-info" style="padding-bottom:10px">
+                <img src="${resourcesPath}/images/key.png" class="key">
+                  Access to the tool can be requested using AccessHUB. 
+                  For access instructions and the user guide please follow this 
+                  <a href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR%20Access%20and%20Support">link</a> or go to 
+                  <a href="https://ibm.idaccesshub.com/ECM/login/index">AccessHUB</a> directly              
+              </div> 
+              <div class="login-info" style="padding-bottom:10px">
+                <img src="${resourcesPath}/images/question.png" class="key">
+                  For support, please contact the help desk by sending an email to <a href="mailto:CCM Worldwide Support/Raleigh/Contr/IBM">CCM Worldwide Support/Raleigh/Contr/IBM</a>
+                </a>
+              </div>
             </div>
           </div>
         </form:form>
       </div>
 
-      <div class="ibm-columns">
+<%--
+    <div class="ibm-columns">
         <div class="ibm-col-6-1" style="width:500px">
           <p>
             <input id="cmr-login-btn" type="button" style="display: none" value="Login" class="ibm-btn-arrow-pri ibm-btn-small"
@@ -66,7 +87,7 @@
         </div>
       </div>
     </div>
-
+--%>
     <div id="push"></div>
     <!-- stop main content -->
   </div>
