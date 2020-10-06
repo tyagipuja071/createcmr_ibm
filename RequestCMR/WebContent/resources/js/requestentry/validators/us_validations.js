@@ -246,52 +246,6 @@ function enableUSSicMenForScenarios(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function addUpdateChecksValidator() {
-  console.log("addUpdateChecksValidator..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var reqType = FormManager.getActualValue('reqType');
-        if (reqType != 'U') {
-          return new ValidationResult(null, true);
-        }
-        dojo.xhrPost({
-          url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
-          handleAs : 'json',
-          method : 'POST',
-          content : {
-            'issuingCountry' : FormManager.getActualValue('cmrIssuingCntry'),
-            'reqId' : FormManager.getActualValue('reqId'),
-          },
-          timeout : 300000,
-          sync : false,
-          load : function(data, ioargs) {
-            cmr.hideProgress();
-            console.log(data);
-            if (!data.success) {
-              console.log('No Issues found in field updates, proceeding with request creation...');
-              resolve(frmCMR);
-            } else {
-              // when duplicate requests have been found successfully show
-              // them
-              // in
-              // gird.
-              return new ValidationResult(null, false, 'Updates to the following fields need validation.');
-              // reject('Duplicate CMR Found');
-            }
-          },
-          error : function(error, ioargs) {
-            success = false;
-            cmr.hideProgress();
-            cmr.showAlert('An error occurred while running UpdateSwitchElement. Please contact your system administrator', 'Error');
-            reject('Error occurred in Update Checks.');
-          }
-        });
-      }
-    };
-  })(), 'MAIN_GENERAL_TAB', 'frmCMR');
-}
-
 /* Register US Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
