@@ -473,9 +473,11 @@ public class MCOPtEsHandler extends MCOHandler {
         data.getAbbrevLocn();
       }
 
-      CmrtCust cust = this.legacyObjects.getCustomer();
-      if (cust != null) {
-        data.setSpecialTaxCd(StringUtils.isEmpty(cust.getTaxCd()) ? "" : cust.getTaxCd());
+      if (this.legacyObjects != null) {
+        CmrtCust cust = this.legacyObjects.getCustomer();
+        if (cust != null) {
+          data.setSpecialTaxCd(StringUtils.isEmpty(cust.getTaxCd()) ? "" : cust.getTaxCd());
+        }
       }
     }
   }

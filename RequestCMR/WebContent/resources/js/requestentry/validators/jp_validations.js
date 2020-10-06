@@ -96,6 +96,7 @@ function afterConfigForJP() {
     setCSBORequired();
     setCSBOOnScenarioChange();
     setSalesBusOffCdRequired();
+    setSalesTeamCdEditoble();
 
   });
   if (_custSubGrpHandler && _custSubGrpHandler[0]) {
@@ -854,11 +855,10 @@ function toggleAddrTypesForJP(cntry, addressMode) {
     }
   }
 
-  return;
   if (FormManager.getActualValue('reqType') == 'C') {
     if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-      cmr.hideNode('radiocont_ZI02');
-      cmr.hideNode('radiocont_ZI01');
+      // cmr.hideNode('radiocont_ZI02');
+      // cmr.hideNode('radiocont_ZI01');
       cmr.hideNode('radiocont_ZI03');
       cmr.hideNode('radiocont_ZP02');
       cmr.hideNode('radiocont_ZP03');
@@ -869,6 +869,7 @@ function toggleAddrTypesForJP(cntry, addressMode) {
       cmr.hideNode('radiocont_ZP08');
     }
   }
+  return;
 }
 /**
  * Opens Find CMR search
@@ -4805,6 +4806,25 @@ function setOutsourcingServiceRequired() {
     break;
   default:
     break;
+  }
+
+}
+
+// CMR-6915 INAC editable for requestor of Create request.
+function setSalesTeamCdEditoble() {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var _role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    _role = _pagemodel.userRole;
+  }
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  console.log("---setSalesTeamCdEditoble---reqType==" + reqType + " custSubGrp==" + custSubGrp + " _role==" + _role);
+  if (custSubGrp == 'BVMDS' && reqType == 'C' && _role == 'Requester') {
+    FormManager.enable('inacType');
+    FormManager.enable('inacCd');
   }
 
 }
