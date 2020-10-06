@@ -313,26 +313,30 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be computed automatically");
     }
 
-    USCeIdMapping mapping = USCeIdMapping.getByCeid(data.getPpsceid());
-    String enterpriseNo = data.getEnterprise();
+    // USCeIdMapping mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+    USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+    // String enterpriseNo = data.getEnterprise();
     if (mapping != null) {
-      if (!mapping.getEnterpriseNo().equals(enterpriseNo)) {
-        details.append("\nEnterprise No. updated to mapped value for the CEID (" + mapping.getEnterpriseNo() + ").");
-        overrides.addOverride(getProcessCode(), "DATA", "ENTERPRISE", enterpriseNo, mapping.getEnterpriseNo());
-        enterpriseNo = mapping.getEnterpriseNo();
-      }
+      // if (!mapping.getEnterpriseNo().equals(enterpriseNo)) {
+      // details.append("\nEnterprise No. updated to mapped value for the CEID
+      // (" + mapping.getEnterpriseNo() + ").");
+      // overrides.addOverride(getProcessCode(), "DATA", "ENTERPRISE",
+      // enterpriseNo, mapping.getEnterpriseNo());
+      // enterpriseNo = mapping.getEnterpriseNo();
+      // }
       if (!mapping.getCompanyNo().equals(data.getCompany())) {
         details.append("\nCompany No. updated to mapped value for the CEID (" + mapping.getCompanyNo() + ").");
         overrides.addOverride(getProcessCode(), "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
       }
     } else {
-      details.append("\nEnterprise No. and CEID combination cannot be validated automatically.");
-      engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. and CEID combination cannot be validated automatically.");
+      details.append("\nEnterprise No. cannot be validated automatically.");
+      engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. cannot be validated automatically.");
     }
-    if (StringUtils.isBlank(enterpriseNo)) {
-      details.append("\nEnterprise No. cannot be computed automatically.\n");
-      engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. cannot be computed automatically");
-    }
+    // if (StringUtils.isBlank(enterpriseNo)) {
+    // details.append("\nEnterprise No. cannot be computed automatically.\n");
+    // engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. cannot be
+    // computed automatically");
+    // }
 
     output.setProcessOutput(overrides);
     output.setDetails(details.toString());
@@ -382,14 +386,14 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       return true;
     }
 
-    if (StringUtils.isBlank(data.getPpsceid())) {
-      String msg = "PPS CEID is required for Business Partner requests.";
-      engineData.addRejectionComment("OTH", msg, "", "");
-      output.setOnError(true);
-      output.setDetails(msg);
-      output.setResults("CEID Missing");
-      return true;
-    }
+    // if (StringUtils.isBlank(data.getPpsceid())) {
+    // String msg = "PPS CEID is required for Business Partner requests.";
+    // engineData.addRejectionComment("OTH", msg, "", "");
+    // output.setOnError(true);
+    // output.setDetails(msg);
+    // output.setResults("CEID Missing");
+    // return true;
+    // }
 
     return false;
   }
@@ -1183,26 +1187,34 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
         overrides.addOverride(getProcessCode(), "ZS01", "DIVN", installAt.getDivn(), nameParts[0]);
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), nameParts[1]);
+        details.append("\nUpdated Division to " + nameParts[0]);
+        details.append("\nUpdated Department to " + nameParts[1]);
       }
 
       if (!StringUtils.equals(installAt.getAddrTxt(), streetAddress1)) {
         overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT", installAt.getAddrTxt(), streetAddress1);
+        details.append("\nUpdated Street Address1 to " + streetAddress1);
       }
       if (!StringUtils.equals(installAt.getAddrTxt2(), streetAddress2)) {
         overrides.addOverride(getProcessCode(), "ZS01", "ADDR_TXT2", installAt.getAddrTxt2(), streetAddress2);
+        details.append("\nUpdated Street Address2 to " + streetAddress2);
       }
       if (!StringUtils.equals(installAt.getCity1(), city1)) {
         overrides.addOverride(getProcessCode(), "ZS01", "CITY1", installAt.getCity1(), city1);
+        details.append("\nUpdated City to " + city1);
       }
       if (!StringUtils.equals(installAt.getPostCd(), postalCd)) {
         overrides.addOverride(getProcessCode(), "ZS01", "POST_CD", installAt.getPostCd(), postalCd);
+        details.append("\nUpdated Postal Code to " + postalCd);
       }
       if (!StringUtils.equals(installAt.getStateProv(), stateProv)) {
         overrides.addOverride(getProcessCode(), "ZS01", "STATE_PROV", installAt.getStateProv(), stateProv);
+        details.append("\nUpdated State/Prov to " + postalCd);
       }
       if (!StringUtils.equals(installAt.getCounty(), county)) {
         overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), county);
         overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NM", installAt.getCountyName(), county);
+        details.append("\nUpdated County to " + county);
       }
     }
 

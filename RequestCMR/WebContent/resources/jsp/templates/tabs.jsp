@@ -48,13 +48,18 @@ boolean approver = user != null && user.isApprover();
                 <a href="javascript: goToUrl('${contextPath}/myappr')">Approvals</a>
               </li>
             <%} %>
+            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
+                <li id="SEARCH_HOME_TAB">
+                    <a href="javascript: goToUrl('${contextPath}/searchhome')">Search</a>
+                </li>
+            <%}%>  
   
   					<%if (SystemConfiguration.isAdmin(request) || (user != null && user.isCmde())){%>
                 <li id="ADMIN_TAB">
                   <%if (SystemConfiguration.isAdmin(request)){%>
-                    <a href="javascript: goToUrl('${contextPath}/systemParameters')">System Administration</a>
+                    <a href="javascript: goToUrl('${contextPath}/systemParameters')">Admin</a>
                   <%} else  {%>
-                    <a href="javascript: goToUrl('${contextPath}/code')">System Administration</a>
+                    <a href="javascript: goToUrl('${contextPath}/code')">Admin</a>
                   <%} %>
                 </li>
             <%}%>
@@ -105,6 +110,12 @@ boolean approver = user != null && user.isApprover();
             <li id="METRICS_USAGE_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/usage')">Web Service Usage</a></li>
             <%} %>
         </c:if>
+
+        <c:if test="${primaryTabId ==  'SEARCH_HOME'}">
+            <li id="LSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/legacysearch')">Legacy DB2</a></li>
+            <li id="MQSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/mqsearch')">SOF/WTAAS</a></li>
+        </c:if>
+        
 
 				  
     			<c:if test="${primaryTabId ==  'WORKFLOW'}">

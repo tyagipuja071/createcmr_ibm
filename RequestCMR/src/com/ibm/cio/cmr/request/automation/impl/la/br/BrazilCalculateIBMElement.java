@@ -592,23 +592,27 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
         if ("5B".equalsIgnoreCase(cnaeRecord.getIsuCd())) {
           state = soldTo.getStateProv();
-          sql = ExternalizedQuery.getSql("BR.AUTO.GET_SBO_FROM_STATE");
+          sql = ExternalizedQuery.getSql("BR.AUTO.GET_VAL_FROM_STATE");
           query = new PreparedQuery(entityManager, sql);
           query.setParameter("STATE", "M" + state);
-          List<String> sboMSPList = query.getResults(String.class);
+          ReftBrSboCollector sboMSP = query.getSingleResult(ReftBrSboCollector.class);
+
+          if (sboMSP != null) {
+            details.append("Search Term/Sales Branch Office = " + sboMSP.getSbo() + "\n");
+            overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboMSP.getSbo());
+
+            details.append("Market Responsibility Code (MRC) = " + sboMSP.getMrcCd() + "\n");
+            overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sboMSP.getMrcCd());
+
+            details.append("Country Use = " + sboMSP.getMrcCd() + "\n");
+            overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sboMSP.getMrcCd());
+          }
 
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_COLLECTOR_FROM_STATE");
           query = new PreparedQuery(entityManager, sql);
           query.setParameter("STATE", state);
           List<String> collectorList = query.getResults(String.class);
 
-          if (sboMSPList != null && sboMSPList.size() > 0) {
-            for (String sboMSP : sboMSPList) {
-              details.append("Search Term/Sales Branch Office = " + sboMSP + "\n");
-              overrides.addOverride(getProcessCode(), "DATA", "SALES_BO_CD", data.getSalesBusOffCd(), sboMSP);
-
-            }
-          }
           if (collectorList != null && collectorList.size() > 0) {
             for (String collectorNo : collectorList) {
               details.append("Collector Number = " + collectorNo + "\n");
@@ -798,7 +802,8 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       } else if ("CC3CC".equalsIgnoreCase(scenarioSubType)) {
         if (midasResponse != null && midasResponse.isSuccess()) {
           String abbrevName = (midasResponse.getRecord().getCompanyName().length() > 26)
-              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26) : "CC3/" + (midasResponse.getRecord().getCompanyName());
+              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26)
+              : "CC3/" + (midasResponse.getRecord().getCompanyName());
           LOG.debug("Sold To Company Name : " + midasResponse.getRecord().getCompanyName());
           // SET Abbreviated Name
           details.append("Abbreviated Name (TELX1) = " + abbrevName + "\n");

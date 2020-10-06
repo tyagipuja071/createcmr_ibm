@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -20,6 +21,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.AutomationServiceClient;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.ServiceClient.Method;
@@ -32,6 +34,10 @@ public class AustraliaUtil extends AutomationUtil {
   private static final Logger LOG = Logger.getLogger(AustraliaUtil.class);
 
   private static final List<String> ALLOW_DEFAULT_SCENARIOS = Arrays.asList("PRIV", "XPRIV", "BLUMX", "MKTPC", "XBLUM", "XMKTP");
+
+  public static final String SCENARIO_BLUEMIX = "BLUMX";
+  public static final String SCENARIO_MARKETPLACE = "MKTPC";
+  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -147,9 +153,25 @@ public class AustraliaUtil extends AutomationUtil {
     // skipCompanyCheckForScenario(requestData, engineData,
     // Arrays.asList(scnarioList), true);
     // scenario check for normal and ESOSW
+    Data data = requestData.getData();
+    String scenario = data.getCustSubGrp();
     String scenarioList[] = { "NRML", "ESOSW" };
+    Addr soldTo = requestData.getAddress("ZS01");
+    String custNm1 = soldTo.getCustNm1();
+    String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
+    String customerName = custNm1 + custNm2;
+
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scenarioList));
     processSkipCompanyChecks(engineData, requestData, details);
+    switch (scenario) {
+    case SCENARIO_BLUEMIX:
+    case SCENARIO_MARKETPLACE:
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      break;
+    case SCENARIO_PRIVATE_CUSTOMER:
+      return doPrivatePersonChecks(engineData, SystemLocation.AUSTRALIA, soldTo.getLandCntry(), customerName, details,
+          SCENARIO_PRIVATE_CUSTOMER.equals(scenario), requestData);
+    }
     return true;
   }
 
@@ -171,5 +193,11 @@ public class AustraliaUtil extends AutomationUtil {
     TypeReference<AutomationResponse<BNValidationResponse>> ref = new TypeReference<AutomationResponse<BNValidationResponse>>() {
     };
     return mapper.readValue(json, ref);
+  }
+
+  @Override
+  protected List<String> getCountryLegalEndings() {
+    return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
+        "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
 }

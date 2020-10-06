@@ -49,7 +49,6 @@ import com.ibm.cio.cmr.request.service.requestentry.RequestEntryService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
-import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 
@@ -245,10 +244,7 @@ public class RequestEntryController extends BaseController {
         LOG.debug("Country " + country + " has requester automation enabled. Redirecting to CreateCMR2.0 requester page..");
         return new ModelAndView("redirect:/autoreq?cmrIssuingCntry=" + country + "&reqType=" + reqType, "reqentry", model);
       }
-
-      // TODO QUERY here for enabling Quicksearch first
-      boolean showQuickSearchFirst = SystemLocation.UNITED_STATES.equals(country);
-      if (showQuickSearchFirst && ("C".equals(reqType) || "U".equals(reqType))) {
+      if (RequestUtils.isQuickSearchFirstEnabled(country) && ("C".equals(reqType) || "U".equals(reqType))) {
         LOG.debug("Country " + country + " has enabled quick search as first interface. Redirecting to Quick Search page..");
         return new ModelAndView("redirect:/quick_search?issuingCntry=" + country
             + "&infoMessage=Quick Search should be done for CMR being requested for or updated before creating a request.", "reqentry", model);
@@ -582,7 +578,12 @@ public class RequestEntryController extends BaseController {
     String searchCntry = model.getSearchIssuingCntry();
     String newParams = "?cmrIssuingCntry=" + cmrCntry + "&reqType=" + reqModel.getReqType();
     try {
-      FindCMRResultModel results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
+      FindCMRResultModel results = null;
+      if(!model.isPoolRecord()){	
+  	    results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
+      } else {
+  	    results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry, true); //searching for pool records
+      }
 
       boolean noResults = false;
       if (results == null || results.getItems() == null || results.getItems().size() == 0) {
@@ -659,18 +660,22 @@ public class RequestEntryController extends BaseController {
 
       FindCMRRecordModel record = results.getItems().get(0);
       String dunsNo = record.getCmrDuns();
+      String dnBname = "";
+      if(record != null && StringUtils.isNotBlank(record.getCmrName1Plain())){
+        dnBname = record.getCmrName1Plain() + (StringUtils.isNotBlank(record.getCmrName2Plain())? " " + record.getCmrName2Plain() : "");
+      }
       // do a fresh check on details for proper formatting
       record = DnBUtil.extractRecordFromDnB(reqModel.getCmrIssuingCntry(), dunsNo, record.getCmrPostalCode());
       if (record != null) {
         results.setItems(new ArrayList<FindCMRRecordModel>());
         results.getItems().add(record);
       }
-
       ParamContainer params = new ParamContainer();
       params.addParam("reqId", reqId);
       params.addParam("results", results);
       params.addParam("system", model.getSystem());
       params.addParam("model", reqModel);
+      params.addParam("dnBname", dnBname);
       ImportCMRModel retModel = dnbService.process(request, params);
       long reqIdNew = retModel.getReqId();
       mv = new ModelAndView("redirect:/request" + (reqIdNew > 0 ? "/" + reqIdNew : newParams), "cmr", new ImportCMRModel());
