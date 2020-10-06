@@ -1081,6 +1081,14 @@ function mandatoryForBusinessPartner() {
   }
 }
 
+function validateTypeOfCustomer() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'U') {
+    return;
+  }
+  FormManager.addValidator('crosSubTyp', Validators.NO_SPECIAL_CHAR, [ 'Type Of Customer' ], 'MAIN_CUST_TAB');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1138,5 +1146,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCmrForProcessor, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
-
+  GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
 });
