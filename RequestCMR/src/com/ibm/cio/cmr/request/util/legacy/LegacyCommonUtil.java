@@ -1,18 +1,10 @@
 package com.ibm.cio.cmr.request.util.legacy;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrRdc;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -22,13 +14,9 @@ import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
-import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
-import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.SystemUtil;
-import com.ibm.cio.cmr.request.util.mail.Email;
-import com.ibm.cio.cmr.request.util.mail.MessageType;
 
 /**
  * Class that contains utilities for Legacy
@@ -229,15 +217,6 @@ public class LegacyCommonUtil {
       return true;
     }
     return false;
-  }
-
-  public static String doFormatPoBox(String poBox) {
-    boolean poBoxFlag = poBox.contains("PO BOX");
-    if (poBoxFlag) {
-      return poBox.substring(6).trim();
-    } else {
-      return poBox;
-    }
   }
 
   public static AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {

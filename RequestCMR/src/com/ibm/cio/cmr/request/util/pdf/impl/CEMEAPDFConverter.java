@@ -134,6 +134,7 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
       Table checklistSection = createDetailsTable(new float[] { 91, 9 });
 
       try {
+
         String sysLocs = "";
 
         if ("607".equals(sysLoc) || "358".equals(sysLoc) || "626".equals(sysLoc) || "651".equals(sysLoc) || "694".equals(sysLoc)
@@ -145,6 +146,7 @@ public class CEMEAPDFConverter extends DefaultPDFConverter {
         }
 
         List<ChecklistItem> items = ChecklistUtil.getItems(checklist, sysLocs, ChecklistResponse.Responded);
+
         String answer = null;
         Cell answerCell = null;
         checklistSection.addCell(createLabelCell("Questionnaire", 1, 2));
