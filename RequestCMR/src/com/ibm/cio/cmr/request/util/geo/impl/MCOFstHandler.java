@@ -60,7 +60,7 @@ public class MCOFstHandler extends MCOHandler {
       SystemLocation.SEYCHELLES, SystemLocation.GUINEA_BISSAU, SystemLocation.NIGER, SystemLocation.CHAD);
 
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mail-to Address", "Bill-to Address", "Sold-to Address", "Ship-to Address",
-      "Install-at", "Data" };
+      "Install-at Address", "Data" };
 
   @Override
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
@@ -486,12 +486,15 @@ public class MCOFstHandler extends MCOHandler {
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     XSSFCell currCell = null;
+    String defaultLanded = LANDED_CNTRY_MAP.get(country);
     for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
+            String street = ""; // 4
+            String landedcountry = "";// 8
             String embargo = ""; // 9
             String cof = ""; // 10
             String cod = ""; // 11
@@ -529,12 +532,16 @@ public class MCOFstHandler extends MCOHandler {
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(5);
               stcont = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(6);
               city = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(7);
               postalcd = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(8);
+              landedcountry = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               addnameinfo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
@@ -555,6 +562,42 @@ public class MCOFstHandler extends MCOHandler {
             }
 
             TemplateValidation error = new TemplateValidation(name);
+
+            if (landedcountry.length() == 0 && !"Data".equalsIgnoreCase(sheet.getSheetName()) && cmrNo.length() != 0) {
+              LOG.trace("Landed country is required to be filled.");
+              error.addError(row.getRowNum(), "", "Landed country is required to be filled.");
+              validations.add(error);
+            } else if (landedcountry.length() > 0) {
+              if (!defaultLanded.equals(landedcountry) && !"Data".equalsIgnoreCase(sheet.getSheetName()) && cmrNo.length() != 0) {
+                LOG.debug("isCrossborder");
+                if (addnameinfo.length() != 0 && stcont.length() != 0 && poBox.length() != 0) {
+                  LOG.trace("Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
+                  error.addError(row.getRowNum(), "",
+                      "Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
+                  validations.add(error);
+                } else if (addnameinfo.length() != 0 && (stcont.length() != 0 || poBox.length() != 0)) {
+                  LOG.trace("Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
+                  error.addError(row.getRowNum(), "",
+                      "Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
+                  validations.add(error);
+                } else if (stcont.length() != 0 && poBox.length() != 0 && addnameinfo.length() == 0) {
+                  if (stcont.length() + poBox.length() > 23) {
+                    LOG.trace("Total computed length of Street Cont and PO Box should not exceed 21 characters.");
+                    error.addError(row.getRowNum(), "", "Total computed length of Street Cont and PO Box should not exceed 21 characters.");
+                    validations.add(error);
+                  }
+                }
+              } else {
+                LOG.debug("isLocal");
+                if (stcont.length() != 0 && poBox.length() != 0) {
+                  if (stcont.length() + poBox.length() > 23) {
+                    LOG.trace("Total computed length of Street Cont and PO Box should not exceed 21 characters.");
+                    error.addError(row.getRowNum(), "", "Total computed length of Street Cont and PO Box should not exceed 21 characters.");
+                    validations.add(error);
+                  }
+                }
+              }
+            }
 
             if (cod.length() > 0 && cof.length() > 0) {
               LOG.trace("Note that COF and COD flag cannot be filled at same time.");
