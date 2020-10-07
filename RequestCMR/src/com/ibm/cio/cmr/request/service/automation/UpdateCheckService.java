@@ -46,8 +46,10 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
         List<RejectionContainer> rejectContList = new ArrayList<RejectionContainer>();
         rejectContList = (List<RejectionContainer>) engineData.get("rejections");
         String message = "";
-        for (RejectionContainer r : rejectContList) {
-          message = message + r.getRejComment() + "\n";
+        if (!rejectContList.isEmpty()) {
+          for (RejectionContainer r : rejectContList) {
+            message = message + r.getRejComment() + "\n";
+          }
         }
         updtChkModel.setValidationMessage(message);
       }
