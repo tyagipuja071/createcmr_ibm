@@ -1248,7 +1248,7 @@ function addUpdateChecksValidator() {
         if (reqType != 'U') {
           return new ValidationResult(null, true);
         }
-        cmr.showProgress('Running Update Checks Element...');
+        console.log('Running Update Checks Element...');
         dojo.xhrPost({
           url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
           handleAs : 'json',
@@ -1261,7 +1261,6 @@ function addUpdateChecksValidator() {
           sync : true,
           load : function(data, ioargs) {
             elementResData = data;
-            cmr.hideProgress();
             console.log(data);
             if (!data.success) {
               console.log('Error occurred in generating UpdateChecks result -> ...' + data.error);
@@ -1271,18 +1270,17 @@ function addUpdateChecksValidator() {
           },
           error : function(error, ioargs) {
             success = false;
-            cmr.hideProgress();
-            cmr.showAlert('An error occurred while running UpdateSwitchElement. Please contact your system administrator', 'Error');
+            console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
             reject('Error occurred in Update Checks.');
           }
         });
 
         if (elementResData != '' && elementResData != undefined) {
-          if (formData.validated) {
-            cmr.showAlert(data.details, 'UpdateChecks Element Executed Successfully.');
-            return new ValidationResult(null, true);
+          if (elementResData.onError) {
+            console.log('UpdateChecks Element Executed Successfully.');
+            return new ValidationResult(null, false, elementResData.validationMessage);
           } else {
-            return new ValidationResult(null, false, 'Updates to the following fields need validation. >>> ' + formData.details);
+            return new ValidationResult(null, true);
           }
         } else {
           return new ValidationResult(null, true);

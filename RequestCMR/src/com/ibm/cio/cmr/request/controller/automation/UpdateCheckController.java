@@ -41,9 +41,9 @@ public class UpdateCheckController extends BaseController {
       map.addAttribute("updtChkModel", updtChksModel);
       if (updtChksModel != null) {
         map.addAttribute("success", true);
-        map.addAttribute("validated", updtChksModel.isSuccess());
+        map.addAttribute("onError", updtChksModel.isOnError());
         map.addAttribute("result", updtChksModel.getResult());
-        map.addAttribute("details", updtChksModel.getDetails());
+        map.addAttribute("validationMessage", updtChksModel.getValidationMessage());
       } else {
         map.addAttribute("success", false);
       }

@@ -1,15 +1,20 @@
 package com.ibm.cio.cmr.request.service.automation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.gbl.UpdateSwitchElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
+import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.automation.UpdateCheckModel;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
@@ -32,13 +37,19 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
     if (updtChkModel != null) {
       Long reqId = Long.parseLong(updtChkModel.getReqId());
       RequestData requestData = new RequestData(entityManager, reqId);
-
-      AutomationResult<ValidationOutput> updtElementResult = updtElement.executeElement(entityManager, requestData, null);
+      AutomationEngineData engineData = new AutomationEngineData();
+      AutomationResult<ValidationOutput> updtElementResult = updtElement.executeElement(entityManager, requestData, engineData);
 
       if (updtElementResult != null) {
         updtChkModel.setResult(updtElementResult.getResults());
-        updtChkModel.setSuccess(updtElementResult.getProcessOutput().isSuccess());
-        updtChkModel.setDetails(updtElementResult.getDetails());
+        updtChkModel.setOnError(updtElementResult.isOnError());
+        List<RejectionContainer> rejectContList = new ArrayList<RejectionContainer>();
+        rejectContList = (List<RejectionContainer>) engineData.get("rejections");
+        String message = "";
+        for (RejectionContainer r : rejectContList) {
+          message = message + r.getRejComment() + "\n";
+        }
+        updtChkModel.setValidationMessage(message);
       }
     }
 

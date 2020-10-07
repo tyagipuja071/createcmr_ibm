@@ -11,8 +11,8 @@ public class UpdateCheckModel extends BaseModel {
   private String issuingCountry;
   private String reqId;
   private String result;
-  private String details;
-  private boolean success;
+  private String validationMessage;
+  private boolean onError;
 
   public String getIssuingCountry() {
     return issuingCountry;
@@ -56,19 +56,19 @@ public class UpdateCheckModel extends BaseModel {
   public void addKeyParameters(ModelMap map) {
   }
 
-  public boolean isSuccess() {
-    return success;
+  public boolean isOnError() {
+    return onError;
   }
 
-  public void setSuccess(Boolean success) {
-    this.success = success;
+  public void setOnError(Boolean onError) {
+    this.onError = onError;
   }
 
-  public String getDetails() {
-    return details;
+  public String getValidationMessage() {
+    return validationMessage;
   }
 
-  public void setDetails(String details) {
-    this.details = details;
+  public void setValidationMessage(String validationMessage) {
+    this.validationMessage = validationMessage;
   }
 }
