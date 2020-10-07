@@ -148,7 +148,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if ((StringUtils.isEmpty(line3) && !StringUtils.isEmpty(addrData.getCustNm2()))
-        || (!StringUtils.isEmpty(line2) && line2.toUpperCase().startsWith("ATT ") && line2.toUpperCase().startsWith("ATT:"))) {
+        || (!StringUtils.isEmpty(line2) && (line2.toUpperCase().startsWith("ATT ") || line2.toUpperCase().startsWith("ATT:")))) {
       line3 = addrData.getAddrTxt2();
     }
 
