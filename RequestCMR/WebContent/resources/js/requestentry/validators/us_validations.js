@@ -127,21 +127,17 @@ function addAddressRecordTypeValidator() {
  * After configuration for US
  */
 function afterConfigForUS() {
-  // PPS CEID field as mandatory for BP scenario
-  // var custTypeHandler = null;
-  // if (custTypeHandler == null) {
-  // var custTypeHandler = dojo.connect(FormManager.getField('custType'),
-  // 'onChange', function(value) {
-  // if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' &&
-  // FormManager.getActualValue('reqType') == 'C' &&
-  // FormManager.getActualValue('custType') == '7') {
-  // FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPSCEID' ],
-  // 'MAIN_IBM_TAB');
-  // } else {
-  // FormManager.removeValidator('ppsceid', Validators.REQUIRED);
-  // }
-  // });
-  // }
+  // Enterprise field as mandatory for BP scenario
+  var custTypeHandler = null;
+  if (custTypeHandler == null) {
+    var custTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
+      if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' && FormManager.getActualValue('reqType') == 'C' && FormManager.getActualValue('custType') == '7') {
+        FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
+      } else {
+        FormManager.removeValidator('enterprise', Validators.REQUIRED);
+      }
+    });
+  }
 
   var usCntryHandler = null;
   if (usCntryHandler == null) {
