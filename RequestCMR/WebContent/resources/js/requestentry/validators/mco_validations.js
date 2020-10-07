@@ -98,7 +98,11 @@ function afterTemplateLoadPT() {
   if (custNm1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
     FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " c/o " + custNm1.substring(0, 9));
   } else {
-    FormManager.setValue('abbrevNm', custNm2.substring(0, 22));
+    if(custNm2 != undefined && custNm2 != ''){
+      FormManager.setValue('abbrevNm', custNm2.substring(0, 22));
+    }else{
+      FormManager.setValue('abbrevNm', custNm2);
+    }
   }
   crossborderScenariosAbbrvLocOnChange();
 }
