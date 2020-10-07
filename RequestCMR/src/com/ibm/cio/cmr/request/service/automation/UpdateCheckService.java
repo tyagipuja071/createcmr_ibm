@@ -1,6 +1,5 @@
 package com.ibm.cio.cmr.request.service.automation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -43,10 +42,9 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
       if (updtElementResult != null) {
         updtChkModel.setResult(updtElementResult.getResults());
         updtChkModel.setOnError(updtElementResult.isOnError());
-        List<RejectionContainer> rejectContList = new ArrayList<RejectionContainer>();
-        rejectContList = (List<RejectionContainer>) engineData.get("rejections");
+        List<RejectionContainer> rejectContList = (List<RejectionContainer>) engineData.get("rejections");
         String message = "";
-        if (!rejectContList.isEmpty()) {
+        if (rejectContList != null && !rejectContList.isEmpty()) {
           for (RejectionContainer r : rejectContList) {
             message = message + r.getRejComment() + "\n";
           }
