@@ -67,6 +67,8 @@ function afterTemplateLoadPT() {
     if (city1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
       FormManager.setValue('abbrevLocn', city1.substring(0, 12));
     }
+  } else if (subCustGrp == 'SAAPA') {
+    FormManager.setValue('abbrevLocn', 'SAAS');
   } else if (subCustGrp != 'INTSO' || subCustGrp != 'THDPT' || subCustGrp != 'SAAPA') {
     var city1Params = {
       REQ_ID : _reqId,
@@ -76,8 +78,6 @@ function afterTemplateLoadPT() {
     var city1 = city1Result.ret1;
     if (city1 != null) {
       FormManager.setValue('abbrevLocn', city1.substring(0, 12));
-    } else if (subCustGrp == 'SAAPA') {
-      FormManager.setValue('abbrevLocn', 'SAAS');
     }
   }
 
@@ -2404,6 +2404,26 @@ function addAbbrevLocationValidatorPT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addTypeOfCustomerValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var typeOfCustomer = FormManager.getActualValue('crosSubTyp');
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (typeOfCustomer != '' && (typeOfCustomer.length > 0 && !typeOfCustomer.match(reg))) {
+          return new ValidationResult({
+            id : 'crosSubTyp',
+            type : 'text',
+            name : 'crosSubTyp'
+          }, false, 'The value for Type of Customer is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndcForPT();
   var reqId = FormManager.getActualValue('reqId');
@@ -2551,10 +2571,12 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
 
+  GEOHandler.addAfterTemplateLoad(retainImportValuesPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(configureVATExemptOnScenariosPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.registerValidator(addAbbrevNmValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
-  GEOHandler.addAfterTemplateLoad(retainImportValuesPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.registerValidator(addTypeOfCustomerValidatorPT, [ SysLoc.PORTUGAL ], null, true);
+
 });
