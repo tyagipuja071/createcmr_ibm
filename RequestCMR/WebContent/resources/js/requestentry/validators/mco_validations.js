@@ -104,11 +104,12 @@ function afterTemplateLoadPT() {
 }
 
 function addHandlersForPT() {
-  if (_postalCodeHandler == null) {
-    _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
-      setTaxCodeOnPostalCodePT();
-    });
-  }
+  dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+    var req = FormManager.getActualValue('reqType').toUpperCase();
+    if (req == 'C') {
+      setTaxCdByPostCdPT();
+    }
+  });
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -134,43 +135,41 @@ function getImportedIndcForPT() {
   return _importedIndc;
 }
 
-function setTaxCodeOnPostalCodePT(postCd) {
-
-  var postCd = FormManager.getActualValue('postCd');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+function setTaxCdByPostCdPT() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGroup = FormManager.getActualValue('custSubGrp');
+  var addrType = FormManager.getActualValue('addrType');
+  if (reqType != 'C') {
     return;
   }
-
-  if (custSubGrp == 'CRISO' || custSubGrp == 'CRIINT' || custSubGrp == 'CRPRI' || custSubGrp == 'XCRO' || custSubGrp == 'XBP') {
-    return;
-  }
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : zs01ReqId,
-  };
-
-  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
-  var postCodeOrg = '';
-  if (result != null && result.ret1 != undefined) {
-    postCodeOrg = result.ret1;
+  var postcd = FormManager.getActualValue('postCd');
+  if (postcd != '' && postcd != undefined) {
+    if (addrType == 'ZS01') {
+      postcd = postcd.substring(0, 1);
+    }
   } else {
-    postCodeOrg = '';
+    var qParams = {
+      REQ_ID : FormManager.getActualValue('reqId')
+    };
+    var result = cmr.query('GET.ZS01POSTCD.BY_REQID', qParams);
+    if (result != null && result != '' && result.ret1 != undefined) {
+      postcd = result.ret1.substring(0, 1);
+    }
   }
-
-  var postCode = parseInt(postCodeOrg.substring(0, 1));
-  if (postCd && postCd != undefined && postCd != '') {
-    postCode = postCd.substring(0, 1);
-  }
-
-  // set Tax code based on postal-Code logic
-  var checkImportIndc = getImportedIndcForPT();
-  if (checkImportIndc != 'Y') {
-    if (custSubGrp == 'GOVRN' && postCode == 9) {
+  console.log(postcd);
+  if (postcd == '9') {
+    if (reqType == 'C' && (custSubGroup == 'GOVRN' || custSubGroup == 'CRGOV')) {
       FormManager.setValue('specialTaxCd', '18');
-    } else if (custSubGrp != 'GOVRN' && postCode == 9) {
+    } else if (reqType == 'C' && (custSubGroup != 'GOVRN' && custSubGroup != 'CRGOV')) {
       FormManager.setValue('specialTaxCd', '23');
+    }
+  } else {
+    var qParams = {
+      CUST_TYP : FormManager.getActualValue('custSubGroup')
+    };
+    var result = cmr.query('GET.TAXCD.BY_CUSTSUBGRP', qParams);
+    if (result != null && result != '' && result.ret1 != undefined) {
+      FormManager.setValue('specialTaxCd', result.ret1);
     }
   }
 }
@@ -2558,10 +2557,10 @@ dojo.addOnLoad(function() {
   // PT Legacy
   GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterConfig(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAddrFunction(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(afterTemplateLoadPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
