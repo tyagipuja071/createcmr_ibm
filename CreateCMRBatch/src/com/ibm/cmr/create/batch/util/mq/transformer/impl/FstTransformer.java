@@ -676,7 +676,7 @@ public class FstTransformer extends MCOTransformer {
           line5 = line6;
       }
       if (!StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
-        line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry().toUpperCase());
+        line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
       }
     } else {
       LOG.debug("performing local setup");
