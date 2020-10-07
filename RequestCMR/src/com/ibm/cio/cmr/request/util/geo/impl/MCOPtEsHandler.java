@@ -762,6 +762,13 @@ public class MCOPtEsHandler extends MCOHandler {
       update.setOldData(oldData.getSpecialTaxCd());
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TypeOfCustomer", "-"));
+      update.setNewData(newData.getCrosSubTyp());
+      update.setOldData(oldData.getCrosSubTyp());
+      results.add(update);
+    }
 
   }
 
