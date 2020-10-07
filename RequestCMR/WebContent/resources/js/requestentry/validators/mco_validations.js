@@ -69,7 +69,7 @@ function afterTemplateLoadPT() {
     }
   } else if (subCustGrp == 'SAAPA') {
     FormManager.setValue('abbrevLocn', 'SAAS');
-  } else if (subCustGrp != 'INTSO' || subCustGrp != 'THDPT' || subCustGrp != 'SAAS') {
+  } else if (subCustGrp != 'INTSO' || subCustGrp != 'THDPT' || subCustGrp != 'SAAPA') {
     var city1Params = {
       REQ_ID : _reqId,
       ADDR_TYPE : "ZS01",
