@@ -656,7 +656,12 @@ public class PortugalTransformer extends MessageTransformer {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getVat().trim())) {
         legacyCust.setVat("");
       } else {
-        legacyCust.setVat(muData.getVat());
+        String vat = muData.getVat();
+        if (!StringUtils.isEmpty(vat) && vat.matches("^[A-Z]{2}.*") && "PT".equals(vat.substring(0, 2))) {
+          legacyCust.setVat(vat.substring(2, vat.length()));
+        } else {
+          legacyCust.setVat(muData.getVat());
+        }
       }
     }
 
@@ -712,7 +717,7 @@ public class PortugalTransformer extends MessageTransformer {
         if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
           cust.setTelNoOrVat("");
         } else {
-          cust.setTelNoOrVat(addr.getCustPhone());
+          cust.setTelNoOrVat("TF" + addr.getCustPhone());
         }
       }
     }
@@ -722,7 +727,7 @@ public class PortugalTransformer extends MessageTransformer {
         if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
           legacyAddr.setAddrPhone("");
         } else {
-          legacyAddr.setAddrPhone(addr.getCustPhone());
+          legacyAddr.setAddrPhone("TF" + addr.getCustPhone());
         }
       }
     }
