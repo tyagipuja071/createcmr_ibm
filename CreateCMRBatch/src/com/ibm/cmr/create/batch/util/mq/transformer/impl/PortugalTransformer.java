@@ -464,6 +464,8 @@ public class PortugalTransformer extends MessageTransformer {
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+      } else {
+        legacyCust.setVat("");
       }
     }
 
