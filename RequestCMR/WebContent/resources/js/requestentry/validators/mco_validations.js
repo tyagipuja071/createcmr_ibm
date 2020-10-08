@@ -98,9 +98,9 @@ function afterTemplateLoadPT() {
   if (custNm1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
     FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " c/o " + custNm1.substring(0, 9));
   } else {
-    if(custNm2 != undefined && custNm2 != ''){
+    if (custNm2 != undefined && custNm2 != '') {
       FormManager.setValue('abbrevNm', custNm2.substring(0, 22));
-    }else{
+    } else {
       FormManager.setValue('abbrevNm', custNm2);
     }
   }
@@ -110,6 +110,7 @@ function afterTemplateLoadPT() {
 function addHandlersForPT() {
   dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
     var req = FormManager.getActualValue('reqType').toUpperCase();
+    var role = FormManager.getActualValue('reqType').toUpperCase();
     if (req == 'C') {
       setTaxCdByPostCdPT();
     }
@@ -2099,14 +2100,16 @@ function isuCtcBasedOnISIC() {
 }
 
 /*
- * validate CMRNumber for Internal So Scenario
+ * validate CMRNumber for PT
  */
-function validateCMRNumberForISO() {
+function validateCMRNumberForPT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var cmrNo = FormManager.getActualValue('cmrNo');
         var _custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        var numPattern = /^[0-9]+$/;
         if (FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
@@ -2122,7 +2125,6 @@ function validateCMRNumberForISO() {
           if ('Y' == ifProspect) {
             return new ValidationResult(null, true);
           }
-          // Validation for Internal SO Scenario
           if (_custSubGrp == 'INTSO') {
             if (!cmrNo.startsWith("997")) {
               return new ValidationResult(null, false, 'Internal SO CMR should begin with 997.');
@@ -2131,6 +2133,29 @@ function validateCMRNumberForISO() {
             if (cmrNo.startsWith("997")) {
               return new ValidationResult(null, false, 'CMR Starting with 997 is allowed for InternalSO Scenario Only.');
             }
+          }
+          // Validation for Internal Scenario
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'XINT') {
+            if (!cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+            }
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT') {
+            if (cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
+            }
+          }
+          if (cmrNo == '000000') {
+            return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
+          }
+          if (cmrNo.length >= 1 && cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+          }
+          if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be number only.');
           }
           return new ValidationResult(null, true);
         }
@@ -2561,8 +2586,6 @@ dojo.addOnLoad(function() {
   // PT Legacy
   GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterConfig(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAddrFunction(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(afterTemplateLoadPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
@@ -2570,7 +2593,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
-  GEOHandler.registerValidator(validateCMRNumberForISO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
 
