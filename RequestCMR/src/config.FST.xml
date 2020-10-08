@@ -33,7 +33,7 @@
 					<lovId>CollectionCd</lovId>
 					<length>6</length>
 				</column>
-				<column number="true" exactLength="false">
+				<column exactLength="true">
 					<label>SBO/Search Term</label>
 					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>20</width>

@@ -427,6 +427,7 @@ public class MCOCewaHandler extends MCOHandler {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
             String street = ""; // 4
+            String sbo = ""; // 5
             String landedcountry = "";// 8
             String embargo = ""; // 9
             String cof = ""; // 10
@@ -444,6 +445,8 @@ public class MCOCewaHandler extends MCOHandler {
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
               cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(5);
+              sbo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               embargo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(10);
@@ -562,6 +565,15 @@ public class MCOCewaHandler extends MCOHandler {
                 LOG.trace("Invalid format for TIN Number.");
                 error.addError(row.getRowNum(), "TIN Number", "Invalid format for TIN Number. Format should be NNN-NNN-NNN.");
                 validations.add(error);
+              }
+            }
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(sbo)) {
+                if (!StringUtils.isNumeric(sbo.substring(0, 4))) {
+                  LOG.trace("SBO should have numeric values only.");
+                  error.addError(row.getRowNum(), "", "SBO should have numeric values only.");
+                  validations.add(error);
+                }
               }
             }
           }
