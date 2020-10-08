@@ -1606,7 +1606,7 @@ dojo.addOnLoad(function() {
 
   // GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2,
   // GEOHandler.REQUESTER,true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.TANZANIA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.TANZANIA ], null, true);
+
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
 
