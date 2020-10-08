@@ -642,7 +642,7 @@ function setSalesRepValues(clientTier) {
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-  if (cntry == SysLoc.PORTUGAL && _noISRLogicPT.has(custSubGroup)) {
+  if (cntry == SysLoc.PORTUGAL && (_noISRLogicPT.has(custSubGroup) || custSubGroup == '')) {
     return;
   }
   if (cntry == SysLoc.SPAIN && _noISRLogicES.has(custSubGroup)) {
