@@ -809,7 +809,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
-  // For Legacy GR
+  // For Legacy GR, CY and PT
   GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
