@@ -724,7 +724,7 @@ public class USUtil extends AutomationUtil {
       throws Exception {
     Data data = requestData.getData();
     String updatedValue = updatedDataModel.getNewData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle .\nLink: https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -736,7 +736,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 100000) {
-        return error;
+        return error +"\nCMR with revenue > 100K";
       } else if (revenue.floatValue() == 0) {
         String dunsNo = "";
         if (StringUtils.isNotBlank(data.getDunsNo())) {
@@ -755,7 +755,7 @@ public class USUtil extends AutomationUtil {
           DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
           if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
             if (!dnbData.getIbmIsic().equals(updatedValue)) {
-              return error;
+              return error+ "\nRequested ISIC did not match value in D&B";
             } else {
               sql = ExternalizedQuery.getSql("AUTO.US.GET_ISU_BY_ISIC");
               query = new PreparedQuery(entityManager, sql);
@@ -764,7 +764,7 @@ public class USUtil extends AutomationUtil {
               query.setForReadOnly(true);
               String brsch = query.getSingleResult(String.class);
               if (!data.getIsuCd().equals(brsch)) {
-                return error;
+                return error +"\nISU/Industry impact"; 
               } else {
                 // check if isic and sicmen are equal if not set them equal
                 if (data.getIsicCd() != null && !data.getIsicCd().equals(data.getUsSicmen())) {
@@ -778,10 +778,10 @@ public class USUtil extends AutomationUtil {
               }
             }
           } else {
-            return error;
+            return error +"\nIsic is blank"; 
           }
         } else {
-          return error;
+          return error + "\nDuns No. is blank";
         }
       }
     }
@@ -799,7 +799,7 @@ public class USUtil extends AutomationUtil {
    */
   private String performEnterpriseAffiliateCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink: https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -811,7 +811,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 0) {
-        return error;
+        return error + "\nCMR with revenue";
       } else if (revenue.floatValue() == 0) {
         sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
         query = new PreparedQuery(entityManager, sql);
@@ -841,7 +841,7 @@ public class USUtil extends AutomationUtil {
           }
 
         } else {
-          return error;
+          return error + "\nTarget enterprise/affiliate is not under the same GU DUNs/parent";
         }
       }
     }
@@ -870,8 +870,16 @@ public class USUtil extends AutomationUtil {
         String creationCapChanged = (String) results.get(0)[2];
         String sicValidation = (String) results.get(0)[3];
         String revenue = (String) results.get(0)[4];
+        String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink: https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
         if (!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation) || !"Ok".equals(revenue)) {
-          return "'The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+          if( !"Ok".equals(revenue)){
+           error+= "\nCMR with revenue";
+          }
+          if(!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation) ){
+            error+="\nNot new CMR (for CMR pass the 30 days period)";
+          }
+          return error;
+          
         } else {
           sql = ExternalizedQuery.getSql("AUTO.US.GET_CSP_AFFILIATE");
           query = new PreparedQuery(cedpManager, sql);
