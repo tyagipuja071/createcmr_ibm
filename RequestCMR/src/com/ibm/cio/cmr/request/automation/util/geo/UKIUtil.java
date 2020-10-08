@@ -182,7 +182,8 @@ public class UKIUtil extends AutomationUtil {
             matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
           }
           if (!matchesDnb) {
-            resultCodes.add("R");// Reject
+            // resultCodes.add("R"); // commenting because of CMR-7134
+            cmdeReview = true;
             details.append("Company Registration Number on the request did not match D&B\n");
           } else {
             details.append("Company Registration Number on the request matches D&B\n");
