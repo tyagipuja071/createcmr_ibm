@@ -2499,6 +2499,26 @@ function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
   disableAddrFieldsPTES();
 }
 
+/* Overriding Address Grid Formatters for PT */
+function streetValueFormatter(value, rowIndex) {
+  var rowData = this.grid.getItem(rowIndex);
+  var streetCont = rowData.addrTxt2;
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '822') {
+    if (value && streetCont && streetCont[0]) {
+      return value + '<br>' + streetCont;
+    } else if (streetCont && streetCont[0]) {
+      return streetCont;
+    }
+    return value;
+  }
+
+  if (streetCont && streetCont[0]) {
+    return value + '<br>' + streetCont;
+  }
+  return value;
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO = [ SysLoc.PORTUGAL, SysLoc.SPAIN ];
