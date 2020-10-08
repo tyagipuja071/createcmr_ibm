@@ -111,7 +111,7 @@ function addHandlersForPT() {
   dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
     var req = FormManager.getActualValue('reqType').toUpperCase();
     var role = FormManager.getActualValue('reqType').toUpperCase();
-    if (req == 'C' && role == 'REQUESTER') {
+    if (req == 'C') {
       setTaxCdByPostCdPT();
     }
   });
@@ -2586,8 +2586,6 @@ dojo.addOnLoad(function() {
   // PT Legacy
   GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterConfig(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAddrFunction(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(afterTemplateLoadPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
