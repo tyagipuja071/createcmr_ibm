@@ -219,57 +219,66 @@ public class CEWATransformer extends MCOTransformer {
     String line4 = "";
     String line5 = "";
     String line6 = "";
-    String addrType = addrData.getId().getAddrType();
+    String addtlName = addrData.getCustNm4();
+    String street = addrData.getAddrTxt();
+    String streetCont = addrData.getAddrTxt2();
+    String poBox = addrData.getPoBox();
+    String poBoxWithPrefix = "PO BOX " + addrData.getPoBox();
+    String postalCd = addrData.getPostCd();
+    String city = addrData.getCity1();
+    String streetContPoBox = streetCont + ", " + poBoxWithPrefix;
 
     line1 = addrData.getCustNm1();
     line2 = addrData.getCustNm2();
 
-    if (!StringUtils.isBlank(addrData.getCustNm4())) {
-      line3 = addrData.getCustNm4();
-    } else if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line3 = addrData.getAddrTxt();
+    if (StringUtils.isNotBlank(addtlName)) {
+      line3 = addtlName;
+    } else if (StringUtils.isBlank(addtlName) && StringUtils.isNotBlank(street)) {
+      line3 = street;
     }
 
-    if (!StringUtils.isBlank(addrData.getAddrTxt())) {
-      line4 = addrData.getAddrTxt();
-    } else if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
-      line4 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
-    } else if (!StringUtils.isBlank(addrData.getPoBox())) {
-      line4 = "PO BOX " + addrData.getPoBox();
-    } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-      line4 = addrData.getAddrTxt2();
+    if (StringUtils.isNotBlank(addtlName) && StringUtils.isNotBlank(street)) {
+      line4 = street;
+    }
+
+    if (StringUtils.isBlank(line4)) {
+      if (StringUtils.isNotBlank(streetCont) && StringUtils.isNotBlank(poBox)) {
+        line4 = streetContPoBox;
+      } else if (StringUtils.isNotBlank(poBox)) {
+        line4 = poBoxWithPrefix;
+      } else if (StringUtils.isNotBlank(streetCont)) {
+        line4 = streetCont;
+      }
     }
 
     if (crossBorder) {
-      if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
-        line5 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
-      } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-        line5 = addrData.getAddrTxt2();
-      } else if (!StringUtils.isBlank(addrData.getPoBox())) {
-        line5 = "PO BOX " + addrData.getPoBox();
-      } else if (!StringUtils.isBlank(addrData.getCity1()) || !StringUtils.isBlank(addrData.getPostCd())) {
-        String cityPostalCode = addrData.getCity1();
-        if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(addrData.getPostCd())) {
-          cityPostalCode += ", " + addrData.getPostCd();
-        }
-        line5 = cityPostalCode;
+      String postalCdCity = postalCd;
+      if (StringUtils.isNotBlank(city) && StringUtils.isNotBlank(postalCd)) {
+        postalCdCity += " " + city;
+      } else if (StringUtils.isNotBlank(city) && StringUtils.isBlank(postalCd)) {
+        postalCdCity = city;
       }
+      line5 = postalCdCity;
       line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-
     } else {
-      if (!StringUtils.isBlank(addrData.getAddrTxt2()) && !StringUtils.isBlank(addrData.getPoBox())) {
-        line5 = addrData.getAddrTxt2() + ", " + "PO BOX " + addrData.getPoBox();
-      } else if (!StringUtils.isBlank(addrData.getAddrTxt2())) {
-        line5 = addrData.getAddrTxt2();
-      } else if (!StringUtils.isBlank(addrData.getPoBox())) {
-        line5 = "PO BOX " + addrData.getPoBox();
+
+      if (StringUtils.isNotBlank(addtlName) && StringUtils.isNotBlank(street)) {
+        if (StringUtils.isNotBlank(streetCont) && StringUtils.isNotBlank(poBox)) {
+          line5 = streetContPoBox;
+        } else if (StringUtils.isNotBlank(streetCont)) {
+          line5 = streetCont;
+        } else if (StringUtils.isNotBlank(poBox)) {
+          line5 = poBoxWithPrefix;
+        }
       }
 
-      String cityPostalCode = addrData.getCity1();
-      if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(addrData.getPostCd())) {
-        cityPostalCode += ", " + addrData.getPostCd();
+      String postalCdCity = postalCd;
+      if (StringUtils.isNotBlank(city) && StringUtils.isNotBlank(postalCd)) {
+        postalCdCity += " " + city;
+      } else if (StringUtils.isNotBlank(city) && StringUtils.isBlank(postalCd)) {
+        postalCdCity = city;
       }
-      line6 = cityPostalCode;
+      line6 = postalCdCity;
     }
 
     legacyAddr.setAddrLine1(line1);
