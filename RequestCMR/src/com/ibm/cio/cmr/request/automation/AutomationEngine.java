@@ -337,7 +337,6 @@ public class AutomationEngine {
               }
             } else {
               rejCmtBuilder.append(".");
-              rejectInfo = new ArrayList<RejectionContainer>();
             }
             String cmt = rejCmtBuilder.toString();
             if (cmt.length() > 1000) {
