@@ -1357,8 +1357,12 @@ public class RequestUtils {
    * @param country
    * @return
    */
-  public static boolean isQuickSearchFirstEnabled(EntityManager entityManager, String country) {
-    return SystemLocation.UNITED_STATES.equals(country);
+  public static String isQuickSearchFirstEnabled(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.START_FROM_QUICK_SEARCH");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    return query.getSingleResult(String.class);
   }
 
   /**
@@ -1409,7 +1413,12 @@ public class RequestUtils {
     try {
       EntityManager entityManager = JpaManager.getEntityManager();
       try {
-        return isQuickSearchFirstEnabled(entityManager, country);
+        String quickSearchFirst = isQuickSearchFirstEnabled(entityManager, country);
+        if ("Y".equals(quickSearchFirst)) {
+          return true;
+        } else {
+          return false;
+        }
       } finally {
         entityManager.clear();
         entityManager.close();
