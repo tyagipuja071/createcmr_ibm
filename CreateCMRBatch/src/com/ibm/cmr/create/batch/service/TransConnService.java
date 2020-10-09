@@ -506,6 +506,7 @@ public class TransConnService extends BaseBatchService {
           admin.setLockBy(null);
           admin.setLockByNm(null);
           admin.setReqStatus("COM");
+          admin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
           updateEntity(admin, entityManager);
 
           ReservedCMRNos reservedCMRNo = new ReservedCMRNos();
@@ -617,6 +618,11 @@ public class TransConnService extends BaseBatchService {
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
           Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
 
+          PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
+          zp01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+          zp01AddrQuery.setParameter("ADDR_TYPE", "ZP01");
+          List<Addr> zp01Addrs = zp01AddrQuery.getResults(Addr.class);
+
           PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
           newAddrQuery.setParameter("REQ_ID", reqId);
           List<Addr> newAddresses = newAddrQuery.getResults(Addr.class);
@@ -645,7 +651,33 @@ public class TransConnService extends BaseBatchService {
             updateEntity(newAddr, entityManager);
           }
 
+          if (zp01Addrs != null && !zp01Addrs.isEmpty()) {
+            // copy zp01 addresses
+            for (Addr zp01 : zp01Addrs) {
+              Addr newAddr = new Addr();
+              AddrPK addrPK = new AddrPK();
+              addrPK.setAddrSeq(zp01.getId().getAddrSeq());
+              addrPK.setReqId(reqId);
+              addrPK.setAddrType("ZP01");
+              copyValuesToEntity(zp01, newAddr);
+              newAddr.setSapNo(null);
+              newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+              newAddr.setChangedIndc(null);
+              newAddr.setId(addrPK);
+              newAddr.setAddrStdResult("X");
+              newAddr.setAddrStdAcceptInd(null);
+              newAddr.setAddrStdRejReason(null);
+              newAddr.setAddrStdRejCmt(null);
+              newAddr.setAddrStdTs(null);
+              newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+              newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+              updateEntity(newAddr, entityManager);
+              break;
+            }
+          }
+
           newAdmin.setReqStatus("PCP");
+          newAdmin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
 
           RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(),
               "Child Update Request " + reqId + " created.");
@@ -1187,9 +1219,17 @@ public class TransConnService extends BaseBatchService {
     addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
 
     if ("897".equals(data.getCmrIssuingCntry())) {
-      // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
-      // the ZI01 address
-      addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      if ("ZP01".equals(record.getAddressType()) && record.getSeqNo() != null && Integer.parseInt(record.getSeqNo()) >= 200) {
+        // If additional bill to handle accordingly
+        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
+        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+        addrQuery.setParameter("ADDR_TYPE", "ZP01");
+        addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
+      } else {
+        // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
+        // the ZI01 address
+        addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      }
     } else {
       addrQuery.setParameter("ADDR_TYPE", record.getAddressType());
     }
