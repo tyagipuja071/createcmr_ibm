@@ -24,6 +24,7 @@ var _reqReasonHandler = null;
 var _codHandler = null;
 var _cofHandler = null;
 var _vatExemptHandler = null;
+var _streetHandler = null;
 
 function addHandlersForMCO2() {
 
@@ -71,6 +72,27 @@ function addHandlersForMCO2() {
     _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
       resetVatRequired();
     });
+  }
+
+  if (_streetHandler == null) {
+    _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
+      setStreetContBehavior();
+    });
+  }
+}
+
+function setStreetContBehavior() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  var street = FormManager.getActualValue('addrTxt');
+  if (street != null && street != '') {
+    FormManager.enable('addrTxt2');
+  } else {
+    FormManager.clearValue('addrTxt2');
+    FormManager.disable('addrTxt2');
   }
 }
 
@@ -325,12 +347,15 @@ function addAddressFieldValidators() {
       validate : function() {
         var stCont = FormManager.getActualValue('addrTxt2');
         var poBox = FormManager.getActualValue('poBox');
-        var val = stCont;
 
-        if (poBox != '') {
-          val += poBox;
-          if (val != null && val.length > 21) {
+        if (poBox != '' && stCont != '') {
+          var stContPoBox = stCont + poBox;
+          if (stContPoBox != null && stContPoBox.length > 21) {
             return new ValidationResult(null, false, 'Total computed length of Street Con\'t and PO Box should not exceed 21 characters.');
+          }
+        } else if (poBox != '') {
+          if (poBox.length > 23) {
+            return new ValidationResult(null, false, 'PO Box length should not exceed 23 characters.');
           }
         }
         return new ValidationResult(null, true);
@@ -497,94 +522,6 @@ function addAbbrvNmAndLocValidator() {
     FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Abbreviated Name' ]);
     FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ]);
   }
-}
-
-function streetAvenueValidator() {
-  dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
-    var addrVal = FormManager.getActualValue('addrTxt').toUpperCase();
-    var addrPlain = FormManager.getActualValue('addrTxt');
-    var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    var indexes = new Array();
-    var isFST = false;
-    var isOthers = false;
-    var isPresent = false;
-
-    if (fstCEWA.indexOf(cntry) > -1) {
-      isFST = true;
-    } else if (othCEWA.indexOf(cntry) > -1) {
-      isOthers = true;
-    }
-
-    indexes.push(addrVal.match(/(^|\W)AVENUE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)AV($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)STREET($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)STR($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)ROAD($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)RD($|\W)/));
-
-    indexes.push(addrVal.match(/(^|\W)STRASSE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)STAAT($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)STRAAT($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)AVENUR($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)NO($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)NR($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)AVENIDA($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)RUA($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)CIRCLE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)ST($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)SQUARE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)ESTATE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)ESTRADA($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)DRIVE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)PLAZA($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)AREA($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)LANE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)BUILDING($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)SUITE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)HOUSE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)FLOOR($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)PLACE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)BLDG($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)BLOCK($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)BRIDGE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)RIDGE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)BR($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)UNIT($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)PARK($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)FACTORY($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)SURREY($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)MIDDLESEX($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)BLD($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)S($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)B($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)P($|\W)/));
-
-    indexes.push(addrVal.match(/(^|\W)RUE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)ROUTE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)BOULEVARD($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)AVE($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)WAY($|\W)/));
-    indexes.push(addrVal.match(/(^|\W)CITICENTER($|\W)/));
-
-    for (var i = 0; i < indexes.length; i++) {
-      if (indexes[i] != null) {
-        isPresent = true;
-        break;
-      }
-    }
-
-    if (!(isPresent)) {
-      if (isFST) {
-        if (addrPlain != null && addrPlain.length > 0) {
-          FormManager.setValue('addrTxt', addrPlain.trim() + ' Avenue');
-        }
-      } else if (isOthers) {
-        if (addrPlain != null && addrPlain.length > 0) {
-          FormManager.setValue('addrTxt', addrPlain.trim() + ' Street');
-        }
-      }
-    }
-  });
 }
 
 function setScenarioBehaviour() {
@@ -1105,26 +1042,27 @@ function addAdditionalNameStreetContPOBoxValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var filledCount = 0;
 
-        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
+        var isUpdate = FormManager.getActualValue('reqType') == 'U';
+        var isLocalBasedOnLanded = FormManager.getActualValue('defaultLandedCountry') == FormManager.getActualValue('landCntry');
+
+        if (FormManager.getActualValue('custGrp') == 'LOCAL' || (isUpdate && isLocalBasedOnLanded)) {
           return new ValidationResult(null, true);
         }
 
+        var isAddlNameFilled = false;
+        var isStreetContPOBOXFilled = false;
+
         if (FormManager.getActualValue('custNm4') != '') {
-          filledCount++;
+          isAddlNameFilled = true;
         }
 
-        if (FormManager.getActualValue('addrTxt2') != '') {
-          filledCount++;
+        if (FormManager.getActualValue('addrTxt2') != '' || FormManager.getActualValue('poBox') != '') {
+          isStreetContPOBOXFilled = true;
         }
 
-        if (FormManager.getActualValue('poBox') != '') {
-          filledCount++;
-        }
-
-        if (filledCount > 2) {
-          return new ValidationResult(null, false, 'Additional Name or Address Information, Street Continuation, and PO Box only 2 can be filled at the same time');
+        if (isAddlNameFilled && isStreetContPOBOXFilled) {
+          return new ValidationResult(null, false, 'Please fill-out either \'Additional Name or Address Information\' or \'Street Continuation\' and/or \'PO Box\' only.');
         }
 
         return new ValidationResult(null, true);
@@ -1578,8 +1516,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(streetAvenueValidator, GEOHandler.MCO2);
-  // GEOHandler.addAfterConfig(enterpriseMalta, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO2);
@@ -1640,5 +1576,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(registerMCO2VatValidator, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);  
+  GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
+
 });
