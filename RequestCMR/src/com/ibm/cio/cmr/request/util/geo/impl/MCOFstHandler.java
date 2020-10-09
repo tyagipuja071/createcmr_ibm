@@ -278,8 +278,14 @@ public class MCOFstHandler extends MCOHandler {
       List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
 
     String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), "U");
+    boolean prospectCmrChosen = mainRecord != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(mainRecord.getCmrOrderBlock());
+
     if (CmrConstants.PROCESSING_TYPE_LEGACY_DIRECT.equals(processingType)) {
       if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
+        if (prospectCmrChosen && "ZS01".equals(mainRecord.getCmrAddrTypeCode())) {
+          LOG.debug("Installing Address prospect CMR No. " + mainRecord.getCmrNum());
+          mainRecord.setCmrAddrSeq("00003");
+        }
         mapCreateReqAddrLD(mainRecord, converted);
       } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
         mapUpdateReqAddrLD(source, converted);

@@ -782,4 +782,9 @@ public class FstTransformer extends MCOTransformer {
     }
     return true;
   }
+
+  @Override
+  public String getFixedAddrSeqForProspectCreation() {
+    return "00003";
+  }
 }
