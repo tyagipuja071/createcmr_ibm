@@ -341,7 +341,10 @@ public class AutomationEngine {
         // failed
         LOG.debug("No. of Non-Verification Errors: " + nonCompanyVerificationErrorCount + ", No. of Non-Verification Negative Checks: "
             + engineData.get().getTrackedNegativeCheckCount());
-        if (nonCompanyVerificationErrorCount == 0 && engineData.get().getTrackedNegativeCheckCount() == 0 && payGoAddredited) {
+        // added check that there was indeed an error somewhere before going the
+        // paygo route
+        if ((!actionsOnError.isEmpty() || !engineData.get().getNegativeChecks().isEmpty()) && nonCompanyVerificationErrorCount == 0
+            && engineData.get().getTrackedNegativeCheckCount() == 0 && payGoAddredited) {
           moveForPayGo = true;
         }
         if (moveForPayGo) {
