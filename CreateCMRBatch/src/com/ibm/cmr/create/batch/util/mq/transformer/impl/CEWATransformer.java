@@ -646,4 +646,8 @@ public class CEWATransformer extends MCOTransformer {
     }
   }
 
+  @Override
+  public String getFixedAddrSeqForProspectCreation() {
+    return "00001";
+  }
 }
