@@ -343,8 +343,8 @@ public class AutomationEngine {
             + engineData.get().getTrackedNegativeCheckCount());
         // added check that there was indeed an error somewhere before going the
         // paygo route
-        if ((!actionsOnError.isEmpty() || !engineData.get().getNegativeChecks().isEmpty()) && nonCompanyVerificationErrorCount == 0
-            && engineData.get().getTrackedNegativeCheckCount() == 0 && payGoAddredited) {
+        if ((!actionsOnError.isEmpty() || (engineData.get().getNegativeChecks() != null && !engineData.get().getNegativeChecks().isEmpty()))
+            && nonCompanyVerificationErrorCount == 0 && engineData.get().getTrackedNegativeCheckCount() == 0 && payGoAddredited) {
           moveForPayGo = true;
         }
         if (moveForPayGo) {
