@@ -3219,7 +3219,8 @@ function cemeaCustomVATMandatory() {
   var custSubType = FormManager.getActualValue('custSubGrp');
   if (listVatMandatoryForLocal.indexOf(cntry) > -1 && custSubType != undefined && custSubType != null && custSubType != '') {
     var scenario = FormManager.getActualValue('custGrp');
-    if (scenario == 'LOCAL' && !(custSubType.includes('IN') || custSubType == 'PRICU' || custSubType.includes('PC'))) {
+    // CMR-6020 Local or GBM SBM Local
+    if ((scenario.includes('LOC') && !(custSubType.includes('IN') || custSubType == 'PRICU' || custSubType.includes('PC'))) || custSubType.includes('EL')) {
       // Make Vat Mandatory
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       console.log("Vat is Mandatory");
