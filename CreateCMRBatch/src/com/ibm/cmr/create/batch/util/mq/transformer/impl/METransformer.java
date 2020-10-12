@@ -703,9 +703,13 @@ public class METransformer extends EMEATransformer {
     LOG.debug("Set max and min range of cmrNo..");
     // if (_custSubGrp == "INTER" || _custSubGrp == "XINT") {
     if (custSubGrp.contains("IN")) {
-      generateCMRNoObj.setMin(990300);
-      generateCMRNoObj.setMax(999990);
-      LOG.debug("that is ME INTER CMR");
+      if (!StringUtils.isBlank(data.getAbbrevNm()) && data.getAbbrevNm().startsWith("DUMMY")) {
+        generateCMRNoObj.setMin(985001);
+        generateCMRNoObj.setMax(985999);
+      } else {
+        generateCMRNoObj.setMin(993110);
+        generateCMRNoObj.setMax(998899);
+      }
     } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
       generateCMRNoObj.setMin(1000);
       generateCMRNoObj.setMax(9999);
