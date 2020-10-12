@@ -242,6 +242,29 @@
     </cmr:row>
     <input type="hidden" name="custNm3_view" id="custNm3_view">
   </cmr:view>
+  
+  <cmr:view forCountry="726">
+    <cmr:row>
+      <cmr:column span="1">
+        <cmr:label fieldId="custNm1_view">${ui.custNameUKI1}:</cmr:label>
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm1_view">-</div>
+      </cmr:column>
+    </cmr:row>
+
+    <cmr:row>
+      <cmr:column span="1">
+		<cmr:label fieldId="custNm2_view">
+        <span class="lbl-CustomerName2">${ui.custName2}:</span>
+        </cmr:label>:
+      </cmr:column>
+      <cmr:column span="2">
+        <div id="custNm2_view">-</div>
+      </cmr:column>
+    </cmr:row>
+    <input type="hidden" name="custNm3_view" id="custNm3_view">
+  </cmr:view>
 
   <cmr:view forGEO="MCO,MCO1,MCO2">
     <cmr:row>
@@ -1089,7 +1112,7 @@
       </cmr:column>
     </cmr:row>
   </cmr:view>
-
+	
   <cmr:view forCountry="862">
     <cmr:row addBackground="true">
       <cmr:column span="1" containerForField="taxOffice_view">

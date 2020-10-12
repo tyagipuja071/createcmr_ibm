@@ -1409,5 +1409,32 @@ public class LegacyDirectUtil {
     }
     return false;
   }
+  
+   public static boolean checkFieldsUpdated(EntityManager entityManager, String cmrIssuingCntry, Admin admin, long reqId) throws Exception {
+    RequestChangeContainer changes = new RequestChangeContainer(entityManager, cmrIssuingCntry, admin, reqId);
+    if (changes != null && changes.hasDataChanges()) {
+      for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
+        if (updatedDataModel != null) {
+          String field = updatedDataModel.getDataField();
+          switch (field) {
+          case "Abbreviated Name":
+          case "ISIC":
+          case "Subindustry":
+          case "INAC/NAC Code":
+          case "Client Tier":
+          case "SBO":
+          case "ISU Code":
+          case "ISR":
+          case "Collection Code":
+          case "Abbreviated Location":
+            return true;
+          default:
+            return false;
+          }
+        }
+      }
+    }
+    return false;
+  }
     
 }
