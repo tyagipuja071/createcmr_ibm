@@ -357,8 +357,7 @@ public class CEEProcessService extends LegacyDirectService {
 
   }
 
-  @Override
-  public String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
+  private String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
     if (entityManager == null) {
       return null;
     }
@@ -378,8 +377,8 @@ public class CEEProcessService extends LegacyDirectService {
     return res;
   }
 
-  @Override
-  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
+  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
+      boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -402,7 +401,7 @@ public class CEEProcessService extends LegacyDirectService {
     }
   }
 
-  public static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+  private static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
 
     for (String use : addrUse.split("")) {
       if (!StringUtils.isEmpty(use)) {
@@ -617,7 +616,7 @@ public class CEEProcessService extends LegacyDirectService {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
     // Setting status=A in case of single reactivation requests
     if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && CMR_REACTIVATION_REQUEST_REASON.equals(admin.getReqReason())) {

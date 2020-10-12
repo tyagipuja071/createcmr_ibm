@@ -139,7 +139,7 @@ public class SpainUtil extends AutomationUtil {
       Addr zi01 = requestData.getAddress("ZI01");
       boolean hasValidMatches = false;
       boolean highQualityMatchExists = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZI01");
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZI01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
       if (response != null && response.getMatched()) {
         List<DnBMatchingResponse> dnbMatches = response.getMatches();

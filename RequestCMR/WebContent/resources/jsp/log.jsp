@@ -53,6 +53,26 @@ ul {
       <th width="*">Changes</th>
     </tr>
     <tr>
+      <td>R5.0 b-R5250</td>
+      <td>October 10, 2020</td>
+      <td>
+        <ul>
+          <li>Cyprus & Portugal Legacy Consolidation</li>
+          <li>Internal CreateCMR Fixes & Enhancements</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>R5.0 b-R5235</td>
+      <td>October 03, 2020</td>
+      <td>
+        <ul>
+          <li>CreateCMR 2.0 - United Kingdom & Ireland</li>
+          <li>Internal CreateCMR Fixes & Enhancements</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
       <td>R5.0 b-R5193</td>
       <td>August 22, 2020</td>
       <td>
