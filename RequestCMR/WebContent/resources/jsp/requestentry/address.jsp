@@ -133,16 +133,26 @@ visibility: hidden !IMPORTANT;
         <label>${ui.dplChkStatus}:</label> 
         </p>
     </cmr:column>
-    <cmr:column span="1" width="100">
-    <p>
+    <cmr:column span="2" width="400">
+    <p style="font-size:14px !important;padding:2px">
                   <c:if test="${fn:trim(reqentry.dplChkResult) == 'AP'}">
-                  All Passed
+                    <span style="color:green;font-weight:bold;margin-left:5px;display:inline">
+                    All Passed (${reqentry.dplChkDate})
+                    </span>
                   </c:if>
                   <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF'}">
-                  All Failed
+                    <span style="color:red;font-weight:bold;margin-left:5px;display:inline">
+                      All Failed (${reqentry.dplChkDate})
+                    </span>
+                  <input type="button" title="Search DPL Database" value="Search DPL Database" class="cmr-grid-btn-h" onclick="openDPLSearch()">
+                  <cmr:info text="Opens a new window and searches directly against the DPL Database" />
                   </c:if>
                   <c:if test="${fn:trim(reqentry.dplChkResult) == 'SF'}">
-                  Some Failed
+                    <span style="color:red;font-weight:bold;margin-left:5px;display:inline">
+                      Some Failed (${reqentry.dplChkDate})
+                    </span>
+                  <input type="button" title="Search DPL Database" value="Search DPL Database" class="cmr-grid-btn-h" onclick="openDPLSearch()">
+                  <cmr:info text="Opens a new window and searches directly against the DPL Database" />
                   </c:if>
                   <c:if test="${fn:trim(reqentry.dplChkResult) == 'Not Done'}">
                   Not Done
@@ -152,6 +162,7 @@ visibility: hidden !IMPORTANT;
                   </c:if>
                   </p>
     </cmr:column>
+<%--
     <cmr:column span="1" width="125">
     <p>
         <label>${ui.dplChkDate}:</label>
@@ -162,6 +173,7 @@ visibility: hidden !IMPORTANT;
         ${reqentry.dplChkDate}
         </p>
      </cmr:column>
+--%>
   </cmr:row>
   <%
   String contextPath = request.getContextPath();

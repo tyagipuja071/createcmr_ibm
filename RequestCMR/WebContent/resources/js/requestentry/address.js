@@ -2765,3 +2765,10 @@ function doValidateSave() {
   }
 
 }
+
+
+function openDPLSearch(){
+  var reqId = FormManager.getActualValue('reqId');
+  WindowMgr.open('DPLSEARCH', 'DPLSEARCH'+reqId, 'dpl/request?reqId='+reqId, null,
+      550);
+}
