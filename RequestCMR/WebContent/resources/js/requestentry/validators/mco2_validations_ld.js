@@ -1237,7 +1237,7 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
         FormManager.setValue('clientTier', origClientTier);
         FormManager.setValue('salesBusOffCd', origSbo);
         FormManager.setValue('inacCd', origInac);
-        FormManager.setValue('enterprise', origEnterprise);
+        // FormManager.setValue('enterprise', origEnterprise);
       }
     } else {
       FormManager.setValue('inacCd', '');
