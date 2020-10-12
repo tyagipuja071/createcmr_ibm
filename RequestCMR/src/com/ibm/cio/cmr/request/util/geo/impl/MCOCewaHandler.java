@@ -486,8 +486,11 @@ public class MCOCewaHandler extends MCOHandler {
               landedcountry = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
               addnameinfo = validateColValFromCell(currCell);
-              currCell = (XSSFCell) row.getCell(10);
-              poBox = validateColValFromCell(currCell);
+
+              if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+                currCell = (XSSFCell) row.getCell(10);
+                poBox = validateColValFromCell(currCell);
+              }
             }
 
             if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName())) {
