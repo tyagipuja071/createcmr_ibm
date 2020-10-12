@@ -707,8 +707,8 @@ public class METransformer extends EMEATransformer {
         generateCMRNoObj.setMin(985001);
         generateCMRNoObj.setMax(985999);
       } else {
-        generateCMRNoObj.setMin(993110);
-        generateCMRNoObj.setMax(998899);
+        generateCMRNoObj.setMin(990300);
+        generateCMRNoObj.setMax(999990);
       }
     } else if (custSubGrp.contains("BP") || custSubGrp.contains("BUS")) {
       generateCMRNoObj.setMin(1000);
@@ -716,7 +716,7 @@ public class METransformer extends EMEATransformer {
       LOG.debug("that is ME BP CMR");
     } else {
       generateCMRNoObj.setMin(15000);
-      generateCMRNoObj.setMax(988880);
+      generateCMRNoObj.setMax(984880);
     }
   }
 
