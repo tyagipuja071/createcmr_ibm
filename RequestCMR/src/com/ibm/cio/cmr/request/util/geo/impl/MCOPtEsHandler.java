@@ -762,6 +762,13 @@ public class MCOPtEsHandler extends MCOHandler {
       update.setOldData(oldData.getSpecialTaxCd());
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TypeOfCustomer", "-"));
+      update.setNewData(newData.getCrosSubTyp());
+      update.setOldData(oldData.getCrosSubTyp());
+      results.add(update);
+    }
 
   }
 
@@ -1215,7 +1222,6 @@ public class MCOPtEsHandler extends MCOHandler {
 
             checkList = Arrays.asList(addressCont, poBox, attPerson);
             count = checkList.stream().filter(field -> !field.isEmpty()).count();
-
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(13);
               poBox = validateColValFromCell(currCell);
@@ -1247,20 +1253,17 @@ public class MCOPtEsHandler extends MCOHandler {
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               validations.add(error);
             }
-
             if (StringUtils.isEmpty(street) && !StringUtils.isEmpty(addressCont)) {
               LOG.trace("Address Continuation cannot be filled if Street is empty. >> ");
               error.addError(row.getRowNum(), "Address Continuation", "Address Continuation cannot be filled if Street is empty.");
               validations.add(error);
             }
-
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(localCity)) {
               LOG.trace("Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty. >> ");
               error.addError(row.getRowNum(), "City",
                   "Cross Border City and Local City must not be populated at the same time. If one is populated, the other must be empty.");
               validations.add(error);
             }
-
             if (!StringUtils.isEmpty(cbPostal) && !StringUtils.isEmpty(localPostal)) {
               LOG.trace("Cross Border Postal Code and Local Postal Code must not be populated at the same time. "
                   + "If one is populated, the other must be empty. >>");
@@ -1268,7 +1271,6 @@ public class MCOPtEsHandler extends MCOHandler {
                   + "If one is populated, the other must be empty.");
               validations.add(error);
             }
-
             if (!StringUtils.isEmpty(crossCity) && !StringUtils.isEmpty(cbPostal)) {
               int maxlengthcomputed = crossCity.length() + cbPostal.length();
               if (maxlengthcomputed > 32) {
@@ -1278,7 +1280,6 @@ public class MCOPtEsHandler extends MCOHandler {
                 validations.add(error);
               }
             }
-
             if (count > 1) {
               LOG.trace("Out of Address Con't, PO BOX and Att Person only 1 can be filled at the same time .");
               error.addError(row.getRowNum(), "Address Con't/PO BOX/Att Person",
@@ -1314,7 +1315,6 @@ public class MCOPtEsHandler extends MCOHandler {
                 validations.add(error);
               }
             }
-
             if ("Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
               if (poBox.contains("+")) {
                 LOG.trace("Please input value in numeric format. Please fix and upload the template again.");

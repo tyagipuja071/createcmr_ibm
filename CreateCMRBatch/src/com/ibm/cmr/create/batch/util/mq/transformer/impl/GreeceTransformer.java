@@ -908,7 +908,7 @@ public class GreeceTransformer extends EMEATransformer {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
 
   @Override

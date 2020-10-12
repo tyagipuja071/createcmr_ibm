@@ -64,8 +64,8 @@
 			</p>
 		</cmr:column>
 	</cmr:row>
-	<cmr:row addBackground="false">
 
+	<cmr:row addBackground="false">
 		<cmr:column span="2" containerForField="SpecialTaxCd"
 			exceptForCountry="666,726,862">
 			<p>

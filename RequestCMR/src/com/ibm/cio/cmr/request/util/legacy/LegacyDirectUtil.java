@@ -260,8 +260,8 @@ public class LegacyDirectUtil {
 
   }
 
-  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo,
-      MassUpdtData muData, boolean readOnly) throws CmrException {
+  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo, MassUpdtData muData,
+      boolean readOnly) throws CmrException {
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
     // DENNIS: Grab first the CMRTCEXT record of the CMR
@@ -1350,6 +1350,7 @@ public class LegacyDirectUtil {
 
     return isFisCodeUsed;
   }
+
   public static boolean checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
     int addrSize = 0;
     boolean flage = true;
@@ -1363,9 +1364,9 @@ public class LegacyDirectUtil {
       addrSize = addresses.size();
       LOG.debug(">> checkLDAddress for CMR# " + cmrNo + " address size> " + addresses.size());
     }
-    
-    if(addrSize == 1){
-      //Checking billing and company in CMRTCEXT
+
+    if (addrSize == 1) {
+      // Checking billing and company in CMRTCEXT
       sql = ExternalizedQuery.getSql("LEGACYD.CMRTCEXT_CHECK_COMPANY");
       query = new PreparedQuery(entityManager, sql);
       query.setParameter("COUNTRY", country);
@@ -1375,14 +1376,14 @@ public class LegacyDirectUtil {
 
       if (results != null && !results.isEmpty()) {
         Object[] sResult = results.get(0);
-        LOG.debug("Checking billing and company in CMRTCEXT:"+sResult[0].toString()); 
+        LOG.debug("Checking billing and company in CMRTCEXT:" + sResult[0].toString());
         flage = false;
       }
     }
-   
+
     return flage;
   }
-  
+
   public static boolean checkFieldsUpdated(EntityManager entityManager, String cmrIssuingCntry, Admin admin, long reqId) throws Exception {
     RequestChangeContainer changes = new RequestChangeContainer(entityManager, cmrIssuingCntry, admin, reqId);
     if (changes != null && changes.hasDataChanges()) {
@@ -1409,5 +1410,5 @@ public class LegacyDirectUtil {
     }
     return false;
   }
-    
+
 }

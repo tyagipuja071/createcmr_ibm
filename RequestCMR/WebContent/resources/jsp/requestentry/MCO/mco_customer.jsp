@@ -74,8 +74,8 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-     <cmr:view forGEO="MCO,MCO1,MCO2" exceptForCountry="780">
-      <cmr:column span="2" containerForField="EmbargoCode">
+     <cmr:view forGEO="MCO,MCO1,MCO2">
+      <cmr:column span="2" containerForField="EmbargoCode" exceptForCountry="780">
       <p>
         <cmr:label fieldId="embargoCd">
           <cmr:fieldLabel fieldId="EmbargoCode" />:
@@ -97,19 +97,6 @@
         <cmr:field path="ordBlk" id="ordBlk" fieldId="OrdBlk" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    </cmr:view>
-  </cmr:row>
-  <%--New Fields for Malta --%> 
- <cmr:row addBackground="false">
-	<cmr:column span="2" containerForField="OrdBlk" forCountry="780">
-      <p>
-        <cmr:label fieldId="ordBlk">
-          <cmr:fieldLabel fieldId="OrdBlk" />:
-            <cmr:delta text="${rdcdata.ordBlk}" oldValue="${reqentry.ordBlk}" />
-        </cmr:label>
-        <cmr:field path="ordBlk" id="ordBlk" fieldId="OrdBlk" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>
   <cmr:column span="2" containerForField="CustClass" forCountry="780">
         <p>
           <cmr:label fieldId="custClass">
@@ -119,6 +106,7 @@
         </p>
     </cmr:column>
    </cmr:row>
+
 
   <cmr:view forCountry="XXXX">
     <cmr:row addBackground="false">
