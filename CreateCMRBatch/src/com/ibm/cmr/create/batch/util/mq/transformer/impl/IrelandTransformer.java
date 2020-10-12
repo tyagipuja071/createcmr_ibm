@@ -1231,7 +1231,7 @@ public class IrelandTransformer extends UnitedKingdomTransformer {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
 
   @Override
