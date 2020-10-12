@@ -54,7 +54,7 @@
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    <cmr:view forGEO="MCO,MCO1,MCO2">
+    
       <cmr:column span="2" containerForField="SpecialTaxCd">
         <p>
         <label for="specialTaxCd"> 
@@ -203,7 +203,6 @@
 	    </c:if>
   </cmr:view>
   <cmr:view forCountry="838">
-    <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="CurrencyCode">
         <p>
           <cmr:label fieldId="legacyCurrencyCd">
