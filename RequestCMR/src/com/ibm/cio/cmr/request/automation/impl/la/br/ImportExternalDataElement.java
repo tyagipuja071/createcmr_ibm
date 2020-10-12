@@ -203,6 +203,7 @@ public class ImportExternalDataElement extends OverridingElement {
     String state = midasRecord.getState();
     String stateFiscalCode = midasRecord.getStateFiscalCode();
     String status = midasRecord.getStateFiscalCodeStatus();
+    String observation = midasRecord.getStateFiscalCodeObservation();
     String name1 = null;
     String name2 = null;
     String icms = null;
@@ -303,6 +304,7 @@ public class ImportExternalDataElement extends OverridingElement {
         if (sintegraResponse != null) {
           status = sintegraResponse.getStateFiscalCodeStatus();
           stateFiscalCode = sintegraResponse.getStateFiscalCode();
+          observation = sintegraResponse.getStateFiscalCodeObservation();
           log.debug("State Fiscal Code retrieved from Sintegra for CNPJ " + addr.getVat() + ": " + stateFiscalCode + " (" + status + ")");
         } else {
           // status = "Unknown";
@@ -317,7 +319,11 @@ public class ImportExternalDataElement extends OverridingElement {
     if (status != null) {
       if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
           || "Ativa".equalsIgnoreCase(status)) {
-        icms = "2";
+        if ("DF".equals(state) && observation != null && "NÃO CADASTRADO COMO CONTRIBUINTE ICMS".equalsIgnoreCase(observation)) {
+          icms = "1";
+        } else {
+          icms = "2";
+        }
         code = stateFiscalCode;
       } else {
         icms = "1";

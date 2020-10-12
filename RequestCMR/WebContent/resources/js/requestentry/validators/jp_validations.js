@@ -2908,7 +2908,7 @@ function performDPLCheck4JP() {
   var reqType = FormManager.getActualValue('reqType');
   var dplChkResult = FormManager.getActualValue('dplChkResult');
   if (reqType == 'C') {
-    if (custSubGrp == 'INTER' || custSubGrp == 'BPWPQ' || custSubGrp == 'ISOCU') {
+    if (custSubGrp == 'INTER' || custSubGrp == 'BPWPQ') {
       FormManager.setValue('dplChkResult', 'NR');
     } else if (dplChkResult == 'NR') {
       FormManager.setValue('dplChkResult', 'Not Done');
