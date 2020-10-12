@@ -11,8 +11,9 @@ public class UpdateCheckModel extends BaseModel {
   private String issuingCountry;
   private String reqId;
   private String result;
-  private String validationMessage;
+  private String rejectionMsg;
   private boolean onError;
+  private String negativeChksMsg;
 
   public String getIssuingCountry() {
     return issuingCountry;
@@ -64,11 +65,19 @@ public class UpdateCheckModel extends BaseModel {
     this.onError = onError;
   }
 
-  public String getValidationMessage() {
-    return validationMessage;
+  public String getRejectionMsg() {
+    return rejectionMsg;
   }
 
-  public void setValidationMessage(String validationMessage) {
-    this.validationMessage = validationMessage;
+  public void setRejectionMsg(String rejectionMsg) {
+    this.rejectionMsg = rejectionMsg;
+  }
+
+  public String getNegativeChksMsg() {
+    return negativeChksMsg;
+  }
+
+  public void setNegativeChksMsg(String negativeChksMsg) {
+    this.negativeChksMsg = negativeChksMsg;
   }
 }

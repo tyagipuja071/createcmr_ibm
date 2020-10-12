@@ -13,6 +13,7 @@ import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.controller.BaseController;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.automation.UpdateCheckModel;
+import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.automation.UpdateCheckService;
 
 /**
@@ -31,19 +32,23 @@ public class UpdateCheckController extends BaseController {
 
   @SuppressWarnings("unchecked")
   @RequestMapping(value = "/auto/element/updateCheck")
-  public ModelMap getUpdateCheckResult(HttpServletRequest request, HttpServletResponse response, UpdateCheckModel model) throws CmrException {
+  public ModelMap getUpdateCheckResult(HttpServletRequest request, HttpServletResponse response, UpdateCheckModel model, RequestEntryModel reqModel)
+      throws CmrException {
     ParamContainer params = new ParamContainer();
     ModelMap map = new ModelMap();
     UpdateCheckModel updtChksModel = new UpdateCheckModel();
     try {
       params.addParam("model", model);
+      params.addParam("reqModel", reqModel);
       updtChksModel = this.service.process(request, params);
       map.addAttribute("updtChkModel", updtChksModel);
       if (updtChksModel != null) {
         map.addAttribute("success", true);
         map.addAttribute("onError", updtChksModel.isOnError());
         map.addAttribute("result", updtChksModel.getResult());
-        map.addAttribute("validationMessage", updtChksModel.getValidationMessage());
+        map.addAttribute("rejectionMsg", updtChksModel.getRejectionMsg());
+        map.addAttribute("negativeChksMsg", updtChksModel.getNegativeChksMsg());
+
       } else {
         map.addAttribute("success", false);
       }

@@ -131,16 +131,11 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      if (checkIfFinalDnBCheckRequired()) {
-        matchDnBForAutomationCountries();
-      } else {
-        if (cmrCntry == '821') {
-          executeBeforeSubmit();
-        } else {
-          // if there are no errors, show the Address Verification modal window
-          cmr.showModal('addressVerificationModal');
-        }
-      }
+      // CMR-6374
+      var cntryList = [ '897' ];
+      var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+      if (cntryList.includes(cmrIssuingCntry))
+        addUpdateChecksExecution(frmCMR);
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
@@ -217,6 +212,20 @@ function processRequestAction() {
     }
   } else {
     cmr.showAlert('Invalid action.');
+  }
+}
+
+function executeFinalDnBChk() {
+  if (checkIfFinalDnBCheckRequired()) {
+    matchDnBForAutomationCountries();
+  } else {
+    var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (cmrCntry == '821') {
+      executeBeforeSubmit();
+    } else {
+      // if there are no errors, show the Address Verification modal window
+      cmr.showModal('addressVerificationModal');
+    }
   }
 }
 
@@ -1239,7 +1248,8 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?', 'Warning', null, null);
+  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?',
+      'Warning', null, null);
 }
 
 /**
@@ -1254,7 +1264,8 @@ function doOverrideDnBMatch() {
 function autoDnbImportActFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   if (rowData) {
-    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo
+        + '\')">';
     var dunsNo = rowData.autoDnbDunsNo[0];
     if (dunsNo) {
       formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dunsNo.trim() + '\')">';
@@ -1454,7 +1465,7 @@ function matchDnBForAutomationCountries() {
       cmr.hideProgress();
       console.log(data);
       if (data && data.success) {
-        if(data.match){
+        if (data.match) {
           cmr.showModal('addressVerificationModal');
         } else {
           showDnBMatchModal();
@@ -1471,4 +1482,57 @@ function matchDnBForAutomationCountries() {
     error : function(error, ioargs) {
     }
   });
+}
+
+/**
+ * Generic Validator to execute UpdateChecks Automation
+ */
+function addUpdateChecksExecution(frmCMR) {
+  console.log("addUpdateChecksExecution..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var elementResData = "";
+
+  if (reqType != 'U') {
+    return new ValidationResult(null, true);
+  }
+  console.log('Running Update Checks Element...');
+  dojo.xhrPost({
+    url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+    handleAs : 'json',
+    method : 'POST',
+    content : dojo.formToObject(frmCMR),
+    timeout : 500000,
+    sync : true,
+    load : function(data, ioargs) {
+      elementResData = data;
+      console.log(data);
+      if (!data.success) {
+        console.log('Error occurred in generating UpdateChecks result -> ...' + data.error);
+      } else {
+        console.log('Update Check Element executed.');
+      }
+    },
+    error : function(error, ioargs) {
+      success = false;
+      console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+      reject('Error occurred in Update Checks.');
+    }
+  });
+
+  if (elementResData != '' && elementResData != undefined) {
+    if (elementResData.onError) {
+      console.log('UpdateChecks Element Executed Successfully.');
+      cmr.showAlert('Request will be sent back to requester for the following reasons /\n.' + elementResData.rejectionMsg);
+    } else {
+      if (elementResData.negativeChksMsg != '' && elementResData.negativeChksMsg != null) {
+        cmr.showConfirm("executeFinalDnBChk()", 'The Update checks have negative checks \n  <strong>' + elementResData.negativeChksMsg + '</strong> \n Do you really want to proceed ?', 'Warning',
+            null, {
+              OK : 'Ok',
+              CANCEL : 'Cancel'
+            });
+      }
+    }
+  } else {
+    executeFinalDnBChk();
+  }
 }

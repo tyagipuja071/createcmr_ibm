@@ -278,7 +278,4 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCSPValues, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(enableUSSicMenForScenarios, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(enableUSSicMenForScenarios, [ SysLoc.USA ]);
-  // CMR - 6374
-  GEOHandler.registerValidator(addUpdateChecksValidator, [ SysLoc.USA ], null, true);
-
 });
