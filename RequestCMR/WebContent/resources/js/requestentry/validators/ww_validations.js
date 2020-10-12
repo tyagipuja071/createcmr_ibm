@@ -946,8 +946,8 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR);
 
   // For Legacy PT,CY,GR,SA
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(doubleByteCharacterValidator, [ SysLoc.CHINA ], null, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
