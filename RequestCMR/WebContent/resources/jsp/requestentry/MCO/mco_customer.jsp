@@ -43,9 +43,8 @@
         </p>
       </cmr:column>
   	</cmr:row>
-  </cmr:view>
-  <cmr:row addBackground="false">
-<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
+  </cmr:view>  
+<%--<cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
         <cmr:label fieldId="locationNumber">
           <cmr:fieldLabel fieldId="LocationNumber" />: 
@@ -54,7 +53,8 @@
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    <cmr:view forGEO="MCO,MCO1,MCO2">
+    
+  <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="SpecialTaxCd">
         <p>
         <label for="specialTaxCd"> 
@@ -64,7 +64,6 @@
         <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-    </cmr:view>
     <cmr:column span="2" containerForField="AbbrevLocation">
       <p>
         <label for="abbrevLocn"> 
@@ -85,7 +84,7 @@
       </p>
     </cmr:column>
 	</cmr:view>
-     </cmr:row>
+	</cmr:row>
   <%--New Fields for Malta --%> 
  <cmr:row addBackground="false">
 	<cmr:column span="2" containerForField="OrdBlk" forCountry="780">
@@ -212,7 +211,8 @@
           </cmr:label>
           <cmr:field path="legacyCurrencyCd" id="legacyCurrencyCd" fieldId="CurrencyCd" tabId="MAIN_CUST_TAB" />
         </p>
-      </cmr:column>   
+      </cmr:column> 
+      </cmr:row>  
      <cmr:row topPad="10" addBackground="false">
     <cmr:column span="2" containerForField="IbmDeptCostCenter">
       <p>
@@ -228,7 +228,6 @@
           </cmr:label>
         <cmr:field fieldId="CustClass" id="custClass" path="custClass" tabId="MAIN_IBM_TAB" />
     </cmr:column>
-    </cmr:row>
     </cmr:row>
   </cmr:view>
   
