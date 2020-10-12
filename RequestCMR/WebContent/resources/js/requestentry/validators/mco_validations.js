@@ -67,6 +67,8 @@ function afterTemplateLoadPT() {
     if (city1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
       FormManager.setValue('abbrevLocn', city1.substring(0, 12));
     }
+  } else if (subCustGrp == 'SAAPA') {
+    FormManager.setValue('abbrevLocn', 'SAAS');
   } else if (subCustGrp != 'INTSO' || subCustGrp != 'THDPT' || subCustGrp != 'SAAPA') {
     var city1Params = {
       REQ_ID : _reqId,
@@ -76,8 +78,6 @@ function afterTemplateLoadPT() {
     var city1 = city1Result.ret1;
     if (city1 != null) {
       FormManager.setValue('abbrevLocn', city1.substring(0, 12));
-    } else if (subCustGrp == 'SAAPA') {
-      FormManager.setValue('abbrevLocn', 'SAAS');
     }
   }
 
@@ -98,17 +98,23 @@ function afterTemplateLoadPT() {
   if (custNm1 != '' && subCustGrp == 'INTSO' || subCustGrp == 'THDPT') {
     FormManager.setValue('abbrevNm', custNm2.substring(0, 8) + " c/o " + custNm1.substring(0, 9));
   } else {
-    FormManager.setValue('abbrevNm', custNm2);
+    if (custNm2 != undefined && custNm2 != '') {
+      FormManager.setValue('abbrevNm', custNm2.substring(0, 22));
+    } else {
+      FormManager.setValue('abbrevNm', custNm2);
+    }
   }
   crossborderScenariosAbbrvLocOnChange();
 }
 
 function addHandlersForPT() {
-  if (_postalCodeHandler == null) {
-    _postalCodeHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
-      setTaxCodeOnPostalCodePT();
-    });
-  }
+  dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
+    var req = FormManager.getActualValue('reqType').toUpperCase();
+    var role = FormManager.getActualValue('reqType').toUpperCase();
+    if (req == 'C') {
+      setTaxCdByPostCdPT();
+    }
+  });
 
   if (_ISICHandler == null) {
     _ISICHandler = dojo.connect(FormManager.getField('isicCd'), 'onChange', function(value) {
@@ -134,43 +140,41 @@ function getImportedIndcForPT() {
   return _importedIndc;
 }
 
-function setTaxCodeOnPostalCodePT(postCd) {
-
-  var postCd = FormManager.getActualValue('postCd');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-
-  if (FormManager.getActualValue('reqType') != 'C' || FormManager.getActualValue('viewOnlyPage') == 'true') {
+function setTaxCdByPostCdPT() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGroup = FormManager.getActualValue('custSubGrp');
+  var addrType = FormManager.getActualValue('addrType');
+  if (reqType != 'C') {
     return;
   }
-
-  if (custSubGrp == 'CRISO' || custSubGrp == 'CRIINT' || custSubGrp == 'CRPRI' || custSubGrp == 'XCRO' || custSubGrp == 'XBP') {
-    return;
-  }
-  var zs01ReqId = FormManager.getActualValue('reqId');
-  var qParams = {
-    REQ_ID : zs01ReqId,
-  };
-
-  var result = cmr.query('ADDR.GET.POST_CD.BY_REQID', qParams);
-  var postCodeOrg = '';
-  if (result != null && result.ret1 != undefined) {
-    postCodeOrg = result.ret1;
+  var postcd = FormManager.getActualValue('postCd');
+  if (postcd != '' && postcd != undefined) {
+    if (addrType == 'ZS01') {
+      postcd = postcd.substring(0, 1);
+    }
   } else {
-    postCodeOrg = '';
+    var qParams = {
+      REQ_ID : FormManager.getActualValue('reqId')
+    };
+    var result = cmr.query('GET.ZS01POSTCD.BY_REQID', qParams);
+    if (result != null && result != '' && result.ret1 != undefined) {
+      postcd = result.ret1.substring(0, 1);
+    }
   }
-
-  var postCode = parseInt(postCodeOrg.substring(0, 1));
-  if (postCd && postCd != undefined && postCd != '') {
-    postCode = postCd.substring(0, 1);
-  }
-
-  // set Tax code based on postal-Code logic
-  var checkImportIndc = getImportedIndcForPT();
-  if (checkImportIndc != 'Y') {
-    if (custSubGrp == 'GOVRN' && postCode == 9) {
+  console.log(postcd);
+  if (postcd == '9') {
+    if (reqType == 'C' && (custSubGroup == 'GOVRN' || custSubGroup == 'CRGOV')) {
       FormManager.setValue('specialTaxCd', '18');
-    } else if (custSubGrp != 'GOVRN' && postCode == 9) {
+    } else if (reqType == 'C' && (custSubGroup != 'GOVRN' && custSubGroup != 'CRGOV')) {
       FormManager.setValue('specialTaxCd', '23');
+    }
+  } else {
+    var qParams = {
+      CUST_TYP : FormManager.getActualValue('custSubGroup')
+    };
+    var result = cmr.query('GET.TAXCD.BY_CUSTSUBGRP', qParams);
+    if (result != null && result != '' && result.ret1 != undefined) {
+      FormManager.setValue('specialTaxCd', result.ret1);
     }
   }
 }
@@ -418,8 +422,9 @@ function addAddressFieldValidators() {
             }
           }
         } else if (cntry == SysLoc.PORTUGAL) {
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('custNm4') != '') {
-            return new ValidationResult(null, false, 'For Customer Name Con\'t, Address Con\'t, and Attention Person, only two can be filled.');
+          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('custNm4') != '' && FormManager.getActualValue('addrTxt') != '' && FormManager.getActualValue('addrTxt2') != ''
+              && FormManager.getActualValue('poBox') != '') {
+            return new ValidationResult(null, false, 'For Customer Name Con\'t, Street, Address Con\'t, Attention Person, and PO Box only 3 can be filled.');
           }
         }
 
@@ -637,7 +642,7 @@ function setSalesRepValues(clientTier) {
   }
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubGroup = FormManager.getActualValue('custSubGrp');
-  if (cntry == SysLoc.PORTUGAL && _noISRLogicPT.has(custSubGroup)) {
+  if (cntry == SysLoc.PORTUGAL && (_noISRLogicPT.has(custSubGroup) || custSubGroup == '')) {
     return;
   }
   if (cntry == SysLoc.SPAIN && _noISRLogicES.has(custSubGroup)) {
@@ -2095,14 +2100,16 @@ function isuCtcBasedOnISIC() {
 }
 
 /*
- * validate CMRNumber for Internal So Scenario
+ * validate CMRNumber for PT
  */
-function validateCMRNumberForISO() {
+function validateCMRNumberForPT() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var cmrNo = FormManager.getActualValue('cmrNo');
         var _custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        var numPattern = /^[0-9]+$/;
         if (FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
@@ -2118,7 +2125,6 @@ function validateCMRNumberForISO() {
           if ('Y' == ifProspect) {
             return new ValidationResult(null, true);
           }
-          // Validation for Internal SO Scenario
           if (_custSubGrp == 'INTSO') {
             if (!cmrNo.startsWith("997")) {
               return new ValidationResult(null, false, 'Internal SO CMR should begin with 997.');
@@ -2127,6 +2133,29 @@ function validateCMRNumberForISO() {
             if (cmrNo.startsWith("997")) {
               return new ValidationResult(null, false, 'CMR Starting with 997 is allowed for InternalSO Scenario Only.');
             }
+          }
+          // Validation for Internal Scenario
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'XINT') {
+            if (!cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+            }
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT') {
+            if (cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
+            }
+          }
+          if (cmrNo == '000000') {
+            return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
+          }
+          if (cmrNo.length >= 1 && cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+          }
+          if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be number only.');
           }
           return new ValidationResult(null, true);
         }
@@ -2403,6 +2432,26 @@ function addAbbrevLocationValidatorPT() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addTypeOfCustomerValidatorPT() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var typeOfCustomer = FormManager.getActualValue('crosSubTyp');
+        var reg = /^[-_ a-zA-Z0-9]+$/;
+        if (typeOfCustomer != '' && (typeOfCustomer.length > 0 && !typeOfCustomer.match(reg))) {
+          return new ValidationResult({
+            id : 'crosSubTyp',
+            type : 'text',
+            name : 'crosSubTyp'
+          }, false, 'The value for Type of Customer is invalid. Only ALPHANUMERIC characters are allowed.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
   var isCmrImported = getImportedIndcForPT();
   var reqId = FormManager.getActualValue('reqId');
@@ -2448,6 +2497,26 @@ function retainImportValuesPT(fromAddress, scenario, scenarioChanged) {
     FormManager.setValue('enterprise', '');
   }
   disableAddrFieldsPTES();
+}
+
+/* Overriding Address Grid Formatters for PT */
+function streetValueFormatter(value, rowIndex) {
+  var rowData = this.grid.getItem(rowIndex);
+  var streetCont = rowData.addrTxt2;
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '822') {
+    if (value && streetCont && streetCont[0]) {
+      return value + '<br>' + streetCont;
+    } else if (streetCont && streetCont[0]) {
+      return streetCont;
+    }
+    return value;
+  }
+
+  if (streetCont && streetCont[0]) {
+    return value + '<br>' + streetCont;
+  }
+  return value;
 }
 
 /* End 1430539 */
@@ -2537,29 +2606,23 @@ dojo.addOnLoad(function() {
   // PT Legacy
   GEOHandler.addAfterConfig(afterConfigPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterConfig(addHandlersForPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterConfig(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAddrFunction(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(afterTemplateLoadPT, [ SysLoc.PORTUGAL ]);
-  GEOHandler.addAfterTemplateLoad(setTaxCodeOnPostalCodePT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.addAfterTemplateLoad(setTaxCdByPostCdPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setISUCTCOnISIC, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(TaxCdOnPostalChange, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterConfig(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
   GEOHandler.addAfterTemplateLoad(setTaxCdByPostCd, [ SysLoc.SPAIN ]);
-  GEOHandler.registerValidator(validateCMRNumberForISO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN ])
+  GEOHandler.registerValidator(validateCMRNumberForPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
 
+  GEOHandler.addAfterTemplateLoad(retainImportValuesPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN ]);
-  GEOHandler.registerValidator(validateCMRNumberForISO, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterTemplateLoad(autoSetVatExemptFrPriCust, [ SysLoc.SPAIN ]);
-
-  GEOHandler.registerValidator(addValidatorForCollectionCdUpdateSpain, [ SysLoc.SPAIN ], null, true);
-
   GEOHandler.addAfterTemplateLoad(configureVATExemptOnScenariosPT, [ SysLoc.PORTUGAL ]);
   GEOHandler.registerValidator(addAbbrevNmValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addAbbrevLocationValidatorPT, [ SysLoc.PORTUGAL ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addEmbargoCodeValidatorPT, [ SysLoc.PORTUGAL ], null, true);
-  GEOHandler.addAfterTemplateLoad(retainImportValuesPT, [ SysLoc.PORTUGAL ]);
+  GEOHandler.registerValidator(addTypeOfCustomerValidatorPT, [ SysLoc.PORTUGAL ], null, true);
+
 });

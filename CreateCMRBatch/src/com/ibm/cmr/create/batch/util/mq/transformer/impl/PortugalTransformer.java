@@ -121,7 +121,7 @@ public class PortugalTransformer extends MessageTransformer {
 
     String vat = !StringUtils.isEmpty(cmrData.getVat()) ? cmrData.getVat() : "";
     String vatDigit = vat;
-    if (vat.matches("^[A-Z]{2}.*")) {
+    if (!StringUtils.isEmpty(cmrData.getVat()) && vat.matches("^[A-Z]{2}.*")) {
       vatDigit = vat.substring(2, vat.length());
     }
 
@@ -129,7 +129,7 @@ public class PortugalTransformer extends MessageTransformer {
     line2 = addrData.getCustNm2();
 
     if (StringUtils.isEmpty(line2)) {
-      line2 = addrData.getCustNm4().trim();
+      line2 = !StringUtils.isBlank(addrData.getCustNm4()) ? addrData.getCustNm4().trim() : "";
       if (!StringUtils.isEmpty(addrData.getCustNm4()) && !line2.toUpperCase().startsWith("ATT ") && !line2.toUpperCase().startsWith("ATT:")) {
         line2 = "ATT " + line2;
       }
@@ -148,7 +148,7 @@ public class PortugalTransformer extends MessageTransformer {
     }
 
     if ((StringUtils.isEmpty(line3) && !StringUtils.isEmpty(addrData.getCustNm2()))
-        || (!StringUtils.isEmpty(line2) && line2.toUpperCase().startsWith("ATT ") && line2.toUpperCase().startsWith("ATT:"))) {
+        || (!StringUtils.isEmpty(line2) && (line2.toUpperCase().startsWith("ATT ") || line2.toUpperCase().startsWith("ATT:")))) {
       line3 = addrData.getAddrTxt2();
     }
 
@@ -464,6 +464,8 @@ public class PortugalTransformer extends MessageTransformer {
     } else {
       if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+      } else {
+        legacyCust.setVat("");
       }
     }
 
@@ -654,7 +656,12 @@ public class PortugalTransformer extends MessageTransformer {
       if (DEFAULT_CLEAR_CHAR.equals(muData.getVat().trim())) {
         legacyCust.setVat("");
       } else {
-        legacyCust.setVat(muData.getVat());
+        String vat = muData.getVat();
+        if (!StringUtils.isEmpty(vat) && vat.matches("^[A-Z]{2}.*") && "PT".equals(vat.substring(0, 2))) {
+          legacyCust.setVat(vat.substring(2, vat.length()));
+        } else {
+          legacyCust.setVat(muData.getVat());
+        }
       }
     }
 
@@ -692,7 +699,7 @@ public class PortugalTransformer extends MessageTransformer {
       legacyCust.setImsCd(subInd);
     }
     legacyCust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    legacyCust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // legacyCust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
 
   @Override
@@ -710,7 +717,7 @@ public class PortugalTransformer extends MessageTransformer {
         if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
           cust.setTelNoOrVat("");
         } else {
-          cust.setTelNoOrVat(addr.getCustPhone());
+          cust.setTelNoOrVat("TF" + addr.getCustPhone());
         }
       }
     }
@@ -720,7 +727,7 @@ public class PortugalTransformer extends MessageTransformer {
         if (DEFAULT_CLEAR_NUM.equals(addr.getCustPhone())) {
           legacyAddr.setAddrPhone("");
         } else {
-          legacyAddr.setAddrPhone(addr.getCustPhone());
+          legacyAddr.setAddrPhone("TF" + addr.getCustPhone());
         }
       }
     }
