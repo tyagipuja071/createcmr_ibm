@@ -1498,6 +1498,51 @@ function resetVatRequired() {
   }
 }
 
+function requireVATForCrossMCO2() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var scenario = FormManager.getActualValue('custGrp');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        if (reqType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (scenario != null && !scenario.includes('CRO')) {
+          return new ValidationResult(null, true);
+        }
+        // MCO cross subType codes
+        if (custSubGrp != null && (custSubGrp.includes('XSOFT') || custSubGrp.includes('XSL') || custSubGrp.includes('XPRIC') || custSubGrp.includes('XPC') || custSubGrp.includes('XGO'))) {
+          return new ValidationResult(null, true);
+        }
+
+        var vat = FormManager.getActualValue('vat');
+        var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+          REQID : FormManager.getActualValue('reqId'),
+          TYPE : 'ZS01'
+        });
+        if (ret && ret.ret1 && ret.ret1 != '') {
+          zs01Cntry = ret.ret1;
+        }
+
+        if ((!vat || vat == '' || vat.trim() == '') && !dijit.byId('vatExempt').get('checked')) {
+          if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0) {
+            var msg = "VAT for " + zs01Cntry + " # is required.";
+            return new ValidationResult({
+              id : 'vat',
+              type : 'text',
+              name : 'vat'
+            }, false, msg);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1543,7 +1588,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerValidator(addTinInfoValidator, GEOHandler.MCO2,
   // GEOHandler.REQUESTER,true);
 
-  GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
+  GEOHandler.registerValidator(requireVATForCrossMCO2, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
 
   GEOHandler.addAddrFunction(addAddrValidatorMCO2, GEOHandler.MCO2);
