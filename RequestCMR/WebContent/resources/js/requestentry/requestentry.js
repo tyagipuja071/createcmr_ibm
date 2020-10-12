@@ -1493,7 +1493,7 @@ function addUpdateChecksExecution(frmCMR) {
   var elementResData = "";
 
   if (reqType != 'U') {
-    return new ValidationResult(null, true);
+    executeFinalDnBChk();
   }
   console.log('Running Update Checks Element...');
   dojo.xhrPost({
