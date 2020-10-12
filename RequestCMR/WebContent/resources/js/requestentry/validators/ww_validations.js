@@ -810,9 +810,9 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
-  // For Legacy GR
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.GREECE, SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.GREECE, SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
+  // For Legacy GR, CY and PT
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic

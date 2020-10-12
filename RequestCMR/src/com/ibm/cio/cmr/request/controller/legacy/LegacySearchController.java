@@ -24,8 +24,10 @@ import com.ibm.cio.cmr.request.model.legacy.LegacySearchModel;
 import com.ibm.cio.cmr.request.model.legacy.LegacySearchResultModel;
 import com.ibm.cio.cmr.request.service.legacy.LegacyDetailsService;
 import com.ibm.cio.cmr.request.service.legacy.LegacySearchService;
+import com.ibm.cio.cmr.request.service.legacy.MQSearchService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectObjectContainer;
+import com.ibm.cio.cmr.request.util.search.MQSearchResult;
 
 /**
  * Controller for Legacy Search Page
@@ -45,6 +47,9 @@ public class LegacySearchController extends BaseController {
 
   @Autowired
   private LegacyDetailsService detailsService;
+
+  @Autowired
+  private MQSearchService mqSearchService;
 
   /**
    * Handles the refresh page
@@ -70,7 +75,7 @@ public class LegacySearchController extends BaseController {
     }
 
     ModelAndView mv = new ModelAndView("legacysearch", "model", new LegacySearchModel());
-    setPageKeys("LSEARCH", "LSEARCH", mv);
+    setPageKeys("SEARCH_HOME", "LSEARCH", mv);
     return mv;
   }
 
@@ -118,4 +123,76 @@ public class LegacySearchController extends BaseController {
     map.addAttribute("details", results);
     return map;
   }
+
+  /**
+   * Handles the refresh page
+   * 
+   * @param request
+   * @param model
+   * @return
+   */
+  @RequestMapping(value = "/searchhome", method = RequestMethod.GET)
+  public @ResponseBody ModelAndView showSearchHomePage(HttpServletRequest request) {
+    LOG.debug("Showing Search Home page..");
+    ModelMap map = new ModelMap();
+
+    AppUser user = AppUser.getUser(request);
+
+    if (user == null) {
+      map.put("ERROR", ERROR_MSG);
+    } else {
+      if (!user.isAdmin() && !user.isCmde()) {
+        map.put("ERROR", ERROR_MSG);
+      } else {
+      }
+    }
+
+    ModelAndView mv = new ModelAndView("searchhome");
+    setPageKeys("SEARCH_HOME", "SEARCH_HOME", mv);
+    return mv;
+  }
+
+  /**
+   * Handles the refresh page
+   * 
+   * @param request
+   * @param model
+   * @return
+   */
+  @RequestMapping(value = "/mqsearch", method = RequestMethod.GET)
+  public @ResponseBody ModelAndView showMQSearchPage(HttpServletRequest request) {
+    LOG.debug("Showing MQ Search page..");
+    ModelMap map = new ModelMap();
+
+    AppUser user = AppUser.getUser(request);
+
+    if (user == null) {
+      map.put("ERROR", ERROR_MSG);
+    } else {
+      if (!user.isAdmin() && !user.isCmde()) {
+        map.put("ERROR", ERROR_MSG);
+      } else {
+      }
+    }
+
+    ModelAndView mv = new ModelAndView("mqsearch");
+    setPageKeys("SEARCH_HOME", "MQSEARCH", mv);
+    return mv;
+  }
+
+  @RequestMapping(value = "/mqsearch/process", method = RequestMethod.GET)
+  public @ResponseBody ModelMap processMQSearch(HttpServletRequest request, @RequestParam("cmrNo") String cmrNo,
+      @RequestParam("country") String country) throws CmrException {
+    LOG.debug("Processing MQ Search for CMR No. " + cmrNo + " under " + country);
+    ModelMap map = new ModelMap();
+
+    ParamContainer params = new ParamContainer();
+    params.addParam("cmrNo", cmrNo);
+    params.addParam("country", country);
+
+    MQSearchResult<?> result = mqSearchService.process(request, params);
+    map.addAttribute("result", result);
+    return map;
+  }
+
 }

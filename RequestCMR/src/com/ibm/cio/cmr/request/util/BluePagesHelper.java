@@ -512,7 +512,7 @@ public class BluePagesHelper {
     return false;
 
   }
-  
+
   /**
    * Checks if the employee is under any manager provided in the list
    * 

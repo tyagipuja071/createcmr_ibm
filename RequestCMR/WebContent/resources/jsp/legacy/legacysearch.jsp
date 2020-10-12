@@ -21,7 +21,7 @@
 <script>
   
   function backToCodeMaintHome() {
-    window.location = cmr.CONTEXT_ROOT + '/code';
+    window.location = cmr.CONTEXT_ROOT + '/searchhome';
   } 
   dojo.addOnLoad(function() {
 
@@ -312,9 +312,9 @@
   </cmr:boxContent>
   <cmr:section alwaysShown="true">
     <cmr:buttonsRow>
-      <input style="height:40px" type="button" class="ibm-btn-cancel-sec ibm-btn-small" value="Back to Code Maintenance Home" onclick="backToCodeMaintHome()">
+      <input style="height:40px" type="button" class="ibm-btn-cancel-sec ibm-btn-small" value="Back to Search Home" onclick="backToCodeMaintHome()">
     </cmr:buttonsRow>
-    <br>
+    <br> 
   </cmr:section>
 </div>
 <script src="${resourcesPath}/js/legacy/legacysearch.js?${cmrv}"></script>

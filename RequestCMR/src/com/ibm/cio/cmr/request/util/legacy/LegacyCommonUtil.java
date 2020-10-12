@@ -114,7 +114,7 @@ public class LegacyCommonUtil {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
   }
 
