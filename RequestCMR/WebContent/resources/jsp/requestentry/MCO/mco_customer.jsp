@@ -1,6 +1,5 @@
 <%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
-<%@page
-	import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
+<%@page	import="com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
@@ -18,7 +17,6 @@
 %>
 
 <cmr:view forGEO="MCO,MCO1,MCO2">
-
 	<!-- Add hidden fields to keep imported values -->
 	<form:hidden path="orgNo" />
 	<form:hidden path="sourceCd" />
@@ -26,8 +24,9 @@
 	<form:hidden path="sitePartyId" />
 	<form:hidden path="searchTerm" />
 
-	<cmr:row addBackground="false">
-		<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
+<cmr:view forGEO="MCO,MCO1,MCO2">
+      <cmr:row addBackground="false">
+          <%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
         <cmr:label fieldId="locationNumber">
           <cmr:fieldLabel fieldId="LocationNumber" />: 
@@ -36,7 +35,7 @@
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    <cmr:view forGEO="MCO,MCO1,MCO2">
+    
       <cmr:column span="2" containerForField="SpecialTaxCd">
         <p>
         <label for="specialTaxCd"> 
@@ -66,6 +65,7 @@
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    </cmr:row>
 	</cmr:view>
 
   <cmr:view forCountry="XXXX">
@@ -114,6 +114,7 @@
       
 	<cmr:view forCountry="822">
 		<c:if test="${reqentry.reqType != 'C'}">
+		<cmr:row addBackground="true">
 			<cmr:column span="2" containerForField="TypeOfCustomer">
         		<p>
           			<cmr:label fieldId="crosSubTyp">
@@ -121,6 +122,7 @@
 					</cmr:label>
           			<cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
         		</p>
+        		</cmr:row>
       		</cmr:column>
 		</c:if>
 	</cmr:view>
@@ -138,9 +140,29 @@
       </cmr:column>
     </cmr:row>
   </cmr:view>
-	
+	<cmr:view forGEO="MCO1" >
+		<c:if test="${reqentry.reqType != 'C'}">	
+	  <cmr:row addBackground="false">
+	    <cmr:column span="2" containerForField="CommercialFinanced">
+	      <p>
+	          <cmr:label fieldId="commercialFinanced">
+	          <cmr:fieldLabel fieldId="CommercialFinanced" />:
+	          </cmr:label>
+	          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    <cmr:column span="2" containerForField="CodFlag">
+	      <p>
+	          <cmr:label fieldId="codFlag">
+	          <cmr:fieldLabel fieldId="CodFlag" />:
+	          </cmr:label>
+	          <cmr:field path="creditCd" id="codFlag" fieldId="CodFlag" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    </cmr:row>
+	    </c:if>
+  </cmr:view>
   <cmr:view forCountry="838">
-    <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="CurrencyCode">
         <p>
           <cmr:label fieldId="legacyCurrencyCd">
