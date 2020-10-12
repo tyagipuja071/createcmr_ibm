@@ -490,6 +490,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     ibmDirectCmr.setCmrPostalCode(childInstallAt.getPostCd());
     ibmDirectCmr.setCmrState(childInstallAt.getStateProv());
     ibmDirectCmr.setCmrCountryLanded(childInstallAt.getLandCntry());
+    ibmDirectCmr.setCmrDept(childInstallAt.getDept());
     ibmDirectCmr.setCmrBuyingGroup(completedChildData.getBgId());
     ibmDirectCmr.setCmrBuyingGroupDesc(completedChildData.getBgDesc());
     ibmDirectCmr.setCmrGlobalBuyingGroup(completedChildData.getGbgId());
@@ -1134,6 +1135,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     String postalCd = "";
     String stateProv = "";
     String county = "";
+    String dept = "";
 
     if (childRequest != null && "COM".equals(childRequest.getAdmin().getReqStatus())) {
       Addr childInstallAt = childRequest.getAddress("ZS01");
@@ -1146,6 +1148,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       postalCd = childInstallAt.getPostCd();
       stateProv = childInstallAt.getStateProv();
       county = childInstallAt.getCounty();
+      dept = childInstallAt.getDept();
       createAddressOverrides = true;
     } else if (ibmDirectCmr != null) {
       // CMR-4033
@@ -1159,6 +1162,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       postalCd = ibmDirectCmr.getCmrPostalCode();
       stateProv = ibmDirectCmr.getCmrState();
       county = ibmDirectCmr.getCmrCounty();
+      dept = ibmDirectCmr.getCmrDept();
       createAddressOverrides = true;
     }
 
@@ -1196,6 +1200,11 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
         overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "");
         details.append("Updated Division to " + (StringUtils.isNotBlank(nameParts[0]) ? nameParts[0] : "-blank-")).append("\n");
         details.append("Updated Department to " + (StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "-blank-")).append("\n");
+      }
+
+      if (StringUtils.isBlank(installAt.getDept()) && StringUtils.isNotBlank(dept)) {
+        overrides.addOverride(getProcessCode(), "ZS01", "DEPT", installAt.getDept(), dept);
+        details.append("Updated Department to " + dept).append("\n");
       }
 
       if (!StringUtils.equals(installAt.getAddrTxt(), streetAddress1)) {
