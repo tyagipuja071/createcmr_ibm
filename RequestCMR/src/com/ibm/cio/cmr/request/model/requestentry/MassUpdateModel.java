@@ -41,6 +41,8 @@ public class MassUpdateModel extends BaseModel {
 
   private String custNm3;
 
+  private String military;
+
   public String getCustNm3() {
     return custNm3;
   }
@@ -771,6 +773,14 @@ public class MassUpdateModel extends BaseModel {
 
   public void setNewEntpName1(String newEntpName1) {
     this.newEntpName1 = newEntpName1;
+  }
+
+  public String getMilitary() {
+    return military;
+  }
+
+  public void setMilitary(String military) {
+    this.military = military;
   }
 
 }
