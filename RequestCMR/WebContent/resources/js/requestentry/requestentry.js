@@ -1456,6 +1456,13 @@ function matchDnBForAutomationCountries() {
       if (data && data.success) {
         if(data.match){
           cmr.showModal('addressVerificationModal');
+        } else if (data.tradeStyleMatch) {
+          cmr.showConfirm('autoDnbImportMatch("' + data.dunsNo + '","0")',
+              'The customer name on the request is a tradestyle name. For CMR creation legal names should be used. Do you want to override the customer name on the request with ' + data.legalName
+                  + '?', 'Warning', null, {
+                OK : 'Yes',
+                CANCEL : 'No'
+              });
         } else {
           showDnBMatchModal();
         }
