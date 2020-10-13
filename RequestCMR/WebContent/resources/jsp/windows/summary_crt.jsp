@@ -875,7 +875,7 @@ form.ibm-column-form .ibm-columns label,form.ibm-column-form label {
           <cmr:column span="1" width="130">
             <label>${ui.engagesupprotreqnumber}:</label>
           </cmr:column>
-          <cmr:column span="1" width="240">
+            <cmr:column span="1" width="240">
              ${summary.admin.soeReqNo}
   				</cmr:column>
         </cmr:view>

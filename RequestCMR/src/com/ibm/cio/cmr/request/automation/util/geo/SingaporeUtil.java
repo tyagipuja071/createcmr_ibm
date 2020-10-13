@@ -34,6 +34,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class SingaporeUtil extends AutomationUtil {
@@ -49,6 +50,8 @@ public class SingaporeUtil extends AutomationUtil {
   public static final String SCENARIO_MARKETPLACE = "MKTPC";
   public static final String SCENARIO_CROSS_BLUEMIX = "XBLUM";
   public static final String SCENARIO_CROSS_MARKETPLACE = "XMKTP";
+  private static final String SCENARIO_PRIVATE_CUSTOMER = "PRIV";
+  private static final String SCENARIO_CROSS_PRIVATE_CUSTOMER = "XPRIV";
 
   @Override
   public AutomationResult<OverrideOutput> doCountryFieldComputations(EntityManager entityManager, AutomationResult<OverrideOutput> results,
@@ -178,6 +181,10 @@ public class SingaporeUtil extends AutomationUtil {
     Data data = requestData.getData();
     String scenario = data.getCustSubGrp();
     String[] scnarioList = { "ASLOM", "NRML" };
+    Addr soldTo = requestData.getAddress("ZS01");
+    String custNm1 = soldTo.getCustNm1();
+    String custNm2 = StringUtils.isNotBlank(soldTo.getCustNm2()) ? " " + soldTo.getCustNm2() : "";
+    String customerName = custNm1 + custNm2;
 
     allowDuplicatesForScenario(engineData, requestData, Arrays.asList(scnarioList));
 
@@ -251,6 +258,10 @@ public class SingaporeUtil extends AutomationUtil {
     case SCENARIO_CROSS_MARKETPLACE:
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
       break;
+    case SCENARIO_PRIVATE_CUSTOMER:
+    case SCENARIO_CROSS_PRIVATE_CUSTOMER:
+      return doPrivatePersonChecks(engineData, SystemLocation.SINGAPORE, soldTo.getLandCntry(), customerName, details,
+          (SCENARIO_PRIVATE_CUSTOMER.equals(scenario) || SCENARIO_CROSS_PRIVATE_CUSTOMER.equals(scenario)), requestData);
     }
     result.setDetails(details.toString());
     return true;
@@ -396,6 +407,14 @@ public class SingaporeUtil extends AutomationUtil {
         exc.setSkipCompanyVerification(true);
         engineData.put("SCENARIO_EXCEPTIONS", exc);
       }
+    }
+  }
+
+  @Override
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    Data data = requestData.getData();
+    if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
+      request.setCity("SINGAPORE");
     }
   }
 
@@ -549,5 +568,11 @@ public class SingaporeUtil extends AutomationUtil {
     output.setDetails(details);
     output.setProcessOutput(validation);
     return true;
+  }
+
+  @Override
+  protected List<String> getCountryLegalEndings() {
+    return Arrays.asList("PTY LTD", "LTD", "company", "limited", "PT", "SDN BHD", "berhad", "CO. LTD", "company limited", "JSC", "JOINT STOCK",
+        "INC.", "PTE LTD", "PVT LTD", "private limited", "CORPORATION", "hospital", "university");
   }
 }

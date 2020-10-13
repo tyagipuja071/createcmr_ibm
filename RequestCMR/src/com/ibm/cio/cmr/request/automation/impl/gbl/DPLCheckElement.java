@@ -85,19 +85,24 @@ public class DPLCheckElement extends ValidatingElement {
 
         recomputeDPLResult(user, entityManager, requestData);
 
-        if ("U".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getEmbargoCd()) && !"N".equals(data.getEmbargoCd())) {
-          validation.setSuccess(false);
-          output.setOnError(true);
-          engineData.addRejectionComment("OTH", "This is a CMR record with a DPL/Embargo Code.ERC approval will be needed to process this request.",
-              "", "");
-          log.debug(
-              "This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.Hence sending back to processor.");
-          details.append(details.toString());
-          output.setResults("CMR with DPL/Embargo Code");
-          output.setDetails(details.toString());
-          output.setProcessOutput(validation);
-          return output;
-        }
+        // if ("U".equals(admin.getReqType()) &&
+        // StringUtils.isNotEmpty(data.getEmbargoCd()) &&
+        // !"N".equals(data.getEmbargoCd())) {
+        // validation.setSuccess(false);
+        // output.setOnError(true);
+        // engineData.addRejectionComment("OTH", "This is a CMR record with a
+        // DPL/Embargo Code.ERC approval will be needed to process this
+        // request.",
+        // "", "");
+        // log.debug(
+        // "This is a CMR record with a DPL/Embargo Code. ERC approval will be
+        // needed to process this request.Hence sending back to processor.");
+        // details.append(details.toString());
+        // output.setResults("CMR with DPL/Embargo Code");
+        // output.setDetails(details.toString());
+        // output.setProcessOutput(validation);
+        // return output;
+        // }
 
         if (StringUtils.isNotEmpty(scorecard.getDplChkResult())
             && ("AF".equals(scorecard.getDplChkResult()) || "SF".equals(scorecard.getDplChkResult()))) {

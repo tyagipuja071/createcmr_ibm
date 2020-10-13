@@ -55,7 +55,6 @@ import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.SuppCntry;
 import com.ibm.cio.cmr.request.entity.WfHist;
-import com.ibm.cio.cmr.request.model.BatchEmailModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -310,7 +309,6 @@ public class LegacyDirectService extends TransConnService {
     } else {
       // prepare legacy data, map to the values needed
       LegacyDirectObjectContainer legacyObjects = mapRequestDataForCreate(entityManager, cmrObjects);
-      MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
 
       LOG.info("Checking existing records with same Name and Location..");
       LOG.trace("Name: " + legacyObjects.getCustomer().getAbbrevNm() + " - Location: " + legacyObjects.getCustomer().getAbbrevLocn());
@@ -345,8 +343,7 @@ public class LegacyDirectService extends TransConnService {
       cmrObjects.getData().setCmrNo(legacyObjects.getCustomerNo());
       if (cmrObjects.getAdmin().getProspLegalInd() != null && cmrObjects.getAdmin().getProspLegalInd().equalsIgnoreCase("Y")
           && cmrObjects.getData().getOrdBlk() != null && CmrConstants.PROSPECT_ORDER_BLOCK.equals(cmrObjects.getData().getOrdBlk())) {
-        // MessageTransformer transformer =
-        // TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
+        MessageTransformer transformer = TransformerManager.getTransformer(cmrObjects.getData().getCmrIssuingCntry());
         if (transformer != null) {
           cmrObjects.getData().setProspectSeqNo(transformer.getFixedAddrSeqForProspectCreation());
         }
@@ -357,8 +354,7 @@ public class LegacyDirectService extends TransConnService {
 
       updateEntity(cmrObjects.getData(), entityManager);
 
-      // completeRecord(entityManager, admin, legacyObjects.getCustomerNo(),
-      // legacyObjects);
+      completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
       if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode()) && legacyObjects.getCustomerExt() != null) {
         updateCompanyBillingChildRecordsItaly(entityManager, legacyObjects, cmrObjects);
       }
@@ -551,7 +547,7 @@ public class LegacyDirectService extends TransConnService {
          * for (CmrtAddrUse legacyAddrUse : legacyObjects.getUses()) {
          * createEntity(legacyAddrUse, entityManager); }
          */
-        completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects, cmrObjects);
+        completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects);
 
         // CMR-1025 Legacy processing failed when updated Billing seq 0000B
         if (SystemLocation.ITALY.equals(legacyCust.getId().getSofCntryCode())) {
@@ -961,17 +957,9 @@ public class LegacyDirectService extends TransConnService {
     partialCommit(entityManager);
   }
 
-  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects,
-      CMRRequestContainer cmrObjects) throws CmrException, SQLException {
+  private void completeRecord(EntityManager entityManager, Admin admin, String cmrNo, LegacyDirectObjectContainer legacyObjects)
+      throws CmrException, SQLException {
     LOG.info("Completing legacy processing for  Request " + admin.getId().getReqId());
-    String cntry = cmrObjects.getData().getCmrIssuingCntry();
-    MessageTransformer transformer = TransformerManager.getTransformer(cntry);
-    boolean hasDupCreates = false;
-    String targetCntry = transformer.getGmllcDupCreation(cmrObjects.getData());
-    if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType()) && !"NA".equals(targetCntry)) {
-      hasDupCreates = true;
-    }
-
     admin.setLockBy(null);
     admin.setLockByNm(null);
     admin.setLockInd("N");
@@ -1037,25 +1025,9 @@ public class LegacyDirectService extends TransConnService {
       }
       message = message.trim();
     }
-
-    if (hasDupCreates) {
-      message += "\n" + "Records created successfully on the Legacy Database. CMR No. " + cmrNo + " assigned for country " + targetCntry;
-    }
-
     WfHist hist = createHistory(entityManager, message, "PCO", "Legacy Processing", admin.getId().getReqId());
     createComment(entityManager, message, admin.getId().getReqId());
     RequestUtils.sendEmailNotifications(entityManager, admin, hist, false, true);
-
-    String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(), admin, entityManager);
-    if (!"NA".equals(mailFlag)) {
-      String mailTemplate = transformer.getEmailTemplateName(mailFlag);
-      String statusForMailSend = transformer.getReqStatusForSendingMail(mailFlag);
-      if (statusForMailSend != null && "PCO".equals(statusForMailSend)) {
-        BatchEmailModel mailParams = transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
-        LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager, mailParams, mailTemplate);
-      }
-    }
-
     partialCommit(entityManager);
   }
 
@@ -1187,9 +1159,6 @@ public class LegacyDirectService extends TransConnService {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
     String cmrNo = data.getCmrNo();
-    String cntry = data.getCmrIssuingCntry();
-    MessageTransformer transformer = TransformerManager.getTransformer(cntry);
-    String targetCountry = null;
 
     if (!StringUtils.isEmpty(cmrNo) && !"Y".equals(admin.getProspLegalInd())) {
       boolean isCMRExist = LegacyDirectUtil.checkCMRNoInLegacyDB(entityManager, data);
@@ -1213,6 +1182,8 @@ public class LegacyDirectService extends TransConnService {
       cmrNo = generateCMRNo(entityManager, cmrObjects, data.getCmrIssuingCntry(), targetCountry);
     }
 
+    String cntry = data.getCmrIssuingCntry();
+    MessageTransformer transformer = TransformerManager.getTransformer(cntry);
     legacyObjects.setCustomerNo(cmrNo);
     legacyObjects.setSofCntryCd(cntry);
 
@@ -1520,7 +1491,7 @@ public class LegacyDirectService extends TransConnService {
     // Mukesh:Defect 1703041: FVT: Update_TS is not getting updated for Update
     // requests in Legacy DB
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
     // Setting status=A in case of single reactivation requests
     if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && CMR_REACTIVATION_REQUEST_REASON.equals(admin.getReqReason())) {
@@ -1838,7 +1809,6 @@ public class LegacyDirectService extends TransConnService {
           legacyObjects.setCustomerExt(custExt);
         }
       }
-
       // rebuild the address use table
       transformer.transformOtherData(entityManager, legacyObjects, cmrObjects);
 
@@ -1872,11 +1842,10 @@ public class LegacyDirectService extends TransConnService {
    * @throws SecurityException
    * @throws NoSuchMethodException
    */
-  private String generateCMRNo(EntityManager entityManager, CMRRequestContainer cmrObjects, String cmrIssuingCntry, String targetCountry)
-      throws Exception {
+  private String generateCMRNo(EntityManager entityManager, CMRRequestContainer cmrObjects, String cmrIssuingCntry) throws Exception {
     GenerateCMRNoRequest request = new GenerateCMRNoRequest();
     request.setLoc1(cmrIssuingCntry);
-    request.setLoc2(targetCountry);
+    request.setLoc2(cmrIssuingCntry);
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     request.setSystem(GenerateCMRNoClient.SYSTEM_SOF);
 
@@ -2186,7 +2155,8 @@ public class LegacyDirectService extends TransConnService {
    * @param oldSeq
    * @param newSeq
    */
-  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
+  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
+      boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -2233,10 +2203,12 @@ public class LegacyDirectService extends TransConnService {
       // if not aborted and not completed rdc processing status, complete the
       // request
       admin.setReqStatus("COM");
+      admin.setProcessedFlag("Y");
       updateEntity(admin, entityManager);
     } else if (CmrConstants.RDC_STATUS_ABORTED.equals(admin.getRdcProcessingStatus())
         || CmrConstants.RDC_STATUS_NOT_COMPLETED.equals(admin.getRdcProcessingStatus())) {
       admin.setReqStatus("PPN");
+      admin.setProcessedFlag("E");
       updateEntity(admin, entityManager);
     }
     if (!CmrConstants.RDC_STATUS_IGNORED.equals(resultCode)) {
@@ -2413,6 +2385,7 @@ public class LegacyDirectService extends TransConnService {
           }
           updateEntity(sMassUpdt, entityManager);
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.COM.toString());
+          admin.setProcessedFlag("Y");
           updateEntity(admin, entityManager);
           partialCommit(entityManager);
         }
@@ -2457,8 +2430,10 @@ public class LegacyDirectService extends TransConnService {
         if (statusCodes.contains(CmrConstants.RDC_STATUS_NOT_COMPLETED)) {
           admin.setRdcProcessingStatus(CmrConstants.RDC_STATUS_NOT_COMPLETED);
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+          admin.setProcessedFlag("E");
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_ABORTED)) {
           admin.setReqStatus(CmrConstants.REQUEST_STATUS.PPN.toString());
+          admin.setProcessedFlag("E");
           admin.setRdcProcessingStatus(
               processingStatus.equals(CmrConstants.RDC_STATUS_ABORTED) ? CmrConstants.RDC_STATUS_NOT_COMPLETED : CmrConstants.RDC_STATUS_ABORTED);
         } else if (statusCodes.contains(CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS)) {
@@ -2479,6 +2454,7 @@ public class LegacyDirectService extends TransConnService {
 
         if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("COM");
+          admin.setProcessedFlag("Y");
         }
         updateEntity(admin, entityManager);
 
@@ -2712,6 +2688,7 @@ public class LegacyDirectService extends TransConnService {
             admin.setReqStatus("CPR");
           } else if ("A".equals(admin.getRdcProcessingStatus()) || "N".equals(admin.getRdcProcessingStatus())) {
             admin.setReqStatus("PPN");
+            admin.setProcessedFlag("E");
             admin.setProcessedTs(getZeroDate());
             admin.setRdcProcessingTs(getZeroDate());
           }
@@ -2757,8 +2734,9 @@ public class LegacyDirectService extends TransConnService {
             ProcessResponse response = null;
             String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
-            boolean isDataUpdated = false;
-            isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+            // boolean isDataUpdated = false;
+            // isDataUpdated = LegacyDirectUtil.isDataUpdated(data, dataRdc,
+            // data.getCmrIssuingCntry());
 
             for (Addr addr : addresses) {
               entityManager.detach(addr);
@@ -2768,6 +2746,11 @@ public class LegacyDirectService extends TransConnService {
                * LOG.warn("Address Type: " + addr.getId().getAddrType() +
                * "  Skipping all address except ZS01 address."); continue; }
                */
+
+              if (StringUtils.isEmpty(addr.getSapNo())) {
+                LOG.warn("Address Type: " + addr.getId().getAddrType() + "  Skipping as SAP no is blank.");
+                continue;
+              }
 
               request.setSapNo(addr.getSapNo());
 
@@ -2916,8 +2899,10 @@ public class LegacyDirectService extends TransConnService {
             admin.setRdcProcessingMsg(rdcProcessingMsg.toString().trim());
             if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
               admin.setReqStatus("COM");
+              admin.setProcessedFlag("Y");
             } else if ("A".equals(admin.getRdcProcessingStatus()) || "N".equals(admin.getRdcProcessingStatus())) {
               admin.setReqStatus("PPN");
+              admin.setProcessedFlag("E");
             }
 
             updateEntity(admin, entityManager);
@@ -3192,8 +3177,10 @@ public class LegacyDirectService extends TransConnService {
         admin.setRdcProcessingMsg(rdcProcessingMsg.toString().trim());
         if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("COM");
+          admin.setProcessedFlag("Y");
         } else if ("A".equals(admin.getRdcProcessingStatus()) || "N".equals(admin.getRdcProcessingStatus())) {
           admin.setReqStatus("PPN");
+          admin.setProcessedFlag("E");
         }
 
         updateEntity(admin, entityManager);
@@ -3206,17 +3193,6 @@ public class LegacyDirectService extends TransConnService {
           RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin,
               "RDc  Processing has been completed. Please check request's comment log for details.", ACTION_RDC_UPDATE, null, null,
               "COM".equals(admin.getReqStatus()));
-        }
-
-        // email Notify
-        String mailFlag = transformer.getMailSendingFlag(cmrObjects.getData(), admin, entityManager);
-        if (!"NA".equals(mailFlag)) {
-          String mailTemplate = transformer.getEmailTemplateName(mailFlag);
-          String statusForMailSend = transformer.getReqStatusForSendingMail(mailFlag);
-          if (statusForMailSend != null && "COM".equals(statusForMailSend)) {
-            BatchEmailModel mailParams = transformer.getMailFormatParams(entityManager, cmrObjects, mailFlag);
-            LegacyCommonUtil.sendfieldUpdateEmailNotification(entityManager, mailParams, mailTemplate);
-          }
         }
 
         partialCommit(entityManager);
@@ -3364,6 +3340,7 @@ public class LegacyDirectService extends TransConnService {
                 cust.setStatus(LEGACY_STATUS_CANCELLED);
 
               cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+              cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
             }
           } else if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(record.getStatus())) {
             if (cust != null) {
@@ -3375,6 +3352,7 @@ public class LegacyDirectService extends TransConnService {
                 cust.setStatus(LEGACY_STATUS_CANCELLED);
 
               cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
+              cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
             }
           }
           LOG.info("Mass Update Record Updated [Request ID: " + massUpdt.getId().getParReqId() + " CMR_NO: " + massUpdt.getCmrNo() + " SEQ No: "
@@ -3433,8 +3411,10 @@ public class LegacyDirectService extends TransConnService {
       admin.setRdcProcessingMsg(response.getMessage());
       if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
         admin.setReqStatus("COM");
+        admin.setProcessedFlag("Y");
       } else if ("A".equals(admin.getRdcProcessingStatus()) || "N".equals(admin.getRdcProcessingStatus())) {
         admin.setReqStatus("PPN");
+        admin.setProcessedFlag("E");
       }
 
       updateEntity(admin, entityManager);
@@ -3603,8 +3583,10 @@ public class LegacyDirectService extends TransConnService {
       admin.setRdcProcessingMsg(response.getMessage());
       if (!"A".equals(admin.getRdcProcessingStatus()) && !"N".equals(admin.getRdcProcessingStatus())) {
         admin.setReqStatus("COM");
+        admin.setProcessedFlag("Y");
       } else if ("A".equals(admin.getRdcProcessingStatus()) || "N".equals(admin.getRdcProcessingStatus())) {
         admin.setReqStatus("PPN");
+        admin.setProcessedFlag("E");
       }
 
       updateEntity(admin, entityManager);
@@ -3670,7 +3652,7 @@ public class LegacyDirectService extends TransConnService {
   }
 
   // Mukesh:Story 1698123
-  public static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+  private static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
 
     for (String use : addrUse.split("")) {
       if (!StringUtils.isEmpty(use)) {
@@ -4083,7 +4065,7 @@ public class LegacyDirectService extends TransConnService {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
     capsAndFillNulls(cust, true);
     legacyObjects.setCustomer(cust);
@@ -4187,7 +4169,7 @@ public class LegacyDirectService extends TransConnService {
     return legacyObjects;
   }
 
-  public String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
+  private String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
     if (entityManager == null) {
       return null;
     }

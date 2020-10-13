@@ -53,6 +53,9 @@ public class DefaultApprovalsElement extends ApprovalsElement {
 
     LOG.info("Checking and generating required approvals for Request " + reqId);
 
+    LOG.debug("Merging admin entity before checking for default approvals.");
+    entityManager.merge(admin);
+
     ApprovalService service = new ApprovalService();
     String approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
     LOG.trace("Approvals result: " + approvalsResult);

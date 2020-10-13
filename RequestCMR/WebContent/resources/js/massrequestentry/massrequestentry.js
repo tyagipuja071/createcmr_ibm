@@ -131,7 +131,13 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      doYourAction();
+      if (isNewMassTemplateUsed() && isDPLCheckNeeded()) {
+        MessageMgr.showErrorMessage('DPL Check is needed for uploaded template.');
+      } else if (isNewMassTemplateUsed() && isAttachmentNeeded()) {
+        MessageMgr.showErrorMessage('DPL Matching results has not been attached to the request. This is required since DPL checks failed for one or more addresses.');
+      } else {
+        doYourAction();
+      }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }

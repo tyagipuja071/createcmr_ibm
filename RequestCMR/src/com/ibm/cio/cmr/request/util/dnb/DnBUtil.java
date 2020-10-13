@@ -15,7 +15,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -134,6 +136,8 @@ public class DnBUtil {
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
+    registerDnBTaxCd1Code("GB", 2541); // UK CRO Number
+    registerDnBTaxCd1Code("IE", 9134); // Ireland CRO Number
 
     // other codes
     registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
@@ -174,6 +178,19 @@ public class DnBUtil {
       String[] parts = geoHandler.doSplitName(company.getCompanyName(), "", splitLength, splitLength2);
       cmrRecord.setCmrName1Plain(parts[0]);
       cmrRecord.setCmrName2Plain(parts[1]);
+      String completeNameAfterSplit = parts[0] + (StringUtils.isNotBlank(parts[1]) ? " " + parts[1] : "");
+      if (!company.getCompanyName().equals(completeNameAfterSplit)) {
+        if (company.getCompanyName().length() > splitLength) {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, splitLength).toUpperCase());
+          if (company.getCompanyName().length() > splitLength + splitLength2) {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength, splitLength + splitLength2).toUpperCase());
+          } else {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength).toUpperCase());
+          }
+        } else {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().toUpperCase());
+        }
+      }
     } else {
       if (company.getCompanyName().length() > 30) {
         cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, 30).toUpperCase());
@@ -447,12 +464,15 @@ public class DnBUtil {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
 
     String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+    String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
 
     if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12 && (altCompareName == null
+          || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12)) {
         return false;
       }
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
+      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6 && (altCompareName == null
+          || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6)) {
         // do a comparison of common words first
         List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
         List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
@@ -465,7 +485,19 @@ public class DnBUtil {
           }
         }
         if (!foundMinimal) {
-          return false;
+          if (altCompareName != null) {
+            List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
+            for (String phraseA : altCommonA) {
+              for (String phraseB : commonB) {
+                if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                  foundMinimal = true;
+                }
+              }
+            }
+          }
+          if (!foundMinimal) {
+            return false;
+          }
         }
       } else {
         LOG.debug("Name " + compareName + " close to " + dnbRecord.getDnbName());
@@ -550,6 +582,25 @@ public class DnBUtil {
   }
 
   /**
+   * returns concatenated customerName from admin or address as per country
+   * settings
+   *
+   * @param handler
+   * @param admin
+   * @param soldTo
+   * @return
+   */
+  private static String getAltCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
+    String customerName = null;
+    if (handler != null && !handler.customerNamesOnAddress()) {
+      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : admin.getMainCustNm2());
+    } else {
+      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : soldTo.getCustNm2());
+    }
+    return customerName;
+  }
+
+  /**
    * checks if a DnB response contains valid matches i.e., Confidence Code>7
    * 
    * @param response
@@ -591,31 +642,33 @@ public class DnBUtil {
    * @return
    * @throws Exception
    */
-  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, String addrType) throws Exception {
+  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, String addrType)
+      throws Exception {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
+    boolean isTaxCdMatch = false;
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    if (countryUtil != null) {
+      isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
+    }
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
-      if (StringUtils.isNotBlank(data.getVat())) {
-        if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-          request.setOrgId(data.getVat().split("\\s")[0]);
-        } else {
+      if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
+        request.setOrgId(data.getTaxCd1());
+      } else if (!isTaxCdMatch) {
+        if (StringUtils.isNotBlank(data.getVat())) {
           request.setOrgId(data.getVat());
+        } else if (StringUtils.isNotBlank(addr.getVat())) {
+          request.setOrgId(addr.getVat());
         }
-      } else if (StringUtils.isNotBlank(addr.getVat())) {
-        request.setOrgId(addr.getVat());
       }
 
       request.setCity(addr.getCity1());
-      if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-        // here for now, find a way to move to common class
-        request.setCity("SINGAPORE");
-      }
       request.setCustomerName(getCustomerName(handler, admin, addr));
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(addr.getAddrTxt2());
@@ -623,6 +676,12 @@ public class DnBUtil {
       request.setPostalCode(addr.getPostCd());
       request.setStateProv(addr.getStateProv());
       request.setMinConfidence("4");
+
+      if (countryUtil != null) {
+        // Allow flexibility to tweak the request before matching
+        countryUtil.tweakDnBMatchingRequest(request, requestData, engineData);
+      }
+
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           MatchingServiceClient.class);
       client.setReadTimeout(1000 * 60 * 5);
