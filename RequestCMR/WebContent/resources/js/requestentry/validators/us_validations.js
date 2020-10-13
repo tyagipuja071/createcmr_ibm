@@ -121,6 +121,17 @@ function addAddressRecordTypeValidator() {
  * After configuration for US
  */
 function afterConfigForUS() {
+
+  var reqType = FormManager.getActualValue('reqType');
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'U' && role == 'Requester') {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+  }
+
   // Enterprise field as mandatory for BP scenario
   var custTypeHandler = null;
   if (custTypeHandler == null) {
