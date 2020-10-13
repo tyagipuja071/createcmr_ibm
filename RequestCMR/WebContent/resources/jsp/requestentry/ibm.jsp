@@ -389,14 +389,15 @@ dojo.addOnLoad(function(){
   		<cmr:row topPad="10" addBackground="true">
         <cmr:column span="2" containerForField="SOENumber">
           <p>
-            <cmr:label fieldId="soeReqNo">
+           <cmr:label fieldId="soeReqNo">
               <cmr:fieldLabel fieldId="SOENumber" />:
             </cmr:label>
             <cmr:field fieldId="SOENumber" id="soeReqNo" path="soeReqNo" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
   		</cmr:row>
-    </cmr:view>
+    </cmr:view> 
+    --%>
 		</cmr:view>
 
     <!-- Include Here IBM Specific fields for GEOs -->
