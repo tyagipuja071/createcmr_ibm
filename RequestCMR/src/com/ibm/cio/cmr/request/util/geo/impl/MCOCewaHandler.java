@@ -442,7 +442,8 @@ public class MCOCewaHandler extends MCOHandler {
             String deptNo = ""; // 14
             String city = "";
             String postalcd = "";
-            String phoneNo = "";
+            String phoneNo = ""; // 10
+            String phoneNoData = ""; // 13
             String stcont = ""; // 5
             String addnameinfo = ""; // 9
             String poBox = "";// 10
@@ -464,10 +465,10 @@ public class MCOCewaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(14);
               deptNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(13);
-              phoneNo = validateColValFromCell(currCell);
+              phoneNoData = validateColValFromCell(currCell);
               if (currCell != null) {
                 DataFormatter df = new DataFormatter();
-                phoneNo = df.formatCellValue(row.getCell(13));
+                phoneNoData = df.formatCellValue(row.getCell(13));
               }
               currCell = (XSSFCell) row.getCell(15);
               tin = validateColValFromCell(currCell);
@@ -490,10 +491,14 @@ public class MCOCewaHandler extends MCOHandler {
               if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
                 currCell = (XSSFCell) row.getCell(10);
                 poBox = validateColValFromCell(currCell);
+                if (currCell != null) {
+                  DataFormatter df = new DataFormatter();
+                  poBox = df.formatCellValue(row.getCell(10));
+                }
               }
             }
 
-            if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName())) {
+            if ("Shipping Address".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(10);
               phoneNo = validateColValFromCell(currCell);
               if (currCell != null) {
@@ -561,11 +566,32 @@ public class MCOCewaHandler extends MCOHandler {
               error.addError(row.getRowNum(), "Internal Department No.", "CMR No. should start with 99 if internal department no. is filled.");
               validations.add(error);
             }
-            if ("Ship To Address".equalsIgnoreCase(sheet.getSheetName()) || "Data".equalsIgnoreCase(sheet.getSheetName())) {
-              if (phoneNo.contains("+")) {
-                LOG.trace("Please input value in numeric format. Please fix and upload the template again.");
-                error.addError(row.getRowNum(), "Phone No.", "Please input value in numeric format. Please fix and upload the template again.");
-                validations.add(error);
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(phoneNoData)) {
+                if (!StringUtils.isNumeric(phoneNoData.substring(0, phoneNoData.length()))) {
+                  LOG.trace("Phone number should have numeric values only.");
+                  error.addError(row.getRowNum(), "", "Phone number should have numeric values only.");
+                  validations.add(error);
+                }
+              }
+            }
+
+            if ("Shipping Address".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(phoneNo)) {
+                if (!StringUtils.isNumeric(phoneNo.substring(0, phoneNo.length()))) {
+                  LOG.trace("Phone number should have numeric values only.");
+                  error.addError(row.getRowNum(), "", "Phone number should have numeric values only.");
+                  validations.add(error);
+                }
+              }
+            }
+            if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(poBox)) {
+                if (!StringUtils.isNumeric(poBox.substring(0, poBox.length()))) {
+                  LOG.trace("POBox number should have numeric values only.");
+                  error.addError(row.getRowNum(), "", "POBox number should have numeric values only.");
+                  validations.add(error);
+                }
               }
             }
             if (tin.length() != 0) {

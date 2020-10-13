@@ -83,7 +83,7 @@
           			<width>20</width>
           			<length>20</length>
         		</column>
-        		<column number="true" exactLength="false">
+        		<column>
           			<label>Phone #</label>
           			<dbColumn>RESTRICT_TO</dbColumn>
           			<length>16</length>
@@ -166,7 +166,7 @@
 					<width>25</width>
 					<length>30</length>
 				</column>
-				<column number="true">
+				<column>
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
@@ -236,7 +236,7 @@
 					<width>25</width>
 					<length>30</length>
 				</column>
-				<column number="true">
+				<column>
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
@@ -306,7 +306,7 @@
 					<width>25</width>
 					<length>30</length>
 				</column>
-				<column number="true">
+				<column>
 					<label>PO Box</label>
 					<dbColumn>PO_BOX</dbColumn>
 					<width>18</width>
@@ -376,7 +376,7 @@
 					<width>25</width>
 					<length>30</length>
 				</column>
-				<column number="true" exactLength="false">
+				<column>
           			<label>Phone #</label>
           			<dbColumn>CUST_PHONE</dbColumn>
           			<length>16</length>
