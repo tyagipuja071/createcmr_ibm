@@ -183,6 +183,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
+    boolean isCrossBorder = false;
     List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC");
     String landedCntry = "";
     // formatDataLines(dummyHandler);
@@ -228,7 +229,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
         } else {
           legacyCust.setTelNoOrVat("");
         }
-        landedCntry = addr.getLandCntry();
         break;
       }
     }
@@ -281,14 +281,24 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+        landedCntry = addr.getLandCntry();
+        if (isCrossBorder(addr)) {
+          isCrossBorder = true;
+        }
+        break;
+      }
+    }
+
+    if (dummyHandler != null && isCrossBorder && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
       if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
       } else {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       }
     } else {
-      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+      if (dummyHandler != null && !StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       } else {
         legacyCust.setVat("");
@@ -601,31 +611,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
       isCrossBorder = true;
     }
     return isCrossBorder;
-  }
-
-  protected boolean zs01CrossBorder(MQMessageHandler handler) {
-    EntityManager entityManager = handler.getEntityManager();
-    if (entityManager == null) {
-      return false;
-    }
-    List<Addr> addresses = null;
-    if (handler.currentAddresses == null) {
-      String sql = ExternalizedQuery.getSql("MQREQUEST.GETNEXTADDR");
-      PreparedQuery query = new PreparedQuery(entityManager, sql);
-      query.setParameter("REQ_ID", handler.addrData.getId().getReqId());
-      query.setForReadOnly(true);
-      addresses = query.getResults(Addr.class);
-    } else {
-      addresses = handler.currentAddresses;
-    }
-    if (addresses != null) {
-      for (Addr addr : addresses) {
-        if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-          return isCrossBorder(addr);
-        }
-      }
-    }
-    return false;
   }
 
 }
