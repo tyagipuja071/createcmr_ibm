@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
+import com.ibm.cio.cmr.request.user.AppUser;
 
 /**
  * @author JeffZAMORA
@@ -50,11 +51,20 @@ public class DPLSearchController extends BaseWindowController {
       mv.addObject("error", false);
     }
 
-    return getWindow(mv, "DPL Search");
+    return getWindow(mv, "Denied Parties List Search");
+  }
+
+  @RequestMapping(value = "/dplsearch")
+  public ModelAndView showDPLSearchPage(HttpServletRequest request, HttpServletResponse response)
+      throws CmrException, JsonGenerationException, JsonMappingException, IOException {
+
+    ModelAndView mv = new ModelAndView("dplsearch");
+    setPageKeys("SEARCH_HOME", "DPLSEARCH", mv);
+    return mv;
   }
 
   @RequestMapping("/dplsearch/process")
-  public ModelMap getRequestData(HttpServletRequest request, HttpServletResponse response)
+  public ModelMap processDPLAction(HttpServletRequest request, HttpServletResponse response)
       throws CmrException, JsonGenerationException, JsonMappingException, IOException {
 
     ModelMap map = new ModelMap();
@@ -71,6 +81,7 @@ public class DPLSearchController extends BaseWindowController {
       params.addParam("reqId", Long.parseLong(reqId));
       params.addParam("searchString", request.getParameter("searchString"));
       params.addParam("processType", request.getParameter("processType"));
+      params.addParam("user", AppUser.getUser(request));
       Object results = service.process(request, params);
 
       map.addAttribute("data", results);
@@ -83,4 +94,13 @@ public class DPLSearchController extends BaseWindowController {
     return map;
   }
 
+  @RequestMapping("/dplsearch/pdf")
+  public void generatePDF(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ParamContainer params = new ParamContainer();
+    params.addParam("searchString", request.getParameter("searchString"));
+    params.addParam("processType", request.getParameter("processType"));
+    AppUser user = AppUser.getUser(request);
+    service.generatePDF(user, response, params);
+
+  }
 }

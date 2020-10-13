@@ -92,7 +92,7 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
               section.addCell(createValueCell(DPLSearchResult.exactMatchFound(result) ? "Yes" : "No"));
               section.addCell(createLabelCell("Partial Match Found:"));
               section.addCell(createValueCell(DPLSearchResult.partialMatchFound(result) ? "Yes" : "No"));
-              section.addCell(createLabelCell("Closest Name Matches:"));
+              section.addCell(createLabelCell("Closest Name Match:"));
               StringBuilder closest = new StringBuilder();
               for (DPLRecord closestItem : DPLSearchResult.getTopMatches(result)) {
                 String dplName = closestItem.getCompanyName();
@@ -105,22 +105,23 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
                   dplName = "";
                 }
                 closest.append(closest.length() > 0 ? "\n" : "");
-                closest.append(" - " + dplName + " (" + (person ? "Individual" : "Company") + ")");
+                closest.append(dplName + " (" + (person ? "Individual" : "Company") + ")");
               }
               section.addCell(createValueCell(closest.toString()));
               document.add(section);
               document.add(blankLine());
 
               document.add(createSubHeader("Results"));
-              section = createDetailsTable(new float[] { 10, 10, 40, 40 });
-              section.addCell(createLabelCell("Item"));
-              section.addCell(createLabelCell("Denial Code Country"));
+              section = createDetailsTable(new float[] { 10, 10, 10, 50, 20 });
+              section.addCell(createLabelCell("ID"));
+              section.addCell(createLabelCell("Denial Country"));
+              section.addCell(createLabelCell("Entity Type"));
               section.addCell(createLabelCell("Entity Name"));
               section.addCell(createLabelCell("Entity Address"));
               if (result.getDeniedPartyRecords() == null || result.getDeniedPartyRecords().isEmpty()) {
-                section.addCell(createValueCell("No matches found", 1, 3));
+                section.addCell(createValueCell("No matches found", 1, 5));
               } else {
-                int itemNo = 1;
+                // int itemNo = 1;
                 for (DPLRecord item : result.getDeniedPartyRecords()) {
                   String dplName = item.getCompanyName();
                   boolean person = false;
@@ -131,11 +132,12 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
                   if (dplName == null) {
                     dplName = "";
                   }
-                  section.addCell(createValueCell(itemNo + ""));
+                  section.addCell(createValueCell(item.getEntityId()));
                   section.addCell(createValueCell(item.getCountryCode()));
-                  section.addCell(createValueCell(dplName + " (" + (person ? "Individual" : "Company") + ")"));
-                  section.addCell(createValueCell(item.getEntityAddress()));
-                  itemNo++;
+                  section.addCell(createValueCell(person ? "Individual" : "Company"));
+                  section.addCell(createValueCell(dplName));
+                  section.addCell(createValueCell(item.getEntityCity() + ", " + item.getEntityCountry()));
+                  // itemNo++;
                 }
               }
               document.add(section);
@@ -152,7 +154,7 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
       }
       return true;
     } catch (Exception e) {
-      LOG.error("Error in Generating PDF for Request ID " + admin.getId().getReqId(), e);
+      LOG.error("Error in Generating PDF for " + this.companyName + "(" + this.user + ")", e);
       return false;
     }
   }

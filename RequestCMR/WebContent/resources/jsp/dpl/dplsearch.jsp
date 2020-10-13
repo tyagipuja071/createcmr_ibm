@@ -1,33 +1,43 @@
-  <%@page import="com.ibm.cio.cmr.request.model.automation.DuplicateCheckModel"%>
+<%@page import="java.util.HashMap"%>
+<%@page import="java.util.Map"%>
+<%@page import="com.ibm.cio.cmr.request.model.BaseModel"%>
+<%@page import="com.ibm.cio.cmr.request.model.code.LovModel"%>
+<%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="/tags/cmr" prefix="cmr"%>
+<%
+%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
-<%@ taglib uri="/tags/cmr" prefix="cmr"%>
-
+<link href="${resourcesPath}/css/ext/data.css" rel="stylesheet" title="www" type="text/css" />
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
 <script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
-<link href="${resourcesPath}/css/ext/data.css" rel="stylesheet" title="www" type="text/css" />
-<link rel="stylesheet" href="${resourcesPath}/css/quick_search.css?${cmrv}"/>
 
-<style> 
-td.dnb-label {
-  text-align: right;
-  padding-right: 3px;
-  font-weight: bold !important;
-}
+<script>
+  
+  function backToCodeMaintHome() {
+    window.location = cmr.CONTEXT_ROOT + '/searchhome';
+  } 
+  dojo.addOnLoad(function() {
 
-img.exp-col {
-  width: 15px;
-  height: 15px;
-  cursor: pointer;
-  vertical-align: sub;
-}
-div.ibm-columns {
-  width:95%;
-}
+  });
+</script>
+<style>
+ table.legacy-crit th {
+   text-align: right;
+   padding-right: 3px;
+ }
+ table.legacy-crit tr {
+   border-top : none !important;
+ }
+ table.ibm-data-table tbody td, table.ibm-data-table thead th {
+   font-size: 12px;
+ }
  div.use-m, div.use-b, div.use-i, div.use-s, div.use-e, div.use-l, div.use-gen {
    width:12px; 
    display: inline-block;
@@ -64,133 +74,60 @@ div.ibm-columns {
  div.use-gen {
    background: rgb(215,215,215)
  }
-
-td.inner-det {
-  border: none !important;
-  padding: 2px !important;
-}
-span.bold {
-  font-weight: bold;
-}
+ 
+ div.checkinput {
+   display: inline-block;
+   font-size: 11px;
+   text-transform: uppercase;
+   color: #555;
+   margin-right: 10px;
+ }
+ input[type="date"]{
+   font-family: Tahoma;
+ }
+ div.cancel {
+   border: 1px Solid Red;
+   color: Red;
+   border-radius: 3px;
+   height: 15px;
+   width: 50px;
+   font-size: 10px;
+   line-height: 15px;
+   text-align: center;
+   font-weight: bold;
+ }
+ .btn-search, .btn-reset {
+   width: 100px;
+   font-size: 13px;
+   height: 30px;
+ }
 </style>
+<cmr:boxContent>
+  <cmr:tabs />
 
-<cmr:window>
-  <div ng-app="DPLSearchApp">
-    <div ng-controller="DPLSearchController">
-    
-    
-      <!-- Customer -->
-      <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results">
-        <tbody>
-          <tr>
-            <td class="dnb-label" width="15%">Request ID:</td>
-            <td ng-bind-html="reqId" width="15%"></td>
-            <td class="dnb-label" width="20%">Customer Name:</td>
-            <td ng-bind-html="customerName" width="*"></td>
-          </tr>
-          <tr>
-            <td class="dnb-label">DPL Check Result:</td>
-            <td>
-              <span style="font-weight:bold">
-                {{dplResult}}
-              </span>              
-            </td>
-            <td class="dnb-label">DPL Check Date:</td>
-            <td ng-bind-html="dplCheckDate"></td>
-          </tr>
-        </tbody>
-      </table>
-      <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results">
-        <caption>
-          <em>Addresses</em>
-        </caption>
-        <tbody>
-          <tr ng-repeat="addr in request.addresses ">
-            <td class="dnb-label" width="10%">Name:</td>
-            <td width="30%">
-              {{addr.custNm1 ? addr.custNm1 : customerName}}
-            </td>
-            <td class="dnb-label" width="10%">Address:</td>
-            <td width-="36%">
-              {{addr.addrTxt}} {{addr.addrTxt2 ? ', ' + addr.addrTxt2 : ''}}
-              <br>
-              {{addr.city1}} {{addr.stateProv ? ', '+addr.stateProv : ''}}
-              <br>
-              {{addr.landCntry}} {{addr.postCd ? addr.postCd : ''}}
-            </td>
-            <td class="dnb-label" width="10%">DPL Check:</td>
-            <td width="14%">
-              {{addr.dplChkResult}}
-            </td>
-          </tr>
-          
-        </tbody>
-      </table>
-      
-      
-      <div ng-show="results">
-        <div class="filter" style="display:inline-block;float:left;margin-bottom:20px;font-size:14px;width:700px;font-weight:bold">
-          Showing results for searches against the name and variations. Results after the first one already filter out
-          entities appearing on the previous name search.
-        </div>
-        <div class="filter" style="display:inline-block;float:right;margin-bottom:20px">
-          <input ng-model="allTextFilter" placeholder="Type to filter by name" style="width:200px">
-        </div>
-      </div>
-      <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results" ng-repeat="result in results">
-        <caption>
-          <em>DPL Matches for "{{result.searchArgument}}" ({{result.records.length}} matches)</em>
-          <img class="exp-col" title="Expand Details" src="${resourcesPath}/images/add.png" ng-click="result.exp = true" ng-show="!result.exp">
-          <img class="exp-col" title="Collapse Details" src="${resourcesPath}/images/collapse2.png" ng-click="result.exp = false" ng-show="result.exp">
-        </caption>
-        <thead ng-show="result.exp">
-          <tr>
-            <th width="8%">Item</th>
-            <th width="*">DPL Information (Denial Country Code, Denied Party Name)</th>
-          </tr>
-        </thead>
-        <tbody ng-show="result.exp">
-          <tr ng-repeat="party in result.records| textFilter:allTextFilter">
-            <td>{{party.itemNo}}</td>
-            <td>
-              <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results">
-                <tbody>
-                  <tr ng-repeat="record in party.records" style="border-top:1px solid #DDD">
-                    <td width="10%" style="border-top:1px solid #DDD">
-                      {{record.countryCode}}
-                    </td>
-                    <td width="*" style="border-top:1px solid #DDD" >
-                      <img class="exp-col" title="Expand Details" src="${resourcesPath}/images/add.png" ng-click="record.exp = true" ng-show="!record.exp">
-                      <img class="exp-col" title="Collapse Details" src="${resourcesPath}/images/collapse2.png" ng-click="record.exp = false" ng-show="record.exp">
-                      {{record.companyName ? record.companyName : record.customerFirstName + ' ' +record.customerLastName}}      
-                      
-                      <div ng-show="record.exp" style="font-size:10px">
-                        <br>
-                        ENTITY ID: {{record.entityId}}
-                        <br>
-                        ADDRESS: {{record.entityAddress}}, {{record.city}}, {{record.entityCountry}} {{record.entityPostalCode}}
-                        <br>
-                        DENIAL CODE: {{record.denialCodeDescription}} [{{record.denialCode}}]
-                        <br>
-                        COMMENTS: {{record.comments}} 
-                        <br>
-                        ADDL INFO:
-                        {{record.additionalInfo}}
-                      </div>      
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      
-    </div>
-  </div>
-  <cmr:row>
-  </cmr:row>
-  <cmr:windowClose />
-<script src="${resourcesPath}/js/dpl/dplsearch.js?${cmrv}"
-  type="text/javascript"></script>
-</cmr:window>
+  <cmr:section>
+    <cmr:row topPad="8">
+      <cmr:column span="6">
+        <h3>Denied Parties List (DPL) Search</h3>
+      </cmr:column>
+    </cmr:row>
+    <cmr:row>
+
+
+
+      <jsp:include page="dplcommon.jsp"></jsp:include>
+
+    </cmr:row>
+  </cmr:section>
+</cmr:boxContent>
+<cmr:section alwaysShown="true">
+  <cmr:buttonsRow>
+    <input style="height: 40px" type="button" class="ibm-btn-cancel-sec ibm-btn-small" value="Back to Search Home"
+      onclick="backToCodeMaintHome()">
+  </cmr:buttonsRow>
+  <br>
+</cmr:section>
+
+<cmr:row>
+</cmr:row>
+<script src="${resourcesPath}/js/dpl/dplsearch.js?${cmrv}" type="text/javascript"></script>

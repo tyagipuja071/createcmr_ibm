@@ -43,6 +43,8 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
       
       $scope.reqId = $scope.getParameterByName('reqId');
       $scope.customerName = '';
+      $scope.plain = false;
+      $scope.searchString = '';
       $scope.allTextFilter = '';
       $scope.request = {
           admin : {},
@@ -114,10 +116,18 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
         });
       };
       
-      $scope.dplSearchRequest = function(){
-        cmr.showProgress('Searching customer information on request from DPL database..')
+      $scope.dplSearchRequest = function(plainSearch){
+        var url = cmr.CONTEXT_ROOT + '/dplsearch/process.json?reqId='+$scope.reqId+'&processType=SEARCH';
+        if (plainSearch){
+          url = cmr.CONTEXT_ROOT + '/dplsearch/process.json?reqId=0&searchString='+encodeURIComponent($scope.searchString)+'&processType=SEARCH';
+        }
+        if (plainSearch){
+          cmr.showProgress('Searching the DPL database..')
+        } else {
+          cmr.showProgress('Searching customer information on request from the DPL database..')
+        }
         $http({
-          url : cmr.CONTEXT_ROOT + '/dplsearch/process.json?reqId='+$scope.reqId+'&processType=SEARCH',
+          url : url,
           method : 'GET'
         }).then(function(response) {
           cmr.hideProgress();
@@ -128,6 +138,18 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
             if ($scope.results){
               $scope.results.forEach(function(res, i){
                 res.exp = true;
+                var search = res.searchArgument;
+                if (res.topMatches){
+                  res.topMatches.forEach(function(top, j){
+                    var nm = top.companyName;
+                    if (!nm){
+                      nm = top.customerFirstName + ' ' + top.customerLastName;
+                    }
+                    if (nm.toUpperCase().indexOf(search.toUpperCase()) >= 0){
+                      top.exact = true;
+                    }
+                  });
+                }
               });
             }
           } else {
@@ -141,5 +163,66 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
         });
       };
       
-      $scope.getRequestInfo();
+      
+      $scope.search = function() {
+        if (!$scope.searchString){
+          alert('Please input a name to search.');
+          return;
+        }
+        $scope.dplSearchRequest(true);
+      };
+      
+      $scope.resetSearch = function() {
+        $scope.searchString = '';
+        $scope.allTextFilter = '';
+        $scope.results = [];
+      };
+      
+      $scope.generatePDF = function(){
+        if (!$scope.searchString){
+          alert('Please input a name to search.');
+          return;
+        }
+        document.getElementById('pdfSearchString').value = $scope.searchString;
+        document.forms['frmPDF'].submit();
+        console.log(document.forms['frmPDF']);
+        alert('Please wait for the PDF to be generated.');
+      }
+      
+      $scope.attachToRequest = function(){
+        cmr.showProgress('Attaching results to the request..');
+        var url = cmr.CONTEXT_ROOT + '/dplsearch/process.json?reqId='+$scope.reqId+'&processType=ATTACH';
+        $http({
+          url : url,
+          method : 'GET'
+        }).then(function(response) {
+          cmr.hideProgress();
+          console.log('success');
+          console.log(response.data);
+          if (response.data && response.data.data) {
+            if (window.opener && window.opener.CmrGrid){
+              try {
+                console.log('refreshing attachment grid');
+                window.opener.CmrGrid.refresh('ATTACHMENT_GRID');
+              } catch (e) {
+                console.log('error in refreshing request data');
+              }
+            }
+            alert('Results have been added to the request as DPL Matching Attachment');
+          } else {
+            alert('An error occurred while processing. Please try again later.');
+          }
+        }, function(response) {
+          cmr.hideProgress();
+          console.log('error: ');
+          console.log(response);
+          alert('An error occurred while processing. Please try again later.');
+        });
+      };
+      
+      if ($scope.reqId){
+        $scope.getRequestInfo();
+      } else {
+        $scope.plain = true;
+      }
     } ]);
