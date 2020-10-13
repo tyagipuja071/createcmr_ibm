@@ -181,6 +181,7 @@ function afterConfigForMCO2() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('salesBusOffCd', Validators.DIGIT, [ 'SBO/ Search Term (SORTL)' ], 'MAIN_IBM_TAB');
 }
 
 /**
