@@ -362,6 +362,30 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
+    if (!StringUtils.isBlank(muData.getCustNm1())) {
+      legacyCust.setSbo(muData.getCustNm1());
+      legacyCust.setIbo(muData.getCustNm1());
+    }
+
+    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
+      legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
+      legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
+    }
+
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      String subInd = muData.getSubIndustryCd();
+      legacyCust.setImsCd(subInd);
+    }
+    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
+      legacyCust.setModeOfPayment(muData.getSvcArOffice());
+    }
+    if (!StringUtils.isBlank(muData.getMilitary())) {
+      if ("Y".equals(muData.getMilitary())) {
+        legacyCust.setModeOfPayment("5");
+      } else {
+        legacyCust.setModeOfPayment("");
+      }
+    }
   }
 
   @Override
