@@ -368,6 +368,12 @@ public class LegacyDirectService extends TransConnService {
         CEEProcessService theService = new CEEProcessService();
         theService.processDupCreate(entityManager, admin, cmrObjects);
       }
+      
+      // Add to build duplicate CMR data for ME countries -CMR6019
+      if ("Y".equals(cmrObjects.getData().getDupCmrIndc())) {
+        DupCMRProcessService theService = new DupCMRProcessService();
+        theService.processDupCreate(entityManager, admin, cmrObjects);
+      }
 
       if (!"NA".equals(transformer.getGmllcDupCreation(data))) {
         LegacyDirectDuplicateProcessService dupService = new LegacyDirectDuplicateProcessService();
@@ -375,7 +381,6 @@ public class LegacyDirectService extends TransConnService {
       }
 
       completeRecord(entityManager, admin, legacyObjects.getCustomerNo(), legacyObjects, cmrObjects);
-
     }
   }
 
