@@ -1341,7 +1341,7 @@ public class USUtil extends AutomationUtil {
 
       if (response != null && response.getMatched()) {
         for (DnBMatchingResponse dnbRecord : response.getMatches()) {
-          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn())) {
+          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn(), false)) {
             closeMatches.add(dnbRecord);
           }
         }
