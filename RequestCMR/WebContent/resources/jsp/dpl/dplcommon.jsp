@@ -152,8 +152,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaefb5', end
                         <br>
                         DENIAL CODE: {{top.denialCodeDescription}} [{{top.denialCode}}]
                         <br>
-                        DENIAL CODE: {{top.denialCodeDescription}} [{{top.denialCode}}]
-                        <br>
                         COMMENTS: {{top.comments}} 
                         <br>
                         ADDL INFO:
