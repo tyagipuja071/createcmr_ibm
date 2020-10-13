@@ -184,6 +184,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
     List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC");
+    String landedCntry = "";
     // formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
@@ -202,7 +203,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyCust.setMrcCd("2");
       legacyCust.setCollectionCd("00001");
       legacyCust.setCreditCd(""); // blank on new creates
-
+      legacyCust.setDcRepeatAgreement("0");
+      legacyCust.setLeasingInd("0");
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
@@ -221,7 +223,13 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-        legacyCust.setTelNoOrVat(addr.getCustPhone());
+        if (!StringUtils.isEmpty(addr.getCustPhone())) {
+          legacyCust.setTelNoOrVat(addr.getCustPhone());
+        } else {
+          legacyCust.setTelNoOrVat("");
+        }
+        landedCntry = addr.getLandCntry();
+        break;
       }
     }
 
@@ -270,6 +278,20 @@ public class SouthAfricaTransformer extends MCOTransformer {
         }
         LOG.debug("Setting Abbreviated Name for GM LLC");
         legacyCust.setAbbrevNm(abbrevNm + " GM");
+      }
+    }
+
+    if (zs01CrossBorder(dummyHandler) && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
+      } else {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+      }
+    } else {
+      if (!StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+      } else {
+        legacyCust.setVat("");
       }
     }
   }
@@ -579,6 +601,31 @@ public class SouthAfricaTransformer extends MCOTransformer {
       isCrossBorder = true;
     }
     return isCrossBorder;
+  }
+
+  protected boolean zs01CrossBorder(MQMessageHandler handler) {
+    EntityManager entityManager = handler.getEntityManager();
+    if (entityManager == null) {
+      return false;
+    }
+    List<Addr> addresses = null;
+    if (handler.currentAddresses == null) {
+      String sql = ExternalizedQuery.getSql("MQREQUEST.GETNEXTADDR");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", handler.addrData.getId().getReqId());
+      query.setForReadOnly(true);
+      addresses = query.getResults(Addr.class);
+    } else {
+      addresses = handler.currentAddresses;
+    }
+    if (addresses != null) {
+      for (Addr addr : addresses) {
+        if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+          return isCrossBorder(addr);
+        }
+      }
+    }
+    return false;
   }
 
 }
