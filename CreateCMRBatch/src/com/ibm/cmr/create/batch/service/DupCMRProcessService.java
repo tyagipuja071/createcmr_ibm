@@ -172,6 +172,7 @@ public class DupCMRProcessService extends LegacyDirectService {
         custDup.setRealCtyCd(dupCntry);
         custDup.setStatus(LEGACY_STATUS_ACTIVE);
         custDup.setCeBo(cntry + "0000");
+        custDup.setLocNo(cntry + data.getSubIndustryCd());
         custDup.setCreateTs(SystemUtil.getCurrentTimestamp());
         custDup.setUpdateTs(SystemUtil.getCurrentTimestamp());
         custDup.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
