@@ -115,6 +115,9 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
       int seq = 0;
       for (Addr copyAddr : results) {
 
+        if(handler != null && handler.checkCopyToAdditionalAddress(entityManager, copyAddr, model.getCmrIssuingCntry())){
+            continue;
+        }
         if (!seqMap.containsKey(copyAddr.getId().getAddrType())) {
           seqMap.put(copyAddr.getId().getAddrType(), 0);
         }
