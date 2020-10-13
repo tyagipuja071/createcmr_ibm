@@ -3933,7 +3933,29 @@ function validatorsDIGIT() {
   // FormManager.addValidator('EngineeringBo', Validators.DIGIT, [
   // 'EngineeringBo' ]);
   FormManager.addValidator('taxCd2', Validators.DIGIT, [ 'Enterprise Number' ]);
+  FormManager.addValidator('taxCd2', validEnterpriseNumber6Length, [ 'Enterprise Number' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('enterprise', Validators.DIGIT, [ 'Company Number' ]);
+  FormManager.addValidator('enterprise', validCompanyNumber6Length, [ 'Company Number' ], 'MAIN_IBM_TAB');
+}
+
+function validEnterpriseNumber6Length(input) {
+  var taxCd2 = FormManager.getActualValue('taxCd2');
+  if (taxCd2 != '' && taxCd2 != null && taxCd2 != undefined) {
+    if (taxCd2.length != 6) {
+      return new ValidationResult(input, false, 'Enterprise Number must be 6 length');
+    }
+  }
+  return new ValidationResult(input, true);
+}
+
+function validCompanyNumber6Length(input) {
+  var enterprise = FormManager.getActualValue('enterprise');
+  if (enterprise != '' && enterprise != null && enterprise != undefined) {
+    if (enterprise.length != 6) {
+      return new ValidationResult(input, false, 'Company Number must be 6 length');
+    }
+  }
+  return new ValidationResult(input, true);
 }
 
 // CMR-4606
