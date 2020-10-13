@@ -183,7 +183,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData South Africa transformer...");
     Data data = cmrObjects.getData();
     Admin admin = cmrObjects.getAdmin();
+    boolean isCrossBorder = false;
     List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC");
+    String landedCntry = "";
     // formatDataLines(dummyHandler);
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
       String custSubGrp = data.getCustSubGrp();
@@ -202,7 +204,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyCust.setMrcCd("2");
       legacyCust.setCollectionCd("00001");
       legacyCust.setCreditCd(""); // blank on new creates
-
+      legacyCust.setDcRepeatAgreement("0");
+      legacyCust.setLeasingInd("0");
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
@@ -221,7 +224,12 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
-        legacyCust.setTelNoOrVat(addr.getCustPhone());
+        if (!StringUtils.isEmpty(addr.getCustPhone())) {
+          legacyCust.setTelNoOrVat(addr.getCustPhone());
+        } else {
+          legacyCust.setTelNoOrVat("");
+        }
+        break;
       }
     }
 
@@ -270,6 +278,30 @@ public class SouthAfricaTransformer extends MCOTransformer {
         }
         LOG.debug("Setting Abbreviated Name for GM LLC");
         legacyCust.setAbbrevNm(abbrevNm + " GM");
+      }
+    }
+
+    for (Addr addr : cmrObjects.getAddresses()) {
+      if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
+        landedCntry = addr.getLandCntry();
+        if (isCrossBorder(addr)) {
+          isCrossBorder = true;
+        }
+        break;
+      }
+    }
+
+    if (dummyHandler != null && isCrossBorder && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
+      } else {
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
+      }
+    } else {
+      if (dummyHandler != null && !StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
+      } else {
+        legacyCust.setVat("");
       }
     }
   }
@@ -340,6 +372,30 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
+    if (!StringUtils.isBlank(muData.getCustNm1())) {
+      legacyCust.setSbo(muData.getCustNm1());
+      legacyCust.setIbo(muData.getCustNm1());
+    }
+
+    if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
+      legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
+      legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
+    }
+
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      String subInd = muData.getSubIndustryCd();
+      legacyCust.setImsCd(subInd);
+    }
+    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
+      legacyCust.setModeOfPayment(muData.getSvcArOffice());
+    }
+    if (!StringUtils.isBlank(muData.getMilitary())) {
+      if ("Y".equals(muData.getMilitary())) {
+        legacyCust.setModeOfPayment("5");
+      } else {
+        legacyCust.setModeOfPayment("");
+      }
+    }
   }
 
   @Override

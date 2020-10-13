@@ -144,6 +144,7 @@
      </cmr:row>
   </cmr:view>
 		<!-- Type Of Customer for MCO,MCO1 -->
+		    <!-- CommercialFinanced,CodFlag MCO1 --> 
 		<cmr:view forGEO="MCO,MCO1" exceptForCountry="838">
 			<c:if test="${reqentry.reqType != 'C'}">
 			<cmr:row addBackground="true">
@@ -155,7 +156,25 @@
 						<cmr:field path="crosSubTyp" id="crosSubTyp"
 							fieldId="TypeOfCustomer" tabId="MAIN_CUST_TAB" />
 					</p>
-				</cmr:column>
+				</cmr:column>  
+        <cmr:column span="2" containerForField="CommercialFinanced" forGEO="MCO1">
+            <p>
+              <cmr:label fieldId="commercialFinanced">
+                <cmr:fieldLabel fieldId="CommercialFinanced" />:
+            </cmr:label>
+              <cmr:field path="commercialFinanced" id="commercialFinanced"
+                fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB" />
+            </p>
+          </cmr:column>  
+          <cmr:column span="2" containerForField="CodFlag" forGEO="MCO1">
+            <p>
+              <cmr:label fieldId="codFlag">
+                <cmr:fieldLabel fieldId="CodFlag" />:
+            </cmr:label>
+              <cmr:field path="creditCd" id="codFlag" fieldId="CodFlag"
+                tabId="MAIN_CUST_TAB" />
+            </p>
+          </cmr:column>
 				</cmr:row>
 			</c:if>
 		</cmr:view>
@@ -169,28 +188,6 @@
         </p>
       </cmr:column>
     </cmr:row>
-  </cmr:view>
-	<cmr:view forGEO="MCO1" >
-		<c:if test="${reqentry.reqType != 'C'}">	
-	  <cmr:row addBackground="false">
-	    <cmr:column span="2" containerForField="CommercialFinanced">
-	      <p>
-	          <cmr:label fieldId="commercialFinanced">
-	          <cmr:fieldLabel fieldId="CommercialFinanced" />:
-	          </cmr:label>
-	          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
-	      </p>
-	    </cmr:column>
-	    <cmr:column span="2" containerForField="CodFlag">
-	      <p>
-	          <cmr:label fieldId="codFlag">
-	          <cmr:fieldLabel fieldId="CodFlag" />:
-	          </cmr:label>
-	          <cmr:field path="creditCd" id="codFlag" fieldId="CodFlag" tabId="MAIN_CUST_TAB"/>
-	      </p>
-	    </cmr:column>
-	    </cmr:row>
-	    </c:if>
   </cmr:view>
   <cmr:view forCountry="838">
     <cmr:row addBackground="false">
@@ -244,7 +241,7 @@
     	<form:hidden path="crosSubTyp" id="crosSubTyp"/>
     </c:if>
   </cmr:view>
-  <cmr:view forGEO="MCO2" exceptForCountry="780">
+  <cmr:view forGEO="MCO2">
 	<cmr:row addBackground="true">
 	  <cmr:column span="2" containerForField="CrosSubTyp">
 		<p>
