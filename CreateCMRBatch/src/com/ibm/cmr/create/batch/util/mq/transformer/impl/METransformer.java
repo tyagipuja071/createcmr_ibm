@@ -597,7 +597,13 @@ public class METransformer extends EMEATransformer {
       line2 = "";
     }
 
-    line3 = addrData.getCustNm3();
+    String pobox = addrData.getPoBox();
+    String name3 = addrData.getCustNm3();
+    if (StringUtils.isNotBlank(name3)) {
+      line3 = name3;
+    } else if (StringUtils.isNotBlank(pobox)) {
+      line3 = "PO BOX " + pobox;
+    }
 
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
       line4 = addrData.getAddrTxt();
@@ -745,15 +751,21 @@ public class METransformer extends EMEATransformer {
 
     }
 
-    if (!StringUtils.isBlank(addr.getCustNm3())) {
-      if ("@".equals(addr.getCustNm3())) {
-        legacyAddr.setAddrLine3("");
-        // legacyAddr.setContact("");
-      } else {
-        legacyAddr.setAddrLine3(addr.getCustNm3());
-        // legacyAddr.setContact(addr.getCustNm3());
-      }
+    String pobox = addr.getPoBox();
+    String name3 = addr.getCustNm3();
 
+    if (!StringUtils.isBlank(name3)) {
+      if ("@".equals(name3)) {
+        legacyAddr.setAddrLine3("");
+      } else {
+        legacyAddr.setAddrLine3(name3);
+      }
+    } else if (!StringUtils.isBlank(pobox)) {
+      if ("@".equals(pobox)) {
+        legacyAddr.setAddrLine3("PO BOX ");
+      } else {
+        legacyAddr.setAddrLine3("PO BOX " + pobox);
+      }
     }
 
     if (!StringUtils.isBlank(addr.getPoBox())) {

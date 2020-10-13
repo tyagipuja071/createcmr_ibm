@@ -2157,7 +2157,7 @@ public class MEHandler extends BaseSOFHandler {
       for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
         row = sheet.getRow(rowIndex);
         if (row == null) {
-          return; // stop immediately when row is blank
+          break; // stop immediately when row is blank
         }
         currCell = row.getCell(ordBlkIndex);
         String ordBlk = validateColValFromCell(currCell);
@@ -2168,22 +2168,30 @@ public class MEHandler extends BaseSOFHandler {
         }
       }
 
-      // for (String name : countryAddrss) {
-      // sheet = book.getSheet(name);
-      // for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
-      // String cbCity = ""; // 8
-      // String localCity = ""; // 7
-      //
-      // row = sheet.getRow(rowIndex);
-      // if (row == null) {
-      // return; // stop immediately when row is blank
-      // }
-      // currCell = row.getCell(6);
-      // localCity = validateColValFromCell(currCell);
-      //
-      // TemplateValidation error = new TemplateValidation(name);
-      // }
-      // }
+      for (String name : countryAddrss) {
+        sheet = book.getSheet(name);
+        for (int rowIndex = 1; rowIndex <= maxRows; rowIndex++) {
+
+          row = sheet.getRow(rowIndex);
+          if (row == null) {
+            break; // stop immediately when row is blank
+          }
+          String name3 = ""; // 4
+          String pobox = ""; // 8
+
+          currCell = (XSSFCell) row.getCell(4);
+          name3 = validateColValFromCell(currCell);
+          currCell = (XSSFCell) row.getCell(8);
+          pobox = validateColValFromCell(currCell);
+
+          if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
+            TemplateValidation errorAddr = new TemplateValidation(name);
+            LOG.trace("Customer Name (3) and PO BOX should not be input at the sametime.");
+            errorAddr.addError(row.getRowNum(), "PO BOX", "Customer Name (3) and PO BOX should not be input at the sametime.");
+            validations.add(errorAddr);
+          }
+        }
+      }
     }
   }
 
