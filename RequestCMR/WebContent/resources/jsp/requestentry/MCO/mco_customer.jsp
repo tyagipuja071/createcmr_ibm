@@ -244,7 +244,7 @@
     	<form:hidden path="crosSubTyp" id="crosSubTyp"/>
     </c:if>
   </cmr:view>
-  <cmr:view forGEO="MCO2">
+  <cmr:view forGEO="MCO2" exceptForCountry="780">
 	<cmr:row addBackground="true">
 	  <cmr:column span="2" containerForField="CrosSubTyp">
 		<p>
