@@ -3005,6 +3005,10 @@ function cemeaCustomVATValidator(cntry, tabName, formName, aType) {
             zs01Cntry = ret.ret1;
           }
           console.log(addrType + ' VAT Country: ' + zs01Cntry);
+          var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
+          if (cmrIssuingCntry == '821' && zs01Cntry == 'RU' && vat.length == 12) {
+            return new ValidationResult(null, true);
+          }
 
           var result = cmr.validateVAT(zs01Cntry, vat);
           if (result && !result.success) {
