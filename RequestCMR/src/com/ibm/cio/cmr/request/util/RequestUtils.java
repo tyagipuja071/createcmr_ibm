@@ -1335,6 +1335,23 @@ public class RequestUtils {
   }
 
   /**
+   * Checks the usage configuration for tradestyle names
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String getTradestyleUsage(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_TRADESTYLE_USAGE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    String result = query.getSingleResult(String.class);
+    return StringUtils.isNotBlank(result) ? result : "";
+
+  }
+
+  /**
    * Checks whether automation is configued for a particular country or not
    * 
    * @param entityManager
