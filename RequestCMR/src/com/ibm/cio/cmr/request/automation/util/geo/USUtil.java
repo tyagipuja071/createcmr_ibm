@@ -879,7 +879,7 @@ public class USUtil extends AutomationUtil {
             error += "\n- Not new CMR (for CMR pass the 30 days period)";
           }
           if (!"Ok".equals(sicValidation)) {
-            error += "\n- ISU for the ISIC should be 5B";
+            error += "\n- ISU-ISIC validation failed";
           }
           return error;
 
