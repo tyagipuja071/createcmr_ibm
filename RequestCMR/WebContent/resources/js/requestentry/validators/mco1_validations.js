@@ -39,6 +39,8 @@ function lockEmbargo() {
 
 var _addrTypesForZA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypeHandler = [];
+var _isuHandler = null;
+var _ctcHandler = null;
 var _reqReasonHandler = null;
 function addHandlersForZA() {
   for (var i = 0; i < _addrTypesForZA.length; i++) {
@@ -56,6 +58,44 @@ function addHandlersForZA() {
     });
   }
 
+  if (_isuHandler == null) {
+    if (FormManager.getActualValue('reqType') == 'C') {
+      _isuHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+        setCtcSalesRepSBO(value);
+      });
+    }
+  }
+  if (_ctcHandler == null) {
+    if (FormManager.getActualValue('reqType') == 'C') {
+      _ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
+        setCtcSalesRepSBO(FormManager.getField('isuCd'));
+      });
+    }
+  }
+
+}
+
+function setCtcSalesRepSBO(value) {
+  var reqType = FormManager.getActualValue('reqType');
+  var countryUse = FormManager.getActualValue('countryUse');
+  var clientTier = FormManager.getActualValue('clientTier');
+  var sbo = FormManager.getActualValue('salesBusOffCd');
+  var scenario = FormManager.getActualValue('custSubGrp');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var internalBUScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN', 'LSXBP', 'LSBP', 'NAXBP', 'NABP', 'SZXBP', 'SZBP', 'ZAXBP', 'ZABP' ];
+  var isuCtc = value + clientTier;
+  if (reqType != 'C' || role != 'REQUESTER') {
+    return;
+  }
+
+  if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '32S' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
+    FormManager.setValue('salesBusOffCd', '');
+    FormManager.setValue('repTeamMemberNo', '');
+  }
+  if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '32C' && countryUse == '864NA') {
+    FormManager.setValue('salesBusOffCd', '');
+    FormManager.setValue('repTeamMemberNo', '');
+  }
 }
 
 function afterConfigForZA() {
