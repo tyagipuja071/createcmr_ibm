@@ -1365,4 +1365,10 @@ public class USUtil extends AutomationUtil {
     engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
     engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
   }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("E", "M");
+  }
+
 }
