@@ -636,7 +636,7 @@ public class TransConnService extends BaseBatchService {
           Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
           PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
           zp01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
-          zp01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
+          zp01AddrQuery.setParameter("ADDR_TYPE", "ZP01");
           List<Addr> zp01Addrs = zp01AddrQuery.getResults(Addr.class);
 
           PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
