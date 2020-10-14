@@ -159,14 +159,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
 
-    if ("ZS01".equals(currAddr.getId().getAddrType())) {
-      String abbrevLoc = LandedCountryMap.getCountryName(currAddr.getLandCntry());
-      if (!StringUtils.isEmpty(abbrevLoc)) {
-        LOG.debug("Setting Abbreviated Location as parent country for GM LLC");
-        legacyCust.setAbbrevLocn(abbrevLoc);
-      }
-    }
-
     String poBox = currAddr.getPoBox();
     if (!StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
       if (!poBox.startsWith("PO BOX ")) {
