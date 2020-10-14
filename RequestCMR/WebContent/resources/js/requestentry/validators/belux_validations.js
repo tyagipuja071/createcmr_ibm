@@ -454,8 +454,15 @@ function setAccountTeamNumberValues(clientTier) {
       console.log('pagemodel subIndustryCd==' + _pagemodel.subIndustryCd);
 
       if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
-          || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd))
-        FormManager.setValue('searchTerm', selectedAaccountTeamNumber[0]);
+          || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (custSubGrp != 'BEBUS') {
+          FormManager.setValue('searchTerm', selectedAaccountTeamNumber[0]);
+        } else if (custSubGrp == 'BEBUS') {
+          FormManager.setValue('searchTerm', 'BP0000');
+        }
+
+      }
 
     }
 
