@@ -1569,6 +1569,13 @@ function limitClientTierValues(value) {
 
   if (tierValues != null) {
     FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
+    preSelectSingleValue(value, tierValues)
+  }
+}
+
+function preSelectSingleValue(value, tierValues) {
+  if ((value == '21' || value == '8B') && tierValues.includes('7')) {
+    FormManager.setValue('clientTier', '7');
   }
 }
 
