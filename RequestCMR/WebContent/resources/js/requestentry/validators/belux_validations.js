@@ -455,7 +455,7 @@ function setAccountTeamNumberValues(clientTier) {
 
       if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
           || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd))
-        FormManager.setValue('searchTerm', selectedAaccountTeamNumber);
+        FormManager.setValue('searchTerm', selectedAaccountTeamNumber[0]);
 
     }
 
