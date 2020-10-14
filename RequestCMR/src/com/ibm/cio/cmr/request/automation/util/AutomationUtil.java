@@ -1043,6 +1043,11 @@ public abstract class AutomationUtil {
     return kunnr;
   }
 
+  /**
+   * Skips execution for all elements
+   * 
+   * @param engineData
+   */
   public void skipAllChecks(AutomationEngineData engineData) {
     if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
       ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
@@ -1050,6 +1055,32 @@ public abstract class AutomationUtil {
       scenarioExceptions.setSkipChecks(true);
       scenarioExceptions.setSkipCompanyVerification(true);
     }
+  }
+
+  /**
+   * 
+   * Gets scenario exceptions for a particular request
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   */
+  public static ScenarioExceptionsUtil getScenarioExceptions(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
+    ScenarioExceptionsUtil scenarioExceptions = null;
+    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
+      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      return scenarioExceptions;
+    } else {
+      Data data = requestData.getData();
+      scenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getCustGrp(),
+          data.getCustSubGrp());
+      if (engineData != null) {
+        engineData.put("SCENARIO_EXCEPTIONS", scenarioExceptions);
+      }
+      return scenarioExceptions;
+    }
+
   }
 
   /**

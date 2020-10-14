@@ -1347,6 +1347,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Admin admin = requestData.getAdmin();
         Addr zs01 = requestData.getAddress("ZS01");
         DnBMatchingResponse tradeStyleName = null;
+        boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
+            || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
         MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
         if (response != null && response.getSuccess()) {
           map.put("success", true);
@@ -1356,7 +1358,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record)) {
                 match = true;
                 break;
-              } else if (record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
+              } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
                   && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, true)) {
                 tradeStyleName = record;
               }

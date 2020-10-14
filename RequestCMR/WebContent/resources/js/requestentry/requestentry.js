@@ -133,6 +133,8 @@ function processRequestAction() {
     } else if (FormManager.validate('frmCMR')) {
       if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
+      } else if (checkIfUpfrontUpdateChecksRequired()) {
+        addUpdateChecksExecution(frmCMR);
       } else {
         if (cmrCntry == '821') {
           executeBeforeSubmit();
@@ -1239,7 +1241,8 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?', 'Warning', null, null);
+  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?',
+      'Warning', null, null);
 }
 
 /**
@@ -1254,7 +1257,8 @@ function doOverrideDnBMatch() {
 function autoDnbImportActFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   if (rowData) {
-    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo
+        + '\')">';
     var dunsNo = rowData.autoDnbDunsNo[0];
     if (dunsNo) {
       formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dunsNo.trim() + '\')">';
@@ -1423,8 +1427,8 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
-  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-      && !isSkipDnbMatching() && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
+  if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching()
+      && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
     // currently Enabled Only For US
     return true;
   }
@@ -1454,7 +1458,7 @@ function matchDnBForAutomationCountries() {
       cmr.hideProgress();
       console.log(data);
       if (data && data.success) {
-        if(data.match){
+        if (data.match) {
           cmr.showModal('addressVerificationModal');
         } else if (data.tradeStyleMatch) {
           cmr.showConfirm('autoDnbImportMatch("' + data.dunsNo + '","0")',
@@ -1476,6 +1480,69 @@ function matchDnBForAutomationCountries() {
       }
     },
     error : function(error, ioargs) {
+    }
+  });
+}
+
+function checkIfUpfrontUpdateChecksRequired() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var result = cmr.query('QUERY.SYS_PARAM_VALUE_VERIFY', {
+    CD : 'UPD_UI_CNTRY_LIST',
+    VALUE : '%' + cntry + '%'
+  });
+
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && result && result.ret1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
+ * Generic Validator to execute UpdateChecks Automation
+ */
+function addUpdateChecksExecution(frmCMR) {
+  console.log("addUpdateChecksExecution..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var elementResData = "";
+
+  if (reqType != 'U') {
+    cmr.showModal('addressVerificationModal');
+    return;
+  }
+  console.log('Running Update Checks Element...');
+  dojo.xhrPost({
+    url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+    handleAs : 'json',
+    method : 'POST',
+    content : dojo.formToObject(frmCMR),
+    timeout : 500000,
+    sync : true,
+    load : function(data, ioargs) {
+      if (data != '' && data != undefined) {
+        if (data.onError) {
+          console.log('UpdateChecks Element Executed Successfully.');
+          cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
+        } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
+          cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg
+              + '</strong> <br/> Do you really want to proceed ?', 'Warning', null, {
+            OK : 'Ok',
+            CANCEL : 'Cancel'
+          });
+        } else {
+          cmr.showModal('addressVerificationModal');
+        }
+      } else {
+        cmr.showModal('addressVerificationModal');
+      }
+    },
+    error : function(error, ioargs) {
+      success = false;
+      console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+      reject('Error occurred in Update Checks.');
     }
   });
 }
