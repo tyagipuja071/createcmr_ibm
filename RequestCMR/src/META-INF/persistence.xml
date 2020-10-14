@@ -238,4 +238,24 @@
     </properties>
   </persistence-unit>
 
+  <persistence-unit name="CEDP" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <non-jta-data-source>jdbc/cedp</non-jta-data-source>
+
+    <properties>
+
+      <property name="openjpa.ConnectionFactoryMode" value="managed" />
+      <property name="openjpa.ConnectionRetainMode" value="on-demand" />
+      <property name="openjpa.ConnectionFactoryProperties"
+        value="ExceptionAction=destroy, TestOnReturn=true, TestWhileIdle=true, TestOnBorrow=true, TimeBetweenEvictionRunsMillis=300000, ValidationTimeout=240000, MaxActive=10, MaxIdle=3, MaxTotal=15, ValidationSQL='SELECT current date FROM sysibm.sysdummy1'" />
+
+      <property name="openjpa.jdbc.EagerFetchMode" value="none" />
+      <property name="openjpa.jdbc.DBDictionary" value="db2(maxColumnNameLength=128)" />
+
+      <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
+      <property name="openjpa.Log" value="SQL=INFO" />
+
+    </properties>
+  </persistence-unit>
+
 </persistence>
