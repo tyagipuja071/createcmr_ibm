@@ -1663,22 +1663,31 @@ function setMESBO(repTeamMemberNo) {
 
 // CMR-5993 SBO is required for processor
 function validateMESBO() {
-  if (FormManager.getActualValue('userRole') == GEOHandler.ROLE_PROCESSOR) {
-    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'SBO' ], 'MAIN_IBM_TAB');
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('userRole') == GEOHandler.ROLE_PROCESSOR) {
+          var cntry = FormManager.getActualValue('cmrIssuingCntry');
+          var sbo = FormManager.getActualValue('salesBusOffCd');
+          var custGrp = FormManager.getActualValue('custGrp');
+          var reqType = FormManager.getActualValue('reqType');
 
-    var cntry = FormManager.getActualValue('cmrIssuingCntry');
-    var sbo = FormManager.getActualValue('salesBusOffCd');
-    var custGrp = FormManager.getActualValue('custGrp');
-    if (sbo != null && cntry != sbo.substring(0, 3)) {
-      if (!(custGrp == 'GBM' || custGrp == 'SBM')) {
-        return new ValidationResult(null, false, 'For ME country,Selling Branch Office should be its cntry');
-      } else if (sbo.substring(0, 3) != '530') {
-        return new ValidationResult(null, false, 'For GBM/SBM type, Selling Branch Office should be 530');
+          if (sbo == null || sbo == '') {
+            return new ValidationResult(null, false, 'Selling Branch Office can not be empty');
+          }
+
+          if (sbo != null && cntry != sbo.substring(0, 3)) {
+            if (!(custGrp == 'GBM' || custGrp == 'SBM') && (reqType == 'C')) {
+              return new ValidationResult(null, false, 'For ME country,Selling Branch Office should be its cntry');
+            } else if (sbo.substring(0, 3) != '530') {
+              return new ValidationResult(null, false, 'For GBM/SBM type, Selling Branch Office should be 530');
+            }
+          }
+        }
+        return new ValidationResult(null, true);
       }
-    }
-    return new ValidationResult(null, true);
-  }
-  return new ValidationResult(null, true);
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 // CMR-2101 SBO is required for processor
@@ -1746,8 +1755,8 @@ function dupCMRExistCheck() {
             if (resultsD.ret1 == dupCEBO && FormManager.getActualValue('reqType') == 'U') {
               return new ValidationResult(null, true);
             } else {
-              return new ValidationResult(null, false, 'There have exist dup 675 data under this CMR for country code:' + existDupCEBO.substring(0, 3))
-                  + ',please use another cmrno or uncheck the dup 675 box.';
+              return new ValidationResult(null, false, 'There have exist dup 675 data under this CMR for country code:' + existDupCEBO.substring(0, 3)
+                  + ',please use another CMRNO or uncheck the duplicate box.');
             }
           }
         }
