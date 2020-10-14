@@ -3818,7 +3818,9 @@ function convertToUpperCaseGR(cntry, addressMode, saving) {
     }
   } else {
     for (var i = 0; i < addrFields.length; i++) {
-      dojo.byId(addrFields[i]).style.textTransform = 'none';
+      if(dojo.byId(addrFields[i]) != null) {
+        dojo.byId(addrFields[i]).style.textTransform = 'none';
+      }
     }
   }
 }
