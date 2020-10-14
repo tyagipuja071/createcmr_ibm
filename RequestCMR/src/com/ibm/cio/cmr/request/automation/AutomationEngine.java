@@ -330,7 +330,7 @@ public class AutomationEngine {
               AutomationConst.STATUS_AWAITING_PROCESSING, "Automated Processing", reqId, appUser, null, null, false, null);
         }
       } else {
-        boolean moveToNextStep = true
+        boolean moveToNextStep = true;
         // get rejection comments
         List<RejectionContainer> rejectInfo = engineData.get().getRejectionReasons();
         HashMap<String, String> pendingChecks = engineData.get().getPendingChecks();
@@ -353,7 +353,7 @@ public class AutomationEngine {
           data.setIsicCd("8888");
         } else {
           if (!actionsOnError.isEmpty()) {
-             // an error has occurred
+            // an error has occurred
             if (actionsOnError.contains(ActionOnError.Reject)) {
               moveToNextStep = false;
               // reject the record
@@ -389,7 +389,6 @@ public class AutomationEngine {
               String cmt = "";
               StringBuilder rejectCmt = new StringBuilder();
               List<RejectionContainer> rejectionInfo = (List<RejectionContainer>) engineData.get().get("rejections");
-              Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
               if ((rejectionInfo != null && !rejectionInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
                 rejectCmt.append("Processor review is required for following issues");
                 rejectCmt.append(":");
@@ -447,7 +446,7 @@ public class AutomationEngine {
             // if any element reported an error, it should always be reviewed by
             // processor
             processOnCompletion = processOnCompletion && actionsOnError.isEmpty() && !scenarioExceptions.isManualReviewIndc()
-              && (StringUtils.isBlank(admin.getSourceSystId()) || !scenarioExceptions.isReviewExtReqIndc());
+                && (StringUtils.isBlank(admin.getSourceSystId()) || !scenarioExceptions.isReviewExtReqIndc());
           }
           LOG.debug("Process on Completion: " + processOnCompletion);
           String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
