@@ -343,7 +343,8 @@ public class MCOSaHandler extends MCOHandler {
 
     if (legacyObjects != null && legacyObjects.getCustomer() != null) {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
-      // data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
+      data.setSpecialTaxCd(legacyObjects.getCustomer().getTaxCd());
+      data.setIbmDeptCostCenter(legacyObjects.getCustomer().getDeptCd());
     }
 
     if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
@@ -388,8 +389,10 @@ public class MCOSaHandler extends MCOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
+
     if (StringUtils.isBlank(address.getCustNm4())) {
       address.setCustNm4(currentRecord.getCmrName4());
     }
@@ -419,6 +422,8 @@ public class MCOSaHandler extends MCOHandler {
     } else if ("ZS01".equals(address.getId().getAddrType())) {
       address.setCustPhone(currentRecord.getCmrCustPhone());
     }
+    address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+
   }
 
   @Override
