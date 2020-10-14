@@ -1129,6 +1129,23 @@ function addAddressFieldValidators() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+
+  // Customer Name (3) and PO BOX should not be input at the sametime.
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var custNm3 = FormManager.getActualValue('custNm3');
+        var poBox = FormManager.getActualValue('poBox');
+
+        if (custNm3 != null && custNm3 != '' && custNm3 != undefined && poBox != null && poBox != '' && poBox != undefined) {
+          if (custNm3.length > 0 && poBox.length > 0) {
+            return new ValidationResult(null, false, 'Customer Name (3) and PO BOX should not be input at the sametime.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
 }
 
 function setPreferredLang() {
