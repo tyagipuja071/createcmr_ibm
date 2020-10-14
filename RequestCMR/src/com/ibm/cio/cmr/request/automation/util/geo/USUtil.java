@@ -879,7 +879,7 @@ public class USUtil extends AutomationUtil {
             error += "\n- Not new CMR (for CMR pass the 30 days period)";
           }
           if (!"Ok".equals(sicValidation)) {
-            error += "\n- ISU for the ISIC should be 5B";
+            error += "\n- ISU-ISIC validation failed";
           }
           return error;
 
@@ -1365,4 +1365,10 @@ public class USUtil extends AutomationUtil {
     engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
     engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
   }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("E", "M");
+  }
+
 }

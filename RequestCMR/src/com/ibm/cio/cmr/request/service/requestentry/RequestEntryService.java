@@ -1278,42 +1278,44 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           StringBuilder ibmIsic = null;
           int itemNo = 1;
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            if (dnbRecord.getConfidenceCode() >= 8) {
 
-            resultModel = new AutoDNBDataModel();
-            address = new StringBuilder();
-            ibmIsic = new StringBuilder();
+              resultModel = new AutoDNBDataModel();
+              address = new StringBuilder();
+              ibmIsic = new StringBuilder();
 
-            resultModel.setItemNo(itemNo);
-            resultModel.setAutoDnbDunsNo(dnbRecord.getDunsNo());
-            resultModel.setAutoDnbMatchGrade("Confidence Code = " + dnbRecord.getConfidenceCode());
-            resultModel.setAutoDnbName(dnbRecord.getDnbName());
-            address.append(dnbRecord.getDnbStreetLine1()).append("\n");
-            if (!StringUtils.isBlank(dnbRecord.getDnbStreetLine2())) {
-              address.append(dnbRecord.getDnbStreetLine2()).append("\n");
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
-              address.append(dnbRecord.getDnbCity());
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbStateProv())) {
-              address.append(", " + dnbRecord.getDnbStateProv());
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
-              address.append("\n" + dnbRecord.getDnbCountry());
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
-              address.append(" " + dnbRecord.getDnbPostalCode());
-            }
-            resultModel.setFullAddress(address.toString());
+              resultModel.setItemNo(itemNo);
+              resultModel.setAutoDnbDunsNo(dnbRecord.getDunsNo());
+              resultModel.setAutoDnbMatchGrade("Confidence Code = " + dnbRecord.getConfidenceCode());
+              resultModel.setAutoDnbName(dnbRecord.getDnbName());
+              address.append(dnbRecord.getDnbStreetLine1()).append("\n");
+              if (!StringUtils.isBlank(dnbRecord.getDnbStreetLine2())) {
+                address.append(dnbRecord.getDnbStreetLine2()).append("\n");
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
+                address.append(dnbRecord.getDnbCity());
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbStateProv())) {
+                address.append(", " + dnbRecord.getDnbStateProv());
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
+                address.append("\n" + dnbRecord.getDnbCountry());
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
+                address.append(" " + dnbRecord.getDnbPostalCode());
+              }
+              resultModel.setFullAddress(address.toString());
 
-            this.log.debug("Connecting to D&B details service..");
-            DnBCompany dnbDetailsUI = getDnBDetailsUI(dnbRecord.getDunsNo());
-            if (dnbDetailsUI != null) {
-              ibmIsic.append("ISIC =  " + dnbDetailsUI.getIbmIsic() + " (" + dnbDetailsUI.getIbmIsicDesc() + ")").append("\n");
-            }
-            resultModel.setIbmIsic(ibmIsic.toString());
+              this.log.debug("Connecting to D&B details service..");
+              DnBCompany dnbDetailsUI = getDnBDetailsUI(dnbRecord.getDunsNo());
+              if (dnbDetailsUI != null) {
+                ibmIsic.append("ISIC =  " + dnbDetailsUI.getIbmIsic() + " (" + dnbDetailsUI.getIbmIsicDesc() + ")").append("\n");
+              }
+              resultModel.setIbmIsic(ibmIsic.toString());
 
-            resultList.add(resultModel);
-            itemNo++;
+              resultList.add(resultModel);
+              itemNo++;
+            }
           }
         } else {
           this.log.debug("No D&B record was found using advanced matching.");
