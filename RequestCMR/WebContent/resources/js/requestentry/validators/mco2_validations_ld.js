@@ -184,7 +184,10 @@ function afterConfigForMCO2() {
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('salesBusOffCd', Validators.DIGIT, [ 'SBO/ Search Term (SORTL)' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('specialTaxCd', Validators.ALPHANUM, [ 'Tax Code' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('specialTaxCd', Validators.ALPHANUM, [ 'Tax Code' ], 'MAIN_CUST_TAB');
+  if (FormManager.getActualValue('reqType') == 'U') {
+    FormManager.addValidator('collectionCd', Validators.ALPHANUM, [ 'Collection Code' ], 'MAIN_IBM_TAB');
+  }
 }
 
 /**
@@ -1579,6 +1582,35 @@ function preSelectSingleValue(value, tierValues) {
   }
 }
 
+function validateCollectionCd() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = null;
+        if (typeof (_pagemodel) != 'undefined') {
+          reqType = FormManager.getActualValue('reqType');
+        }
+        if (reqType != 'U') {
+          return new ValidationResult(null, true);
+        }
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return new ValidationResult(null, true);
+        }
+        var collectionCd = FormManager.getActualValue('collectionCd');
+        if (collectionCd == '') {
+          return new ValidationResult(null, true);
+        } else {
+          if (collectionCd.length != 6) {
+            return new ValidationResult(null, false, 'Collection Code should be 6 characters long.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1660,4 +1692,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
+  GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
 });
