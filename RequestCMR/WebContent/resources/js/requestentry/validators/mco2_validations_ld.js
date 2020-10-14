@@ -182,6 +182,7 @@ function afterConfigForMCO2() {
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('salesBusOffCd', Validators.DIGIT, [ 'SBO/ Search Term (SORTL)' ], 'MAIN_IBM_TAB');
+  FormManager.addValidator('specialTaxCd', Validators.ALPHANUM, [ 'Tax Code' ], 'MAIN_IBM_TAB');
 }
 
 /**
@@ -512,7 +513,7 @@ function addAddrValidatorMCO2() {
   FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
   FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
   FormManager.addValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
-  
+
   FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
   FormManager.addValidator('poBox', Validators.DIGIT, [ 'PO BOX' ]);
 }
