@@ -209,8 +209,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
-      legacyCust.setIbo(data.getSalesBusOffCd());
-      legacyCust.setSbo(data.getSalesBusOffCd());
+      String formatSBO = data.getSalesBusOffCd() + "000";
+      legacyCust.setIbo(formatSBO);
+      legacyCust.setSbo(formatSBO);
     } else {
       legacyCust.setIbo("");
       legacyCust.setSbo("");
