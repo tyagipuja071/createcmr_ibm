@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
@@ -46,7 +46,7 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
  * @author Jeffrey Zamora
- * 
+ *
  */
 public class USHandler extends GEOHandler {
 
@@ -332,7 +332,7 @@ public class USHandler extends GEOHandler {
   }
 
   /**
-   * 
+   *
    * @param url
    * @param data
    * @throws Exception
@@ -780,7 +780,7 @@ public class USHandler extends GEOHandler {
 
   /**
    * Checks absolute equality between the strings
-   * 
+   *
    * @param val1
    * @param val2
    * @return
@@ -997,7 +997,7 @@ public class USHandler extends GEOHandler {
 
   /**
    * Gets the Affiliate value assigned with the most CMRs under the INAC
-   * 
+   *
    * @param entityManager
    * @param inac
    * @return
@@ -1020,7 +1020,7 @@ public class USHandler extends GEOHandler {
 
   /**
    * Gets the Affiliate value assigned with the most CMRs under the INAC
-   * 
+   *
    * @param entityManager
    * @param inac
    * @return
