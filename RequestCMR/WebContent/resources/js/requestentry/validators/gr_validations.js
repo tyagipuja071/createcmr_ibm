@@ -1717,8 +1717,8 @@ function addNonLatinCharValidator() {
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'Attention Person' ]);
       checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
     } else if (cntry == SysLoc.GREECE) {
-      checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
-      checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
+      //checkAndAddValidator('custNm1', Validators.NON_LATIN, [ 'Customer Name' ]);
+      //checkAndAddValidator('custNm2', Validators.NON_LATIN, [ 'Customer Name Con\'t' ]);
       checkAndAddValidator('addrTxt2', Validators.NON_LATIN, [ 'Address Con\'t/Occupation' ]);
       checkAndAddValidator('dept', Validators.NON_LATIN, [ 'District' ]);
       checkAndAddValidator('taxOffice', Validators.NON_LATIN, [ 'Tax Office' ]);
