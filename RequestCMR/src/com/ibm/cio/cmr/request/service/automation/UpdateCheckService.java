@@ -77,8 +77,8 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
             }
           }
         }
-        updtChkModel.setRejectionMsg(message);
-        updtChkModel.setNegativeChksMsg(negativeChecksMessage);
+        updtChkModel.setRejectionMsg(message.replaceAll("\n", "<br/>"));
+        updtChkModel.setNegativeChksMsg(negativeChecksMessage.replace("\n", "<br/>"));
       }
     }
 

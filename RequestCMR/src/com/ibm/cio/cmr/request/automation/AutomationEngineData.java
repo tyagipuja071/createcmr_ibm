@@ -207,7 +207,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
     if (container != null) {
       return container;
     } else {
-      return new ArrayList<RejectionContainer>();
+      container = new ArrayList<RejectionContainer>();
+      put(REJECTIONS, container);
+      return container;
     }
   }
 

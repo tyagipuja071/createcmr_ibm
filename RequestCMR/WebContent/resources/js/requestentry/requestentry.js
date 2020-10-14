@@ -131,11 +131,18 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      // CMR-6374
-      var cntryList = [ '897' ];
-      var cmrIssuingCntry = FormManager.getActualValue('cmrIssuingCntry');
-      if (cntryList.includes(cmrIssuingCntry))
+      if (checkIfFinalDnBCheckRequired()) {
+        matchDnBForAutomationCountries();
+      } else if (checkIfUpfrontUpdateChecksRequired()) {
         addUpdateChecksExecution(frmCMR);
+      } else {
+        if (cmrCntry == '821') {
+          executeBeforeSubmit();
+        } else {
+          // if there are no errors, show the Address Verification modal window
+          cmr.showModal('addressVerificationModal');
+        }
+      }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
     }
@@ -212,20 +219,6 @@ function processRequestAction() {
     }
   } else {
     cmr.showAlert('Invalid action.');
-  }
-}
-
-function executeFinalDnBChk() {
-  if (checkIfFinalDnBCheckRequired()) {
-    matchDnBForAutomationCountries();
-  } else {
-    var cmrCntry = FormManager.getActualValue('cmrIssuingCntry');
-    if (cmrCntry == '821') {
-      executeBeforeSubmit();
-    } else {
-      // if there are no errors, show the Address Verification modal window
-      cmr.showModal('addressVerificationModal');
-    }
   }
 }
 
@@ -1434,8 +1427,8 @@ function checkIfFinalDnBCheckRequired() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
-  if (reqId > 0 && (reqType == 'C' || reqType == 'U') && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
-      && !isSkipDnbMatching() && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
+  if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching()
+      && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
     // currently Enabled Only For US
     return true;
   }
@@ -1491,6 +1484,23 @@ function matchDnBForAutomationCountries() {
   });
 }
 
+function checkIfUpfrontUpdateChecksRequired() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var result = cmr.query('QUERY.SYS_PARAM_VALUE_VERIFY', {
+    CD : 'UPD_UI_CNTRY_LIST',
+    VALUE : '%' + cntry + '%'
+  });
+
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && result && result.ret1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 /**
  * Generic Validator to execute UpdateChecks Automation
  */
@@ -1500,7 +1510,8 @@ function addUpdateChecksExecution(frmCMR) {
   var elementResData = "";
 
   if (reqType != 'U') {
-    executeFinalDnBChk();
+    cmr.showModal('addressVerificationModal');
+    return;
   }
   console.log('Running Update Checks Element...');
   dojo.xhrPost({
@@ -1511,12 +1522,21 @@ function addUpdateChecksExecution(frmCMR) {
     timeout : 500000,
     sync : true,
     load : function(data, ioargs) {
-      elementResData = data;
-      console.log(data);
-      if (!data.success) {
-        console.log('Error occurred in generating UpdateChecks result -> ...' + data.error);
+      if (data != '' && data != undefined) {
+        if (data.onError) {
+          console.log('UpdateChecks Element Executed Successfully.');
+          cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
+        } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
+          cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg
+              + '</strong> <br/> Do you really want to proceed ?', 'Warning', null, {
+            OK : 'Ok',
+            CANCEL : 'Cancel'
+          });
+        } else {
+          cmr.showModal('addressVerificationModal');
+        }
       } else {
-        console.log('Update Check Element executed.');
+        cmr.showModal('addressVerificationModal');
       }
     },
     error : function(error, ioargs) {
@@ -1525,21 +1545,4 @@ function addUpdateChecksExecution(frmCMR) {
       reject('Error occurred in Update Checks.');
     }
   });
-
-  if (elementResData != '' && elementResData != undefined) {
-    if (elementResData.onError) {
-      console.log('UpdateChecks Element Executed Successfully.');
-      cmr.showAlert('Request will be sent back to requester for the following reasons /\n.' + elementResData.rejectionMsg);
-    } else {
-      if (elementResData.negativeChksMsg != '' && elementResData.negativeChksMsg != null) {
-        cmr.showConfirm("executeFinalDnBChk()", 'The Update checks have negative checks \n  <strong>' + elementResData.negativeChksMsg + '</strong> \n Do you really want to proceed ?', 'Warning',
-            null, {
-              OK : 'Ok',
-              CANCEL : 'Cancel'
-            });
-      }
-    }
-  } else {
-    executeFinalDnBChk();
-  }
 }
