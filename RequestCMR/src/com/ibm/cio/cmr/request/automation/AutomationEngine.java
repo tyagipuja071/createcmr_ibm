@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -42,7 +43,6 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -153,9 +153,7 @@ public class AutomationEngine {
     engineData.remove();
     AutomationEngineData threadData = new AutomationEngineData();
     AppUser appUser = createAutomationAppUser();
-    List<RejectionContainer> rejectInfo = new ArrayList<RejectionContainer>();
     threadData.put(AutomationEngineData.APP_USER, appUser);
-    threadData.put(AutomationEngineData.REJECTIONS, rejectInfo);
     engineData.set(threadData);
 
     ChangeLogListener.setUser(appUser.getIntranetId());
@@ -174,6 +172,7 @@ public class AutomationEngine {
     // failsafes before engine run for any request
     requestData.getAdmin().setReviewReqIndc("N");
     requestData.getAdmin().setDisableAutoProc("N");
+    ScenarioExceptionsUtil scenarioExceptions = AutomationUtil.getScenarioExceptions(entityManager, requestData, engineData.get());
 
     LOG.debug("Verifying PayGo Accreditation for " + requestData.getAdmin().getSourceSystId());
     boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
@@ -181,10 +180,7 @@ public class AutomationEngine {
     int nonCompanyVerificationErrorCount = 0;
 
     for (AutomationElement<?> element : this.elements) {
-      ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
-
       // determine if element is to be skipped
-
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
       boolean skipElement = (skipChecks || engineData.get().isSkipChecks())
           && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType())
@@ -335,7 +331,9 @@ public class AutomationEngine {
         }
       } else {
         boolean moveToNextStep = true;
-
+        // get rejection comments
+        List<RejectionContainer> rejectInfo = engineData.get().getRejectionReasons();
+        HashMap<String, String> pendingChecks = engineData.get().getPendingChecks();
         boolean moveForPayGo = false;
         // CMR-5954 - paygo solution - move to next step if only company checks
         // failed
@@ -361,7 +359,6 @@ public class AutomationEngine {
               // reject the record
               StringBuilder rejCmtBuilder = new StringBuilder();
               rejCmtBuilder.append("The record has been rejected due to some system processing errors");
-              rejectInfo = (List<RejectionContainer>) engineData.get().get("rejections");
               if (rejectInfo != null && !rejectInfo.isEmpty()) {
                 rejCmtBuilder.append(":");
                 for (RejectionContainer rejCont : rejectInfo) {
@@ -392,7 +389,6 @@ public class AutomationEngine {
               String cmt = "";
               StringBuilder rejectCmt = new StringBuilder();
               List<RejectionContainer> rejectionInfo = (List<RejectionContainer>) engineData.get().get("rejections");
-              Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
               if ((rejectionInfo != null && !rejectionInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
                 rejectCmt.append("Processor review is required for following issues");
                 rejectCmt.append(":");
@@ -431,26 +427,12 @@ public class AutomationEngine {
         if (moveToNextStep) {
 
           // if there is anything that changed on the request via automated
-          // import
-          // of overrides/match/standard output, do a save
-
+          // import of overrides /match /standard output, do a save
           if (hasOverrideOrMatchingApplied) {
             GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
             if (geoHandler != null) {
-
               LOG.debug("Performing GEO Handler saves on request..");
-
               geoHandler.doBeforeAdminSave(entityManager, admin, data.getCmrIssuingCntry());
-
-              if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
-                // TODO - check if this is needed
-                // geoHandler.setDataDefaultsOnCreate(data, entityManager);
-                // geoHandler.doBeforeDataSave(entityManager, admin, data,
-                // data.getCmrIssuingCntry());
-              } else {
-                // geoHandler.doBeforeDataSave(entityManager, admin, data,
-                // data.getCmrIssuingCntry());
-              }
             }
           }
 
@@ -463,7 +445,8 @@ public class AutomationEngine {
           } else {
             // if any element reported an error, it should always be reviewed by
             // processor
-            processOnCompletion = processOnCompletion && actionsOnError.isEmpty();
+            processOnCompletion = processOnCompletion && actionsOnError.isEmpty() && !scenarioExceptions.isManualReviewIndc()
+                && (StringUtils.isBlank(admin.getSourceSystId()) || !scenarioExceptions.isReviewExtReqIndc());
           }
           LOG.debug("Process on Completion: " + processOnCompletion);
           String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
@@ -473,8 +456,6 @@ public class AutomationEngine {
           admin.setLockBy(null);
           admin.setLockTs(null);
           admin.setProcessedFlag("N");
-          Map<String, String> pendingChecks = engineData.get().getNegativeChecks();
-          pendingChecks = pendingChecks != null ? pendingChecks : new HashMap<String, String>();
           if (moveForPayGo) {
             pendingChecks.clear();
           }

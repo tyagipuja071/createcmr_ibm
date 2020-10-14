@@ -1346,6 +1346,9 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         Data data = requestData.getData();
         Admin admin = requestData.getAdmin();
         Addr zs01 = requestData.getAddress("ZS01");
+        DnBMatchingResponse tradeStyleName = null;
+        boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
+            || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
         MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
         if (response != null && response.getSuccess()) {
           map.put("success", true);
@@ -1355,10 +1358,18 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
               if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record)) {
                 match = true;
                 break;
+              } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
+                  && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, true)) {
+                tradeStyleName = record;
               }
             }
           }
           map.put("match", match);
+          if (!match && tradeStyleName != null) {
+            map.put("tradeStyleMatch", true);
+            map.put("legalName", tradeStyleName.getDnbName());
+            map.put("dunsNo", tradeStyleName.getDunsNo());
+          }
         } else {
           map.put("success", false);
           map.put("match", false);

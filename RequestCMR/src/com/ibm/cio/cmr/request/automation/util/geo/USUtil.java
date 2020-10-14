@@ -736,7 +736,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 100000) {
-        return error + "\n-CMR with revenue > 100K";
+        return error + "\n- CMR with revenue > 100K";
       } else if (revenue.floatValue() == 0) {
         String dunsNo = "";
         if (StringUtils.isNotBlank(data.getDunsNo())) {
@@ -755,7 +755,7 @@ public class USUtil extends AutomationUtil {
           DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
           if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
             if (!dnbData.getIbmIsic().equals(updatedValue)) {
-              return error+ "\n-Requested ISIC did not match value in D&B";
+              return error + "\n- Requested ISIC did not match value in D&B";
             } else {
               sql = ExternalizedQuery.getSql("AUTO.US.GET_ISU_BY_ISIC");
               query = new PreparedQuery(entityManager, sql);
@@ -764,7 +764,7 @@ public class USUtil extends AutomationUtil {
               query.setForReadOnly(true);
               String brsch = query.getSingleResult(String.class);
               if (!data.getIsuCd().equals(brsch)) {
-                return error +"\n-ISU/Industry impact"; 
+                return error + "\n- ISU/Industry impact";
               } else {
                 // check if isic and sicmen are equal if not set them equal
                 if (data.getIsicCd() != null && !data.getIsicCd().equals(data.getUsSicmen())) {
@@ -778,10 +778,10 @@ public class USUtil extends AutomationUtil {
               }
             }
           } else {
-            return error + "\n-Isic is blank";
+            return error + "\n- Isic is blank";
           }
         } else {
-          return error + "\n-Duns No. is blank";
+          return error + "\n- Duns No. is blank";
         }
       }
     }
@@ -811,7 +811,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 0) {
-        return error + "\n-CMR with revenue";
+        return error + "\n- CMR with revenue";
       } else if (revenue.floatValue() == 0) {
         sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
         query = new PreparedQuery(entityManager, sql);
@@ -841,7 +841,7 @@ public class USUtil extends AutomationUtil {
           }
 
         } else {
-          return error + "\n-Target enterprise/affiliate is not under the same GU DUNs/parent";
+          return error + "\n- Target enterprise/affiliate is not under the same GU DUNs/parent";
         }
       }
     }
@@ -873,10 +873,13 @@ public class USUtil extends AutomationUtil {
         String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
         if (!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation) || !"Ok".equals(revenue)) {
           if (!"Ok".equals(revenue)) {
-            error += "\n-CMR with revenue";
+            error += "\n- CMR with revenue";
           }
-          if (!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation)) {
-            error += "\n-Not new CMR (for CMR pass the 30 days period)";
+          if (!"Ok".equals(creationCapChanged)) {
+            error += "\n- Not new CMR (for CMR pass the 30 days period)";
+          }
+          if (!"Ok".equals(sicValidation)) {
+            error += "\n- ISU for the ISIC should be 5B";
           }
           return error;
 
@@ -1341,7 +1344,7 @@ public class USUtil extends AutomationUtil {
 
       if (response != null && response.getMatched()) {
         for (DnBMatchingResponse dnbRecord : response.getMatches()) {
-          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn())) {
+          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn(), false)) {
             closeMatches.add(dnbRecord);
           }
         }

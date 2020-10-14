@@ -55,12 +55,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
    */
   @SuppressWarnings("unchecked")
   public void addRejectionComment(String code, String comment, String supplInf1, String supplInf2) {
-    List<RejectionContainer> rejComments = (List<RejectionContainer>) get(REJECTIONS);
-    if (rejComments == null) {
-      rejComments = new ArrayList<RejectionContainer>();
-      put(REJECTIONS, rejComments);
-    }
-    rejComments = (List<RejectionContainer>) get(REJECTIONS);
+    List<RejectionContainer> rejComments = getRejectionReasons();
     RejectionContainer rejCon = new RejectionContainer();
     rejCon.setRejCode(code);
     rejCon.setRejComment(comment);
@@ -222,6 +217,27 @@ public class AutomationEngineData extends HashMap<String, Object> {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public List<RejectionContainer> getRejectionReasons() {
+    List<RejectionContainer> container = (List<RejectionContainer>) get(REJECTIONS);
+    if (container != null) {
+      return container;
+    } else {
+      container = new ArrayList<RejectionContainer>();
+      put(REJECTIONS, container);
+      return container;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public HashMap<String, String> getPendingChecks() {
+    HashMap<String, String> checks = (HashMap<String, String>) get(NEGATIVE_CHECKS);
+    if (checks == null) {
+      return new HashMap<String, String>();
+    } else {
+      return checks;
+    }
+  }
   public boolean isTrackNegativeChecks() {
     return trackNegativeChecks;
   }

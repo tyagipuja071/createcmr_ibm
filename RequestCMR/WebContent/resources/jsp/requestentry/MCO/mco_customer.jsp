@@ -178,8 +178,7 @@
 				</cmr:row>
 			</c:if>
 		</cmr:view>
-		
-  <cmr:view forCountry="822">
+		  <cmr:view forCountry="822">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="DistrictCd">
         <p>
@@ -273,7 +272,6 @@
 	    </cmr:column>
 	    </cmr:row>
 	    </c:if>
-  </cmr:view>  
-    
+  </cmr:view>      
   <form:hidden path="economicCd" id="economicCd"/>
 </cmr:view>
