@@ -717,6 +717,7 @@ function setCISFieldHandlers() {
   if (_DupIssuingCntryCdHandler == null) {
     _DupIssuingCntryCdHandler = dojo.connect(FormManager.getField('dupIssuingCntryCd'), 'onChange', function(value) {
       setDropdownField2Values(value);
+      setDupISUValues(value);
     });
   }
 
@@ -1360,7 +1361,7 @@ function setClientTierValues(isuCd) {
         && (FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'COMME'
             || FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'XPC')) {
       if (isuCd == '34') {
-        clientTiers = [ '6', 'V', 'A' ];
+        clientTiers = [ '6', 'A', 'V' ];
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'N' ];
       } else if (isuCd == '5B') {
@@ -1416,6 +1417,43 @@ function setClientTier2Values(dupIsuCd) {
     }
   }
 }
+
+// CMR-6057 setup ISU value for 821 Dup countries
+function setDupISUValues(custSubGrp) {
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var isuCds = [];
+  if (custSubGrp != '') {
+    if (FormManager.getActualValue('custSubGrp') == 'XBP' || FormManager.getActualValue('custSubGrp') == 'BUSPR' || FormManager.getActualValue('custSubGrp') == 'EXBP'
+        || FormManager.getActualValue('custSubGrp') == 'ELBP') {
+      isuCds = [ '8B' ];
+    } else if (FormManager.getActualValue('custSubGrp') == 'XINT' || FormManager.getActualValue('custSubGrp') == 'INTER') {
+      isuCds = [ '21' ];
+    } else if (FormManager.getActualValue('custSubGrp') == 'XCOM' || FormManager.getActualValue('custSubGrp') == 'XTP' || FormManager.getActualValue('custSubGrp') == 'COMME'
+        || FormManager.getActualValue('custSubGrp') == 'PRICU' || FormManager.getActualValue('custSubGrp') == 'THDPT' || FormManager.getActualValue('custSubGrp') == 'EXCOM'
+        || FormManager.getActualValue('custSubGrp') == 'ELCOM') {
+      if (SysLoc.UKRAINE == cntry || SysLoc.AZERBAIJAN == cntry) {
+        isuCds = [ '32', '34' ];
+      } else if (SysLoc.MOLDOVA == cntry) {
+        isuCds = [ '32', '34', '5B' ];
+      } else {
+        isuCds = [ '32' ];
+      }
+    }
+  }
+
+  if (isuCds != null && isuCds != '') {
+    FormManager.limitDropdownValues(FormManager.getField('dupIsuCd'), isuCds);
+    if (isuCds.length == 1) {
+      FormManager.setValue('dupIsuCd', isuCds[0]);
+    }
+  }
+}
+// End of 6057
 
 /**
  * resets SalRepNo2 and Enterprise2 values based duplicate country
@@ -4362,8 +4400,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(validatorsDIGITForDupField, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterConfig(setClientTier2Values, [ SysLoc.RUSSIA ]);
   GEOHandler.addAfterTemplateLoad(setClientTier2Values, [ SysLoc.RUSSIA ]);
-  // GEOHandler.addAfterConfig(setEnterprise2Values, [ SysLoc.RUSSIA ]);
-  // GEOHandler.addAfterTemplateLoad(setEnterprise2Values, [ SysLoc.RUSSIA ]);
+  // GEOHandler.addAfterConfig(setDupISUValues, [ SysLoc.RUSSIA ]);
+  GEOHandler.addAfterTemplateLoad(setDupISUValues, [ SysLoc.RUSSIA ]);
   // Slovakia
   GEOHandler.addAfterConfig(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
