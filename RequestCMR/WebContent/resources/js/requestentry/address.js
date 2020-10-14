@@ -124,7 +124,7 @@ function addrFormatter(value, rowIndex) {
     }
     return actions;
   }
-  if (addrType == 'ZS01' || addrType == 'ZI01') {
+  if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
       actions += '<input type="button" value="Copy" class="cmr-grid-btn" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt + '\',\'' + name + '\')">';
     }
@@ -224,6 +224,7 @@ function openAddressDetails(reqId, addrType, addrSeq, mandt) {
  */
 function AddressDetailsModal_onLoad() {
   var details = cmr.addrdetails;
+  var role = FormManager.getActualValue('userRole').toUpperCase();
   dojo.byId('dplChkResult_view').innerHTML = '';
   dojo.byId('dplChkInfo_view').innerHTML = '';
   _assignDetailsValue('#AddressDetailsModal #custNm1_view', details.ret4);
@@ -252,7 +253,11 @@ function AddressDetailsModal_onLoad() {
   _assignDetailsValue('#AddressDetailsModal #custPhone_view', details.ret23);
 
   if (FormManager.getActualValue('cmrIssuingCntry') == '897' && details.ret2 != 'ZI01' && details.ret2 != 'ZS01') {
-    cmr.hideNode('updateButtonFromView');
+    if (details.ret2 == 'ZP01' && role == 'PROCESSOR') {
+      cmr.showNode('updateButtonFromView');
+    } else {
+      cmr.hideNode('updateButtonFromView');
+    }
   } else {
     cmr.showNode('updateButtonFromView');
   }
@@ -1787,6 +1792,18 @@ function applyAddrChangesModal_onLoad() {
     	  }
       } 
 
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+          continue;
+        }
+      }
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+          continue;
+        }
+      }
+
       if (type.ret3 == cntry) {
         useCntry = true;
       }
@@ -2154,7 +2171,7 @@ function addrFormatterIcons(value, rowIndex) {
     }
     return actions;
   }
-  if (addrType == 'ZS01' || addrType == 'ZI01') {
+  if (addrType == 'ZS01' || addrType == 'ZI01' || addrType == 'ZP01') {
     if (canCopyAddress(value, rowIndex, this.grid)) {
       actions += '<img src="' + imgloc + 'addr-copy-icon.png" class="addr-icon" title="Copy Address" onclick="doCopyAddr(\'' + reqId + '\',\'' + addrType + '\',\'' + addrSeq + '\',\'' + mandt
           + '\',\'' + name + '\')">';
@@ -2764,4 +2781,16 @@ function doValidateSave() {
     doAddToAddressList();
   }
 
+}
+
+
+function openDPLSearch(){
+  var reqId = FormManager.getActualValue('reqId');
+  WindowMgr.open('DPLSEARCH', 'DPLSEARCH'+reqId, 'dpl/request?reqId='+reqId, null,
+      550);
+}
+
+function doDplSearchRequest() {
+  cmr.hideModal('DplDetailsModal');
+  openDPLSearch();
 }

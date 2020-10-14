@@ -282,6 +282,7 @@ public class RequestUtils {
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history) {
 
+    // for marketplace story
     String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
     String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
     boolean skip = false;
@@ -704,7 +705,7 @@ public class RequestUtils {
     return sb.toString();
   }
 
-  private static String getExternalEmailTemplate(String sourceSystId) {
+  public static String getExternalEmailTemplate(String sourceSystId) {
     try {
       InputStream is = ConfigUtil.getResourceStream((sourceSystId.toLowerCase()) + ".html");
 
@@ -1577,6 +1578,24 @@ public class RequestUtils {
     query.setParameter("COUNTRY", country);
     query.setForReadOnly(true);
     return query.getSingleResult(String.class);
+  }
+
+  /**
+   * Returns true if the partner is accredited for the Pay-Go process
+   * 
+   * @param entityManager
+   * @param sourceSystId
+   * @return
+   */
+  public static boolean isPayGoAccredited(EntityManager entityManager, String sourceSystId) {
+    if (StringUtils.isBlank(sourceSystId)) {
+      return false;
+    }
+    String sql = ExternalizedQuery.getSql("PAYGO.CHECK");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SYST_ID", sourceSystId);
+    query.setForReadOnly(true);
+    return query.exists();
   }
 
 }

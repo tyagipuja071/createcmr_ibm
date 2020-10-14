@@ -17,6 +17,9 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.ibm.ci.search.client.IndexServiceClient;
+import com.ibm.ci.search.client.impl.index.DeleteFromIndexRequest;
+import com.ibm.ci.search.client.impl.index.IndexResponse;
 import com.ibm.cio.cmr.create.entity.NotifyReq;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
@@ -38,6 +41,8 @@ import com.ibm.cio.cmr.request.entity.ReqCmtLog;
 import com.ibm.cio.cmr.request.entity.ReqCmtLogPK;
 import com.ibm.cio.cmr.request.entity.ReservedCMRNos;
 import com.ibm.cio.cmr.request.entity.ReservedCMRNosPK;
+import com.ibm.cio.cmr.request.entity.SystParameters;
+import com.ibm.cio.cmr.request.entity.SystParametersPK;
 import com.ibm.cio.cmr.request.entity.WfHist;
 import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.ParamContainer;
@@ -52,6 +57,8 @@ import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
+import com.ibm.cio.cmr.request.util.mail.Email;
+import com.ibm.cio.cmr.request.util.mail.MessageType;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MQIntfReqQueueModel;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
@@ -447,14 +454,12 @@ public class TransConnService extends BaseBatchService {
         admin.setLockBy(BATCH_USER_ID);
         admin.setLockByNm(BATCH_USER_ID);
         admin.setLockTs(SystemUtil.getCurrentTimestamp());
-
         sql = ExternalizedQuery.getSql("BATCH.GET_DATA");
         query = new PreparedQuery(entityManager, sql);
         query.setParameter("REQ_ID", admin.getId().getReqId());
 
         Data data = query.getSingleResult(Data.class);
         entityManager.detach(data);
-
         // Query FindCMR using filter on configuration file
         CompanyRecordModel search = new CompanyRecordModel();
         search.setName(SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
@@ -472,8 +477,19 @@ public class TransConnService extends BaseBatchService {
         List<CompanyRecordModel> records = CompanyFinder.findCompanies(search);
         LOG.info("Number of CMRs in Pool: " + records.size());
 
+        String threshold = SystemParameters.getString("POOL.CMR.THRESHOLD");
+        if (threshold == null || !StringUtils.isNumeric(threshold)) {
+          threshold = "20";
+        }
+
+        LOG.debug("Available Pool CMRs for " + data.getCmrIssuingCntry() + " = " + records.size());
+        if (records.size() <= Integer.parseInt(threshold)) {
+          // low threshold, send warning
+          sendPoolCMRWarningMail(entityManager, data.getCmrIssuingCntry(), records.size(), false);
+        }
         if (records.size() == 0) {
           LOG.error("CMR Pool depleted. Cannot proceed with automatic CMR number assignment");
+          sendPoolCMRWarningMail(entityManager, data.getCmrIssuingCntry(), records.size(), true);
           return;
         }
 
@@ -599,11 +615,12 @@ public class TransConnService extends BaseBatchService {
           newData.setId(dataPk);
           newData.setCustGrp(null);
           newData.setCustSubGrp(null);
-          if (data.getAffiliate() == null || data.getAffiliate().equals(""))
+          if (data.getAffiliate() == null || data.getAffiliate().equals("")) {
             newData.setAffiliate(record.getCmrNo());
-          if (data.getEnterprise() == null || data.getEnterprise().equals(""))
+          }
+          if (data.getEnterprise() == null || data.getEnterprise().equals("")) {
             newData.setEnterprise(record.getCmrNo());
-
+          }
           updateEntity(newData, entityManager);
 
           PreparedQuery addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
@@ -617,6 +634,10 @@ public class TransConnService extends BaseBatchService {
           zi01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
           zi01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
           Addr zi01Addr = zi01AddrQuery.getSingleResult(Addr.class);
+          PreparedQuery zp01AddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ"));
+          zp01AddrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+          zp01AddrQuery.setParameter("ADDR_TYPE", "ZI01");
+          List<Addr> zp01Addrs = zp01AddrQuery.getResults(Addr.class);
 
           PreparedQuery newAddrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_FOR_SAP_NO"));
           newAddrQuery.setParameter("REQ_ID", reqId);
@@ -644,6 +665,31 @@ public class TransConnService extends BaseBatchService {
             newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
             newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
             updateEntity(newAddr, entityManager);
+          }
+
+          if (zp01Addrs != null && !zp01Addrs.isEmpty()) {
+            // copy zp01 addresses
+            for (Addr zp01 : zp01Addrs) {
+              Addr newAddr = new Addr();
+              AddrPK addrPK = new AddrPK();
+              addrPK.setAddrSeq(zp01.getId().getAddrSeq());
+              addrPK.setReqId(reqId);
+              addrPK.setAddrType("ZP01");
+              copyValuesToEntity(zp01, newAddr);
+              newAddr.setSapNo(null);
+              newAddr.setImportInd(CmrConstants.YES_NO.N.toString());
+              newAddr.setChangedIndc(null);
+              newAddr.setId(addrPK);
+              newAddr.setAddrStdResult("X");
+              newAddr.setAddrStdAcceptInd(null);
+              newAddr.setAddrStdRejReason(null);
+              newAddr.setAddrStdRejCmt(null);
+              newAddr.setAddrStdTs(null);
+              newAddr.setRdcCreateDt(ERDAT_FORMATTER.format(SystemUtil.getCurrentTimestamp()));
+              newAddr.setRdcLastUpdtDt(SystemUtil.getCurrentTimestamp());
+              updateEntity(newAddr, entityManager);
+              break;
+            }
           }
 
           newAdmin.setReqStatus("PCP");
@@ -1189,9 +1235,17 @@ public class TransConnService extends BaseBatchService {
     addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
 
     if ("897".equals(data.getCmrIssuingCntry())) {
-      // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
-      // the ZI01 address
-      addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      if ("ZP01".equals(record.getAddressType()) && record.getSeqNo() != null && Integer.parseInt(record.getSeqNo()) >= 200) {
+        // If additional bill to handle accordingly
+        addrQuery = new PreparedQuery(entityManager, ExternalizedQuery.getSql("BATCH.GET_ADDR_ENTITY_CREATE_REQ_SEQ"));
+        addrQuery.setParameter("REQ_ID", admin.getId().getReqId());
+        addrQuery.setParameter("ADDR_TYPE", "ZP01");
+        addrQuery.setParameter("ADDR_SEQ", record.getSeqNo());
+      } else {
+        // if returned is ZS01/ZI01, update the ZS01 address. Else, Update
+        // the ZI01 address
+        addrQuery.setParameter("ADDR_TYPE", "ZS01".equals(record.getAddressType()) || "ZI01".equals(record.getAddressType()) ? "ZS01" : "ZI01");
+      }
     } else {
       addrQuery.setParameter("ADDR_TYPE", record.getAddressType());
     }
@@ -2171,6 +2225,8 @@ public class TransConnService extends BaseBatchService {
       query.setForReadOnly(true);
       List<String> kunnrs = query.getResults(String.class);
       if (!kunnrs.isEmpty()) {
+
+        IndexServiceClient client = new IndexServiceClient(SystemConfiguration.getValue("BATCH_CI_SERVICES_URL"));
         for (String kunnr : kunnrs) {
           LOG.debug("Got KUNNR: " + kunnr);
           LOG.debug("Deleting RDc records for KATR6: " + country + " and CMR No.: " + cmrNo);
@@ -2182,6 +2238,22 @@ public class TransConnService extends BaseBatchService {
             query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
             query.setParameter("KUNNR", kunnr);
             query.executeSql();
+
+            try {
+              DeleteFromIndexRequest deleteReq = new DeleteFromIndexRequest("cmr");
+              deleteReq.setDelete(true);
+              deleteReq.setKunnr(kunnr);
+              deleteReq.setMandt(SystemConfiguration.getValue("MANDT"));
+
+              IndexResponse response = client.sendRequest(deleteReq);
+              if (response.isSuccess()) {
+                LOG.debug("KUNNR " + kunnr + " deleted from Index");
+              } else {
+                LOG.warn("Error when deleting KUNNR " + kunnr + " from Index: " + response.getMsg());
+              }
+            } catch (Exception e) {
+              LOG.warn("Cannot delete from KUNNR " + kunnr + " from Index", e);
+            }
           }
         }
         partialCommit(entityManager);
@@ -2191,6 +2263,75 @@ public class TransConnService extends BaseBatchService {
     } catch (Exception e) {
       partialRollback(entityManager);
     }
+  }
+
+  /**
+   * Sends an email notification to a list of people about depleted CMRs
+   * 
+   * @param entityManager
+   * @param currentCount
+   */
+  private void sendPoolCMRWarningMail(EntityManager entityManager, String country, long currentCount, boolean depleted) {
+    String template = RequestUtils.getExternalEmailTemplate(depleted ? "pool-cmr-depleted" : "pool-cmr-warning");
+    if (!StringUtils.isBlank(template)) {
+      // template params:
+      // {{country}}
+      // {{count}}
+      // {{crit.name}}
+      // {{crit.address}}
+      // {{crit.city}}
+      // {{crit.state}}
+      // {{crit.zip}}
+
+      template = StringUtils.replace(template, "{{country}}", country);
+      template = StringUtils.replace(template, "{{count}}", currentCount + "");
+      template = StringUtils.replace(template, "{{cat.name}}", SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
+      template = StringUtils.replace(template, "{{cat.address}}", SystemConfiguration.getValue("BATCH_CMR_POOL_STREET"));
+      template = StringUtils.replace(template, "{{cat.city}}", SystemConfiguration.getValue("BATCH_CMR_POOL_CITY"));
+      template = StringUtils.replace(template, "{{cat.state}}", SystemConfiguration.getValue("BATCH_CMR_POOL_STATE"));
+      template = StringUtils.replace(template, "{{cat.zip}}", SystemConfiguration.getValue("BATCH_CMR_POOL_POSTAL"));
+
+      // search.setName(SystemConfiguration.getValue("BATCH_CMR_POOL_CUST_NAME"));
+      // search.setIssuingCntry(SystemConfiguration.getValue("BATCH_CMR_POOL_ISSUING_CNTRY"));
+      // search.setCountryCd(SystemConfiguration.getValue("BATCH_CMR_POOL_LANDED_CNTRY_CD"));
+      // search.setStreetAddress1(SystemConfiguration.getValue("BATCH_CMR_POOL_STREET"));
+      // search.setCity(SystemConfiguration.getValue("BATCH_CMR_POOL_CITY"));
+      // search.setStateProv(SystemConfiguration.getValue("BATCH_CMR_POOL_STATE"));
+      // search.setPostCd(SystemConfiguration.getValue("BATCH_CMR_POOL_POSTAL"));
+
+      String recipients = SystemParameters.getString("POOL.CMR.TO." + country);
+      String subject = "Warning: Available Pool CMR records almost consumed for Country " + country;
+      if (depleted) {
+        subject = "For Your Action: No Pool CMR records available for Country " + country;
+      }
+
+      if (depleted) {
+        SystParametersPK systPk = new SystParametersPK();
+        systPk.setParameterCd("POOL.CMR.STATUS");
+        SystParameters sysPar = entityManager.find(SystParameters.class, systPk);
+        if (sysPar != null) {
+          LOG.debug("Setting Pool CMR enablement to N..");
+          sysPar.setParameterValue("N");
+          entityManager.merge(sysPar);
+        }
+      }
+      if (!StringUtils.isBlank(recipients)) {
+        Email mail = new Email();
+        mail.setSubject(subject);
+        mail.setTo(recipients);
+        mail.setFrom(SystemConfiguration.getValue("MAIL_FROM"));
+        mail.setMessage(template);
+        mail.setType(MessageType.HTML);
+        if (depleted) {
+          mail.setImportant(true);
+        }
+
+        LOG.debug("Sending warning notification for Pool CMRs..");
+        mail.send(SystemConfiguration.getValue("MAIL_HOST"));
+      }
+
+    }
+
   }
 
   public boolean isDeleteRDcTargets() {

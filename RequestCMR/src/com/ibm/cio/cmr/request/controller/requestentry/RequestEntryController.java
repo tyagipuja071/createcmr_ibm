@@ -577,6 +577,7 @@ public class RequestEntryController extends BaseController {
     String cmrCntry = model.getCmrIssuingCntry();
     String searchCntry = model.getSearchIssuingCntry();
     String newParams = "?cmrIssuingCntry=" + cmrCntry + "&reqType=" + reqModel.getReqType();
+
     try {
       FindCMRResultModel results = null;
       if(!model.isPoolRecord()){	
