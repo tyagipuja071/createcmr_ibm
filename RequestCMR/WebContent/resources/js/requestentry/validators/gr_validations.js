@@ -3811,9 +3811,11 @@ function convertToUpperCaseGR(cntry, addressMode, saving) {
   var addrFields = [ 'custNm1', 'custNm2', 'addrTxt', 'addrTxt2', 'city1', 'postCd', 'custPhone', 'sapNo', 'taxOffice', 'custNm4' ];
   if (FormManager.getActualValue('addrType') == 'ZP01') {
     for (var i = 0; i < addrFields.length; i++) {
-      dojo.byId(addrFields[i]).style.textTransform = 'uppercase';
-      if (saving) {
-        dojo.byId(addrFields[i]).value = dojo.byId(addrFields[i]).value.toUpperCase();
+      if(dojo.byId(addrFields[i]) != null) {
+        dojo.byId(addrFields[i]).style.textTransform = 'uppercase';
+        if (saving) {
+          dojo.byId(addrFields[i]).value = dojo.byId(addrFields[i]).value.toUpperCase();
+        }
       }
     }
   } else {
