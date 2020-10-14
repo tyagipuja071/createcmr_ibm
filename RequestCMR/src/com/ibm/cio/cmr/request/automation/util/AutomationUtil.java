@@ -17,6 +17,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CMDERequesterCheck;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
@@ -1127,6 +1128,16 @@ public abstract class AutomationUtil {
     String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
     String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
     return custNm1 + custNm2 + custNm3 + custNm4;
+  }
+
+  /**
+   * returns the country-wise request types for {@link CMDERequesterCheck}
+   * element to skip all checks if the requester is CMDE
+   * 
+   * @return
+   */
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return new ArrayList<String>();
   }
 
 }

@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.automation.ActionOnError;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -34,23 +35,34 @@ public class CMDERequesterCheck extends ValidatingElement {
     ValidationOutput validation = new ValidationOutput();
     AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
     log.debug("Automation Util for " + data.getCmrIssuingCntry() + " = " + (countryUtil != null ? countryUtil.getClass().getSimpleName() : "none"));
-
-    String sqlKey = ExternalizedQuery.getSql("AUTO.CHECK_CMDE");
-    PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
-    query.setParameter("REQUESTER_ID", admin.getRequesterId());
-    query.setParameter("CMR_ISSUING_CNTRY", data.getCmrIssuingCntry());
-    query.setForReadOnly(true);
-    if (query.exists()) {
-      // skip checks if requester is from CMDE team
-      countryUtil.skipAllChecks(engineData);
-      log.debug("Requester is from CMDE team, skipping Automation checks.");
-      output.setDetails("Requester is from CMDE team, skipping Automation checks.\n");
-      validation.setMessage("Automation checks Skipped");
-      validation.setSuccess(true);
+    if (countryUtil != null && countryUtil.getSkipChecksRequestTypesforCMDE().contains(admin.getReqType())) {
+      String sqlKey = ExternalizedQuery.getSql("AUTO.CHECK_CMDE");
+      PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
+      query.setParameter("REQUESTER_ID", admin.getRequesterId());
+      query.setParameter("CMR_ISSUING_CNTRY", data.getCmrIssuingCntry());
+      query.setForReadOnly(true);
+      if (query.exists()) {
+        // skip checks if requester is from CMDE team
+        countryUtil.skipAllChecks(engineData);
+        log.debug("Requester is from CMDE team, skipping Automation checks.");
+        output.setDetails("Requester is from CMDE team, skipping Automation checks.\n");
+        validation.setMessage("Automation checks Skipped");
+        validation.setSuccess(true);
+      } else {
+        String message = "Requester not from CMDE team.";
+        if (ActionOnError.Proceed.equals(getActionOnError())) {
+          message += "Further processing validation will be required before proceeding.";
+        }
+        output.setDetails(message);
+        engineData.addRejectionComment("OTH", message, "", "");
+        output.setOnError(true);
+        validation.setMessage("Validation Failed");
+        validation.setSuccess(false);
+      }
     } else {
-      output.setDetails("Requester is not from CMDE team");
-      validation.setMessage("Approval Required");
-      validation.setSuccess(false);
+      output.setDetails("Element execution skipped for current request type based on country configurations.");
+      validation.setMessage("Skipped");
+      validation.setSuccess(true);
     }
     output.setResults(validation.getMessage());
     output.setProcessOutput(validation);
