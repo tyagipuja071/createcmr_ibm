@@ -102,7 +102,7 @@ public class LegacyCommonUtil {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
   }
 
@@ -216,6 +216,15 @@ public class LegacyCommonUtil {
       return true;
     }
     return false;
+  }
+
+  public static String doFormatPoBox(String poBox) {
+    boolean poBoxFlag = poBox.contains("PO BOX");
+    if (poBoxFlag) {
+      return poBox.substring(6).trim();
+    } else {
+      return poBox;
+    }
   }
 
   public static AddrRdc getAddrRdcRecord(EntityManager entityManager, Addr addr) {

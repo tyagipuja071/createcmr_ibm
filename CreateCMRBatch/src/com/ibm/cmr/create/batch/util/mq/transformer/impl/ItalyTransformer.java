@@ -1233,18 +1233,27 @@ public class ItalyTransformer extends EMEATransformer {
       // legacyAddr.setItPostalAddrss(!StringUtils.isBlank(currAddr.getBillingPstlAddr())
       // ? currAddr.getBillingPstlAddr() : "");
       if (crossBorder) {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country                                                                                                        // Landed
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country
+                                                                                                                     // //
+                                                                                                                     // Landed
       } else {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State Province                                                                                                        // Province
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State
+                                                                                                                     // Province
+                                                                                                                     // //
+                                                                                                                     // Province
       }
     }
 
     // Company Address
     if (MQMsgConstants.ADDR_ZI01.equals(addrType)) {
       if (crossBorder) {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country                                                                                                         // Landed
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getLandCntry()) ? currAddr.getLandCntry() : ""); // Country
+                                                                                                                     // //
+                                                                                                                     // Landed
       } else {
-        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State Province                                                                 // 
+        legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(currAddr.getStateProv()) ? currAddr.getStateProv() : ""); // State
+                                                                                                                     // Province
+                                                                                                                     // //
       }
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
@@ -1391,13 +1400,13 @@ public class ItalyTransformer extends EMEATransformer {
         }
       }
     }
-    
+
     if (addrData.getLandCntry().equals("IT")) {
       legacyAddr.setItCompanyProvCd(!StringUtils.isBlank(addrData.getStateProv()) ? addrData.getStateProv() : "");
     } else {
       legacyAddr.setItCompanyProvCd("");
     }
-    
+
     legacyAddr.setAddrLine1(line1);
     legacyAddr.setAddrLine2(line2);
     legacyAddr.setAddrLine3(line3);
@@ -1741,7 +1750,7 @@ public class ItalyTransformer extends EMEATransformer {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
 
   // private boolean isFisCodeUsed(EntityManager entityManager, String cntry,
