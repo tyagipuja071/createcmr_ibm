@@ -40,7 +40,6 @@ public class AutomationEngineData extends HashMap<String, Object> {
   public static final String SKIP_GBG = "_gblSkipGbg";
   public static final String SKIP_COVERAGE = "_gblSkipCoverage";
   public static final String REQ_MATCH_SCENARIO = "REQ_MATCH_SCENARIO";
-
   private int trackedNegativeCheckCount;
   private boolean trackNegativeChecks;
   /**
