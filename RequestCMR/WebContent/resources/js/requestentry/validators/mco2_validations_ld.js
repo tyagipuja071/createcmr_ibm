@@ -30,6 +30,7 @@ function addHandlersForMCO2() {
 
   if (_ISUHandler == null) {
     _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
+      limitClientTierValues(value);
       setSalesRepValues(value);
     });
   }
@@ -178,6 +179,7 @@ function lockCmrOwnerPrefLang() {
   }
 }
 function afterConfigForMCO2() {
+  limitClientTierValues();
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
@@ -1545,6 +1547,31 @@ function requireVATForCrossMCO2() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function limitClientTierValues(value) {
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (!value) {
+    value = FormManager.getActualValue('isuCd');
+  }
+
+  var tierValues = null;
+  tierValues = [ '', 'C', 'S', 'T', 'N', 'V', 'A', '7' ]
+
+  if (reqType == 'C') {
+    if (value == '32') {
+      tierValues = [ 'C', 'S', 'T', 'N' ];
+    } else if (value == '34') {
+      tierValues = [ 'V', 'A' ];
+    } else if (value == '21' || value == '8B') {
+      tierValues = [ '7' ];
+    }
+  }
+
+  if (tierValues != null) {
+    FormManager.limitDropdownValues(FormManager.getField('clientTier'), tierValues);
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1625,5 +1652,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
-
+  GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
 });
