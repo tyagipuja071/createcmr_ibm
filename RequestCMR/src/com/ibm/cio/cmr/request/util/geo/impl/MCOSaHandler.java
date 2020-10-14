@@ -343,7 +343,8 @@ public class MCOSaHandler extends MCOHandler {
 
     if (legacyObjects != null && legacyObjects.getCustomer() != null) {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
-      // data.setCreditCd(legacyObjects.getCustomer().getCreditCd());
+      data.setSpecialTaxCd(legacyObjects.getCustomer().getTaxCd());
+      data.setIbmDeptCostCenter(legacyObjects.getCustomer().getDeptCd());
     }
 
     if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
