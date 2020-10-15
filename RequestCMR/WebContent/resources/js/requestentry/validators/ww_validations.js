@@ -126,17 +126,26 @@ function addDnBMatchingAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+        var findDnbResult = FormManager.getActualValue('findDnbResult');
+        var userRole = FormManager.getActualValue('userRole');
+        var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+        if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR US Temporary
-          var show = false;
           var id = FormManager.getActualValue('reqId');
           var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
             ID : id
           });
-          if (SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry') && (ret == null || ret.ret1 == null)) {
-            return new ValidationResult(null, false, "Please provide the supporting documentation for D&B Match Override, such as client's official website, " +
-            		"Secretary of State business registration proof, client's confirmation email, signed PO and etc. Please note that the sources " +
-            		"from Wikipedia, Linked In and social medias are not acceptable.");
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, "Please provide the supporting documentation for D&B Match Override, such as client's official website, "
+                + "Secretary of State business registration proof, client's confirmation email, signed PO and etc. Please note that the sources "
+                + "from Wikipedia, Linked In and social medias are not acceptable.");
+          } else {
+            return new ValidationResult(null, true);
           }
         }
         return new ValidationResult(null, true);

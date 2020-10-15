@@ -68,6 +68,15 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
 
+    // skip dnb matching if dnb matches on UI are overriden and attachment is
+    // provided
+    if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+      result.setResults("Overriden");
+      result.setDetails(
+          "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
+      return result;
+    }
+
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
