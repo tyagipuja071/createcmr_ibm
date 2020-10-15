@@ -37,6 +37,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.query.QueryRequest;
@@ -625,6 +626,21 @@ public class MCOCewaHandler extends MCOHandler {
       }
     }
     return null;
+  }
+
+  @Override
+  public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr copyAddr, String cmrIssuingCntry) throws Exception {
+
+    if (copyAddr != null && copyAddr.getId() != null) {
+      Admin adminRec = LegacyCommonUtil.getAdminByReqId(entityManager, copyAddr.getId().getReqId());
+      if (adminRec != null) {
+        boolean isCreateReq = CmrConstants.REQ_TYPE_CREATE.equals(adminRec.getReqType());
+        if (isCreateReq && copyAddr.getId().getAddrSeq().compareTo("00006") >= 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 }
