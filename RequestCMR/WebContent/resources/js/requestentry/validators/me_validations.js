@@ -1850,6 +1850,8 @@ function validTeleCoverageRep6Length(input) {
  * Validate Special Character for Abbreviated Name/Location
  */
 function validateAbbrevNmLocn() {
+  FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+  FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ], 'MAIN_CUST_TAB');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'PROCESSOR') {
     FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
