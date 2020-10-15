@@ -324,7 +324,7 @@ public class SpainUtil extends AutomationUtil {
       }
     }
     if (coverageFieldUpdtd > 0) {
-      String managerID = SystemParameters.getString("ES_MGR_COV_UPDT");
+      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
       if (StringUtils.isNotBlank(managerID)) {
         boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
