@@ -762,10 +762,6 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   return canRemoveAddress(value, rowIndex, grid);
 }
 
-function addValidatorStreet() {
-  FormManager.removeValidator('addrTxt', Validators.MAXLENGTH);
-}
-
 function setSalesRepValues(isuCd, clientTier) {
 
   var reqType = FormManager.getActualValue('reqType');
@@ -1581,7 +1577,7 @@ dojo.addOnLoad(function() {
       '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
   console.log('adding MCO2 functions...');
   GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
-  GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01', 'ZI01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.MCO2);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
   GEOHandler.setRevertIsicBehavior(false);
@@ -1602,8 +1598,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
   // GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO2, null, true);
