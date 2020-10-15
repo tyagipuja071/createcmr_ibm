@@ -746,42 +746,6 @@ function setEntpMaltaValues() {
   }
 }
 
-function streetValidatorCustom() {
-  console.log("streetValidatorCustom..............");
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var addrPlain = FormManager.getActualValue('addrTxt').trim();
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var isFST = false;
-        var isOthers = false;
-
-        if (fstCEWA.indexOf(cntry) > -1) {
-          isFST = true;
-        } else if (othCEWA.indexOf(cntry) > -1) {
-          isOthers = true;
-        }
-
-        if (isFST) {
-          if (addrPlain != null && addrPlain.length > 30) {
-            return new ValidationResult(FormManager.getField('addrTxt'), false, 'Street value should be at most 23 CHAR long + "Avenue".');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        } else if (isOthers) {
-          if (addrPlain != null && addrPlain.length > 30) {
-            return new ValidationResult(FormManager.getField('addrTxt'), false, 'Street value should be at most 23 CHAR long + "Street".');
-          } else {
-            return new ValidationResult(null, true);
-          }
-        } else {
-          return new ValidationResult(null, true);
-        }
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
-}
-
 /* 1430539 - do not allow delete of imported addresses on update requests */
 
 function canRemoveAddress(value, rowIndex, grid) {
@@ -796,10 +760,6 @@ function canRemoveAddress(value, rowIndex, grid) {
 
 function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   return canRemoveAddress(value, rowIndex, grid);
-}
-
-function addValidatorStreet() {
-  FormManager.removeValidator('addrTxt', Validators.MAXLENGTH);
 }
 
 function setSalesRepValues(isuCd, clientTier) {
@@ -1617,7 +1577,7 @@ dojo.addOnLoad(function() {
       '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
   console.log('adding MCO2 functions...');
   GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
-  GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
+  GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01', 'ZI01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.MCO2);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
   GEOHandler.setRevertIsicBehavior(false);
@@ -1638,8 +1598,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
   // GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO2, null, true);
@@ -1657,7 +1615,6 @@ dojo.addOnLoad(function() {
   // GEOHandler.REQUESTER,true);
 
   GEOHandler.registerValidator(requireVATForCrossMCO2, GEOHandler.MCO2, null, true);
-  GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
 
   GEOHandler.addAddrFunction(addAddrValidatorMCO2, GEOHandler.MCO2);
   GEOHandler.addAddrFunction(disableAddrFieldsCEWA, GEOHandler.MCO2);

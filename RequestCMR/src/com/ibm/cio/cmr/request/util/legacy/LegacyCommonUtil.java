@@ -351,4 +351,15 @@ public class LegacyCommonUtil {
     return oldData;
   }
 
+  public static Admin getAdminByReqId(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADMIN.SEARCH_BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Admin> records = query.getResults(1, Admin.class);
+    if (records != null && records.size() > 0) {
+      return records.get(0);
+    }
+    return null;
+  }
+
 }
