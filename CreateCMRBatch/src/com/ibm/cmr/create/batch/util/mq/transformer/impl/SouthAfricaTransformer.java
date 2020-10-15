@@ -255,7 +255,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    legacyCust.setAbbrevNm(data.getAbbrevNm());
+    legacyCust.setAbbrevNm(!StringUtils.isEmpty(data.getAbbrevNm()) ? data.getAbbrevNm().toUpperCase() : data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
     legacyCust.setCustType(data.getCrosSubTyp());
