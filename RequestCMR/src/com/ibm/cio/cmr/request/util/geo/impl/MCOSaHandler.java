@@ -13,12 +13,17 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -36,6 +41,9 @@ import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 public class MCOSaHandler extends MCOHandler {
 
   protected static final Logger LOG = Logger.getLogger(MCOSaHandler.class);
+
+  protected static final String[] ZA_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
+      "Shipping Address (Update)", "EPL Address" };
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
@@ -393,40 +401,41 @@ public class MCOSaHandler extends MCOHandler {
 
   @Override
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
+    if (currentRecord != null) {
+      address.setCustNm1(currentRecord.getCmrName1Plain());
+      address.setCustNm2(currentRecord.getCmrName2Plain());
 
-    address.setCustNm1(currentRecord.getCmrName1Plain());
-    address.setCustNm2(currentRecord.getCmrName2Plain());
+      if (StringUtils.isBlank(address.getCustNm4())) {
+        address.setCustNm4(currentRecord.getCmrName4());
+      }
 
-    if (StringUtils.isBlank(address.getCustNm4())) {
-      address.setCustNm4(currentRecord.getCmrName4());
+      if (StringUtils.isBlank(address.getAddrTxt2())) {
+        address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
+      }
+
+      if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
+        String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
+        address.getId().setAddrSeq(seq);
+      }
+
+      if ("D".equals(address.getImportInd())) {
+        String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
+        address.getId().setAddrSeq(seq);
+      }
+
+      address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+
+      if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())
+          || "ZS02".equals(address.getId().getAddrType())) {
+        address.setCustPhone("");
+      } else if ("ZD01".equals(address.getId().getAddrType())) {
+        String phone = getShippingPhoneFromLegacy(currentRecord);
+        address.setCustPhone(phone != null ? phone : "");
+      } else if ("ZS01".equals(address.getId().getAddrType())) {
+        address.setCustPhone(currentRecord.getCmrCustPhone());
+      }
+
     }
-
-    if (StringUtils.isBlank(address.getAddrTxt2())) {
-      address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
-    }
-
-    if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-      String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
-      address.getId().setAddrSeq(seq);
-    }
-
-    if ("D".equals(address.getImportInd())) {
-      String seq = StringUtils.leftPad(address.getId().getAddrSeq(), 5, '0');
-      address.getId().setAddrSeq(seq);
-    }
-
-    address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
-
-    if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())
-        || "ZS02".equals(address.getId().getAddrType())) {
-      address.setCustPhone("");
-    } else if ("ZD01".equals(address.getId().getAddrType())) {
-      String phone = getShippingPhoneFromLegacy(currentRecord);
-      address.setCustPhone(phone != null ? phone : "");
-    } else if ("ZS01".equals(address.getId().getAddrType())) {
-      address.setCustPhone(currentRecord.getCmrCustPhone());
-    }
-    address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
 
   }
 
@@ -906,6 +915,85 @@ public class MCOSaHandler extends MCOHandler {
       }
     }
     return null;
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    XSSFCell currCell = null;
+    for (String name : ZA_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      if (sheet != null) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+            // Common
+            String cmrNo = ""; // 0
+
+            // Address Sheet
+            String seqNo = ""; // 1
+            String nameCont = ""; // 3
+            String street = ""; // 4
+            String landCountry = ""; // 09
+            String poBox = ""; // 10
+
+            List<String> checkList = null;
+            long count = 0;
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              // iterate all the rows and check each column value
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              seqNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              nameCont = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              street = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              landCountry = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              poBox = validateColValFromCell(currCell);
+
+            }
+
+            checkList = Arrays.asList(nameCont, poBox, street);
+            count = checkList.stream().filter(field -> !field.isEmpty()).count();
+
+            TemplateValidation error = new TemplateValidation(name);
+
+            if (StringUtils.isEmpty(cmrNo)) {
+              LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (count > 1 && !("ZA").equals(landCountry)) {
+              LOG.trace("Out of Name Con't, Street and PO BOX only 1 can be filled at the same time.");
+              error.addError(row.getRowNum(), "Name Con't, Street and PO BOX",
+                  "Out of Name Con't, Street and PO BOX only 1 can be filled at the same time. ");
+              validations.add(error);
+              count = 0;
+            }
+
+          }
+        }
+      }
+    }
+
   }
 
   @Override
