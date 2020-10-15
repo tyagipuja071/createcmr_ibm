@@ -39,7 +39,7 @@ public class CMDERequesterCheck extends ValidatingElement {
       String sqlKey = ExternalizedQuery.getSql("AUTO.CHECK_CMDE");
       PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
       query.setParameter("REQUESTER_ID", admin.getRequesterId());
-      query.setParameter("CMR_ISSUING_CNTRY", data.getCmrIssuingCntry());
+      query.setParameter("CNTRY", data.getCmrIssuingCntry());
       query.setForReadOnly(true);
       if (query.exists()) {
         // skip checks if requester is from CMDE team
