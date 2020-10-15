@@ -48,13 +48,15 @@ public class MCOSaHandler extends MCOHandler {
 
       if (!StringUtils.isEmpty(record.getCmrName4())) {
         // name4 in rdc is street con't
-        record.setCmrStreetAddressCont(record.getCmrName4());
+        if (record.getCmrName4() != null && (!record.getCmrName4().startsWith("ATT") && !record.getCmrName4().startsWith("ATT: "))) {
+          record.setCmrStreetAddressCont(record.getCmrName4());
+        }
         record.setCmrName4(null);
       }
 
       // name3 in rdc = attn on SOF
       if (!StringUtils.isEmpty(record.getCmrName3())) {
-        if (record.getCmrName3().startsWith("ATT")) {
+        if (record.getCmrName3().startsWith("ATT") || record.getCmrName3().startsWith("ATT: ")) {
           record.setCmrName4(record.getCmrName3());
         }
         record.setCmrName3(null);
@@ -106,9 +108,11 @@ public class MCOSaHandler extends MCOHandler {
                   LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
 
                   // name3 in rdc = Address Con't on SOF
-                  addr.setCmrStreetAddressCont(record.getCmrName4());
+                  if (record.getCmrName4() != null && (!record.getCmrName4().startsWith("ATT") && !record.getCmrName4().startsWith("ATT: "))) {
+                    addr.setCmrStreetAddressCont(record.getCmrName4());
+                  }
                   addr.setCmrName3(null);
-                  if (record.getCmrName3() != null && record.getCmrName3().startsWith("ATT")) {
+                  if (record.getCmrName3() != null && (record.getCmrName3().startsWith("ATT") || record.getCmrName3().startsWith("ATT: "))) {
                     addr.setCmrName4(record.getCmrName3());
                   }
 
@@ -610,24 +614,62 @@ public class MCOSaHandler extends MCOHandler {
       // line4 = Street Con't + PO BOX
       // line5 = City
       // line6 = Postal Code
+      String[] lines = new String[] { line1, line2, line3, line4, line5, line6 };
+      int lineNo = 1, attLine = 0, boxLine = 0, zipLine = 0, streetLine = 0;
+      for (String line : lines) {
+        if (isAttn(line)) {
+          address.setCmrName4(line.substring(4));
+          attLine = lineNo;
+        } else if (isPOBox(line)) {
+          String tempLine = line.replace("PO BOX", "");
+          address.setCmrPOBox(tempLine);
+          boxLine = lineNo;
+        } else if (isStreet(line)) {
+          address.setCmrStreetAddress(line);
+          streetLine = lineNo;
+        }
+        lineNo++;
+      }
 
-      address.setCmrName1Plain(line1);
+      address.setCmrName1Plain(line1); // line1
 
-      handlePhoneAndAttn(line2, cmrIssuingCntry, address, addressKey);
+      if (attLine == 3) {
+        address.setCmrName2Plain(line2); // line2= name cont, line 3 = ATT ,
+                                         // line4=Street
+        handlePhoneAndAttn(line3, cmrIssuingCntry, address, addressKey);
+        if (StringUtils.isEmpty(address.getCmrStreetAddress())) {
+          address.setCmrStreetAddress(line4);
+          streetLine = 4;
+        }
+        handleStreetContAndPoBox(line5, cmrIssuingCntry, address, addressKey);
+        handleCityAndPostCode(line6, cmrIssuingCntry, address, addressKey);
+      }
 
-      address.setCmrStreetAddress(line3);
-
-      handleStreetContAndPoBox(line4, cmrIssuingCntry, address, addressKey);
-
-      handleCityAndPostCode(line5, cmrIssuingCntry, address, addressKey);
+      if (attLine == 0) {
+        if (StringUtils.isEmpty(address.getCmrStreetAddress())) {
+          address.setCmrStreetAddress(line2);
+          streetLine = 2;
+        }
+        handleStreetContAndPoBox(line3, cmrIssuingCntry, address, addressKey);
+        handleCityAndPostCode(line4, cmrIssuingCntry, address, addressKey);
+        if (!StringUtils.isEmpty(line5)) {
+          if (StringUtils.isEmpty(address.getCmrPostalCode()) && !StringUtils.isEmpty(address.getCmrCity())) {
+            address.setCmrPostalCode(line5);
+          }
+        }
+      } else if (attLine == 2) {
+        if (StringUtils.isEmpty(address.getCmrStreetAddress())) {
+          address.setCmrStreetAddress(line3);
+          streetLine = 3;
+        }
+        handleStreetContAndPoBox(line4, cmrIssuingCntry, address, addressKey);
+        handleCityAndPostCode(line5, cmrIssuingCntry, address, addressKey);
+      }
 
       if (!StringUtils.isEmpty(line6)) {
         if (StringUtils.isEmpty(address.getCmrPostalCode()) && !StringUtils.isEmpty(address.getCmrCity())) {
           address.setCmrPostalCode(line6);
-        } else if (!StringUtils.isEmpty(address.getCmrPostalCode()) && StringUtils.isEmpty(address.getCmrCity())) {
-          address.setCmrCity(line6);
         }
-
       }
 
     }
@@ -642,7 +684,7 @@ public class MCOSaHandler extends MCOHandler {
       address.setCmrStreetAddressCont(null);
     }
 
-    if (!StringUtils.isEmpty(address.getCmrStreetAddress()) && !StringUtils.isEmpty(address.getCmrStreetAddress())
+    if (!StringUtils.isEmpty(address.getCmrStreetAddress()) && !StringUtils.isEmpty(address.getCmrStreetAddressCont())
         && isStreet(address.getCmrStreetAddressCont()) && !isStreet(address.getCmrStreetAddress())) {
       // interchange street and street con't based on data
       String cont = address.getCmrStreetAddressCont();
