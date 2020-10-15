@@ -4829,6 +4829,9 @@ function setSalesBusOffCdRequired() {
       FormManager.readOnly('salesBusOffCd');
     }
     break;
+  case 'BVMDS':
+    FormManager.addValidator('salesBusOffCd', Validators.REQUIRED, [ 'Office Code' ], 'MAIN_IBM_TAB');
+	break;
   default:
     if (_role == 'Processor') {
       FormManager.enable('salesBusOffCd');
