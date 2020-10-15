@@ -294,7 +294,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       if (dummyHandler != null && !StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       } else {
-        legacyCust.setVat("");
+        legacyCust.setVat(data.getVat());
       }
     }
   }
