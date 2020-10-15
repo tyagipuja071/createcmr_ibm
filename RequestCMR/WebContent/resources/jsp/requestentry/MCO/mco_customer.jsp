@@ -43,8 +43,9 @@
         </p>
       </cmr:column>
   	</cmr:row>
-  </cmr:view>  
-<%--<cmr:column span="2" containerForField="LocationNumber" forCountry="838">
+  </cmr:view>
+  <cmr:row addBackground="false">
+<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
         <cmr:label fieldId="locationNumber">
           <cmr:fieldLabel fieldId="LocationNumber" />: 
@@ -53,8 +54,7 @@
             <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column> --%>
-    
-  <cmr:row addBackground="false">
+    <cmr:view forGEO="MCO,MCO1,MCO2">
       <cmr:column span="2" containerForField="SpecialTaxCd">
         <p>
         <label for="specialTaxCd"> 
@@ -64,6 +64,7 @@
         <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    </cmr:view>
     <cmr:column span="2" containerForField="AbbrevLocation">
       <p>
         <label for="abbrevLocn"> 

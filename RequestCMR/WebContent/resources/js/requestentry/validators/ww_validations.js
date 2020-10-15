@@ -940,14 +940,18 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerWWValidator(addDPLCheckValidator,GEOHandler.ROLE_PROCESSOR);
 
   GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ], GEOHandler.ROLE_PROCESSOR, true, true);
+  GEOHandler.registerValidator(addDPLCheckValidator, [ '862', '603', '607', '626', '644', '651', '668', '693', '694', '695', '699', '704', '705', '707', '708', '740', '741', '787', '820', '821',
+      '826', '889', '358', '359', '363', '666', '726', '822', '373', '382', '383', '635', '637', '656', '662', '667', '670', '691', '692', '700', '717', '718', '753', '810', '840', '841', '876',
+      '879', '880', '881','610', '636', '645', '669', '698', '725', '745', '764', '769', '770', '782', '804', '825', '827', '831', '833', '835', '842', '851', '857', '883' ], GEOHandler.ROLE_PROCESSOR, true, true);
 
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
-  // For Legacy PT,CY,GR,SA
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
+  // For Legacy PT,CY,GR
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE, ...GEOHandler.AFRICA], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE, ...GEOHandler.AFRICA], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(doubleByteCharacterValidator, [ SysLoc.CHINA ], null, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic
