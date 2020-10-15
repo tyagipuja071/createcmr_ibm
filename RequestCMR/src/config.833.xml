@@ -182,7 +182,7 @@
 					<length>5</length>
 				</column>
 				<column>
-					<label>Customer Name</label>
+					<label>Customer Name Con't</label>
 					<dbColumn>CUST_NM1</dbColumn>
 					<width>40</width>
 					<length>30</length>
