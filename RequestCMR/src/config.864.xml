@@ -42,7 +42,7 @@
 				</column>
 				<column>
 					<label>Commercial Financed</label>
-					<dbColumn>COMMERCIAL_FINANCED</dbColumn>
+					<dbColumn>SVC_AR_OFFICE</dbColumn>
 					<width>30</width>
 					<lovId>CommercialFinanced</lovId>
 				</column>
@@ -103,7 +103,7 @@
 				</column>
 				<column>
 					<label>Internal Department Number</label>
-					<dbColumn>IBM_DEPT_COST_CENTER</dbColumn>
+					<dbColumn>AFFILIATE</dbColumn>
 					<width>25</width>
 					<length>6</length>
 				</column>
@@ -148,12 +148,6 @@
 					<width>40</width>
 					<length>30</length>
 				</column>
-				<column number="true">
-					<label>PO Box</label>
-					<dbColumn>PO_BOX</dbColumn>
-					<width>18</width>
-					<length>23</length>
-				</column>
 				<column>
 					<label>Att. Person</label>
 					<dbColumn>COUNTY</dbColumn>
@@ -161,22 +155,28 @@
 					<length>30</length>
 				</column>
 				<column>
-					<label>Postal Code</label>
-					<dbColumn>POST_CD</dbColumn>
-					<width>18</width>
-					<length>8</length>
-				</column>
-				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>21</length>
+					<length>26</length>
+				</column>
+				<column>
+					<label>Postal Code</label>
+					<dbColumn>POST_CD</dbColumn>
+					<width>18</width>
+					<length>10</length>
 				</column>
 				<column>
 					<label>Landed Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column number="true">
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>18</width>
+					<length>23</length>
 				</column>
 			</columns>
 		</tab>
@@ -218,12 +218,6 @@
 					<width>40</width>
 					<length>30</length>
 				</column>
-				<column number="true">
-					<label>PO Box</label>
-					<dbColumn>PO_BOX</dbColumn>
-					<width>18</width>
-					<length>23</length>
-				</column>
 				<column>
 					<label>Att. Person</label>
 					<dbColumn>COUNTY</dbColumn>
@@ -234,19 +228,25 @@
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>8</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>24</length>
+					<length>26</length>
 				</column>
 				<column>
 					<label>Landed Country</label>
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
+				</column>
+				<column number="true">
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>18</width>
+					<length>23</length>
 				</column>
 			</columns>
 		</tab>
@@ -298,13 +298,13 @@
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>8</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>21</length>
+					<length>26</length>
 				</column>
 				<column>
 					<label>Landed Country</label>
@@ -362,13 +362,13 @@
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>8</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>21</length>
+					<length>26</length>
 				</column>
 				<column>
 					<label>Landed Country</label>
@@ -426,13 +426,13 @@
 					<label>Postal Code</label>
 					<dbColumn>POST_CD</dbColumn>
 					<width>18</width>
-					<length>8</length>
+					<length>10</length>
 				</column>
 				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
-					<length>21</length>
+					<length>26</length>
 				</column>
 				<column>
 					<label>Landed Country</label>
