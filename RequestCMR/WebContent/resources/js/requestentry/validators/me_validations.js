@@ -3863,6 +3863,7 @@ function setEngineeringBO() {
   var reqType = FormManager.getActualValue('reqType');
   var cmrIssuing = FormManager.getActualValue('cmrIssuingCntry');
   var cntryRegion = FormManager.getActualValue('countryUse');
+  FormManager.addValidator('engineeringBo', Validators.DIGIT, [ 'Engineering BO' ], 'MAIN_IBM_TAB');
   if (reqType == 'C') {
     if (cntryRegion == '808AF') {
       FormManager.setValue('engineeringBo', '6140000');

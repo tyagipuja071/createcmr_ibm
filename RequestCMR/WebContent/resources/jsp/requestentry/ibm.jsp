@@ -397,7 +397,6 @@ dojo.addOnLoad(function(){
         </cmr:column>
   		</cmr:row>
     </cmr:view> 
-    --%>
 		</cmr:view>
 
     <!-- Include Here IBM Specific fields for GEOs -->
