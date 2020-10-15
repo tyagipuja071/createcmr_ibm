@@ -7,7 +7,7 @@
  * UI handling
  * 
  */
-var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
+//var CNTRY_LIST_FOR_INVALID_CUSTOMERS = [ '838', '866', '754' ];
 dojo.require("dojo.io.iframe");
 
 /**
@@ -131,11 +131,17 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      if (cmrCntry == '821') {
-        executeBeforeSubmit();
+      if (checkIfFinalDnBCheckRequired()) {
+        matchDnBForAutomationCountries();
+      } else if (checkIfUpfrontUpdateChecksRequired()) {
+        addUpdateChecksExecution(frmCMR);
       } else {
-        // if there are no errors, show the Address Verification modal window
-        cmr.showModal('addressVerificationModal');
+        if (cmrCntry == '821') {
+          executeBeforeSubmit();
+        } else {
+          // if there are no errors, show the Address Verification modal window
+          cmr.showModal('addressVerificationModal');
+        }
       }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
@@ -465,7 +471,53 @@ function doSaveChangeComments() {
   if (action == YourActions.Reject && rejReason == '') {
     cmr.showAlert('Please specify the Reject Reason');
     return;
-  } else if (action == YourActions.Reject && (rejReason == 'DUPC' || rejReason == 'MAPP') && (FormManager.getActualValue('rejSupplInfo1') == '' || FormManager.getActualValue('rejSupplInfo2') == '')) {
+  } else if (action == YourActions.Reject && rejReason == 'DUPC') {
+	    if (dojo.byId('rejInfo1Label').innerText == "CMR No.") {
+	        var rej = FormManager.getActualValue('rejectReason');
+	        var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+	        mandt = FormManager.getActualValue('mandt');
+	        var ktokd = "ZS01";
+	        var rejInfo1 = FormManager.getActualValue('rejSupplInfo1');
+	        if (rejInfo1 != '') {
+	          var qParams = {
+	            ZZKV_CUSNO : rejInfo1,
+	            KATR6 : isscntry,
+	            MANDT : mandt
+	          };
+	          var result = cmr.query('VALIDATECMR', qParams);
+	          var cmrExist = result.ret1;
+	          if (cmrExist != undefined) {
+	            var qParams1 = {
+	              ZZKV_CUSNO : rejInfo1,
+	              MANDT : mandt,
+	              KATR6 : isscntry
+	            };
+	            var kunnr = cmr.query('GET.KUNNR.SOLDTO', qParams1);
+	            var kunnr1 = kunnr.ret1;
+	            if (kunnr1 != null || kunnr1 != undefined ) {
+	              dojo.byId('rejSupplInfo2').value = kunnr1;
+	              console.log(dojo.byId('rejSupplInfo2').value);
+	            }
+	            else{
+	            	cmr.showAlert('No Sold-To Kunnr found for ' + rejInfo1 +".");
+	            	return;
+	            }
+	            var rejInfo2 = FormManager.getActualValue('rejSupplInfo2');
+	            var rejField = '<input type="hidden" name="rejectReason" value="' + rej + '">';
+	            rejField += '<input type="hidden" name="rejSupplInfo1" value="' + rejInfo1 + '">';
+	            rejField += '<input type="hidden" name="rejSupplInfo2" value="' + rejInfo2 + '">';
+	            dojo.place(rejField, document.forms['frmCMR'], 'last');
+	          } else {
+	          cmr.showAlert('The CMR Number is not correct');
+	          return;
+	          } 
+	        }
+	        else{
+	        	cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText +".");
+	        	return;
+	        }
+	      }
+	    } else if (action == YourActions.Reject && (rejReason == 'DUPC' || rejReason == 'MAPP') && (FormManager.getActualValue('rejSupplInfo1') == '' || FormManager.getActualValue('rejSupplInfo2') == '')) {
     cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText + " and " + dojo.byId('rejInfo2Label').innerText + ".");
     return;
   } else if (action == YourActions.Reject && (rejReason == 'MDOC' || rejReason == 'DUPR' || rejReason == 'TYPR') && FormManager.getActualValue('rejSupplInfo1') == '') {
@@ -693,11 +745,11 @@ function afterConfigChange() {
     }
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
 
-    if (FormManager.getActualValue('ordBlk') == '93' && !CNTRY_LIST_FOR_INVALID_CUSTOMERS.includes(cntry)) {
+    if (FormManager.getActualValue('ordBlk') == '93' && _pagemodel.reqType != 'X') {
       FormManager.show('DeactivateToActivateCMR', 'func');
       if (dijit.byId('func')) {
         FormManager.getField('func').set('checked', true);
-      } else {
+      } else if (dojo.byId('func')) {
         dojo.byId('func').checked = true;
       }
       FormManager.disable('func');
@@ -950,23 +1002,27 @@ function connectToCmrServices() {
         errorMsg += (showError ? ', ' : '') + 'DUNS No.';
         showError = true;
       } else {
-//        var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
-//        var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
-//            SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA, SysLoc.JAPAN ];
-//        if (COUNTRIES.indexOf(sysLocCd) == -1) {
-//          FormManager.setValue('dunsNo', data.dunsNo);
-//        } else {
-          var dunsNo = FormManager.getActualValue('dunsNo');
+        // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
+        // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
+        // SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA,
+        // SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
+        // SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA,
+        // SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY,
+        // SysLoc.VENEZUELA, SysLoc.JAPAN ];
+        // if (COUNTRIES.indexOf(sysLocCd) == -1) {
+        // FormManager.setValue('dunsNo', data.dunsNo);
+        // } else {
+        var dunsNo = FormManager.getActualValue('dunsNo');
 
-          if (dunsNo == '' && data.dunsNo != '') {
-            FormManager.setValue('dunsNo', data.dunsNo);
-          } else {
-            if (dunsNo && data.dunsNo){
-              cmr.showAlert('DUNS '+data.dunsNo+' was retrieved but an existing DUNS '+dunsNo+' was found. The value was not overwritten.');
-            }
+        if (dunsNo == '' && data.dunsNo != '') {
+          FormManager.setValue('dunsNo', data.dunsNo);
+        } else {
+          if (dunsNo && data.dunsNo) {
+            cmr.showAlert('DUNS ' + data.dunsNo + ' was retrieved but an existing DUNS ' + dunsNo + ' was found. The value was not overwritten.');
           }
+        }
 
-//        }
+        // }
       }
       if (showError) {
         if (covError) {
@@ -1191,7 +1247,7 @@ function dnbAutoChk() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Rejected' && findDnbResult != 'Accepted' && userRole != 'Viewer') {
-    cmr.showModal('DnbAutoCheckModal');
+    showDnBMatchModal();
   }
 }
 
@@ -1231,7 +1287,8 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matches will be overriden. Proceed?', 'Warning', null, null);
+  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?',
+      'Warning', null, null);
 }
 
 /**
@@ -1246,7 +1303,13 @@ function doOverrideDnBMatch() {
 function autoDnbImportActFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   if (rowData) {
-    return '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo
+        + '\')">';
+    var dunsNo = rowData.autoDnbDunsNo[0];
+    if (dunsNo) {
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dunsNo.trim() + '\')">';
+    }
+    return formattedString;
   } else {
     return '';
   }
@@ -1314,6 +1377,7 @@ function setRejSupplInfoFields(value) {
     cmr.showNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "CMR No.";
     dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
+    FormManager.readOnly('rejSupplInfo2');
     break;
   case "MDOC":
     cmr.showNode('rejInfo1Div');
@@ -1400,4 +1464,132 @@ function handleRequiredDnBSearch() {
       }
     });
   }
+}
+
+function checkIfFinalDnBCheckRequired() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+  var findDnbResult = FormManager.getActualValue('findDnbResult');
+  var userRole = FormManager.getActualValue('userRole');
+  var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching()
+      && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
+    // currently Enabled Only For US
+    return true;
+  }
+  return false;
+}
+
+function matchDnBForAutomationCountries() {
+  var reqId = FormManager.getActualValue('reqId');
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo.xhrGet({
+    url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+    handleAs : 'json',
+    method : 'GET',
+    content : {
+      'reqId' : reqId
+    },
+    timeout : 50000,
+    sync : false,
+    load : function(data, ioargs) {
+      cmr.hideProgress();
+      console.log(data);
+      if (data && data.success) {
+        if (data.match) {
+          cmr.showModal('addressVerificationModal');
+        } else if (data.tradeStyleMatch) {
+          cmr.showConfirm('autoDnbImportMatch("' + data.dunsNo + '","0")',
+              'The customer name on the request is a tradestyle name. For CMR creation legal names should be used. Do you want to override the customer name on the request with ' + data.legalName
+                  + '?', 'Warning', null, {
+                OK : 'Yes',
+                CANCEL : 'No'
+              });
+        } else {
+          showDnBMatchModal();
+        }
+      } else {
+        // continue
+        console.log("An error occurred while matching dnb.");
+        cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+          OK : 'Yes',
+          CANCEL : 'No'
+        });
+      }
+    },
+    error : function(error, ioargs) {
+    }
+  });
+}
+
+function checkIfUpfrontUpdateChecksRequired() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var result = cmr.query('QUERY.SYS_PARAM_VALUE_VERIFY', {
+    CD : 'UPD_UI_CNTRY_LIST',
+    VALUE : '%' + cntry + '%'
+  });
+
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && result && result.ret1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
+ * Generic Validator to execute UpdateChecks Automation
+ */
+function addUpdateChecksExecution(frmCMR) {
+  console.log("addUpdateChecksExecution..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var elementResData = "";
+
+  if (reqType != 'U') {
+    cmr.showModal('addressVerificationModal');
+    return;
+  }
+  console.log('Running Update Checks Element...');
+  dojo.xhrPost({
+    url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+    handleAs : 'json',
+    method : 'POST',
+    content : dojo.formToObject(frmCMR),
+    timeout : 500000,
+    sync : true,
+    load : function(data, ioargs) {
+      if (data != '' && data != undefined) {
+        if (data.onError) {
+          console.log('UpdateChecks Element Executed Successfully.');
+          cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
+        } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
+          cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg
+              + '</strong> <br/> Do you really want to proceed ?', 'Warning', null, {
+            OK : 'Ok',
+            CANCEL : 'Cancel'
+          });
+        } else {
+          cmr.showModal('addressVerificationModal');
+        }
+      } else {
+        cmr.showModal('addressVerificationModal');
+      }
+    },
+    error : function(error, ioargs) {
+      success = false;
+      console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+      reject('Error occurred in Update Checks.');
+    }
+  });
 }

@@ -622,6 +622,7 @@ public class TurkeyTransformer extends EMEATransformer {
       contact = addrData.getCustNm4();
     }
 
+
     // Dept + Postal code + City
     if (!StringUtils.isEmpty(addrData.getDept())) {
       line5 = addrData.getDept() + " " + addrData.getPostCd() + " " + addrData.getCity1();
@@ -718,7 +719,7 @@ public class TurkeyTransformer extends EMEATransformer {
     legacyAddr.setAddrLine4(line4);
     legacyAddr.setAddrLine5(line5);
     legacyAddr.setAddrLine6(line6);
-    // legacyAddr.setAddrPhone(phone);
+//    legacyAddr.setAddrPhone(phone);
     legacyAddr.setAddrLineT(addrLineT);
     legacyAddr.setDistrict(addrData.getDept());
     legacyAddr.setContact(contact);
@@ -889,8 +890,8 @@ public class TurkeyTransformer extends EMEATransformer {
     String line4 = "";
     String line5 = "";
 
-    line1 = legacyAddr.getAddrLine1();
-    line2 = legacyAddr.getAddrLine2();
+      line1 = legacyAddr.getAddrLine1();
+      line2 = legacyAddr.getAddrLine2();
 
     // if (StringUtils.isEmpty(line2) && crossBorder) {
     // if (!StringUtils.isEmpty(line2) && !line2.toUpperCase().startsWith("ATT
@@ -902,20 +903,20 @@ public class TurkeyTransformer extends EMEATransformer {
     // }
     // }
 
-    if (StringUtils.isEmpty(line2)) {
-      line2 = legacyAddr.getStreetNo();
-    }
+      if (StringUtils.isEmpty(line2)) {
+        line2 = legacyAddr.getStreetNo();
+      }
 
-    line3 = legacyAddr.getStreet() != null ? legacyAddr.getStreet().trim() : "";
+      line3 = legacyAddr.getStreet() != null ? legacyAddr.getStreet().trim() : "";
 
-    String poBox = !StringUtils.isEmpty(legacyAddr.getPoBox()) ? legacyAddr.getPoBox() : "";
-    if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
-      poBox = " APTO " + poBox;
-    }
+      String poBox = !StringUtils.isEmpty(legacyAddr.getPoBox()) ? legacyAddr.getPoBox() : "";
+      if (!StringUtils.isEmpty(poBox) && !poBox.toUpperCase().startsWith("APTO")) {
+        poBox = " APTO " + poBox;
+      }
 
-    line3 = (StringUtils.isEmpty(line3) ? poBox : line3.trim()) + poBox;
-    line4 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() : "") + " "
-        + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
+      line3 = (StringUtils.isEmpty(line3) ? poBox : line3.trim()) + poBox;
+      line4 = (legacyAddr.getZipCode() != null ? legacyAddr.getZipCode().trim() : "") + " "
+          + (legacyAddr.getCity() != null ? legacyAddr.getCity().trim() : "");
 
     // if (!crossBorder) {
     // line5 = !StringUtils.isEmpty(legacyAddr.getAddrLine5()) ?
@@ -929,11 +930,11 @@ public class TurkeyTransformer extends EMEATransformer {
     // line5 = line5.substring(0, 30);
     // }
     // } else {
-    if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
-      line5 = massUpdtAddr.getLandCntry();
-    } else {
-      line5 = legacyAddr.getAddrLine5();
-    }
+        if (!StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
+          line5 = massUpdtAddr.getLandCntry();
+        } else {
+          line5 = legacyAddr.getAddrLine5();
+        }
     // }
 
     String[] lines = new String[] { (line1 != null ? line1.trim() : ""), (line2 != null ? line2.trim() : ""), (line3 != null ? line3.trim() : ""),
@@ -1102,11 +1103,11 @@ public class TurkeyTransformer extends EMEATransformer {
       String sbo = StringUtils.rightPad(data.getSalesBusOffCd(), 7, '0');
       legacyCust.setSbo(sbo);
       legacyCust.setIbo(sbo);
-      legacyCust.setCeBo(sbo);
+       legacyCust.setCeBo(sbo);
     } else {
       legacyCust.setSbo("");
       legacyCust.setIbo("");
-      legacyCust.setCeBo("");
+       legacyCust.setCeBo("");
     }
 
     // common data for C/U
@@ -1247,13 +1248,13 @@ public class TurkeyTransformer extends EMEATransformer {
       cust.setCeBo(cebo);
     }
 
-    // Email1 used to store Phone#
+    //Email1 used to store Phone#
     if (!StringUtils.isBlank(muData.getEmail1())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getEmail1())) {
-        cust.setTelNoOrVat("");
-      } else {
-        cust.setTelNoOrVat(muData.getEmail1());
-      }
+        if (DEFAULT_CLEAR_CHAR.equals(muData.getEmail1())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(muData.getEmail1());
+        }
     }
 
     if (!StringUtils.isBlank(muData.getCollectionCd())) {
@@ -1306,16 +1307,16 @@ public class TurkeyTransformer extends EMEATransformer {
       String subInd = muData.getSubIndustryCd();
       cust.setImsCd(subInd);
       // Defect 1776715: Fix for Economic code
-      // String firstChar = String.valueOf(subInd.charAt(0));
-      // StringBuilder builder = new StringBuilder();
-      // builder.append(firstChar);
-      // builder.append(subInd);
-      // LOG.debug("***Auto setting Economic code as > " + builder.toString());
-      // cust.setEconomicCd(builder.toString());
+//      String firstChar = String.valueOf(subInd.charAt(0));
+//      StringBuilder builder = new StringBuilder();
+//      builder.append(firstChar);
+//      builder.append(subInd);
+//      LOG.debug("***Auto setting Economic code as > " + builder.toString());
+//      cust.setEconomicCd(builder.toString());
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
     // CMR-2279 Turkey update massUpdateData
     entityManager.merge(cmrObjects.getMassUpdateData());
@@ -1538,27 +1539,26 @@ public class TurkeyTransformer extends EMEATransformer {
         Addr addrData = addrList.get(i);
         String addrType = addrData.getId().getAddrType();
         if ("Y".equals(addrData.getChangedIndc())) {
-          if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
-            // CmrtAddr olddataaddr =
-            // legacyObjects.findBySeqNo(billseqinlegacy);
-            // if (!isExistMailing) {
-            // // copy billing from mailing
-            // copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
-            // }
-            for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
-              if ("Y".equals(currAddr.getIsAddrUseBilling())) {
-                CmrtAddr olddataaddr = currAddr;
-                if (!isExistMailing) {
-                  // copy billing from mailing
-                  copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+        if (addrType.equalsIgnoreCase(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+//            CmrtAddr olddataaddr = legacyObjects.findBySeqNo(billseqinlegacy);
+//            if (!isExistMailing) {
+//            // copy billing from mailing
+//            copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
+//        }
+          for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
+            if ("Y".equals(currAddr.getIsAddrUseBilling())) {
+              CmrtAddr olddataaddr =  currAddr;           
+              if (!isExistMailing) {
+                // copy billing from mailing
+                copyBillingFromMailing(legacyObjects, olddataaddr, billingseq);
                   break;
-                }
-              }
             }
-          }
+          }        
+        }
         }
       }
-
+      }
+      
       for (CmrtAddr currAddr : legacyObjects.getAddresses()) {
 
         if ("00001".equals(billseqinlegacy)) {
@@ -1625,11 +1625,11 @@ public class TurkeyTransformer extends EMEATransformer {
           legacyObjects.getCustomerNo());
 
       if (!StringUtils.isBlank(mailseqinlegacy) && !StringUtils.isBlank(billseqinlegacy) && billseqinlegacy != mailseqinlegacy) {
-        // need to sync mailling and billing
+        //need to sync mailling and billing
         CmrtAddr billLegacyAddr = legacyObjects.findBySeqNo(billseqinlegacy);
         CmrtAddr mailLegacyAddr = legacyObjects.findBySeqNo(mailseqinlegacy);
-        if (billLegacyAddr != null || mailLegacyAddr != null) {
-          // there is address need to be massUpd and sync
+        if(billLegacyAddr!=null || mailLegacyAddr!=null){
+          //there is address need to be massUpd and sync
           CmrtAddr sourceAddr = mailLegacyAddr != null ? mailLegacyAddr : billLegacyAddr;
           String sourceType = mailLegacyAddr != null ? "M" : "B";
 
@@ -1647,7 +1647,7 @@ public class TurkeyTransformer extends EMEATransformer {
             targetAddr.setIsAddrUseBilling(ADDRESS_USE_NOT_EXISTS);
 
           }
-
+          
           targetAddr.setAddrLine1(sourceAddr.getAddrLine1());
           if (!StringUtils.isBlank(sourceAddr.getAddrLine2())) {
             targetAddr.setAddrLine2(sourceAddr.getAddrLine2());

@@ -199,7 +199,7 @@ dojo.addOnLoad(function(){
     </cmr:row>
    </cmr:view>
 
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848" exceptForGEO="FR,JP">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848" exceptForGEO="FR,JP,MCO2">
     <cmr:row topPad="10" addBackground="true">
       <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755">
         <p>
@@ -366,7 +366,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
   				</p>
   			</cmr:column>
-        <cmr:column span="2" containerForField="MembLevel" exceptForCountry="754,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838">
+        <cmr:column exceptForGEO="MCO2" span="2" containerForField="MembLevel" exceptForCountry="754,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
           <p>
             <cmr:label fieldId="memLvl">
               <cmr:fieldLabel fieldId="MembLevel" />:
@@ -375,7 +375,7 @@ dojo.addOnLoad(function(){
             <cmr:field fieldId="MembLevel" id="memLvl" path="memLvl" tabId="MAIN_IBM_TAB" />
           </p>
         </cmr:column>
-        <cmr:column span="2" containerForField="BPRelationType" exceptForCountry="754,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838">
+        <cmr:column exceptForGEO="MCO2" span="2" containerForField="BPRelationType" exceptForCountry="754,866,822,666,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
           <p>
             <cmr:label fieldId="bpRelType">
               <cmr:fieldLabel fieldId="BPRelationType" />:
@@ -397,7 +397,6 @@ dojo.addOnLoad(function(){
         </cmr:column>
   		</cmr:row>
     </cmr:view> 
-    --%>
 		</cmr:view>
 
     <!-- Include Here IBM Specific fields for GEOs -->

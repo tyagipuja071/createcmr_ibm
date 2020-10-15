@@ -3009,20 +3009,20 @@ public class RequestEntryModel extends BaseModel {
     this.addrStdTs = addrStdTs;
   }
 
-  public String getPaygoProcessIndc() {
-    return paygoProcessIndc;
-  }
-
-  public void setPaygoProcessIndc(String paygoProcessIndc) {
-    this.paygoProcessIndc = paygoProcessIndc;
-  }
-
   public String getMilitary() {
     return military;
   }
 
   public void setMilitary(String military) {
     this.military = military;
+  }
+  
+  public String getPaygoProcessIndc() {
+    return paygoProcessIndc;
+  }
+
+  public void setPaygoProcessIndc(String paygoProcessIndc) {
+    this.paygoProcessIndc = paygoProcessIndc;
   }
 
 }

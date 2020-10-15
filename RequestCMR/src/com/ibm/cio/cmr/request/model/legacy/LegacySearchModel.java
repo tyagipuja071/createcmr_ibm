@@ -52,7 +52,7 @@ public class LegacySearchModel {
 
   // france
   private String siret;
-
+  
   private List<String> addressUses = new ArrayList<String>();
 
   private int recCount;

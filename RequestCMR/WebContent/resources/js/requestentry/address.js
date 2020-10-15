@@ -909,7 +909,7 @@ function addEditAddressModal_onLoad() {
       FormManager.setValue('addrType', 'ZP01');
     }
     if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.PORTUGAL || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.SPAIN
-        || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
+     || FormManager.getActualValue('cmrIssuingCntry') == SysLoc.GREECE) {
       FormManager.setValue('addrType', 'ZS01');
     }
     FormManager.clearValue('transportZone');
@@ -1776,17 +1776,29 @@ function applyAddrChangesModal_onLoad() {
         }
       }
 
-      if (SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
-        if (FormManager.getActualValue('custGrp') == 'LOCAL') {
-          continue;
-        } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
-          continue;
-        } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+      if(SysLoc.GREECE == cntry && type.ret1 == 'ZP01') {
+    	  if(FormManager.getActualValue('custGrp') == 'LOCAL') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('reqType') == 'U' && FormManager.getActualValue('landCntry') == 'GR') {
+    		  continue;
+    	  } else if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
+    		  continue;
+    	  }
+      }
+      
+      if(SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+    	  if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
+    		  continue;
+    	  }
+      } 
+
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZP01') {
+        if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZS01') {
           continue;
         }
       }
 
-      if (SysLoc.GREECE == cntry && type.ret1 == 'ZS01') {
+      if (SysLoc.TURKEY == cntry && type.ret1 == 'ZS01') {
         if (FormManager.getActualValue('custGrp') == 'CROSS' && FormManager.getActualValue('addrType') == 'ZP01') {
           continue;
         }
@@ -2769,4 +2781,16 @@ function doValidateSave() {
     doAddToAddressList();
   }
 
+}
+
+
+function openDPLSearch(){
+  var reqId = FormManager.getActualValue('reqId');
+  WindowMgr.open('DPLSEARCH', 'DPLSEARCH'+reqId, 'dpl/request?reqId='+reqId, null,
+      550);
+}
+
+function doDplSearchRequest() {
+  cmr.hideModal('DplDetailsModal');
+  openDPLSearch();
 }

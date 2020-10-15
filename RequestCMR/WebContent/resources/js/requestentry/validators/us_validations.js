@@ -59,6 +59,21 @@ function addInvoiceAddressLinesValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addCreateByModelValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var CUST_GRP = FormManager.getActualValue('custSubGrp');
+        var CMR_NO = FormManager.getActualValue('modelCmrNo');
+        if ((CUST_GRP == 'BYMODEL') && (CMR_NO == '')) {
+          return new ValidationResult(null, false, 'A CMR should have been imported on the request as the model CMR.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR');
+}
+
 /**
  * Validates that the request only has exactly 1 Install-to and at most 1
  * Invoice-to
@@ -112,14 +127,25 @@ function addAddressRecordTypeValidator() {
  * After configuration for US
  */
 function afterConfigForUS() {
-  // PPS CEID field as mandatory for BP scenario
+
+  var reqType = FormManager.getActualValue('reqType');
+  var role = null;
+  if (typeof (_pagemodel) != 'undefined') {
+    role = _pagemodel.userRole;
+  }
+  if (reqType == 'U' && role == 'Requester') {
+    FormManager.enable('isuCd');
+    FormManager.enable('clientTier');
+  }
+
+  // Enterprise field as mandatory for BP scenario
   var custTypeHandler = null;
   if (custTypeHandler == null) {
     var custTypeHandler = dojo.connect(FormManager.getField('custType'), 'onChange', function(value) {
       if (FormManager.getActualValue('userRole').toUpperCase() == 'REQUESTER' && FormManager.getActualValue('reqType') == 'C' && FormManager.getActualValue('custType') == '7') {
-        FormManager.addValidator('ppsceid', Validators.REQUIRED, [ 'PPSCEID' ], 'MAIN_IBM_TAB');
+        FormManager.addValidator('enterprise', Validators.REQUIRED, [ 'Enterprise' ], 'MAIN_IBM_TAB');
       } else {
-        FormManager.removeValidator('ppsceid', Validators.REQUIRED);
+        FormManager.removeValidator('enterprise', Validators.REQUIRED);
       }
     });
   }
@@ -312,6 +338,7 @@ function canRemoveAddress(value, rowIndex, grid) {
 dojo.addOnLoad(function() {
   console.log('adding US scripts...');
   GEOHandler.registerValidator(addInvoiceAddressLinesValidator, [ SysLoc.USA ], null, true);
+  GEOHandler.registerValidator(addCreateByModelValidator, [ SysLoc.USA ], null, true);
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.USA ], null, true);
   GEOHandler.addAfterConfig(afterConfigForUS, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(initUSTemplateHandler, [ SysLoc.USA ]);

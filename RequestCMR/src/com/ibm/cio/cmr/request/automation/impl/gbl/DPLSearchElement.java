@@ -18,7 +18,6 @@ import com.ibm.cio.cmr.request.automation.AutomationElement;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
-import com.ibm.cio.cmr.request.automation.dpl.DPLSearchItem;
 import com.ibm.cio.cmr.request.automation.dpl.DPLSearchProcess;
 import com.ibm.cio.cmr.request.automation.dpl.DPLSearchResult;
 import com.ibm.cio.cmr.request.automation.impl.MatchingElement;
@@ -37,6 +36,8 @@ import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.pdf.impl.DPLSearchPDFConverter;
+import com.ibm.cmr.services.client.dpl.DPLRecord;
+import com.ibm.cmr.services.client.dpl.DPLSearchResults;
 
 /**
  * {@link AutomationElement} that connects to the defined DPL Check web
@@ -78,58 +79,20 @@ public class DPLSearchElement extends MatchingElement {
       return result;
     }
 
-    boolean deepTokenSearch = false;
-    // get access token, hidden in the CMT field
-    String accessToken = admin.getCmt();
-    List<DPLSearchResult> dplResults = new ArrayList<DPLSearchResult>();
-    DPLSearchResult searchResult = null;
+    List<DPLSearchResults> dplResults = new ArrayList<DPLSearchResults>();
+    DPLSearchResults searchResult = null;
     List<String> names = extractCompanyNames(entityManager, requestData);
 
-    if (!StringUtils.isBlank(accessToken)) {
-      try {
-        DPLSearchProcess dplSearch = new DPLSearchProcess(accessToken, admin.getRequesterId());
-        for (String name : names) {
-          dplSearch.performDplCheck(name);
-          searchResult = dplSearch.getResult();
-          if (searchResult != null) {
-            dplResults.add(searchResult);
-          }
-        }
-        details.append("DPL name search performed successfully.\n");
-      } catch (Exception e) {
-        // access token invalid
-        deepTokenSearch = true;
+    DPLSearchProcess dplSearch = new DPLSearchProcess();
+    for (String name : names) {
+      dplSearch.performDplSearch(name);
+      searchResult = dplSearch.getResult();
+      if (searchResult != null) {
+        dplResults.add(searchResult);
       }
-    } else {
-      deepTokenSearch = true;
     }
+    details.append("DPL name search performed successfully.\n");
 
-    if (deepTokenSearch) {
-      List<String> tokens = getAccessTokens(entityManager, admin.getRequesterId());
-      if (tokens == null || tokens.isEmpty()) {
-        result.setOnError(true);
-        result.setResults("Not Done");
-        result.setDetails("DPL name search cannot be performed for this request.");
-      } else {
-        for (String token : tokens) {
-          try {
-            DPLSearchProcess dplSearch = new DPLSearchProcess(token, admin.getRequesterId());
-            for (String name : names) {
-              dplSearch.performDplCheck(name);
-              searchResult = dplSearch.getResult();
-              if (searchResult != null) {
-                dplResults.add(searchResult);
-              }
-            }
-            details.append("DPL name search performed successfully.\n");
-            break;
-          } catch (Exception e) {
-            // access token invalid
-            LOG.warn("Token is invalid, retrying..");
-          }
-        }
-      }
-    }
     if (dplResults.isEmpty()) {
       result.setOnError(true);
       result.setResults("Not Done");
@@ -139,12 +102,12 @@ public class DPLSearchElement extends MatchingElement {
       boolean exactMatch = false;
       boolean partialMatch = false;
 
-      for (DPLSearchResult dplResult : dplResults) {
-        cnt += dplResult.getItems().size();
-        if (dplResult.exactMatchFound()) {
+      for (DPLSearchResults dplResult : dplResults) {
+        cnt += dplResult.getDeniedPartyRecords().size();
+        if (DPLSearchResult.exactMatchFound(dplResult)) {
           exactMatch = true;
         }
-        if (dplResult.partialMatchFound()) {
+        if (DPLSearchResult.partialMatchFound(dplResult)) {
           partialMatch = true;
         }
       }
@@ -167,14 +130,19 @@ public class DPLSearchElement extends MatchingElement {
         details.append("Matches against the DPL database found for the request.\n");
         details.append("Complete results added as attachment.\n");
         int resultNo = 1;
-        for (DPLSearchResult dplResult : dplResults) {
-          output.addMatch(getProcessCode(), "RESULT_ID", dplResult.getResultId().substring(0, 19), "", "", "DPL", resultNo);
-          details.append("\nName: " + dplResult.getName()).append("\n");
-          details.append("Potential Matches: ").append(dplResult.getItems().size()).append(dplResult.getItems().size() >= 50 ? "+" : "").append("\n");
+        for (DPLSearchResults dplResult : dplResults) {
+          output.addMatch(getProcessCode(), "ENTITY_ID", resultNo + "", "", "", "DPL", resultNo);
+          details.append("\nName: " + dplResult.getSearchArgument()).append("\n");
+          details.append("Potential Matches: ").append(dplResult.getDeniedPartyRecords().size()).append("\n");
           details.append("Highest matches: ").append("\n");
 
-          for (DPLSearchItem item : dplResult.getTopMatches()) {
-            details.append(" - ").append(item.getPartyName()).append("(" + item.getCountryCode() + ")").append("\n");
+          for (DPLRecord item : DPLSearchResult.getTopMatches(dplResult)) {
+            if (!StringUtils.isBlank(item.getCompanyName())) {
+              details.append(" - ").append(item.getCompanyName()).append("(" + item.getCountryCode() + ")").append("\n");
+            } else if (!StringUtils.isBlank(item.getCustomerLastName())) {
+              details.append(" - ").append(item.getCustomerFirstName() + " " + item.getCustomerLastName()).append("(" + item.getCountryCode() + ")")
+                  .append("\n");
+            }
           }
 
           resultNo++;
@@ -208,23 +176,6 @@ public class DPLSearchElement extends MatchingElement {
 
     result.setProcessOutput(output);
     return result;
-  }
-
-  /**
-   * Gets the 5 latest tokens by the same user within the last 5 hours from
-   * different requests
-   * 
-   * @param entityManager
-   * @param userId
-   * @return
-   */
-  private List<String> getAccessTokens(EntityManager entityManager, String userId) {
-    String sql = ExternalizedQuery.getSql("AUTOMATION.DPL.GET_ACCESS_TOKENS");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQUESTER_ID", userId);
-    query.setForReadOnly(true);
-
-    return query.getResults(5, String.class);
   }
 
   /**

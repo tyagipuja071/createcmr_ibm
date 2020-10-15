@@ -5251,6 +5251,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_NM2":
         muaModel.setCustNm2(tempVal);
         break;
+      case "CUST_NM3":
+        muaModel.setCustNm3(tempVal);
+        break;
       case "CUST_NM4":
         muaModel.setCustNm4(tempVal);
         break;
@@ -5310,6 +5313,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "COUNTY":
         muaModel.setCounty(tempVal);
+        break;
+      case "DIVN":
+        muaModel.setDivn(tempVal);
         break;
       default:
         LOG.debug("Default condition was executed [nothing is saved] for DB column >> " + col.getLabel());
@@ -5532,6 +5538,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "SUB_INDUSTRY_CD":
         muModel.setSubIndustryCd(tempVal);
+        break;
+      case "MILITARY":
+        muModel.setMilitary(tempVal);
         break;
       case "SVC_AR_OFFICE":
         muModel.setSvcArOffice(tempVal);
