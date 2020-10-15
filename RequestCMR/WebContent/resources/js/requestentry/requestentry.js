@@ -1489,7 +1489,7 @@ function checkIfUpfrontUpdateChecksRequired() {
   var reqType = FormManager.getActualValue('reqType');
   var reqStatus = FormManager.getActualValue('reqStatus');
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var result = cmr.query('QUERY.SYS_PARAM_VALUE_VERIFY', {
+  var result = cmr.query('SYS_PARAM_VALUE_VERIFY', {
     CD : 'UPD_UI_CNTRY_LIST',
     VALUE : '%' + cntry + '%'
   });
