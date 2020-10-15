@@ -226,7 +226,7 @@ public class UKIUtil extends AutomationUtil {
     }
 
     if (coverageFieldUpdtd > 0) {
-      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
+      String managerID = SystemParameters.getString("UKI_MGR_COV_UPDT");
       if (StringUtils.isNotBlank(managerID)) {
         boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
         if (!managerCheck) {
@@ -234,7 +234,7 @@ public class UKIUtil extends AutomationUtil {
             cmdeReview = true;
             admin.setScenarioVerifiedIndc("Y");
           } else {
-            details.append("'Updates to coverage fields cannot be validated.\n");
+            details.append("Updates to coverage fields cannot be validated. An Approval wil be required.\n");
             admin.setScenarioVerifiedIndc("N");
           }
         } else {
