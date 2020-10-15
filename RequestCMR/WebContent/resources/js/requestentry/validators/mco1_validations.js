@@ -1129,6 +1129,23 @@ function validateTypeOfCustomer() {
   FormManager.addValidator('crosSubTyp', Validators.NO_SPECIAL_CHAR, [ 'Type Of Customer' ], 'MAIN_CUST_TAB');
 }
 
+function embargoCdValidator() {
+  console.log("embargoCdValidator..............");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd');
+        var validValues = [ 'Y', 'J', '' ];
+
+        if (!validValues.includes(embargoCd)) {
+          return new ValidationResult(null, false, 'Embargo Code can have either Y or J or empty as values');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1187,4 +1204,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterTemplateLoad(mandatoryForBusinessPartner, [ SysLoc.SOUTH_AFRICA ]);
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
+
+  GEOHandler.registerValidator(embargoCdValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
 });
