@@ -194,7 +194,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyCust.setCurrencyCd("SA");
       legacyCust.setTaxCd(data.getSpecialTaxCd());
       legacyCust.setMrcCd("2");
-      legacyCust.setCollectionCd("00001");
+      legacyCust.setCollectionCd("000001");
       legacyCust.setCreditCd(""); // blank on new creates
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
@@ -255,7 +255,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    legacyCust.setAbbrevNm(data.getAbbrevNm());
+    legacyCust.setAbbrevNm(!StringUtils.isEmpty(data.getAbbrevNm()) ? data.getAbbrevNm().toUpperCase() : data.getAbbrevNm());
     legacyCust.setLangCd("1");
     legacyCust.setMrcCd("2");
     legacyCust.setCustType(data.getCrosSubTyp());
