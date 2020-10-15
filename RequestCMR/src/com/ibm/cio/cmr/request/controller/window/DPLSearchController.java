@@ -82,6 +82,8 @@ public class DPLSearchController extends BaseWindowController {
       params.addParam("searchString", request.getParameter("searchString"));
       params.addParam("processType", request.getParameter("processType"));
       params.addParam("user", AppUser.getUser(request));
+      params.addParam("assessment", request.getParameter("assessment"));
+      params.addParam("assessmentCmt", request.getParameter("assessmentCmt"));
       Object results = service.process(request, params);
 
       map.addAttribute("data", results);

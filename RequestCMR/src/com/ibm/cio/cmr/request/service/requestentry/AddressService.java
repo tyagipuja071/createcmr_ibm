@@ -37,11 +37,13 @@ import com.ibm.cio.cmr.request.entity.MachinesToInstallPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.KeyContainer;
+import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
+import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -1415,7 +1417,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     query.executeSql();
   }
 
-  public void recomputeDPLResult(AppUser user, EntityManager entityManager, long reqId) {
+  public void recomputeDPLResult(AppUser user, EntityManager entityManager, long reqId) throws CmrException {
 
     Scorecard scorecard = getScorecardRecord(entityManager, reqId);
 
@@ -1447,6 +1449,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
       }
 
+      boolean doDplSearch = false;
       if (all == notrequired) {
         scorecard.setDplChkResult("NR");
         // not required
@@ -1456,8 +1459,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       } else if (all == failed + notrequired) {
         // all failed
         scorecard.setDplChkResult("AF");
+        doDplSearch = true;
       } else if (passed > 0 && all != passed) {
         // some passed, some failed/not done
+        doDplSearch = true;
         scorecard.setDplChkResult("SF");
       }
 
@@ -1471,8 +1476,29 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         scorecard.setDplChkUsrId(user.getIntranetId());
         scorecard.setDplChkUsrNm(user.getBluePagesName());
       }
+      if (scorecard.getDplChkUsrId() == null) {
+        scorecard.setDplChkUsrId(user.getIntranetId());
+        scorecard.setDplChkUsrNm(user.getBluePagesName());
+      }
       this.log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
       updateEntity(scorecard, entityManager);
+
+      if (doDplSearch) {
+        this.log.debug("Performing DPL Search for Request " + reqId + " with DPL Status: " + scorecard.getDplChkResult());
+
+        ParamContainer params = new ParamContainer();
+        params.addParam("processType", "ATTACH");
+        params.addParam("reqId", reqId);
+        params.addParam("user", user);
+        params.addParam("filePrefix", "AutoDPLSearch_");
+
+        try {
+          DPLSearchService dplService = new DPLSearchService();
+          dplService.process(null, params);
+        } catch (Exception e) {
+          this.log.warn("DPL results not attached to the request", e);
+        }
+      }
     }
   }
 

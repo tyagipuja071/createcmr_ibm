@@ -72,6 +72,12 @@ td.inner-det {
 span.bold {
   font-weight: bold;
 }
+
+ .btn-search, .btn-reset {
+   min-width: 100px;
+   font-size: 13px;
+   height: 30px;
+ }
 </style>
 
 <cmr:window>
