@@ -64,10 +64,12 @@ public class RequestData {
     case "U":
       this.addresses = extractAddresses(entityManager, reqId);
       break;
-    case "M":
-      throw new IllegalArgumentException("Mass Update is not supported at the moment.");
-    case "N":
-      throw new IllegalArgumentException("Mass Create is not supported at the moment.");
+    /*
+     * case "M": throw new
+     * IllegalArgumentException("Mass Update is not supported at the moment.");
+     * case "N": throw new
+     * IllegalArgumentException("Mass Create is not supported at the moment.");
+     */
     }
   }
 
