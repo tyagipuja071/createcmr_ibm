@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -24,6 +26,8 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -740,4 +744,11 @@ public class DnBUtil {
     return res;
   }
 
+  public static boolean isDnbOverrideAttachmentProvided(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+
+    return query.exists();
+  }
 }

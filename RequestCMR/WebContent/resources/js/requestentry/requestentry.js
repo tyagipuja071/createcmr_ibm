@@ -1428,7 +1428,7 @@ function checkIfFinalDnBCheckRequired() {
   var userRole = FormManager.getActualValue('userRole');
   var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
   if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching()
-      && matchOverrideIndc != 'Y' && SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry')) {
+      && matchOverrideIndc != 'Y') {
     // currently Enabled Only For US
     return true;
   }
