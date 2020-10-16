@@ -294,7 +294,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       if (dummyHandler != null && !StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
         legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
       } else {
-        legacyCust.setVat("");
+        legacyCust.setVat(data.getVat());
       }
     }
   }
@@ -323,6 +323,20 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   @Override
+  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
+      MassUpdtData muData, String cmr) throws Exception {
+
+    if (!StringUtils.isBlank(muData.getTaxCd1())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getTaxCd1())) {
+        custExt.setTeleCovRep("");
+      } else {
+        custExt.setTeleCovRep(muData.getTaxCd1());
+      }
+    }
+
+  }
+
+  @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
 
@@ -331,8 +345,16 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     if (!StringUtils.isBlank(muAddr.getPostCd())) {
       legacyAddr.setZipCode(muAddr.getPostCd());
-    } else {
-      legacyAddr.setZipCode("");
+    }
+
+    if ("ZS01".equals(muAddr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(muAddr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(muAddr.getCustPhone());
+        }
+      }
     }
 
     if ("ZD01".equals(muAddr.getId().getAddrType())) {
@@ -342,6 +364,14 @@ public class SouthAfricaTransformer extends MCOTransformer {
         } else {
           legacyAddr.setAddrPhone(muAddr.getCustPhone());
         }
+      }
+    }
+
+    if (!StringUtils.isBlank(muAddr.getPostCd())) {
+      if (DEFAULT_CLEAR_NUM.equals(cust.getTelNoOrVat())) {
+        legacyAddr.setZipCode("");
+      } else {
+        legacyAddr.setZipCode(muAddr.getPostCd());
       }
     }
 
@@ -363,23 +393,49 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
+    if (!StringUtils.isBlank(muData.getAffiliate())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
+        legacyCust.setLangCd("");
+      } else {
+        legacyCust.setLangCd(muData.getAffiliate());
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getCustNm1())) {
-      legacyCust.setSbo(muData.getCustNm1());
-      legacyCust.setIbo(muData.getCustNm1());
+      if (DEFAULT_CLEAR_NUM.equals(muData.getCustNm1())) {
+        legacyCust.setSbo("");
+      } else {
+        legacyCust.setSbo(muData.getCustNm1());
+        legacyCust.setIbo(muData.getCustNm1());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
-      legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
+      if (DEFAULT_CLEAR_NUM.equals(muData.getRepTeamMemberNo())) {
+        legacyCust.setSalesRepNo("");
+      } else {
+        legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
+        legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
-      legacyCust.setImsCd(subInd);
+      if (DEFAULT_CLEAR_NUM.equals(subInd)) {
+        legacyCust.setImsCd("");
+      } else {
+        legacyCust.setImsCd(subInd);
+      }
     }
+
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      legacyCust.setModeOfPayment(muData.getSvcArOffice());
+      if (DEFAULT_CLEAR_NUM.equals(muData.getSvcArOffice())) {
+        legacyCust.setModeOfPayment("");
+      } else {
+        legacyCust.setModeOfPayment(muData.getSvcArOffice());
+      }
     }
+
     if (!StringUtils.isBlank(muData.getMilitary())) {
       if ("Y".equals(muData.getMilitary())) {
         legacyCust.setModeOfPayment("5");
@@ -387,6 +443,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
         legacyCust.setModeOfPayment("");
       }
     }
+
   }
 
   @Override
