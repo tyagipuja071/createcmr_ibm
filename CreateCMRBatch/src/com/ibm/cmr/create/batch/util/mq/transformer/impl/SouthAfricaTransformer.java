@@ -47,6 +47,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
   private static final Logger LOG = Logger.getLogger(MCOTransformer.class);
   private static final String DEFAULT_CLEAR_NUM = "0";
+  public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
+  public static final String CMR_REQUEST_STATUS_CPR = "CPR";
+  public static final String CMR_REQUEST_STATUS_PCR = "PCR";
 
   public SouthAfricaTransformer() {
     super(SystemLocation.SOUTH_AFRICA);
@@ -246,12 +249,29 @@ public class SouthAfricaTransformer extends MCOTransformer {
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
                                                                                             // removal-single
       // inactivation
-      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && !"TREC".equals(admin.getReqReason())) {
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && !CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason())) {
         if (!StringUtils.isBlank(rdcEmbargoCd) && ("Y".equals(rdcEmbargoCd))) {
           if (StringUtils.isBlank(data.getEmbargoCd())) {
             legacyCust.setEmbargoCd("");
           }
         }
+      }
+
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd("");
+        blankOrdBlockFromData(entityManager, data);
+      }
+
+      if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason())
+          && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
+          && admin.getReqStatus().equals(CMR_REQUEST_STATUS_PCR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
+          && "Y".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
+        legacyCust.setEmbargoCd(rdcEmbargoCd);
+        resetOrdBlockToData(entityManager, data);
       }
     }
 
@@ -298,6 +318,18 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
   }
+  
+  private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("");
+    entityManager.merge(data);
+    entityManager.flush();
+  }
+
+  private void resetOrdBlockToData(EntityManager entityManager, Data data) {
+    data.setOrdBlk("88");
+    entityManager.merge(data);
+    entityManager.flush();
+  }
 
   @Override
   public boolean hasCmrtCustExt() {
@@ -323,14 +355,34 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   @Override
+  public void transformLegacyCustomerExtDataMassUpdate(EntityManager entityManager, CmrtCustExt custExt, CMRRequestContainer cmrObjects,
+      MassUpdtData muData, String cmr) throws Exception {
+
+    if (!StringUtils.isBlank(muData.getTaxCd1())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getTaxCd1())) {
+        custExt.setTeleCovRep("");
+      } else {
+        custExt.setTeleCovRep(muData.getTaxCd1());
+      }
+    }
+
+  }
+
+  @Override
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
 
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
     legacyAddr.setForUpdate(true);
 
-    if (!StringUtils.isBlank(muAddr.getPostCd())) {
-      legacyAddr.setZipCode(muAddr.getPostCd());
+    if ("ZS01".equals(muAddr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(muAddr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(muAddr.getCustPhone());
+        }
+      }
     }
 
     if ("ZD01".equals(muAddr.getId().getAddrType())) {
@@ -344,7 +396,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(muAddr.getPostCd())) {
-      legacyAddr.setZipCode(muAddr.getPostCd());
+      if (DEFAULT_CLEAR_NUM.equals(muAddr.getPostCd())) {
+        legacyAddr.setZipCode("");
+      } else {
+        legacyAddr.setZipCode(muAddr.getPostCd());
+      }
     }
 
     formatMassUpdateAddressLines(entityManager, legacyAddr, muAddr, false);
@@ -365,23 +421,49 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
+    if (!StringUtils.isBlank(muData.getAffiliate())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
+        legacyCust.setLangCd("");
+      } else {
+        legacyCust.setLangCd(muData.getAffiliate());
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getCustNm1())) {
-      legacyCust.setSbo(muData.getCustNm1());
-      legacyCust.setIbo(muData.getCustNm1());
+      if (DEFAULT_CLEAR_NUM.equals(muData.getCustNm1())) {
+        legacyCust.setSbo("");
+      } else {
+        legacyCust.setSbo(muData.getCustNm1());
+        legacyCust.setIbo(muData.getCustNm1());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
-      legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
+      if (DEFAULT_CLEAR_NUM.equals(muData.getRepTeamMemberNo())) {
+        legacyCust.setSalesRepNo("");
+      } else {
+        legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
+        legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
+      }
     }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
-      legacyCust.setImsCd(subInd);
+      if (DEFAULT_CLEAR_NUM.equals(subInd)) {
+        legacyCust.setImsCd("");
+      } else {
+        legacyCust.setImsCd(subInd);
+      }
     }
+
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      legacyCust.setModeOfPayment(muData.getSvcArOffice());
+      if (DEFAULT_CLEAR_NUM.equals(muData.getSvcArOffice())) {
+        legacyCust.setModeOfPayment("");
+      } else {
+        legacyCust.setModeOfPayment(muData.getSvcArOffice());
+      }
     }
+
     if (!StringUtils.isBlank(muData.getMilitary())) {
       if ("Y".equals(muData.getMilitary())) {
         legacyCust.setModeOfPayment("5");
@@ -389,6 +471,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
         legacyCust.setModeOfPayment("");
       }
     }
+
   }
 
   @Override
