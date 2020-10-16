@@ -142,7 +142,7 @@
     <editable>true</editable>
     <required>true</required>
     <editType>text</editType>
-	<value>https://localhost:9444/FindCMR</value>
+    <value>https://localhost:9444/FindCMR</value>
   </item>
   <item>
     <id>MAIL_SUBJECT</id>
