@@ -343,10 +343,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
     legacyAddr.setForUpdate(true);
 
-    if (!StringUtils.isBlank(muAddr.getPostCd())) {
-      legacyAddr.setZipCode(muAddr.getPostCd());
-    }
-
     if ("ZS01".equals(muAddr.getId().getAddrType())) {
       if (!StringUtils.isBlank(muAddr.getCustPhone())) {
         if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
@@ -368,7 +364,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(muAddr.getPostCd())) {
-      if (DEFAULT_CLEAR_NUM.equals(cust.getTelNoOrVat())) {
+      if (DEFAULT_CLEAR_NUM.equals(muAddr.getPostCd())) {
         legacyAddr.setZipCode("");
       } else {
         legacyAddr.setZipCode(muAddr.getPostCd());
