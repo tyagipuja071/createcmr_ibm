@@ -318,7 +318,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
   }
-  
+
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
     data.setOrdBlk("");
     entityManager.merge(data);
@@ -429,12 +429,13 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getCustNm1())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getCustNm1())) {
+    if (!StringUtils.isBlank(muData.getSalesBoCd())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getSalesBoCd())) {
         legacyCust.setSbo("");
+        legacyCust.setIbo("");
       } else {
-        legacyCust.setSbo(muData.getCustNm1());
-        legacyCust.setIbo(muData.getCustNm1());
+        legacyCust.setSbo(muData.getSalesBoCd());
+        legacyCust.setIbo(muData.getSalesBoCd());
       }
     }
 
