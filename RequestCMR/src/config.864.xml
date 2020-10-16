@@ -35,7 +35,7 @@
 				</column>
 				<column>
 					<label>Collection Branch Office</label>
-					<dbColumn>COLL_BO_ID</dbColumn>
+					<dbColumn>TAX_CD1</dbColumn>
 					<width>30</width>
 					<lovId>CollBranchOff</lovId>
 					<length>4</length>
