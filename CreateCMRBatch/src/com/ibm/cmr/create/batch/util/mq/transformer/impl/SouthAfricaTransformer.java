@@ -347,12 +347,22 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyAddr.setZipCode(muAddr.getPostCd());
     }
 
+    if ("ZS01".equals(muAddr.getId().getAddrType())) {
+      if (!StringUtils.isBlank(muAddr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
+          cust.setTelNoOrVat("");
+        } else {
+          cust.setTelNoOrVat(muAddr.getCustPhone());
+        }
+      }
+    }
+
     if ("ZD01".equals(muAddr.getId().getAddrType())) {
-      if (!StringUtils.isBlank(cust.getTelNoOrVat())) {
-        if (DEFAULT_CLEAR_NUM.equals(cust.getTelNoOrVat())) {
+      if (!StringUtils.isBlank(muAddr.getCustPhone())) {
+        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
           legacyAddr.setAddrPhone("");
         } else {
-          legacyAddr.setAddrPhone(cust.getTelNoOrVat());
+          legacyAddr.setAddrPhone(muAddr.getCustPhone());
         }
       }
     }
