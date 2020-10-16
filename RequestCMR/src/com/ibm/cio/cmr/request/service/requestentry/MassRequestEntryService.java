@@ -4595,17 +4595,16 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         try (InputStream is = new ByteArrayInputStream(bookBytes)) {
           validations = template.validate(em, is, country, 2000);
           LOG.debug(new ObjectMapper().writeValueAsString(validations));
-          for (TemplateValidation validation : validations) {
-            for (ValidationRow row : validation.getRows()) {
-              if (!row.isSuccess()) {
-                if (StringUtils.isEmpty(errTxt.toString())) {
-                  errTxt.append("Tab name :" + validation.getTabName() + ", " + row.getError());
-                } else {
-                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + row.getError());
-                }
-              }
-            }
-          }
+          
+    	  for (TemplateValidation validation : validations) {
+	    	  if(validation.hasErrors()) {
+	    		  if (StringUtils.isEmpty(errTxt.toString())) {
+	                  errTxt.append("Tab name :" + validation.getTabName() + ", " + validation.getAllError());
+	              } else {
+	                  errTxt.append("\nTab name :" + validation.getTabName() + ", " + validation.getAllError());
+	              }	  
+	    	  }
+          }  
         }
 
         if (!StringUtils.isEmpty(errTxt.toString())) {

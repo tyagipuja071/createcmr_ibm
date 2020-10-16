@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -18,7 +17,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -430,6 +428,8 @@ public class MCOCewaHandler extends MCOHandler {
     for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
+    	TemplateValidation error = new TemplateValidation(name);  
+    	  
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
@@ -511,13 +511,11 @@ public class MCOCewaHandler extends MCOHandler {
             if (row.getRowNum() == 2001) {
               continue;
             }
-
-            TemplateValidation error = new TemplateValidation(name);
-
+            
+            
             if (landedcountry.length() == 0 && !"Data".equalsIgnoreCase(sheet.getSheetName()) && cmrNo.length() != 0) {
               LOG.trace("Landed country is required to be filled.");
               error.addError(row.getRowNum(), "", "Landed country is required to be filled.");
-              validations.add(error);
             } else if (landedcountry.length() > 0) {
               if (!defaultLanded.equals(landedcountry) && !"Data".equalsIgnoreCase(sheet.getSheetName()) && cmrNo.length() != 0) {
                 LOG.debug("isCrossborder");
@@ -525,17 +523,14 @@ public class MCOCewaHandler extends MCOHandler {
                   LOG.trace("Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
                   error.addError(row.getRowNum(), "",
                       "Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
-                  validations.add(error);
                 } else if (addnameinfo.length() != 0 && (stcont.length() != 0 || poBox.length() != 0)) {
                   LOG.trace("Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
                   error.addError(row.getRowNum(), "",
                       "Additional name or address information and Street Cont/POBox cannot be filled at the same time.");
-                  validations.add(error);
                 } else if (stcont.length() != 0 && poBox.length() != 0 && addnameinfo.length() == 0) {
                   if (stcont.length() + poBox.length() > 23) {
                     LOG.trace("Total computed length of Street Cont and PO Box should not exceed 21 characters.");
                     error.addError(row.getRowNum(), "", "Total computed length of Street Cont and PO Box should not exceed 21 characters.");
-                    validations.add(error);
                   }
                 }
               } else {
@@ -544,7 +539,6 @@ public class MCOCewaHandler extends MCOHandler {
                   if (stcont.length() + poBox.length() > 23) {
                     LOG.trace("Total computed length of Street Cont and PO Box should not exceed 21 characters.");
                     error.addError(row.getRowNum(), "", "Total computed length of Street Cont and PO Box should not exceed 21 characters.");
-                    validations.add(error);
                   }
                 }
               }
@@ -554,25 +548,21 @@ public class MCOCewaHandler extends MCOHandler {
               LOG.trace("Note that COF and COD flag cannot be filled at same time.");
               error.addError(row.getRowNum(), "COF/COD",
                   "Note that COF and COD flag cannot be filled at same time. Please fix and upload the template again.");
-              validations.add(error);
             }
             if (city.length() == 0 && postalcd.length() != 0) {
               LOG.trace("Note that city should be filled if postal is filled");
               error.addError(row.getRowNum(), "City/Postal Code",
                   "Note that city should be filled if postal is filled. Please fix and upload the template again.");
-              validations.add(error);
             }
             if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(deptNo)) {
               LOG.trace("CMR No. should start with 99 if internal department no. is filled.");
               error.addError(row.getRowNum(), "Internal Department No.", "CMR No. should start with 99 if internal department no. is filled.");
-              validations.add(error);
             }
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isBlank(phoneNoData)) {
                 if (!StringUtils.isNumeric(phoneNoData.substring(0, phoneNoData.length()))) {
                   LOG.trace("Phone number should have numeric values only.");
                   error.addError(row.getRowNum(), "", "Phone number should have numeric values only.");
-                  validations.add(error);
                 }
               }
             }
@@ -582,7 +572,6 @@ public class MCOCewaHandler extends MCOHandler {
                 if (!StringUtils.isNumeric(phoneNo.substring(0, phoneNo.length()))) {
                   LOG.trace("Phone number should have numeric values only.");
                   error.addError(row.getRowNum(), "", "Phone number should have numeric values only.");
-                  validations.add(error);
                 }
               }
             }
@@ -591,7 +580,6 @@ public class MCOCewaHandler extends MCOHandler {
                 if (!StringUtils.isNumeric(poBox.substring(0, poBox.length()))) {
                   LOG.trace("POBox number should have numeric values only.");
                   error.addError(row.getRowNum(), "", "POBox number should have numeric values only.");
-                  validations.add(error);
                 }
               }
             }
@@ -600,7 +588,6 @@ public class MCOCewaHandler extends MCOHandler {
               if (!isMatch) {
                 LOG.trace("Invalid format for TIN Number.");
                 error.addError(row.getRowNum(), "TIN Number", "Invalid format for TIN Number. Format should be NNN-NNN-NNN.");
-                validations.add(error);
               }
             }
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -608,11 +595,14 @@ public class MCOCewaHandler extends MCOHandler {
                 if (!StringUtils.isNumeric(sbo.substring(0, 4))) {
                   LOG.trace("SBO should have numeric values only.");
                   error.addError(row.getRowNum(), "", "SBO should have numeric values only.");
-                  validations.add(error);
                 }
               }
             }
           }
+        }//end row loop
+        
+        if(error.hasErrors()) {
+        	validations.add(error);
         }
       }
     }
