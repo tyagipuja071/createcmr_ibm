@@ -1676,8 +1676,8 @@ function validateMESBO() {
             return new ValidationResult(null, false, 'Selling Branch Office can not be empty');
           }
 
-          if (sbo != null && cntry != sbo.substring(0, 3)) {
-            if (!(custGrp == 'GBM' || custGrp == 'SBM') && (reqType == 'C')) {
+          if (sbo != null && cntry != sbo.substring(0, 3) && (reqType == 'C')) {
+            if (!(custGrp == 'GBM' || custGrp == 'SBM')) {
               return new ValidationResult(null, false, 'For ME country,Selling Branch Office should be its cntry');
             } else if (sbo.substring(0, 3) != '530') {
               return new ValidationResult(null, false, 'For GBM/SBM type, Selling Branch Office should be 530');
