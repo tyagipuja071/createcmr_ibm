@@ -487,6 +487,9 @@ public class METransformer extends EMEATransformer {
     if ("865".equals(data.getCmrIssuingCntry())) {
       DEFAULT_LANDED_COUNTRY = "EG";
     }
+    if ("729".equals(data.getCmrIssuingCntry())) {
+      DEFAULT_LANDED_COUNTRY = "TN";
+    }
   }
 
   /**
