@@ -79,7 +79,7 @@
 				</column>
 				<column>
 					<label>Embargo Code</label>
-					<dbColumn>EMBARGO_CD</dbColumn>
+					<dbColumn>MISC_BILL_CD</dbColumn>
 					<width>10</width>
 					<length>1</length>
 					<lovId>EmbargoCode</lovId>
