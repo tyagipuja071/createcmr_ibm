@@ -930,10 +930,16 @@ public class MCOSaHandler extends MCOHandler {
 
             // Address Sheet
             String seqNo = ""; // 1
+            String custName1 = ""; // 2
             String nameCont = ""; // 3
             String street = ""; // 4
+            String streetCont = ""; // 5
+            String att = ""; // 6
+            String city = "";// 7
+            String postalCode = ""; // 8
             String landCountry = ""; // 09
             String poBox = ""; // 10
+            boolean isDummyUpdate = true;
 
             List<String> checkList = null;
             long count = 0;
@@ -949,11 +955,26 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(1);
               seqNo = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(2);
+              custName1 = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(3);
               nameCont = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(4);
               street = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              streetCont = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              att = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              city = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
               landCountry = validateColValFromCell(currCell);
@@ -987,6 +1008,37 @@ public class MCOSaHandler extends MCOHandler {
                   "Out of Name Con't, Street and PO BOX only 1 can be filled at the same time. ");
               validations.add(error);
               count = 0;
+            }
+
+            if (!StringUtils.isBlank(custName1) || !StringUtils.isBlank(nameCont) || !StringUtils.isBlank(street) || !StringUtils.isBlank(streetCont)
+                || !StringUtils.isBlank(att) || !StringUtils.isBlank(city) || !StringUtils.isBlank(postalCode) || !StringUtils.isBlank(landCountry)
+                || !StringUtils.isBlank(poBox)) {
+              isDummyUpdate = false;
+            }
+
+            if (!isDummyUpdate) {
+              if (StringUtils.isBlank(custName1)) {
+                LOG.trace("Customer Name is required.");
+                error.addError(row.getRowNum(), "Customer Name", "Customer Name is required.");
+              }
+
+              if (StringUtils.isBlank(street)) {
+                LOG.trace("Street is required.");
+                error.addError(row.getRowNum(), "Street", "Street is required.");
+              }
+
+              if (StringUtils.isBlank(city)) {
+                LOG.trace("City is required.");
+                error.addError(row.getRowNum(), "City", "City is required.");
+              }
+
+              if (StringUtils.isBlank(landCountry)) {
+                LOG.trace("Landed Country is required.");
+                error.addError(row.getRowNum(), "Landed Country", "Landed Country is required.");
+
+              }
+
+              validations.add(error);
             }
 
           }
