@@ -306,7 +306,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     if (dummyHandler != null && isCrossBorder && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
       if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat().substring(2));
+        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       } else {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       }
