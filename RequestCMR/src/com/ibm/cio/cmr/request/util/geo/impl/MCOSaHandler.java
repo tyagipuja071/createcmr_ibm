@@ -505,7 +505,7 @@ public class MCOSaHandler extends MCOHandler {
 
   protected void importOtherSOFAddressesLD(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted, List<String> addrTypesImported) {
-    List<String> addrToBeImported = Arrays.asList("ZD01", "ZP01", "ZI01", "ZS02");
+    List<String> addrToBeImported = Arrays.asList("ZP01", "ZI01", "ZS02");
 
     for (String addrType : addrToBeImported) {
       if (!addrTypesImported.contains(addrType)) {
@@ -514,6 +514,19 @@ public class MCOSaHandler extends MCOHandler {
           converted.add(record);
         }
 
+      }
+    }
+
+    if (this.legacyObjects != null && this.legacyObjects.getAddresses() != null) {
+      for (CmrtAddr addr : this.legacyObjects.getAddresses()) {
+        if ("Y".equals(addr.getIsAddrUseShipping())) {
+          FindCMRRecordModel record = new FindCMRRecordModel();
+          handleSOFAddressImportLD(entityManager, cmrCountry, record, getTargetAddressTypeKey("ZD01"), addr, "ZD01");
+          if (record != null && converted != null
+              && !converted.stream().anyMatch(cmrAddr -> cmrAddr.getCmrAddrSeq().equals(record.getCmrAddrSeq()))) {
+            converted.add(record);
+          }
+        }
       }
     }
   }
