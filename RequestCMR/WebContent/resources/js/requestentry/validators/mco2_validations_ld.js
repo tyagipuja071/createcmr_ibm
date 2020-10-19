@@ -1,6 +1,6 @@
 /* Register MCO Javascripts */
 var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "691", "692", "700", "717", "718", "753", "810", "840", "841", "876", "879", "880", "881" ];
-var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883", "780" ];
+var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883" ];
 
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
@@ -531,23 +531,6 @@ function addAbbrvNmAndLocValidator() {
   }
 }
 
-function setScenarioBehaviour() {
-  var custGroup = FormManager.getActualValue('custGrp');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var cntrySalesRep = cntry + cntry;
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MALTA) {
-    if (custGroup == 'LOCAL') {
-      FormManager.setValue('repTeamMemberNo', cntrySalesRep);
-    }
-  }
-}
-
-function setScenarioBehaviourOnchange() {
-  dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-    setScenarioBehaviour();
-  });
-}
-
 function addAttachmentValidator() {
   console.log("addAttachmentValidator..............");
   FormManager.addFormValidator((function() {
@@ -707,45 +690,6 @@ function showDeptNoForInternalsOnly(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function enterpriseMalta() {
-  var req = FormManager.getActualValue('reqType').toUpperCase();
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-
-  if (cntry != '780') {
-    FormManager.hide('Enterprise', 'enterprise');
-    return;
-  }
-
-  if (req == 'U' || (cntry == '780' && req == 'C')) {
-    FormManager.show('Enterprise', 'enterprise');
-
-  } else {
-    FormManager.hide('Enterprise', 'enterprise');
-  }
-
-}
-
-function setEntpMaltaValues() {
-  var req = FormManager.getActualValue('reqType').toUpperCase();
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var custSubGrp = FormManager.getActualValue('custSubGrp');
-  var role = FormManager.getActualValue('userRole');
-
-  if ((cntry == '780' && req == 'C')) {
-    if (custSubGrp != 'BUSPR' && custSubGrp != 'XBP') {
-      FormManager.setValue('enterprise', '985204');
-    } else {
-      FormManager.clearValue('enterprise');
-    }
-
-    if (role == 'Requester') {
-      FormManager.readOnly('enterprise');
-    } else {
-      FormManager.enable('enterprise');
-    }
-  }
-}
-
 /* 1430539 - do not allow delete of imported addresses on update requests */
 
 function canRemoveAddress(value, rowIndex, grid) {
@@ -781,31 +725,14 @@ function setSalesRepValues(isuCd, clientTier) {
       ISU : '%' + isuCd + '%',
     };
     results = cmr.query('GET.MCO2SR.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        salesReps.push(results[i].ret1);
-      }
-      if (salesReps != null) {
-        FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
-        if (salesReps.length == 1) {
-          FormManager.setValue('repTeamMemberNo', salesReps[0]);
-        }
-        if (salesReps.length == 0) {
-          FormManager.setValue('repTeamMemberNo', '');
-        }
-      }
-    }
-
     if (cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857') {
       if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
-        FormManager.setValue('repTeamMemberNo', 'DUMMY8');
         FormManager.setValue('salesBusOffCd', '0080');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
       }
     } else if (cntry == '698' || cntry == '745') {
       if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
-        FormManager.setValue('repTeamMemberNo', 'DUMMY6');
         FormManager.setValue('salesBusOffCd', '0060');
       } else {
         FormManager.setValue('salesBusOffCd', '0010');
@@ -1574,7 +1501,7 @@ function validateCollectionCd() {
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
-      '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
+      '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
   console.log('adding MCO2 functions...');
   GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
   GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01', 'ZI01' ]);
@@ -1589,20 +1516,19 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(setEntpMaltaValues, GEOHandler.MCO2);
+
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockCmrOwnerPrefLang, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
+
   // GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.MCO2, null, true);
-  GEOHandler.registerValidator(addGenericVATValidator(SysLoc.MALTA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.MALTA ], null, true);
   // Story 1718889: Tanzania: new mandatory TIN number field fix
   // GEOHandler.addAddrFunction(diplayTinNumberforTZ, [ SysLoc.TANZANIA ]);
   // GEOHandler.registerValidator(addTinFormatValidationTanzania, [
