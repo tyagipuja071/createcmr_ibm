@@ -1163,8 +1163,6 @@ public abstract class AutomationUtil {
         }
       }
     }
-
     return rejectRequest;
-
   }
 }
