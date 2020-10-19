@@ -353,6 +353,10 @@ public class MCOCewaHandler extends MCOHandler {
         data.setSearchTerm(data.getSalesBusOffCd());
       }
     }
+
+    if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
+      data.setRepTeamMemberNo("DUMMY1");
+    }
   }
 
   @Override
