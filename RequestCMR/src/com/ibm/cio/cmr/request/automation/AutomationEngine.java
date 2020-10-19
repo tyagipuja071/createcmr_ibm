@@ -270,10 +270,8 @@ public class AutomationEngine {
 
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
-
     String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
     String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
-
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
     }
@@ -745,5 +743,4 @@ public class AutomationEngine {
   public String getRejectionReason(String code) {
     return rejectionReasons.get(code);
   }
-
 }
