@@ -23,11 +23,14 @@ import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
@@ -930,10 +933,16 @@ public class MCOSaHandler extends MCOHandler {
 
             // Address Sheet
             String seqNo = ""; // 1
+            String custName1 = ""; // 2
             String nameCont = ""; // 3
             String street = ""; // 4
+            String streetCont = ""; // 5
+            String att = ""; // 6
+            String city = "";// 7
+            String postalCode = ""; // 8
             String landCountry = ""; // 09
             String poBox = ""; // 10
+            boolean isDummyUpdate = true;
 
             List<String> checkList = null;
             long count = 0;
@@ -949,11 +958,26 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(1);
               seqNo = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(2);
+              custName1 = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(3);
               nameCont = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(4);
               street = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              streetCont = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              att = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              city = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(9);
               landCountry = validateColValFromCell(currCell);
@@ -987,6 +1011,37 @@ public class MCOSaHandler extends MCOHandler {
                   "Out of Name Con't, Street and PO BOX only 1 can be filled at the same time. ");
               validations.add(error);
               count = 0;
+            }
+
+            if (!StringUtils.isBlank(custName1) || !StringUtils.isBlank(nameCont) || !StringUtils.isBlank(street) || !StringUtils.isBlank(streetCont)
+                || !StringUtils.isBlank(att) || !StringUtils.isBlank(city) || !StringUtils.isBlank(postalCode) || !StringUtils.isBlank(landCountry)
+                || !StringUtils.isBlank(poBox)) {
+              isDummyUpdate = false;
+            }
+
+            if (!isDummyUpdate) {
+              if (StringUtils.isBlank(custName1)) {
+                LOG.trace("Customer Name is required.");
+                error.addError(row.getRowNum(), "Customer Name", "Customer Name is required.");
+              }
+
+              if (StringUtils.isBlank(street)) {
+                LOG.trace("Street is required.");
+                error.addError(row.getRowNum(), "Street", "Street is required.");
+              }
+
+              if (StringUtils.isBlank(city)) {
+                LOG.trace("City is required.");
+                error.addError(row.getRowNum(), "City", "City is required.");
+              }
+
+              if (StringUtils.isBlank(landCountry)) {
+                LOG.trace("Landed Country is required.");
+                error.addError(row.getRowNum(), "Landed Country", "Landed Country is required.");
+
+              }
+
+              validations.add(error);
             }
 
           }
@@ -1067,6 +1122,76 @@ public class MCOSaHandler extends MCOHandler {
     // map.put("##CommercialFinanced", "commercialFinanced");
     // *abner revert end
     return map;
+  }
+
+  @Override
+  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
+      List<UpdatedDataModel> results) {
+    UpdatedDataModel update = null;
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
+      update.setNewData(newData.getRepTeamMemberNo());
+      update.setOldData(oldData.getRepTeamMemberNo());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff", "-"));
+      update.setNewData(newData.getSalesBusOffCd());
+      update.setOldData(oldData.getSalesBusOffCd());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CollectionCd", "-"));
+      update.setNewData(newData.getCollectionCd());
+      update.setOldData(oldData.getCollectionCd());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollBoId(), newData.getCollBoId())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CollectionBranchOffice", "-"));
+      update.setNewData(newData.getCollBoId());
+      update.setOldData(oldData.getCollBoId());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
+      update.setNewData(newData.getCommercialFinanced());
+      update.setOldData(oldData.getCommercialFinanced());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevLocn(), newData.getAbbrevLocn())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "AbbrevLocation", "-"));
+      update.setNewData(newData.getAbbrevLocn());
+      update.setOldData(oldData.getAbbrevLocn());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSpecialTaxCd(), newData.getSpecialTaxCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SpecialTaxCd", "-"));
+      update.setNewData(newData.getSpecialTaxCd());
+      update.setOldData(oldData.getSpecialTaxCd());
+      results.add(update);
+    }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "TypeOfCustomer", "-"));
+      update.setNewData(newData.getCrosSubTyp());
+      update.setOldData(oldData.getCrosSubTyp());
+      results.add(update);
+    }
+
   }
 
 }

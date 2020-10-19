@@ -35,7 +35,7 @@
         <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
           <cmr:fieldLabel fieldId="SitePartyID" />:</cmr:label>
         <cmr:delta text="-" id="delta-ierpSitePrtyId" />
-        <cmr:field fieldId="SitePartyID" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+        <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
       </p>
     </cmr:column>
   </cmr:row>
