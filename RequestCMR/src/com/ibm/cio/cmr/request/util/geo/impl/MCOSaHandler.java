@@ -1128,6 +1128,7 @@ public class MCOSaHandler extends MCOHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
+    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
       update = new UpdatedDataModel();
