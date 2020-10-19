@@ -605,7 +605,8 @@ public class METransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(name3)) {
       line3 = name3;
     } else if (StringUtils.isNotBlank(pobox)) {
-      line3 = "PO BOX " + pobox;
+      line3 = "ZP02".equals(addrType) ? "" : "PO BOX ";
+      line3 = line3 + pobox;
     }
 
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
