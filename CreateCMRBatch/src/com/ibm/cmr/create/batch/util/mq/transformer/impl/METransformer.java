@@ -605,7 +605,8 @@ public class METransformer extends EMEATransformer {
     if (StringUtils.isNotBlank(name3)) {
       line3 = name3;
     } else if (StringUtils.isNotBlank(pobox)) {
-      line3 = "PO BOX " + pobox;
+      line3 = "ZP02".equals(addrType) ? "" : "PO BOX ";
+      line3 = line3 + pobox;
     }
 
     if (!StringUtils.isBlank(addrData.getAddrTxt())) {
@@ -997,6 +998,8 @@ public class METransformer extends EMEATransformer {
 
       if (!StringUtils.isBlank(data.getPhone1())) {
         legacyCust.setTelNoOrVat(data.getPhone1());
+      } else {
+        legacyCust.setTelNoOrVat("");
       }
 
       if (!StringUtils.isBlank(data.getTaxCd1())) {
@@ -1059,6 +1062,8 @@ public class METransformer extends EMEATransformer {
 
       if (!StringUtils.isBlank(data.getPhone1())) {
         legacyCust.setTelNoOrVat(data.getPhone1());
+      } else {
+        legacyCust.setTelNoOrVat("");
       }
 
       if (!StringUtils.isBlank(data.getTaxCd1())) {
@@ -1113,6 +1118,8 @@ public class METransformer extends EMEATransformer {
     String dataEmbargoCd = data.getEmbargoCd();
     if (dataEmbargoCd != null) {
       legacyCust.setEmbargoCd(dataEmbargoCd);
+    } else {
+      legacyCust.setEmbargoCd("");
     }
 
     String cebo = data.getEngineeringBo();
