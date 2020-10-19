@@ -1469,7 +1469,7 @@ function matchDnBForAutomationCountries() {
                   .showConfirm(
                       'autoDnbImportMatch("' + data.dunsNo + '","0")',
                       'The customer name on the request is a tradestyle name. For CMR creation, legal name should be used. <strong>Tradestyle name can be placed on the address’s division line.<strong> Do you want to override the customer name on the request with <u>'
-                          + data.legalName + '</u>?' + '?', 'Warning', 'doOverrideDnBMatch', {
+                          + data.legalName + '</u>?' + '?', 'Warning', 'doOverrideDnBMatch()', {
                         OK : 'Yes',
                         CANCEL : 'No'
                       });
@@ -1488,7 +1488,7 @@ function matchDnBForAutomationCountries() {
         error : function(error, ioargs) {
         }
       });
-      
+
 }
 
 function checkIfUpfrontUpdateChecksRequired() {
@@ -1534,11 +1534,11 @@ function addUpdateChecksExecution(frmCMR) {
           console.log('UpdateChecks Element Executed Successfully.');
           cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
         } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
-          cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg
-              + '</strong> <br/> Do you really want to proceed ?', 'Warning', null, {
-            OK : 'Ok',
-            CANCEL : 'Cancel'
-          });
+          cmr.showConfirm('showAddrVerificationModal()', 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg + '</strong> <br/> Do you really want to proceed ?',
+              'Warning', null, {
+                OK : 'Ok',
+                CANCEL : 'Cancel'
+              });
         } else {
           cmr.showModal('addressVerificationModal');
         }
@@ -1552,4 +1552,8 @@ function addUpdateChecksExecution(frmCMR) {
       reject('Error occurred in Update Checks.');
     }
   });
+}
+
+function showAddrVerificationModal() {
+  cmr.showModal('addressVerificationModal');
 }
