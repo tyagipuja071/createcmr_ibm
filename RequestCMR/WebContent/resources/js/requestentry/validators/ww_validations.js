@@ -141,9 +141,9 @@ function addDnBMatchingAttachmentValidator() {
             ID : id
           });
           if (ret == null || ret.ret1 == null) {
-            return new ValidationResult(null, false, "Please provide the supporting documentation for D&B Match Override, such as client's official website, "
-                + "Secretary of State business registration proof, client's confirmation email, signed PO and etc. Please note that the sources "
-                + "from Wikipedia, Linked In and social medias are not acceptable.");
+            return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>D&B Match Override</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
           } else {
             return new ValidationResult(null, true);
           }

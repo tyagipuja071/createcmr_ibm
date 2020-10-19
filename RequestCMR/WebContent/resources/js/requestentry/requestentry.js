@@ -1241,8 +1241,11 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matching will be overriden. <br><b>Note: </b>Supporting documentation will be required as attachments before the request can be submitted.<br>Proceed?',
-      'Warning', null, null);
+  cmr
+      .showConfirm(
+          'doOverrideDnBMatch()',
+          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>D&B Match Override</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+          'Warning', null, null);
 }
 
 /**
@@ -1445,43 +1448,47 @@ function matchDnBForAutomationCountries() {
     return;
   }
   cmr.showProgress('Checking request data with D&B...');
-  dojo.xhrGet({
-    url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
-    handleAs : 'json',
-    method : 'GET',
-    content : {
-      'reqId' : reqId
-    },
-    timeout : 50000,
-    sync : false,
-    load : function(data, ioargs) {
-      cmr.hideProgress();
-      console.log(data);
-      if (data && data.success) {
-        if (data.match) {
-          cmr.showModal('addressVerificationModal');
-        } else if (data.tradeStyleMatch) {
-          cmr.showConfirm('autoDnbImportMatch("' + data.dunsNo + '","0")',
-              'The customer name on the request is a tradestyle name. For CMR creation legal names should be used. Do you want to override the customer name on the request with ' + data.legalName
-                  + '?', 'Warning', null, {
-                OK : 'Yes',
-                CANCEL : 'No'
-              });
-        } else {
-          showDnBMatchModal();
+  dojo
+      .xhrGet({
+        url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+        handleAs : 'json',
+        method : 'GET',
+        content : {
+          'reqId' : reqId
+        },
+        timeout : 50000,
+        sync : false,
+        load : function(data, ioargs) {
+          cmr.hideProgress();
+          console.log(data);
+          if (data && data.success) {
+            if (data.match) {
+              cmr.showModal('addressVerificationModal');
+            } else if (data.tradeStyleMatch) {
+              cmr
+                  .showConfirm(
+                      'autoDnbImportMatch("' + data.dunsNo + '","0")',
+                      'The customer name on the request is a tradestyle name. For CMR creation, legal name should be used. <strong>Tradestyle name can be placed on the address’s division line.<strong> Do you want to override the customer name on the request with <u>'
+                          + data.legalName + '</u>?' + '?', 'Warning', 'doOverrideDnBMatch', {
+                        OK : 'Yes',
+                        CANCEL : 'No'
+                      });
+            } else {
+              showDnBMatchModal();
+            }
+          } else {
+            // continue
+            console.log("An error occurred while matching dnb.");
+            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          }
+        },
+        error : function(error, ioargs) {
         }
-      } else {
-        // continue
-        console.log("An error occurred while matching dnb.");
-        cmr.showConfirm('showAddrVerificationModal()', 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
-          OK : 'Yes',
-          CANCEL : 'No'
-        });
-      }
-    },
-    error : function(error, ioargs) {
-    }
-  });
+      });
+      
 }
 
 function checkIfUpfrontUpdateChecksRequired() {
@@ -1527,11 +1534,11 @@ function addUpdateChecksExecution(frmCMR) {
           console.log('UpdateChecks Element Executed Successfully.');
           cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
         } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
-          cmr.showConfirm('showAddrVerificationModal()', 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg + '</strong> <br/> Do you really want to proceed ?',
-              'Warning', null, {
-                OK : 'Ok',
-                CANCEL : 'Cancel'
-              });
+          cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg
+              + '</strong> <br/> Do you really want to proceed ?', 'Warning', null, {
+            OK : 'Ok',
+            CANCEL : 'Cancel'
+          });
         } else {
           cmr.showModal('addressVerificationModal');
         }
@@ -1545,8 +1552,4 @@ function addUpdateChecksExecution(frmCMR) {
       reject('Error occurred in Update Checks.');
     }
   });
-}
-
-function showAddrVerificationModal() {
-  cmr.showModal('addressVerificationModal');
 }
