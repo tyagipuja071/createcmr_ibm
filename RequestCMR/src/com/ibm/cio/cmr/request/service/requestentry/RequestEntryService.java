@@ -1347,6 +1347,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         RequestData requestData = new RequestData(entityManager, reqId);
         Data data = requestData.getData();
         Admin admin = requestData.getAdmin();
+        Scorecard scorecard = requestData.getScorecard();
         Addr zs01 = requestData.getAddress("ZS01");
         DnBMatchingResponse tradeStyleName = null;
         boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
@@ -1355,7 +1356,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         if (response != null && response.getSuccess()) {
           map.put("success", true);
           boolean match = false;
-          if (response.getMatched()) {
+          if (response.getMatched() && (("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
+              || "Rejected".equals(scorecard.getFindDnbResult()))) {
             for (DnBMatchingResponse record : response.getMatches()) {
               if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record)) {
                 match = true;
