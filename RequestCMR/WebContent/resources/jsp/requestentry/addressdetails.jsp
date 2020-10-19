@@ -1005,7 +1005,7 @@
       </cmr:column>
     </cmr:view>
    
-    <cmr:view forCountry="666">
+    <cmr:view forCountry="666,864">
      <c:if test="${reqentry.mainAddrType == 'ZS01' || reqentry.mainAddrType == 'ZD01'}">
       <cmr:column span="1">
         <cmr:label fieldId="custPhone_view">
@@ -1026,7 +1026,7 @@
         <div id="divn_view">-</div>
       </cmr:column>
     </cmr:view>
-    <cmr:view forGEO="NORDX,BELUX,NL,SWISS,MCO1">
+    <cmr:view forGEO="NORDX,BELUX,NL,SWISS">
       <cmr:column span="1">
         <cmr:label fieldId="custPhone_view">
           <span class="lbl-CustPhone">${ui.phone}</span>:</cmr:label>
