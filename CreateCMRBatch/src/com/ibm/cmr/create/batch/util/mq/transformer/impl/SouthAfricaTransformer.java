@@ -636,6 +636,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
     LOG.debug("*** START GR formatMassUpdateAddressLines >>>");
+    if (LegacyCommonUtil.isCheckDummyUpdate(massUpdtAddr)) {
+      return; // dummy update , skip address update
+    }
     boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     String addrKey = getAddressKey(massUpdtAddr.getId().getAddrType());
     Map<String, String> messageHash = new LinkedHashMap<String, String>();
@@ -646,41 +649,50 @@ public class SouthAfricaTransformer extends MCOTransformer {
     messageHash.remove(addrKey + "City");
     messageHash.remove(addrKey + "POBox");
 
-    String line1 = legacyAddr.getAddrLine1();
-    String line2 = legacyAddr.getAddrLine2();
-    String line3 = legacyAddr.getAddrLine3();
-    String line4 = legacyAddr.getAddrLine4();
-    String line5 = legacyAddr.getAddrLine5();
-    String line6 = legacyAddr.getAddrLine6();
-    String line7 = legacyAddr.getAddrLineI();
+    String line1 = "";
+    String line2 = "";
+    String line3 = "";
+    String line4 = "";
+    String line5 = "";
+    String line6 = "";
+    String line7 = "";
 
     // line1 is always customer name
-    line1 = !StringUtils.isEmpty(massUpdtAddr.getCustNm1()) ? massUpdtAddr.getCustNm1() : line1;
-    line2 = !StringUtils.isEmpty(massUpdtAddr.getCustNm2()) ? massUpdtAddr.getCustNm2() : line2;
+    line1 = massUpdtAddr.getCustNm1();
+    line2 = massUpdtAddr.getCustNm2();
 
     String attnPerson = massUpdtAddr.getCounty();
     if (StringUtils.isNotBlank(attnPerson) && !hasAttnPrefix(attnPerson)) {
       attnPerson = "Att: " + attnPerson;
     }
 
-    line3 = !StringUtils.isBlank(attnPerson) ? attnPerson : line3;
-    line4 = !StringUtils.isBlank(massUpdtAddr.getAddrTxt()) ? massUpdtAddr.getAddrTxt() : line4;
+    line3 = attnPerson;
+    line4 = massUpdtAddr.getAddrTxt();
+
+    legacyAddr.setStreet(!StringUtils.isBlank(line4) ? line4 : "");
 
     String streetContPoBox = massUpdtAddr.getAddrTxt2();
+    String poBox = !StringUtils.isBlank(massUpdtAddr.getPoBox()) ? "PO BOX " + massUpdtAddr.getPoBox() : "";
     if (StringUtils.isNotBlank(streetContPoBox) && StringUtils.isNotBlank(massUpdtAddr.getPoBox())) {
       streetContPoBox += ", PO BOX " + massUpdtAddr.getPoBox();
     } else if (StringUtils.isBlank(streetContPoBox) && StringUtils.isNotBlank(massUpdtAddr.getPoBox())) {
       streetContPoBox = "PO BOX " + massUpdtAddr.getPoBox();
     }
 
-    line5 = !StringUtils.isBlank(streetContPoBox) ? streetContPoBox : line5;
+    legacyAddr.setPoBox(poBox);
+    legacyAddr.setStreetNo(!StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) ? massUpdtAddr.getAddrTxt2() : "");
+
+    line5 = streetContPoBox;
 
     String cityPostalCode = massUpdtAddr.getCity1();
     if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
       cityPostalCode += ", " + massUpdtAddr.getPostCd();
     }
 
-    line6 = !StringUtils.isNotBlank(cityPostalCode) ? cityPostalCode : line6;
+    legacyAddr.setCity(!StringUtils.isBlank(massUpdtAddr.getCity1()) ? massUpdtAddr.getCity1() : "");
+    legacyAddr.setZipCode(!StringUtils.isBlank(massUpdtAddr.getPostCd()) ? massUpdtAddr.getPostCd() : "");
+
+    line6 = cityPostalCode;
     if (crossBorder && !StringUtils.isEmpty(massUpdtAddr.getLandCntry())) {
       line7 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry());
     }
@@ -691,17 +703,17 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     for (String line : lines) {
       if (StringUtils.isNotBlank(line)) {
-        messageHash.put(addrKey + "Address" + lineNo, line);
+        messageHash.put(addrKey + "Address" + lineNo, line.trim());
         lineNo++;
       }
     }
 
-    legacyAddr.setAddrLine1(line1 != null ? line1.trim() : "");
-    legacyAddr.setAddrLine2(line2 != null ? line2.trim() : "");
-    legacyAddr.setAddrLine3(line3 != null ? line3.trim() : "");
-    legacyAddr.setAddrLine4(line4 != null ? line4.trim() : "");
-    legacyAddr.setAddrLine5(line5 != null ? line5.trim() : "");
-    legacyAddr.setAddrLine6(line6 != null ? line6.trim() : "");
+    legacyAddr.setAddrLine1(messageHash.get(addrKey + "Address1") != null ? messageHash.get(addrKey + "Address1") : "");
+    legacyAddr.setAddrLine2(messageHash.get(addrKey + "Address2") != null ? messageHash.get(addrKey + "Address2") : "");
+    legacyAddr.setAddrLine3(messageHash.get(addrKey + "Address3") != null ? messageHash.get(addrKey + "Address3") : "");
+    legacyAddr.setAddrLine4(messageHash.get(addrKey + "Address4") != null ? messageHash.get(addrKey + "Address4") : "");
+    legacyAddr.setAddrLine5(messageHash.get(addrKey + "Address5") != null ? messageHash.get(addrKey + "Address5") : "");
+    legacyAddr.setAddrLine6(messageHash.get(addrKey + "Address6") != null ? messageHash.get(addrKey + "Address6") : "");
   }
 
   @Override
