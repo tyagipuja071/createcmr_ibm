@@ -727,6 +727,10 @@ public class METransformer extends EMEATransformer {
       generateCMRNoObj.setMin(15000);
       generateCMRNoObj.setMax(984880);
     }
+
+    if ("Y".equals(data.getDupCmrIndc())) {
+      generateCMRNoObj.setLoc2("675");
+    }
   }
 
   @Override
