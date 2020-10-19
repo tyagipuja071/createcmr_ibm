@@ -1295,7 +1295,7 @@ function addTaxRegFormatValidationMadagascar() {
       validate : function() {
         var taxReg = FormManager.getActualValue('busnType');
 
-        if (taxReg.length > 0 && !taxReg.match("([0-9]{5} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{5})") && taxReg.length < 21) {
+        if (taxReg.length > 0 && !taxReg.match("([0-9]{5} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{5})")) {
           return new ValidationResult({
             id : 'busnType',
             type : 'text',
