@@ -997,6 +997,8 @@ public class METransformer extends EMEATransformer {
 
       if (!StringUtils.isBlank(data.getPhone1())) {
         legacyCust.setTelNoOrVat(data.getPhone1());
+      } else {
+        legacyCust.setTelNoOrVat("");
       }
 
       if (!StringUtils.isBlank(data.getTaxCd1())) {
@@ -1059,6 +1061,8 @@ public class METransformer extends EMEATransformer {
 
       if (!StringUtils.isBlank(data.getPhone1())) {
         legacyCust.setTelNoOrVat(data.getPhone1());
+      } else {
+        legacyCust.setTelNoOrVat("");
       }
 
       if (!StringUtils.isBlank(data.getTaxCd1())) {
@@ -1113,6 +1117,8 @@ public class METransformer extends EMEATransformer {
     String dataEmbargoCd = data.getEmbargoCd();
     if (dataEmbargoCd != null) {
       legacyCust.setEmbargoCd(dataEmbargoCd);
+    } else {
+      legacyCust.setEmbargoCd("");
     }
 
     String cebo = data.getEngineeringBo();
