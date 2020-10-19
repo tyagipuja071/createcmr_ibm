@@ -1545,8 +1545,8 @@ function addUpdateChecksExecution(frmCMR) {
       reject('Error occurred in Update Checks.');
     }
   });
+}
 
-  function showAddrVerificationModal() {
-    cmr.showModal('addressVerificationModal');
-  }
+function showAddrVerificationModal() {
+  cmr.showModal('addressVerificationModal');
 }
