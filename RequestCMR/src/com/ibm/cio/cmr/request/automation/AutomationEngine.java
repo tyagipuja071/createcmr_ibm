@@ -41,6 +41,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 
@@ -270,6 +271,15 @@ public class AutomationEngine {
 
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+
+    // CMR - 3999
+    if (SystemLocation.UNITED_STATES.equals(data.getCmrIssuingCntry())) {
+      boolean shouldBPRejectReq = AutomationUtil.checkCommentSection(entityManager, admin, data);
+      if (shouldBPRejectReq) {
+        stopExecution = true;
+      }
+    }
+
     String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
     String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
 
@@ -744,4 +754,5 @@ public class AutomationEngine {
   public String getRejectionReason(String code) {
     return rejectionReasons.get(code);
   }
+
 }

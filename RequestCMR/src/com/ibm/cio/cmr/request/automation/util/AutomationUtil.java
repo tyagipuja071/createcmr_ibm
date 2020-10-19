@@ -1140,4 +1140,31 @@ public abstract class AutomationUtil {
     return new ArrayList<String>();
   }
 
+  public static boolean checkCommentSection(EntityManager entityManager, Admin admin, Data data) {
+    List<String> BP_CMT_1 = Arrays.asList("Maintenance", "MA", "HWMA");
+    List<String> BP_CMT_2 = Arrays.asList("End User", "HW");
+    boolean rejectRequest = false;
+    String restrictCd = data.getRestrictTo();
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_CMT_LOG");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", admin.getId().getReqId());
+    query.setForReadOnly(true);
+    List<String> comments = query.getResults(String.class);
+    for (String cmt : comments) {
+      for (String keyword : BP_CMT_1) {
+        if (cmt.contains(" " + getCleanString(keyword) + " ") && "BPQS".equalsIgnoreCase(restrictCd)) {
+          rejectRequest = true;
+        }
+      }
+
+      for (String keyword : BP_CMT_2) {
+        if (cmt.contains(" " + getCleanString(keyword) + " ") && "IRCSO".equalsIgnoreCase(restrictCd)) {
+          rejectRequest = true;
+        }
+      }
+    }
+
+    return rejectRequest;
+
+  }
 }
