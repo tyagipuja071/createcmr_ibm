@@ -324,21 +324,19 @@ public class SpainUtil extends AutomationUtil {
       }
     }
     if (coverageFieldUpdtd > 0) {
-      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
-      if (StringUtils.isNotBlank(managerID)) {
-        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
-        if (!managerCheck) {
-          if (changes.isDataChanged("INAC/NAC Code")) {
-            cmdeReview = true;
-            admin.setScenarioVerifiedIndc("Y");
-          } else {
-            details.append("Updates to coverage fields cannot be validated. An approval will be required.\n");
-            admin.setScenarioVerifiedIndc("N");
-          }
-        } else {
-          details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
+      List<String> managerID = SystemParameters.getList("ES_UKI_MGR_COV_UPDT");
+      boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+      if (!managerCheck) {
+        if (changes.isDataChanged("INAC/NAC Code")) {
+          cmdeReview = true;
           admin.setScenarioVerifiedIndc("Y");
+        } else {
+          details.append("Updates to coverage fields cannot be validated. An approval will be required.\n");
+          admin.setScenarioVerifiedIndc("N");
         }
+      } else {
+        details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
+        admin.setScenarioVerifiedIndc("Y");
       }
     }
     if (resultCodes.contains("D")) {

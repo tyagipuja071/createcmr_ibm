@@ -226,21 +226,19 @@ public class UKIUtil extends AutomationUtil {
     }
 
     if (coverageFieldUpdtd > 0) {
-      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
-      if (StringUtils.isNotBlank(managerID)) {
-        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
-        if (!managerCheck) {
-          if (changes.isDataChanged("INAC/NAC Code") || changes.isDataChanged("Company Number")) {
-            cmdeReview = true;
-            admin.setScenarioVerifiedIndc("Y");
-          } else {
-            details.append("Updates to coverage fields cannot be validated. An Approval wil be required.\n");
-            admin.setScenarioVerifiedIndc("N");
-          }
-        } else {
+      List<String> managerID = SystemParameters.getList("ES_UKI_MGR_COV_UPDT");
+      boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+      if (!managerCheck) {
+        if (changes.isDataChanged("INAC/NAC Code") || changes.isDataChanged("Company Number")) {
+          cmdeReview = true;
           admin.setScenarioVerifiedIndc("Y");
-          details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
+        } else {
+          details.append("Updates to coverage fields cannot be validated. An Approval wil be required.\n");
+          admin.setScenarioVerifiedIndc("N");
         }
+      } else {
+        admin.setScenarioVerifiedIndc("Y");
+        details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
       }
     }
 
