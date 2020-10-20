@@ -365,7 +365,7 @@ public class MCOSaHandler extends MCOHandler {
     }
 
     if (StringUtils.isNotBlank(mainRecord.getCmrCity())) {
-      data.setAbbrevLocn(mainRecord.getCmrCity().substring(0, 12));
+      data.setAbbrevLocn(mainRecord.getCmrCity().length() > 12 ? mainRecord.getCmrCity().substring(0, 12) : mainRecord.getCmrCity());
     }
 
     if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
