@@ -631,9 +631,9 @@ function addCMRSearchHandler(readOnly) {
     FormManager.disable('dnbSearchBtn');
     dojo.removeClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-pri');
     dojo.addClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-disabled');
-    FormManager.disable('dplCheckBtn');
-    dojo.removeClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-pri');
-    dojo.addClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-disabled');
+    //FormManager.disable('dplCheckBtn');
+    //dojo.removeClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-pri');
+    //dojo.addClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-disabled');
   }
 }
 

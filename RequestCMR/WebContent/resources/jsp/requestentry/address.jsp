@@ -167,10 +167,12 @@ visibility: hidden !IMPORTANT;
       </p>
     </cmr:column>
     <cmr:column span="1" width="170">
+      <%if (!readOnly){ %>
       <p>
         <input type="button" value="DPL Check" class="cmr-grid-btn-h btn-search" onclick="doDplCheck()"> 
         <cmr:info text="${ui.info.dplCheck}" />
       </p>
+      <%} %>
     </cmr:column>
   </cmr:row>
 
