@@ -886,14 +886,11 @@ function addAddressTypeValidatorME() {
 /* defect : 1864345 */
 
 /* Street or PO Box should be required (Austria) */
-
+/* CMR-7266 Street or PO Box should be required (ME) */
 function addStreetAndPoBoxFormValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
-          return new ValidationResult(null, true);
-        }
         if (FormManager.getActualValue('addrTxt') == '' && FormManager.getActualValue('poBox') == '') {
           return new ValidationResult(null, false, 'Please fill-out either Street Address or PO Box.');
         }
@@ -4180,6 +4177,7 @@ dojo.addOnLoad(function() {
   // true);
 
   GEOHandler.registerValidator(addStreetAndPoBoxFormValidator, [ SysLoc.AUSTRIA ], null, true);
+  GEOHandler.registerValidator(addStreetAndPoBoxFormValidator, GEOHandler.ME);
   GEOHandler.registerValidator(restrictDuplicateAddrAT, [ SysLoc.AUSTRIA ]);
 
   // Checklist
