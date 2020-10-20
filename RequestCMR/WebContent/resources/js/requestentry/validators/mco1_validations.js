@@ -355,23 +355,16 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  // Name Con't, Address Con't can't be filled together
+  // Name Con't, Address Con't can't and POXOX be filled together
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var cntryRegion = FormManager.getActualValue('countryUse');
-        var scenario = FormManager.getActualValue('custGrp');
-        if (scenario != null && scenario.includes('CRO')) {
-          scenario = 'CROSS';
-        }
+        var landCntry = FormManager.getActualValue('landCntry');
 
-        if (scenario == 'CROSS') {
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '') {
-            return new ValidationResult(null, false, 'Customer Name Con\'t and Street Con\'t cannot be filled together');
-          }
-
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('poBox') != '') {
-            return new ValidationResult(null, false, 'Customer Name Con\'t and PO Box cannot be filled together');
+        if (landCntry != 'ZA') {
+          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('poBox') != '') {
+            return new ValidationResult(null, false, 'Customer Name Con\'t, Street Con\'t and POBox cannot be filled at once for cross-borders');
           }
         }
         return new ValidationResult(null, true);
@@ -1008,71 +1001,103 @@ function getCommonSubgrpVal(custSubGrp) {
 }
 
 function validateCMRForGMLLCScenario() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        console.log('checking requested cmr number...');
-        var requestCMR = FormManager.getActualValue('cmrNo');
-        var reqType = FormManager.getActualValue('reqType');
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var action = FormManager.getActualValue('yourAction');
-        var requestID = FormManager.getActualValue('reqId');
-        var landed = 'LANDED COUNTRY';
-        var subCustGrp = FormManager.getActualValue('custSubGrp');
-        var targetCntry = 'Kenya';
+  FormManager
+      .addFormValidator(
+          (function() {
+            return {
+              validate : function() {
+                console.log('checking requested cmr number...');
+                var requestCMR = FormManager.getActualValue('cmrNo');
+                var reqType = FormManager.getActualValue('reqType');
+                var cntry = FormManager.getActualValue('cmrIssuingCntry');
+                var action = FormManager.getActualValue('yourAction');
+                var requestID = FormManager.getActualValue('reqId');
+                var landed = 'LANDED COUNTRY';
+                var subCustGrp = FormManager.getActualValue('custSubGrp');
+                var targetCntry = 'Kenya';
+                var targetCntryCd = '764';
 
-        if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'NAELC' || subCustGrp == 'SZELC' || subCustGrp == 'LSELC')) {
+                if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'NAELC' || subCustGrp == 'SZELC' || subCustGrp == 'LSELC')) {
 
-          if (requestCMR.length < 6) {
-            return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
-            }, false, 'CMR: ' + requestCMR + ' is invalid. Please enter valid CMR Number');
-          }
+                  if (requestCMR.length < 6) {
+                    return new ValidationResult({
+                      id : 'cmrNo',
+                      type : 'text',
+                      name : 'cmrNo'
+                    }, false, 'CMR: ' + requestCMR + ' is invalid. Please enter valid CMR Number');
+                  }
+                  var res = cmr.query('GET_LAND_CNTRY_ZS01', {
+                    REQ_ID : requestID
+                  });
 
-          var res = cmr.query('GET_LAND_CNTRY_ZS01', {
-            REQ_ID : requestID
-          });
+                  if (res && res.ret1) {
+                    landed = res.ret1;
+                  }
 
-          if (res && res.ret1) {
-            landed = res.ret1;
-          }
+                  var exist3 = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+                    COUNTRY : cntry,
+                    CMR_NO : requestCMR,
+                    MANDT : cmr.MANDT
+                  });
+                  if (exist3 && exist3.ret1 && action != 'PCM') {
+                    return new ValidationResult({
+                      id : 'cmrNo',
+                      type : 'text',
+                      name : 'cmrNo'
+                    }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and '
+                        + landed);
+                  } else {
+                    exist4 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+                      COUNTRY : cntry,
+                      CMR_NO : requestCMR,
+                      MANDT : cmr.MANDT
+                    });
+                    if (exist4 && exist4.ret1 && action != 'PCM') {
+                      return new ValidationResult({
+                        id : 'cmrNo',
+                        type : 'text',
+                        name : 'cmrNo'
+                      }, false, 'CMR: ' + requestCMR + ' is already in use in ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and ' + landed);
+                    } else {
+                      var exist1 = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+                        COUNTRY : targetCntryCd,
+                        CMR_NO : requestCMR,
+                        MANDT : cmr.MANDT
+                      });
+                      if (exist1.ret1 == undefined && action != 'PCM') {
+                        return new ValidationResult({
+                          id : 'cmrNo',
+                          type : 'text',
+                          name : 'cmrNo'
+                        }, false, 'CMR: ' + requestCMR + ' is not already in use in ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both '
+                            + targetCntry + ' and ' + landed);
+                      } else {
+                        exist2 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+                          COUNTRY : targetCntryCd,
+                          CMR_NO : requestCMR,
+                          MANDT : cmr.MANDT
+                        });
+                        if (exist2.ret1 == undefined && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'CMR: ' + requestCMR + ' is not already in use in ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and '
+                              + landed);
+                        }
 
-          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
-            COUNTRY : cntry,
-            CMR_NO : requestCMR,
-            MANDT : cmr.MANDT
-          });
-          if (exists && exists.ret1 && action != 'PCM') {
-            return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
-            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
-          } else {
-            exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
-              COUNTRY : cntry,
-              CMR_NO : requestCMR,
-              MANDT : cmr.MANDT
-            });
-            if (exists && exists.ret1) {
-              return new ValidationResult({
-                id : 'cmrNo',
-                type : 'text',
-                name : 'cmrNo'
-              }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and ' + landed);
-            }
-          }
-        }
-        return new ValidationResult({
-          id : 'cmrNo',
-          type : 'text',
-          name : 'cmrNo'
-        }, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+                      }
+                    }
+                  }
+                }
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, true);
+              }
+            };
+          })(), 'MAIN_IBM_TAB', 'frmCMR');
 
 }
 
