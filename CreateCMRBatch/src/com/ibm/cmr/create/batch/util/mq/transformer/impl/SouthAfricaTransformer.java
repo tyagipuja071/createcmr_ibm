@@ -47,6 +47,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
   private static final Logger LOG = Logger.getLogger(MCOTransformer.class);
   private static final String DEFAULT_CLEAR_NUM = "0";
+  private static final String DEFAULT_CLEAR_CHAR = "@";
   public static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   public static final String CMR_REQUEST_STATUS_CPR = "CPR";
   public static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -158,7 +159,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
       CMRRequestContainer cmrObjects, Addr currAddr) {
     LOG.debug("transformLegacyAddressData South Africa transformer...");
     formatAddressLines(dummyHandler);
-    if ("ZD01".equals(currAddr.getId().getAddrType())) {
+
+    if (DEFAULT_CLEAR_CHAR.equals(currAddr.getId().getAddrType())) {
+      legacyAddr.setAddrPhone("");
+    } else if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
     }
 
