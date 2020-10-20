@@ -355,23 +355,16 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  // Name Con't, Address Con't can't be filled together
+  // Name Con't, Address Con't can't and POXOX be filled together
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var cntryRegion = FormManager.getActualValue('countryUse');
-        var scenario = FormManager.getActualValue('custGrp');
-        if (scenario != null && scenario.includes('CRO')) {
-          scenario = 'CROSS';
-        }
+        var landCntry = FormManager.getActualValue('landCntry');
 
-        if (scenario == 'CROSS') {
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '') {
-            return new ValidationResult(null, false, 'Customer Name Con\'t and Street Con\'t cannot be filled together');
-          }
-
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('poBox') != '') {
-            return new ValidationResult(null, false, 'Customer Name Con\'t and PO Box cannot be filled together');
+        if (landCntry != 'ZA') {
+          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('poBox') != '') {
+            return new ValidationResult(null, false, 'Customer Name Con\'t, Street Con\'t and POBox cannot be filled at once for cross-borders');
           }
         }
         return new ValidationResult(null, true);
@@ -1178,6 +1171,70 @@ function embargoCdValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function validateCMRNumForProspect() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        var numPattern = /^[0-9]+$/;
+        var cmrSubNum = '';
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        } else {
+          cmrSubNum = cmrNo.substring(1, 6);
+
+          // Skip validation for Prospect Request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumberForLegacy ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            if (cmrNo == '000000') {
+              return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
+            }
+            if (cmrNo.length >= 1 && cmrNo.length != 6) {
+              return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+            }
+
+            // Validation for Internal Scenario
+            var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+            if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT' || internalScenarios.includes(_custSubGrp)) {
+              if (!cmrNo.startsWith("99")) {
+                return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+              }
+              if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'CMR Number should be number only.');
+              }
+            } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT' || !internalScenarios.includes(_custSubGrp)) {
+              if (cmrNo.startsWith("99")) {
+                return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
+              }
+              if (cmrNo.length > 1 && (!cmrNo.startsWith('P') || !cmrSubNum.match(numPattern))) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'CMR Number should start with P and later have numbers only.');
+              }
+            }
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1239,4 +1296,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(validateTypeOfCustomer, GEOHandler.MCO1);
 
   GEOHandler.registerValidator(embargoCdValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
+  GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
 });

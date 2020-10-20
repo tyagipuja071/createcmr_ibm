@@ -362,6 +362,10 @@ public class MCOSaHandler extends MCOHandler {
       data.setIbmDeptCostCenter(legacyObjects.getCustomer().getDeptCd());
     }
 
+    if (StringUtils.isNotBlank(mainRecord.getCmrCity())) {
+      data.setAbbrevLocn(mainRecord.getCmrCity().substring(0, 12));
+    }
+
     if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
       String collBo = legacyObjects.getCustomerExt().getTeleCovRep();
       if (StringUtils.isNotEmpty(collBo) && collBo.length() > 4) {
@@ -505,7 +509,7 @@ public class MCOSaHandler extends MCOHandler {
 
   protected void importOtherSOFAddressesLD(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted, List<String> addrTypesImported) {
-    List<String> addrToBeImported = Arrays.asList("ZD01", "ZP01", "ZI01", "ZS02");
+    List<String> addrToBeImported = Arrays.asList("ZP01", "ZI01", "ZS02");
 
     for (String addrType : addrToBeImported) {
       if (!addrTypesImported.contains(addrType)) {
@@ -514,6 +518,19 @@ public class MCOSaHandler extends MCOHandler {
           converted.add(record);
         }
 
+      }
+    }
+
+    if (this.legacyObjects != null && this.legacyObjects.getAddresses() != null) {
+      for (CmrtAddr addr : this.legacyObjects.getAddresses()) {
+        if ("Y".equals(addr.getIsAddrUseShipping())) {
+          FindCMRRecordModel record = new FindCMRRecordModel();
+          handleSOFAddressImportLD(entityManager, cmrCountry, record, getTargetAddressTypeKey("ZD01"), addr, "ZD01");
+          if (record != null && converted != null
+              && !converted.stream().anyMatch(cmrAddr -> cmrAddr.getCmrAddrSeq().equals(record.getCmrAddrSeq()))) {
+            converted.add(record);
+          }
+        }
       }
     }
   }
@@ -931,6 +948,10 @@ public class MCOSaHandler extends MCOHandler {
             // Common
             String cmrNo = ""; // 0
 
+            // Data Sheet
+            String cof = ""; // 7
+            String codFlag = ""; // 14
+
             // Address Sheet
             String seqNo = ""; // 1
             String custName1 = ""; // 2
@@ -948,6 +969,14 @@ public class MCOSaHandler extends MCOHandler {
             long count = 0;
             if (row.getRowNum() == 2001) {
               continue;
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(7);
+              cof = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(14);
+              codFlag = validateColValFromCell(currCell);
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -995,6 +1024,13 @@ public class MCOSaHandler extends MCOHandler {
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isEmpty(cof) && !StringUtils.isEmpty(codFlag)) {
+              LOG.trace("cof and codFlag must not be populated at the same time. If one is populated, the other must be empty. >> ");
+              error.addError(row.getRowNum(), "COD Flag",
+                  "cof and codFlag must not be populated at the same time. If one is populated, the other must be empty..");
               validations.add(error);
             }
 
