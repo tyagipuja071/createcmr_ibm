@@ -446,6 +446,25 @@ public class MCOSaHandler extends MCOHandler {
 
   }
 
+  private void serBlankFieldsAtCopy(Addr addr) {
+    if (!StringUtils.isEmpty(addr.getCustPhone())) {
+      if (!"ZS01".equals(addr.getId().getAddrType()) && !"ZD01".equals(addr.getId().getAddrType())) {
+        addr.setCustPhone("");
+      }
+    }
+
+    if (!StringUtils.isEmpty(addr.getPoBox())) {
+      if (!"ZS01".equals(addr.getId().getAddrType()) && !"ZP01".equals(addr.getId().getAddrType())) {
+        addr.setPoBox("");
+      }
+    }
+  }
+
+  @Override
+  public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    serBlankFieldsAtCopy(addr);
+  }
+
   @Override
   protected String getAddressTypeByUse(String addressUse) {
     switch (addressUse) {

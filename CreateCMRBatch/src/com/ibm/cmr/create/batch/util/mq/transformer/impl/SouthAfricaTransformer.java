@@ -174,6 +174,16 @@ public class SouthAfricaTransformer extends MCOTransformer {
         legacyAddr.setPoBox(poBox);
       }
     }
+
+    String streetCont = currAddr.getAddrTxt2();
+    if ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType())) {
+      if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(streetCont)) {
+        if (!poBox.startsWith("PO BOX ")) {
+          legacyAddr.setAddrLine4(streetCont + "," + "PO BOX " + currAddr.getPoBox());
+        }
+      }
+    }
+
   }
 
   @Override
@@ -426,10 +436,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getAffiliate())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
-        legacyCust.setLangCd("");
+      if (DEFAULT_CLEAR_NUM.equals(muData.getAffiliate())) {
+        legacyCust.setDeptCd("");
       } else {
-        legacyCust.setLangCd(muData.getAffiliate());
+        legacyCust.setDeptCd(muData.getAffiliate());
       }
     }
 

@@ -262,11 +262,11 @@ function disableAddrFieldsZA() {
   }
 
   // Phone - for mailing and shipping addresses
-  if (addrType == 'ZS01' || addrType == 'ZD01') {
-    FormManager.enable('custPhone');
-  } else {
+  if (addrType != 'ZS01' && addrType != 'ZD01') {
+    FormManager.readOnly('custPhone');
     FormManager.setValue('custPhone', '');
-    FormManager.disable('custPhone');
+  } else {
+    FormManager.enable('custPhone');
   }
 
   disablePOBox();
