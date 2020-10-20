@@ -48,6 +48,8 @@ public class MCOSaHandler extends MCOHandler {
   protected static final String[] ZA_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
 
+  private static final String[] SA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CAP", "ModeOfPayment" };
+
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
@@ -1183,7 +1185,6 @@ public class MCOSaHandler extends MCOHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
-    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
       update = new UpdatedDataModel();
@@ -1247,7 +1248,18 @@ public class MCOSaHandler extends MCOHandler {
       update.setOldData(oldData.getCrosSubTyp());
       results.add(update);
     }
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
 
   }
 
+  @Override
+  public boolean skipOnSummaryUpdate(String cntry, String field) {
+    return Arrays.asList(SA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
+  }
 }

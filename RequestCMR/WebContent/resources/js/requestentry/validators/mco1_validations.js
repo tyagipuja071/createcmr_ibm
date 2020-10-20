@@ -1235,6 +1235,44 @@ function validateCMRNumForProspect() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addStreetAddressValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var addrTxt = null;
+        var type = null;
+        var record = null;
+        var reqType = FormManager.getActualValue('reqType').toUpperCase();
+        var changedInd = null;
+
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            addrTxt = record.addrTxt;
+            changedInd = record.updateInd;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+
+            if ((type != undefined && type != '')) {
+              if (addrTxt == '' && reqType != 'U') {
+                return new ValidationResult(null, false, 'Street Address is required for all address.');
+              } else if (addrTxt == '' && reqType == 'U' && (changedInd == 'U' || changedInd == 'N')) {
+                return new ValidationResult(null, false, 'Street Address is required for all address.');
+              }
+            }
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1297,4 +1335,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(embargoCdValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(addStreetAddressValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
 });
