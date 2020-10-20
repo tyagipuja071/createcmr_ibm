@@ -229,6 +229,7 @@ public class USUtil extends AutomationUtil {
     StringBuilder eleResults = new StringBuilder();
     String scenarioSubType = "";
     boolean boCodesCalculated = false;
+
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
@@ -377,11 +378,18 @@ public class USUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
       }
 
-    } else if ("U".equals(admin.getReqType()))
-
-    {
+    } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");
+    }
+
+    // CMR - 3999
+    boolean shouldBPRejectReq = AutomationUtil.checkCommentSection(entityManager, admin, data);
+    if (shouldBPRejectReq) {
+      String cmt = "The model CMR provided isn't consistent with the CMR type requested, please cancel this request and choose a compatible model CMR.";
+      details.append(cmt).append("\n");
+      engineData.addRejectionComment("DUPC", cmt, "", "");
+      results.setOnError(true);
     }
 
     if (results == null || (results != null && results.isOnError())) {
