@@ -132,10 +132,10 @@ visibility: hidden !IMPORTANT;
             All Passed
           </c:if>
           <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF'}">
-            All Failed
+            <span style="color:red;font-weight:bold">All Failed</span>
           </c:if>
           <c:if test="${fn:trim(reqentry.dplChkResult) == 'SF'}">
-            Some Failed 
+            <span style="color:red;font-weight:bold">Some Failed</span>
           </c:if>
           <c:if test="${fn:trim(reqentry.dplChkResult) == 'Not Done'}">
             Not Done
@@ -174,47 +174,60 @@ visibility: hidden !IMPORTANT;
     </cmr:column>
   </cmr:row>
 
-  <cmr:row>
-    <cmr:column span="1" width="190">
-      <p>
-        <cmr:label fieldId="dplCheck">
-            DPL Assessment Result:
-            <cmr:info text="The final assessment made by a user when searching directly against the DPL database and comparing the customer information against the list of DPL entities returned." />
-        </cmr:label>
-        <div>
-           Matched DPL
-        </div>
-      </p>
-    </cmr:column>
-    <cmr:column span="1" width="190">
-      <p>
-        <cmr:label fieldId="dplCheck">
-          Assessed By:
-        </cmr:label>
-        <div>
-          zamoraja@ph.ibm.com
-        </div>
-      </p>
-    </cmr:column>
-    <cmr:column span="1" width="170">
-      <p>
-        <cmr:label fieldId="dplCheck">
-          Assessment Date:
-        </cmr:label>
-        <div>
-          2020-10-10
-        </div>
-      </p>
-    </cmr:column>
-    <cmr:column span="1" width="170">
-      <p>
-        <%if (!readOnly) {%>
-          <input type="button" title="Search DPL Database" value="Search DPL Database" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
-          <cmr:info text="Opens a new window and searches directly against the DPL Database" />
-        <%}%>
-      </p>
-    </cmr:column>
-  </cmr:row>
+  <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF' || fn:trim(reqentry.dplChkResult) == 'SF'}">
+    <cmr:row>
+      <cmr:column span="1" width="190">
+        <p>
+          <cmr:label fieldId="dplCheck">
+              DPL Assessment Result:
+              <cmr:info text="The final assessment made by a user when searching directly against the DPL database and comparing the customer information against the list of DPL entities returned." />
+          </cmr:label>
+          <div>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'Y'}">
+              <span style="color:red;font-weight:bold">Matched DPL entities</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'N'}">
+              <span>No Actual Matches</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'U'}">
+              <span>Cannot determine, needs further review</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == ''}">
+              <span>Not Done</span>
+            </c:if>
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="190">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            Assessed By:
+          </cmr:label>
+          <div>
+            ${reqentry.intDplAssessmentBy}
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="170">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            Assessment Date:
+          </cmr:label>
+          <div>
+            ${reqentry.intDplAssessmentDate}
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="170">
+        <p>
+          <%if (!readOnly) {%>
+            <input type="button" title="Search and Assess DPL Results" value="Search DPL Database" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
+            <cmr:info text="Opens a new window and searches directly against the DPL Database" />
+          <%}%>
+        </p>
+      </cmr:column>
+    </cmr:row>
+  </c:if>
 
   <cmr:row addBackground="true" topPad="10">
     <cmr:column span="1" width="170">

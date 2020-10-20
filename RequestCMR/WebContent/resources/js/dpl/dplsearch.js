@@ -119,7 +119,7 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
                   $scope.dplAssessment = 'No actual matches';
                   break;
                 case 'U' :
-                  $scope.dplAssessment = 'Not able to determine conclusively';
+                  $scope.dplAssessment = 'Needs further review';
                   break;
                 } 
               } 

@@ -1424,6 +1424,9 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     if (scorecard == null) {
       return;
     }
+
+    String currentResult = scorecard.getDplChkResult();
+
     this.log.debug("Recomputing DPL Results for Request ID " + reqId);
     String sql = ExternalizedQuery.getSql("DPL.GETDPLCOUNTS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1479,6 +1482,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (scorecard.getDplChkUsrId() == null) {
         scorecard.setDplChkUsrId(user.getIntranetId());
         scorecard.setDplChkUsrNm(user.getBluePagesName());
+      }
+
+      if (currentResult == null || !currentResult.equals(scorecard.getDplChkResult())) {
+        // it has changed, clear assessment
+        scorecard.setDplAssessmentBy(null);
+        scorecard.setDplAssessmentDate(null);
+        scorecard.setDplAssessmentCmt(null);
+        scorecard.setDplAssessmentResult(null);
       }
       this.log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
       updateEntity(scorecard, entityManager);

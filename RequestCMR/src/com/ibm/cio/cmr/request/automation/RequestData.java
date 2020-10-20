@@ -50,14 +50,17 @@ public class RequestData {
     AdminPK adminPk = new AdminPK();
     adminPk.setReqId(reqId);
     this.admin = entityManager.find(Admin.class, adminPk);
+    entityManager.refresh(this.admin);
 
     DataPK dataPk = new DataPK();
     dataPk.setReqId(reqId);
     this.data = entityManager.find(Data.class, dataPk);
+    entityManager.refresh(this.data);
 
     ScorecardPK scorecardPk = new ScorecardPK();
     scorecardPk.setReqId(reqId);
     this.scorecard = entityManager.find(Scorecard.class, scorecardPk);
+    entityManager.refresh(this.scorecard);
 
     switch (admin.getReqType()) {
     case "C":
