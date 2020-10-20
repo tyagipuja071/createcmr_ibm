@@ -1235,6 +1235,42 @@ function validateCMRNumForProspect() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function restrictDuplicateAddrZA(cntry, addressMode, saving, finalSave, force) {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var requestId = FormManager.getActualValue('reqId');
+        var addressSeq = FormManager.getActualValue('addrSeq');
+        var addressType = FormManager.getActualValue('addrType');
+        var dummyseq = "xx";
+        var showDuplicateSoldToError = false;
+        var qParams;
+        if (addressMode == 'updateAddress') {
+          qParams = {
+            REQ_ID : requestId,
+            ADDR_SEQ : addressSeq,
+          };
+        } else {
+          qParams = {
+            REQ_ID : requestId,
+            ADDR_SEQ : dummyseq,
+          };
+        }
+        if (addressType != undefined && addressType != '' && addressType == 'ZS01' && cmr.addressMode != 'updateAddress') {
+          var result = cmr.query('GETZS01RECORDS', qParams);
+          var zs01count = result.ret1;
+          showDuplicateSoldToError = Number(zs01count) >= 1 && addressType == 'ZS01';
+          if (showDuplicateSoldToError) {
+            return new ValidationResult(null, false, 'Only one Mailing address is allowed. If you still want to create new address , please delete the existing one and then create a new address.');
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1297,4 +1333,5 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerValidator(embargoCdValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(restrictDuplicateAddrZA, [ SysLoc.SOUTH_AFRICA ]);
 });

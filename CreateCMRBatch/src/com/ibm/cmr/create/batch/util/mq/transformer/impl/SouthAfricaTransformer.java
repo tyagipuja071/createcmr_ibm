@@ -426,10 +426,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getAffiliate())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
-        legacyCust.setLangCd("");
-      } else {
-        legacyCust.setLangCd(muData.getAffiliate());
+      if (DEFAULT_CLEAR_NUM.equals(muData.getAffiliate())) {
+        legacyCust.setDeptCd("");
+      } else if (muData.getAffiliate().length() == 6) {
+        legacyCust.setDeptCd(muData.getAffiliate().substring(2, 6));
       }
     }
 
