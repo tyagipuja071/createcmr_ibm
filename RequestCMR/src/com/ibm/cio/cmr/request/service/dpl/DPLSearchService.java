@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.service.requestentry.AttachmentService;
@@ -66,6 +67,8 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       return getItemizedDPLSearchResults(entityManager, params);
     case "ATTACH":
       return attachResultsToRequest(entityManager, params);
+    case "ASSESS":
+      return assessDPL(entityManager, params);
     }
     return null;
   }
@@ -87,6 +90,14 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     return reqData;
   }
 
+  /**
+   * Attaches the results of the automated DPL search to the request
+   * 
+   * @param entityManager
+   * @param params
+   * @return
+   * @throws Exception
+   */
   private Boolean attachResultsToRequest(EntityManager entityManager, ParamContainer params) throws Exception {
     Long reqId = (Long) params.getParam("reqId");
     if (reqId == null) {
@@ -111,9 +122,15 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       type = "application/octet-stream";
     }
 
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
-    String fileName = "DPLSearch_" + formatter.format(ts) + ".pdf";
+    String prefix = (String) params.getParam("filePrefix");
+    if (prefix == null) {
+      prefix = "DPLSearch_";
+    }
 
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
+    String fileName = prefix + formatter.format(ts) + ".pdf";
+
+    LOG.debug("Attaching " + fileName + " to Request " + reqId);
     boolean success = true;
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
       pdf.exportToPdf(null, null, null, bos, null);
@@ -122,6 +139,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
 
       try (ByteArrayInputStream bis = new ByteArrayInputStream(pdfBytes)) {
         try {
+          attachmentService.removeAttachmentsOfType(entityManager, reqId, "DPL", prefix);
           attachmentService.addExternalAttachment(entityManager, user, reqId, "DPL", fileName, "DPL Search Results", bis);
         } catch (Exception e) {
           LOG.warn("Unable to save DPL attachment.", e);
@@ -323,13 +341,43 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     }
 
     SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
-    String fileName = "DPLSearch_" + formatter.format(ts) + ".pdf";
+    String fileName = "ManualDPLSearch_" + formatter.format(ts) + ".pdf";
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/pdf");
     response.addHeader("Content-Type", type);
     response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
     pdf.exportToPdf(null, null, null, response.getOutputStream(), null);
+  }
+
+  /**
+   * Records the DPL Assessment
+   * 
+   * @param entityManager
+   * @param params
+   * @return
+   * @throws Exception
+   */
+  private RequestData assessDPL(EntityManager entityManager, ParamContainer params) throws Exception {
+    Long reqId = (Long) params.getParam("reqId");
+    LOG.debug("Retreiving Request data for Request ID " + reqId);
+    RequestData reqData = new RequestData(entityManager, reqId);
+    if (reqData.getAdmin() == null) {
+      throw new Exception("Request " + reqId + " does not exist.");
+    }
+    String assessment = (String) params.getParam("assessment");
+    String cmt = (String) params.getParam("assessmentCmt");
+    AppUser user = (AppUser) params.getParam("user");
+
+    Scorecard scorecard = reqData.getScorecard();
+    scorecard.setDplAssessmentResult(assessment);
+    scorecard.setDplAssessmentBy(user.getIntranetId());
+    scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+    scorecard.setDplAssessmentCmt(cmt);
+
+    entityManager.merge(scorecard);
+
+    return reqData;
   }
 
   @Override

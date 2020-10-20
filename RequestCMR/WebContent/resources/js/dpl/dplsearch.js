@@ -46,6 +46,7 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
       $scope.plain = false;
       $scope.searchString = '';
       $scope.allTextFilter = '';
+      $scope.reassess = false;
       $scope.request = {
           admin : {},
           data : {},
@@ -105,6 +106,31 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
                 break;
               }
             });
+            var score = $scope.request.scorecard;
+            $scope.dplAssessment = 'Not done';
+            if (score) {
+              console.log(score);
+              if (score.dplAssessmentResult){
+                switch (score.dplAssessmentResult) {
+                case 'Y' :
+                  $scope.dplAssessment = 'Matched DPL entities';
+                  break;
+                case 'N' :
+                  $scope.dplAssessment = 'No actual matches';
+                  break;
+                case 'U' :
+                  $scope.dplAssessment = 'Needs further review';
+                  break;
+                } 
+              } 
+              $scope.dplAssessmentBy = score.dplAssessmentBy;
+              if (score.dplAssessmentDate){
+                var dt = new Date(score.dplAssessmentDate);
+                $scope.dplAssessmentDate = moment(dt).format('YYYY-MM-DD HH:mm:ss');
+              }
+              $scope.dplAssessmentCmt = score.dplAssessmentCmt;
+            }
+            
             $scope.dplSearchRequest();
           } else {
             alert('An error occurred while processing. Please try again later.');
@@ -117,6 +143,7 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
       };
       
       $scope.dplSearchRequest = function(plainSearch){
+        $scope.results = [];
         var url = cmr.CONTEXT_ROOT + '/dplsearch/process.json?reqId='+$scope.reqId+'&processType=SEARCH';
         if (plainSearch){
           url = cmr.CONTEXT_ROOT + '/dplsearch/process.json?reqId=0&searchString='+encodeURIComponent($scope.searchString)+'&processType=SEARCH';
@@ -209,6 +236,42 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
               }
             }
             alert('Results have been added to the request as DPL Matching Attachment');
+          } else {
+            alert('An error occurred while processing. Please try again later.');
+          }
+        }, function(response) {
+          cmr.hideProgress();
+          console.log('error: ');
+          console.log(response);
+          alert('An error occurred while processing. Please try again later.');
+        });
+      };
+      
+      $scope.assessDPL = function(result) {
+        if (!$scope.dplAssessmentCmt){
+          alert('Please input assessment comments.');
+          return;
+        }
+        if ($scope.dplAssessmentCmt.length > 500) {
+          alert('Assessment comments too long, maximum of 500 characters.');
+          return;
+        }
+        if (!confirm('Kindly ensure that you have reviewed all the results and have made all relevant checks on the entities shown. Proceed with assessment?')){
+          return;
+        }
+        cmr.showProgress('Recording responses..');
+        var url = cmr.CONTEXT_ROOT + '/dplsearch/process.json?reqId='+$scope.reqId+'&processType=ASSESS&assessment='+result+'&assessmentCmt='+encodeURIComponent($scope.dplAssessmentCmt);
+        $http({
+          url : url,
+          method : 'GET'
+        }).then(function(response) {
+          cmr.hideProgress();
+          console.log('success');
+          console.log(response.data);
+          if (response.data && response.data.data) {
+            alert('DPL Assessment recorded successfully.');
+            $scope.reassess = false;
+            $scope.getRequestInfo();
           } else {
             alert('An error occurred while processing. Please try again later.');
           }

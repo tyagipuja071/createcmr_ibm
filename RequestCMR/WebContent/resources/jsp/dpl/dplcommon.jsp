@@ -30,6 +30,30 @@ background: -webkit-linear-gradient(top,  #eaefb5 0%,#e1e9a0 100%); /* Chrome10-
 background: linear-gradient(to bottom,  #eaefb5 0%,#e1e9a0 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaefb5', endColorstr='#e1e9a0',GradientType=0 ); /* IE6-9 */
 }
+.dpl-y {
+  background: #febbbb; /* Old browsers */
+  background: -moz-linear-gradient(top,  #febbbb 0%, #fe9090 45%, #ff5c5c 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #febbbb 0%,#fe9090 45%,#ff5c5c 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #febbbb 0%,#fe9090 45%,#ff5c5c 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#febbbb', endColorstr='#ff5c5c',GradientType=0 ); /* IE6-9 */
+  border: 1px Solid #999;
+  cursor: pointer;
+}
+.dpl-n {
+  background: #e4efc0; /* Old browsers */
+  background: -moz-linear-gradient(top,  #e4efc0 0%, #abbd73 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #e4efc0 0%,#abbd73 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #e4efc0 0%,#abbd73 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e4efc0', endColorstr='#abbd73',GradientType=0 ); /* IE6-9 */
+  border: 1px Solid #999;
+  cursor: pointer;
+}
+.dpl-u {
+  cursor: pointer;
+}
+table.search-results-dpl td, table.search-results-dpl th {
+  font-size:11px;
+}
 </style>
 
   <div ng-app="DPLSearchApp">
@@ -88,7 +112,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaefb5', end
               {{addr.custNm1 ? addr.custNm1 : customerName}}
             </td>
             <td class="dnb-label" width="10%">Address:</td>
-            <td width-="36%">
+            <td width="36%">
               {{addr.addrTxt}} {{addr.addrTxt2 ? ', ' + addr.addrTxt2 : ''}}
               <br>
               {{addr.city1}} {{addr.stateProv ? ', '+addr.stateProv : ''}}
@@ -103,9 +127,43 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaefb5', end
           
         </tbody>
       </table>
+      <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results" ng-show="!plain">
+        <caption>
+          <em>DPL Results Assessment</em>
+        </caption>
+        <tbody>
+          <tr>
+            <td class="dnb-label" width="10%">Status:</td>
+            <td width="25%"><strong>{{dplAssessment}}</strong></td>
+            <td class="dnb-label" width="10%">Assessed By:</td>
+            <td width="*">{{dplAssessmentBy ? dplAssessmentBy : ''}}</td>
+            <td class="dnb-label" width="10%">Date:</td>
+            <td width="15%">{{dplAssessmentDate ? dplAssessmentDate : ''}}</td>
+          </tr>
+          <tr>
+            <td class="dnb-label">Comments:</td>
+            <td colspan="5">
+              <div ng-show="!reassess">{{dplAssessmentCmt}}</div>
+              <div ng-show="reassess">
+                <textarea ng-model="dplAssessmentCmt" rows="5" cols="70"></textarea>
+              </div>
+            </td>
+          </tr>
+          <tr ng-show="results && results.length > 0"> 
+            <td colspan="6">
+              <input type="button" class="btn-search" value="Assess Results" style="margin-left:10px" ng-click="reassess = true" ng-show="!reassess"> 
+              <input type="button" class="btn-search dpl-y" value="Yes, the Customer is on DPL" style="margin-left:10px" ng-click="assessDPL('Y')" ng-show="reassess"> 
+              <input type="button" class="btn-search dpl-n" value="No, the Customer is not on DPL" style="margin-left:10px" ng-click="assessDPL('N')" ng-show="reassess"> 
+              <input type="button" class="btn-search dpl-u" value="Needs further review" style="margin-left:10px" ng-click="assessDPL('U')" ng-show="reassess"> 
+            </td>
+          </tr>
+        </tbody>
+      </table>
       
       
-      <div ng-show="results">
+      <br>
+      <br>
+      <div ng-show="results && results.length > 0">
         <div class="filter" style="display:inline-block;float:left;margin-bottom:20px;font-size:14px;width:700px;font-weight:bold">
           Showing results for searches against the name and variations. Results after the first one already filter out
           entities appearing on the previous name search.
@@ -114,7 +172,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaefb5', end
           <input ng-model="allTextFilter" placeholder="Type to filter by name" style="width:200px">
         </div>
       </div>
-      <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results" ng-repeat="result in results">
+      <table cellspacing="0" cellpadding="0" border="0" summary="Customer Information" class="ibm-data-table ibm-sortable-table ibm-alternating search-results search-results-dpl" ng-repeat="result in results">
         <caption>
           <em>DPL Matches for "{{result.searchArgument}}" ({{result.records.length}} matches)</em>
           <img class="exp-col" title="Expand Details" src="${resourcesPath}/images/add.png" ng-click="result.exp = true" ng-show="!result.exp">
@@ -203,7 +261,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaefb5', end
         </tbody>
       </table>
       
-       <table cellspacing="0" cellpadding="0" border="0" summary="Info" class="ibm-data-table ibm-sortable-table ibm-alternating legacy-crit" ng-show="results">
+       <table cellspacing="0" cellpadding="0" border="0" summary="Info" class="ibm-data-table ibm-sortable-table ibm-alternating legacy-crit" ng-show="results && results.length > 0">
           <thead>
             <tr>
               <td colspan="4">

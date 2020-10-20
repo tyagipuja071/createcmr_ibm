@@ -108,72 +108,135 @@ visibility: hidden !IMPORTANT;
     }
   }
 </script>
+<style>
+ .btn-search, .btn-reset {
+   min-width: 100px;
+   height: 30px !important;
+ }
+</style>
 <cmr:section id="NAME_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
 
   <cmr:row addBackground="true" topPad="10">
-    <cmr:column span="1" width="180">
+    <cmr:column span="1" width="190">
+      <p>
+        <cmr:label fieldId="dplCheck">
+              DPL Check Result:
+              <%if ("Processor".equalsIgnoreCase(reqentry.getUserRole())){%>
+                <span class="ibm-required cmr-required-spacer">*</span>
+              <%} %>
+              <cmr:info text="The results of the automated DPL check done against Export Validation Services (EVS). Results are returned as pass or fail only per address." />
+        </cmr:label>
+        <div>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'AP'}">
+            All Passed
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF'}">
+            <span style="color:red;font-weight:bold">All Failed</span>
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'SF'}">
+            <span style="color:red;font-weight:bold">Some Failed</span>
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'Not Done'}">
+            Not Done
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'NR'}">
+            Not Required
+          </c:if>
+        </div>
+      </p>
+    </cmr:column>
+    <cmr:column span="1" width="190">
+      <p>
+        <cmr:label fieldId="dplCheck">
+          Performed By:
+        </cmr:label>
+        <div>
+          ${reqentry.dplChkUsrId}
+        </div>
+      </p>
+    </cmr:column>
+    <cmr:column span="1" width="170">
+      <p>
+        <cmr:label fieldId="dplCheck">
+          DPL Check Date:
+        </cmr:label>
+        <div>
+          ${reqentry.dplChkDate}
+        </div>
+      </p>
+    </cmr:column>
+    <cmr:column span="1" width="170">
+      <p>
+        <input type="button" value="DPL Check" class="cmr-grid-btn-h btn-search"> 
+        <cmr:info text="${ui.info.dplCheck}" />
+      </p>
+    </cmr:column>
+  </cmr:row>
+
+  <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF' || fn:trim(reqentry.dplChkResult) == 'SF'}">
+    <cmr:row>
+      <cmr:column span="1" width="190">
+        <p>
+          <cmr:label fieldId="dplCheck">
+              DPL Assessment Result:
+              <cmr:info text="The final assessment made by a user when searching directly against the DPL database and comparing the customer information against the list of DPL entities returned." />
+          </cmr:label>
+          <div>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'Y'}">
+              <span style="color:red;font-weight:bold">Matched DPL entities</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'N'}">
+              <span>No Actual Matches</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'U'}">
+              <span>Cannot determine, needs further review</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == ''}">
+              <span>Not Done</span>
+            </c:if>
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="190">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            Assessed By:
+          </cmr:label>
+          <div>
+            ${reqentry.intDplAssessmentBy}
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="170">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            Assessment Date:
+          </cmr:label>
+          <div>
+            ${reqentry.intDplAssessmentDate}
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="170">
+        <p>
+          <%if (!readOnly) {%>
+            <input type="button" title="Search and Assess DPL Results" value="Search DPL Database" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
+            <cmr:info text="Opens a new window and searches directly against the DPL Database" />
+          <%}%>
+        </p>
+      </cmr:column>
+    </cmr:row>
+  </c:if>
+
+  <cmr:row addBackground="true" topPad="10">
+    <cmr:column span="1" width="170">
       <p>
         <cmr:label fieldId="addressList">
               ${ui.addressList}:
         </cmr:label>
       </p>
     </cmr:column>
-    <cmr:column span="1">
-      <cmr:button label="${ui.btn.dplChk}" id="dplCheckBtn" onClick="doDplCheck()" highlight="true" styleClass="cmr-reqentry-btn"/>
-      <%if ("Processor".equalsIgnoreCase(reqentry.getUserRole())){%>
-      <span class="ibm-required cmr-required-spacer">*</span>
-      <%} else {%>
-      <span class="ibm-required cmr-required-spacer" style="visibility:hidden">*</span>
-      <%} %>
-      <cmr:info text="${ui.info.dplCheck}" />
-    </cmr:column>
-    <cmr:column span="1" width="120">
-    <p>
-        <label>${ui.dplChkStatus}:</label> 
-        </p>
-    </cmr:column>
-    <cmr:column span="2" width="400">
-    <p style="font-size:14px !important;padding:2px">
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'AP'}">
-                    <span style="color:green;font-weight:bold;margin-left:5px;display:inline">
-                    All Passed (${reqentry.dplChkDate})
-                    </span>
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF'}">
-                    <span style="color:red;font-weight:bold;margin-left:5px;display:inline">
-                      All Failed (${reqentry.dplChkDate})
-                    </span>
-                  <input type="button" title="Search DPL Database" value="Search DPL Database" class="cmr-grid-btn-h" onclick="openDPLSearch()">
-                  <cmr:info text="Opens a new window and searches directly against the DPL Database" />
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'SF'}">
-                    <span style="color:red;font-weight:bold;margin-left:5px;display:inline">
-                      Some Failed (${reqentry.dplChkDate})
-                    </span>
-                  <input type="button" title="Search DPL Database" value="Search DPL Database" class="cmr-grid-btn-h" onclick="openDPLSearch()">
-                  <cmr:info text="Opens a new window and searches directly against the DPL Database" />
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'Not Done'}">
-                  Not Done
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'NR'}">
-                  Not Required
-                  </c:if>
-                  </p>
-    </cmr:column>
-<%--
-    <cmr:column span="1" width="125">
-    <p>
-        <label>${ui.dplChkDate}:</label>
-        </p>
-    </cmr:column>
-    <cmr:column span="1" width="100">
-    <p>
-        ${reqentry.dplChkDate}
-        </p>
-     </cmr:column>
---%>
   </cmr:row>
   <%
   String contextPath = request.getContextPath();
