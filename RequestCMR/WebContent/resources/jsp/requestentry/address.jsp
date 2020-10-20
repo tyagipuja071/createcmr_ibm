@@ -168,7 +168,7 @@ visibility: hidden !IMPORTANT;
     </cmr:column>
     <cmr:column span="1" width="170">
       <p>
-        <input type="button" value="DPL Check" class="cmr-grid-btn-h btn-search"> 
+        <input type="button" value="DPL Check" class="cmr-grid-btn-h btn-search" onclick="doDplCheck"> 
         <cmr:info text="${ui.info.dplCheck}" />
       </p>
     </cmr:column>
@@ -221,7 +221,7 @@ visibility: hidden !IMPORTANT;
       <cmr:column span="1" width="170">
         <p>
           <%if (!readOnly) {%>
-            <input type="button" title="Search and Assess DPL Results" value="Search DPL Database" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
+            <input type="button" title="Assess DPL Results" value="Search DPL Database" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
             <cmr:info text="Opens a new window and searches directly against the DPL Database" />
           <%}%>
         </p>
