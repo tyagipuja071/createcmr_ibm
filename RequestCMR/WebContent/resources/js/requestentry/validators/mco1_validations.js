@@ -355,23 +355,16 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
 
-  // Name Con't, Address Con't can't be filled together
+  // Name Con't, Address Con't can't and POXOX be filled together
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
         var cntryRegion = FormManager.getActualValue('countryUse');
-        var scenario = FormManager.getActualValue('custGrp');
-        if (scenario != null && scenario.includes('CRO')) {
-          scenario = 'CROSS';
-        }
+        var landCntry = FormManager.getActualValue('landCntry');
 
-        if (scenario == 'CROSS') {
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '') {
-            return new ValidationResult(null, false, 'Customer Name Con\'t and Street Con\'t cannot be filled together');
-          }
-
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('poBox') != '') {
-            return new ValidationResult(null, false, 'Customer Name Con\'t and PO Box cannot be filled together');
+        if (landCntry != 'ZA') {
+          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('poBox') != '') {
+            return new ValidationResult(null, false, 'Customer Name Con\'t, Street Con\'t and POBox cannot be filled at once for cross-borders');
           }
         }
         return new ValidationResult(null, true);
