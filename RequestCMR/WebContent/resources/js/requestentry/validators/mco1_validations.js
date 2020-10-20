@@ -1308,6 +1308,69 @@ function restrictDuplicateAddrZA(cntry, addressMode, saving, finalSave, force) {
 
 }
 
+function validateCMRNoFORGMLLC() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+        var targetCntryCd = '764';
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
+        var requestID = FormManager.getActualValue('reqId');
+        var landed = 'LANDED COUNTRY';
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        }
+
+        var res = cmr.query('GET_LAND_CNTRY_ZS01', {
+          REQ_ID : requestID
+        });
+
+        if (res && res.ret1) {
+          landed = res.ret1;
+        }
+
+        if (_custSubGrp != '' && (_custSubGrp == 'LSLLC' || _custSubGrp == 'NALLC' || _custSubGrp == 'SZLLC' || _custSubGrp == 'NABLC' || _custSubGrp == 'SZBLC' || _custSubGrp == 'LSBLC')) {
+          var exist1 = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+            COUNTRY : targetCntryCd,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+
+          if (exist1 && exist1.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR: ' + cmrNo + ' is already in use in ' + targetCntryCd + '. Please use GM LLC for already existing customer sub-scenario in ' + landed
+                + ' to create new CMR under both Kenya and ' + landed);
+          }
+
+          exist2 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+            COUNTRY : targetCntryCd,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+          if (exist2 && exist2.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR: ' + cmrNo + ' is already in use in ' + targetCntryCd + '. Please use GM LLC for already existing customer sub-scenario in ' + landed
+                + ' to create new CMR under both Kenya and ' + landed);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1372,4 +1435,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(validateCMRNumForProspect, [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addStreetAddressValidator, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(restrictDuplicateAddrZA, [ SysLoc.SOUTH_AFRICA ], null, true);
+  GEOHandler.registerValidator(validateCMRNoFORGMLLC, [ SysLoc.SOUTH_AFRICA ], null, true);
 });
