@@ -174,6 +174,16 @@ public class SouthAfricaTransformer extends MCOTransformer {
         legacyAddr.setPoBox(poBox);
       }
     }
+
+    String streetCont = currAddr.getAddrTxt2();
+    if ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType())) {
+      if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(streetCont)) {
+        if (!poBox.startsWith("PO BOX ")) {
+          legacyAddr.setAddrLine4(streetCont + "," + "PO BOX " + currAddr.getPoBox());
+        }
+      }
+    }
+
   }
 
   @Override
