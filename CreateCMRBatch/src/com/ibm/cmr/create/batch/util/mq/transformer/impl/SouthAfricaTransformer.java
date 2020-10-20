@@ -389,16 +389,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
     legacyAddr.setForUpdate(true);
 
-    if ("ZS01".equals(muAddr.getId().getAddrType())) {
-      if (!StringUtils.isBlank(muAddr.getCustPhone())) {
-        if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
-          cust.setTelNoOrVat("");
-        } else {
-          cust.setTelNoOrVat(muAddr.getCustPhone());
-        }
-      }
-    }
-
     if ("ZD01".equals(muAddr.getId().getAddrType())) {
       if (!StringUtils.isBlank(muAddr.getCustPhone())) {
         if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone())) {
@@ -428,7 +418,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LegacyCommonUtil.setlegacyCustDataMassUpdtFields(entityManager, legacyCust, muData);
 
     if (!StringUtils.isBlank(muData.getRestrictTo())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getRestrictTo())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getRestrictTo())) {
         legacyCust.setTelNoOrVat("");
       } else {
         legacyCust.setTelNoOrVat(muData.getRestrictTo());
@@ -436,43 +426,30 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getAffiliate())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getAffiliate())) {
-        legacyCust.setDeptCd("");
-      } else {
+      if (muData.getAffiliate().length() == 6) {
+        legacyCust.setDeptCd(muData.getAffiliate().substring(2, 6));
+      } else if (muData.getAffiliate().length() <= 4) {
         legacyCust.setDeptCd(muData.getAffiliate());
       }
     }
 
     if (!StringUtils.isBlank(muData.getSalesBoCd())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getSalesBoCd())) {
-        legacyCust.setSbo("");
-        legacyCust.setIbo("");
-      } else {
-        legacyCust.setSbo(muData.getSalesBoCd());
-        legacyCust.setIbo(muData.getSalesBoCd());
-      }
+      legacyCust.setSbo(muData.getSalesBoCd());
+      legacyCust.setIbo(muData.getSalesBoCd());
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getRepTeamMemberNo())) {
-        legacyCust.setSalesRepNo("");
-      } else {
-        legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
-        legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
-      }
+      legacyCust.setSalesRepNo(muData.getRepTeamMemberNo());
+      legacyCust.setSalesGroupRep(muData.getRepTeamMemberNo());
     }
 
     if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
       String subInd = muData.getSubIndustryCd();
-      if (DEFAULT_CLEAR_NUM.equals(subInd)) {
-        legacyCust.setImsCd("");
-      } else {
-        legacyCust.setImsCd(subInd);
-      }
+      legacyCust.setImsCd(subInd);
     }
 
     if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getSvcArOffice())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getSvcArOffice())) {
         legacyCust.setModeOfPayment("");
       } else {
         legacyCust.setModeOfPayment(muData.getSvcArOffice());
