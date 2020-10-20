@@ -769,10 +769,12 @@ public class METransformer extends EMEATransformer {
         legacyAddr.setAddrLine3(name3);
       }
     } else if (!StringUtils.isBlank(pobox)) {
+      String line3 = "ZP02".equals(addr.getAddrTxt()) ? "" : "PO BOX ";
+      line3 = line3 + pobox;
       if ("@".equals(pobox)) {
-        legacyAddr.setAddrLine3("PO BOX ");
+        legacyAddr.setAddrLine3(line3);
       } else {
-        legacyAddr.setAddrLine3("PO BOX " + pobox);
+        legacyAddr.setAddrLine3(line3);
       }
     }
 
