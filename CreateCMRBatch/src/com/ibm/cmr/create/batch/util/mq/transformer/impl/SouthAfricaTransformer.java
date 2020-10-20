@@ -437,9 +437,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
 
     if (!StringUtils.isBlank(muData.getAffiliate())) {
       if (DEFAULT_CLEAR_NUM.equals(muData.getAffiliate())) {
-        legacyCust.setLangCd("");
+        legacyCust.setDeptCd("");
       } else {
-        legacyCust.setLangCd(muData.getAffiliate());
+        legacyCust.setDeptCd(muData.getAffiliate());
       }
     }
 
