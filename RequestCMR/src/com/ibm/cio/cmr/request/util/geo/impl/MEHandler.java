@@ -248,9 +248,10 @@ public class MEHandler extends BaseSOFHandler {
                 int maxintSeqLegacy = getMaxSequenceOnLegacyAddr(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String maxSeq = StringUtils.leftPad(String.valueOf(maxintSeqLegacy), 5, '0');
                 String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
+                String legacyzs01Seq = getZS01SeqFromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String legacyGaddrLN6 = getGaddressAddLN6FromLegacy(entityManager, reqEntry.getCmrIssuingCntry(), record.getCmrNum());
                 String gAddrSeq = "";
-                if (!StringUtils.isEmpty(legacyGaddrSeq) && !"00001".equals(legacyGaddrSeq)) {
+                if (!StringUtils.isEmpty(legacyGaddrSeq) && !legacyzs01Seq.equals(legacyGaddrSeq)) {
                   gAddrSeq = legacyGaddrSeq;
                 } else {
                   gAddrSeq = maxSeq;
@@ -2105,6 +2106,21 @@ public class MEHandler extends BaseSOFHandler {
     return gSeq;
   }
 
+  public static String getZS01SeqFromLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
+    String gSeq = "";
+    String sql = ExternalizedQuery.getSql("CEE.GET_ZS01_SEQ_FROM_LEGACY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("RCYAA", rcyaa);
+    query.setParameter("RCUXA", cmr_no);
+    String result = query.getSingleResult(String.class);
+
+    if (result != null) {
+      gSeq = result;
+    }
+    LOG.debug("gSeq of Legacy" + gSeq);
+    return gSeq;
+  }
+
   public static String getGaddressAddLN6FromLegacy(EntityManager entityManager, String rcyaa, String cmr_no) {
     String gLn6 = "";
     String sql = ExternalizedQuery.getSql("CEE.GET_G_ADRLN6_FROM_LEGACY");
@@ -2179,9 +2195,9 @@ public class MEHandler extends BaseSOFHandler {
           String name3 = ""; // 4
           String pobox = ""; // 8
 
-          currCell = (XSSFCell) row.getCell(4);
+          currCell = row.getCell(4);
           name3 = validateColValFromCell(currCell);
-          currCell = (XSSFCell) row.getCell(8);
+          currCell = row.getCell(8);
           pobox = validateColValFromCell(currCell);
 
           if (!StringUtils.isEmpty(name3) && !StringUtils.isEmpty(pobox)) {
