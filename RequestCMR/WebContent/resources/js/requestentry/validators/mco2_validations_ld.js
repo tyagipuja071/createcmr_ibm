@@ -1377,11 +1377,17 @@ function enableCMRNOMCO2GLLC() {
 function enableCmrNumForProcessor() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var isProspect = FormManager.getActualValue('prospLegalInd');
   if (reqType != 'C') {
     return;
   }
-
-  if (role == "PROCESSOR") {
+  if (dijit.byId('prospLegalInd')) {
+    isProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  console.log("validateCMRNumberForLegacy ifProspect:" + isProspect);
+  if ('Y' == isProspect) {
+    FormManager.readOnly('cmrNo');
+  } else if (role == "PROCESSOR") {
     FormManager.enable('cmrNo');
   } else {
     FormManager.readOnly('cmrNo');
