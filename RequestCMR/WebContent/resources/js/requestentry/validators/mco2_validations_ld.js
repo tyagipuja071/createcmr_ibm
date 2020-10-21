@@ -127,7 +127,7 @@ function setIbmDeptCostCenterBehavior() {
  var cmrNo = FormManager.getActualValue('cmrNo');
  var reqType = FormManager.getActualValue('reqType');
  
- if(cmrNo != '' && reqType == 'U' && (cmrNo.substring(0,2) == '00') ) {
+ if(cmrNo != '' && reqType == 'U' && (cmrNo.substring(0,2) != '99') ) {
    FormManager.readOnly('ibmDeptCostCenter');  	 
  }
 }
