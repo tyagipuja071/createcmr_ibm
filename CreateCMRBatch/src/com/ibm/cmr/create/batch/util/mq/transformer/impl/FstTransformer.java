@@ -79,6 +79,8 @@ public class FstTransformer extends MCOTransformer {
       } else if (MQMsgConstants.CUSTSUBGRP_IBMEM.equals(custType)) {
         legacyCust.setCustType("98");
       }
+      legacyCust.setSalesRepNo("DUMMY1");
+      legacyCust.setSalesGroupRep("DUMMY1");
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       legacyCust.setCustType(data.getCrosSubTyp());
 
@@ -93,6 +95,9 @@ public class FstTransformer extends MCOTransformer {
         }
       }
       legacyCust.setCreditCd("");
+
+      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
 
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
@@ -145,8 +150,11 @@ public class FstTransformer extends MCOTransformer {
       legacyCust.setSalesGroupRep("");
     }
 
-    legacyCust.setSalesRepNo("DUMMY1");
-    legacyCust.setSalesGroupRep("DUMMY1");
+    if (!StringUtils.isBlank(data.getVat())) {
+      legacyCust.setVat(data.getVat());
+    } else {
+      legacyCust.setVat("");
+    }
 
     String formatSBO = data.getSalesBusOffCd() + "000";
     legacyCust.setIbo(formatSBO);
