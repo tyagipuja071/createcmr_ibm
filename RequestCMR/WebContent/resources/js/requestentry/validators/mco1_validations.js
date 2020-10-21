@@ -1027,6 +1027,15 @@ function validateCMRForExistingGMLLCScenario() {
                       name : 'cmrNo'
                     }, false, 'CMR: ' + requestCMR + ' is invalid. Please enter valid CMR Number');
                   }
+                  
+                  if (requestCMR.startsWith('P')) {
+                    return new ValidationResult({
+                      id : 'cmrNo',
+                      type : 'text',
+                      name : 'cmrNo'
+                    }, false, 'CMR: ' + requestCMR + ' is Prospect CMR#. Only legal CMR Number is allowed for GM LLC for already existing customer sub-scenario.');
+                  }
+                  
                   var res = cmr.query('GET_LAND_CNTRY_ZS01', {
                     REQ_ID : requestID
                   });
@@ -1074,7 +1083,7 @@ function validateCMRForExistingGMLLCScenario() {
                           id : 'cmrNo',
                           type : 'text',
                           name : 'cmrNo'
-                        }, false, 'CMR: ' + requestCMR + ' is not already in use in ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both '
+                        }, false, 'CMR: ' + requestCMR + ' is not in use for ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both '
                             + targetCntry + ' and ' + landed);
                       } 
                         exist2 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
@@ -1088,7 +1097,7 @@ function validateCMRForExistingGMLLCScenario() {
                             id : 'cmrNo',
                             type : 'text',
                             name : 'cmrNo'
-                          }, false, 'CMR: ' + requestCMR + ' is not already in use in ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and '
+                          }, false, 'CMR: ' + requestCMR + ' is not in use for ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and '
                               + landed);
                         }                
                 }
@@ -1383,7 +1392,7 @@ function validateCMRNoFORGMLLC() {
             CMR_NO : cmrNo,
             MANDT : cmr.MANDT
           });
-          if (exist4 && exist4.ret1 && action != 'PCM') {
+          if (exist4 && exist4.ret1 && action != 'PCM' && !cmrNo.startsWith('P')) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
