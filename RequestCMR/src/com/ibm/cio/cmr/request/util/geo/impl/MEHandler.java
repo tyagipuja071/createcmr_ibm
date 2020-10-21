@@ -1288,9 +1288,11 @@ public class MEHandler extends BaseSOFHandler {
     }
     if (ME_COUNTRIES_LIST.contains(data.getCmrIssuingCntry()) && "U".equals(admin.getReqType())) {
       String legacyGaddrSeq = getGaddressSeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
+      String legacyzs01Seq = getZS01SeqFromLegacy(entityManager, data.getCmrIssuingCntry(), data.getCmrNo());
       String zp02updateinit = getZP02UpdateInit(entityManager, data.getId().getReqId());
       String zp02importinit = getZP02importInit(entityManager, data.getId().getReqId());
-      if (StringUtils.isBlank(legacyGaddrSeq) || "00001".equals(legacyGaddrSeq)) {
+
+      if (StringUtils.isBlank(legacyGaddrSeq) || legacyzs01Seq.equals(legacyGaddrSeq)) {
         changeZP02AddrNew(entityManager, data.getId().getReqId());
       }
       if ("Y".equals(zp02updateinit)) {
