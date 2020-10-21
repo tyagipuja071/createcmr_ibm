@@ -364,9 +364,18 @@ public class MCOSaHandler extends MCOHandler {
       data.setIbmDeptCostCenter(legacyObjects.getCustomer().getDeptCd());
     }
 
-    if (StringUtils.isNotBlank(mainRecord.getCmrCity())) {
-      data.setAbbrevLocn(mainRecord.getCmrCity().length() > 12 ? mainRecord.getCmrCity().substring(0, 12) : mainRecord.getCmrCity());
+    if (legacyObjects != null && legacyObjects.getCustomer() != null) {
+      if (legacyObjects.getCustomer().getAbbrevLocn().length() > 12) {
+        data.setAbbrevLocn(legacyObjects.getCustomer().getAbbrevLocn().substring(0, 12));
+      } else {
+        data.setAbbrevLocn(legacyObjects.getCustomer().getAbbrevLocn());
+      }
     }
+
+    // if (StringUtils.isNotBlank(mainRecord.getCmrCity())) {
+    // data.setAbbrevLocn(mainRecord.getCmrCity().length() > 12 ?
+    // mainRecord.getCmrCity().substring(0, 12) : mainRecord.getCmrCity());
+    // }
 
     if (ifUpdt && legacyObjects != null && legacyObjects.getCustomerExt() != null) {
       String collBo = legacyObjects.getCustomerExt().getTeleCovRep();
@@ -1212,7 +1221,7 @@ public class MCOSaHandler extends MCOHandler {
 
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollBoId(), newData.getCollBoId())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "CollectionBranchOffice", "-"));
+      update.setDataField(PageManager.getLabel(cmrCountry, "CollBranchOff", "-"));
       update.setNewData(newData.getCollBoId());
       update.setOldData(oldData.getCollBoId());
       results.add(update);
