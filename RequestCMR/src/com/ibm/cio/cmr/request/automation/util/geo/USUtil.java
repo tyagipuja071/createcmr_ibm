@@ -383,15 +383,6 @@ public class USUtil extends AutomationUtil {
       details.append("Skipping BO codes computations for update requests.");
     }
 
-    // CMR - 3999
-    boolean shouldBPRejectReq = AutomationUtil.checkCommentSection(entityManager, admin, data);
-    if (shouldBPRejectReq) {
-      String cmt = "The model CMR provided isn't consistent with the CMR type requested, please cancel this request and choose a compatible model CMR.";
-      details.append(cmt).append("\n");
-      engineData.addRejectionComment("DUPC", cmt, "", "");
-      results.setOnError(true);
-    }
-
     if (results == null || (results != null && results.isOnError())) {
       eleResults.append("Error On Field Calculation.");
     }
@@ -501,6 +492,7 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
       // skip checks if requester is from USCMDE team
+      admin.setScenarioVerifiedIndc("Y");
       LOG.debug("Requester is from US CMDE team, skipping update checks.");
       output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
       validation.setMessage("Skipped");
