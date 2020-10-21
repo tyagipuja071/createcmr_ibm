@@ -161,6 +161,7 @@ function afterConfigForZA() {
   setCreditCdField();
   enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
+  showDeptNoForInternalsOnly();
 }
 
 function onLobchange() {
@@ -759,12 +760,11 @@ function enterpriseValidation() {
 
 function showDeptNoForInternalsOnly() {
   var scenario = FormManager.getActualValue('custSubGrp');
-  var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
-  if (scenario != null && internalScenarios.includes(scenario)) {
+  if (scenario != null && scenario.includes('IN')) {
     FormManager.show('InternalDept', 'ibmDeptCostCenter');
     FormManager.addValidator('ibmDeptCostCenter', Validators.NUMBER, [ 'Internal Department Number' ]);
     FormManager.addValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
-  } else {
+  } else if (scenario != null && scenario != '' && !scenario.includes('IN')) {
     FormManager.removeValidator('ibmDeptCostCenter', Validators.REQUIRED);
     FormManager.clearValue('ibmDeptCostCenter');
     FormManager.hide('InternalDept', 'ibmDeptCostCenter');
@@ -1426,7 +1426,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO1);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO1);
-  GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(onChangeSubCustGroup, GEOHandler.MCO1);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO1);
