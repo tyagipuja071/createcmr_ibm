@@ -249,8 +249,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
-      legacyCust.setModeOfPayment(data.getCommercialFinanced());
-      if (data.getCreditCd() != null) {
+
+      if (StringUtils.isNotBlank(data.getCommercialFinanced())) {
+        legacyCust.setModeOfPayment(data.getCommercialFinanced());
+      } else {
         String cod = data.getCreditCd();
         if ("Y".equals(cod)) {
           legacyCust.setModeOfPayment("5");
@@ -459,7 +461,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     if (!StringUtils.isBlank(muData.getMilitary())) {
       if ("Y".equals(muData.getMilitary())) {
         legacyCust.setModeOfPayment("5");
-      } else {
+      } else if ("N".equals(muData.getMilitary())) {
         legacyCust.setModeOfPayment("");
       }
     }
@@ -551,6 +553,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
     String oldCOD = "";
     String oldCOF = "";
     String sql = ExternalizedQuery.getSql("GET.OLD_COD_COF_BY_REQID");
+    String currentCOF = data.getCommercialFinanced();
+    String currentCOD = data.getCreditCd();
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
 
@@ -561,9 +565,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
       oldCOF = result[1] != null ? (String) result[0] : "";
     }
 
-    if (StringUtils.isNotBlank(oldCOF) && StringUtils.isBlank(data.getCommercialFinanced())) {
+    boolean currCOFHasValidValue = "R".equals(currentCOF) || "S".equals(currentCOF) || "T".equals(currentCOF);
+
+    if (StringUtils.isBlank(oldCOF) && currCOFHasValidValue) {
       return "COF";
-    } else if (StringUtils.isNotBlank(oldCOD) && StringUtils.isBlank(data.getCreditCd())) {
+    } else if ((StringUtils.isBlank(oldCOD) || "N".equals(oldCOD)) && "Y".equals(currentCOD)) {
       return "COD";
     } else {
       return "NA";
