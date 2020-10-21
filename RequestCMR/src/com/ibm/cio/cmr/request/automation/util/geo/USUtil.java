@@ -492,6 +492,7 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
       // skip checks if requester is from USCMDE team
+      admin.setScenarioVerifiedIndc("Y");
       LOG.debug("Requester is from US CMDE team, skipping update checks.");
       output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
       validation.setMessage("Skipped");
