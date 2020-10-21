@@ -63,6 +63,10 @@ public class MCOFstHandler extends MCOHandler {
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mail-to Address", "Bill-to Address", "Sold-to Address", "Ship-to Address",
       "Install-at Address", "Data" };
 
+  private static final String[] MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "Company", "CustClassCode", "LocalTax2",
+      "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
+      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel" };
+
   @Override
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted) {
@@ -260,9 +264,9 @@ public class MCOFstHandler extends MCOHandler {
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "MODE_OF_PAYMENT", "VAT", "ISIC_CD", "EMBARGO_CD", "MAILING_COND", "ABBREV_NM",
-        "LOCN_NO", "CLIENT_TIER", "ENGINEERING_BO", "ENTERPRISE", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "COLLECTION_CD", "SPECIAL_TAX_CD",
-        "SEARCH_TERM", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER", "COMMERCIAL_FINANCED", "CREDIT_CD", "BUSN_TYP"));
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "VAT", "ISIC_CD", "EMBARGO_CD", "ABBREV_NM", "CLIENT_TIER", "CUST_PREF_LANG",
+        "INAC_CD", "ISU_CD", "COLLECTION_CD", "SPECIAL_TAX_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER",
+        "COMMERCIAL_FINANCED", "CREDIT_CD", "BUSN_TYP"));
     return fields;
   }
 
@@ -501,8 +505,8 @@ public class MCOFstHandler extends MCOHandler {
     for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
-    	TemplateValidation error = new TemplateValidation(name);
-    	  
+        TemplateValidation error = new TemplateValidation(name);
+
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
@@ -673,10 +677,10 @@ public class MCOFstHandler extends MCOHandler {
               }
             }
           }
-        }//end row loop
-        
-        if(error.hasErrors()) {
-        	validations.add(error);
+        } // end row loop
+
+        if (error.hasErrors()) {
+          validations.add(error);
         }
       }
     }
@@ -705,6 +709,11 @@ public class MCOFstHandler extends MCOHandler {
       }
     }
     return false;
+  }
+
+  @Override
+  public boolean skipOnSummaryUpdate(String cntry, String field) {
+    return Arrays.asList(MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
   }
 
 }
