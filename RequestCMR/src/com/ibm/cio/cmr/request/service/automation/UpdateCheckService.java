@@ -7,7 +7,6 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +19,7 @@ import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.automation.UpdateCheckModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
@@ -38,7 +38,7 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
   protected UpdateCheckModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     UpdateCheckModel updtChkModel = null;
     RequestEntryModel reqEntryModel = null;
-    Data data = new Data();
+    DataPK dataPk = new DataPK();
     AdminPK adminPk = new AdminPK();
 
     UpdateSwitchElement updtElement = new UpdateSwitchElement(null, null, false, false);
@@ -49,9 +49,14 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
     if (updtChkModel != null && reqEntryModel != null) {
       adminPk.setReqId(reqEntryModel.getReqId());
       Admin admin = entityManager.find(Admin.class, adminPk);
-      PropertyUtils.copyProperties(data, reqEntryModel);
-      if (admin != null)
+      dataPk.setReqId(reqEntryModel.getReqId());
+      Data data = entityManager.find(Data.class, dataPk);
+      if (data != null) {
+        PropertyUtils.copyProperties(data, reqEntryModel);
+      }
+      if (admin != null) {
         PropertyUtils.copyProperties(admin, reqEntryModel);
+      }
       RequestData requestData = new RequestData(entityManager, reqEntryModel.getReqId());
       requestData.setData(data);
       requestData.setAdmin(admin);
@@ -59,10 +64,10 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
       AutomationResult<ValidationOutput> updtElementResult = updtElement.executeElement(entityManager, requestData, engineData);
 
       if (updtElementResult != null) {
-        Map<String, String> pendingChecks = (Map<String, String>) engineData.get(AutomationEngineData.NEGATIVE_CHECKS);
+        Map<String, String> pendingChecks = engineData.getPendingChecks();
         updtChkModel.setResult(updtElementResult.getResults());
         updtChkModel.setOnError(updtElementResult.isOnError());
-        List<RejectionContainer> rejectContList = (List<RejectionContainer>) engineData.get("rejections");
+        List<RejectionContainer> rejectContList = engineData.getRejectionReasons();
         String message = "";
         String negativeChecksMessage = "";
         if (rejectContList != null && !rejectContList.isEmpty()) {
@@ -76,9 +81,10 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
             for (String pendingCheck : pendingChecks.values()) {
               negativeChecksMessage = negativeChecksMessage + pendingCheck + "\n";
             }
-            if (StringUtils.isNotBlank(updtElementResult.getDetails())) {
-              negativeChecksMessage = negativeChecksMessage + updtElementResult.getDetails();
-            }
+            // if (StringUtils.isNotBlank(updtElementResult.getDetails())) {
+            // negativeChecksMessage = negativeChecksMessage +
+            // updtElementResult.getDetails();
+            // }
           }
         }
         updtChkModel.setRejectionMsg(message.replaceAll("\n", "<br/>"));
