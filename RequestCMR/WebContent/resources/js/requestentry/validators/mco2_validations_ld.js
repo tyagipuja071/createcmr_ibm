@@ -123,6 +123,15 @@ function setCofFieldBehavior() {
   }
 }
 
+function setIbmDeptCostCenterBehavior() {
+  var cmrNo = FormManager.getActualValue('cmrNo');
+  var reqType = FormManager.getActualValue('reqType');
+
+  if (cmrNo != '' && reqType == 'U' && (cmrNo.substring(0, 2) != '99')) {
+    FormManager.readOnly('ibmDeptCostCenter');
+  }
+}
+
 function setCodValueByCof() {
   var cof = FormManager.getActualValue('commercialFinanced');
   if (cof == 'R' || cof == 'S' || cof == 'T') {
@@ -187,6 +196,14 @@ function afterConfigForMCO2() {
   FormManager.addValidator('specialTaxCd', Validators.ALPHANUM, [ 'Tax Code' ], 'MAIN_CUST_TAB');
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.addValidator('collectionCd', Validators.ALPHANUM, [ 'Collection Code' ], 'MAIN_IBM_TAB');
+
+    var role = FormManager.getActualValue('userRole');
+    var numero = FormManager.getActualValue('busnType');
+    if (role == GEOHandler.ROLE_REQUESTER) {
+      if (numero != null && numero != '') {
+        FormManager.readOnly('busnType');
+      }
+    }
   }
 }
 
@@ -207,7 +224,7 @@ function lockRequireFieldsMCO2() {
     // FormManager.readOnly('clientTier');
   }
 
-  if (reqType = 'U') {
+  if (reqType == 'U') {
     setCodFieldBehavior();
     setCofFieldBehavior();
   }
@@ -1498,6 +1515,32 @@ function validateCollectionCd() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function addEmbargoCodeValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var embargoCd = FormManager.getActualValue('embargoCd').toUpperCase();
+        var reqType = FormManager.getActualValue('reqType');
+        var role = FormManager.getActualValue('userRole').toUpperCase();
+        if (role == 'REQUESTER' && reqType == 'C') {
+          return new ValidationResult(null, true);
+        }
+        embargoCd = embargoCd.trim();
+        if (embargoCd == '' || embargoCd == 'Y' || embargoCd == 'J') {
+          return new ValidationResult(null, true);
+        } else {
+          return new ValidationResult({
+            id : 'embargoCd',
+            type : 'text',
+            name : 'embargoCd'
+          }, false, 'Embargo Code value should be only Y, J or Blank.');
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1516,6 +1559,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(setIbmDeptCostCenterBehavior, GEOHandler.MCO2);
 
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO2);
@@ -1576,4 +1620,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
+  GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
 });
