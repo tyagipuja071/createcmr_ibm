@@ -1541,6 +1541,45 @@ function addEmbargoCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function resetVatExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var vat = FormManager.getActualValue('vat');
+
+  if (vat != null && vat.length > 0) {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.getField('vatExempt').set('checked', false);
+    }
+  }
+}
+
+function vatExemptOnScenario() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var vat = FormManager.getActualValue('vat');
+  var vatExempt = dijit.byId('vatExempt').get('checked');
+
+  var subGrp = new Array();
+  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+  for (var i = 0; i < subGrp.length; i++) {
+    if (custSubType == subGrp[i]) {
+      if ((vat == null || vat.length == 0) && vatExempt != true) {
+        FormManager.getField('vatExempt').set('checked', true);
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      } else {
+        FormManager.getField('vatExempt').set('checked', false);
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      }
+      break;
+    }
+  }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1621,4 +1660,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
+  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO2);
 });
