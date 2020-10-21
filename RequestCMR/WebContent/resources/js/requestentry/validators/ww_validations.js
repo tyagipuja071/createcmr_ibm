@@ -126,17 +126,26 @@ function addDnBMatchingAttachmentValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+        var findDnbResult = FormManager.getActualValue('findDnbResult');
+        var userRole = FormManager.getActualValue('userRole');
+        var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+        if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
           // FOR US Temporary
-          var show = false;
           var id = FormManager.getActualValue('reqId');
           var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
             ID : id
           });
-          if (SysLoc.USA == FormManager.getActualValue('cmrIssuingCntry') && (ret == null || ret.ret1 == null)) {
-            return new ValidationResult(null, false, "Please provide the supporting documentation for D&B Match Override, such as client's official website, " +
-            		"Secretary of State business registration proof, client's confirmation email, signed PO and etc. Please note that the sources " +
-            		"from Wikipedia, Linked In and social medias are not acceptable.");
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>D&B Match Override</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+          } else {
+            return new ValidationResult(null, true);
           }
         }
         return new ValidationResult(null, true);
@@ -833,9 +842,9 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
-  // For Legacy GR
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  // For Legacy GR, CY and PT
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic

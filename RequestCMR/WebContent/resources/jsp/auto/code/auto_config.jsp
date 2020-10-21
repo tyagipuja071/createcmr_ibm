@@ -179,6 +179,7 @@
                 <option value="R">Reactivate</option>
                 <option value="D">Delete</option>
                 <option value="RD">Delete/Reactivate</option>
+                <option value="*">All Types</option>
               </select>
             </td>
             <td>

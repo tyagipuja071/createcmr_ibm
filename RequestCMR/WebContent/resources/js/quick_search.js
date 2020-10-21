@@ -237,9 +237,12 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     if (subRegion) {
       cntry = subRegion;
     }
-    // TODO Query supp cntry for QS indc
     var url = '/request?create=Y&newReqType=C&newReqCntry=' + cntry;
-    if ('897' == cntry) {
+
+    var ret = cmr.query('GET.START_FROM_QUICK_SEARCH', {
+      CNTRY : cntry.substring(0, 3)
+    });
+    if (ret && ret.ret1 && 'Y' == ret.ret1) {
       url += '&_f=Y';
     }
     goToUrl(cmr.CONTEXT_ROOT + url);

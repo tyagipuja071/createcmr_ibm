@@ -182,7 +182,8 @@ public class UKIUtil extends AutomationUtil {
             matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
           }
           if (!matchesDnb) {
-            resultCodes.add("R");// Reject
+            // resultCodes.add("R"); // commenting because of CMR-7134
+            cmdeReview = true;
             details.append("Company Registration Number on the request did not match D&B\n");
           } else {
             details.append("Company Registration Number on the request matches D&B\n");
@@ -344,7 +345,7 @@ public class UKIUtil extends AutomationUtil {
                 }
                 if (!matchesDnb) {
                   LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  resultCodes.add("R");
+                  resultCodes.add("D");
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
                 } else {
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -498,7 +499,7 @@ public class UKIUtil extends AutomationUtil {
         }
 
         for (DnBMatchingResponse dnbRecord : response) {
-          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord, custNmTrimmed);
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord, custNmTrimmed, false);
           if (closelyMatches) {
             engineData.put("ZI01_DNB_MATCH", dnbRecord);
             highQualityMatchExists = true;
