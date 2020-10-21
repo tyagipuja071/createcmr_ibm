@@ -57,7 +57,10 @@ public class DefaultApprovalsElement extends ApprovalsElement {
     entityManager.merge(admin);
 
     ApprovalService service = new ApprovalService();
-    String approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
+    String approvalsResult = null;
+    if ("N".equalsIgnoreCase(admin.getScenarioVerifiedIndc()) && StringUtils.isBlank(admin.getSourceSystId())) {
+      approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);
+    }
     LOG.trace("Approvals result: " + approvalsResult);
     if (StringUtils.isBlank(approvalsResult) || "NONE".equalsIgnoreCase(approvalsResult)) {
       result.setResults("None");
