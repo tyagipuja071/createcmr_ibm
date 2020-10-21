@@ -123,6 +123,15 @@ function setCofFieldBehavior() {
   }
 }
 
+function setIbmDeptCostCenterBehavior() {
+ var cmrNo = FormManager.getActualValue('cmrNo');
+ var reqType = FormManager.getActualValue('reqType');
+ 
+ if(cmrNo != '' && reqType == 'U' && (cmrNo.substring(0,2) != '99') ) {
+   FormManager.readOnly('ibmDeptCostCenter');  	 
+ }
+}
+
 function setCodValueByCof() {
   var cof = FormManager.getActualValue('commercialFinanced');
   if (cof == 'R' || cof == 'S' || cof == 'T') {
@@ -206,8 +215,8 @@ function lockRequireFieldsMCO2() {
     // FormManager.readOnly('isuCd');
     // FormManager.readOnly('clientTier');
   }
-
-  if (reqType = 'U') {
+  
+  if (reqType == 'U') {
     setCodFieldBehavior();
     setCofFieldBehavior();
   }
@@ -1516,6 +1525,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(setIbmDeptCostCenterBehavior, GEOHandler.MCO2);
 
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setTypeOfCustomerBehavior, GEOHandler.MCO2);
