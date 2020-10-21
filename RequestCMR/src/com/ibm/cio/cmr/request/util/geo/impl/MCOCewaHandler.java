@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -17,6 +18,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -59,6 +61,10 @@ public class MCOCewaHandler extends MCOHandler {
 
   protected static final String[] LD_MASS_UPDATE_SHEET_NAMES = { "Mailing Address", "Billing Address", "Installing Address", "Shipping Address",
       "EPL Address", "Data" };
+
+  private static final String[] MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "Company", "CustClassCode", "LocalTax2",
+      "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
+      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel" };
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
@@ -216,9 +222,9 @@ public class MCOCewaHandler extends MCOHandler {
   @Override
   public List<String> getDataFieldsForUpdateCheckLegacy(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
-    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "MODE_OF_PAYMENT", "VAT", "ISIC_CD", "EMBARGO_CD", "MAILING_COND", "ABBREV_NM",
-        "LOCN_NO", "CLIENT_TIER", "ENGINEERING_BO", "ENTERPRISE", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "COLLECTION_CD", "SPECIAL_TAX_CD",
-        "SEARCH_TERM", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER", "COMMERCIAL_FINANCED", "CREDIT_CD", "TAX_CD1"));
+    fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "VAT", "ISIC_CD", "EMBARGO_CD", "ABBREV_NM", "CLIENT_TIER", "CUST_PREF_LANG",
+        "INAC_CD", "ISU_CD", "COLLECTION_CD", "SPECIAL_TAX_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER",
+        "COMMERCIAL_FINANCED", "CREDIT_CD", "TAX_CD1"));
     return fields;
   }
 
@@ -432,8 +438,8 @@ public class MCOCewaHandler extends MCOHandler {
     for (String name : LD_MASS_UPDATE_SHEET_NAMES) {
       XSSFSheet sheet = book.getSheet(name);
       if (sheet != null) {
-    	TemplateValidation error = new TemplateValidation(name);  
-    	  
+        TemplateValidation error = new TemplateValidation(name);
+
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
@@ -515,8 +521,7 @@ public class MCOCewaHandler extends MCOHandler {
             if (row.getRowNum() == 2001) {
               continue;
             }
-            
-            
+
             if (landedcountry.length() == 0 && !"Data".equalsIgnoreCase(sheet.getSheetName()) && cmrNo.length() != 0) {
               LOG.trace("Landed country is required to be filled.");
               error.addError(row.getRowNum(), "", "Landed country is required to be filled.");
@@ -603,10 +608,10 @@ public class MCOCewaHandler extends MCOHandler {
               }
             }
           }
-        }//end row loop
-        
-        if(error.hasErrors()) {
-        	validations.add(error);
+        } // end row loop
+
+        if (error.hasErrors()) {
+          validations.add(error);
         }
       }
     }
@@ -635,6 +640,11 @@ public class MCOCewaHandler extends MCOHandler {
       }
     }
     return false;
+  }
+
+  @Override
+  public boolean skipOnSummaryUpdate(String cntry, String field) {
+    return Arrays.asList(MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
   }
 
 }
