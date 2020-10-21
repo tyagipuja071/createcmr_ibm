@@ -362,7 +362,7 @@ public class MCOSaHandler extends MCOHandler {
       data.setCrosSubTyp(legacyObjects.getCustomer().getCustType());
       data.setSpecialTaxCd(legacyObjects.getCustomer().getTaxCd());
       data.setIbmDeptCostCenter(legacyObjects.getCustomer().getDeptCd());
-      data.setAbbrevLocn(legacyObjects.getCustomer().getAbbrevLocn());
+      data.setAbbrevLocn(legacyObjects.getCustomer().getAbbrevLocn().substring(0, 12));
     }
 
     // if (StringUtils.isNotBlank(mainRecord.getCmrCity())) {
