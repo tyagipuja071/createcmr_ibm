@@ -32,6 +32,15 @@
           <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="LocalTax2" />
+          </cmr:label>
+        </p>
+      </cmr:column>
   	</cmr:row>
   </cmr:view>
   <cmr:view forCountry="700">
@@ -40,6 +49,15 @@
         <p>
           <cmr:label fieldId="busnType"> <cmr:fieldLabel fieldId="BusinessType" />: </cmr:label>
           <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="LocalTax2" />
+          </cmr:label>
         </p>
       </cmr:column>
   	</cmr:row>
