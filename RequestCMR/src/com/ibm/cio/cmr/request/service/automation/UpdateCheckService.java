@@ -18,9 +18,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.entity.Admin;
-import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
-import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.automation.UpdateCheckModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
@@ -39,8 +37,6 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
   protected UpdateCheckModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     UpdateCheckModel updtChkModel = null;
     RequestEntryModel reqEntryModel = null;
-    DataPK dataPk = new DataPK();
-    AdminPK adminPk = new AdminPK();
 
     UpdateSwitchElement updtElement = new UpdateSwitchElement(null, null, false, false);
     LOG.debug("Processing doProcess() method of  AutoCheckService");
@@ -48,19 +44,15 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
     reqEntryModel = (RequestEntryModel) params.getParam("reqModel");
 
     if (updtChkModel != null && reqEntryModel != null) {
-      adminPk.setReqId(reqEntryModel.getReqId());
-      Admin admin = entityManager.find(Admin.class, adminPk);
-      dataPk.setReqId(reqEntryModel.getReqId());
-      Data data = entityManager.find(Data.class, dataPk);
+      RequestData requestData = new RequestData(entityManager, reqEntryModel.getReqId());
+      Data data = requestData.getData();
+      Admin admin = requestData.getAdmin();
       if (data != null) {
         PropertyUtils.copyProperties(data, reqEntryModel);
       }
       if (admin != null) {
         PropertyUtils.copyProperties(admin, reqEntryModel);
       }
-      RequestData requestData = new RequestData(entityManager, reqEntryModel.getReqId());
-      requestData.setData(data);
-      requestData.setAdmin(admin);
       AutomationEngineData engineData = new AutomationEngineData();
       AutomationResult<ValidationOutput> updtElementResult = updtElement.executeElement(entityManager, requestData, engineData);
 
