@@ -5553,9 +5553,12 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "ISU_CD":
         muModel.setIsuCd(tempVal);
         break;
-      case "SALES_BO_CD":
+      case "CUST_NM1":
         // DTN: This is temporary until we can get the right field
         muModel.setCustNm1(tempVal);
+        break;
+      case "SALES_BO_CD":
+        muModel.setSalesBoCd(tempVal);
         break;
       case "REP_TEAM_MEMBER_NO":
         muModel.setRepTeamMemberNo(tempVal);
