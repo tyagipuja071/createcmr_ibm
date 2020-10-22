@@ -1534,7 +1534,7 @@ function addUpdateChecksExecution(frmCMR) {
           console.log('UpdateChecks Element Executed Successfully.');
           cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
         } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
-          cmr.showConfirm('showAddrVerificationModal()', '<strong>' + data.negativeChksMsg + '</strong> <br/> The request will review CMDE review. Do you want to proceed ?', 'Warning', null, {
+          cmr.showConfirm('showAddrVerificationModal()', '<strong>' + data.negativeChksMsg + '</strong> <br/> The request will require CMDE review. Do you want to proceed ?', 'Warning', null, {
             OK : 'Ok',
             CANCEL : 'Cancel'
           });

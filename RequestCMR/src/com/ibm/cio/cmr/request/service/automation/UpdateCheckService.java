@@ -77,7 +77,7 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
           }
         }
 
-        if (updtElementResult.isOnError()) {
+        if (!updtElementResult.isOnError()) {
           if (pendingChecks != null && !pendingChecks.isEmpty()) {
             // for (String pendingCheck : pendingChecks.values()) {
             // negativeChecksMessage = negativeChecksMessage + pendingCheck +
