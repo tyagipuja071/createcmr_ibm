@@ -2732,6 +2732,7 @@ public class LegacyDirectService extends TransConnService {
 
             Set<String> usedSequences = new HashSet<String>();
             ProcessResponse response = null;
+            Set<String> sapNoList = new HashSet<String>();
             String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
             // boolean isDataUpdated = false;
@@ -2832,10 +2833,13 @@ public class LegacyDirectService extends TransConnService {
                 updateEntity(addr, entityManager);
 
                 if (response.getRecords() != null) {
-                  comment = comment.append("\nSuccessfully processed in RDc KUNNR: ");
                   if (response.getRecords() != null && response.getRecords().size() != 0) {
                     for (int i = 0; i < response.getRecords().size(); i++) {
-                      comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
+                      if (!sapNoList.contains(response.getRecords().get(i).getSapNo())) {
+                        comment = comment.append("\nSuccessfully processed in RDc KUNNR: ");
+                        comment = comment.append(response.getRecords().get(i).getSapNo() + " ");
+                        sapNoList.add(response.getRecords().get(i).getSapNo());
+                      }
                     }
                   }
                   if (CmrConstants.RDC_STATUS_COMPLETED_WITH_WARNINGS.equals(resultCode)) {
