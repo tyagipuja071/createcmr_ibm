@@ -198,6 +198,8 @@ public class FstTransformer extends MCOTransformer {
     if (SystemLocation.MADAGASCAR.equals(cmrIssuingCntry)) {
       if (StringUtils.isNotBlank(data.getBusnType())) {
         legacyCustExt.setiTaxCode(data.getBusnType());
+      } else {
+        legacyCustExt.setiTaxCode("");
       }
     }
   }
