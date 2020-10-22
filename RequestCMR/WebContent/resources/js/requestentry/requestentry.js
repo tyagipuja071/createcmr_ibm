@@ -1530,15 +1530,14 @@ function addUpdateChecksExecution(frmCMR) {
     sync : true,
     load : function(data, ioargs) {
       if (data != '' && data != undefined) {
-        if (data.onError) {
+        if (data.rejectionMsg != null && data.rejectionMsg != '') {
           console.log('UpdateChecks Element Executed Successfully.');
           cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
         } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
-          cmr.showConfirm('showAddrVerificationModal()', 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg + '</strong> <br/> Do you really want to proceed ?',
-              'Warning', null, {
-                OK : 'Ok',
-                CANCEL : 'Cancel'
-              });
+          cmr.showConfirm('showAddrVerificationModal()', '<strong>' + data.negativeChksMsg + '</strong> <br/> The request will review CMDE review. Do you want to proceed ?', 'Warning', null, {
+            OK : 'Ok',
+            CANCEL : 'Cancel'
+          });
         } else {
           cmr.showModal('addressVerificationModal');
         }
