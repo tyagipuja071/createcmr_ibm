@@ -1017,6 +1017,8 @@ function validateCMRForExistingGMLLCScenario() {
                 var subCustGrp = FormManager.getActualValue('custSubGrp');
                 var targetCntry = 'Kenya';
                 var targetCntryCd = '764';
+                var activeCMRExistLanded = false;
+                var activeCMRExistKenya= false;
 
                 if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'NAELC' || subCustGrp == 'SZELC' || subCustGrp == 'LSELC')) {
 
@@ -1044,13 +1046,14 @@ function validateCMRForExistingGMLLCScenario() {
                     landed = res.ret1;
                   }
 
-                  var exist3 = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+                  var exist3 = cmr.query('LD.CHECK_EXISTING_CMR_NO_SA', {
                     COUNTRY : cntry,
                     CMR_NO : requestCMR,
                     MANDT : cmr.MANDT
                   });
                   
-                  if (exist3 && exist3.ret1 && action != 'PCM') {
+                  if (exist3 && exist3.ret1  && exist3.ret2 == 'A' && action != 'PCM') {
+                    activeCMRExistLanded = true;
                     return new ValidationResult({
                       id : 'cmrNo',
                       type : 'text',
@@ -1058,13 +1061,14 @@ function validateCMRForExistingGMLLCScenario() {
                     }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and '
                         + landed);
                   } 
-                    exist4 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+                    exist4 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC_SA', {
                       COUNTRY : cntry,
                       CMR_NO : requestCMR,
                       MANDT : cmr.MANDT
                     });
                     
-                    if (exist4 && exist4.ret1 && action != 'PCM') {
+                    if (exist4 && exist4.ret1 && exist4.ret2 != 'X' && exist4.ret3!= '93' && action != 'PCM') {
+                      activeCMRExistLanded = true;
                       return new ValidationResult({
                         id : 'cmrNo',
                         type : 'text',
@@ -1072,34 +1076,81 @@ function validateCMRForExistingGMLLCScenario() {
                       }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and ' + landed);
                     } 
                     
-                      var exist1 = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+                      var exist1 = cmr.query('LD.CHECK_EXISTING_CMR_NO_SA', {
                         COUNTRY : targetCntryCd,
                         CMR_NO : requestCMR,
                         MANDT : cmr.MANDT
                       });
                       
-                      if (exist1.ret1 == undefined && action != 'PCM') {
+                      if (exist1.ret1 == undefined && exist3.ret1 == undefined && action != 'PCM') {
                         return new ValidationResult({
                           id : 'cmrNo',
                           type : 'text',
                           name : 'cmrNo'
-                        }, false, 'CMR: ' + requestCMR + ' is not in use for ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both '
-                            + targetCntry + ' and ' + landed);
+                        }, false, 'CMR: ' + requestCMR + ' does not exist in either '+ landed + ' or Kenya. Please use GM LLC under landed. Processors are able to enter specific CMR if needed.');
                       } 
-                        exist2 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+                        exist2 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC_SA', {
                           COUNTRY : targetCntryCd,
                           CMR_NO : requestCMR,
                           MANDT : cmr.MANDT
                         });
                         
-                        if (exist2.ret1 == undefined && action != 'PCM') {
+                        if (exist2.ret1 == undefined && exist4.ret1 == undefined && action != 'PCM') {
                           return new ValidationResult({
                             id : 'cmrNo',
                             type : 'text',
                             name : 'cmrNo'
-                          }, false, 'CMR: ' + requestCMR + ' is not in use for ' + targetCntryCd + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both Kenya and '
-                              + landed);
-                        }                
+                          }, false, 'CMR: ' + requestCMR + ' does not exist in either '+ landed + ' or Kenya. Please use GM LLC under landed. Processors are able to enter specific CMR if needed.');
+                        } 
+                        
+                        if (exist1 && exist1.ret2 == 'C' && exist3.ret1 == undefined && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'Please note CMR ' + requestCMR + ' in Kenya is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                        } 
+                        
+                        if (exist2 && exist2.ret2 == 'X' && exist2.ret3 == '93' && exist4.ret1 == undefined && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'Please note CMR ' + requestCMR + ' in Kenya is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                        } 
+                        
+                        if (exist1 && exist1.ret2 == undefined && !activeCMRExistLanded && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'Please note CMR ' + requestCMR + ' in ' +landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                        } 
+                        
+                        if (exist2 == undefined  && exist4 && exist4.ret2 == 'X' && exist4.ret3 == '93' && !activeCMRExistLanded && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'Please note CMR ' + requestCMR + ' in ' +landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                        }
+                        
+                        if (exist1 && exist1.ret2 == 'C' && !activeCMRExistLanded  && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'Please note CMR ' + requestCMR + ' in ' +landed + ' and Kenya is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                        } 
+                        
+                        if (exist2 && exist2.ret2 == 'X' && exist2.ret3 == '93' && exist4 && exist4.ret2 == 'X' && exist4.ret3 == '93' && !activeCMRExistLanded && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'Please note CMR ' + requestCMR + ' in ' +landed + ' and Kenya is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                        }
+                           
                 }
                 return new ValidationResult({
                   id : 'cmrNo',
