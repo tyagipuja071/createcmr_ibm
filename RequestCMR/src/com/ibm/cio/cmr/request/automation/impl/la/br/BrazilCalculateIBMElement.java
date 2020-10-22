@@ -603,6 +603,9 @@ public class BrazilCalculateIBMElement extends OverridingElement {
 
             details.append("Market Responsibility Code (MRC) = " + sboMSP.getMrcCd() + "\n");
             overrides.addOverride(getProcessCode(), "DATA", "MRC_CD", data.getMrcCd(), sboMSP.getMrcCd());
+
+            details.append("Country Use = " + sboMSP.getMrcCd() + "\n");
+            overrides.addOverride(getProcessCode(), "DATA", "CNTRY_USE", data.getMrcCd(), sboMSP.getMrcCd());
           }
 
           sql = ExternalizedQuery.getSql("BR.AUTO.GET_COLLECTOR_FROM_STATE");
@@ -799,8 +802,7 @@ public class BrazilCalculateIBMElement extends OverridingElement {
       } else if ("CC3CC".equalsIgnoreCase(scenarioSubType)) {
         if (midasResponse != null && midasResponse.isSuccess()) {
           String abbrevName = (midasResponse.getRecord().getCompanyName().length() > 26)
-              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26)
-              : "CC3/" + (midasResponse.getRecord().getCompanyName());
+              ? "CC3/" + (midasResponse.getRecord().getCompanyName()).substring(0, 26) : "CC3/" + (midasResponse.getRecord().getCompanyName());
           LOG.debug("Sold To Company Name : " + midasResponse.getRecord().getCompanyName());
           // SET Abbreviated Name
           details.append("Abbreviated Name (TELX1) = " + abbrevName + "\n");
@@ -1127,7 +1129,12 @@ public class BrazilCalculateIBMElement extends OverridingElement {
             if (status != null) {
               if ("Habilitado".equalsIgnoreCase(status) || "Ativo".equalsIgnoreCase(status) || "habilitada".equalsIgnoreCase(status)
                   || "Ativa".equalsIgnoreCase(status)) {
-                icms = "2";
+                if ("DF".equals(state) && sintegraResponse.getStateFiscalCodeObservation() != null
+                    && "NÃO CADASTRADO COMO CONTRIBUINTE ICMS".equalsIgnoreCase(sintegraResponse.getStateFiscalCodeObservation())) {
+                  icms = "1";
+                } else {
+                  icms = "2";
+                }
                 code = stateFiscalCode;
               } else {
                 icms = "1";

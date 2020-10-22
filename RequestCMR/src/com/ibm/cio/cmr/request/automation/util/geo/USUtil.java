@@ -742,7 +742,7 @@ public class USUtil extends AutomationUtil {
         if (StringUtils.isNotBlank(data.getDunsNo())) {
           dunsNo = data.getDunsNo();
         } else {
-          MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
+          MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
           if (response != null && DnBUtil.hasValidMatches(response)) {
             DnBMatchingResponse dnbRecord = response.getMatches().get(0);
             if (dnbRecord.getConfidenceCode() >= 8) {
@@ -998,7 +998,7 @@ public class USUtil extends AutomationUtil {
     Addr addr = requestData.getAddress(addrType);
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
-    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, addrType);
+    MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, addrType);
     if (response.getSuccess()) {
       if (response.getMatched() && !response.getMatches().isEmpty()) {
         if (DnBUtil.hasValidMatches(response)) {

@@ -49,8 +49,8 @@ boolean approver = user != null && user.isApprover();
               </li>
             <%} %>
             <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
-                <li id="LSEARCH_TAB">
-                    <a href="javascript: goToUrl('${contextPath}/legacysearch')">Search</a>
+                <li id="SEARCH_HOME_TAB">
+                    <a href="javascript: goToUrl('${contextPath}/searchhome')">Search</a>
                 </li>
             <%}%>  
   
@@ -110,6 +110,12 @@ boolean approver = user != null && user.isApprover();
             <li id="METRICS_USAGE_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/usage')">Web Service Usage</a></li>
             <%} %>
         </c:if>
+
+        <c:if test="${primaryTabId ==  'SEARCH_HOME'}">
+            <li id="LSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/legacysearch')">Legacy DB2</a></li>
+            <li id="MQSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/mqsearch')">SOF/WTAAS</a></li>
+        </c:if>
+        
 
 				  
     			<c:if test="${primaryTabId ==  'WORKFLOW'}">
