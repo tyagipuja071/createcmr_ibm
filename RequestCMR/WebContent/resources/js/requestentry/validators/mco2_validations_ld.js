@@ -25,6 +25,8 @@ var _codHandler = null;
 var _cofHandler = null;
 var _vatExemptHandler = null;
 var _streetHandler = null;
+var _tinExemptHandler = null;
+var _numeroExemptHandler = null;
 
 function addHandlersForMCO2() {
 
@@ -78,6 +80,18 @@ function addHandlersForMCO2() {
   if (_streetHandler == null) {
     _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
       setStreetContBehavior();
+    });
+  }
+
+  if (_tinExemptHandler == null) {
+    _tinExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
+      resetTinRequired();
+    });
+  }
+
+  if (_numeroExemptHandler == null) {
+    _numeroExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
+      resetNumeroRequired();
     });
   }
 }
@@ -1516,6 +1530,38 @@ function resetVatRequired() {
   }
 }
 
+function resetTinRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '851') {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
+
+function resetNumeroRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '700') {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.removeValidator('busnType', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
+
 function requireVATForCrossMCO2() {
   FormManager.addFormValidator((function() {
     return {
@@ -1662,6 +1708,34 @@ function resetVatExempt() {
   }
 }
 
+function resetNumeroExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var numero = FormManager.getActualValue('busnType');
+
+  if (numero != null && numero.length > 0) {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.getField('taxCd2').set('checked', false);
+    }
+  }
+}
+
+function resetTinExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var tin = FormManager.getActualValue('taxCd1');
+
+  if (tin != null && tin.length > 0) {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.getField('taxCd2').set('checked', false);
+    }
+  }
+}
+
 function vatExemptOnScenario() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -1681,6 +1755,56 @@ function vatExemptOnScenario() {
       } else {
         FormManager.getField('vatExempt').set('checked', false);
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      }
+      break;
+    }
+  }
+}
+
+function numeroExemptOnScenario() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var numero = FormManager.getActualValue('busnType');
+  var numeroExempt = dijit.byId('taxCd2').get('checked');
+
+  var subGrp = new Array();
+  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+  for (var i = 0; i < subGrp.length; i++) {
+    if (custSubType == subGrp[i]) {
+      if ((numero == null || numero.length == 0) && numeroExempt != true) {
+        FormManager.getField('taxCd2').set('checked', true);
+        FormManager.removeValidator('busnType', Validators.REQUIRED);
+      } else {
+        FormManager.getField('taxCd2').set('checked', false);
+        FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+      }
+      break;
+    }
+  }
+}
+
+function tinExemptOnScenario() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var tin = FormManager.getActualValue('taxCd1');
+  var tinExempt = dijit.byId('taxCd2').get('checked');
+
+  var subGrp = new Array();
+  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+  for (var i = 0; i < subGrp.length; i++) {
+    if (custSubType == subGrp[i]) {
+      if ((tin == null || tin.length == 0) && tinExempt != true) {
+        FormManager.getField('taxCd2').set('checked', true);
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      } else {
+        FormManager.getField('taxCd2').set('checked', false);
+        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
       }
       break;
     }
@@ -1764,6 +1888,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(registerMCO2VatValidator, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(resetTinRequired, SysLoc.TANZANIA);
+  GEOHandler.addAfterTemplateLoad(resetNumeroRequired, SysLoc.MADAGASCAR);
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
@@ -1771,5 +1897,11 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
   GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(resetNumeroExempt, SysLoc.MADAGASCAR);
+  GEOHandler.addAfterTemplateLoad(resetNumeroExempt, SysLoc.MADAGASCAR);
+  GEOHandler.addAfterConfig(resetTinExempt, SysLoc.TANZANIA);
+  GEOHandler.addAfterTemplateLoad(resetTinExempt, SysLoc.TANZANIA);
   GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(numeroExemptOnScenario, SysLoc.MADAGASCAR);
+  GEOHandler.addAfterTemplateLoad(tinExemptOnScenario, SysLoc.TANZANIA);
 });
