@@ -624,27 +624,37 @@ public class METransformer extends EMEATransformer {
 
     if (SystemLocation.JORDAN.equals(cmrData.getCmrIssuingCntry())) {
       String cntryUse = cmrData.getCountryUse();
-      if (!StringUtils.isBlank(cntryUse)) {
-        if ("762PS".equals(cntryUse)) {
-          line6 = "Palestine";
-        } else {
-          if (!StringUtils.isBlank(addrData.getLandCntry())) {
-            line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+      if ("ZP02".equals(addrData.getId().getAddrType())) {
+        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+      } else {
+        if (!StringUtils.isBlank(cntryUse)) {
+          if ("762PS".equals(cntryUse)) {
+            line6 = "Palestine";
           } else {
-            line6 = "";
+            if (!StringUtils.isBlank(addrData.getLandCntry())) {
+              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+            } else {
+              line6 = "";
+            }
           }
         }
       }
+
     } else if (SystemLocation.PAKISTAN.equals(cmrData.getCmrIssuingCntry())) {
       String cntryUse = cmrData.getCountryUse();
-      if (!StringUtils.isBlank(cntryUse)) {
-        if ("808AF".equals(cntryUse)) {
-          line6 = "Afganistan";
-        } else {
-          if (!StringUtils.isBlank(addrData.getLandCntry())) {
-            line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+
+      if ("ZP02".equals(addrData.getId().getAddrType())) {
+        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
+      } else {
+        if (!StringUtils.isBlank(cntryUse)) {
+          if ("808AF".equals(cntryUse)) {
+            line6 = "Afganistan";
           } else {
-            line6 = "";
+            if (!StringUtils.isBlank(addrData.getLandCntry())) {
+              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+            } else {
+              line6 = "";
+            }
           }
         }
       }
@@ -829,9 +839,13 @@ public class METransformer extends EMEATransformer {
 
     }
 
-    if (SystemLocation.PAKISTAN.equals(cntry) || SystemLocation.JORDAN.equals(cntry)) {
+    if ("ZP02".equals(addr.getId().getAddrType())) {
       if (!StringUtils.isBlank(addr.getDivn())) {
-        legacyAddr.setAddrLine6(addr.getDivn());
+        if ("@".equals(addr.getDivn())) {
+          legacyAddr.setAddrLine6("");
+        } else {
+          legacyAddr.setAddrLine6(addr.getDivn());
+        }
       }
     } else {
       if (!StringUtils.isBlank(addr.getLandCntry())) {
