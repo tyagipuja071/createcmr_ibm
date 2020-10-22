@@ -141,7 +141,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   private boolean hasAttnPrefix(String attnPerson) {
-    String[] attPersonPrefix = { "Att:", "Att", "Attention Person", "ATT:", "ATT" };
+    String[] attPersonPrefix = { "Att:", "Att", "Attention Person", "ATT:", "ATT", "att:", "att" };
     boolean isPrefixFound = false;
 
     for (String prefix : attPersonPrefix) {
@@ -659,7 +659,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     line2 = massUpdtAddr.getCustNm2();
 
     String attnPerson = massUpdtAddr.getCounty();
-    if (StringUtils.isNotBlank(attnPerson) && !hasAttnPrefix(attnPerson)) {
+    if (StringUtils.isNotBlank(attnPerson) && !hasAttnPrefix(attnPerson.toUpperCase())) {
       attnPerson = "Att: " + attnPerson;
     }
 
