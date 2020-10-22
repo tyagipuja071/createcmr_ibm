@@ -34,7 +34,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation.ValidationRow;
 import com.ibm.cio.cmr.request.util.at.ATUtil;
-import com.ibm.cio.cmr.request.util.geo.impl.FRHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cio.cmr.request.util.legacy.LegacyDirectUtil;
 import com.ibm.cio.cmr.request.util.swiss.SwissUtil;
 
@@ -207,7 +207,7 @@ public class MassChangeTemplate {
           validations.add(tab.validate(entityManager, book, country, maxRows));
         }
       } else if (FranceUtil.isCountryFREnabled(entityManager, country)) {
-        FRHandler.validateFRMassUpdateTemplateDupFills(validations, book, maxRows, country);
+        FranceHandler.validateFRMassUpdateTemplateDupFills(validations, book, maxRows, country);
         for (TemplateTab tab : this.tabs) {
           validations.add(tab.validate(entityManager, book, country, maxRows));
         }
