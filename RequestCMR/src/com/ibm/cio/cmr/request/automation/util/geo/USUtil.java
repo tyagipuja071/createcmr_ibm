@@ -383,6 +383,15 @@ public class USUtil extends AutomationUtil {
       details.append("Skipping BO codes computations for update requests.");
     }
 
+    // CMR - 3999
+    boolean shouldBPRejectReq = AutomationUtil.checkCommentSection(entityManager, admin, data);
+    if (shouldBPRejectReq) {
+      String cmt = "The model CMR provided isn't consistent with the CMR type requested, please cancel this request and choose a compatible model CMR.";
+      details.append(cmt).append("\n");
+      engineData.addRejectionComment("DUPC", cmt, "", "");
+      results.setOnError(true);
+    }
+
     if (results == null || (results != null && results.isOnError())) {
       eleResults.append("Error On Field Calculation.");
     }
