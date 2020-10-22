@@ -2747,6 +2747,10 @@ public class LegacyDirectService extends TransConnService {
                * "  Skipping all address except ZS01 address."); continue; }
                */
 
+              if (usedSequences.contains(addr.getId().getAddrSeq())) {
+                LOG.warn("Sequence " + addr.getId().getAddrSeq() + " already sent in a previous request. Skipping.");
+                continue;
+              }
               if (StringUtils.isEmpty(addr.getSapNo())) {
                 LOG.warn("Address Type: " + addr.getId().getAddrType() + "  Skipping as SAP no is blank.");
                 continue;
