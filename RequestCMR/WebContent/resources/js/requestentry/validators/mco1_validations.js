@@ -173,6 +173,10 @@ function onLobchange() {
   });
 }
 function lobChange() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
   if (FormManager.getActualValue('requestingLob') == 'IGF' && FormManager.getActualValue('reqReason') == 'COPT') {
     FormManager.enable('commercialFinanced');
   } else {
@@ -189,15 +193,11 @@ function lobChange() {
 
 function setCofField() {
   dojo.connect(FormManager.getField('commercialFinanced'), 'onChange', function(value) {
-    if (FormManager.getActualValue('codFlag') != "") {
       setCodFieldOnChange();
-    }
   });
 
   dojo.connect(FormManager.getField('codFlag'), 'onChange', function(value) {
-    if (FormManager.getActualValue('commercialFinanced') != "") {
       setCofFieldOnChange();
-    }
   });
 }
 
@@ -206,7 +206,7 @@ function setCodFieldOnChange() {
   var cod = FormManager.getActualValue('codFlag');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   // if (role == 'REQUESTER') {
-  if (cod != null && cod != "" && (cof == 'R' || cof == 'S' || cof == 'T')) {
+  if (cof != undefined && (cof == 'R' || cof == 'S' || cof == 'T')) {
     FormManager.setValue('codFlag', 'N');
     // }
   }
@@ -216,7 +216,7 @@ function setCofFieldOnChange() {
   var cod = FormManager.getActualValue('codFlag');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   // if (role == 'REQUESTER') {
-  if (cof != null && cof != "" && cod == 'Y') {
+  if (cod != undefined && cod == 'Y') {
     FormManager.setValue('commercialFinanced', '');
     // }
   }
@@ -347,9 +347,9 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var att = FormManager.getActualValue('custNm4');
-        if (att != null && !hasAttPersonPrefix(att) && att.length > 25) {
+        if (att != null  && att!= '' && !hasAttPersonPrefix(att.toUpperCase()) && att.length > 25) {
           return new ValidationResult(null, false, 'Total computed length of Att. Person should not exceed 25 characters.');
-        } else if (att != null && hasAttPersonPrefix(att) && att.length > 30) {
+        } else if (att != null && att!= '' && hasAttPersonPrefix(att.toUpperCase()) && att.length > 30) {
           return new ValidationResult(null, false, 'Total computed length of Att. Person should not exceed 30 characters.');
         }
         return new ValidationResult(null, true);
@@ -376,7 +376,7 @@ function addAddressFieldValidators() {
 }
 
 function hasAttPersonPrefix(attPerson) {
-  var attPrefixList = [ 'Att:' ];
+  var attPrefixList = [ 'Att:' ,'att:', 'ATT:'];
   var prefixFound = false;
   for (var i = 0; i < attPrefixList.length; i++) {
     if (!prefixFound) {
