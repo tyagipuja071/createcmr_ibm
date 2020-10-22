@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -78,13 +79,13 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
 
         if (!updtElementResult.isOnError()) {
           if (pendingChecks != null && !pendingChecks.isEmpty()) {
-            for (String pendingCheck : pendingChecks.values()) {
-              negativeChecksMessage = negativeChecksMessage + pendingCheck + "\n";
-            }
-            // if (StringUtils.isNotBlank(updtElementResult.getDetails())) {
-            // negativeChecksMessage = negativeChecksMessage +
-            // updtElementResult.getDetails();
+            // for (String pendingCheck : pendingChecks.values()) {
+            // negativeChecksMessage = negativeChecksMessage + pendingCheck +
+            // "\n";
             // }
+            if (StringUtils.isNotBlank(updtElementResult.getDetails())) {
+              negativeChecksMessage = negativeChecksMessage + updtElementResult.getDetails();
+            }
           }
         }
         updtChkModel.setRejectionMsg(message.replaceAll("\n", "<br/>"));
