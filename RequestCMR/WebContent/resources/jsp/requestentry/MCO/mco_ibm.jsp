@@ -79,7 +79,6 @@
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
             <cmr:fieldLabel fieldId="InternalDept" />: 
-            	<cmr:delta text="${rdcdata.adminDeptCd}" oldValue="${reqentry.adminDeptCd}" id="delta-adminDeptCd" />
           </cmr:label>
           <cmr:field path="ibmDeptCostCenter" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
         </p>
