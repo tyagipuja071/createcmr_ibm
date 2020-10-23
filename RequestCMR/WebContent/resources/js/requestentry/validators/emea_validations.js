@@ -5505,8 +5505,14 @@ function setVATForItaly() {
 
 function canRemoveAddress(value, rowIndex, grid) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var rowData = grid.getItem(rowIndex);
+  var addrType = rowData.addrType[0];
+  if (addrType == 'PG01'){
+    // no removes for paygo addresses
+    return false;
+  }
+  
   if (cntry != '758') {
-    var rowData = grid.getItem(rowIndex);
     var importInd = rowData.importInd[0];
     var reqType = FormManager.getActualValue('reqType');
     if ('U' == reqType && 'Y' == importInd) {
@@ -5537,8 +5543,14 @@ function canRemoveAddress(value, rowIndex, grid) {
 
 function canUpdateAddress(value, rowIndex, grid) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var rowData = grid.getItem(rowIndex);
+  var addrType = rowData.addrType[0];
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (addrType == 'PG01' && role != 'PROCESSOR'){
+    // no updates for non processors for paygo addresses
+    return false;
+  }
   if (cntry == '758') {
-    var rowData = grid.getItem(rowIndex);
     var importInd = rowData.importInd[0];
     var type = FormManager.getActualValue('reqType');
     var ifProspect = FormManager.getActualValue('prospLegalInd');
@@ -5573,6 +5585,11 @@ function canUpdateAddress(value, rowIndex, grid) {
 // Defect 1509289 :Mukesh
 function canCopyAddress(value, rowIndex, grid) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var addrType = rowData.addrType[0];
+  if (addrType == 'PG01'){
+    // no copy for paygo addresses
+    return false;
+  }
 
   if (cntry == '726') {
     return shouldShowCopyAddressInGrid(rowIndex, grid);
