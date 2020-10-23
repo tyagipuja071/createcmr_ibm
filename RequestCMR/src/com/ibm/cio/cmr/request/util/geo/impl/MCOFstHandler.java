@@ -126,7 +126,7 @@ public class MCOFstHandler extends MCOHandler {
 
       String zs01sapNo = getKunnrSapr3Kna1(data.getCmrNo(), data.getCmrIssuingCntry());
       data.setIbmDeptCostCenter(getDepartment(zs01sapNo));
-
+      data.setAdminDeptLine(data.getIbmDeptCostCenter());
       String modeOfPayment = legacyObjects.getCustomer().getModeOfPayment();
       if (StringUtils.isNotBlank(modeOfPayment) && ("R".equals(modeOfPayment) || "S".equals(modeOfPayment) || "T".equals(modeOfPayment))) {
         data.setCommercialFinanced(modeOfPayment);
@@ -266,7 +266,7 @@ public class MCOFstHandler extends MCOHandler {
     List<String> fields = new ArrayList<>();
     fields.addAll(Arrays.asList("SALES_BO_CD", "REP_TEAM_MEMBER_NO", "VAT", "ISIC_CD", "EMBARGO_CD", "ABBREV_NM", "CLIENT_TIER", "CUST_PREF_LANG",
         "INAC_CD", "ISU_CD", "COLLECTION_CD", "SPECIAL_TAX_CD", "SUB_INDUSTRY_CD", "ABBREV_LOCN", "PPSCEID", "IBM_DEPT_COST_CENTER",
-        "COMMERCIAL_FINANCED", "CREDIT_CD", "BUSN_TYP"));
+        "COMMERCIAL_FINANCED", "CREDIT_CD", "BUSN_TYP", "ADMIN_DEPT_LN"));
     return fields;
   }
 
@@ -430,6 +430,8 @@ public class MCOFstHandler extends MCOHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
       data.setRepTeamMemberNo("DUMMY1");
     }
+
+    data.setAdminDeptLine(data.getIbmDeptCostCenter());
   }
 
   @Override
@@ -493,6 +495,14 @@ public class MCOFstHandler extends MCOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "CoF (Commercial Financed)", "CoF (Commercial Financed)"));
       update.setNewData(service.getCodeAndDescription(newData.getCommercialFinanced(), "CoF (Commercial Financed)", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getCommercialFinanced(), "CoF (Commercial Financed)", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getAdminDeptLine(), newData.getAdminDeptLine())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "Internal Department Number", "Internal Department Number"));
+      update.setNewData(service.getCodeAndDescription(newData.getAdminDeptLine(), "Internal Department Number", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getAdminDeptLine(), "Internal Department Number", cmrCountry));
       results.add(update);
     }
 
