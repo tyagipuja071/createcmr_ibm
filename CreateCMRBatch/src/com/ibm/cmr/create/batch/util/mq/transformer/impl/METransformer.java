@@ -659,29 +659,16 @@ public class METransformer extends EMEATransformer {
         }
       }
     } else {
-      // if ("ZP02".equals(addrData.getId().getAddrType())) {
-      // if (!StringUtils.isBlank(addrData.getBldg())) {
-      // line6 = addrData.getBldg();
-      // } else {
-      // line6 = "";
-      // }
-      // } else {
-      if (!StringUtils.isBlank(addrData.getLandCntry())) {
-        if ("ZP02".equals(addrData.getId().getAddrType()))
-          line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
-        else {
-          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-        }
+      if ("ZP02".equals(addrData.getId().getAddrType())) {
+        line6 = addrData.getBldg() == null ? "" : addrData.getBldg();
       } else {
-        line6 = "";
-        // }
+        if (!StringUtils.isBlank(addrData.getLandCntry())) {
+          line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+        } else {
+          line6 = "";
+        }
       }
     }
-    // if (!StringUtils.isBlank(addrData.getLandCntry())) {
-    // line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
-    // } else {
-    // line6 = "";
-    // }
 
     // if (!StringUtils.isBlank(addrData.getCustPhone())) {
     // phone = addrData.getCustPhone().trim();
