@@ -193,6 +193,8 @@ public class CEWATransformer extends MCOTransformer {
     if (SystemLocation.TANZANIA.equals(cmrIssuingCntry)) {
       if (StringUtils.isNotBlank(data.getTaxCd1())) {
         legacyCustExt.setiTaxCode(data.getTaxCd1());
+      } else {
+        legacyCustExt.setiTaxCode("");
       }
     }
   }
