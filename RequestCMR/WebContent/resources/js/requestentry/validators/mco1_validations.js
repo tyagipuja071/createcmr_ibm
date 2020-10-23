@@ -158,7 +158,6 @@ function afterConfigForZA() {
   }
 
   lobChange();
-  setCreditCdField();
   enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
   showDeptNoForInternalsOnly();
@@ -204,31 +203,49 @@ function setCofField() {
 function setCodFieldOnChange() {
   var cof = FormManager.getActualValue('commercialFinanced');
   var cod = FormManager.getActualValue('codFlag');
+  var reqId = FormManager.getActualValue('reqId');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   // if (role == 'REQUESTER') {
   if (cof != undefined && (cof == 'R' || cof == 'S' || cof == 'T')) {
     FormManager.setValue('codFlag', 'N');
     // }
+  } else if(cof!=undefined && cof == ''){
+    var result = cmr.query('LD.OLD_COD_COF_BY_REQID_SA', {
+      REQ_ID : reqId    
+    });
+    
+    if(result){
+    var oldCOD= result.ret1;
+    var oldCOF= result.ret2;
+    if(cof == oldCOF){
+    FormManager.setValue('codFlag', oldCOD);
+      }
+    }
+    
   }
 }
 function setCofFieldOnChange() {
   var cof = FormManager.getActualValue('commercialFinanced');
   var cod = FormManager.getActualValue('codFlag');
+  var reqId = FormManager.getActualValue('reqId');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   // if (role == 'REQUESTER') {
   if (cod != undefined && cod == 'Y') {
     FormManager.setValue('commercialFinanced', '');
     // }
+  } else if(cod!=undefined && (cod == '' || cod =='N')){
+    var result = cmr.query('LD.OLD_COD_COF_BY_REQID_SA', {
+      REQ_ID : reqId    
+    });
+    if(result){
+    var oldCOD= result.ret1;
+    var oldCOF= result.ret2;
+    if(cod == oldCOD){
+    FormManager.setValue('commercialFinanced', oldCOF);
+      }
+    }
   }
-}
-
-function setCreditCdField() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U' && FormManager.getActualValue('reqReason') == 'COD') {
-    FormManager.setValue('repTeamMemberNo', 'AMSNBA');
-    FormManager.setValue('salesBusOffCd', '0020');
-    FormManager.setValue('collBoId', '0020');
-  }
+    
 }
 
 /**
@@ -816,7 +833,7 @@ function addStreetContPoBoxLengthValidator() {
           }
         } else {
           if (poBox.length > 10) {
-            return new ValidationResult(null, false, 'Max Allowed fpr PO BOX length will be 10 characters');
+            return new ValidationResult(null, false, 'Max Allowed for PO BOX length is 10 characters');
           }
         }
         return new ValidationResult(null, true);
@@ -963,11 +980,24 @@ function retainImportedValues(fromAddress, scenario, scenarioChanged) {
         origSbo = result.ret4;
         origInac = result.ret6;
 
-        FormManager.setValue('isuCd', origISU);
-        FormManager.setValue('clientTier', origClientTier);
-        FormManager.setValue('repTeamMemberNo', origRepTeam);
-        FormManager.setValue('salesBusOffCd', origSbo);
-        FormManager.setValue('inacCd', origInac);
+        var savedSubGrp = getCommonSubgrpVal(_pagemodel.custSubGrp);
+
+        var isComm = (savedSubGrp == 'XCO' || savedSubGrp == 'COM');
+        var isGov = (savedSubGrp == 'XGO' ||savedSubGrp == 'GOV');
+        var isTPD = (savedSubGrp == 'XTP' || savedSubGrp == 'TP');
+        if ( scenario != _pagemodel.custSubGrp && ( isComm || isGov || isTPD )) {
+          FormManager.setValue('isuCd', origISU);
+          FormManager.setValue('clientTier', origClientTier);
+          FormManager.setValue('repTeamMemberNo', origRepTeam);
+          FormManager.setValue('salesBusOffCd', origSbo);
+          FormManager.setValue('inacCd', origInac);
+        } else {
+          FormManager.setValue('isuCd', origISU);
+          FormManager.setValue('clientTier', origClientTier);
+          FormManager.setValue('repTeamMemberNo', origRepTeam);
+          FormManager.setValue('salesBusOffCd', origSbo);
+          FormManager.setValue('inacCd', _pagemodel.inacCd);
+        }
       }
     } else {
       FormManager.setValue('inacCd', '');
