@@ -441,7 +441,9 @@ public class MCOSaHandler extends MCOHandler {
         address.getId().setAddrSeq(seq);
       }
 
-      address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+      if ("U".equals(admin.getReqType())) {
+        address.setIerpSitePrtyId(currentRecord.getCmrSitePartyID());
+      }
 
       if ("ZP01".equals(address.getId().getAddrType()) || "ZI01".equals(address.getId().getAddrType())
           || "ZS02".equals(address.getId().getAddrType())) {
@@ -659,11 +661,27 @@ public class MCOSaHandler extends MCOHandler {
       if (!StringUtils.isEmpty(line5)) {
         if (StringUtils.isEmpty(address.getCmrPostalCode()) && !StringUtils.isEmpty(address.getCmrCity())) {
           address.setCmrPostalCode(line5);
-        } else if (!StringUtils.isEmpty(address.getCmrPostalCode()) && StringUtils.isEmpty(address.getCmrCity())) {
-          address.setCmrCity(line5);
         }
-
       }
+
+      if (StringUtils.isEmpty(address.getCmrStreetAddress()) && !StringUtils.isEmpty(address.getCmrStreetAddressCont())) {
+        address.setCmrStreetAddress(address.getCmrStreetAddressCont());
+        address.setCmrStreetAddressCont(null);
+      }
+
+      if (StringUtils.isEmpty(address.getCmrCity()) && !StringUtils.isEmpty(address.getCmrStreetAddressCont())) {
+        address.setCmrCity(address.getCmrStreetAddressCont());
+        address.setCmrStreetAddressCont(null);
+      }
+
+      if (!StringUtils.isEmpty(address.getCmrStreetAddress()) && !StringUtils.isEmpty(address.getCmrStreetAddressCont())
+          && isStreet(address.getCmrStreetAddressCont()) && !isStreet(address.getCmrStreetAddress())) {
+        // interchange street and street con't based on data
+        String cont = address.getCmrStreetAddressCont();
+        address.setCmrStreetAddressCont(address.getCmrStreetAddress());
+        address.setCmrStreetAddress(cont);
+      }
+
       address.setCmrCountryLanded(countryCd);
 
     } else {

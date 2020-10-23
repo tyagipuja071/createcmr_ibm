@@ -535,12 +535,14 @@ public class SouthAfricaTransformer extends MCOTransformer {
         if (bpGMLLCScenarios.contains(data.getCustSubGrp())) {
           legacyCust.setIsuCd("8B7");
           legacyCust.setSalesRepNo("DUMMY1");
+          legacyCust.setSalesGroupRep("DUMMY1");
           legacyCust.setSbo("0010000");
           legacyCust.setIbo("0010000");
           legacyCust.setInacCd("");
         } else {
           legacyCust.setIsuCd("32S");
           legacyCust.setSalesRepNo("DUMMY1");
+          legacyCust.setSalesGroupRep("DUMMY1");
           legacyCust.setSbo("0080000");
           legacyCust.setIbo("0080000");
         }
