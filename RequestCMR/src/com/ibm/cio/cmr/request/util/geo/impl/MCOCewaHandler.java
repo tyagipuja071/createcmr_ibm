@@ -398,16 +398,6 @@ public class MCOCewaHandler extends MCOHandler {
       results.add(update);
     }
 
-    if (SystemLocation.TANZANIA.equals(oldData.getCmrIssuingCntry())) {
-      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd1(), newData.getTaxCd1())) {
-        update = new UpdatedDataModel();
-        update.setDataField(PageManager.getLabel(cmrCountry, "TIN number", "TIN number"));
-        update.setNewData(service.getCodeAndDescription(newData.getTaxCd1(), "TIN number", cmrCountry));
-        update.setOldData(service.getCodeAndDescription(oldData.getTaxCd1(), "TIN number", cmrCountry));
-        results.add(update);
-      }
-    }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Collection Code", "Collection Code"));
