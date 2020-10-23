@@ -52,9 +52,8 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
 /**
- * Handler for Switzerland
+ * Handler for France
  * 
- * @author Rangoli Saxena
  * 
  */
 public class FranceHandler extends GEOHandler {
@@ -291,12 +290,7 @@ public class FranceHandler extends GEOHandler {
       String maxAddrSeq = "99999";
       String sql = null;
       reqType = getReqType(entityManager, reqId);
-      if (reqType.equalsIgnoreCase("U")) {
-        cmrNo = getCMRNo(entityManager, reqId);
-        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.SWISS_U");
-      } else {
-        sql = ExternalizedQuery.getSql("ADDRESS.GETADDRSEQ.SWISS_C");
-      }
+      sql = ExternalizedQuery.getSql("ADDRESS.GETMADDRSEQ");
       PreparedQuery query = new PreparedQuery(entityManager, sql);
       query.setParameter("REQ_ID", reqId);
       query.setParameter("ADDR_TYPE", addrType);
@@ -328,7 +322,7 @@ public class FranceHandler extends GEOHandler {
 
   public String getCMRNo(EntityManager entityManager, long reqId) {
     String cmrNo = "";
-    String sql = ExternalizedQuery.getSql("DATA.GETCMRNO.SWISS");
+    String sql = ExternalizedQuery.getSql("DATA.GETCMRNO.FR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
@@ -341,7 +335,7 @@ public class FranceHandler extends GEOHandler {
 
   public String getReqType(EntityManager entityManager, long reqId) {
     String reqType = "";
-    String sql = ExternalizedQuery.getSql("ADMIN.GETREQTYPE.SWISS");
+    String sql = ExternalizedQuery.getSql("ADMIN.GETREQTYPE.FR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
 
@@ -444,9 +438,9 @@ public class FranceHandler extends GEOHandler {
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
 
-    if ("C".equals(admin.getReqType())) {
-      data.setCurrencyCd("CHF");
-    }
+    // if ("C".equals(admin.getReqType())) {
+    // data.setCurrencyCd("CHF");
+    // }
 
   }
 
@@ -493,14 +487,6 @@ public class FranceHandler extends GEOHandler {
   @Override
   public boolean useSeqNoFromImport() {
     return false;
-  }
-
-  public static boolean isCHIssuingCountry(String issuingCntry) {
-    if (SystemLocation.SWITZERLAND.equals(issuingCntry)) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   @Override
@@ -558,7 +544,6 @@ public class FranceHandler extends GEOHandler {
     return val1.trim().equals(val2.trim());
   }
 
-  /* Swiss Story : 1326413, 1834659 */
   @Override
   public void doAfterImport(EntityManager entityManager, Admin admin, Data data) {
 
@@ -665,12 +650,12 @@ public class FranceHandler extends GEOHandler {
     return memLevel;
   }
 
-  /* Story : 1834659 - Import from KUNNR_EXT table */
+  /* Import from KUNNR_EXT table */
   private KunnrExt getKunnrExtDetails(String kunnr) throws Exception {
     KunnrExt ke = new KunnrExt();
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String mandt = SystemConfiguration.getValue("MANDT");
-    String sql = ExternalizedQuery.getSql("GET.KUNNR_EXT.BY_KUNNR_MANDT_SWISS");
+    String sql = ExternalizedQuery.getSql("GET.KUNNR_EXT.BY_KUNNR_MANDT_FR");
     sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
     sql = StringUtils.replace(sql, ":KUNNR", "'" + kunnr + "'");
     String dbId = QueryClient.RDC_APP_ID;
@@ -870,7 +855,6 @@ public class FranceHandler extends GEOHandler {
     return taxcode;
   }
 
-  /* Swiss Story : 1326413 */
   private String getRDcIerpSitePartyId(String kunnr) throws Exception {
     String spid = "";
 
