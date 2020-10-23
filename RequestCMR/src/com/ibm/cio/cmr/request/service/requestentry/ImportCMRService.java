@@ -57,6 +57,7 @@ import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
@@ -647,6 +648,9 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
         seqMap.put(type, new Integer(seq + 1));
       }
       if ("618".equals(reqModel.getCmrIssuingCntry()) && "C".equals(reqModel.getReqType())) {
+        addrPk.setAddrSeq(cmr.getCmrAddrSeq());
+      }
+      if (SystemLocation.UNITED_STATES.equals(reqModel.getCmrIssuingCntry()) && CmrConstants.RDC_BILL_TO.equals(type)) {
         addrPk.setAddrSeq(cmr.getCmrAddrSeq());
       }
 
