@@ -158,7 +158,6 @@ function afterConfigForZA() {
   }
 
   lobChange();
-  setCreditCdField();
   enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
   showDeptNoForInternalsOnly();
@@ -219,15 +218,6 @@ function setCofFieldOnChange() {
   if (cod != undefined && cod == 'Y') {
     FormManager.setValue('commercialFinanced', '');
     // }
-  }
-}
-
-function setCreditCdField() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U' && FormManager.getActualValue('reqReason') == 'COD') {
-    FormManager.setValue('repTeamMemberNo', 'AMSNBA');
-    FormManager.setValue('salesBusOffCd', '0020');
-    FormManager.setValue('collBoId', '0020');
   }
 }
 
