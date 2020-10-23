@@ -386,17 +386,15 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         response.setMatches(reqCheckMatchesTmp);
         break;
       case USUtil.COMMERCIAL:
-        if (!subIndCode.startsWith("Y")) {
-          for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
-            if ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
-                || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo()))) {
-              reqCheckMatchesTmp.add(reqCheckRecord);
-            }
+        for (ReqCheckResponse reqCheckRecord : reqCheckMatches) {
+          if ((StringUtils.isNotBlank(reqCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+              && reqCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
+              || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(reqCheckRecord.getUsRestrictTo()))) {
+            reqCheckMatchesTmp.add(reqCheckRecord);
           }
-          response.setMatches(reqCheckMatchesTmp);
-          break;
         }
+        response.setMatches(reqCheckMatchesTmp);
+        break;
       }
       break;
     default:
@@ -497,18 +495,17 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         response.setMatches(cmrCheckMatchesTmp);
         break;
       case USUtil.COMMERCIAL:
-        if (!subIndCode.startsWith("Y")) {
-          for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-            if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
-                && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
-                && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
-                    && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
-                    || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))) {
-              cmrCheckMatchesTmp.add(cmrCheckRecord);
-            }
+        for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+          if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(usDetails.getCompanyNo())
+              && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
+              && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
+                  && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
+                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))
+              && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
+            cmrCheckMatchesTmp.add(cmrCheckRecord);
           }
-          response.setMatches(cmrCheckMatchesTmp);
         }
+        response.setMatches(cmrCheckMatchesTmp);
       }
     default:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
