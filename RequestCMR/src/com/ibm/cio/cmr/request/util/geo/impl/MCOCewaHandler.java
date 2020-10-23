@@ -364,6 +364,8 @@ public class MCOCewaHandler extends MCOHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
       data.setRepTeamMemberNo("DUMMY1");
     }
+
+    data.setAdminDeptLine(data.getIbmDeptCostCenter());
   }
 
   @Override
@@ -380,7 +382,7 @@ public class MCOCewaHandler extends MCOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SBO/ Search Term (SORTL):", "SBO/ Search Term (SORTL):"));
       update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SBO/ Search Term (SORTL):", cmrCountry));
@@ -406,7 +408,7 @@ public class MCOCewaHandler extends MCOHandler {
       }
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Collection Code", "Collection Code"));
       update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "Collection Code", cmrCountry));
@@ -414,7 +416,7 @@ public class MCOCewaHandler extends MCOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Sales Rep", "Sales Rep"));
       update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "Sales Rep", cmrCountry));
@@ -435,6 +437,14 @@ public class MCOCewaHandler extends MCOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "Internal Department Number", "Internal Department Number"));
       update.setNewData(service.getCodeAndDescription(newData.getAdminDeptLine(), "Internal Department Number", cmrCountry));
       update.setOldData(service.getCodeAndDescription(oldData.getAdminDeptLine(), "Internal Department Number", cmrCountry));
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevLocn(), newData.getAbbrevLocn())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "AbbrevLocation", "-"));
+      update.setNewData(newData.getAbbrevLocn());
+      update.setOldData(oldData.getAbbrevLocn());
       results.add(update);
     }
   }
