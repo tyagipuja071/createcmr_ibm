@@ -206,7 +206,6 @@ function afterConfigForMCO2() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('salesBusOffCd', Validators.DIGIT, [ 'SBO/ Search Term (SORTL)' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('specialTaxCd', Validators.ALPHANUM, [ 'Tax Code' ], 'MAIN_CUST_TAB');
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.addValidator('collectionCd', Validators.ALPHANUM, [ 'Collection Code' ], 'MAIN_IBM_TAB');
@@ -1811,6 +1810,44 @@ function tinExemptOnScenario() {
   }
 }
 
+function addSalesBusOffValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return new ValidationResult(null, true);
+        }
+        var input = FormManager.getActualValue('salesBusOffCd');
+        if (input && input.length > 0 && isNaN(input)) {
+          return new ValidationResult(null, false, input + ' is not a valid numeric value for SBO/Search Term (SORTL).');
+        } else {
+          return new ValidationResult(input, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function addSBOLengthValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = null;
+        var scenario = null;
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return new ValidationResult(null, true);
+        }
+        var input = FormManager.getActualValue('salesBusOffCd');
+        if (input.length != 4) {
+          return new ValidationResult(null, false, 'SBO/Search Term (SORTL) should be 4 characters long.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -1904,4 +1941,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(numeroExemptOnScenario, SysLoc.MADAGASCAR);
   GEOHandler.addAfterTemplateLoad(tinExemptOnScenario, SysLoc.TANZANIA);
+  GEOHandler.registerValidator(addSalesBusOffValidator, GEOHandler.MCO2, null, true);
+  GEOHandler.registerValidator(addSBOLengthValidator, GEOHandler.MCO2, null, true);
 });
