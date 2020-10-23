@@ -1310,12 +1310,12 @@ function validateCMRNumForProspect() {
               if (cmrNo.startsWith("99")) {
                 return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
               }
-              if (cmrNo.length > 1 && (!cmrNo.startsWith('P') || !cmrSubNum.match(numPattern))) {
+              if (cmrNo.length > 1 && (!cmrSubNum.match(numPattern))) {
                 return new ValidationResult({
                   id : 'cmrNo',
                   type : 'text',
                   name : 'cmrNo'
-                }, false, 'CMR Number should start with P and later have numbers only.');
+                }, false, 'CMR Number should have numbers only.');
               }
             }
             return new ValidationResult(null, true);
