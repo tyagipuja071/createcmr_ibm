@@ -230,6 +230,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
         }
       }
 
+      String creditCd = legacyCust.getCreditCd();
+      legacyCust.setCreditCd(creditCd);
+
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
                                                                                             // removal-single
@@ -723,6 +726,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
       isCrossBorder = true;
     }
     return isCrossBorder;
+  }
+
+  @Override
+  public boolean skipCreditCodeUpdateForCountry() {
+    return true;
   }
 
 }
