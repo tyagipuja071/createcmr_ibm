@@ -209,9 +209,9 @@ public class FranceHandler extends GEOHandler {
         address.setIerpSitePrtyId(spid);
 
       } else {
-        String addrSeq = address.getId().getAddrSeq();
-        addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
-        address.getId().setAddrSeq(addrSeq);
+        // String addrSeq = address.getId().getAddrSeq();
+        // addrSeq = StringUtils.leftPad(addrSeq, 5, '0');
+        address.getId().setAddrSeq("1");
         address.setIerpSitePrtyId(spid);
       }
       KunnrExt addlAddDetail = getKunnrExtDetails(currentRecord.getCmrSapNumber());
