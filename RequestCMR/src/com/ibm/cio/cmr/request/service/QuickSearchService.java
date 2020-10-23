@@ -117,6 +117,7 @@ public class QuickSearchService extends BaseSimpleService<RequestEntryModel> {
     }
     importModel.setCmrNum(model.getCmrNo());
     importModel.setSystem("cmr");
+    // check added for external service
     if (!StringUtils.isBlank(model.getName())) {
       importModel.setQuickSearchData(formatSearchParams(model));
     }
