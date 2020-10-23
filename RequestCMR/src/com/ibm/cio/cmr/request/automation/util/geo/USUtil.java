@@ -62,7 +62,6 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
- * @author Rangoli Saxena
  * @author RoopakChugh
  *
  */
@@ -687,11 +686,12 @@ public class USUtil extends AutomationUtil {
           }
         }
 
-        // Admin update checks
-        if (changes.isLegalNameChanged()) {
-          failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is updated.");
-          hasNegativeCheck = true;
-        }
+        // // Admin update checks
+        // if (changes.isLegalNameChanged()) {
+        // failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is
+        // updated.");
+        // hasNegativeCheck = true;
+        // }
       } finally {
         cedpManager.clear();
         cedpManager.close();
