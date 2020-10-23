@@ -1310,7 +1310,7 @@ function validateCMRNumForProspect() {
               if (cmrNo.startsWith("99")) {
                 return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
               }
-              if (cmrNo.length > 1 && (!cmrSubNum.match(numPattern))) {
+              if (cmrNo.length > 1 && ((!cmrNo.startsWith('P') && isNaN(cmrNo.substring(0,1))) || (!cmrSubNum.match(numPattern)))) {
                 return new ValidationResult({
                   id : 'cmrNo',
                   type : 'text',
