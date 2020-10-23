@@ -463,11 +463,11 @@ public class MCOFstHandler extends MCOHandler {
     }
 
     if ("700".equals(oldData.getCmrIssuingCntry())) {
-      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnTyp(), newData.getBusnType())) {
+      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getBusnType(), newData.getBusnType())) {
         update = new UpdatedDataModel();
         update.setDataField(PageManager.getLabel(cmrCountry, "Numero Statistique du Client", "Numero Statistique du Client"));
         update.setNewData(service.getCodeAndDescription(newData.getBusnType(), "Numero Statistique du Client", cmrCountry));
-        update.setOldData(service.getCodeAndDescription(oldData.getBusnTyp(), "Numero Statistique du Client", cmrCountry));
+        update.setOldData(service.getCodeAndDescription(oldData.getBusnType(), "Numero Statistique du Client", cmrCountry));
         results.add(update);
       }
     }

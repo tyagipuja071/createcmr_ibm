@@ -25,6 +25,8 @@ var _codHandler = null;
 var _cofHandler = null;
 var _vatExemptHandler = null;
 var _streetHandler = null;
+var _tinExemptHandler = null;
+var _numeroExemptHandler = null;
 
 function addHandlersForMCO2() {
 
@@ -78,6 +80,18 @@ function addHandlersForMCO2() {
   if (_streetHandler == null) {
     _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
       setStreetContBehavior();
+    });
+  }
+
+  if (_tinExemptHandler == null) {
+    _tinExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
+      resetTinRequired();
+    });
+  }
+
+  if (_numeroExemptHandler == null) {
+    _numeroExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
+      resetNumeroRequired();
     });
   }
 }
@@ -192,7 +206,6 @@ function afterConfigForMCO2() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
   FormManager.addValidator('ibmDeptCostCenter', Validators.DIGIT, [ 'Internal Department Number' ], 'MAIN_IBM_TAB');
-  FormManager.addValidator('salesBusOffCd', Validators.DIGIT, [ 'SBO/ Search Term (SORTL)' ], 'MAIN_IBM_TAB');
   FormManager.addValidator('specialTaxCd', Validators.ALPHANUM, [ 'Tax Code' ], 'MAIN_CUST_TAB');
   if (FormManager.getActualValue('reqType') == 'U') {
     FormManager.addValidator('collectionCd', Validators.ALPHANUM, [ 'Collection Code' ], 'MAIN_IBM_TAB');
@@ -1324,7 +1337,6 @@ function validateCMRForMCO2GMLLCScenario() {
             CMR_NO : requestCMR,
             MANDT : cmr.MANDT
           });
-
           if (exists && exists.ret1 && action != 'PCM' && cmrStatusOrig != 'C') {
             return new ValidationResult({
               id : 'cmrNo',
@@ -1517,6 +1529,38 @@ function resetVatRequired() {
   }
 }
 
+function resetTinRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '851') {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
+
+function resetNumeroRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '700') {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.removeValidator('busnType', Validators.REQUIRED);
+    } else {
+      FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
+
 function requireVATForCrossMCO2() {
   FormManager.addFormValidator((function() {
     return {
@@ -1663,6 +1707,34 @@ function resetVatExempt() {
   }
 }
 
+function resetNumeroExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var numero = FormManager.getActualValue('busnType');
+
+  if (numero != null && numero.length > 0) {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.getField('taxCd2').set('checked', false);
+    }
+  }
+}
+
+function resetTinExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var tin = FormManager.getActualValue('taxCd1');
+
+  if (tin != null && tin.length > 0) {
+    if (dijit.byId('taxCd2').get('checked')) {
+      FormManager.getField('taxCd2').set('checked', false);
+    }
+  }
+}
+
 function vatExemptOnScenario() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -1686,6 +1758,94 @@ function vatExemptOnScenario() {
       break;
     }
   }
+}
+
+function numeroExemptOnScenario() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var numero = FormManager.getActualValue('busnType');
+  var numeroExempt = dijit.byId('taxCd2').get('checked');
+
+  var subGrp = new Array();
+  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+  for (var i = 0; i < subGrp.length; i++) {
+    if (custSubType == subGrp[i]) {
+      if ((numero == null || numero.length == 0) && numeroExempt != true) {
+        FormManager.getField('taxCd2').set('checked', true);
+        FormManager.removeValidator('busnType', Validators.REQUIRED);
+      } else {
+        FormManager.getField('taxCd2').set('checked', false);
+        FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+      }
+      break;
+    }
+  }
+}
+
+function tinExemptOnScenario() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var tin = FormManager.getActualValue('taxCd1');
+  var tinExempt = dijit.byId('taxCd2').get('checked');
+
+  var subGrp = new Array();
+  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+  for (var i = 0; i < subGrp.length; i++) {
+    if (custSubType == subGrp[i]) {
+      if ((tin == null || tin.length == 0) && tinExempt != true) {
+        FormManager.getField('taxCd2').set('checked', true);
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      } else {
+        FormManager.getField('taxCd2').set('checked', false);
+        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+      }
+      break;
+    }
+  }
+}
+
+function addSalesBusOffValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return new ValidationResult(null, true);
+        }
+        var input = FormManager.getActualValue('salesBusOffCd');
+        if (input && input.length > 0 && isNaN(input)) {
+          return new ValidationResult(null, false, input + ' is not a valid numeric value for SBO/Search Term (SORTL).');
+        } else {
+          return new ValidationResult(input, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+function addSBOLengthValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = null;
+        var scenario = null;
+        if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+          return new ValidationResult(null, true);
+        }
+        var input = FormManager.getActualValue('salesBusOffCd');
+        if (input.length != 4) {
+          return new ValidationResult(null, false, 'SBO/Search Term (SORTL) should be 4 characters long.');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 /* End 1430539 */
@@ -1765,6 +1925,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(registerMCO2VatValidator, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(resetTinRequired, SysLoc.TANZANIA);
+  GEOHandler.addAfterTemplateLoad(resetNumeroRequired, SysLoc.MADAGASCAR);
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
@@ -1772,5 +1934,13 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
   GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(resetNumeroExempt, SysLoc.MADAGASCAR);
+  GEOHandler.addAfterTemplateLoad(resetNumeroExempt, SysLoc.MADAGASCAR);
+  GEOHandler.addAfterConfig(resetTinExempt, SysLoc.TANZANIA);
+  GEOHandler.addAfterTemplateLoad(resetTinExempt, SysLoc.TANZANIA);
   GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(numeroExemptOnScenario, SysLoc.MADAGASCAR);
+  GEOHandler.addAfterTemplateLoad(tinExemptOnScenario, SysLoc.TANZANIA);
+  GEOHandler.registerValidator(addSalesBusOffValidator, GEOHandler.MCO2, null, true);
+  GEOHandler.registerValidator(addSBOLengthValidator, GEOHandler.MCO2, null, true);
 });
