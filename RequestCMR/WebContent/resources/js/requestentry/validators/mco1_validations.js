@@ -158,7 +158,6 @@ function afterConfigForZA() {
   }
 
   lobChange();
-  setCreditCdField();
   enterpriseValidation();
   clearPoBoxPhoneAddrGridItems();
   showDeptNoForInternalsOnly();
@@ -219,15 +218,6 @@ function setCofFieldOnChange() {
   if (cod != undefined && cod == 'Y') {
     FormManager.setValue('commercialFinanced', '');
     // }
-  }
-}
-
-function setCreditCdField() {
-  var reqType = FormManager.getActualValue('reqType');
-  if (reqType == 'U' && FormManager.getActualValue('reqReason') == 'COD') {
-    FormManager.setValue('repTeamMemberNo', 'AMSNBA');
-    FormManager.setValue('salesBusOffCd', '0020');
-    FormManager.setValue('collBoId', '0020');
   }
 }
 
@@ -963,11 +953,24 @@ function retainImportedValues(fromAddress, scenario, scenarioChanged) {
         origSbo = result.ret4;
         origInac = result.ret6;
 
-        FormManager.setValue('isuCd', origISU);
-        FormManager.setValue('clientTier', origClientTier);
-        FormManager.setValue('repTeamMemberNo', origRepTeam);
-        FormManager.setValue('salesBusOffCd', origSbo);
-        FormManager.setValue('inacCd', origInac);
+        var savedSubGrp = getCommonSubgrpVal(_pagemodel.custSubGrp);
+
+        var isComm = (savedSubGrp == 'XCO' || savedSubGrp == 'COM');
+        var isGov = (savedSubGrp == 'XGO' ||savedSubGrp == 'GOV');
+        var isTPD = (savedSubGrp == 'XTP' || savedSubGrp == 'TP');
+        if ( scenario != _pagemodel.custSubGrp && ( isComm || isGov || isTPD )) {
+          FormManager.setValue('isuCd', origISU);
+          FormManager.setValue('clientTier', origClientTier);
+          FormManager.setValue('repTeamMemberNo', origRepTeam);
+          FormManager.setValue('salesBusOffCd', origSbo);
+          FormManager.setValue('inacCd', origInac);
+        } else {
+          FormManager.setValue('isuCd', origISU);
+          FormManager.setValue('clientTier', origClientTier);
+          FormManager.setValue('repTeamMemberNo', origRepTeam);
+          FormManager.setValue('salesBusOffCd', origSbo);
+          FormManager.setValue('inacCd', _pagemodel.inacCd);
+        }
       }
     } else {
       FormManager.setValue('inacCd', '');
