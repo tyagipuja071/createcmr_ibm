@@ -4050,11 +4050,21 @@ function addVATAttachValidation() {
         var vat = FormManager.getActualValue('vat');
         if (vat != null && vat != undefined && vat != '') {
           var id = FormManager.getActualValue('reqId');
-          var ret = cmr.query('CHECK_VATD_ATTACHMENT', {
-            ID : id
+          var reqType = FormManager.getActualValue('reqType');
+          var retVAT = cmr.query('GET.VAT_OLD_BY_REQID', {
+            REQ_ID : id
           });
-          if (ret == null || ret.ret1 == null) {
-            return new ValidationResult(null, false, 'VAT/TAX Documentation is mandatory, please add VAT/TAX Documentation attachment.');
+          var vatChangedStatus = false;
+          if (retVAT == null || vat != retVAT.ret1) {
+            vatChangedStatus = true;
+          }
+          if (reqType == 'C' || (reqType == 'U' && vatChangedStatus)) {
+            var ret = cmr.query('CHECK_VATD_ATTACHMENT', {
+              ID : id
+            });
+            if (ret == null || ret.ret1 == null) {
+              return new ValidationResult(null, false, 'VAT/TAX Documentation is mandatory, please add VAT/TAX Documentation attachment.');
+            }
           }
         }
         return new ValidationResult(null, true);
