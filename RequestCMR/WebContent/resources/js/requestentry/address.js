@@ -262,6 +262,9 @@ function AddressDetailsModal_onLoad() {
     cmr.showNode('updateButtonFromView');
   }
 
+  if (details.ret2 == 'PG01' && role != 'PROCESSOR') {
+    cmr.hideNode('updateButtonFromView');
+  }  
   // Defect 1518423: PP: Update Address functionality is visible for Imported
   // Billing Address for SM Create :Mukesh
   if ('758' == FormManager.getActualValue('cmrIssuingCntry') && 'C' == FormManager.getActualValue('reqType') && 'Y' == details.ret31) {
