@@ -467,12 +467,8 @@ function setAbbrvNmLoc() {
 
   var cntryUse = FormManager.getActualValue('countryUse');
 
-  if (cntryUse == '864NA') {
-    abbrevLocn = 'Namibia';
-  } else if (cntryUse == '864LS') {
-    abbrevLocn = 'Lesotho';
-  } else if (cntryUse == '864SZ') {
-    abbrevLocn = 'Swaziland';
+  if (cntryUse == '864NA' || cntryUse == '864LS' || cntryUse == '864SZ') {
+    abbrevLocn = getLandedCountryDesc(reqId)
   } else {
     city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
     abbrevLocn = city.ret1;
@@ -676,6 +672,7 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
       var role = FormManager.getActualValue('userRole').toUpperCase();
       var abbrevNm = FormManager.getActualValue('custNm1');
       var abbrevLocn = FormManager.getActualValue('city1');
+      var reqId = FormManager.getActualValue('reqId');
       if (FormManager.getActualValue('reqType') != 'C') {
         return;
       }
@@ -686,12 +683,8 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
 
         var cntryUse = FormManager.getActualValue('countryUse');
 
-        if (cntryUse == '864NA') {
-          abbrevLocn = 'Namibia';
-        } else if (cntryUse == '864LS') {
-          abbrevLocn = 'Lesotho';
-        } else if (cntryUse == '864SZ') {
-          abbrevLocn = 'Swaziland';
+        if (cntryUse == '864NA' || cntryUse == '864LS' || cntryUse == '864SZ') {
+          abbrevLocn = getLandedCountryDesc(reqId)
         }
 
         if (abbrevLocn && abbrevLocn.length > 12) {
@@ -1112,6 +1105,14 @@ function validateCMRForExistingGMLLCScenario() {
                         MANDT : cmr.MANDT
                       });
                       
+                      if (exist1.ret1 && exist1.ret2 == 'A' && exist3.ret1 && exist3.ret2 == 'C' && action != 'PCM') {
+                        return new ValidationResult({
+                          id : 'cmrNo',
+                          type : 'text',
+                          name : 'cmrNo'
+                        }, false, 'Please note CMR ' + requestCMR + ' in ' +landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                      } 
+                      
                       if (exist1.ret1 == undefined && exist3.ret1 == undefined && action != 'PCM') {
                         return new ValidationResult({
                           id : 'cmrNo',
@@ -1124,6 +1125,14 @@ function validateCMRForExistingGMLLCScenario() {
                           CMR_NO : requestCMR,
                           MANDT : cmr.MANDT
                         });
+                        
+                        if (exist2.ret3!=undefined && exist2.ret2 == 'X' && exist2.ret3 == '93' && exist4.ret3!=undefined && exist4.ret2 != 'X' && exist4.ret3 != '93' && action != 'PCM') {
+                          return new ValidationResult({
+                            id : 'cmrNo',
+                            type : 'text',
+                            name : 'cmrNo'
+                          }, false, 'Please note CMR ' + requestCMR + ' in ' +landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed + ' and Kenya using GM LLC scenario under '+ landed );
+                        }
                         
                         if (exist2.ret1 == undefined && exist4.ret1 == undefined && action != 'PCM') {
                           return new ValidationResult({
@@ -1486,6 +1495,20 @@ function validateCMRNoFORGMLLC() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 
+}
+
+function getLandedCountryDesc(requestId){
+  if(requestId!= undefined && requestId!= ''){
+    exist = cmr.query('LD.GET_LANDED_COUNTRY_DESC', {
+    REQ_ID : requestId
+  });
+  
+  if(exist.ret1!= undefined){
+    return exist.ret1;
+  } else{
+    return '';
+   }  
+  }
 }
 
 /* End 1430539 */
