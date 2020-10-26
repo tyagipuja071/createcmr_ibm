@@ -471,9 +471,9 @@ public class MCOCewaHandler extends MCOHandler {
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(4);
               collectioncd = validateColValFromCell(currCell);
-              cmrNo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(5);
               sbo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
