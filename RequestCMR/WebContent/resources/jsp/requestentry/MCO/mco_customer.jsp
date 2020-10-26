@@ -32,6 +32,7 @@
           <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+      <c:if test="${reqentry.reqType != 'U'}">
       <cmr:column span="2" containerForField="LocalTax2">
         <p>
        	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -41,6 +42,7 @@
           </cmr:label>
         </p>
       </cmr:column>
+      </c:if>
   	</cmr:row>
   </cmr:view>
   <cmr:view forCountry="700">
@@ -51,6 +53,7 @@
           <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
+      <c:if test="${reqentry.reqType != 'U'}">
       <cmr:column span="2" containerForField="LocalTax2">
         <p>
        	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -60,6 +63,7 @@
           </cmr:label>
         </p>
       </cmr:column>
+      </c:if>
   	</cmr:row>
   </cmr:view>
   <cmr:row addBackground="false">
