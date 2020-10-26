@@ -26,11 +26,10 @@
 					<width>16</width>
 					<bdsId>ISIC</bdsId>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>Collection Code</label>
 					<dbColumn>COLLECTION_CD</dbColumn>
 					<width>16</width>
-					<lovId>CollectionCd</lovId>
 					<length>6</length>
 				</column>
 				<column exactLength="true">
@@ -49,13 +48,13 @@
 					<label>Industry Solution Unit (ISU)</label>
 					<dbColumn>ISU_CD</dbColumn>
 					<width>25</width>
-					<bdsId>ISU</bdsId>
+					<lovId>ISU</lovId>
 				</column>
 				<column>
 					<label>Client Tier</label>
 					<dbColumn>CLIENT_TIER</dbColumn>
 					<width>15</width>
-					<bdsId>ClientTier</bdsId>
+					<lovId>ClientTier</lovId>
 				</column>
 				<column>
 					<label>Embargo Code</label>
