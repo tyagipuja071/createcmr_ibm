@@ -364,6 +364,8 @@ public class MCOCewaHandler extends MCOHandler {
     if (CmrConstants.REQ_TYPE_CREATE.equalsIgnoreCase(admin.getReqType())) {
       data.setRepTeamMemberNo("DUMMY1");
     }
+
+    data.setAdminDeptLine(data.getIbmDeptCostCenter());
   }
 
   @Override
@@ -380,7 +382,7 @@ public class MCOCewaHandler extends MCOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SBO/ Search Term (SORTL):", "SBO/ Search Term (SORTL):"));
       update.setNewData(service.getCodeAndDescription(newData.getSalesBusOffCd(), "SBO/ Search Term (SORTL):", cmrCountry));
@@ -396,17 +398,7 @@ public class MCOCewaHandler extends MCOHandler {
       results.add(update);
     }
 
-    if (SystemLocation.TANZANIA.equals(oldData.getCmrIssuingCntry())) {
-      if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd1(), newData.getTaxCd1())) {
-        update = new UpdatedDataModel();
-        update.setDataField(PageManager.getLabel(cmrCountry, "TIN number", "TIN number"));
-        update.setNewData(service.getCodeAndDescription(newData.getTaxCd1(), "TIN number", cmrCountry));
-        update.setOldData(service.getCodeAndDescription(oldData.getTaxCd1(), "TIN number", cmrCountry));
-        results.add(update);
-      }
-    }
-
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Collection Code", "Collection Code"));
       update.setNewData(service.getCodeAndDescription(newData.getCollectionCd(), "Collection Code", cmrCountry));
@@ -414,7 +406,7 @@ public class MCOCewaHandler extends MCOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "Sales Rep", "Sales Rep"));
       update.setNewData(service.getCodeAndDescription(newData.getRepTeamMemberNo(), "Sales Rep", cmrCountry));
@@ -437,6 +429,14 @@ public class MCOCewaHandler extends MCOHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getAdminDeptLine(), "Internal Department Number", cmrCountry));
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAbbrevLocn(), newData.getAbbrevLocn())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "AbbrevLocation", "-"));
+      update.setNewData(newData.getAbbrevLocn());
+      update.setOldData(oldData.getAbbrevLocn());
+      results.add(update);
+    }
   }
 
   @Override
@@ -452,6 +452,7 @@ public class MCOCewaHandler extends MCOHandler {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
             String cmrNo = "";
             String street = ""; // 4
+            String collectioncd = ""; // 4
             String sbo = ""; // 5
             String landedcountry = "";// 8
             String embargo = ""; // 9
@@ -471,6 +472,8 @@ public class MCOCewaHandler extends MCOHandler {
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               currCell = (XSSFCell) row.getCell(0);
               cmrNo = validateColValFromCell(currCell);
+              currCell = (XSSFCell) row.getCell(4);
+              collectioncd = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(5);
               sbo = validateColValFromCell(currCell);
               currCell = (XSSFCell) row.getCell(9);
@@ -612,6 +615,15 @@ public class MCOCewaHandler extends MCOHandler {
                 if (!StringUtils.isNumeric(sbo.substring(0, 4))) {
                   LOG.trace("SBO should have numeric values only.");
                   error.addError(row.getRowNum(), "", "SBO should have numeric values only.");
+                }
+              }
+            }
+
+            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              if (!StringUtils.isBlank(collectioncd)) {
+                if (!StringUtils.isAlphanumeric(collectioncd)) {
+                  LOG.trace("Collection code should have alphanumeric values only.");
+                  error.addError(row.getRowNum(), "", "Collection code should have alphanumeric values only.");
                 }
               }
             }
