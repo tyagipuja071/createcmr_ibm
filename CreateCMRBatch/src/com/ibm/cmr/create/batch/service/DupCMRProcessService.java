@@ -75,7 +75,7 @@ public class DupCMRProcessService extends LegacyDirectService {
       LegacyDirectObjectContainer legacyDupObjects = mapRequestDataForDupCreate(entityManager, cmrObjects, dupCntry);
       legacyCust = legacyDupObjects.getCustomer();
       if (legacyCust == null) {
-        throw new Exception("Customer record cannot be created.");
+        throw new Exception("Dup Customer record for country" + dupCntry + " cannot be created.");
       }
 
       LOG.info("Creating Legacy duplicate CMR Records for Request ID " + admin.getId().getReqId());
@@ -128,7 +128,7 @@ public class DupCMRProcessService extends LegacyDirectService {
 
         if (legacyCust == null) {
 
-          throw new Exception("Customer record cannot be updated.");
+          throw new Exception("Dup Customer record for country" + dupCntry + " cannot be updated.");
         } else {
           LOG.info("Updating Legacy Records for Request ID " + admin.getId().getReqId());
           LOG.info(" - SOF Country: " + legacyCust.getId().getSofCntryCode() + " CMR No.: " + legacyCust.getId().getCustomerNo());
@@ -159,7 +159,7 @@ public class DupCMRProcessService extends LegacyDirectService {
 
         custDup = legacyObjects.getCustomer();
         if (custDup == null) {
-          throw new Exception("Customer record cannot be created.");
+          throw new Exception("Dup Customer record for country" + dupCntry + " cannot be created");
         }
         LOG.debug("CMR No. " + cmrNo + " generated and assigned.");
 
@@ -787,9 +787,27 @@ public class DupCMRProcessService extends LegacyDirectService {
             // Mukesh:Story 1698123
             legacyAddr = legacyObjects.findBySeqNo(addr.getId().getAddrSeq());
             if (legacyAddr == null) {
-              throw new Exception("Cannot find legacy address with sequence " + addr.getId().getAddrSeq());
+              // Add code to create dup 675 if data missing CMR-6019
+              LegacyDirectObjectContainer legacyObjectsDup = LegacyDirectUtil.getLegacyDBValues(entityManager, cntry, cmrNo, false,
+                  transformer.hasAddressLinks());
+              legacyAddr = legacyObjectsDup.findBySeqNo(addr.getId().getAddrSeq());
+              if (legacyAddr == null) {
+                LOG.trace("Cannot find Duplicate " + dupCntry + "legacy address with sequence " + addr.getId().getAddrSeq());
+                continue;
+              }
+              legacyAddrPk = new CmrtAddrPK();
+              legacyAddrPk.setCustomerNo(cmrNo);
+              legacyAddrPk.setSofCntryCode(dupCntry);
+              legacyAddrPk.setAddrNo(addr.getId().getAddrSeq());
+              legacyAddr.setId(legacyAddrPk);
+              legacyAddr.setForCreate(true);
+              legacyAddr.setCreateTs(SystemUtil.getCurrentTimestamp());
+              legacyAddr.setForUpdate(false);
+              // throw new Exception("Cannot find Duplicate " + dupCntry +
+              // "legacy address with sequence " + addr.getId().getAddrSeq());
+            } else {
+              legacyAddr.setForUpdate(true);
             }
-            legacyAddr.setForUpdate(true);
           } else if ("N".equals(addr.getImportInd()) || sequences.get(addr.getId().getAddrSeq()) > 1) {
             // a. an added address
             // b. address shares a sequence
@@ -829,9 +847,25 @@ public class DupCMRProcessService extends LegacyDirectService {
             legacyAddr = legacyObjects.findBySeqNo(addr.getId().getAddrSeq());
 
             if (legacyAddr == null) {
-              throw new Exception("Cannot find legacy address with sequence " + addr.getId().getAddrSeq());
+              // Add for dup address missing case -CMR 6019
+              LegacyDirectObjectContainer legacyObjectsDup = LegacyDirectUtil.getLegacyDBValues(entityManager, cntry, cmrNo, false,
+                  transformer.hasAddressLinks());
+              legacyAddr = legacyObjectsDup.findBySeqNo(addr.getId().getAddrSeq());
+              if (legacyAddr == null) {
+                LOG.trace("Address No: " + addr.getId().getAddrSeq() + " Not exist for dup " + dupCntry + " data.");
+                continue;
+              }
+              legacyAddrPk = new CmrtAddrPK();
+              legacyAddrPk.setCustomerNo(cmrNo);
+              legacyAddrPk.setSofCntryCode(dupCntry);
+              legacyAddrPk.setAddrNo(addr.getId().getAddrSeq());
+              legacyAddr.setId(legacyAddrPk);
+              legacyAddr.setForCreate(true);
+              legacyAddr.setForUpdate(false);
+              legacyAddr.setCreateTs(SystemUtil.getCurrentTimestamp());
+            } else {
+              legacyAddr.setForUpdate(true);
             }
-            legacyAddr.setForUpdate(true);
           }
 
           legacyAddr.setAddressUse(transformer.getAddressUse(addr));
@@ -904,10 +938,24 @@ public class DupCMRProcessService extends LegacyDirectService {
           // Defect 1759962: Spain - address F
           legacyAddr = legacyObjects.findBySeqNo(addr.getId().getAddrSeq());
           if (legacyAddr == null) {
-            throw new Exception("Cannot find legacy address with sequence " + addr.getId().getAddrSeq());
+            LegacyDirectObjectContainer legacyObjectsDup = LegacyDirectUtil.getLegacyDBValues(entityManager, cntry, cmrNo, false,
+                transformer.hasAddressLinks());
+            legacyAddr = legacyObjectsDup.findBySeqNo(addr.getId().getAddrSeq());
+            if (legacyAddr == null) {
+              LOG.trace("Dup 675 Cannot find legacy address with sequence " + addr.getId().getAddrSeq());
+              continue;
+            }
+            legacyAddrPk = new CmrtAddrPK();
+            legacyAddrPk.setCustomerNo(cmrNo);
+            legacyAddrPk.setSofCntryCode(dupCntry);
+            legacyAddrPk.setAddrNo(addr.getId().getAddrSeq());
+            legacyAddr.setId(legacyAddrPk);
+            legacyAddr.setForCreate(true);
+            legacyAddr.setForUpdate(false);
+            legacyAddr.setCreateTs(SystemUtil.getCurrentTimestamp());
+          } else {
+            legacyAddr.setForUpdate(true);
           }
-          legacyAddr.setForUpdate(true);
-
           legacyAddr.setAddressUse(transformer.getAddressUse(addr));
 
           sofKey = transformer.getAddressKey(addr.getId().getAddrType());
