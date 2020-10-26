@@ -1768,13 +1768,12 @@ function numeroExemptOnScenario() {
   }
   var custSubType = FormManager.getActualValue('custSubGrp');
   var numero = FormManager.getActualValue('busnType');
-  var numeroExempt = dijit.byId('taxCd2').get('checked');
 
   var subGrp = new Array();
-  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+  subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
   for (var i = 0; i < subGrp.length; i++) {
     if (custSubType == subGrp[i]) {
-      if ((numero == null || numero.length == 0) && numeroExempt != true) {
+      if ((numero == null || numero.length == 0)) {
         FormManager.getField('taxCd2').set('checked', true);
         FormManager.removeValidator('busnType', Validators.REQUIRED);
       } else {
@@ -1793,13 +1792,12 @@ function tinExemptOnScenario() {
   }
   var custSubType = FormManager.getActualValue('custSubGrp');
   var tin = FormManager.getActualValue('taxCd1');
-  var tinExempt = dijit.byId('taxCd2').get('checked');
 
   var subGrp = new Array();
-  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+  subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
   for (var i = 0; i < subGrp.length; i++) {
     if (custSubType == subGrp[i]) {
-      if ((tin == null || tin.length == 0) && tinExempt != true) {
+      if ((tin == null || tin.length == 0)) {
         FormManager.getField('taxCd2').set('checked', true);
         FormManager.removeValidator('taxCd1', Validators.REQUIRED);
       } else {
