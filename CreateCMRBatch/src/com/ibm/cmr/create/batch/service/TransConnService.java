@@ -484,12 +484,26 @@ public class TransConnService extends BaseBatchService {
         LOG.debug("Available Pool CMRs for " + data.getCmrIssuingCntry() + " = " + records.size());
         if (records.size() <= Integer.parseInt(threshold)) {
           // low threshold, send warning
-          sendPoolCMRWarningMail(entityManager, data.getCmrIssuingCntry(), records.size(), false);
+          if (!"Y".equals(SystemParameters.getString("POOL.CMR.WARNING"))) {
+            sendPoolCMRWarningMail(entityManager, data.getCmrIssuingCntry(), records.size(), false);
+          } else {
+            LOG.debug("Warning message already sent and pool has not been replenished. Skipping notification.");
+          }
         }
         if (records.size() == 0) {
           LOG.error("CMR Pool depleted. Cannot proceed with automatic CMR number assignment");
           sendPoolCMRWarningMail(entityManager, data.getCmrIssuingCntry(), records.size(), true);
           return;
+        }
+        if (records.size() > Integer.parseInt(threshold)) {
+          SystParametersPK systPk = new SystParametersPK();
+          systPk.setParameterCd("POOL.CMR.WARNING");
+          SystParameters sysPar = entityManager.find(SystParameters.class, systPk);
+          if (sysPar != null) {
+            LOG.debug("Setting Pool CMR Warning to N");
+            sysPar.setParameterValue("N");
+            entityManager.merge(sysPar);
+          }
         }
 
         for (CompanyRecordModel record : records) {
@@ -2250,6 +2264,17 @@ public class TransConnService extends BaseBatchService {
         if (sysPar != null) {
           LOG.debug("Setting Pool CMR enablement to N..");
           sysPar.setParameterValue("N");
+          entityManager.merge(sysPar);
+        }
+      } else {
+        // set a system parameter for warning so that it won't be sent more than
+        // once
+        SystParametersPK systPk = new SystParametersPK();
+        systPk.setParameterCd("POOL.CMR.WARNING");
+        SystParameters sysPar = entityManager.find(SystParameters.class, systPk);
+        if (sysPar != null) {
+          LOG.debug("Setting Pool CMR Warning to Y");
+          sysPar.setParameterValue("Y");
           entityManager.merge(sysPar);
         }
       }
