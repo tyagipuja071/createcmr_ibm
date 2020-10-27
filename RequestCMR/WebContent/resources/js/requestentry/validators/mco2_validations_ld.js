@@ -71,28 +71,30 @@ function addHandlersForMCO2() {
     }
   }
 
-  if (_vatExemptHandler == null) {
-    _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-      resetVatRequired();
-    });
-  }
-
   if (_streetHandler == null) {
     _streetHandler = dojo.connect(FormManager.getField('addrTxt'), 'onChange', function(value) {
       setStreetContBehavior();
     });
   }
 
-  if (_tinExemptHandler == null) {
-    _tinExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
-      resetTinRequired();
-    });
-  }
+  if (FormManager.getActualValue('reqType') == 'C') {
+    if (_vatExemptHandler == null) {
+      _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+        resetVatRequired();
+      });
+    }
 
-  if (_numeroExemptHandler == null) {
-    _numeroExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
-      resetNumeroRequired();
-    });
+    if (_tinExemptHandler == null) {
+      _tinExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
+        resetTinRequired();
+      });
+    }
+
+    if (_numeroExemptHandler == null) {
+      _numeroExemptHandler = dojo.connect(FormManager.getField('taxCd2'), 'onClick', function(value) {
+        resetNumeroRequired();
+      });
+    }
   }
 }
 
@@ -1526,9 +1528,7 @@ function resetVatRequired() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cntry == '610' || cntry == '700' || cntry == '851') {
+  if (FormManager.getActualValue('reqType') == 'C') {
     if (dijit.byId('vatExempt').get('checked')) {
       FormManager.removeValidator('vat', Validators.REQUIRED);
     } else {
@@ -1542,13 +1542,14 @@ function resetTinRequired() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cntry == '851') {
-    if (dijit.byId('taxCd2').get('checked')) {
-      FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-    } else {
-      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (cntry == '851') {
+      if (dijit.byId('taxCd2').get('checked')) {
+        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      } else {
+        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+      }
     }
   }
 }
@@ -1558,13 +1559,14 @@ function resetNumeroRequired() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  if (cntry == '700') {
-    if (dijit.byId('taxCd2').get('checked')) {
-      FormManager.removeValidator('busnType', Validators.REQUIRED);
-    } else {
-      FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    if (cntry == '700') {
+      if (dijit.byId('taxCd2').get('checked')) {
+        FormManager.removeValidator('busnType', Validators.REQUIRED);
+      } else {
+        FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+      }
     }
   }
 }
@@ -1760,7 +1762,7 @@ function vatExemptOnScenario() {
   if (FormManager.getActualValue('reqType') == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
     var vat = FormManager.getActualValue('vat');
-
+    var found = false;
     var subGrp = new Array();
     subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
     for (var i = 0; i < subGrp.length; i++) {
@@ -1772,11 +1774,13 @@ function vatExemptOnScenario() {
           FormManager.getField('vatExempt').set('checked', false);
           FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
         }
+        found = true;
         break;
-      } else {
-        FormManager.getField('vatExempt').set('checked', false);
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
+    }
+    if (found != true) {
+      FormManager.getField('vatExempt').set('checked', false);
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
   }
 }
@@ -1789,7 +1793,7 @@ function numeroExemptOnScenario() {
   if (FormManager.getActualValue('reqType') == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
     var numero = FormManager.getActualValue('busnType');
-
+    var found = false;
     var subGrp = new Array();
     subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
     for (var i = 0; i < subGrp.length; i++) {
@@ -1801,11 +1805,13 @@ function numeroExemptOnScenario() {
           FormManager.getField('taxCd2').set('checked', false);
           FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
         }
+        found = true;
         break;
-      } else {
-        FormManager.getField('taxCd2').set('checked', false);
-        FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
       }
+    }
+    if (found != true) {
+      FormManager.getField('taxCd2').set('checked', false);
+      FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
     }
   }
 }
@@ -1818,7 +1824,7 @@ function tinExemptOnScenario() {
   if (FormManager.getActualValue('reqType') == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
     var tin = FormManager.getActualValue('taxCd1');
-
+    var found = false;
     var subGrp = new Array();
     subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
     for (var i = 0; i < subGrp.length; i++) {
@@ -1830,11 +1836,13 @@ function tinExemptOnScenario() {
           FormManager.getField('taxCd2').set('checked', false);
           FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
         }
+        found = true;
         break;
-      } else {
-        FormManager.getField('taxCd2').set('checked', false);
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
       }
+    }
+    if (found != true) {
+      FormManager.getField('taxCd2').set('checked', false);
+      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
     }
   }
 }
