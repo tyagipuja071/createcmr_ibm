@@ -746,7 +746,10 @@ public class MCOSaHandler extends MCOHandler {
       if (!StringUtils.isEmpty(line6)) {
         if (StringUtils.isEmpty(address.getCmrPostalCode()) && !StringUtils.isEmpty(address.getCmrCity())) {
           address.setCmrPostalCode(line6);
+        } else if (!StringUtils.isEmpty(address.getCmrPostalCode()) && StringUtils.isEmpty(address.getCmrCity()) && !StringUtils.isNumeric(line6)) {
+          address.setCmrCity(line6);
         }
+
       }
 
     }
