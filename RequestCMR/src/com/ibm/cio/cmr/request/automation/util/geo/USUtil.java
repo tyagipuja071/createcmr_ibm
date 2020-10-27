@@ -382,16 +382,6 @@ public class USUtil extends AutomationUtil {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");
     }
-
-    // CMR - 3999
-    boolean shouldBPRejectReq = AutomationUtil.checkCommentSection(entityManager, admin, data);
-    if (shouldBPRejectReq) {
-      String cmt = "The model CMR provided isn't consistent with the CMR type requested, please cancel this request and choose a compatible model CMR.";
-      details.append(cmt).append("\n");
-      engineData.addRejectionComment("OTH", cmt, "", "");
-      results.setOnError(true);
-    }
-
     if (results == null || (results != null && results.isOnError())) {
       eleResults.append("Error On Field Calculation.");
     }
@@ -476,6 +466,16 @@ public class USUtil extends AutomationUtil {
           "Processor review required since ISIC belongs to Healthcare/Education. Scenario verification needed.");
       details.append("Processor review required since ISIC belongs to Healthcare/Education. Scenario verification needed.").append("\n");
       valid = true;
+    }
+
+    // CMR - 3999
+    boolean shouldBPRejectReq = AutomationUtil.checkCommentSection(entityManager, admin, data);
+    if (shouldBPRejectReq) {
+      String cmt = "The model CMR provided isn't consistent with the CMR type requested, please cancel this request and choose a compatible model CMR.";
+      details.append(cmt).append("\n");
+      engineData.addRejectionComment("OTH", cmt, "", "");
+      result.setOnError(true);
+      valid = false;
     }
     return valid;
   }
