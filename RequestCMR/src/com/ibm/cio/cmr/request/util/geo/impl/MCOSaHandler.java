@@ -1202,14 +1202,6 @@ public class MCOSaHandler extends MCOHandler {
       results.add(update);
     }
 
-    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "SalRepNameNo", "-"));
-      update.setNewData(newData.getRepTeamMemberNo());
-      update.setOldData(oldData.getRepTeamMemberNo());
-      results.add(update);
-    }
-
     if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff", "-"));
