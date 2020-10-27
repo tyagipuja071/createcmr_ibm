@@ -1948,6 +1948,13 @@ public class TransConnService extends BaseBatchService {
         requestDataValueRecords.add(ENTERPRISE_Record);
       }
 
+      if (!StringUtils.isBlank(massUpdtData.getAbbrevNm())) {
+        RequestValueRecord telx1 = new RequestValueRecord();
+        telx1.setField("TELX1");
+        telx1.setValue(massUpdtData.getAbbrevNm());
+        requestDataValueRecords.add(telx1);
+      }
+
       // set requestDataValueRecords list updatDataRec
       updtDataRec.setValues(requestDataValueRecords);
       int recordSize = updtDataRec.getValues().size();
