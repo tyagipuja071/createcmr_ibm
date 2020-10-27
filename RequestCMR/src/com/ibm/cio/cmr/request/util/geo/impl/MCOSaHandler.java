@@ -1090,7 +1090,7 @@ public class MCOSaHandler extends MCOHandler {
                 error.addError(row.getRowNum(), "Name Con't, Street and PO BOX",
                     "Out of Name Con't and Street Con't only 1 can be filled at the same time. ");
                 validations.add(error);
-                count = 0;
+                countSubRegion = 0;
               }
             }
 
