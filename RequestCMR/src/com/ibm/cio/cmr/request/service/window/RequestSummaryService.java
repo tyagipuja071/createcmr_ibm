@@ -542,30 +542,8 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
 
-          if ("864".equals(oldData.getCmrIssuingCntry())) {
-            if (TYPE_IBM.equals(type) && !equals(oldData.getAdminDeptLine(), newData.getAdminDeptLine())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "InternalDept"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "InternalDept", "-"));
-              update.setNewData(newData.getAdminDeptLine());
-              update.setOldData(oldData.getAdminDeptLine());
-              results.add(update);
-            }
-          }
-
           if (!("760".equals(oldData.getCmrIssuingCntry()) || "864".equals(oldData.getCmrIssuingCntry()))) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())
-                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CodFlag"))) {
-              update = new UpdatedDataModel();
-              update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
-              update.setNewData(newData.getCreditCd());
-              update.setOldData(oldData.getCreditCd());
-              results.add(update);
-            }
-          }
-
-          if ("864".equals(oldData.getCmrIssuingCntry())) {
-            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CodFlag"))) {
               update = new UpdatedDataModel();
               update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
