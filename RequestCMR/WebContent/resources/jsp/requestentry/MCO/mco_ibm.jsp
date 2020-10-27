@@ -88,41 +88,36 @@
           <cmr:label fieldId="ibmDeptCostCenter">
             <cmr:fieldLabel fieldId="InternalDept" />: 
           </cmr:label>
-					<cmr:field path="ibmDeptCostCenter" id="ibmDeptCostCenter"
-						fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
-				</p>
-			</cmr:column>
-			<% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
-			<cmr:view forGEO="MCO1,MCO2">
-				<cmr:column span="2" containerForField="CollectionCd">
-					<p>
-						<cmr:label fieldId="collectionCd">
-							<cmr:fieldLabel fieldId="CollectionCd" />: 
-                  <cmr:delta text="${rdcdata.collectionCd}"
-								oldValue="${reqentry.collectionCd}" id="delta-collectionCd" />
-						</cmr:label>
-						<cmr:field path="collectionCd" id="collectionCd"
-							fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
-					</p>
-				</cmr:column>
-			</cmr:view>
-			<cmr:view forGEO="MCO1">
-				<cmr:column span="2" containerForField="CollBranchOff">
-					<p>
-						<cmr:label fieldId="collBoId">
-							<cmr:fieldLabel fieldId="CollBranchOff" />:
-              <cmr:delta text="${rdcdata.collBoId}"
-								oldValue="${reqentry.collBoId}" />
-						</cmr:label>
-						<cmr:field path="collBoId" id="collBoId" fieldId="CollBranchOff"
-							tabId="MAIN_IBM_TAB" />
-					</p>
-				</cmr:column>
-			</cmr:view>
-			<% } %>
-		</cmr:row>
-	</cmr:view>
-	<cmr:view forCountry="838">
-		<form:hidden path="engineeringBo" id="engineeringBo" />
-	</cmr:view>
+          <cmr:field path="adminDeptLine" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+        <% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
+      <cmr:view forGEO="MCO1,MCO2">
+        <cmr:column span="2" containerForField="CollectionCd">
+          <p>
+            <cmr:label fieldId="collectionCd">
+              <cmr:fieldLabel fieldId="CollectionCd" />: 
+                  <cmr:delta text="${rdcdata.collectionCd}" oldValue="${reqentry.collectionCd}" id="delta-collectionCd" />
+            </cmr:label>
+            <cmr:field path="collectionCd" id="collectionCd" fieldId="CollectionCd" tabId="MAIN_IBM_TAB" />
+          </p>
+        </cmr:column>
+    </cmr:view>
+    <cmr:view forGEO="MCO1">
+      <cmr:column span="2" containerForField="CollBranchOff">
+        <p>
+          <cmr:label fieldId="collBoId">
+            <cmr:fieldLabel fieldId="CollBranchOff" />:
+              <cmr:delta text="${rdcdata.collBoId}" oldValue="${reqentry.collBoId}" />
+          </cmr:label>
+          <cmr:field path="collBoId" id="collBoId" fieldId="CollBranchOff" tabId="MAIN_IBM_TAB"/>
+        </p>
+      </cmr:column>
+    </cmr:view>
+    <% } %>      
+    </cmr:row>
+  </cmr:view>
+  <cmr:view forCountry="838">
+    <form:hidden path="engineeringBo" id="engineeringBo"/>
+  </cmr:view>
 </cmr:view>

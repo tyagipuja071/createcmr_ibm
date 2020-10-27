@@ -1460,7 +1460,7 @@ public class LegacyDirectService extends TransConnService {
       cust.setIsuCd(isuClientTier);
     }
 
-    if (!StringUtils.isBlank(data.getCreditCd())) {
+    if (!StringUtils.isBlank(data.getCreditCd()) && (transformer != null && !transformer.skipCreditCodeUpdateForCountry())) {
       cust.setCreditCd(data.getCreditCd());
     }
     if (!StringUtils.isBlank(data.getSpecialTaxCd())) {
