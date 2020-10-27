@@ -1199,7 +1199,7 @@ function requireTaxRegistrationForLocalScenario(fromAddress, scenario, scenarioC
       FormManager.enable('busnType');
     }
   }
-  if (scenarioChanged && scenario != null && scenario != '') {
+  if (scenarioChanged && !fromAddress && scenario != null && scenario != '') {
     FormManager.clearValue('busnType');
   }
 }
@@ -1218,13 +1218,12 @@ function setTinNumberBehaviorForTz(fromAddress, scenario, scenarioChanged) {
         FormManager.enable('taxCd1');
       }
     } else if (role == 'PROCESSOR') {
-
       // On Processor side editable in all instances
       FormManager.enable('taxCd1');
     }
   }
 
-  if (scenarioChanged && scenario != null && scenario != '') {
+  if (scenarioChanged && !fromAddress && scenario != null && scenario != '') {
     FormManager.clearValue('taxCd1');
   }
 }
