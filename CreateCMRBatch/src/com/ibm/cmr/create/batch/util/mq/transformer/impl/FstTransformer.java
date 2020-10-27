@@ -80,6 +80,8 @@ public class FstTransformer extends MCOTransformer {
       }
       legacyCust.setSalesRepNo("DUMMY1");
       legacyCust.setSalesGroupRep("DUMMY1");
+      legacyCust.setDcRepeatAgreement("0");
+      legacyCust.setLeasingInd("0");
     } else if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
       legacyCust.setCustType(data.getCrosSubTyp());
 
