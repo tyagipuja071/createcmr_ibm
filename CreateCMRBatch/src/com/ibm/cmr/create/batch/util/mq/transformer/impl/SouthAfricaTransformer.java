@@ -230,6 +230,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
         }
       }
 
+      String creditCd = legacyCust.getCreditCd();
+      legacyCust.setCreditCd(creditCd);
+
       String dataEmbargoCd = data.getEmbargoCd();
       String rdcEmbargoCd = LegacyDirectUtil.getEmbargoCdFromDataRdc(entityManager, admin); // permanent
                                                                                             // removal-single
@@ -286,9 +289,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    if (!StringUtils.isBlank(data.getIbmDeptCostCenter())) {
-      if (data.getIbmDeptCostCenter().length() == 6)
-        legacyCust.setDeptCd(data.getIbmDeptCostCenter().substring(2, 6));
+    if (!StringUtils.isBlank(data.getAdminDeptLine())) {
+      if (data.getAdminDeptLine().length() == 6)
+        legacyCust.setDeptCd(data.getAdminDeptLine().substring(2, 6));
     }
 
     legacyCust.setAbbrevNm(!StringUtils.isEmpty(data.getAbbrevNm()) ? data.getAbbrevNm().toUpperCase() : data.getAbbrevNm());
@@ -723,6 +726,11 @@ public class SouthAfricaTransformer extends MCOTransformer {
       isCrossBorder = true;
     }
     return isCrossBorder;
+  }
+
+  @Override
+  public boolean skipCreditCodeUpdateForCountry() {
+    return true;
   }
 
 }

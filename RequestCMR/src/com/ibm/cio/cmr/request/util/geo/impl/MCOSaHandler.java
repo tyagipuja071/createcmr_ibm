@@ -996,10 +996,6 @@ public class MCOSaHandler extends MCOHandler {
             // Common
             String cmrNo = ""; // 0
 
-            // Data Sheet
-            String cof = ""; // 7
-            String codFlag = ""; // 14
-
             // Address Sheet
             String seqNo = ""; // 1
             String custName1 = ""; // 2
@@ -1017,14 +1013,6 @@ public class MCOSaHandler extends MCOHandler {
             long count = 0;
             if (row.getRowNum() == 2001) {
               continue;
-            }
-
-            if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
-              currCell = (XSSFCell) row.getCell(7);
-              cof = validateColValFromCell(currCell);
-
-              currCell = (XSSFCell) row.getCell(14);
-              codFlag = validateColValFromCell(currCell);
             }
 
             if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
@@ -1072,13 +1060,6 @@ public class MCOSaHandler extends MCOHandler {
             if (StringUtils.isEmpty(cmrNo)) {
               LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
-              validations.add(error);
-            }
-
-            if (!StringUtils.isEmpty(cof) && !StringUtils.isEmpty(codFlag)) {
-              LOG.trace("cof and codFlag must not be populated at the same time. If one is populated, the other must be empty. >> ");
-              error.addError(row.getRowNum(), "COD Flag",
-                  "cof and codFlag must not be populated at the same time. If one is populated, the other must be empty..");
               validations.add(error);
             }
 
@@ -1245,11 +1226,27 @@ public class MCOSaHandler extends MCOHandler {
       results.add(update);
     }
 
+    if (RequestSummaryService.TYPE_IBM.equals(type) && !equals(oldData.getAdminDeptLine(), newData.getAdminDeptLine())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "InternalDept", "-"));
+      update.setNewData(newData.getAdminDeptLine());
+      update.setOldData(oldData.getAdminDeptLine());
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCommercialFinanced(), newData.getCommercialFinanced())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CommercialFinanced", "-"));
       update.setNewData(newData.getCommercialFinanced());
       update.setOldData(oldData.getCommercialFinanced());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
+      update.setNewData(newData.getCreditCd());
+      update.setOldData(oldData.getCreditCd());
       results.add(update);
     }
 
