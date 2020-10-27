@@ -273,9 +273,13 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
     } else {
-      legacyCust.setSalesGroupRep("");
+      legacyCust.setSalesRepNo("");
+    }
+
+    if (!data.getRepTeamMemberNo().equals(legacyCust.getSalesGroupRep())) {
+      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {

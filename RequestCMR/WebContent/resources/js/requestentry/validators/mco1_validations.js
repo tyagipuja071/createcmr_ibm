@@ -6,10 +6,19 @@ var _landCntryHandler = null;
 var scenarioToSkipCMRValidationZA = [ 'LSELC', 'SZELC', 'NAELC', 'LSLLC', 'NALLC', 'SZLLC', 'LSBLC', 'SZBLC', 'NABLC' ];
 
 function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  var cntryRegion = FormManager.getActualValue('countryUse');
   if (!saving) {
     if (addressMode == 'newAddress') {
       FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
-      FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
+      if (cntryRegion != '' && cntryRegion == '864') {
+        FormManager.setValue('landCntry', 'ZA');
+      } else if (cntryRegion != '' && cntryRegion == '864LS') {
+        FormManager.setValue('landCntry', 'LS');
+      } else if (cntryRegion != '' && cntryRegion == '864NA') {
+        FormManager.setValue('landCntry', 'NA');
+      } else if (cntryRegion != '' && cntryRegion == '864SZ') {
+        FormManager.setValue('landCntry', 'SZ');
+      }
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
