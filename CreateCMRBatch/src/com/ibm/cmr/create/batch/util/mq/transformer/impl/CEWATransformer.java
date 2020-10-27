@@ -65,7 +65,6 @@ public class CEWATransformer extends MCOTransformer {
     LOG.debug("transformLegacyCustomerData CEWA Africa transformer...");
     Admin admin = cmrObjects.getAdmin();
     Data data = cmrObjects.getData();
-    List<String> gmllcScenarios = Arrays.asList("NALLC", "LSLLC", "SZLLC", "NABLC", "LSBLC", "SZBLC", "LLC", "LLCBP");
 
     String custType = data.getCustSubGrp();
     if (CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
@@ -161,16 +160,24 @@ public class CEWATransformer extends MCOTransformer {
       }
     }
 
-    if (StringUtils.isNotBlank(data.getIbmDeptCostCenter())) {
+    if (StringUtils.isNotBlank(data.getIbmDeptCostCenter()) && isInternalScenario(data, admin)) {
       String deptCd = data.getIbmDeptCostCenter().substring(2);
       legacyCust.setDeptCd(deptCd);
+    } else {
+      legacyCust.setDeptCd("");
     }
+  }
 
-    // if (!StringUtils.isEmpty(data.getCustSubGrp()) &&
-    // gmllcScenarios.contains(data.getCustSubGrp())) {
-    // legacyCust.setIsuCd("32");
-    // legacyCust.setSbo("0080");
-    // }
+  private boolean isInternalScenario(Data data, Admin admin) {
+    String reqType = admin.getReqType();
+
+    if (CmrConstants.REQ_TYPE_CREATE.equals(reqType)) {
+      String custSubGrp = data.getCustSubGrp();
+      return ("INTER".equals(custSubGrp) || "XINTE".equals(custSubGrp));
+    } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqType) && data != null && data.getCmrNo() != null) {
+      return data.getCmrNo().startsWith("99");
+    }
+    return false;
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {

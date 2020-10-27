@@ -1698,11 +1698,14 @@ function resetVatExempt() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  var vat = FormManager.getActualValue('vat');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var vat = FormManager.getActualValue('vat');
+    var vatExempt = dijit.byId('vatExempt').get('checked');
 
-  if (vat != null && vat.length > 0) {
-    if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.getField('vatExempt').set('checked', false);
+    if (vat != null && vat.length > 0) {
+      if (vatExempt == true) {
+        FormManager.getField('vatExempt').set('checked', false);
+      }
     }
   }
 }
@@ -1712,11 +1715,14 @@ function resetNumeroExempt() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  var numero = FormManager.getActualValue('busnType');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var numero = FormManager.getActualValue('busnType');
+    var numeroExempt = dijit.byId('taxCd2').get('checked');
 
-  if (numero != null && numero.length > 0) {
-    if (dijit.byId('taxCd2').get('checked')) {
-      FormManager.getField('taxCd2').set('checked', false);
+    if (numero != null && numero.length > 0) {
+      if (numeroExempt == true) {
+        FormManager.getField('taxCd2').set('checked', false);
+      }
     }
   }
 }
@@ -1726,11 +1732,14 @@ function resetTinExempt() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  var tin = FormManager.getActualValue('taxCd1');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var tin = FormManager.getActualValue('taxCd1');
+    var tinExempt = dijit.byId('taxCd2').get('checked');
 
-  if (tin != null && tin.length > 0) {
-    if (dijit.byId('taxCd2').get('checked')) {
-      FormManager.getField('taxCd2').set('checked', false);
+    if (tin != null && tin.length > 0) {
+      if (tinExempt == true) {
+        FormManager.getField('taxCd2').set('checked', false);
+      }
     }
   }
 }
@@ -1740,22 +1749,26 @@ function vatExemptOnScenario() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var vat = FormManager.getActualValue('vat');
-  var vatExempt = dijit.byId('vatExempt').get('checked');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var vat = FormManager.getActualValue('vat');
 
-  var subGrp = new Array();
-  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
-  for (var i = 0; i < subGrp.length; i++) {
-    if (custSubType == subGrp[i]) {
-      if ((vat == null || vat.length == 0) && vatExempt != true) {
-        FormManager.getField('vatExempt').set('checked', true);
-        FormManager.removeValidator('vat', Validators.REQUIRED);
+    var subGrp = new Array();
+    subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
+    for (var i = 0; i < subGrp.length; i++) {
+      if (custSubType == subGrp[i]) {
+        if ((vat == null || vat.length == 0)) {
+          FormManager.getField('vatExempt').set('checked', true);
+          FormManager.removeValidator('vat', Validators.REQUIRED);
+        } else {
+          FormManager.getField('vatExempt').set('checked', false);
+          FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+        }
+        break;
       } else {
         FormManager.getField('vatExempt').set('checked', false);
         FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
-      break;
     }
   }
 }
@@ -1765,22 +1778,26 @@ function numeroExemptOnScenario() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var numero = FormManager.getActualValue('busnType');
-  var numeroExempt = dijit.byId('taxCd2').get('checked');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var numero = FormManager.getActualValue('busnType');
 
-  var subGrp = new Array();
-  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
-  for (var i = 0; i < subGrp.length; i++) {
-    if (custSubType == subGrp[i]) {
-      if ((numero == null || numero.length == 0) && numeroExempt != true) {
-        FormManager.getField('taxCd2').set('checked', true);
-        FormManager.removeValidator('busnType', Validators.REQUIRED);
+    var subGrp = new Array();
+    subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
+    for (var i = 0; i < subGrp.length; i++) {
+      if (custSubType == subGrp[i]) {
+        if ((numero == null || numero.length == 0)) {
+          FormManager.getField('taxCd2').set('checked', true);
+          FormManager.removeValidator('busnType', Validators.REQUIRED);
+        } else {
+          FormManager.getField('taxCd2').set('checked', false);
+          FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+        }
+        break;
       } else {
         FormManager.getField('taxCd2').set('checked', false);
         FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
       }
-      break;
     }
   }
 }
@@ -1790,22 +1807,26 @@ function tinExemptOnScenario() {
   if (viewOnly != '' && viewOnly == 'true') {
     return;
   }
-  var custSubType = FormManager.getActualValue('custSubGrp');
-  var tin = FormManager.getActualValue('taxCd1');
-  var tinExempt = dijit.byId('taxCd2').get('checked');
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var tin = FormManager.getActualValue('taxCd1');
 
-  var subGrp = new Array();
-  subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
-  for (var i = 0; i < subGrp.length; i++) {
-    if (custSubType == subGrp[i]) {
-      if ((tin == null || tin.length == 0) && tinExempt != true) {
-        FormManager.getField('taxCd2').set('checked', true);
-        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+    var subGrp = new Array();
+    subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
+    for (var i = 0; i < subGrp.length; i++) {
+      if (custSubType == subGrp[i]) {
+        if ((tin == null || tin.length == 0)) {
+          FormManager.getField('taxCd2').set('checked', true);
+          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        } else {
+          FormManager.getField('taxCd2').set('checked', false);
+          FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+        }
+        break;
       } else {
         FormManager.getField('taxCd2').set('checked', false);
         FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
       }
-      break;
     }
   }
 }
