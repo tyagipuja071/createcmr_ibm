@@ -993,9 +993,7 @@ public class MCOSaHandler extends MCOHandler {
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
-            // Common
             String cmrNo = ""; // 0
-
             // Address Sheet
             String seqNo = ""; // 1
             String custName1 = ""; // 2
@@ -1007,10 +1005,13 @@ public class MCOSaHandler extends MCOHandler {
             String postalCode = ""; // 8
             String landCountry = ""; // 09
             String poBox = ""; // 10
+
             boolean isDummyUpdate = true;
 
             List<String> checkList = null;
+            List<String> checkListSubRegion = null;
             long count = 0;
+            long countSubRegion = 0;
             if (row.getRowNum() == 2001) {
               continue;
             }
@@ -1055,6 +1056,9 @@ public class MCOSaHandler extends MCOHandler {
             checkList = Arrays.asList(nameCont, poBox, street);
             count = checkList.stream().filter(field -> !field.isEmpty()).count();
 
+            checkListSubRegion = Arrays.asList(nameCont, streetCont);
+            countSubRegion = checkListSubRegion.stream().filter(field -> !field.isEmpty()).count();
+
             TemplateValidation error = new TemplateValidation(name);
 
             if (StringUtils.isEmpty(cmrNo)) {
@@ -1070,12 +1074,24 @@ public class MCOSaHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if (count > 1 && !("ZA").equals(landCountry)) {
-              LOG.trace("Out of Name Con't, Street and PO BOX only 1 can be filled at the same time.");
-              error.addError(row.getRowNum(), "Name Con't, Street and PO BOX",
-                  "Out of Name Con't, Street and PO BOX only 1 can be filled at the same time. ");
-              validations.add(error);
-              count = 0;
+            if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
+              if (count > 1 && !("ZA").equals(landCountry)) {
+                LOG.trace("Out of Name Con't, Street and PO BOX only 1 can be filled at the same time.");
+                error.addError(row.getRowNum(), "Name Con't, Street and PO BOX",
+                    "Out of Name Con't, Street and PO BOX only 1 can be filled at the same time. ");
+                validations.add(error);
+                count = 0;
+              }
+            }
+
+            if (!("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName()))) {
+              if (countSubRegion > 1 && !("ZA").equals(landCountry)) {
+                LOG.trace("Out of Name Con't and Street Con't only 1 can be filled at the same time.");
+                error.addError(row.getRowNum(), "Name Con't, Street and PO BOX",
+                    "Out of Name Con't and Street Con't only 1 can be filled at the same time. ");
+                validations.add(error);
+                countSubRegion = 0;
+              }
             }
 
             if (!StringUtils.isBlank(custName1) || !StringUtils.isBlank(nameCont) || !StringUtils.isBlank(street) || !StringUtils.isBlank(streetCont)
@@ -1103,17 +1119,13 @@ public class MCOSaHandler extends MCOHandler {
               if (StringUtils.isBlank(landCountry)) {
                 LOG.trace("Landed Country is required.");
                 error.addError(row.getRowNum(), "Landed Country", "Landed Country is required.");
-
               }
-
               validations.add(error);
             }
-
           }
         }
       }
     }
-
   }
 
   @Override
