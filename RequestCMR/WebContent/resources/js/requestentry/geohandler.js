@@ -165,6 +165,9 @@ var GEOHandler = (function() {
       return nameAddressType;
     },
     registerWWValidator : function(validator, roleCode, existingRequestOnly) {
+      if (validator == null) {
+        return;
+      }
       if (existingRequestOnly && (dojo.byId("reqId").value == '0' || (typeof (_pagemodel) != 'undefined' && _pagemodel.reqId == 0))) {
         console.log('skipping WW validator for new entry: ' + validator.name);
         return;
@@ -185,6 +188,9 @@ var GEOHandler = (function() {
 
     // register a country specific validator, can be except for that country
     registerValidator : function(validator, arrayOfCountryCodes, roleCode, existingRequestOnly, excludeCountries) {
+      if (validator == null) {
+        return;
+      }
       if (existingRequestOnly && (dojo.byId("reqId").value == '0' || (typeof (_pagemodel) != 'undefined' && _pagemodel.reqId == 0))) {
         console.log('skipping validator for new entry: ' + validator.name + ", countries: " + getCMRIssuingCountry());
         return;
