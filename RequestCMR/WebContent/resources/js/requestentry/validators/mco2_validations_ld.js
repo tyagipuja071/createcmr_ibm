@@ -181,9 +181,12 @@ function lockEmbargo() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
+  var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (role == 'REQUESTER') {
-    FormManager.readOnly('embargoCd');
+    if (reqType != 'U') {
+      FormManager.readOnly('embargoCd');
+    }
   } else {
     FormManager.enable('embargoCd');
   }
@@ -230,7 +233,10 @@ function lockRequireFieldsMCO2() {
 
   // fields locked for Requester
   if (role == GEOHandler.ROLE_REQUESTER) {
-    FormManager.readOnly('specialTaxCd');
+    if (reqType != 'U') {
+      FormManager.readOnly('specialTaxCd');
+    }
+
     // FormManager.readOnly('salesBusOffCd');
     // FormManager.readOnly('repTeamMemberNo');
     // FormManager.readOnly('isuCd');
@@ -692,14 +698,17 @@ function setAddressDetailsForView() {
 function lockAbbrv() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType');
 
   if (viewOnlyPage == 'true') {
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('abbrevNm');
   } else {
     if (role == 'REQUESTER') {
-      FormManager.readOnly('abbrevLocn');
-      FormManager.readOnly('abbrevNm');
+      if (reqType != 'U') {
+        FormManager.readOnly('abbrevLocn');
+        FormManager.readOnly('abbrevNm');
+      }
     }
     if (role == 'PROCESSOR') {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
