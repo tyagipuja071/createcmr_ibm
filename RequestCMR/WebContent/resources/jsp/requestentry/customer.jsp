@@ -222,7 +222,7 @@
           <cmr:field path="vat" id="vat" fieldId="VAT" tabId="MAIN_CUST_TAB" />
         </p>
       </cmr:column>
-      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX,MCO2">
+      <cmr:view forGEO="EMEA,MCO,CEMEA,NL,BELUX,NORDX">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
             <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
@@ -234,6 +234,19 @@
           </p>
         </cmr:column>
       </cmr:view>
+    </cmr:view>
+    <cmr:view forGEO="MCO2">
+      <c:if test="${reqentry.reqType != 'U'}">
+        <cmr:column span="1" containerForField="VATExempt">
+          <p>
+            <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+            <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
+            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+              <cmr:fieldLabel fieldId="VATExempt" />
+            </cmr:label>
+          </p>
+        </cmr:column>
+      </c:if>
     </cmr:view>
     <cmr:view forCountry="724,619">
       <c:if test="${reqentry.reqType != 'U'}">
