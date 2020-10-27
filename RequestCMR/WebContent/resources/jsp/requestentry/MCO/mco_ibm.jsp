@@ -80,7 +80,7 @@
           <cmr:label fieldId="ibmDeptCostCenter">
             <cmr:fieldLabel fieldId="InternalDept" />: 
           </cmr:label>
-          <cmr:field path="ibmDeptCostCenter" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
+          <cmr:field path="adminDeptLine" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
         <% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
