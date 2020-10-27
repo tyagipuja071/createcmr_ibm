@@ -472,7 +472,7 @@ function setAbbrvNmLoc() {
   } else if (cntryUse == '864LS') {
     abbrevLocn = 'Lesotho';
   } else if (cntryUse == '864SZ') {
-    abbrevLocn = 'Swaziland';
+    abbrevLocn = 'Eswatini';
   } else {
     city = cmr.query('ADDR.GET.CITY1.BY_REQID', reqParam);
     abbrevLocn = city.ret1;
@@ -691,7 +691,7 @@ function changeAbbrevNmLocn(cntry, addressMode, saving, finalSave, force) {
         } else if (cntryUse == '864LS') {
           abbrevLocn = 'Lesotho';
         } else if (cntryUse == '864SZ') {
-          abbrevLocn = 'Swaziland';
+          abbrevLocn = 'Eswatini';
         }
 
         if (abbrevLocn && abbrevLocn.length > 12) {
