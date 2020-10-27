@@ -1521,6 +1521,7 @@ function addUpdateChecksExecution(frmCMR) {
     return;
   }
   console.log('Running Update Checks Element...');
+  cmr.showProgress('Validating requested updates...');
   dojo.xhrPost({
     url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
     handleAs : 'json',
@@ -1529,17 +1530,22 @@ function addUpdateChecksExecution(frmCMR) {
     timeout : 500000,
     sync : true,
     load : function(data, ioargs) {
+      cmr.hideProgress();
       if (data != '' && data != undefined) {
-        if (data.onError) {
+        if (data.rejectionMsg != null && data.rejectionMsg != '') {
           console.log('UpdateChecks Element Executed Successfully.');
           cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
-        } else if (data.negativeChksMsg != '' && data.negativeChksMsg != null) {
-          cmr.showConfirm('showAddrVerificationModal()', 'The following update checks failed to verify:<br/> <strong>' + data.negativeChksMsg + '</strong> <br/> Do you really want to proceed ?',
-              'Warning', null, {
-                OK : 'Ok',
-                CANCEL : 'Cancel'
-              });
-        } else {
+        }
+        // else if (data.negativeChksMsg != '' && data.negativeChksMsg != null)
+        // {
+        // cmr.showConfirm('showAddrVerificationModal()', '<strong>' +
+        // data.negativeChksMsg + '</strong> <br/> The request will require CMDE
+        // review. Do you want to proceed ?', 'Warning', null, {
+        // OK : 'Ok',
+        // CANCEL : 'Cancel'
+        // });
+        // }
+        else {
           cmr.showModal('addressVerificationModal');
         }
       } else {

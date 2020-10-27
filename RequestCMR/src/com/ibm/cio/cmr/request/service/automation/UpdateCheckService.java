@@ -18,7 +18,6 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.entity.Admin;
-import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.automation.UpdateCheckModel;
@@ -38,8 +37,6 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
   protected UpdateCheckModel doProcess(EntityManager entityManager, HttpServletRequest request, ParamContainer params) throws Exception {
     UpdateCheckModel updtChkModel = null;
     RequestEntryModel reqEntryModel = null;
-    Data data = new Data();
-    AdminPK adminPk = new AdminPK();
 
     UpdateSwitchElement updtElement = new UpdateSwitchElement(null, null, false, false);
     LOG.debug("Processing doProcess() method of  AutoCheckService");
@@ -47,22 +44,23 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
     reqEntryModel = (RequestEntryModel) params.getParam("reqModel");
 
     if (updtChkModel != null && reqEntryModel != null) {
-      adminPk.setReqId(reqEntryModel.getReqId());
-      Admin admin = entityManager.find(Admin.class, adminPk);
-      PropertyUtils.copyProperties(data, reqEntryModel);
-      if (admin != null)
-        PropertyUtils.copyProperties(admin, reqEntryModel);
       RequestData requestData = new RequestData(entityManager, reqEntryModel.getReqId());
-      requestData.setData(data);
-      requestData.setAdmin(admin);
+      Data data = requestData.getData();
+      Admin admin = requestData.getAdmin();
+      if (data != null) {
+        PropertyUtils.copyProperties(data, reqEntryModel);
+      }
+      if (admin != null) {
+        PropertyUtils.copyProperties(admin, reqEntryModel);
+      }
       AutomationEngineData engineData = new AutomationEngineData();
       AutomationResult<ValidationOutput> updtElementResult = updtElement.executeElement(entityManager, requestData, engineData);
 
       if (updtElementResult != null) {
-        Map<String, String> pendingChecks = (Map<String, String>) engineData.get(AutomationEngineData.NEGATIVE_CHECKS);
+        Map<String, String> pendingChecks = engineData.getPendingChecks();
         updtChkModel.setResult(updtElementResult.getResults());
         updtChkModel.setOnError(updtElementResult.isOnError());
-        List<RejectionContainer> rejectContList = (List<RejectionContainer>) engineData.get("rejections");
+        List<RejectionContainer> rejectContList = engineData.getRejectionReasons();
         String message = "";
         String negativeChecksMessage = "";
         if (rejectContList != null && !rejectContList.isEmpty()) {
@@ -73,9 +71,10 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
 
         if (!updtElementResult.isOnError()) {
           if (pendingChecks != null && !pendingChecks.isEmpty()) {
-            for (String pendingCheck : pendingChecks.values()) {
-              negativeChecksMessage = negativeChecksMessage + pendingCheck + "\n";
-            }
+            // for (String pendingCheck : pendingChecks.values()) {
+            // negativeChecksMessage = negativeChecksMessage + pendingCheck +
+            // "\n";
+            // }
             if (StringUtils.isNotBlank(updtElementResult.getDetails())) {
               negativeChecksMessage = negativeChecksMessage + updtElementResult.getDetails();
             }
