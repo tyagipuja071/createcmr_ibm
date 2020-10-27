@@ -104,6 +104,31 @@ public abstract class USBPHandler {
 
   private boolean waiting;
 
+  public static USBPHandler getBPHandler(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
+    Data data = requestData.getData();
+    Admin admin = requestData.getAdmin();
+    Addr addr = requestData.getAddress("ZS01");
+    String custGrp = data.getCustGrp();
+    String custSubGrp = data.getCustSubGrp();
+
+    if (USUtil.CG_THIRD_P_BUSINESS_PARTNER.equals(custGrp)) {
+      switch (custSubGrp) {
+      case USUtil.SC_BP_END_USER:
+        return new USBPEndUserHandler();
+      }
+    } else if (USUtil.CG_BY_MODEL.equals(custGrp)) {
+      String type = admin.getCustType();
+      String deptAttn = addr.getDept() != null ? addr.getDept().toLowerCase() : "";
+      if (USUtil.BUSINESS_PARTNER.equals(type) && "E".equals(data.getBpAcctTyp())
+          && (RESTRICT_TO_END_USER.equals(data.getRestrictTo()) || RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))
+          && !(deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host"))) {
+        return new USBPEndUserHandler();
+      }
+    }
+
+    return null;
+  }
+
   /**
    * performs initial validations on request data to determine if a request
    * should be processed by BP logic or not

@@ -12,7 +12,6 @@ import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
 import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
-import com.ibm.cio.cmr.request.automation.util.geo.us.USBPEndUserHandler;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USBPHandler;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -30,27 +29,6 @@ import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 public class USBusinessPartnerElement extends OverridingElement implements ProcessWaitingElement {
 
   private static final Logger LOG = Logger.getLogger(USBusinessPartnerElement.class);
-  public static final String RESTRICT_TO_END_USER = "BPQS";
-  public static final String RESTRICT_TO_MAINTENANCE = "IRCSO";
-
-  public static final String BP_MANAGING_IR = "MIR";
-  public static final String BP_INDIRECT_REMARKETER = "IRMR";
-
-  public static final String TYPE_STATE_AND_LOCAL = "7";
-  public static final String TYPE_FEDERAL = "9";
-  public static final String TYPE_COMMERCIAL = "1";
-  public static final String TYPE_BUSINESS_PARTNER = "5";
-
-  public static final String SUB_TYPE_STATE_AND_LOCAL_STATE = "STATE";
-  public static final String SUB_TYPE_STATE_AND_LOCAL_DISTRICT = "SPEC DIST";
-  public static final String SUB_TYPE_STATE_AND_LOCAL_COUNTY = "COUNTY";
-  public static final String SUB_TYPE_STATE_AND_LOCAL_CITY = "CITY";
-  public static final String SUB_TYPE_FEDERAL_POA = "POA";
-  public static final String SUB_TYPE_FEDERAL_REGULAR_GOVT = "FEDERAL";
-  public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
-  public static final String SUB_TYPE_BUSINESS_PARTNER_END_USER = "END USER";
-
-  public static final String AFFILIATE_FEDERAL = "9200000";
   private boolean waiting;
 
   public USBusinessPartnerElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
@@ -60,13 +38,28 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
   @Override
   public AutomationResult<OverrideOutput> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception {
-
+    LOG.debug(">>>> Executing USBusinessPartnerElement <<<<");
     Admin admin = requestData.getAdmin();
     long reqId = admin.getId().getReqId();
     Data data = requestData.getData();
     AutomationResult<OverrideOutput> output = buildResult(reqId);
     Addr addr = requestData.getAddress("ZS01");
-    USBPHandler bpHandler = new USBPEndUserHandler();
+
+    if ("U".equals(admin.getReqType())) {
+      LOG.debug("Request Type update is not supported by USBusinessPartnerElement - Skipping ");
+      output.setResults("Skipped");
+      output.setDetails("Update types not supported.");
+      return output;
+    }
+
+    USBPHandler bpHandler = USBPHandler.getBPHandler(entityManager, requestData, engineData);
+
+    if (bpHandler == null) {
+      LOG.debug("No BP Handler could be determined for the request");
+      output.setResults("Skipped");
+      output.setDetails("Request is either of a non-BP scenario or is not currently supported by the element.");
+      return output;
+    }
 
     // validate first
     if (bpHandler.doInitialValidations(admin, data, addr, output, engineData)) {

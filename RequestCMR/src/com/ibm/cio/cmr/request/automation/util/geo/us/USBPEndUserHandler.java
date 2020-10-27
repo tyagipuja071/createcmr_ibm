@@ -40,12 +40,6 @@ public class USBPEndUserHandler extends USBPHandler {
   @Override
   public boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
     // check the scenario
-    if ("U".equals(admin.getReqType())) {
-      output.setResults("Skipped");
-      output.setDetails("Update types not supported.");
-      return true;
-    }
-
     String custGrp = data.getCustGrp();
     String custSubGrp = data.getCustSubGrp();
     if ("BYMODEL".equals(custSubGrp)) {
