@@ -1568,6 +1568,26 @@ function validateExistingCMRNoZA(scenriosToBeSkipped) {
   };
 }
 
+/* Overriding Address Grid Formatters for SA */
+function streetValueFormatter(value, rowIndex) {
+  var rowData = this.grid.getItem(rowIndex);
+  var streetCont = rowData.addrTxt2;
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  if (cntry == '864') {
+    if (value && streetCont && streetCont[0]) {
+      return value + '<br>' + streetCont;
+    } else if (streetCont && streetCont[0]) {
+      return streetCont;
+    }
+    return value;
+  }
+
+  if (streetCont && streetCont[0]) {
+    return value + '<br>' + streetCont;
+  }
+  return value;
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
