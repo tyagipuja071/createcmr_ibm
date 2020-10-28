@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
@@ -295,10 +297,80 @@ public class MCOFstHandler extends MCOHandler {
       } else if (CmrConstants.REQ_TYPE_UPDATE.equals(reqEntry.getReqType())) {
         mapUpdateReqAddrLD(source, converted);
         importMailingFromDB(entityManager, mainRecord, converted);
+
+        if (mainRecord.getCmrNum() != null && mainRecord.getCmrNum().startsWith("99")) {
+          addOtherLegacyAddresses(entityManager, mainRecord.getCmrIssuedBy(), converted);
+        }
+
       }
     } else {
       super.handleSOFConvertFrom(entityManager, source, reqEntry, mainRecord, converted, searchModel);
     }
+  }
+
+  private void addOtherLegacyAddresses(EntityManager entityManager, String issuingCntry, List<FindCMRRecordModel> converted) {
+
+    Set<Integer> legacySeq = getLegacySequence();
+    Set<Integer> rdcSeq = getRdcSequence(converted);
+
+    Set<Integer> diffSeq = new TreeSet<>(legacySeq);
+    diffSeq.addAll(rdcSeq);
+    diffSeq.removeAll(new TreeSet<>(rdcSeq));
+
+    if (!diffSeq.isEmpty()) {
+      List<String> sofUses = null;
+      for (int seq : diffSeq) {
+        String seqNo = String.format("%05d", seq);
+        sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+        for (String sofUse : sofUses) {
+          String addressType = getAddressTypeByUse(sofUse);
+          FindCMRRecordModel otherLegacyAddr = createAddress(entityManager, issuingCntry, addressType, getTargetAddressType(addressType),
+              new HashMap<String, FindCMRRecordModel>());
+          if (otherLegacyAddr != null) {
+            converted.add(otherLegacyAddr);
+          }
+        }
+      }
+    }
+  }
+
+  private String getTargetAddressType(String addrType) {
+    switch (addrType) {
+    case "ZP01":
+      return "Billing";
+    case "ZI01":
+      return "EplMailing";
+    case "ZD01":
+      return "Shipping";
+    case "ZS01":
+      return "Installing";
+    case "ZS02":
+      return "Mailing";
+    default:
+      return "";
+    }
+  }
+
+  private Set<Integer> getLegacySequence() {
+    Set<Integer> legacySeqSet = new TreeSet<>();
+    List<CmrtAddr> legacyAddr = legacyObjects.getAddresses();
+
+    for (CmrtAddr addr : legacyAddr) {
+      int seq = Integer.parseInt(addr.getId().getAddrNo());
+      legacySeqSet.add(seq);
+    }
+
+    return legacySeqSet;
+  }
+
+  private Set<Integer> getRdcSequence(List<FindCMRRecordModel> converted) {
+    Set<Integer> rdcSeqSet = new TreeSet<>();
+
+    for (FindCMRRecordModel rdcRec : converted) {
+      int seq = Integer.parseInt(rdcRec.getCmrAddrSeq());
+      rdcSeqSet.add(seq);
+    }
+    return rdcSeqSet;
   }
 
   private boolean isOldCmrRecord(EntityManager entityManager, FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted) {
