@@ -1062,6 +1062,9 @@ public class MCOSaHandler extends MCOHandler {
               poBox = validateColValFromCell(currCell);
 
             } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(6);
               cof = validateColValFromCell(currCell);
 
@@ -1087,7 +1090,7 @@ public class MCOSaHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo)) {
+            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
               LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
               error.addError(row.getRowNum(), "Address Sequence No.",
                   "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
