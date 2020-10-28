@@ -25,6 +25,8 @@ import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.model.BatchEmailModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.geo.impl.MCOHandler;
@@ -636,7 +638,85 @@ public class CEWATransformer extends MCOTransformer {
         addr.setChangedIndc("Y");
       }
     }
+
+    String cmrNo = null;
+    String issuingCntry = null;
+
+    if (cmrObjects.getData() != null) {
+      cmrNo = cmrObjects.getData().getCmrNo();
+      issuingCntry = cmrObjects.getData().getCmrIssuingCntry();
+    }
+
+    if (cmrNo != null && issuingCntry != null && cmrNo.startsWith("99") && isOldInternalCmr(entityManager, cmrNo, issuingCntry)) {
+      return true;
+    }
+
     return false;
+  }
+
+  private boolean isOldInternalCmr(EntityManager entityManager, String cmrNo, String country) {
+
+    boolean isAnOldCmr = false;
+    List<String> rdcAddrTypes = getRdcAddressTypes(entityManager, cmrNo, country);
+    List<CmrtAddr> origLDAddr = getOrigLDAddresses(entityManager, cmrNo, country);
+
+    boolean rdcOnlyHasZS01 = false;
+    boolean legacyIsNotSharedSeq = false;
+    // Check if RDC only contains ZS01
+    if (!rdcAddrTypes.isEmpty() && rdcAddrTypes.size() == 1 && "ZS01".equals(rdcAddrTypes.get(0))) {
+      rdcOnlyHasZS01 = true;
+    } else {
+      return false;
+    }
+
+    // Check if Legacy is not shared sequence
+    if (origLDAddr.size() > 1 && !isAddrsSharedSeq(origLDAddr)) {
+      legacyIsNotSharedSeq = true;
+    }
+
+    if (rdcOnlyHasZS01 && legacyIsNotSharedSeq) {
+      return true;
+    }
+
+    return isAnOldCmr;
+  }
+
+  private boolean isAddrsSharedSeq(List<CmrtAddr> addrList) {
+
+    for (CmrtAddr addr : addrList) {
+      int yFlags = countYFlags(addr);
+      if (yFlags > 1) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private int countYFlags(CmrtAddr addr) {
+    int count = 0;
+
+    if ("Y".equals(addr.getIsAddrUseMailing())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseBilling())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseInstalling())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseShipping())) {
+      count++;
+    }
+
+    if ("Y".equals(addr.getIsAddrUseEPL())) {
+      count++;
+    }
+
+    return count;
   }
 
   @Override
@@ -678,5 +758,32 @@ public class CEWATransformer extends MCOTransformer {
   @Override
   public String getFixedAddrSeqForProspectCreation() {
     return "00001";
+  }
+
+  private List<String> getRdcAddressTypes(EntityManager entityManager, String cmrNo, String cntry) {
+    LOG.debug("Get RDC Address types ");
+    String sql = ExternalizedQuery.getSql("GET.RDC_ADDR_TYPES");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setParameter("CNTRY", cntry);
+    query.setParameter("MANDT", SystemConfiguration.getValue("MANDT"));
+    query.setForReadOnly(true);
+    List<String> rdcSequences = query.getResults(String.class);
+    LOG.debug("RDC addr types =" + rdcSequences);
+    return rdcSequences;
+  }
+
+  private List<CmrtAddr> getOrigLDAddresses(EntityManager entityManager, String cmrNo, String country) {
+
+    String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("COUNTRY", country);
+    query.setParameter("CMR_NO", cmrNo);
+    query.setForReadOnly(true);
+    List<CmrtAddr> addresses = query.getResults(CmrtAddr.class);
+    if (addresses != null) {
+      LOG.debug(">> checkLDAddress for CMR# " + cmrNo + " > " + addresses.size());
+    }
+    return addresses;
   }
 }
