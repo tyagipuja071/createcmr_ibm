@@ -1152,15 +1152,21 @@ public abstract class AutomationUtil {
     List<String> comments = query.getResults(String.class);
     for (String cmt : comments) {
       String cleanCmt = getCleanString(cmt);
-      for (String keyword : BP_CMT_1) {
-        if (cleanCmt.contains(" " + getCleanString(keyword) + " ") && "BPQS".equalsIgnoreCase(restrictCd)) {
-          rejectRequest = true;
+      switch (restrictCd) {
+      case "BPQS":
+        for (String keyword : BP_CMT_1) {
+          if (cleanCmt.contains(getCleanString(keyword))) {
+            rejectRequest = true;
+            break;
+          }
         }
-      }
-
-      for (String keyword : BP_CMT_2) {
-        if (cleanCmt.contains(" " + getCleanString(keyword) + " ") && "IRCSO".equalsIgnoreCase(restrictCd)) {
-          rejectRequest = true;
+        break;
+      case "IRCSO":
+        for (String keyword : BP_CMT_2) {
+          if (cleanCmt.contains(getCleanString(keyword))) {
+            rejectRequest = true;
+            break;
+          }
         }
       }
     }
