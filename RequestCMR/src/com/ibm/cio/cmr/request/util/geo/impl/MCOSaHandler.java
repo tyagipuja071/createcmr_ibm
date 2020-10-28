@@ -45,7 +45,7 @@ public class MCOSaHandler extends MCOHandler {
 
   protected static final Logger LOG = Logger.getLogger(MCOSaHandler.class);
 
-  protected static final String[] ZA_MASS_UPDATE_SHEET_NAMES = { "Billing Address", "Mailing Address", "Installing Address",
+  protected static final String[] ZA_MASS_UPDATE_SHEET_NAMES = { "Data", "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address (Update)", "EPL Address" };
 
   private static final String[] SA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CAP", "ModeOfPayment" };
@@ -996,7 +996,9 @@ public class MCOSaHandler extends MCOHandler {
       if (sheet != null) {
         for (Row row : sheet) {
           if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+
             String cmrNo = ""; // 0
+
             // Address Sheet
             String seqNo = ""; // 1
             String custName1 = ""; // 2
@@ -1008,6 +1010,11 @@ public class MCOSaHandler extends MCOHandler {
             String postalCode = ""; // 8
             String landCountry = ""; // 09
             String poBox = ""; // 10
+
+            // Data Sheet
+            String cof = ""; // 6
+            String codFlag = ""; // 13
+            String intDeptNum = ""; // 16
 
             boolean isDummyUpdate = true;
 
@@ -1054,6 +1061,16 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(10);
               poBox = validateColValFromCell(currCell);
 
+            } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(6);
+              cof = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(13);
+              codFlag = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(16);
+              intDeptNum = validateColValFromCell(currCell);
+
             }
 
             checkList = Arrays.asList(nameCont, poBox, street);
@@ -1095,6 +1112,22 @@ public class MCOSaHandler extends MCOHandler {
                 validations.add(error);
                 countSubRegion = 0;
               }
+            }
+
+            if (StringUtils.isNotBlank(cof) && ("R".equals(cof) || "S".equals(cof) || "T".equals(cof)) && "Y".equals(codFlag)) {
+              LOG.trace("if COF is R/S/T, then COD will be N only >> ");
+              error.addError(row.getRowNum(), "COD and COF", "if COF is R/S/T, then COD will be N only ");
+              validations.add(error);
+            } else if (StringUtils.isBlank(cof) && "N".equals(codFlag)) {
+              LOG.trace("If COF is Blank, then COD will be Y only >> ");
+              error.addError(row.getRowNum(), "COD and COF", "If COF is Blank, then COD will be Y only. ");
+              validations.add(error);
+            }
+
+            if (!(StringUtils.isBlank(cmrNo) && cmrNo.startsWith("99")) && !StringUtils.isBlank(intDeptNum)) {
+              LOG.trace("Internal Department Number can be filled only when cmrNo Start with 99.");
+              error.addError(row.getRowNum(), "Internal Dept Number.", "Internal Department Number can be filled only when cmrNo Start with 99.");
+              validations.add(error);
             }
 
             if (!StringUtils.isBlank(custName1) || !StringUtils.isBlank(nameCont) || !StringUtils.isBlank(street) || !StringUtils.isBlank(streetCont)
