@@ -1140,7 +1140,17 @@ public abstract class AutomationUtil {
     return new ArrayList<String>();
   }
 
-  public static boolean checkCommentSection(EntityManager entityManager, Admin admin, Data data) {
+  public static boolean isLegalNameChanged(Admin admin) {
+    String newName = admin.getMainCustNm1().toUpperCase();
+    newName += !StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2().toUpperCase() : "";
+
+    String oldName = !StringUtils.isBlank(admin.getOldCustNm1()) ? admin.getOldCustNm1().toUpperCase() : "";
+    oldName += !StringUtils.isBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2().toUpperCase() : "";
+
+    return !newName.equals(oldName);
+  }
+  
+    public static boolean checkCommentSection(EntityManager entityManager, Admin admin, Data data) {
     List<String> BP_CMT_1 = Arrays.asList("Maintenance", "MA", "HWMA");
     List<String> BP_CMT_2 = Arrays.asList("End User", "HW");
     boolean rejectRequest = false;
