@@ -114,6 +114,10 @@ public class LegacyCommonUtil {
       cust.setVat(muData.getVat());
     }
 
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      cust.setImsCd(muData.getSubIndustryCd());
+    }
+
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
@@ -128,15 +132,20 @@ public class LegacyCommonUtil {
 
     if (!StringUtils.isBlank(addr.getCustNm2())) {
       legacyAddr.setAddrLine2(addr.getCustNm2());
+    } else {
+      legacyAddr.setAddrLine2("");
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
       legacyAddr.setStreet(addr.getAddrTxt());
-
+    } else {
+      legacyAddr.setStreet("");
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
       legacyAddr.setStreetNo(addr.getAddrTxt2());
+    } else {
+      legacyAddr.setStreetNo("");
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
@@ -146,6 +155,8 @@ public class LegacyCommonUtil {
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
       legacyAddr.setPoBox(addr.getPoBox());
+    } else {
+      legacyAddr.setPoBox("");
     }
   }
 

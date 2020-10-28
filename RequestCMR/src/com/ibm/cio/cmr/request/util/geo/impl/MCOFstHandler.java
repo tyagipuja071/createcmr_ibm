@@ -852,9 +852,11 @@ public class MCOFstHandler extends MCOHandler {
 
             if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
               if (!StringUtils.isBlank(deptNo)) {
-                if (!StringUtils.isNumeric(deptNo.substring(0, 6))) {
-                  LOG.trace("Internal Department Number should have numeric values only.");
-                  error.addError(row.getRowNum(), "Internal Department No.", "Internal Department Number should have numeric values only. ");
+                if (!deptNo.equals("@@@@@@")) {
+                  if (!StringUtils.isNumeric(deptNo.substring(0, 6))) {
+                    LOG.trace("Internal Department Number should have numeric values only.");
+                    error.addError(row.getRowNum(), "Internal Department No.", "Internal Department Number should have numeric values only. ");
+                  }
                 }
               }
             }
