@@ -597,6 +597,9 @@ function addAttachmentValidator() {
           case 'XPRIC':
             return new ValidationResult(null, true);
             break;
+          case 'LLCBP':
+            return new ValidationResult(null, true);
+            break;
           default:
             var reqId = FormManager.getActualValue('reqId');
             if (reqId != null) {
