@@ -3,7 +3,6 @@
  */
 package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,12 +46,6 @@ public class CEWATransformer extends MCOTransformer {
 
   private static final Logger LOG = Logger.getLogger(CEWATransformer.class);
   private static final String DEFAULT_CLEAR_NUM = "0";
-  private static final List<String> CEWA_COUNTRY_LIST = Arrays.asList(SystemLocation.ANGOLA, SystemLocation.BOTSWANA, SystemLocation.BURUNDI,
-      SystemLocation.CAPE_VERDE_ISLAND, SystemLocation.ETHIOPIA, SystemLocation.GHANA, SystemLocation.ERITREA, SystemLocation.KENYA,
-      SystemLocation.MALAWI_CAF, SystemLocation.LIBERIA, SystemLocation.MOZAMBIQUE, SystemLocation.NIGERIA, SystemLocation.ZIMBABWE,
-      SystemLocation.SAO_TOME_ISLANDS, SystemLocation.RWANDA, SystemLocation.SIERRA_LEONE, SystemLocation.SOMALIA, SystemLocation.SOUTH_SUDAN,
-      SystemLocation.TANZANIA, SystemLocation.UGANDA, SystemLocation.ZAMBIA);
-
   private static final String CMR_REQUEST_REASON_TEMP_REACT_EMBARGO = "TREC";
   private static final String CMR_REQUEST_STATUS_CPR = "CPR";
   private static final String CMR_REQUEST_STATUS_PCR = "PCR";
@@ -466,8 +459,12 @@ public class CEWATransformer extends MCOTransformer {
     }
 
     if (!StringUtils.isBlank(muData.getAffiliate())) {
-      String deptCd = muData.getAffiliate().substring(2);
-      legacyCust.setDeptCd(deptCd);
+      if ("@@@@@@".equals(muData.getAffiliate())) {
+        legacyCust.setDeptCd("");
+      } else {
+        String deptCd = muData.getAffiliate().substring(2);
+        legacyCust.setDeptCd(deptCd);
+      }
     }
 
     if (!StringUtils.isBlank(muData.getCustNm1())) {
@@ -476,16 +473,34 @@ public class CEWATransformer extends MCOTransformer {
       legacyCust.setSbo(formatSBO);
     }
 
-    if (StringUtils.isNotBlank(muData.getOutCityLimit())) {
-      legacyCust.setModeOfPayment(muData.getOutCityLimit());
+    if (!StringUtils.isBlank(muData.getVat())) {
+      if ("@".equals(muData.getVat())) {
+        legacyCust.setVat("");
+      } else {
+        legacyCust.setVat(muData.getVat());
+      }
     }
 
+    // COF flag
+    if (StringUtils.isNotBlank(muData.getOutCityLimit())) {
+      if ("@".equals(muData.getOutCityLimit())) {
+        legacyCust.setModeOfPayment("");
+      } else {
+        legacyCust.setModeOfPayment(muData.getOutCityLimit());
+      }
+    }
+
+    // COD flag
     if (StringUtils.isNotBlank(muData.getEntpUpdtTyp())) {
       String cod = muData.getEntpUpdtTyp();
-      if ("Y".equals(cod)) {
-        legacyCust.setModeOfPayment("5");
-      } else if ("N".equals(cod)) {
+      if ("@".equals(muData.getEntpUpdtTyp())) {
         legacyCust.setModeOfPayment("");
+      } else {
+        if ("Y".equals(cod)) {
+          legacyCust.setModeOfPayment("5");
+        } else if ("N".equals(cod)) {
+          legacyCust.setModeOfPayment("");
+        }
       }
     }
 
@@ -500,6 +515,8 @@ public class CEWATransformer extends MCOTransformer {
 
     if (!StringUtils.isBlank(muAddr.getPostCd())) {
       legacyAddr.setZipCode(muAddr.getPostCd());
+    } else {
+      legacyAddr.setZipCode("");
     }
 
     if (!StringUtils.isBlank(muAddr.getCustPhone())) {
@@ -522,12 +539,17 @@ public class CEWATransformer extends MCOTransformer {
     boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     LOG.debug("isCrossBorderForMass : " + crossBorder);
 
-    String line1 = legacyAddr.getAddrLine1();
-    String line2 = legacyAddr.getAddrLine2();
-    String line3 = legacyAddr.getAddrLine3();
-    String line4 = legacyAddr.getAddrLine4();
-    String line5 = legacyAddr.getAddrLine5();
-    String line6 = legacyAddr.getAddrLine6();
+    String line1 = "";
+    String line2 = "";
+    String line3 = "";
+    String line4 = "";
+    String line5 = "";
+    String line6 = "";
+    String postalCd = massUpdtAddr.getPostCd();
+    String city = massUpdtAddr.getCity1();
+
+    line1 = massUpdtAddr.getCustNm1();
+    line2 = massUpdtAddr.getCustNm2();
 
     // Additional name/additional info
     if (!StringUtils.isBlank(massUpdtAddr.getCounty())) {
@@ -550,19 +572,16 @@ public class CEWATransformer extends MCOTransformer {
         line3 = "PO BOX " + massUpdtAddr.getPoBox();
       }
 
-      if (StringUtils.isNotBlank(massUpdtAddr.getCity1())) {
-        String cityPostalCode = massUpdtAddr.getCity1();
-        if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
-          cityPostalCode += ", " + massUpdtAddr.getPostCd();
-        }
-        line5 = cityPostalCode;
-      } else {
-        if (StringUtils.isNotBlank(line6))
-          line5 = line6;
+      String postalCdCity = massUpdtAddr.getPostCd();
+      if (StringUtils.isNotBlank(city) && StringUtils.isNotBlank(postalCd)) {
+        postalCdCity += " " + city;
+      } else if (StringUtils.isNotBlank(city) && StringUtils.isBlank(postalCd)) {
+        postalCdCity = city;
       }
-      if (!StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
-        line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
-      }
+      line5 = postalCdCity;
+
+      line6 = LandedCountryMap.getCountryName(massUpdtAddr.getLandCntry()).toUpperCase();
+
     } else {
       LOG.debug("performing local setup");
       if (!StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) && !StringUtils.isBlank(massUpdtAddr.getPoBox())) {
@@ -572,15 +591,15 @@ public class CEWATransformer extends MCOTransformer {
       } else if (!StringUtils.isBlank(massUpdtAddr.getPoBox())) {
         line5 = "PO BOX " + massUpdtAddr.getPoBox();
       }
-      if (StringUtils.isNotBlank(massUpdtAddr.getCity1())) {
-        String cityPostalCode = massUpdtAddr.getCity1();
-        if (StringUtils.isNotBlank(cityPostalCode) && StringUtils.isNotBlank(massUpdtAddr.getPostCd())) {
-          cityPostalCode += ", " + massUpdtAddr.getPostCd();
-        }
-        line6 = cityPostalCode;
-      } else {
-        line6 = legacyAddr.getAddrLine6();
+
+      String postalCdCity = massUpdtAddr.getPostCd();
+      if (StringUtils.isNotBlank(city) && StringUtils.isNotBlank(postalCd)) {
+        postalCdCity += " " + city;
+      } else if (StringUtils.isNotBlank(city) && StringUtils.isBlank(postalCd)) {
+        postalCdCity = city;
       }
+      line6 = postalCdCity;
+
     }
 
     legacyAddr.setAddrLine1(line1);
@@ -596,25 +615,9 @@ public class CEWATransformer extends MCOTransformer {
 
   @Override
   public boolean isCrossBorderForMass(MassUpdtAddr addr, CmrtAddr legacyAddr) {
-    boolean countryFound = false;
-    String cd = MCOHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry());
-    List<String> listCountryNames = new ArrayList<String>();
-    for (String countryCode : CEWA_COUNTRY_LIST) {
-      String cd1 = MCOHandler.LANDED_CNTRY_MAP.get(countryCode);
-      String countryName = LandedCountryMap.getCountryName(cd1);
-      listCountryNames.add(countryName);
-    }
-    for (String names : listCountryNames) {
-      if (names.toUpperCase().equals(legacyAddr.getAddrLine6().toUpperCase())) {
-        countryFound = true;
-        break;
-      }
-    }
-    String countryName = LandedCountryMap.getCountryName(cd);
     boolean isCrossBorder = false;
+    String cd = MCOHandler.LANDED_CNTRY_MAP.get(getCmrIssuingCntry());
     if (!StringUtils.isEmpty(addr.getLandCntry()) && !cd.equals(addr.getLandCntry())) {
-      isCrossBorder = true;
-    } else if (!StringUtils.isEmpty(legacyAddr.getAddrLine6()) && countryFound && !legacyAddr.getAddrLine6().equals(countryName)) {
       isCrossBorder = true;
     }
     return isCrossBorder;
