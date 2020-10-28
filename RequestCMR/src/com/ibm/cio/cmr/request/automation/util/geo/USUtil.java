@@ -507,6 +507,7 @@ public class USUtil extends AutomationUtil {
       validation.setMessage("Skipped");
       validation.setSuccess(true);
     } else {
+      admin.setScenarioVerifiedIndc("N");
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       boolean hasNegativeCheck = false;
       USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
