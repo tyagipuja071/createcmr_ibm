@@ -770,6 +770,7 @@ public class DupCMRProcessService extends LegacyDirectService {
           continue;
         }
         boolean addrUpdated = RequestUtils.isUpdated(entityManager, addr, data.getCmrIssuingCntry());
+        boolean dupAddrMatch = true;//Add for dup addr data math check
         // iterate each address on the request and check if it needs to be
         // processed
         dummyHandler.addrData = addr;
@@ -803,6 +804,7 @@ public class DupCMRProcessService extends LegacyDirectService {
               legacyAddr.setForCreate(true);
               legacyAddr.setCreateTs(SystemUtil.getCurrentTimestamp());
               legacyAddr.setForUpdate(false);
+              dupAddrMatch = false;
               // throw new Exception("Cannot find Duplicate " + dupCntry +
               // "legacy address with sequence " + addr.getId().getAddrSeq());
             } else {
@@ -858,11 +860,13 @@ public class DupCMRProcessService extends LegacyDirectService {
               legacyAddrPk = new CmrtAddrPK();
               legacyAddrPk.setCustomerNo(cmrNo);
               legacyAddrPk.setSofCntryCode(dupCntry);
-              legacyAddrPk.setAddrNo(addr.getId().getAddrSeq());
+              String newSeqNo = StringUtils.leftPad(addr.getId().getAddrSeq(), 5, '0');
+              legacyAddrPk.setAddrNo(newSeqNo);
               legacyAddr.setId(legacyAddrPk);
               legacyAddr.setForCreate(true);
               legacyAddr.setForUpdate(false);
               legacyAddr.setCreateTs(SystemUtil.getCurrentTimestamp());
+              dupAddrMatch = false;
             } else {
               legacyAddr.setForUpdate(true);
             }
@@ -919,20 +923,21 @@ public class DupCMRProcessService extends LegacyDirectService {
           }
           transformer.transformLegacyAddressData(entityManager, dummyHandler, cust, legacyAddr, cmrObjects, addr);
           capsAndFillNulls(legacyAddr, true);
-
           if (legacyAddr.isForCreate()) {
             legacyObjects.addAddress(legacyAddr);
 
-            if (!"N".equals(addr.getImportInd())) {
+            if (!"N".equals(addr.getImportInd()) && dupAddrMatch) {
               LOG.debug("Untagging use " + legacyAddr.getAddressUse() + " on sequence " + addr.getId().getAddrSeq());
 
               modifyAddrUseForSequence(addr.getId().getAddrSeq(), legacyAddr.getAddressUse(), legacyObjects);
             }
 
-            // update the seqno of the original addr record
-            updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(),
-                legacyAddr.getId().getAddrNo() + "", null, legacyAddr.isForSharedSeq());
-
+            // update the seqno of the original addr record skip for the dup
+            // missing modify
+            if (dupAddrMatch) {
+              updateAddrSeq(entityManager, admin.getId().getReqId(), addr.getId().getAddrType(), addr.getId().getAddrSeq(),
+                  legacyAddr.getId().getAddrNo() + "", null, legacyAddr.isForSharedSeq());
+            }
           }
         } else if ("ZP02".equals(addr.getId().getAddrType())) {
           // Defect 1759962: Spain - address F
@@ -953,6 +958,7 @@ public class DupCMRProcessService extends LegacyDirectService {
             legacyAddr.setForCreate(true);
             legacyAddr.setForUpdate(false);
             legacyAddr.setCreateTs(SystemUtil.getCurrentTimestamp());
+            dupAddrMatch = false;
           } else {
             legacyAddr.setForUpdate(true);
           }
