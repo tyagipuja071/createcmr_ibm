@@ -256,7 +256,8 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
           alert('Assessment comments too long, maximum of 500 characters.');
           return;
         }
-        if (!confirm('Kindly ensure that you have reviewed all the results and have made all relevant checks on the entities shown. Proceed with assessment?')){
+        var msg = 'Kindly ensure that you have reviewed all the results and have made all relevant checks on the entities shown.\nThe Request Details page will also be saved automatically after the assessment.\nProceed with assessment?';
+        if (!confirm(msg)){
           return;
         }
         cmr.showProgress('Recording responses..');
@@ -271,6 +272,14 @@ app.controller('DPLSearchController', [ '$scope', '$document', '$http', '$timeou
           if (response.data && response.data.data) {
             alert('DPL Assessment recorded successfully.');
             $scope.reassess = false;
+            if (window.opener && window.opener.autoSaveRequest){
+              try {
+                console.log('autosaving request..');
+                window.opener.autoSaveRequest();
+              } catch (e) {
+                console.log('error in refreshing request data');
+              }
+            }
             $scope.getRequestInfo();
           } else {
             alert('An error occurred while processing. Please try again later.');
