@@ -126,7 +126,12 @@ function actualAddToCMRList() {
 
   cmr.cmrList = textAreaString;
   // validation added to not import invalid CMR number for Swiss
-  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL) {
+
+  var MCOAFRICA = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
+      '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
+
+  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL
+      || (MCOAFRICA.indexOf(cmrCntry) > -1)) {
     var cmrsArr = cmr.cmrList.split(',');
     var reqtype = FormManager.getActualValue('reqType');
     var invalidCount = 0;
