@@ -292,6 +292,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         for (Addr addr : reqData.getAddresses()) {
           if (!"P".equals(addr.getDplChkResult()) && !"X".equals(addr.getDplChkResult())) {
             String name = "";
+            // for japan, name is on cust nm3
             if (SystemLocation.JAPAN.equals(cntry)) {
               name = addr.getCustNm3();
             } else {
