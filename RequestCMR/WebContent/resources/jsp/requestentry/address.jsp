@@ -220,10 +220,10 @@ visibility: hidden !IMPORTANT;
           </div>
         </p>
       </cmr:column>
-      <cmr:column span="1" width="170">
+      <cmr:column span="1" width="250">
         <p>
           <%if (!readOnly) {%>
-            <input type="button" title="Assess DPL Results" value="Search DPL Database" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
+            <input type="button" title="Assess DPL Results" value="Search and Assess DPL Matches" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
             <cmr:info text="Opens a new window and searches directly against the DPL Database" />
           <%}%>
         </p>
