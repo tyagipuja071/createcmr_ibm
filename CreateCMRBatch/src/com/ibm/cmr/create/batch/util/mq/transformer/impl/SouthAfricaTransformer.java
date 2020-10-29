@@ -215,6 +215,15 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyCust.setCreditCd(""); // blank on new creates
       legacyCust.setDcRepeatAgreement("0");
       legacyCust.setLeasingInd("0");
+
+      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+        if (!data.getRepTeamMemberNo().equals(legacyCust.getSalesGroupRep())) {
+          legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+        }
+      } else {
+        legacyCust.setSalesRepNo("");
+      }
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
@@ -261,6 +270,17 @@ public class SouthAfricaTransformer extends MCOTransformer {
         legacyCust.setEmbargoCd(rdcEmbargoCd);
         resetOrdBlockToData(entityManager, data);
       }
+
+      if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
+        if (!data.getRepTeamMemberNo().equals(legacyCust.getSalesRepNo())) {
+          legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
+        }
+        legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
+      } else {
+        legacyCust.setSalesGroupRep("");
+        legacyCust.setSalesRepNo("");
+      }
+
     }
 
     if (!StringUtils.isBlank(data.getSalesBusOffCd())) {
@@ -270,16 +290,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
     } else {
       legacyCust.setIbo("");
       legacyCust.setSbo("");
-    }
-
-    if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-      legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
-    } else {
-      legacyCust.setSalesRepNo("");
-    }
-
-    if (!data.getRepTeamMemberNo().equals(legacyCust.getSalesGroupRep())) {
-      legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
     }
 
     for (Addr addr : cmrObjects.getAddresses()) {
@@ -382,7 +392,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       MassUpdtData muData, String cmr) throws Exception {
 
     if (!StringUtils.isBlank(muData.getTaxCd1())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getTaxCd1())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getTaxCd1())) {
         custExt.setTeleCovRep("");
       } else {
         custExt.setTeleCovRep(muData.getTaxCd1());

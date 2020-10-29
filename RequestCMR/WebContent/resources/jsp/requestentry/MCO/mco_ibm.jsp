@@ -83,12 +83,21 @@
   
   <cmr:view forGEO="MCO1,MCO2">
     <cmr:row>
-      <cmr:column span="2" containerForField="InternalDept">
+      <cmr:column span="2" containerForField="InternalDept" forCountry="864">
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
             <cmr:fieldLabel fieldId="InternalDept" />: 
           </cmr:label>
           <cmr:field path="adminDeptLine" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
+        </p>
+      </cmr:column>
+      
+      <cmr:column span="2" containerForField="InternalDept" exceptForCountry="864">
+        <p>
+          <cmr:label fieldId="ibmDeptCostCenter">
+            <cmr:fieldLabel fieldId="InternalDept" />: 
+          </cmr:label>
+          <cmr:field path="ibmDeptCostCenter" id="ibmDeptCostCenter" fieldId="InternalDept" tabId="MAIN_IBM_TAB" />
         </p>
       </cmr:column>
         <% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
