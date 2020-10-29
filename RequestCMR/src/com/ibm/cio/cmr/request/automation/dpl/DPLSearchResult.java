@@ -83,6 +83,10 @@ public class DPLSearchResult {
       if (results.getSearchArgument().toUpperCase().equals(dplName.toUpperCase())) {
         return true;
       }
+      if (dplName.toUpperCase().contains(results.getSearchArgument().toUpperCase())
+          || results.getSearchArgument().toUpperCase().contains(dplName.toUpperCase())) {
+        return true;
+      }
     }
     return false;
   }
