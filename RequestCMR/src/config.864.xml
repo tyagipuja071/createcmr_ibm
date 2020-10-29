@@ -59,7 +59,7 @@
 					<lovId>SalRepNameNo</lovId>
 					<length>6</length>
 				</column>
-				<column>
+				<column exactLength="true">
 					<label>INAC/NAC</label>
 					<dbColumn>INAC_CD</dbColumn>
 					<width>20</width>
@@ -96,7 +96,7 @@
 					<width>5</width>
 					<length>10</length>
 				</column>
-				<column number="true" exactLength="false">
+				<column exactLength="false">
 					<label>Phone #</label>
 					<dbColumn>RESTRICT_TO</dbColumn>
 					<length>16</length>
