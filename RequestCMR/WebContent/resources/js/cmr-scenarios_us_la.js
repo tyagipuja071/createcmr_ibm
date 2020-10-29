@@ -333,7 +333,7 @@ var TemplateService = (function() {
               showWarning = true;
             }
           }
-          console.log('template loaded: ' + showWarning);
+          //  console.log('template loaded: ' + showWarning);
 
           if (showWarning) {
             cmr.showAlert("Default values for the scenario has been loaded. Any existing value from a previous template has been cleared/overwritten.", "Warning");
