@@ -1401,3 +1401,19 @@ function handleRequiredDnBSearch() {
     });
   }
 }
+
+/**
+ * Save function
+ */
+function autoSaveRequest() {
+  // enable all checkboxes
+  var cb = dojo.query('[type=checkbox]');
+  for (var i = 0; i < cb.length; i++) {
+    if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
+      cb[i].disabled = false;
+      cb[i].removeAttribute('disabled');
+    }
+  }
+  FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
+}
+
