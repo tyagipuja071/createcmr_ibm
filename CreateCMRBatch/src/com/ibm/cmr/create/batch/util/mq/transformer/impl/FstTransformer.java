@@ -502,6 +502,10 @@ public class FstTransformer extends MCOTransformer {
         }
       }
     }
+    CmrtCustExt legacyCustExt = legacyObjects.getCustomerExt();
+    if (legacyCustExt != null) {
+      legacyObjects.setCustomerExt(null);
+    }
   }
 
   @Override
