@@ -1127,7 +1127,7 @@ public class MCOSaHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if (!(StringUtils.isBlank(cmrNo) && cmrNo.startsWith("99")) && !StringUtils.isBlank(intDeptNum)) {
+            if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(intDeptNum)) {
               LOG.trace("Internal Department Number can be filled only when cmrNo Start with 99.");
               error.addError(row.getRowNum(), "Internal Dept Number.", "Internal Department Number can be filled only when cmrNo Start with 99.");
               validations.add(error);

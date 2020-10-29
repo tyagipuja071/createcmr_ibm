@@ -141,7 +141,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   private boolean hasAttnPrefix(String attnPerson) {
-    String[] attPersonPrefix = { "Att:", "Att", "Attention Person", "ATT:", "ATT", "att:", "att" };
+    String[] attPersonPrefix = { "Att: ", "Att ", "Attention Person", "ATT: ", "ATT ", "att: ", "att " };
     boolean isPrefixFound = false;
 
     for (String prefix : attPersonPrefix) {
@@ -457,20 +457,17 @@ public class SouthAfricaTransformer extends MCOTransformer {
       legacyCust.setImsCd(subInd);
     }
 
-    if (!StringUtils.isBlank(muData.getSvcArOffice())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getSvcArOffice())) {
-        legacyCust.setModeOfPayment("");
-      } else {
-        legacyCust.setModeOfPayment(muData.getSvcArOffice());
-      }
-    }
-
-    if (!StringUtils.isBlank(muData.getMilitary())) {
-      if ("Y".equals(muData.getMilitary())) {
+    if (StringUtils.isNotBlank(muData.getSvcArOffice()) && !DEFAULT_CLEAR_CHAR.equals(muData.getSvcArOffice())) {
+      legacyCust.setModeOfPayment(muData.getSvcArOffice());
+    } else if (StringUtils.isNotBlank(muData.getMilitary())) {
+      String cod = muData.getMilitary();
+      if ("Y".equals(cod)) {
         legacyCust.setModeOfPayment("5");
-      } else if ("N".equals(muData.getMilitary())) {
+      } else if ("N".equals(cod) || DEFAULT_CLEAR_CHAR.equals(cod)) {
         legacyCust.setModeOfPayment("");
       }
+    } else if (StringUtils.isNotBlank(muData.getSvcArOffice()) && DEFAULT_CLEAR_CHAR.equals(muData.getSvcArOffice())) {
+      legacyCust.setModeOfPayment("");
     }
 
   }
