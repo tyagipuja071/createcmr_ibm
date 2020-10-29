@@ -503,7 +503,7 @@ public class TransConnService extends BaseBatchService {
           admin.setLockBy(null);
           admin.setLockByNm(null);
           admin.setDisableAutoProc("Y"); // added to send it to processing
-                                         // service
+                                         // service 1020
           admin.setRdcProcessingStatus(null);
           admin.setReqStatus("COM");
           admin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
