@@ -382,7 +382,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
       MassUpdtData muData, String cmr) throws Exception {
 
     if (!StringUtils.isBlank(muData.getTaxCd1())) {
-      if (DEFAULT_CLEAR_NUM.equals(muData.getTaxCd1())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getTaxCd1())) {
         custExt.setTeleCovRep("");
       } else {
         custExt.setTeleCovRep(muData.getTaxCd1());
