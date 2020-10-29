@@ -1013,7 +1013,9 @@ public class MCOSaHandler extends MCOHandler {
 
             // Data Sheet
             String cof = ""; // 6
+            String inac = "";
             String codFlag = ""; // 13
+            String zs01Phone = "";
             String intDeptNum = ""; // 16
 
             boolean isDummyUpdate = true;
@@ -1068,8 +1070,14 @@ public class MCOSaHandler extends MCOHandler {
               currCell = (XSSFCell) row.getCell(6);
               cof = validateColValFromCell(currCell);
 
+              currCell = (XSSFCell) row.getCell(9);
+              inac = validateColValFromCell(currCell);
+
               currCell = (XSSFCell) row.getCell(13);
               codFlag = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(15);
+              zs01Phone = validateColValFromCell(currCell);
 
               currCell = (XSSFCell) row.getCell(16);
               intDeptNum = validateColValFromCell(currCell);
@@ -1130,6 +1138,19 @@ public class MCOSaHandler extends MCOHandler {
             if (!StringUtils.isBlank(cmrNo) && !cmrNo.startsWith("99") && !StringUtils.isBlank(intDeptNum)) {
               LOG.trace("Internal Department Number can be filled only when cmrNo Start with 99.");
               error.addError(row.getRowNum(), "Internal Dept Number.", "Internal Department Number can be filled only when cmrNo Start with 99.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !StringUtils.isNumeric(zs01Phone)) {
+              LOG.trace("Phone Number should contain only digits.");
+              error.addError(row.getRowNum(), "Phone #", "Phone Number should contain only digits.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
+                && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
+              LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits in order.");
+              error.addError(row.getRowNum(), "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
               validations.add(error);
             }
 
