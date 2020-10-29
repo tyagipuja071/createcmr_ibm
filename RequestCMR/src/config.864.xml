@@ -101,7 +101,7 @@
 					<dbColumn>RESTRICT_TO</dbColumn>
 					<length>16</length>
 				</column>
-				<column number="true" exactLength="true">>
+				<column number="true" exactLength="true">
 					<label>Internal Department Number</label>
 					<dbColumn>AFFILIATE</dbColumn>
 					<width>25</width>
