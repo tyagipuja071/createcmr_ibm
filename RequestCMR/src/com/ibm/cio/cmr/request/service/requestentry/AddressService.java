@@ -685,9 +685,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     if (addrList != null && addrList.size() > 0) {
       Addr addr = addrList.get(0);
       if (addr != null && JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
-        addr.setCustNm4((addr.getCustNm4() == null ? "" : addr.getCustNm4()) + (addr.getPoBoxCity() == null ? "" : addr.getPoBoxCity()));
+        String custNm4 = ((addr.getCustNm4() == null ? "" : addr.getCustNm4()) + (addr.getPoBoxCity() == null ? "" : addr.getPoBoxCity())).trim();
+        addr.setCustNm4(custNm4.length() > 23 ? custNm4.substring(0, 23) : custNm4);
         addr.setPoBoxCity(null);
-        addr.setAddrTxt((addr.getAddrTxt() == null ? "" : addr.getAddrTxt()) + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2()));
+        String addrTxt = ((addr.getAddrTxt() == null ? "" : addr.getAddrTxt()) + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2())).trim();
+        addr.setAddrTxt(addrTxt.length() > 23 ? addrTxt.substring(0, 23) : addrTxt);
         addr.setAddrTxt2(null);
       }
       return addr;

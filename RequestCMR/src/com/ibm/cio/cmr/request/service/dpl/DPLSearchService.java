@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
+import com.ibm.cio.cmr.request.entity.ScorecardPK;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
 import com.ibm.cio.cmr.request.service.requestentry.AttachmentService;
@@ -109,9 +110,28 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     String companyName = extractMainCompanyName(reqData);
     List<DPLSearchResults> results = getPlainDPLSearchResults(entityManager, params);
 
+    int resultCount = 0;
+    for (DPLSearchResults result : results) {
+      if (result.getDeniedPartyRecords() != null) {
+        resultCount += result.getDeniedPartyRecords().size();
+      }
+    }
+    ScorecardPK scorecardPk = new ScorecardPK();
+    scorecardPk.setReqId(reqId);
+    Scorecard scorecard = entityManager.find(Scorecard.class, scorecardPk);
+    if (scorecard != null && resultCount == 0) {
+      LOG.debug("Auto assessinging DPL check results.");
+      scorecard.setDplAssessmentBy("CreateCMR");
+      scorecard.setDplAssessmentCmt("No actual results found during the search.");
+      scorecard.setDplAssessmentResult("N");
+      scorecard.setDplAssessmentDate(SystemUtil.getActualTimestamp());
+      entityManager.merge(scorecard);
+    }
+
     AttachmentService attachmentService = new AttachmentService();
     Timestamp ts = SystemUtil.getActualTimestamp();
     DPLSearchPDFConverter pdf = new DPLSearchPDFConverter(user.getIntranetId(), ts.getTime(), companyName, results);
+    pdf.setScorecard(scorecard);
 
     String type = "";
     try {
@@ -131,6 +151,7 @@ public class DPLSearchService extends BaseSimpleService<Object> {
     String fileName = prefix + formatter.format(ts) + ".pdf";
 
     LOG.debug("Attaching " + fileName + " to Request " + reqId);
+
     boolean success = true;
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
       pdf.exportToPdf(null, null, null, bos, null);
@@ -267,13 +288,20 @@ public class DPLSearchService extends BaseSimpleService<Object> {
         }
         names.add(name);
       } else {
+        String cntry = reqData.getData().getCmrIssuingCntry();
         for (Addr addr : reqData.getAddresses()) {
           if (!"P".equals(addr.getDplChkResult()) && !"X".equals(addr.getDplChkResult())) {
-            String name = addr.getCustNm1().toUpperCase();
-            if (!StringUtils.isBlank(addr.getCustNm2())) {
-              name += " " + addr.getCustNm2().toUpperCase();
+            String name = "";
+            // for japan, name is on cust nm3, CMR-7419
+            if (SystemLocation.JAPAN.equals(cntry)) {
+              name = addr.getCustNm3();
+            } else {
+              name = addr.getCustNm1().toUpperCase();
+              if (!StringUtils.isBlank(addr.getCustNm2())) {
+                name += " " + addr.getCustNm2().toUpperCase();
+              }
             }
-            if (!names.contains(name)) {
+            if (!StringUtils.isBlank(name) && !names.contains(name)) {
               names.add(name);
             }
           }

@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import com.ibm.cio.cmr.request.automation.dpl.DPLSearchResult;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cmr.services.client.dpl.DPLRecord;
 import com.ibm.cmr.services.client.dpl.DPLSearchResults;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -39,6 +40,8 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
   private String user;
   private long searchTs;
   private String companyName;
+
+  private Scorecard scorecard;
 
   /**
    * @throws IOException
@@ -108,6 +111,36 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
                 closest.append(dplName + " (" + (person ? "Individual" : "Company") + ")");
               }
               section.addCell(createValueCell(closest.toString()));
+
+              if (this.scorecard != null) {
+                section.addCell(createLabelCell("Results Assessment:"));
+                String assessment = this.scorecard.getDplAssessmentResult();
+                if (assessment == null) {
+                  assessment = "";
+                }
+                String assessResult = "Not Done";
+                switch (assessment) {
+                case "Y":
+                  assessResult = "Matched DPL entities";
+                  break;
+                case "N":
+                  assessResult = "No actual matches";
+                  break;
+                case "U":
+                  assessResult = "Needs further review";
+                  break;
+                }
+                section.addCell(createValueCell(assessResult));
+              }
+              section.addCell(createLabelCell("Assessed By:"));
+              section.addCell(createValueCell(this.scorecard.getDplAssessmentBy() != null ? this.scorecard.getDplAssessmentBy() : ""));
+              section.addCell(createLabelCell("Assessed Date:"));
+              if (this.scorecard.getDplAssessmentDate() != null) {
+                section.addCell(createValueCell(formatter.format(this.scorecard.getDplAssessmentDate())));
+              } else {
+                section.addCell(createValueCell(""));
+              }
+
               document.add(section);
               document.add(blankLine());
 
@@ -181,6 +214,14 @@ public class DPLSearchPDFConverter extends DefaultPDFConverter {
 
   public void setCompanyName(String companyName) {
     this.companyName = companyName;
+  }
+
+  public Scorecard getScorecard() {
+    return scorecard;
+  }
+
+  public void setScorecard(Scorecard scorecard) {
+    this.scorecard = scorecard;
   }
 
 }
