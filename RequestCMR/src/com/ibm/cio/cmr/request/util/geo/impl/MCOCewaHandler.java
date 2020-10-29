@@ -67,7 +67,7 @@ public class MCOCewaHandler extends MCOHandler {
 
   private static final String[] MCO2_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "Affiliate", "CAP", "CMROwner", "Company", "CustClassCode", "LocalTax2",
       "Enterprise", "SearchTerm", "SitePartyID", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor",
-      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel" };
+      "Building", "County", "City2", "INACType", "BPRelationType", "MembLevel", "ModeOfPayment", "CodFlag" };
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
@@ -443,7 +443,14 @@ public class MCOCewaHandler extends MCOHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
-    super.addSummaryUpdatedFields(service, type, cmrCountry, newData, oldData, results);
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      results.add(update);
+    }
 
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCrosSubTyp(), newData.getCrosSubTyp())) {
       update = new UpdatedDataModel();
@@ -506,6 +513,14 @@ public class MCOCewaHandler extends MCOHandler {
       update.setDataField(PageManager.getLabel(cmrCountry, "AbbrevLocation", "-"));
       update.setNewData(newData.getAbbrevLocn());
       update.setOldData(oldData.getAbbrevLocn());
+      results.add(update);
+    }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
+      update.setNewData(newData.getCreditCd());
+      update.setOldData(oldData.getCreditCd());
       results.add(update);
     }
   }
