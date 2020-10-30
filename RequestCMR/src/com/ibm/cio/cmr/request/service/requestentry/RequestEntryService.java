@@ -27,6 +27,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.Attachment;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -71,7 +72,6 @@ import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  * Main Service for request entry
@@ -111,6 +111,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       performSave(model, entityManager, request, true);
     } else if ("OVERRIDE_DNB".equalsIgnoreCase(action)) {
       performSave(model, entityManager, request, true);
+    } else if ("CONFIRM_DOC_UPD".equalsIgnoreCase(action)) {
+      updateDeprecatedAttachmentTypes(model, entityManager, request);
     } else {
       // Claim conditionally approved request (Edit Request)
       /*
@@ -158,6 +160,28 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         performCancelRequest(trans, model, entityManager, request);
       }
     }
+  }
+
+  private void updateDeprecatedAttachmentTypes(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) {
+
+    long reqId = model.getReqId();
+    if (reqId > 0) {
+      String sql = ExternalizedQuery.getSql("AUTO.US.GET_ATTACHMENTS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      List<Attachment> attachments = query.getResults(Attachment.class);
+      if (attachments != null && attachments.size() > 0) {
+        for (Attachment attachment : attachments) {
+          if ("NAM".equals(attachment.getDocContent()) || "ADDR".equals(attachment.getDocContent())) {
+            attachment.setDocContent("COMP");
+            log.debug("Updated attachment type for attachment - " + attachment.getId().getDocLink());
+            entityManager.merge(attachment);
+          }
+        }
+      }
+
+    }
+
   }
 
   /**
@@ -1415,60 +1439,6 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
   }
 
   /**
-   * prepares and returns a dnb request based on requestData
-   * 
-   * @param handler
-   * @param admin
-   * @param data
-   * @param soldTo
-   * @return
-   */
-  private GBGFinderRequest createRequest(GEOHandler handler, Admin admin, Data data, Addr soldTo) {
-    GBGFinderRequest request = new GBGFinderRequest();
-    request.setMandt(SystemConfiguration.getValue("MANDT"));
-    if (StringUtils.isNotBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
-    } else if (StringUtils.isNotBlank(soldTo.getVat())) {
-      request.setOrgId(soldTo.getVat());
-    }
-    if (soldTo != null) {
-      request.setCity(soldTo.getCity1());
-      if (StringUtils.isBlank(soldTo.getCity1()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-        // here for now, find a way to move to common class
-        request.setCity("SINGAPORE");
-      }
-      request.setCustomerName(getCustomerName(handler, admin, soldTo));
-      request.setStreetLine1(soldTo.getAddrTxt());
-      request.setStreetLine2(soldTo.getAddrTxt2());
-      request.setLandedCountry(soldTo.getLandCntry());
-      request.setPostalCode(soldTo.getPostCd());
-      request.setStateProv(soldTo.getStateProv());
-      request.setMinConfidence("8");
-    }
-
-    return request;
-  }
-
-  /**
-   * returns concatenated customerName from admin or address as per country
-   * settings
-   * 
-   * @param handler
-   * @param admin
-   * @param soldTo
-   * @return
-   */
-  private String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
-    String customerName = null;
-    if (!handler.customerNamesOnAddress()) {
-      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
-    } else {
-      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-    }
-    return customerName;
-  }
-
-  /**
    * Connects to the details service and gets the details of the DUNS NO from
    * D&B
    * 
@@ -1559,7 +1529,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
+              : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");
