@@ -1149,12 +1149,12 @@ public abstract class AutomationUtil {
 
     return !newName.equals(oldName);
   }
-  
-    public static boolean checkCommentSection(EntityManager entityManager, Admin admin, Data data) {
+
+  public static boolean checkCommentSection(EntityManager entityManager, Admin admin, Data data) {
     List<String> BP_CMT_1 = Arrays.asList("Maintenance", "MA", "HWMA");
     List<String> BP_CMT_2 = Arrays.asList("End User", "HW");
     boolean rejectRequest = false;
-    String restrictCd = data.getRestrictTo();
+    String restrictCd = StringUtils.isNotBlank(data.getRestrictTo()) ? data.getRestrictTo() : "";
     String sql = ExternalizedQuery.getSql("AUTOMATION.GET_CMT_LOG");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", admin.getId().getReqId());
