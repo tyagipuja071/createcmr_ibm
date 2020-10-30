@@ -106,6 +106,7 @@ var TemplateService = (function() {
         content : dojo.formToObject(formId),
         timeout : 50000,
         load : function(data, ioargs) {
+          console.log(data);
           if (data && data.template) {
             TemplateService.loadTemplate(data.template, formId);
           }
