@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CmrtCust;
 import com.ibm.cio.cmr.request.entity.CmrtCustExt;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.entity.MassUpdtAddr;
 import com.ibm.cio.cmr.request.entity.MassUpdtData;
 import com.ibm.cio.cmr.request.model.BatchEmailModel;
@@ -272,7 +273,9 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
 
       if (!StringUtils.isBlank(data.getRepTeamMemberNo())) {
-        if (!data.getRepTeamMemberNo().equals(legacyCust.getSalesRepNo())) {
+        DataRdc rdcData = null;
+        rdcData = LegacyDirectUtil.getOldData(entityManager, String.valueOf(data.getId().getReqId()));
+        if (rdcData != null && !data.getRepTeamMemberNo().equals(rdcData.getRepTeamMemberNo())) {
           legacyCust.setSalesGroupRep(data.getRepTeamMemberNo());
         }
         legacyCust.setSalesRepNo(data.getRepTeamMemberNo());
