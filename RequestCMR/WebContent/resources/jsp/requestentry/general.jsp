@@ -405,7 +405,7 @@ if (readOnly){
         </cmr:column>
       </cmr:view>
       </c:if>
-      <cmr:view forGEO="EMEA,MCO,MCO1,MCO2,FR,CEMEA,JP">
+      <cmr:view forGEO="EMEA,MCO,MCO1,MCO2,FR,CEMEA,JP,CA">
         <cmr:column span="2" containerForField="CustomerScenarioType">
           <p>
             <cmr:label fieldId="custGrp">
@@ -520,7 +520,7 @@ if (readOnly){
       </cmr:row>      
     </cmr:view>
     
-    <cmr:view forGEO="US,LA">
+    <cmr:view forGEO="US,LA,CA">
       <cmr:row addBackground="false" topPad="10">
         <cmr:column span="2">
           <p>
@@ -637,7 +637,7 @@ if (readOnly){
           </cmr:row>
         </cmr:column>
         </cmr:view>
-        <cmr:view exceptForGEO="JP">
+        <cmr:view exceptForGEO="JP" exceptForCountry="649">
           <cmr:column span="2">
             <cmr:row>
               <cmr:column span="2">

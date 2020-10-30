@@ -43,6 +43,7 @@ import com.ibm.cio.cmr.request.service.CmrClientService;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
@@ -919,6 +920,18 @@ public class USUtil extends AutomationUtil {
       RequestChangeContainer changes, AutomationResult<ValidationOutput> output, ValidationOutput validation) throws Exception {
     // init
     Admin admin = requestData.getAdmin();
+    Data data = requestData.getData();
+
+    LOG.debug("Verifying PayGo Accreditation for " + admin.getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, admin.getSourceSystId());
+    // do an initial check for PayGo cmrs
+    if (payGoAddredited && "PG".equals(data.getOrdBlk())) {
+      LOG.debug("Allowing name/address changes for PayGo accredited partner " + admin.getSourceSystId() + " Request: " + admin.getId().getReqId());
+      output.setDetails("Skipped checks on updates to PayGo CMR. Partner accredited for PayGo.\n");
+      validation.setMessage("Validated");
+      validation.setSuccess(true);
+      return true;
+    }
 
     String sqlKey = ExternalizedQuery.getSql("AUTO.US.CHECK_CMDE");
     PreparedQuery query = new PreparedQuery(entityManager, sqlKey);
