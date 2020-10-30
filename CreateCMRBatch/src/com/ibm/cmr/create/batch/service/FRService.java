@@ -40,7 +40,7 @@ import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
-import com.ibm.cio.cmr.request.util.geo.impl.CEMEAHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
 import com.ibm.cmr.create.batch.model.MassUpdateServiceInput;
 import com.ibm.cmr.create.batch.util.BatchUtil;
@@ -673,7 +673,7 @@ public class FRService extends TransConnService {
   }
 
   private DataRdc getDataRdcRecords(EntityManager entityManager, Data data) {
-    LOG.debug("Searching for DATA_RDC records for Austria Processing " + data.getId().getReqId());
+    LOG.debug("Searching for DATA_RDC records for France Processing " + data.getId().getReqId());
     String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", data.getId().getReqId());
@@ -748,7 +748,7 @@ public class FRService extends TransConnService {
           String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
           boolean isDataUpdated = false;
-          isDataUpdated = CEMEAHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+          isDataUpdated = FranceHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
           lockRecordUpdt(entityManager, admin);
 
           for (Addr addr : addresses) {
@@ -962,7 +962,7 @@ public class FRService extends TransConnService {
             String applicationId = BatchUtil.getAppId(data.getCmrIssuingCntry());
 
             boolean isDataUpdated = false;
-            isDataUpdated = CEMEAHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+            isDataUpdated = FranceHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
 
             for (Addr addr : addresses) {
               entityManager.detach(addr);
@@ -1184,8 +1184,8 @@ public class FRService extends TransConnService {
             AddrRdc addrRdc = getAddrRdcRecords(entityManager, addr);
             boolean isAddrUpdated = false;
 
-            if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
-              CEMEAHandler swHandler = new CEMEAHandler();
+            if (SystemLocation.FRANCE.equals(data.getCmrIssuingCntry())) {
+              FranceHandler swHandler = new FranceHandler();
               isAddrUpdated = swHandler.isAddrUpdated(addr, addrRdc, data.getCmrIssuingCntry());
             }
             if (isAddrUpdated) {
@@ -1201,8 +1201,8 @@ public class FRService extends TransConnService {
         // addresses
         boolean isDataUpdated = false;
 
-        if (SystemLocation.AUSTRIA.equals(data.getCmrIssuingCntry())) {
-          isDataUpdated = CEMEAHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+        if (SystemLocation.FRANCE.equals(data.getCmrIssuingCntry())) {
+          isDataUpdated = FranceHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
         }
 
         if (isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) {
@@ -2145,10 +2145,10 @@ public class FRService extends TransConnService {
     request.setSeqNo(addr.getId().getAddrSeq());
     // call the service
     if (isTempReactivate) {
-      LOG.info("Sending request to Austria Service for TREC(Temporary Reactivate) [Request ID: " + request.getReqId() + " CMR No: "
+      LOG.info("Sending request to France Service for TREC(Temporary Reactivate) [Request ID: " + request.getReqId() + " CMR No: "
           + request.getCmrNo() + " Type: " + request.getReqType() + " SAP No: " + request.getSapNo() + "]");
     } else {
-      LOG.info("Sending request to AustriaService [Request ID: " + request.getReqId() + " CMR No: " + request.getCmrNo() + " Type: "
+      LOG.info("Sending request to FranceService [Request ID: " + request.getReqId() + " CMR No: " + request.getCmrNo() + " Type: "
           + request.getReqType() + " SAP No: " + request.getSapNo() + "]");
     }
     LOG.trace("Request JSON:");
@@ -2188,7 +2188,7 @@ public class FRService extends TransConnService {
           + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
           + "]");
     } else {
-      LOG.info("Response received from AustriaProcessService [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " KUNNR: "
+      LOG.info("Response received from FranceProcessService [Request ID: " + response.getReqId() + " CMR No: " + response.getCmrNo() + " KUNNR: "
           + addr.getSapNo() + " Status: " + response.getStatus() + " Message: " + (response.getMessage() != null ? response.getMessage() : "-")
           + "]");
     }
