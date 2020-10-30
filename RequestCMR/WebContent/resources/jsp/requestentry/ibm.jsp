@@ -185,7 +185,7 @@ dojo.addOnLoad(function(){
     </cmr:view>
     
     <!-- DEFECT 1205817 : Merge SORTL and SBO fields -->
-    <cmr:view exceptForGEO="LA,EMEA,AP,MCO,MCO1,MCO2,FR,CEMEA,NORDX,NL,CN">
+    <cmr:view exceptForGEO="LA,EMEA,AP,MCO,MCO1,MCO2,FR,CEMEA,NORDX,NL,CN" exceptForCountry="649">
     <cmr:row topPad="10">
     <cmr:column span="2" containerForField="SearchTerm" >
         <p>
@@ -199,7 +199,7 @@ dojo.addOnLoad(function(){
     </cmr:row>
    </cmr:view>
 
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848" exceptForGEO="FR,JP">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848,649" exceptForGEO="FR,JP">
     <cmr:row topPad="10" addBackground="true">
       <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755">
         <p>
@@ -355,7 +355,7 @@ dojo.addOnLoad(function(){
   <%}%>
 
    <!--  PPSCEID, Membership Level, BP Relation Type -->    
-   <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760">
+   <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,760,649">
 		<cmr:row topPad="10" addBackground="true">
   			<cmr:column span="2" containerForField="PPSCEID">
   				<p>
@@ -446,5 +446,9 @@ dojo.addOnLoad(function(){
     
      <!--  SWISS fields -->
     <jsp:include page="SWISS/ch_ibm.jsp" />
+    
+       <!--  Canada fields -->
+    <jsp:include page="CA/ca_ibm.jsp" />
+    
      
 	</cmr:section>

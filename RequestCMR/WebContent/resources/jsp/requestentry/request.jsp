@@ -380,7 +380,7 @@ div#ibm-content-main {
     
 	<form:hidden path="dupCmrReason"/>
 
-
+    
     <cmr:view forCountry="760">
       <form:hidden path="custType" />
     </cmr:view>
@@ -393,6 +393,12 @@ div#ibm-content-main {
     	<form:hidden path="hwSvcsRepTeamNo" />
     </cmr:view>
 	
+    <%-- Canada Handling --%>
+    <cmr:view exceptForCountry="649">
+      <form:hidden path="invoiceDistCd" />
+      <form:hidden path="cusInvoiceCopies" />
+    </cmr:view>
+    
     <!-- Your Actions Dropdown -->
     <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : ""}" style="display: none">
       <c:if test="${sourceSystem != null }">
