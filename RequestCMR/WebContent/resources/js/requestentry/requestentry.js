@@ -131,7 +131,9 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      if (checkIfFinalDnBCheckRequired()) {
+			if(checkForConfirmationAttachments()){
+				showDocTypeConfirmDialog();
+			} else if (checkIfFinalDnBCheckRequired()) {
         matchDnBForAutomationCountries();
       } else if (checkIfUpfrontUpdateChecksRequired()) {
         addUpdateChecksExecution(frmCMR);
@@ -1244,7 +1246,7 @@ function overrideDnBMatch() {
   cmr
       .showConfirm(
           'doOverrideDnBMatch()',
-          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>D&B Match Override</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
           'Warning', null, null);
 }
 
@@ -1468,8 +1470,8 @@ function matchDnBForAutomationCountries() {
               cmr
                   .showConfirm(
                       'autoDnbImportMatch("' + data.dunsNo + '","0")',
-                      'The customer name on the request is a tradestyle name. For CMR creation, legal name should be used. <strong>Tradestyle name can be placed on the address’s division line.<strong> Do you want to override the customer name on the request with <u>'
-                          + data.legalName + '</u>?' + '?', 'Warning', 'doOverrideDnBMatch()', {
+                      'The customer name on the request is a tradestyle name. For CMR creation, legal name should be used. <strong>Tradestyle name can be placed on the address’s division line.</strong> Do you want to override the customer name on the request with <strong><u>'
+                          + data.legalName + '</u></strong>?' + '?', 'Warning', 'doOverrideDnBMatch()', {
                         OK : 'Yes',
                         CANCEL : 'No'
                       });
@@ -1562,4 +1564,30 @@ function addUpdateChecksExecution(frmCMR) {
 
 function showAddrVerificationModal() {
   cmr.showModal('addressVerificationModal');
+}
+
+
+function checkForConfirmationAttachments(){
+	var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+    ID : id
+  });
+  if (ret && ret.ret1) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function showDocTypeConfirmDialog() {
+	cmr
+	.showConfirm(
+		'doChangeDocType()',
+		'There are Legal Name Confirmation and/or Address Confirmation attachment(s) attached with the request. '+
+		'These attachment types are not supported anymore and will be sunset. Do you want to use <strong>Company Proof</strong> instead?',
+		'Warning', null, null);
+}
+
+function doChangeDocType() {
+  FormManager.doAction('frmCMR', 'CONFIRM_DOC_UPD', true, "Updating attachment types to 'Company Proof'...");
 }
