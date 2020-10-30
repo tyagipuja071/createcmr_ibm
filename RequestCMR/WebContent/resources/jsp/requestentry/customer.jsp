@@ -28,6 +28,26 @@
         </p>
       </cmr:column>
     </cmr:view>
+    <cmr:view forGEO="CA">
+      <cmr:column span="2" containerForField="AbbrevLocation">
+        <p>
+          <label for="abbrevNm"> 
+            <cmr:fieldLabel fieldId="AbbrevLocation" />: 
+            <cmr:delta text="${rdcdata.abbrevLocn}" oldValue="${reqentry.abbrevLocn}" /> 
+          </label>
+          <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="1" containerForField="OEMInd" width="70">
+        <p>
+          <label for="oemInd"> &nbsp; </label>
+          <cmr:field fieldId="OEMInd" path="oemInd" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="OEMInd" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="OEMInd" />
+          </cmr:label>
+        </p>
+      </cmr:column>
+    </cmr:view>
   </cmr:row>
 
   <cmr:row>

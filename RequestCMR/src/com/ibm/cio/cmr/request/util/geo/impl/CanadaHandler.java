@@ -10,15 +10,20 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
+import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.entity.DataPK;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -30,6 +35,7 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
  */
 public class CanadaHandler extends GEOHandler {
 
+  private static final Logger LOG = Logger.getLogger(CanadaHandler.class);
   private static final String[] USABLE_ADDRESSES = new String[] { "ZS01", "ZI01", "ZP01" };
 
   @Override
@@ -113,10 +119,22 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void doBeforeDataSave(EntityManager entityManager, Admin admin, Data data, String cmrIssuingCntry) throws Exception {
+    setAddressRelatedData(entityManager, admin, data, null);
   }
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    if (!"ZS01".equals(addr.getId().getAddrType())) {
+      // only update for main address
+      return;
+    }
+    DataPK pk = new DataPK();
+    pk.setReqId(addr.getId().getReqId());
+    Data data = entityManager.find(Data.class, pk);
+    AdminPK apk = new AdminPK();
+    apk.setReqId(addr.getId().getReqId());
+    Admin admin = entityManager.find(Admin.class, apk);
+    setAddressRelatedData(entityManager, admin, data, addr);
   }
 
   @Override
@@ -153,4 +171,49 @@ public class CanadaHandler extends GEOHandler {
     return false;
   }
 
+  /* new functions for Canada only */
+
+  /**
+   * Sets the DATA field values that depend on the main address like Location
+   * No, etc
+   * 
+   * @param entityManager
+   * @param admin
+   * @param data
+   * @param zs01
+   */
+  private void setAddressRelatedData(EntityManager entityManager, Admin admin, Data data, Addr zs01) {
+    Addr mainAddr = zs01;
+    if (mainAddr == null) {
+      // reuse italy's ZS01
+      String sql = ExternalizedQuery.getSql("ITALY.GETINSTALLING");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", data.getId().getReqId());
+      mainAddr = query.getSingleResult(Addr.class);
+    }
+    if (mainAddr == null) {
+      return;
+    }
+
+    // set preferred language to F for Quebec
+    if ("QC".equals(mainAddr.getStateProv())) {
+      data.setCustPrefLang("F");
+    }
+
+    // set CS Branch to first 3 digits of postal code
+    if (mainAddr.getPostCd() != null && mainAddr.getPostCd().length() >= 3) {
+      data.setSalesTeamCd(mainAddr.getPostCd().substring(0, 3));
+    }
+    if (mainAddr.getCity1() != null) {
+      data.setAbbrevLocn(mainAddr.getCity1().length() > 12 ? mainAddr.getCity1().substring(0, 12) : mainAddr.getCity1());
+    }
+
+    // set abbreviated name
+    String name = admin.getMainCustNm1();
+    if (name != null) {
+      data.setAbbrevNm(name.length() > 12 ? name.substring(0, 12).toUpperCase() : name);
+    }
+
+    entityManager.merge(data);
+  }
 }

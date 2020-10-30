@@ -96,6 +96,33 @@ function addCAAddressHandler(cntry, addressMode, saving) {
     }
   }
 }
+
+/**
+ * Toggles the COPY function on the address tab if there are already 2 addresses - for initial release only
+ * @param value
+ * @param rowIndex
+ * @param grid
+ * @returns
+ */
+function canCopyAddress(value, rowIndex, grid) {
+  if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount >= 2) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Toggles the REMOVE function on the address tab and prevents removng the ZS01 address
+ * @param value
+ * @param rowIndex
+ * @param grid
+ * @returns
+ */
+function canRemoveAddress(value, rowIndex, grid) {
+  var reqType = FormManager.getActualValue('reqType');
+  return reqType == 'C' || grid.getItem(rowIndex).addrType[0] != 'ZS01'
+}
+
 /**
  * After configuration for Canada
  * Add the scripts here and not via addAfterConfig calls to 
