@@ -115,6 +115,8 @@ public abstract class USBPHandler {
       switch (custSubGrp) {
       case USUtil.SC_BP_END_USER:
         return new USBPEndUserHandler();
+      case USUtil.SC_BP_POOL:
+        return new USBPPoolHandler();
       }
     } else if (USUtil.CG_BY_MODEL.equals(custGrp)) {
       String type = admin.getCustType();
@@ -869,6 +871,43 @@ public abstract class USBPHandler {
         for (PPSProfile profile : response.getProfiles()) {
           if ("1".equals(profile.getTierCode())) {
             LOG.debug("BP " + response.getCompanyName() + " is a T1.");
+            return true;
+          }
+        }
+      } catch (Exception e) {
+        LOG.warn("PPS error encountered.", e);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if the current BP is a T2 from PPS Service
+   * 
+   * @param data
+   * @return
+   */
+  public boolean isTier2BP(Data data) {
+    String ceId = data.getPpsceid();
+
+    if (!StringUtils.isBlank(ceId)) {
+      String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+      LOG.debug("CE ID or Enterprise not mapped to a registered BP. Checking");
+      try {
+        PPSServiceClient client = CmrServicesFactory.getInstance().createClient(url, PPSServiceClient.class);
+        client.setRequestMethod(Method.Get);
+        client.setReadTimeout(1000 * 60 * 5);
+        PPSRequest request = new PPSRequest();
+        request.setCeid(ceId);
+        PPSResponse response = client.executeAndWrap(request, PPSResponse.class);
+        if (response == null || !response.isSuccess()) {
+          LOG.warn("PPS error encountered.");
+          return false;
+        }
+        for (PPSProfile profile : response.getProfiles()) {
+          if ("2".equals(profile.getTierCode())) {
+            LOG.debug("BP " + response.getCompanyName() + " is a T2.");
             return true;
           }
         }
