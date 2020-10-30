@@ -420,7 +420,7 @@ public class CalculateCoverageElement extends OverridingElement {
               case "StartsOrEndsWith":
               case "Equals":
                 details.append(" - " + (addr ? "[Addr] " : "") + field + " = " + val + "\n");
-                if (createOverrides && StringUtils.isNotBlank(fieldValue) && fieldValue.trim().equals(val)) {
+                if (createOverrides && (StringUtils.isBlank(fieldValue) || !fieldValue.trim().equals(val))) {
                   output.addOverride(getProcessCode(), addr ? addrToUse : "DATA", dbField, "", val);
                 }
                 break;
