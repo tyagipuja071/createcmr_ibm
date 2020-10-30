@@ -91,11 +91,11 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       bpHandler.copyAndFillIBMData(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
 
       bpHandler.doFinalValidations(engineData, requestData, details, overrides, output, ibmCmr);
+      output.setResults("Success");
     }
 
     output.setProcessOutput(overrides);
     output.setDetails(details.toString());
-    output.setResults("Success");
     return output;
   }
 

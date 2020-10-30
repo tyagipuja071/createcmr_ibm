@@ -747,21 +747,26 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
-  protected boolean checkPPSCEID(String ppsCeId) throws Exception {
+  public static boolean checkPPSCEID(String ppsCeId) {
     if (StringUtils.isBlank(ppsCeId)) {
       return false;
     }
-    PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-        PPSServiceClient.class);
-    client.setRequestMethod(Method.Get);
-    client.setReadTimeout(1000 * 60 * 5);
-    PPSRequest request = new PPSRequest();
-    request.setCeid(ppsCeId.toLowerCase());
-    PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-    if (!ppsResponse.isSuccess()) {
+    try {
+      PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
+          PPSServiceClient.class);
+      client.setRequestMethod(Method.Get);
+      client.setReadTimeout(1000 * 60 * 5);
+      PPSRequest request = new PPSRequest();
+      request.setCeid(ppsCeId.toLowerCase());
+      PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
+      if (!ppsResponse.isSuccess()) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (Exception e) {
+      LOG.error("Error occured in connecting to PPS", e);
       return false;
-    } else {
-      return true;
     }
   }
 
