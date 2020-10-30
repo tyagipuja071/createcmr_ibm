@@ -832,7 +832,9 @@ function addAddressTypeValidator() {
               installingCnt++;
             }
           }
-          if (contractCnt > 1) {
+          if(contractCnt == 0) {
+            return new ValidationResult(null, false, 'Contract(Sold-to) Address is mandatory.');
+          } else if (contractCnt > 1) {
             return new ValidationResult(null, false, 'Only one Contract address can be defined. Please remove the additional Contract address.');
           } else {
             return new ValidationResult(null, true);
