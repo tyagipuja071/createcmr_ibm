@@ -100,3 +100,7 @@
   <script src="${resourcesPath}/js/requestentry/validators/swiss_validations.js?${cmrv}" type="text/javascript"></script>
 </cmr:view>
 
+<cmr:view forCountry="649">
+  <script src="${resourcesPath}/js/requestentry/validators/ca_validations.js?${cmrv}" type="text/javascript"></script>
+</cmr:view>
+

@@ -637,7 +637,7 @@ if (readOnly){
           </cmr:row>
         </cmr:column>
         </cmr:view>
-        <cmr:view exceptForGEO="JP">
+        <cmr:view exceptForGEO="JP" exceptForCountry="649">
           <cmr:column span="2">
             <cmr:row>
               <cmr:column span="2">

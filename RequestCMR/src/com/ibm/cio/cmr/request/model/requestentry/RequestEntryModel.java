@@ -419,6 +419,10 @@ public class RequestEntryModel extends BaseModel {
   // CMR-5910 - military flag
   private String military;
 
+  // canada fields
+  private String invoiceDistCd;
+  private String cusInvoiceCopies;
+
   public String getMatchIndc() {
     return matchIndc;
   }
@@ -3014,6 +3018,22 @@ public class RequestEntryModel extends BaseModel {
 
   public void setMilitary(String military) {
     this.military = military;
+  }
+
+  public String getInvoiceDistCd() {
+    return invoiceDistCd;
+  }
+
+  public void setInvoiceDistCd(String invoiceDistCd) {
+    this.invoiceDistCd = invoiceDistCd;
+  }
+
+  public String getCusInvoiceCopies() {
+    return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
   }
 
 }
