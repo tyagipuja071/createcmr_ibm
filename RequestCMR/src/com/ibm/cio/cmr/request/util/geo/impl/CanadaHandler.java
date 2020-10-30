@@ -3,6 +3,9 @@
  */
 package com.ibm.cio.cmr.request.util.geo.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -27,9 +30,30 @@ import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
  */
 public class CanadaHandler extends GEOHandler {
 
+  private static final String[] USABLE_ADDRESSES = new String[] { "ZS01", "ZI01", "ZP01" };
+
   @Override
   public void convertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry, ImportCMRModel searchModel)
       throws Exception {
+    List<FindCMRRecordModel> converted = new ArrayList<>();
+    List<FindCMRRecordModel> records = source.getItems();
+    for (FindCMRRecordModel record : records) {
+      // if address is usable, process and add to converted
+      if (Arrays.asList(USABLE_ADDRESSES).contains(record.getCmrAddrTypeCode())) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) || "ZI01".equals(record.getCmrAddrTypeCode())) {
+          // set the address type to Install At for CreateCMR
+          record.setCmrAddrTypeCode("ZS01");
+        } else if ("ZP01".equals(record.getCmrAddrTypeCode())) {
+          // set the address type to Invoice To for CreateCMR
+          record.setCmrAddrTypeCode("ZI01");
+        }
+
+        converted.add(record);
+      }
+    }
+
+    Collections.sort(converted);
+    source.setItems(converted);
   }
 
   @Override

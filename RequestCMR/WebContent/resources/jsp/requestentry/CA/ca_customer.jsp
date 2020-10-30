@@ -17,8 +17,17 @@
 %>
 
 <cmr:view forCountry="649">
+  <%if ("U".equals(reqentry.getReqType())){ %>
+  <cmr:row addBackground="true" topPad="20">
+     <cmr:column span="6">
+       <img src="${resourcesPath}/images/warn-icon.png" class="cmr-error-icon">
+       <cmr:note text="For updates to any of the fields below, leave the fields below blank if you will not be changing the current values." />
+     </cmr:column>
+  </cmr:row>
+  <%} %>
 
-  <cmr:row addBackground="true">
+
+  <cmr:row addBackground="true" >
     <cmr:column span="2" containerForField="LocalTax1">
       <p>
         <label for="taxCd1"> 
@@ -28,6 +37,15 @@
         <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <cmr:column span="2" containerForField="PPSCEID">
+      <p>
+        <cmr:label fieldId="ppsceid">
+          <cmr:fieldLabel fieldId="PPSCEID" />:
+          <cmr:delta text="${rdcdata.ppsceid}" oldValue="${reqentry.ppsceid}"/>
+        </cmr:label>
+        <cmr:field fieldId="PPSCEID" id="ppsceid" path="ppsceid" tabId="MAIN_IBM_TAB" />
+      </p>
+    </cmr:column>
     <cmr:column span="2" containerForField="VADNumber">
       <p>
         <label for="taxCd2"> 
@@ -35,17 +53,6 @@
           <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd1}" />
         </label>
         <cmr:field path="taxCd2" id="taxCd2" fieldId="VADNumber" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>
-    <cmr:column span="2" containerForField="CustomerData">
-      <p>
-        <label for="taxCd3"> 
-          <cmr:fieldLabel fieldId="CustomerData" />: 
-          <%-- uncomment after DM changes or remap field
-          <cmr:delta text="${rdcdata.taxCd3}" oldValue="${reqentry.taxCd3}" />
-          --%>
-        </label>
-        <cmr:field path="taxCd3" id="taxCd3" fieldId="CustomerData" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
   </cmr:row>
@@ -133,6 +140,17 @@
         <cmr:field path="collectorNameNo" id="collectorNameNo" fieldId="BillingProcCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
+    <cmr:column span="2" containerForField="CustomerData">
+      <p>
+        <label for="taxCd3"> 
+          <cmr:fieldLabel fieldId="CustomerData" />: 
+          <%-- uncomment after DM changes or remap field
+          <cmr:delta text="${rdcdata.taxCd3}" oldValue="${reqentry.taxCd3}" />
+          --%>
+        </label>
+        <cmr:field path="taxCd3" id="taxCd3" fieldId="CustomerData" tabId="MAIN_CUST_TAB" />
+      </p>
+    </cmr:column>
   </cmr:row>
 
   <cmr:row addBackground="true">
@@ -158,7 +176,7 @@
     </cmr:column>
     <cmr:column span="2" containerForField="InvoiceSplitCd">
       <p>
-        <label for="invoiceSplitCd"> 
+        <label for="cusInvoiceCopies"> 
           <cmr:fieldLabel fieldId="InvoiceSplitCd" />: 
           <%-- uncomment after DM changes or field remap 
           <cmr:delta text="${rdcdata.invoiceSplitCd}" oldValue="${reqentry.invoiceSplitCd}" />

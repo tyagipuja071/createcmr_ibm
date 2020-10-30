@@ -46,10 +46,12 @@
   </cmr:column>
   <cmr:column span="2">
     <p>
-      <cmr:label fieldId="Division">
-        <cmr:fieldLabel fieldId="Division" />:
-          </cmr:label>
-      <cmr:field fieldId="Division" id="divn" path="divn" />
+      <cmr:label fieldId="stateProv">
+        <cmr:fieldLabel fieldId="StateProv" />:
+             <cmr:delta text="-" id="delta-stateProv" code="L" />
+        <cmr:info text="${ui.info.addrStateProv}" />
+      </cmr:label>
+      <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
     </p>
   </cmr:column>
 </cmr:row>
@@ -84,16 +86,17 @@
       <cmr:field fieldId="City1" id="city1" path="city1" />
     </p>
   </cmr:column>
-  <cmr:column span="2" containerForField="Department">
+  <cmr:column span="2">
     <p>
-      <cmr:label fieldId="dept">
-        <cmr:fieldLabel fieldId="Department" />:
-             <cmr:delta text="-" id="delta-dept" />
+      <cmr:label fieldId="postCd">
+        <cmr:fieldLabel fieldId="PostalCode" />:
+             <cmr:delta text="-" id="delta-postCd" />
       </cmr:label>
-      <cmr:field fieldId="Department" id="dept" path="dept" />
+      <cmr:field fieldId="PostalCode" id="postCd" path="postCd" />
     </p>
   </cmr:column>
 </cmr:row>
+<%-- 
 <cmr:row>
   <cmr:column span="2">
     <p>
@@ -114,20 +117,27 @@
     </p>
   </cmr:column>
 </cmr:row>
-
+--%>
 <cmr:row>
+
   <cmr:column span="2">
     <p>
-      <cmr:label fieldId="stateProv">
-        <cmr:fieldLabel fieldId="StateProv" />:
-             <cmr:delta text="-" id="delta-stateProv" code="L" />
-        <cmr:info text="${ui.info.addrStateProv}" />
-      </cmr:label>
-      <cmr:field fieldId="StateProv" id="stateProv" path="stateProv" />
+      <cmr:label fieldId="Division">
+        <cmr:fieldLabel fieldId="Division" />:
+          </cmr:label>
+      <cmr:field fieldId="Division" id="divn" path="divn" />
     </p>
   </cmr:column>
-
-
+  <cmr:column span="2" containerForField="Department">
+    <p>
+      <cmr:label fieldId="dept">
+        <cmr:fieldLabel fieldId="Department" />:
+             <cmr:delta text="-" id="delta-dept" />
+      </cmr:label>
+      <cmr:field fieldId="Department" id="dept" path="dept" />
+    </p>
+  </cmr:column>
+<%-- 
   <cmr:column span="2" containerForField="Floor">
     <p>
       <cmr:label fieldId="floor">
@@ -137,8 +147,10 @@
       <cmr:field fieldId="Floor" id="floor" path="floor" />
     </p>
   </cmr:column>
+--%>
 </cmr:row>
 
+<%-- 
 <cmr:row>
   <cmr:column span="2">
     <p>
@@ -160,20 +172,12 @@
     </p>
   </cmr:column>
 </cmr:row>
-
+--%>
 <cmr:row>
-  <cmr:column span="2">
-    <p>
-      <cmr:label fieldId="postCd">
-        <cmr:fieldLabel fieldId="PostalCode" />:
-             <cmr:delta text="-" id="delta-postCd" />
-      </cmr:label>
-      <cmr:field fieldId="PostalCode" id="postCd" path="postCd" />
-    </p>
-  </cmr:column>
 
 </cmr:row>
 
+<%-- 
 <cmr:row addBackground="true">
   <cmr:column span="2" containerForField="CustPhone">
     <p>
@@ -210,6 +214,7 @@
     </p>
   </cmr:column>
 </cmr:row>
+--%>
 
 <cmr:row addBackground="true">
   <cmr:column span="2">
