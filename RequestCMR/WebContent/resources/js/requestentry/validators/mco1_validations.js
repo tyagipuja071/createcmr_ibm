@@ -361,7 +361,9 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var postCd = FormManager.getActualValue('postCd');
-        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$")) {
+        var landCntry = FormManager.getActualValue('landCntry');
+        
+        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$") && (landCntry == 'ZA' || landCntry == 'SZ' || landCntry == 'LS')) {
           return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
         }
         return new ValidationResult(null, true);
@@ -1564,6 +1566,18 @@ function validateExistingCMRNoZA(scenriosToBeSkipped) {
                   name : 'cmrNo'
                 }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
               }
+            }
+            var exists1 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+              COUNTRY : cntry,
+              CMR_NO : cmrNo,
+              MANDT : cmr.MANDT
+            });
+            if (exists1 && exists1.ret1 && action != 'PCM') {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The requested CMR: ' + cmrNo + ' already exists in the system for country : ' + cntry);
             }
           }
           return new ValidationResult({
