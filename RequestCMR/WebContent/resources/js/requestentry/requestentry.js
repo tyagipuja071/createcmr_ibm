@@ -1569,7 +1569,7 @@ function showAddrVerificationModal() {
 
 function checkForConfirmationAttachments(){
 	var id = FormManager.getActualValue('reqId');
-  var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+  var ret = cmr.query('CHECK_CONFIRMATION_ATTACHMENTS', {
     ID : id
   });
   if (ret && ret.ret1) {
