@@ -46,7 +46,7 @@ public class MCOSaHandler extends MCOHandler {
   protected static final Logger LOG = Logger.getLogger(MCOSaHandler.class);
 
   protected static final String[] ZA_MASS_UPDATE_SHEET_NAMES = { "Data", "Billing Address", "Mailing Address", "Installing Address",
-      "Shipping Address (Update)", "EPL Address" };
+      "Shipping Address", "EPL Address" };
 
   private static final String[] SA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CAP", "ModeOfPayment", "TransportZone" };
 
@@ -1134,13 +1134,6 @@ public class MCOSaHandler extends MCOHandler {
                 error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
               }
 
-              if (countSubRegion > 1 && !("ZA").equals(landCountry)) {
-                LOG.trace("Out of Name Con't and Street Con't only 1 can be filled at the same time.");
-                error.addError(row.getRowNum(), "Name Con't, Street Con't",
-                    "Out of Name Con't and Street Con't only 1 can be filled at the same time. ");
-                countSubRegion = 0;
-              }
-
               if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
                 LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
                 error.addError(row.getRowNum(), "Address Sequence No.",
@@ -1149,11 +1142,18 @@ public class MCOSaHandler extends MCOHandler {
 
               if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
                 if (count > 1 && !("ZA").equals(landCountry)) {
-                  LOG.trace("Out of Name Con't, PO BOX only 1 can be filled at the same time.");
+                  LOG.trace("Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time.");
                   error.addError(row.getRowNum(), "Name Con't, PO BOX",
-                      "Out of Name Con't, Street and PO BOX only 1 can be filled at the same time. ");
+                      "Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time. ");
                   count = 0;
                 }
+              }
+
+              if (countSubRegion > 1 && !("ZA").equals(landCountry)) {
+                LOG.trace("Out of Name Con't and Street Con't only 1 can be filled at the same time.");
+                error.addError(row.getRowNum(), "Name Con't, Street Con't",
+                    "Out of Name Con't and Street Con't only 1 can be filled at the same time. ");
+                countSubRegion = 0;
               }
 
               if (StringUtils.isBlank(custName1)) {
@@ -1353,4 +1353,5 @@ public class MCOSaHandler extends MCOHandler {
   public boolean skipOnSummaryUpdate(String cntry, String field) {
     return Arrays.asList(SA_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
   }
+
 }
