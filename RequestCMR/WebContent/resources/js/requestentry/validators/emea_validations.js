@@ -5585,6 +5585,7 @@ function canUpdateAddress(value, rowIndex, grid) {
 // Defect 1509289 :Mukesh
 function canCopyAddress(value, rowIndex, grid) {
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var rowData = grid.getItem(rowIndex);
   var addrType = rowData.addrType[0];
   if (addrType == 'PG01'){
     // no copy for paygo addresses
