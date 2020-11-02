@@ -793,6 +793,15 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(oldData.getModeOfPayment());
       results.add(update);
     }
+
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getCustClass(), "CustClass", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "CustClass", cmrCountry));
+      results.add(update);
+    }
+
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
@@ -800,6 +809,7 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       results.add(update);
     }
+
   }
 
   @Override
