@@ -3013,9 +3013,11 @@ public class LegacyDirectService extends TransConnService {
             continue;
           }
 
-          if (transformer.skipLegacyAddressData(entityManager, cmrObjects, addr, false)) {
-            LOG.debug("Skipping RDC update for address :" + addr.getId().getAddrType());
-            continue;
+          if (!"PG01".equals(addr.getId().getAddrType())) {
+            if (transformer.skipLegacyAddressData(entityManager, cmrObjects, addr, false)) {
+              LOG.debug("Skipping RDC update for address :" + addr.getId().getAddrType());
+              continue;
+            }
           }
 
           request.setSapNo(addr.getSapNo());
