@@ -1139,4 +1139,14 @@ public abstract class AutomationUtil {
   public List<String> getSkipChecksRequestTypesforCMDE() {
     return new ArrayList<String>();
   }
+
+  public static boolean isLegalNameChanged(Admin admin) {
+    String newName = admin.getMainCustNm1().toUpperCase();
+    newName += !StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2().toUpperCase() : "";
+
+    String oldName = !StringUtils.isBlank(admin.getOldCustNm1()) ? admin.getOldCustNm1().toUpperCase() : "";
+    oldName += !StringUtils.isBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2().toUpperCase() : "";
+
+    return !newName.equals(oldName);
+  }
 }

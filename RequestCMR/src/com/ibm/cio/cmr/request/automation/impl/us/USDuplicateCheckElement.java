@@ -468,6 +468,17 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
       response.setMatches(cmrCheckMatchesTmp);
       break;
+    case USUtil.SC_COMM_REGULAR:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if (((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
+            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
+                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo()))
+            && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
     case USUtil.SC_BYMODEL:
       USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
       switch (usDetails.getCustTypCd()) {
