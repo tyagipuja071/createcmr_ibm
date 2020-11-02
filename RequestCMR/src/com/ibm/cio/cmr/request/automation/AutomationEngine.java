@@ -381,7 +381,6 @@ public class AutomationEngine {
               admin.setLockBy(null);
               admin.setLockTs(null);
               createComment(entityManager, cmt, reqId, appUser);
-
             } else if (actionsOnError.contains(ActionOnError.Wait)) {
               // do not change status
               moveToNextStep = false;
