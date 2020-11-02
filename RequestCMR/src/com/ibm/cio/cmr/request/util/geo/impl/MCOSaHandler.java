@@ -1084,7 +1084,7 @@ public class MCOSaHandler extends MCOHandler {
 
             }
 
-            checkList = Arrays.asList(nameCont, streetCont, poBox);
+            checkList = Arrays.asList(nameCont, poBox);
             count = checkList.stream().filter(field -> !field.isEmpty()).count();
 
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
