@@ -363,7 +363,7 @@ function addAddressFieldValidators() {
         var postCd = FormManager.getActualValue('postCd');
         var landCntry = FormManager.getActualValue('landCntry');
         
-        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$") && (landCntry == 'ZA' || landCntry == 'SZ' || landCntry == 'LS')) {
+        if (postCd && postCd.length > 0 && !postCd.match("^[a-zA-Z0-9 ]*$") && (landCntry == 'ZA' || landCntry == 'SZ' || landCntry == 'LS' || landCntry == 'NA')) {
           return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
         }
         return new ValidationResult(null, true);
