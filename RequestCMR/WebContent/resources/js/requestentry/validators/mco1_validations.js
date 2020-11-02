@@ -1567,12 +1567,12 @@ function validateExistingCMRNoZA(scenriosToBeSkipped) {
                 }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
               }
             }
-            var exist1 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
+            var exists1 = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
               COUNTRY : cntry,
               CMR_NO : cmrNo,
               MANDT : cmr.MANDT
             });
-            if (exist1 && exist1.ret1 && action != 'PCM') {
+            if (exists1 && exists1.ret1 && action != 'PCM') {
               return new ValidationResult({
                 id : 'cmrNo',
                 type : 'text',
