@@ -290,6 +290,7 @@ public class MEHandler extends BaseSOFHandler {
                     converted.add(installing);
                   } else {
                     CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                    String legacycity = "";
                     if (gAddr != null) {
                       LOG.debug("Adding installing to the records");
                       FindCMRRecordModel installing = new FindCMRRecordModel();
@@ -297,6 +298,11 @@ public class MEHandler extends BaseSOFHandler {
                       // copyAddrData(installing, installingAddr, gAddrSeq);
                       installing.setCmrAddrTypeCode("ZP02");
                       installing.setCmrAddrSeq(gAddrSeq);
+                      String gline5 = gAddr.getAddrLine5();
+                      if (!StringUtils.isBlank(gline5)) {
+                        String legacyposcd = gline5.split(" ")[0];
+                        legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
+                      }
                       // add value
                       installing.setCmrName1Plain(gAddr.getAddrLine1());
                       if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
@@ -311,6 +317,9 @@ public class MEHandler extends BaseSOFHandler {
                         installing.setCmrStreetAddress(gAddr.getAddrLine4());
                       }
                       installing.setCmrCity(record.getCmrCity());
+                      if ("865".equals(reqEntry.getCmrIssuingCntry())) {
+                        installing.setCmrCity(legacycity);
+                      }
                       installing.setCmrCity2(record.getCmrCity2());
                       installing.setCmrCountry(gAddr.getAddrLine6());
                       installing.setCmrCountryLanded("");
@@ -328,6 +337,7 @@ public class MEHandler extends BaseSOFHandler {
                 }
                 if (StringUtils.isBlank(adrnr)) {
                   CmrtAddr gAddr = getLegacyGAddress(entityManager, reqEntry.getCmrIssuingCntry(), searchModel.getCmrNum());
+                  String legacycity = "";
                   if (gAddr != null) {
                     LOG.debug("Adding installing to the records");
                     FindCMRRecordModel installing = new FindCMRRecordModel();
@@ -335,6 +345,11 @@ public class MEHandler extends BaseSOFHandler {
                     // copyAddrData(installing, installingAddr, gAddrSeq);
                     installing.setCmrAddrTypeCode("ZP02");
                     installing.setCmrAddrSeq(gAddrSeq);
+                    String gline5 = gAddr.getAddrLine5();
+                    if (!StringUtils.isBlank(gline5)) {
+                      String legacyposcd = gline5.split(" ")[0];
+                      legacycity = gline5.substring(legacyposcd.length() + 1, gline5.length());
+                    }
                     // add value
                     installing.setCmrName1Plain(gAddr.getAddrLine1());
                     if (!StringUtils.isBlank(gAddr.getAddrLine2())) {
@@ -349,6 +364,9 @@ public class MEHandler extends BaseSOFHandler {
                       installing.setCmrStreetAddress(gAddr.getAddrLine4());
                     }
                     installing.setCmrCity(record.getCmrCity());
+                    if ("865".equals(reqEntry.getCmrIssuingCntry())) {
+                      installing.setCmrCity(legacycity);
+                    }
                     installing.setCmrCity2(record.getCmrCity2());
                     installing.setCmrCountry(gAddr.getAddrLine6());
                     installing.setCmrCountryLanded("");
