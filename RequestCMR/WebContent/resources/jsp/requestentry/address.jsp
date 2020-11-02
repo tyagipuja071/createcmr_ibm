@@ -228,10 +228,15 @@ visibility: hidden !IMPORTANT;
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
-          
-          <cmr:view forGEO="FR">
-            <cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
-          </cmr:view>
+
+			<!-- MALTA LEGACY -->
+			<cmr:view forCountry="780">
+				<cmr:gridCol width="120px" field="custNm3" header="Name 3" />
+			</cmr:view>				
+
+			<cmr:view forGEO="FR">
+            	<cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
+          	</cmr:view>
         <%} %>
         
         <!-- Defect : 1444422 for FR-->
