@@ -37,11 +37,13 @@ import com.ibm.cio.cmr.request.entity.MachinesToInstallPK;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
 import com.ibm.cio.cmr.request.model.KeyContainer;
+import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseService;
+import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -683,9 +685,11 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     if (addrList != null && addrList.size() > 0) {
       Addr addr = addrList.get(0);
       if (addr != null && JPHandler.isJPIssuingCountry(model.getCmrIssuingCntry())) {
-        addr.setCustNm4((addr.getCustNm4() == null ? "" : addr.getCustNm4()) + (addr.getPoBoxCity() == null ? "" : addr.getPoBoxCity()));
+        String custNm4 = ((addr.getCustNm4() == null ? "" : addr.getCustNm4()) + (addr.getPoBoxCity() == null ? "" : addr.getPoBoxCity())).trim();
+        addr.setCustNm4(custNm4.length() > 23 ? custNm4.substring(0, 23) : custNm4);
         addr.setPoBoxCity(null);
-        addr.setAddrTxt((addr.getAddrTxt() == null ? "" : addr.getAddrTxt()) + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2()));
+        String addrTxt = ((addr.getAddrTxt() == null ? "" : addr.getAddrTxt()) + (addr.getAddrTxt2() == null ? "" : addr.getAddrTxt2())).trim();
+        addr.setAddrTxt(addrTxt.length() > 23 ? addrTxt.substring(0, 23) : addrTxt);
         addr.setAddrTxt2(null);
       }
       return addr;
@@ -1415,13 +1419,16 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     query.executeSql();
   }
 
-  public void recomputeDPLResult(AppUser user, EntityManager entityManager, long reqId) {
+  public void recomputeDPLResult(AppUser user, EntityManager entityManager, long reqId) throws CmrException {
 
     Scorecard scorecard = getScorecardRecord(entityManager, reqId);
 
     if (scorecard == null) {
       return;
     }
+
+    String currentResult = scorecard.getDplChkResult();
+
     this.log.debug("Recomputing DPL Results for Request ID " + reqId);
     String sql = ExternalizedQuery.getSql("DPL.GETDPLCOUNTS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
@@ -1447,6 +1454,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
       }
 
+      boolean doDplSearch = false;
       if (all == notrequired) {
         scorecard.setDplChkResult("NR");
         // not required
@@ -1456,8 +1464,10 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       } else if (all == failed + notrequired) {
         // all failed
         scorecard.setDplChkResult("AF");
+        doDplSearch = true;
       } else if (passed > 0 && all != passed) {
         // some passed, some failed/not done
+        doDplSearch = true;
         scorecard.setDplChkResult("SF");
       }
 
@@ -1471,8 +1481,37 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         scorecard.setDplChkUsrId(user.getIntranetId());
         scorecard.setDplChkUsrNm(user.getBluePagesName());
       }
+      if (scorecard.getDplChkUsrId() == null) {
+        scorecard.setDplChkUsrId(user.getIntranetId());
+        scorecard.setDplChkUsrNm(user.getBluePagesName());
+      }
+
+      if (currentResult == null || !currentResult.equals(scorecard.getDplChkResult())) {
+        // it has changed, clear assessment
+        scorecard.setDplAssessmentBy(null);
+        scorecard.setDplAssessmentDate(null);
+        scorecard.setDplAssessmentCmt(null);
+        scorecard.setDplAssessmentResult(null);
+      }
       this.log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
       updateEntity(scorecard, entityManager);
+
+      if (doDplSearch) {
+        this.log.debug("Performing DPL Search for Request " + reqId + " with DPL Status: " + scorecard.getDplChkResult());
+
+        ParamContainer params = new ParamContainer();
+        params.addParam("processType", "ATTACH");
+        params.addParam("reqId", reqId);
+        params.addParam("user", user);
+        params.addParam("filePrefix", "AutoDPLSearch_");
+
+        try {
+          DPLSearchService dplService = new DPLSearchService();
+          dplService.process(null, params);
+        } catch (Exception e) {
+          this.log.warn("DPL results not attached to the request", e);
+        }
+      }
     }
   }
 

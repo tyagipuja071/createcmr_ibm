@@ -28,6 +28,26 @@
         </p>
       </cmr:column>
     </cmr:view>
+    <cmr:view forGEO="CA">
+      <cmr:column span="2" containerForField="AbbrevLocation">
+        <p>
+          <label for="abbrevNm"> 
+            <cmr:fieldLabel fieldId="AbbrevLocation" />: 
+            <cmr:delta text="${rdcdata.abbrevLocn}" oldValue="${reqentry.abbrevLocn}" /> 
+          </label>
+          <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <cmr:column span="1" containerForField="OEMInd" width="70">
+        <p>
+          <label for="oemInd"> &nbsp; </label>
+          <cmr:field fieldId="OEMInd" path="oemInd" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="OEMInd" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="OEMInd" />
+          </cmr:label>
+        </p>
+      </cmr:column>
+    </cmr:view>
   </cmr:row>
 
   <cmr:row>
@@ -124,7 +144,7 @@
   <cmr:row addBackground="true">
     <!-- // 1164561 -->
 
-    <cmr:view exceptForCountry="631,643,749,778,818,834,852,856,646,714,720,666,726,754,755,862,866,641,702,624,848" exceptForGEO="MCO,MCO1,MCO2,CEMEA,JP">
+    <cmr:view exceptForCountry="631,643,749,778,818,834,852,856,646,714,720,666,726,754,755,862,866,641,702,624,848,649" exceptForGEO="MCO,MCO1,MCO2,CEMEA,JP">
       <cmr:column span="2" containerForField="LocalTax1">
         <p>
           <label for="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: <cmr:delta text="${rdcdata.taxCd1}" oldValue="${reqentry.taxCd1}" />
@@ -159,7 +179,7 @@
 
   <cmr:row addBackground="true">
     <!-- // 1164558 -->
-    <cmr:view exceptForCountry="631,848" exceptForGEO="LA,JP">
+    <cmr:view exceptForCountry="631,848,649" exceptForGEO="LA,JP">
       <cmr:view exceptForGEO="EMEA,AP,MCO1,MCO,MCO2,CEMEA,NORDX,BELUX,NL,CN">
         <cmr:column span="2" containerForField="LocalTax2">
           <p>
@@ -182,7 +202,7 @@
         </p>
       </cmr:column>
       </cmr:view>
-      <cmr:column span="2" containerForField="VAT" exceptForCountry="897">
+      <cmr:column span="2" containerForField="VAT" exceptForCountry="897,649">
         <p>
           <label for="vat"> <cmr:fieldLabel fieldId="VAT" />: <cmr:delta text="${rdcdata.vat}" oldValue="${reqentry.vat}" /> <cmr:view
               forCountry="755">
@@ -235,6 +255,19 @@
         </cmr:column>
       </cmr:view>
     </cmr:view>
+    <cmr:view forGEO="MCO2">
+      <c:if test="${reqentry.reqType != 'U'}">
+        <cmr:column span="1" containerForField="VATExempt">
+          <p>
+            <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+            <cmr:field fieldId="VATExempt" id="vatExempt" path="vatExempt" tabId="MAIN_CUST_TAB" />
+            <cmr:label fieldId="vatExempt" forRadioOrCheckbox="true">
+              <cmr:fieldLabel fieldId="VATExempt" />
+            </cmr:label>
+          </p>
+        </cmr:column>
+      </c:if>
+    </cmr:view>
     <cmr:view forCountry="724,619">
       <c:if test="${reqentry.reqType != 'U'}">
         <cmr:column span="1" containerForField="VATExempt">
@@ -249,7 +282,6 @@
         </cmr:column>
       </c:if>
     </cmr:view>
-
   </cmr:row>
 
   <!-- Include Here Customer Specific fields for GEOs -->
@@ -297,7 +329,9 @@
   <jsp:include page="NL/nl_customer.jsp" />
   
    <!--  SWISS fields -->
-    <jsp:include page="SWISS/ch_customer.jsp" />
+  <jsp:include page="SWISS/ch_customer.jsp" />
 
+   <!--  Canada fields -->
+  <jsp:include page="CA/ca_customer.jsp" />
 
 </cmr:section>

@@ -136,6 +136,7 @@ public class DnBUtil {
     registerDnBVATCode("UZ", 17279); // Tax Registration Number (Uzbekistan)
     registerDnBVATCode("VE", 1396); // Venezuelan Registry of Fiscal Information
     registerDnBVATCode("VN", 1397); // Business Registration Number (Vietnam)
+    registerDnBVATCode("ZA", 15169); // Value Added Tax Number(ZA)
 
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
