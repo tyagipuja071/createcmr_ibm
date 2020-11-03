@@ -404,7 +404,14 @@ function afterConfigForCEMEA() {
   }
 
   FormManager.readOnly('capInd');
-  FormManager.setValue('capInd', true);
+  if (CEE_INCL.has(FormManager.getActualValue('cmrIssuingCntry'))) {
+    if (FormManager.getActualValue('reqType') == 'C') {
+      FormManager.getField('capInd').set('checked', true);
+    }
+  } else {
+    FormManager.setValue('capInd', true);
+  }
+
   FormManager.readOnly('subIndustryCd');
 
   if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.AUSTRIA) {
