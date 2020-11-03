@@ -1266,7 +1266,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     request.setAddr1(addr.getAddrTxt());
     request.setAddr2(addr.getAddrTxt2());
     request.setId(id);
-    if (JPHandler.isJPIssuingCountry(addr.getLandCntry()))
+    if (JPHandler.isJPIssuingCountry(issuingCountry))
       request.setCompanyName(addr.getCustNm3());
     else
       request.setCompanyName(name);
@@ -1433,6 +1433,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
     String sql = ExternalizedQuery.getSql("DPL.GETDPLCOUNTS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
     List<Object[]> results = query.getResults();
     if (results != null && results.size() > 0) {
       int all = 0;
@@ -1458,14 +1459,14 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       if (all == notrequired) {
         scorecard.setDplChkResult("NR");
         // not required
-      } else if (all == passed + notrequired) {
+      } else if ((all == passed + notrequired) || (all == passed)) {
         scorecard.setDplChkResult("AP");
         // all passed
-      } else if (all == failed + notrequired) {
+      } else if ((all == failed + notrequired) || (all == failed)) {
         // all failed
         scorecard.setDplChkResult("AF");
         doDplSearch = true;
-      } else if (passed > 0 && all != passed) {
+      } else if ((passed > 0 && all != passed) || (failed > 0 && all != failed)) {
         // some passed, some failed/not done
         doDplSearch = true;
         scorecard.setDplChkResult("SF");

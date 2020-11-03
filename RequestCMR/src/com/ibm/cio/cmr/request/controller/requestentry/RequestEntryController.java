@@ -125,7 +125,7 @@ public class RequestEntryController extends BaseController {
             RequestEntryModel reqModel = results.get(0);
             // get the value of addr Std here
 
-            if (dplStatusInvalid(reqModel)) {
+            if (dplStatusInvalid(AppUser.getUser(request), reqModel)) {
               AddressService.clearDplResults(reqModel.getReqId());
               mv = new ModelAndView("redirect:/request/" + reqModel.getReqId(), "reqentry", reqModel);
               MessageUtil.setErrorMessage(mv, MessageUtil.ERROR_DPL_RESET);
@@ -185,7 +185,7 @@ public class RequestEntryController extends BaseController {
     return mv;
   }
 
-  private boolean dplStatusInvalid(RequestEntryModel model) {
+  private boolean dplStatusInvalid(AppUser user, RequestEntryModel model) {
     // 1150478: for completed records, do not reset DPL, JZ Mar 2, 2017
     if ("COM".equals(model.getReqStatus())) {
       LOG.debug("Completed record, DPL check will not be reset.");
@@ -193,6 +193,10 @@ public class RequestEntryController extends BaseController {
     }
     if ("NR".equals(model.getDplChkResult())) {
       LOG.debug("DPL Check is not required for this record, will not reset status.");
+      return false;
+    }
+    if (user != null && !user.getIntranetId().toLowerCase().equals(model.getLockBy() != null ? model.getLockBy().toLowerCase() : "")) {
+      LOG.debug("Request is not locked by the user, status will not be reset.");
       return false;
     }
     Date ts = model.getDplChkTs();
@@ -580,10 +584,13 @@ public class RequestEntryController extends BaseController {
 
     try {
       FindCMRResultModel results = null;
-      if(!model.isPoolRecord()){	
-  	    results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
+      if (!model.isPoolRecord()) {
+        results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry);
       } else {
-  	    results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry, true); //searching for pool records
+        results = SystemUtil.findCMRs(cmrNo, cmrCntry, 2000, searchCntry, true); // searching
+                                                                                 // for
+                                                                                 // pool
+                                                                                 // records
       }
 
       boolean noResults = false;
@@ -662,8 +669,8 @@ public class RequestEntryController extends BaseController {
       FindCMRRecordModel record = results.getItems().get(0);
       String dunsNo = record.getCmrDuns();
       String dnBname = "";
-      if(record != null && StringUtils.isNotBlank(record.getCmrName1Plain())){
-        dnBname = record.getCmrName1Plain() + (StringUtils.isNotBlank(record.getCmrName2Plain())? " " + record.getCmrName2Plain() : "");
+      if (record != null && StringUtils.isNotBlank(record.getCmrName1Plain())) {
+        dnBname = record.getCmrName1Plain() + (StringUtils.isNotBlank(record.getCmrName2Plain()) ? " " + record.getCmrName2Plain() : "");
       }
       // do a fresh check on details for proper formatting
       record = DnBUtil.extractRecordFromDnB(reqModel.getCmrIssuingCntry(), dunsNo, record.getCmrPostalCode());
