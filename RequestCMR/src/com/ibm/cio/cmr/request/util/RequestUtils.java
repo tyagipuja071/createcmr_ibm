@@ -1335,6 +1335,23 @@ public class RequestUtils {
   }
 
   /**
+   * Checks the usage configuration for tradestyle names
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String getTradestyleUsage(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_TRADESTYLE_USAGE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    String result = query.getSingleResult(String.class);
+    return StringUtils.isNotBlank(result) ? result : "";
+
+  }
+
+  /**
    * Checks whether automation is configued for a particular country or not
    * 
    * @param entityManager
@@ -1343,6 +1360,22 @@ public class RequestUtils {
    */
   public static String isDnBCountry(EntityManager entityManager, String country) {
     String sql = ExternalizedQuery.getSql("AUTOMATION.IS_DNB_COUNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    return query.getSingleResult(String.class);
+  }
+
+  /**
+   * Checks whether quick search is configued as first interface for a
+   * particular country or not
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String isQuickSearchFirstEnabled(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.START_FROM_QUICK_SEARCH");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setForReadOnly(true);
     query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
@@ -1382,6 +1415,33 @@ public class RequestUtils {
       }
     } catch (Exception e) {
       LOG.warn("Status of requester automation cannot be determined", e);
+      return false;
+    }
+  }
+
+  /**
+   * Checks whether quick search is configued as first interface for a
+   * particular country or not
+   * 
+   * @param country
+   * @return
+   */
+  public static boolean isQuickSearchFirstEnabled(String country) {
+    try {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        String quickSearchFirst = isQuickSearchFirstEnabled(entityManager, country);
+        if ("Y".equals(quickSearchFirst)) {
+          return true;
+        } else {
+          return false;
+        }
+      } finally {
+        entityManager.clear();
+        entityManager.close();
+      }
+    } catch (Exception e) {
+      LOG.warn("Status of Quick Search cannot be determined", e);
       return false;
     }
   }
