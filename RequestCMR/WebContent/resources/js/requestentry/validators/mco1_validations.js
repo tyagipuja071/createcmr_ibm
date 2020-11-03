@@ -1572,7 +1572,7 @@ function validateExistingCMRNoZA(scenriosToBeSkipped) {
               CMR_NO : cmrNo,
               MANDT : cmr.MANDT
             });
-            if (exists1 && exists1.ret1 && action != 'PCM') {
+            if (exists1 && exists1.ret1 && action != 'PCM' && !cmrNo.startsWith('P')) {
               return new ValidationResult({
                 id : 'cmrNo',
                 type : 'text',
