@@ -110,7 +110,7 @@ public class CommonWordsUtil {
     addEqual("0", "zero");
     addEqual("mfg", "manufacturing");
 
-    addIrrelevant("llc", "gmbh");
+    addIrrelevant("llc", "gmbh", "pty", "chez");
 
     commonPrepositions.add("OF");
     commonPrepositions.add("WITH");
@@ -182,7 +182,7 @@ public class CommonWordsUtil {
   }
 
   public static void main(String[] args) {
-    String[] words = { "BANK OF AMERICA NATIONAL,LLC", "JP MORGAN CHASE BANK" };
+    String[] words = { "BANK OF AMERICA NATIONAL,LLC", "JP MORGAN CHASE BANK PTY LTD" };
     for (String word : words) {
       List<String> variations = getVariations(word);
       for (String var : variations) {
