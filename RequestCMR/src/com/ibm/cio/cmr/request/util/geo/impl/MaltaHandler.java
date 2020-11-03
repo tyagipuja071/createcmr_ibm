@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
@@ -22,6 +23,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.listener.CmrContextListener;
+import com.ibm.cio.cmr.request.masschange.obj.TemplateValidation;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
@@ -925,6 +927,40 @@ public class MaltaHandler extends BaseSOFHandler {
       }
     }
     return maxSeq;
+  }
+
+  @Override
+  public List<String> getMandtAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZS01", "ZP01", "ZI01", "ZD01");
+    }
+    return null;
+  }
+
+  @Override
+  public List<String> getAdditionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
+      return Arrays.asList("ZD01", "ZI01");
+    }
+    return null;
+  }
+
+  @Override
+  public List<String> getOptionalAddrTypeForLDSeqGen(String cmrIssuingCntry) {
+    return null;
+  }
+
+  @Override
+  public List<String> getReservedSeqForLDSeqGen(String cmrIssuingCntry) {
+    if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
+      return Arrays.asList("4");
+    }
+    return null;
+  }
+
+  @Override
+  public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
+    super.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
   }
 
   @Override

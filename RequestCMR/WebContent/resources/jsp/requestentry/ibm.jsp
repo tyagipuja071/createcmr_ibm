@@ -199,7 +199,7 @@ dojo.addOnLoad(function(){
     </cmr:row>
    </cmr:view>
 
-    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848" exceptForGEO="FR,JP">
+    <cmr:view exceptForCountry="643,749,778,818,834,852,856,646,714,720,848" exceptForGEO="FR,JP,MCO2">
     <cmr:row topPad="10" addBackground="true">
       <cmr:column span="2" containerForField="Enterprise" exceptForGEO="MCO1,NORDX" exceptForCountry="755">
         <p>
