@@ -1282,12 +1282,24 @@ function addAttachmentValidatorOnTaxRegMadagascar() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        var taxCd1 = FormManager.getActualValue('busnType');
+        var numeroStat = FormManager.getActualValue('busnType');
         var reqId = FormManager.getActualValue('reqId');
+
+        if (FormManager.getActualValue('reqType') == 'U') {
+          var result = cmr.query("GET.OLD_BUSN_TYP", {
+            REQ_ID : reqId
+          });
+          var oldNumerStat = result.ret1;
+          var curNumerStat = numeroStat;
+          if (oldNumerStat == curNumerStat) {
+            return new ValidationResult(null, true);
+          }
+        }
+
         var ret = cmr.query('CHECK_VATD_ATTACHMENT', {
           ID : reqId
         });
-        if (taxCd1.length > 0) {
+        if (numeroStat.length > 0) {
           if (ret == null || ret.ret1 == null) {
             return new ValidationResult(null, false, 'VAT/TAX Documentation has not been attached to the request.');
           }
