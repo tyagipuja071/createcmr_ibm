@@ -30,6 +30,18 @@
 					path="repTeamMemberNo" tabId="MAIN_IBM_TAB" />
 			</p>
 		</cmr:column>
+
+		<cmr:column span="2" containerForField="Enterprise" forCountry="780">
+			<p>
+				<cmr:label fieldId="enterprise">
+					<cmr:fieldLabel fieldId="Enterprise" />:
+              <cmr:delta text="${rdcdata.enterprise}"
+						oldValue="${reqentry.enterprise}" />
+				</cmr:label>
+				<cmr:field id="enterprise" path="enterprise" fieldId="Enterprise"
+					tabId="MAIN_IBM_TAB" />
+			</p>
+		</cmr:column>
 		<%-- <cmr:column span="2" containerForField="EngineeringBo" forCountry="838">
       <p>
         <cmr:label fieldId="engineeringBo">
@@ -52,8 +64,8 @@
 
 		<cmr:view forCountry="838">
 			<%
-        if (reqentry.getReqType().equalsIgnoreCase("U")) {
-      %>
+			  if (reqentry.getReqType().equalsIgnoreCase("U")) {
+			%>
 			<cmr:column span="2" containerForField="SalesBusOff2">
 				<p>
 					<cmr:label fieldId="salesBusOffCd">
@@ -65,7 +77,9 @@
 						fieldId="SalesBusOff2" tabId="MAIN_IBM_TAB" />
 				</p>
 			</cmr:column>
-			<%} else if (reqentry.getReqType().equalsIgnoreCase("C")) { %>
+			<%
+			  } else if (reqentry.getReqType().equalsIgnoreCase("C")) {
+			%>
 			<cmr:column span="2" containerForField="SalesBusOff">
 				<p>
 					<cmr:label fieldId="salesBusOffCd">
