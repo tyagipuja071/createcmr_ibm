@@ -1084,7 +1084,7 @@ public class MCOSaHandler extends MCOHandler {
 
             }
 
-            checkList = Arrays.asList(nameCont, poBox);
+            checkList = Arrays.asList(nameCont, streetCont, poBox);
             count = checkList.stream().filter(field -> !field.isEmpty()).count();
 
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
@@ -1143,17 +1143,19 @@ public class MCOSaHandler extends MCOHandler {
               if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
                 if (count > 1 && !("ZA").equals(landCountry)) {
                   LOG.trace("Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time.");
-                  error.addError(row.getRowNum(), "Name Con't, PO BOX",
+                  error.addError(row.getRowNum(), "Name Con't, Street Con't, PO BOX",
                       "Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time. ");
                   count = 0;
                 }
               }
 
-              if (countSubRegion > 1 && !("ZA").equals(landCountry)) {
-                LOG.trace("Out of Name Con't and Street Con't only 1 can be filled at the same time.");
-                error.addError(row.getRowNum(), "Name Con't, Street Con't",
-                    "Out of Name Con't and Street Con't only 1 can be filled at the same time. ");
-                countSubRegion = 0;
+              if (!("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName()))) {
+                if (countSubRegion > 1 && !("ZA").equals(landCountry)) {
+                  LOG.trace("Out of Name Con't and Street Con't only 1 can be filled at the same time.");
+                  error.addError(row.getRowNum(), "Name Con't, Street Con't",
+                      "Out of Name Con't and Street Con't only 1 can be filled at the same time. ");
+                  countSubRegion = 0;
+                }
               }
 
               if (StringUtils.isBlank(custName1)) {
