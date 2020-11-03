@@ -888,7 +888,7 @@ function streetValidatorCustom() {
         var addrPlain = FormManager.getActualValue('addrTxt').trim();
 
         if (addrPlain != null && addrPlain.length > 30) {
-          return new ValidationResult(FormManager.getField('addrTxt'), false, 'Street value should be at most 23 CHAR long + "Street".');
+          return new ValidationResult(FormManager.getField('addrTxt'), false, 'Street value should be at most 30 CHAR long.');
         } else {
           return new ValidationResult(null, true);
         }
