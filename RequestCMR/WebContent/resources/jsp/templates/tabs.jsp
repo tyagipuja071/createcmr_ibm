@@ -48,11 +48,9 @@ boolean approver = user != null && user.isApprover();
                 <a href="javascript: goToUrl('${contextPath}/myappr')">Approvals</a>
               </li>
             <%} %>
-            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
-                <li id="SEARCH_HOME_TAB">
-                    <a href="javascript: goToUrl('${contextPath}/searchhome')">Search</a>
-                </li>
-            <%}%>  
+              <li id="SEARCH_HOME_TAB">
+                <a href="javascript: goToUrl('${contextPath}/searchhome')">Search</a>
+              </li>
   
   					<%if (SystemConfiguration.isAdmin(request) || (user != null && user.isCmde())){%>
                 <li id="ADMIN_TAB">
@@ -112,8 +110,11 @@ boolean approver = user != null && user.isApprover();
         </c:if>
 
         <c:if test="${primaryTabId ==  'SEARCH_HOME'}">
+            <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
             <li id="LSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/legacysearch')">Legacy DB2</a></li>
             <li id="MQSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/mqsearch')">SOF/WTAAS</a></li>
+            <li id="DPLSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/dplsearch')">DPL Search</a></li>
+            <%}%>
         </c:if>
         
 

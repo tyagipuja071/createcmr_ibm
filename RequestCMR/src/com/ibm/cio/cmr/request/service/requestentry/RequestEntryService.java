@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -833,6 +834,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     to.setCanClaim((String) from.getValue("CAN_CLAIM"));
     to.setCanClaimAll((String) from.getValue("CAN_CLAIM_ALL"));
     to.setAutoProcessing((String) from.getValue("AUTO_PROCESSING"));
+
+    // copy internal dpl fields, for display only
+    SimpleDateFormat dateFormat = CmrConstants.DATE_FORMAT();
+    to.setIntDplAssessmentResult(score.getDplAssessmentResult());
+    to.setIntDplAssessmentBy(score.getDplAssessmentBy());
+    to.setIntDplAssessmentCmt(score.getDplAssessmentCmt());
+    if (score.getDplAssessmentDate() != null) {
+      to.setIntDplAssessmentDate(dateFormat.format(score.getDplAssessmentDate()));
+    }
   }
 
   @Override

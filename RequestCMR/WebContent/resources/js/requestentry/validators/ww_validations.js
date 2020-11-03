@@ -789,6 +789,29 @@ function validateExistingCMRNo() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+/**
+ * Validator for the DPL Assessment
+ */
+function addDPLAssessmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var dplResult = FormManager.getActualValue('dplChkResult').toUpperCase();
+        if (dplResult != 'AF' && dplResult != 'SF'){
+          return new ValidationResult(null, true);
+        }
+        var result = typeof(_pagemodel) != 'undefined' ? _pagemodel.intDplAssessmentResult : 'X';
+        if (!result || result.trim() == '') {
+          return new ValidationResult(null, false, 'DPL Assessment is required for failed DPL checks. ');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
