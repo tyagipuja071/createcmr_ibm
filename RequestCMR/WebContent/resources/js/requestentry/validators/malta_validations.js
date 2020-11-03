@@ -72,23 +72,6 @@ function afterConfigForMCO2() {
   FormManager.readOnly('capInd');
 }
 
-/**
- * sets fields to lock/mandatory, not scenario handled
- */
-function lockRequireFieldsMCO2() {
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole');
-
-  // fields locked for Requester
-  if (reqType == 'C' && role == GEOHandler.ROLE_REQUESTER) {
-    FormManager.readOnly('specialTaxCd');
-    // FormManager.readOnly('salesBusOffCd');
-    // FormManager.readOnly('repTeamMemberNo');
-    // FormManager.readOnly('isuCd');
-    // FormManager.readOnly('clientTier');
-  }
-}
-
 function disableAddrFieldsCEWA() {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
@@ -864,15 +847,18 @@ function disableEnableFieldsForMT() {
   var reqType = FormManager.getActualValue('reqType');
 
   if (reqType == 'C') {
-    FormManager.readOnly('cmrOwner');
     FormManager.readOnly('sensitiveFlag');
-    if (role == 'REQUESTER') {
-      FormManager.readOnly('specialTaxCd');
-      FormManager.readOnly('custPrefLang');
-    } else {
-      FormManager.enable('specialTaxCd');
-      FormManager.enable('custPrefLang');
-    }
+  }
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('specialTaxCd');
+    FormManager.readOnly('custPrefLang');
+  } else {
+    FormManager.enable('cmrNo');
+    FormManager.enable('cmrOwner');
+    FormManager.enable('specialTaxCd');
+    FormManager.enable('custPrefLang');
   }
 }
 
@@ -950,8 +936,6 @@ dojo.addOnLoad(function() {
   GEOHandler.setRevertIsicBehavior(false);
 
   GEOHandler.addAfterConfig(afterConfigForMCO2, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(lockRequireFieldsMCO2, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(lockRequireFieldsMCO2, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addHandlersForCEWA, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
