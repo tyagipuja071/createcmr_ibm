@@ -290,13 +290,17 @@ public class DPLSearchService extends BaseSimpleService<Object> {
       } else {
         String cntry = reqData.getData().getCmrIssuingCntry();
         for (Addr addr : reqData.getAddresses()) {
+          if (addr.getId().getAddrType().contains("X")) {
+            // no DPL check for uwanted addresses
+            continue;
+          }
           if (!"P".equals(addr.getDplChkResult()) && !"X".equals(addr.getDplChkResult())) {
             String name = "";
             // for japan, name is on cust nm3, CMR-7419
             if (SystemLocation.JAPAN.equals(cntry)) {
               name = addr.getCustNm3();
             } else {
-              name = addr.getCustNm1().toUpperCase();
+              name = addr.getCustNm1() != null ? addr.getCustNm1().toUpperCase() : "";
               if (!StringUtils.isBlank(addr.getCustNm2())) {
                 name += " " + addr.getCustNm2().toUpperCase();
               }
