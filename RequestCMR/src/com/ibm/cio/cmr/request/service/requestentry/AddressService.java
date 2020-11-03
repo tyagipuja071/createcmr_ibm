@@ -1455,7 +1455,6 @@ public class AddressService extends BaseService<AddressModel, Addr> {
         }
       }
 
-      boolean doDplSearch = false;
       if (all == notrequired) {
         scorecard.setDplChkResult("NR");
         // not required
@@ -1465,10 +1464,8 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       } else if ((all == failed + notrequired) || (all == failed)) {
         // all failed
         scorecard.setDplChkResult("AF");
-        doDplSearch = true;
       } else if ((passed > 0 && all != passed) || (failed > 0 && all != failed)) {
         // some passed, some failed/not done
-        doDplSearch = true;
         scorecard.setDplChkResult("SF");
       }
 
@@ -1497,7 +1494,7 @@ public class AddressService extends BaseService<AddressModel, Addr> {
       this.log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
       updateEntity(scorecard, entityManager);
 
-      if (doDplSearch) {
+      if (failed > 0) {
         this.log.debug("Performing DPL Search for Request " + reqId + " with DPL Status: " + scorecard.getDplChkResult());
 
         ParamContainer params = new ParamContainer();
