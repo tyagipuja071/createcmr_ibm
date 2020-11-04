@@ -721,6 +721,9 @@ function validateExistingCMRNo() {
         var cntry = FormManager.getActualValue('cmrIssuingCntry');
         var action = FormManager.getActualValue('yourAction');
         if (reqType == 'C' && cmrNo) {
+          if (cmrNo.startsWith('P')) {
+            return new ValidationResult(null, true);
+          }
           var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
             COUNTRY : cntry,
             CMR_NO : cmrNo,
