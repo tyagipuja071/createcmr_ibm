@@ -113,8 +113,9 @@ boolean approver = user != null && user.isApprover();
             <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
             <li id="LSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/legacysearch')">Legacy DB2</a></li>
             <li id="MQSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/mqsearch')">SOF/WTAAS</a></li>
-            <li id="DPLSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/dplsearch')">DPL Search</a></li>
+            <li id="FILEATTACH_TAB"><a href="javascript: goToUrl('${contextPath}/attachlist')">File Attachments</a></li>
             <%}%>
+            <li id="DPLSEARCH_TAB"><a href="javascript: goToUrl('${contextPath}/dplsearch')">DPL Search</a></li>
         </c:if>
         
 
