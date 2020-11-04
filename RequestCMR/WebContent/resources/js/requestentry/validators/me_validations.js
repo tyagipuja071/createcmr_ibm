@@ -268,6 +268,7 @@ function addCEMEALandedCountryHandler(cntry, addressMode, saving, finalSave) {
       FormManager.setValue('landCntry', FormManager.getActualValue('defaultLandedCountry'));
     } else {
       FilteringDropdown['val_landCntry'] = null;
+      postCdMandatoryByLandCntry();
     }
   } else if (saving) {
     var landCntry = FormManager.getActualValue('landCntry');
@@ -3922,6 +3923,7 @@ function afterConfigTemplateLoadForME() {
   setClassificationCodeME();
   // disableSBO();
   setEngineeringBO();
+  addLandCntryHandler();
 }
 
 function afterConfigForME() {
@@ -3951,11 +3953,20 @@ function afterConfigTemplateForCroatia() {
   setTaxCd1MandatoryCroatia();
 }
 
-function afterConfigTemplateForHungary() {
+function addLandCntryHandler() {
   if (_landCntryHandler == null) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
-      setCustomerName2LblAndBubble();
+      postCdMandatoryByLandCntry();
     });
+  }
+}
+
+function postCdMandatoryByLandCntry() {
+  var postCdMandatoryCntryList = [ 'EG', 'IQ', 'JO', 'LB', 'MA', 'OM', 'PK', 'SA', 'TN' ];
+  if (postCdMandatoryCntryList.indexOf(FormManager.getActualValue('landCntry')) > -1) {
+    FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ], 'MAIN_NAME_TAB');
+  } else {
+    FormManager.removeValidator('postCd', Validators.REQUIRED);
   }
 }
 function validatorsDIGIT() {
@@ -4251,8 +4262,10 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(afterConfigForSlovakia, [ SysLoc.SLOVAKIA ]);
   // Hungary
   GEOHandler.addAddrFunction(initAddressPageHungary, [ SysLoc.HUNGARY ]);
-  GEOHandler.addAfterConfig(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
-  GEOHandler.addAfterTemplateLoad(afterConfigTemplateForHungary, [ SysLoc.HUNGARY ]);
+  // GEOHandler.addAfterConfig(afterConfigTemplateForHungary, [ SysLoc.HUNGARY
+  // ]);
+  // GEOHandler.addAfterTemplateLoad(afterConfigTemplateForHungary, [
+  // SysLoc.HUNGARY ]);
   // Czech
   GEOHandler.addAfterConfig(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
   GEOHandler.addAfterTemplateLoad(afterConfigTemplateForCzech, [ SysLoc.CZECH_REPUBLIC ]);
