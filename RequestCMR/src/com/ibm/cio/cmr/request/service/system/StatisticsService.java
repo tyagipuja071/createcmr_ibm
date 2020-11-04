@@ -44,6 +44,7 @@ import com.ibm.cio.cmr.request.model.system.SquadStatisticsModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.BaseSimpleService;
+import com.ibm.cio.cmr.request.util.geo.MarketUtil;
 import com.ibm.cio.cmr.request.util.system.RequestStatsContainer;
 import com.ibm.cio.cmr.request.util.system.StatXLSConfig;
 
@@ -77,20 +78,35 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
 
     LOG.info("Extracting data from " + model.getDateFrom() + " to " + model.getDateTo());
     String sql = ExternalizedQuery.getSql("METRICS.REQUEST_STAT");
-    String geo = model.getGroupByGeo();
-    if (!StringUtils.isBlank(geo)) {
-      sql += " and data.CMR_ISSUING_CNTRY in (select CMR_ISSUING_CNTRY from CREQCMR.CNTRY_GEO_DEF where GEO_CD = :GEO_CD) ";
+    String geoMarket = model.getGroupByGeo();
+
+    String[] parts = geoMarket.split("[-]");
+    if (parts.length == 2) {
+      if ("GEO".equals(parts[0])) {
+        sql += " and data.CMR_ISSUING_CNTRY in (" + MarketUtil.createCountryFilterForGeo(parts[1]) + ")";
+      } else if ("MKT".equals(parts[0])) {
+        sql += " and data.CMR_ISSUING_CNTRY in (" + MarketUtil.createCountryFilterForMarket(parts[1]) + ")";
+      }
     }
+
     String procCenter = model.getGroupByProcCenter();
     if (!StringUtils.isBlank(procCenter)) {
       sql += " and data.CMR_ISSUING_CNTRY in (select CMR_ISSUING_CNTRY from CREQCMR.PROC_CENTER where upper(PROC_CENTER_NM) = :PROC_CENTER)";
+    }
+    if ("Y".equals(model.getExcludeUnsubmitted())) {
+      sql += "and ( ";
+      sql += " (admin.REQ_STATUS <> 'DRA') ";
+      sql += " or ";
+      sql += " (admin.REQ_STATUS = 'DRA' and exists (select 1 from CREQCMR.WF_HIST hx where admin.REQ_ID = hx.REQ_ID and hx.REQ_STATUS in ('AUT', 'PPN'))) ";
+      sql += " ) ";
+
     }
     sql += " order by admin.REQ_ID";
     sql = StringUtils.replaceOnce(sql, ":FROM", model.getDateFrom());
     sql = StringUtils.replaceOnce(sql, ":TO", model.getDateTo());
 
     PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("GEO_CD", geo);
+    // query.setParameter("GEO_CD", geo);
     query.setParameter("PROC_CENTER", procCenter != null ? procCenter.toUpperCase().trim() : "");
     query.setForReadOnly(true);
 
@@ -309,7 +325,11 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
           cell.setCellValue(sb.toString());
         }
       } else if (value != null) {
-        if (sc.getDbField().endsWith("_TAT")) {
+        if ("IOT".equals(sc.getDbField())) {
+          cell.setCellValue(MarketUtil.getGEO(value.toString().trim()));
+        } else if ("MARKET".equals(sc.getDbField())) {
+          cell.setCellValue(MarketUtil.getMarket(value.toString().trim()));
+        } else if (sc.getDbField().endsWith("_TAT")) {
           Long lVal = (Long) value;
           if (lVal != null && lVal.longValue() >= 0) {
             long millis = lVal.longValue() * 1000;
@@ -363,9 +383,10 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
 
     config.add(new StatXLSConfig("Country Code", "CNTRY_CD", 12, null));
     config.add(new StatXLSConfig("Country", "CNTRY_DESC", 25, null));
-    config.add(new StatXLSConfig("IOT", "IOT", 8, null));
+    config.add(new StatXLSConfig("Geography", "IOT", 10, null));
+    config.add(new StatXLSConfig("Market", "MARKET", 10, null));
     config.add(new StatXLSConfig("Company", "OWNER", 9, null));
-    config.add(new StatXLSConfig("Request Number", "REQ_ID", 16, null));
+    config.add(new StatXLSConfig("Request ID", "REQ_ID", 16, null));
     config.add(new StatXLSConfig("LOB", "LOB", 24, null));
     config.add(new StatXLSConfig("Request Type", "REQ_TYPE", 18, null));
     config.add(new StatXLSConfig("Prospect Conversion", "PROSPECT", 18, null));
@@ -416,6 +437,9 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("Overall TAT", "OVERALL_TAT", 12, "Total time (hh:mm:ss) it took from request creation to completion."));
     config.add(new StatXLSConfig("Submit-to-Complete TAT", "SUBMIT_TO_COMPLETE_TAT", 20,
         "Total time (hh:mm:ss) it took from last request submission that got completed to request closing."));
+
+    config.add(new StatXLSConfig("Child Request ID", "CHILD_REQ_ID", 16, null));
+    config.add(new StatXLSConfig("Pool CMR", "POOL_CMR_INDC", 16, "Indicates whether the completion was done using Pool CMR processing."));
 
   }
 
