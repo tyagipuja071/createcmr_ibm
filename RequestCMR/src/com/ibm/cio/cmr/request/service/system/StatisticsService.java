@@ -393,6 +393,9 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     config.add(new StatXLSConfig("Completion Timestamp", "COMPLETION_TS", 18, null));
     config.add(new StatXLSConfig("Due Date", "REQUEST_DUE_DATE", 16, null));
     config.add(new StatXLSConfig("Final Status", "FINAL_STATUS", 24, null));
+    config.add(new StatXLSConfig("D&B Search", "FIND_DNB_RESULT", 16, null));
+    config.add(new StatXLSConfig("DPL Check", "DPL_CHK_RESULT", 16, null));
+    config.add(new StatXLSConfig("DPL Assessment", "DPL_ASSESSMENT_RESULT", 16, null));
     config.add(new StatXLSConfig("# of Rejections", "REJECT_TOTAL", 14, null));
     config.add(
         new StatXLSConfig("Last Reject Reason", "LAST_REJ_REASON", 25, "If at anytime the request was rejected, the reason for the last rejection"));
