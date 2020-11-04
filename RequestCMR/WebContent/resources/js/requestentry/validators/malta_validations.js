@@ -924,32 +924,30 @@ function addISICValidatorForScenario() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-
 function addIsicClassificationCodeValidator() {
-   console.log("Validator for ISIC & Classification Code for Malta.");	
-   FormManager.addFormValidator((function() {
+  console.log("Validator for ISIC & Classification Code for Malta.");
+  FormManager.addFormValidator((function() {
     return {
       validate : function() {
-	    if(FormManager.getActualValue('reqType') == 'U'){
-	
-           var field = FormManager.getField('custClass'); 
-           var value = FormManager.getActualValue('isicCd');
-    
-             if(value == '9500' && field == '60'){	              
-		         return new ValidationResult(null, true);	            
-             }else if(value != '9500' && field == '60'){
-	             return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60.');
-                }else if(value == '9500' && field != '60'){
-	             return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60.');
-                }else{ 
-	             return new ValidationResult(null, true);
-                 }
-         }
+        if (FormManager.getActualValue('reqType') == 'U') {
+
+          var field = FormManager.getField('custClass');
+          var value = FormManager.getActualValue('isicCd');
+
+          if (value == '9500' && field == '60') {
+            return new ValidationResult(null, true);
+          } else if (value != '9500' && field == '60') {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60.');
+          } else if (value == '9500' && field != '60') {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-
 
 /* End 1430539 */
 dojo.addOnLoad(function() {
