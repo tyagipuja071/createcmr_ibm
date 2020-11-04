@@ -70,7 +70,7 @@ public class UpdateSwitchElement extends ValidatingElement {
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
       boolean isLegalNameUpdtd = handler != null && !handler.customerNamesOnAddress() && AutomationUtil.isLegalNameChanged(admin);
-      RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, reqId);
+      RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
 
       if (changes.hasDataChanges() || isLegalNameUpdtd) {
         boolean hasCountryLogic = false;
