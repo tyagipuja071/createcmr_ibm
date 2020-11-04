@@ -55,6 +55,10 @@ AppUser user = AppUser.getUser(request);
                 <td><a style="cursor:pointer;font-size:13px" title="Search SOF/WTAAS Records" href="${contextPath}/mqsearch">Search SOF/WTAAS Records</a></td>
                 <td style="font-size:13px">Searches against SOF and WTAAS using the MQ query services.</td>
               </tr>
+              <tr>
+                <td><a style="cursor:pointer;font-size:13px" title="File Attachments" href="${contextPath}/attachlist">File Attachments</a></td>
+                <td style="font-size:13px">Lists file attachments related to requests.</td>
+              </tr>
             <%}%>
               <tr>
                 <td><a style="cursor:pointer;font-size:13px" title="Search Denied Parties List (DPL)" href="${contextPath}/dplsearch">Search Denied Parties List (DPL)</a></td>
