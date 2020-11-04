@@ -924,6 +924,31 @@ function addISICValidatorForScenario() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function addIsicClassificationCodeValidator() {
+  console.log("Validator for ISIC & Classification Code for Malta.");
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        if (FormManager.getActualValue('reqType') == 'U') {
+
+          var field = FormManager.getField('custClass');
+          var value = FormManager.getActualValue('isicCd');
+
+          if (value == '9500' && field == '60') {
+            return new ValidationResult(null, true);
+          } else if (value != '9500' && field == '60') {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60.');
+          } else if (value == '9500' && field != '60') {
+            return new ValidationResult(null, false, 'ISIC value 9500 can be entered only for CMR with Classification code 60.');
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -976,5 +1001,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, SysLoc.MALTA, null, true);
   GEOHandler.registerValidator(addISICValidatorForScenario, SysLoc.MALTA, null, true);
+  GEOHandler.registerValidator(addIsicClassificationCodeValidator, SysLoc.MALTA, null, true);
   GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
 });
