@@ -6288,11 +6288,23 @@ function validateCMRNumExistForTR() {
 }
 
 function enableCMRNUMForPROCESSOR() {
+  var isProspect = FormManager.getActualValue('prospLegalInd');
+  var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  var requestType = FormManager.getActualValue('reqType');
-    if (role == 'PROCESSOR' && requestType != 'U') {
-      FormManager.enable('cmrNo');
-    }
+  if (reqType != 'C') {
+    return;
+  }
+  if (dijit.byId('prospLegalInd')) {
+    isProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  console.log("validateCMRNumberForLegacy ifProspect:" + isProspect);
+  if ('Y' == isProspect) {
+    FormManager.readOnly('cmrNo');
+  } else if(role == "PROCESSOR") {
+    FormManager.enable('cmrNo');
+  } else {
+    FormManager.readOnly('cmrNo');
+  }
 }
 
 function checkIfStateProvBlankForProcIT() {
