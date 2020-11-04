@@ -605,18 +605,20 @@ function addAttachmentValidator() {
             var reqId = FormManager.getActualValue('reqId');
             if (reqId != null) {
               reqParam = {
-                REQ_ID : reqId
+                ID : reqId
               };
             }
-            var results = cmr.query('COUNTATTACHMENTRECORDS', reqParam);
+            var results = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
             var recordCount = results.ret1;
 
             if (recordCount != null) {
               if (recordCount > 0) {
                 return new ValidationResult(null, true);
               } else if (recordCount == 0) {
-                return new ValidationResult(null, false, 'Proof of address is mandatory.');
+                return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
               }
+            } else {
+              return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
             }
             break;
           }
@@ -636,35 +638,39 @@ function addAttachmentValidator() {
                 var reqId = FormManager.getActualValue('reqId');
                 if (reqId != null) {
                   reqParam = {
-                    REQ_ID : reqId
+                    ID : reqId
                   };
                 }
-                var results = cmr.query('COUNTATTACHMENTRECORDS', reqParam);
+                var results = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
                 var recordCount = results.ret1;
 
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
                   } else if (recordCount == 0) {
-                    return new ValidationResult(null, false, 'Proof of address is mandatory.');
+                    return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                   }
+                } else {
+                  return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                 }
               } else if (importInd != 'Y') {
                 var reqId = FormManager.getActualValue('reqId');
                 if (reqId != null) {
                   reqParam = {
-                    REQ_ID : reqId
+                    ID : reqId
                   };
                 }
-                var results = cmr.query('COUNTATTACHMENTRECORDS', reqParam);
+                var results = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', reqParam);
                 var recordCount = results.ret1;
 
                 if (recordCount != null) {
                   if (recordCount > 0) {
                     return new ValidationResult(null, true);
                   } else if (recordCount == 0) {
-                    return new ValidationResult(null, false, 'Proof of address is mandatory.');
+                    return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                   }
+                } else {
+                  return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
                 }
               } else {
                 counter = counter + 1;
@@ -674,7 +680,7 @@ function addAttachmentValidator() {
             if (counter > 0) {
               return new ValidationResult(null, true);
             } else {
-              return new ValidationResult(null, false, 'Proof of address is mandatory.');
+              return new ValidationResult(null, false, 'Proof of address is mandatory. Please attach Company Proof.');
             }
           } else {
             return new ValidationResult(null, true);
