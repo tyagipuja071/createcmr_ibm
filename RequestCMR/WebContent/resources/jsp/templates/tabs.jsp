@@ -63,7 +63,7 @@ boolean approver = user != null && user.isApprover();
             <%}%>
             <%if (user != null && (user.isAdmin() || user.isCmde() || user.isProcessor()) ){%>
                 <li id="METRICS_TAB">
-                    <a href="javascript: goToUrl('${contextPath}/metrics/daily')">Metrics</a>
+                    <a href="javascript: goToUrl('${contextPath}/metrics/stats')">Metrics</a>
                 </li>
             <%}%>  
             <li id="HELP_TAB">
@@ -102,8 +102,8 @@ boolean approver = user != null && user.isApprover();
           <li id="CODE_ADMIN_TAB"><a href="javascript: goToUrl('${contextPath}/code')">Code Maintenance</a></li>
 				</c:if>
         <c:if test="${primaryTabId ==  'METRICS'}">
-            <li id="METRICS_DAILY_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/daily')">Daily Totals</a></li>
             <li id="METRICS_STATS_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/stats')">Request Statistics</a></li>
+            <li id="METRICS_DAILY_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/daily')">Daily Totals</a></li>
             <%if (SystemConfiguration.isAdmin(request)){ %> 
             <li id="METRICS_USAGE_TAB"><a href="javascript: goToUrl('${contextPath}/metrics/usage')">Web Service Usage</a></li>
             <%} %>

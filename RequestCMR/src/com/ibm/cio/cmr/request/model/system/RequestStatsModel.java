@@ -152,6 +152,14 @@ public class RequestStatsModel {
   @Column(name = "DPL_ASSESSMENT_RESULT")
   private String dnbAssessmentResult;
 
+  @Column(name = "CHILD_REQ_ID")
+  private long childReqId;
+
+  @Column(name = "POOL_CMR_INDC")
+  private String poolCmrIndc;
+
+  private String market;
+
   public String getCntryCd() {
     return cntryCd;
   }
@@ -526,5 +534,29 @@ public class RequestStatsModel {
 
   public void setDnbAssessmentResult(String dnbAssessmentResult) {
     this.dnbAssessmentResult = dnbAssessmentResult;
+  }
+
+  public long getChildReqId() {
+    return childReqId;
+  }
+
+  public void setChildReqId(long childReqId) {
+    this.childReqId = childReqId;
+  }
+
+  public String getPoolCmrIndc() {
+    return poolCmrIndc;
+  }
+
+  public void setPoolCmrIndc(String poolCmrIndc) {
+    this.poolCmrIndc = poolCmrIndc;
+  }
+
+  public String getMarket() {
+    return market;
+  }
+
+  public void setMarket(String market) {
+    this.market = market;
   }
 }
