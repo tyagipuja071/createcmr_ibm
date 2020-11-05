@@ -36,7 +36,7 @@
       </p>
     </cmr:column> --%>
     <cmr:view forGEO="MCO,MCO1,MCO2">
-      <cmr:column span="2" containerForField="SpecialTaxCd">
+      <cmr:column span="2" containerForField="SpecialTaxCd" exceptForCountry="780">
         <p>
         <label for="specialTaxCd"> 
         	<cmr:fieldLabel fieldId="SpecialTaxCd" />: 
@@ -115,7 +115,7 @@
 
 	<cmr:view forCountry="822,838">
     <cmr:row addBackground="true">
-      <cmr:column span="2" containerForField="CollectionCd">
+      <cmr:column span="2" containerForField="CollectionCd" exceptForCountry="780">
         <p>
             <cmr:label fieldId="collectionCd">
               <cmr:fieldLabel fieldId="CollectionCd" />: 
