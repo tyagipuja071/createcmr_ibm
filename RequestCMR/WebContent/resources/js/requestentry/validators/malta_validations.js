@@ -918,7 +918,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO2);
 
   // Malta Legacy
-  GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
