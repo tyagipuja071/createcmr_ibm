@@ -1554,20 +1554,6 @@ function registerMCO2VatValidator() {
   GEOHandler.registerValidator(addGenericVATValidator(issuingCntry, 'MAIN_CUST_TAB', 'frmCMR'), [ issuingCntry ], null, true);
 }
 
-function resetVatRequired() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-    } else {
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-    }
-  }
-}
-
 function resetTinRequired() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -1734,23 +1720,6 @@ function addEmbargoCodeValidator() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
-function resetVatExempt() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    var vat = FormManager.getActualValue('vat');
-    var vatExempt = dijit.byId('vatExempt').get('checked');
-
-    if (vat != null && vat.length > 0) {
-      if (vatExempt == true) {
-        FormManager.getField('vatExempt').set('checked', false);
-      }
-    }
-  }
-}
-
 function resetNumeroExempt() {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
@@ -1781,37 +1750,6 @@ function resetTinExempt() {
       if (tinExempt == true) {
         FormManager.getField('taxCd2').set('checked', false);
       }
-    }
-  }
-}
-
-function vatExemptOnScenario() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    var custSubType = FormManager.getActualValue('custSubGrp');
-    var vat = FormManager.getActualValue('vat');
-    var found = false;
-    var subGrp = new Array();
-    subGrp = [ 'IBMEM', 'PRICU', 'XIBME', 'XPRIC' ];
-    for (var i = 0; i < subGrp.length; i++) {
-      if (custSubType == subGrp[i]) {
-        if ((vat == null || vat.length == 0)) {
-          FormManager.getField('vatExempt').set('checked', true);
-          FormManager.removeValidator('vat', Validators.REQUIRED);
-        } else {
-          FormManager.getField('vatExempt').set('checked', false);
-          FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-        }
-        found = true;
-        break;
-      }
-    }
-    if (found != true) {
-      FormManager.getField('vatExempt').set('checked', false);
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
   }
 }
@@ -2005,6 +1943,64 @@ function validateKenyaCBGmllc() {
 
 }
 
+function showVatExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+
+  var vatRequired = isVatRequired();
+
+  if (vatRequired) {
+    // show
+    FormManager.show('VATExempt', 'vatExempt');
+    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+  } else {
+    // hide
+    FormManager.hide('VATExempt', 'vatExempt');
+    FormManager.removeValidator('vat', Validators.REQUIRED);
+  }
+}
+
+function resetVatRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+  var vatRequired = isVatRequired();
+  if (vatRequired) {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    } else {
+      FormManager.enable('vat');
+      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    }
+  }
+}
+
+function isVatRequired() {
+  var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+    REQID : FormManager.getActualValue('reqId'),
+    TYPE : 'ZS01'
+  });
+  if (ret && ret.ret1 && ret.ret1 != '') {
+    zs01Cntry = ret.ret1;
+  }
+  if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0) {
+    return true;
+  }
+  return false;
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
@@ -2091,15 +2087,13 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
-  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(resetNumeroExempt, SysLoc.MADAGASCAR);
   GEOHandler.addAfterTemplateLoad(resetNumeroExempt, SysLoc.MADAGASCAR);
   GEOHandler.addAfterConfig(resetTinExempt, SysLoc.TANZANIA);
   GEOHandler.addAfterTemplateLoad(resetTinExempt, SysLoc.TANZANIA);
-  GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(numeroExemptOnScenario, SysLoc.MADAGASCAR);
   GEOHandler.addAfterTemplateLoad(tinExemptOnScenario, SysLoc.TANZANIA);
   GEOHandler.registerValidator(addSalesBusOffValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addSBOLengthValidator, GEOHandler.MCO2, null, true);
+  GEOHandler.addAfterConfig(showVatExempt, GEOHandler.MCO2);
 });
