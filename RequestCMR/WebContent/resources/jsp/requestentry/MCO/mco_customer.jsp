@@ -55,18 +55,32 @@
         <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-     <cmr:view forGEO="MCO,MCO1,MCO2">
-      <cmr:column span="2" containerForField="EmbargoCode">
-      <p>
-        <cmr:label fieldId="embargoCd">
-          <cmr:fieldLabel fieldId="EmbargoCode" />:
-            <cmr:delta text="${rdcdata.embargoCd}" oldValue="${reqentry.embargoCd}" />
-        </cmr:label>
-        <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>
-	</cmr:view>
-    <cmr:view forGEO="MCO1">
+		<cmr:view forGEO="MCO,MCO1,MCO2">
+			<cmr:column span="2" containerForField="EmbargoCode">
+				<p>
+					<cmr:label fieldId="embargoCd">
+						<cmr:fieldLabel fieldId="EmbargoCode" />:
+            <cmr:delta text="${rdcdata.embargoCd}"
+							oldValue="${reqentry.embargoCd}" />
+					</cmr:label>
+					<cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+
+			<%--New Fields for Malta --%>
+			<cmr:column span="2" containerForField="CustClass" forCountry="780">
+				<p>
+					<cmr:label fieldId="custClass">
+						<cmr:fieldLabel fieldId="CustClass" />:
+          </cmr:label>
+					<cmr:field path="custClass" id="custClass" fieldId="CustClass"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+		</cmr:view>
+
+		<cmr:view forGEO="MCO1">
     <cmr:column span="2" containerForField="CommercialFinanced">
       <p>
         <cmr:label fieldId="commercialFinanced">
@@ -78,17 +92,6 @@
     </cmr:column>
     </cmr:view>
   </cmr:row>
-  <%--New Fields for Malta --%> 
- <cmr:row addBackground="false">
-  <cmr:column span="2" containerForField="CustClass" forCountry="780">
-        <p>
-          <cmr:label fieldId="custClass">
-            <cmr:fieldLabel fieldId="CustClass" />:
-          </cmr:label>
-          <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
-        </p>
-    </cmr:column>
-   </cmr:row>
 
   <cmr:view forCountry="XXXX">
     <cmr:row addBackground="false">
