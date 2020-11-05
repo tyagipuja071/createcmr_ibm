@@ -2155,6 +2155,11 @@ public class MEHandler extends BaseSOFHandler {
         String addln6 = sResult[0].toString();
         if (!StringUtils.isBlank(addln6)) {
           gLn6 = addln6;
+        } else if (sResult[1] != null) {
+          String addln4 = sResult[1].toString();
+          if (!StringUtils.isBlank(addln4)) {
+            gLn6 = addln4;
+          }
         }
       }
     }
