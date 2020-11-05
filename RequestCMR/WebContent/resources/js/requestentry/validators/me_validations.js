@@ -2549,7 +2549,7 @@ function addIceFormatValidationMorocco() {
               id : 'phone3',
               type : 'text',
               name : 'phone3'
-            }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN or "XXX" or "xxx"');
+            }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN');
           }
         }
         if (reqType == 'U') {
@@ -2558,7 +2558,7 @@ function addIceFormatValidationMorocco() {
               id : 'phone3',
               type : 'text',
               name : 'phone3'
-            }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN or "XXX" or "xxx" or "@"');
+            }, false, 'Invalid format of ICE#. Format should be NNNNNNNNNNNNNNN');
           }
         }
         return new ValidationResult(null, true);
