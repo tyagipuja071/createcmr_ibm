@@ -1,3 +1,4 @@
+<%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -10,6 +11,9 @@
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
 <script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/ext/jquery-1.10.2.js"></script>
+<script src="${resourcesPath}/js/ext/typeahead.bundle.js"></script>
+<script src="${resourcesPath}/js/ext/dnb_utilities.js"></script>
 <link rel="stylesheet" href="${resourcesPath}/css/quick_search.css?${cmrv}"/>
 <%
 AppUser user = AppUser.getUser(request);
@@ -20,6 +24,7 @@ form.ibm-column-form .dijitTextBox INPUT {
 }
 </style>
 <script>
+  var _furl = '<%=SystemConfiguration.getValue("FIND_CMR_URL")%>';
   dojo.addOnLoad(function() {
     dojo.byId('quick_search_btn').style.display = 'none';
     // load dropdown values
@@ -186,6 +191,48 @@ form.ibm-column-form .dijitTextBox INPUT {
     <%}%>
   }
 </script>
+<style>
+  span.twitter-typeahead, span.tt-dropdown-menu, span.tt-suggestions {
+    margin-left: 0 !important;
+  }
+  span.tt-dropdown-menu {
+    width: 400px;
+  }
+  span.tt-suggestions {
+    width: 400px;
+  }
+  span.tt-dropdown-menu {
+    background: #FFF;
+  }
+  div.tt-suggestion {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  div.typeahead-suggestion {
+    font-size:14px;
+    font-family: IBM Plex Sans;
+  }
+  #name {
+    border: 1px Solid #CCC !important;
+    line-height: 20px !important;
+    font-size: 14px !important;
+    font-family: HelvLightIBM, IBM Plex Sans, Calibri !important;
+  }
+  #name::placeholder {
+    font-style : italic;
+  }
+  .typeahead-suggestion {
+    margin: 0;
+    margin-bottom: 3px;
+  }
+  .typeahead-suggestion .sub-text {
+    color: black;
+  }
+  input.tt-hint {
+    display: none !important;
+  }
+</style>
 <cmr:boxContent>
   <cmr:tabs />
 
@@ -244,7 +291,7 @@ form.ibm-column-form .dijitTextBox INPUT {
         </cmr:column>
         <cmr:column span="4">
           <p>
-            <form:input path="name" placeHolder="Customer Name" dojoType="dijit.form.TextBox" maxlength="70" cssStyle="width:520px"/>
+            <form:input path="name" placeHolder="Customer Name" maxlength="70" cssStyle="width:520px"/>
           </p>
         </cmr:column>
       </cmr:row>
