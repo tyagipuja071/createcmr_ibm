@@ -1986,6 +1986,18 @@ function resetVatRequired() {
   }
 }
 
+function preTickVatExempt(fromAddress, scenario, scenarioChanged) {
+
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'IBMEM' || scenario == 'PRICU' || scenario == 'XIBME' || scenario == 'XPRIC') {
+      FormManager.setValue('vatExempt', true);
+    } else {
+      FormManager.setValue('vatExempt', false);
+    }
+  }
+  resetVatRequired();
+}
+
 function isVatRequired() {
   var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
   var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
@@ -2079,7 +2091,7 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(enableCMRNOMCO2GLLC, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(registerMCO2VatValidator, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(preTickVatExempt, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(resetTinRequired, SysLoc.TANZANIA);
   GEOHandler.addAfterTemplateLoad(resetNumeroRequired, SysLoc.MADAGASCAR);
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
@@ -2096,4 +2108,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSalesBusOffValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addSBOLengthValidator, GEOHandler.MCO2, null, true);
   GEOHandler.addAfterConfig(showVatExempt, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(resetVatRequired, GEOHandler.MCO2);
 });
