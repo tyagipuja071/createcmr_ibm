@@ -79,6 +79,7 @@ form.ibm-column-form .dijitTextBox INPUT {
         cmr.hideNode('restrict-cont');
         cmr.hideNode('cRn-cont');
         cmr.hideNode('cRn/siret-cont');
+        cmr.hideNode('uen-cont');
         FormManager.setValue('taxCd1','');
         FormManager.readOnly('taxCd1');
         FormManager.setValue('restrictTo','');
@@ -90,10 +91,14 @@ form.ibm-column-form .dijitTextBox INPUT {
           cmr.showNode('siret-cont');
           cmr.showNode('cRn/siret-cont');
           FormManager.enable('taxCd1');
+        } else if (cntry == '834'){
+          cmr.showNode('uen-cont');
+          cmr.showNode('cRn/siret-cont');
+          FormManager.enable('taxCd1');
         } else if(cntry == '866' || cntry == '754'){
-        cmr.showNode('cRn-cont');
-        cmr.showNode('cRn/siret-cont');
-        FormManager.enable('taxCd1');
+          cmr.showNode('cRn-cont');
+          cmr.showNode('cRn/siret-cont');
+          FormManager.enable('taxCd1');
         }
       }
     });
@@ -115,12 +120,24 @@ form.ibm-column-form .dijitTextBox INPUT {
           var crit = buildSearchCriteria();
           if (!crit.cmrNo){
             if (noCities.indexOf(crit.issuingCntry) >=0){
-              if (!crit.name || !crit.countryCd || !crit.streetAddress1){
-                return new ValidationResult({
-                  id : 'streetAddress1',
-                  type : 'text',
-                  name : 'streetAddress1'
-                }, false, 'Company Name, Country, and Street should be specified if CMR No. is blank.');
+              if (crit.issuingCntry == '834') {
+                var orgIdSearch = crit.vat || crit.taxCd1;
+                var nameSearch = crit.name && crit.streetAddress1 && crit.countryCd;
+                if (!orgIdSearch && !nameSearch){
+                  return new ValidationResult({
+                    id : 'streetAddress1',
+                    type : 'text',
+                    name : 'streetAddress1'
+                  }, false, 'VAT/Business Reg. or UEN, OR Company Name + Country + Street should be specified if CMR No. is blank.');
+                }
+              } else {
+                if (!crit.name || !crit.countryCd || !crit.streetAddress1){ 
+                  return new ValidationResult({
+                    id : 'streetAddress1',
+                    type : 'text',
+                    name : 'streetAddress1'
+                  }, false, 'Company Name, Country, and Street should be specified if CMR No. is blank.');
+                }
               }
             } else {
               var orgIdSearch = crit.vat || crit.taxCd1;
@@ -325,8 +342,17 @@ form.ibm-column-form .dijitTextBox INPUT {
               </cmr:label>
             </p>
           </cmr:column>
-           </div>
-            <div id="cRn-cont" style="display:none">
+        </div>
+        <div id="uen-cont" style="display:none">
+          <cmr:column span="1" width="150">
+            <p>
+              <cmr:label fieldId="vat">UEN: 
+              <cmr:info text="Unique Entity No. For Singapore Companies only."></cmr:info>
+              </cmr:label>
+            </p>
+          </cmr:column>
+        </div>
+        <div id="cRn-cont" style="display:none">
           <cmr:column span="1" width="150">
             <p>
               <cmr:label fieldId="vat">CRN: 
@@ -338,10 +364,10 @@ form.ibm-column-form .dijitTextBox INPUT {
            <div id = "cRn/siret-cont" style="display:none">
           <cmr:column span="2" width="250">
             <p> 
-              <form:input path="taxCd1" placeHolder="SIRET/CRN" dojoType="dijit.form.TextBox" maxlength="14"/>
+              <form:input path="taxCd1" placeHolder="Enter Value Here" dojoType="dijit.form.TextBox" maxlength="14"/>
             </p>
           </cmr:column>
-       </div>
+        </div>
          
         <div id="restrict-cont" style="display:none">
           <cmr:column span="1" width="150">
