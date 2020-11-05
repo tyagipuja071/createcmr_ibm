@@ -106,7 +106,7 @@
         </p>
       </cmr:column>
       
-      <cmr:column span="2" containerForField="InternalDept" exceptForCountry="864">
+      <cmr:column span="2" containerForField="InternalDept" exceptForCountry="864,780">
         <p>
           <cmr:label fieldId="ibmDeptCostCenter">
             <cmr:fieldLabel fieldId="InternalDept" />: 
@@ -116,7 +116,7 @@
       </cmr:column>
         <% if (reqentry.getReqType().equalsIgnoreCase("U")) { %>
       <cmr:view forGEO="MCO1,MCO2">
-        <cmr:column span="2" containerForField="CollectionCd">
+        <cmr:column span="2" containerForField="CollectionCd" exceptForCountry="780">
           <p>
             <cmr:label fieldId="collectionCd">
               <cmr:fieldLabel fieldId="CollectionCd" />: 

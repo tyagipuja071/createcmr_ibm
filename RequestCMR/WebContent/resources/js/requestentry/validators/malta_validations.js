@@ -21,22 +21,6 @@ var _ISUHandler = null;
 var _CTCHandler = null;
 var _SalesRepHandler = null;
 
-function addHandlersForMCO2() {
-
-  if (_ISUHandler == null) {
-    _ISUHandler = dojo.connect(FormManager.getField('isuCd'), 'onChange', function(value) {
-      setSalesRepValues(value);
-    });
-  }
-
-  if (_CTCHandler == null) {
-    _CTCHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
-      setSalesRepValues(value);
-    });
-  }
-
-}
-
 var _addrTypesForCEWA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypeHandler = [];
 function addHandlersForCEWA() {
@@ -238,6 +222,10 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var postCd = FormManager.getActualValue('postCd');
+        var custGrp = FormManager.getActualValue('custGrp');
+        if (custGrp != 'LOCAL') {
+          return;
+        }
         if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
           return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
         }
@@ -405,16 +393,14 @@ function scenariosAbbrvLocOnChange() {
   });
 }
 
-function addAddrValidatorMCO2() {
+function addAddrValidatorMALTA() {
   FormManager.addValidator('custNm1', Validators.LATIN, [ 'Customer Name' ]);
-  FormManager.addValidator('custNm2', Validators.LATIN, [ 'Customer Name Continuation' ]);
-  FormManager.addValidator('custNm4', Validators.LATIN, [ 'Division/ Floor/ Building/ Department/ Attention Person' ]);
-  FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Street Continuation' ]);
+  FormManager.addValidator('custNm2', Validators.LATIN, [ 'Name 2' ]);
+  FormManager.addValidator('custNm3', Validators.LATIN, [ 'Name 3' ]);
+  FormManager.addValidator('addrTxt2', Validators.LATIN, [ 'Name 4' ]);
   FormManager.addValidator('city1', Validators.LATIN, [ 'City' ]);
   FormManager.addValidator('abbrevNm', Validators.LATIN, [ 'Abbreviated Name' ]);
   FormManager.addValidator('abbrevLocn', Validators.LATIN, [ 'Abbreviated Location' ]);
-
-  FormManager.addValidator('custPhone', Validators.DIGIT, [ 'Phone #' ]);
 }
 
 function streetAvenueValidator() {
@@ -665,22 +651,6 @@ function lockAbbrv() {
   }
 }
 
-function showDeptNoForInternalsOnly() {
-  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-    return;
-  }
-
-  var subCustGrp = FormManager.getActualValue('custSubGrp');
-  if (subCustGrp == 'INTER' || subCustGrp == 'XINTE') {
-    checkAndAddValidator('ibmDeptCostCenter', Validators.REQUIRED, [ 'Internal Department Number' ]);
-    FormManager.show('InternalDept', 'ibmDeptCostCenter');
-  } else {
-    FormManager.clearValue('ibmDeptCostCenter');
-    FormManager.resetValidations('ibmDeptCostCenter');
-    FormManager.hide('InternalDept', 'ibmDeptCostCenter');
-  }
-}
-
 function enterpriseMalta() {
   var reqType = FormManager.getActualValue('reqType').toUpperCase();
   var role = FormManager.getActualValue('userRole').toUpperCase();
@@ -769,57 +739,6 @@ function addValidatorStreet() {
   FormManager.removeValidator('addrTxt', Validators.MAXLENGTH);
 }
 
-function setSalesRepValues(isuCd, clientTier) {
-  var reqType = FormManager.getActualValue('reqType');
-  var cntry = FormManager.getActualValue('cmrIssuingCntry');
-  var role = FormManager.getActualValue('userRole').toUpperCase();
-  var isuCd = FormManager.getActualValue('isuCd');
-  var clientTier = FormManager.getActualValue('clientTier');
-
-  if (FormManager.getActualValue('viewOnlyPage') == 'true' || reqType != 'C') {
-    return;
-  }
-  var salesReps = [];
-  if (isuCd != '') {
-    var qParams = {
-      _qall : 'Y',
-      ISSUING_CNTRY : cntry,
-      ISU : '%' + isuCd + '%',
-    };
-    results = cmr.query('GET.MCO2SR.BYISU', qParams);
-    if (results != null) {
-      for (var i = 0; i < results.length; i++) {
-        salesReps.push(results[i].ret1);
-      }
-      if (salesReps != null) {
-        FormManager.limitDropdownValues(FormManager.getField('repTeamMemberNo'), salesReps);
-        if (salesReps.length == 1) {
-          FormManager.setValue('repTeamMemberNo', salesReps[0]);
-        }
-        if (salesReps.length == 0) {
-          FormManager.setValue('repTeamMemberNo', '');
-        }
-      }
-    }
-
-    if (cntry == '764' || cntry == '831' || cntry == '851' || cntry == '857') {
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
-        FormManager.setValue('repTeamMemberNo', 'DUMMY8');
-        FormManager.setValue('salesBusOffCd', '0080');
-      } else {
-        FormManager.setValue('salesBusOffCd', '0010');
-      }
-    } else if (cntry == '698' || cntry == '745') {
-      if (isuCd == '32' && (clientTier == 'S' || clientTier == 'C' || clientTier == 'T')) {
-        FormManager.setValue('repTeamMemberNo', 'DUMMY6');
-        FormManager.setValue('salesBusOffCd', '0060');
-      } else {
-        FormManager.setValue('salesBusOffCd', '0010');
-      }
-    }
-  }
-}
-
 var _addrTypesForMCO2 = [ 'ZD01', 'ZI01', 'ZP01', 'ZS01', 'ZS02' ];
 var addrTypeHandler = [];
 
@@ -860,6 +779,7 @@ function disableEnableFieldsForMT() {
     FormManager.enable('specialTaxCd');
     FormManager.enable('custPrefLang');
   }
+
 }
 
 function addOrdBlkValidator() {
@@ -924,6 +844,10 @@ function addISICValidatorForScenario() {
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
 
+function countryScenarioProcessorRules() {
+  return true;
+}
+
 function addIsicClassificationCodeValidator() {
   console.log("Validator for ISIC & Classification Code for Malta.");
   FormManager.addFormValidator((function() {
@@ -968,10 +892,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(streetAvenueValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(showDeptNoForInternalsOnly, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(hideCustName4, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(hideCustName4, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
@@ -988,7 +910,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
 
-  GEOHandler.addAddrFunction(addAddrValidatorMCO2, GEOHandler.MCO2);
   GEOHandler.addAddrFunction(disableAddrFieldsCEWA, GEOHandler.MCO2);
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.MCO2);
 
@@ -998,9 +919,9 @@ dojo.addOnLoad(function() {
 
   // Malta Legacy
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
+  GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, SysLoc.MALTA, null, true);
   GEOHandler.registerValidator(addISICValidatorForScenario, SysLoc.MALTA, null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, SysLoc.MALTA, null, true);
-  GEOHandler.addAfterConfig(addHandlersForMCO2, GEOHandler.MCO2);
 });
