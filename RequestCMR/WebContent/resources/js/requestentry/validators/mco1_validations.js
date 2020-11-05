@@ -52,6 +52,7 @@ var _addrTypeHandler = [];
 var _isuHandler = null;
 var _ctcHandler = null;
 var _reqReasonHandler = null;
+var _vatExemptHandler = null;
 function addHandlersForZA() {
   for (var i = 0; i < _addrTypesForZA.length; i++) {
     _addrTypeHandler[i] = null;
@@ -79,6 +80,14 @@ function addHandlersForZA() {
     if (FormManager.getActualValue('reqType') == 'C') {
       _ctcHandler = dojo.connect(FormManager.getField('clientTier'), 'onChange', function(value) {
         setCtcSalesRepSBO(FormManager.getField('isuCd'));
+      });
+    }
+  }
+  
+  if (FormManager.getActualValue('reqType') == 'C') {
+    if (_vatExemptHandler == null) {
+      _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
+        resetVatRequired();
       });
     }
   }
@@ -1649,6 +1658,115 @@ function addInacCodeValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+function requireVATForCrossBorder() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqType = FormManager.getActualValue('reqType');
+        var scenario = FormManager.getActualValue('custGrp');
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        if (reqType != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (scenario != null && !scenario.includes('CRO')) {
+          return new ValidationResult(null, true);
+        }
+        // MCO cross subType codes
+        if (custSubGrp != null && (custSubGrp.includes('XSOFT') || custSubGrp.includes('XSL') || custSubGrp.includes('XPRIC') || custSubGrp.includes('XPC') || custSubGrp.includes('XGO'))) {
+          return new ValidationResult(null, true);
+        }
+
+        var vat = FormManager.getActualValue('vat');
+        var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+          REQID : FormManager.getActualValue('reqId'),
+          TYPE : 'ZS01'
+        });
+        if (ret && ret.ret1 && ret.ret1 != '') {
+          zs01Cntry = ret.ret1;
+        }
+
+        if ((!vat || vat == '' || vat.trim() == '') && !dijit.byId('vatExempt').get('checked')) {
+          if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0) {
+            var msg = "VAT for " + zs01Cntry + " # is required.";
+            return new ValidationResult({
+              id : 'vat',
+              type : 'text',
+              name : 'vat'
+            }, false, msg);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function resetVatRequired() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  if (FormManager.getActualValue('reqType') == 'C') {
+    var custSubType = FormManager.getActualValue('custSubGrp');
+    var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
+      REQID : FormManager.getActualValue('reqId'),
+      TYPE : 'ZS01'
+    });
+    if (ret && ret.ret1 && ret.ret1 != '') {
+      zs01Cntry = ret.ret1;
+    }
+
+    if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && custSubType != '' ) {
+      FormManager.enable('vatExempt');
+      if ( dijit.byId('vatExempt').get('checked')) {
+          FormManager.removeValidator('vat', Validators.REQUIRED);
+      } else {
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      }
+    } else {
+      FormManager.hide('VATExempt', 'vatExempt');
+    }
+    
+  }
+}
+
+function resetVatExempt() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var vat = FormManager.getActualValue('vat');
+
+  if (vat != null && vat.length > 0) {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.getField('vatExempt').set('checked', false);
+    }
+  }
+}
+
+function vatExemptOnScenario() {
+  var viewOnly = FormManager.getActualValue('viewOnlyPage');
+  if (viewOnly != '' && viewOnly == 'true') {
+    return;
+  }
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  var vat = FormManager.getActualValue('vat');
+  var vatExempt = dijit.byId('vatExempt').get('checked');
+
+  if (custSubType != '' && (custSubType.includes('XPC') || custSubType.includes('XIB') || custSubType.includes('IB') || custSubType.includes('PC'))) {
+      if ((vat == null || vat.length == 0) && vatExempt != true) {
+        FormManager.getField('vatExempt').set('checked', true);
+        FormManager.removeValidator('vat', Validators.REQUIRED);
+      } else {
+        FormManager.getField('vatExempt').set('checked', false);
+        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      }
+   }
+}
+
 /* End 1430539 */
 dojo.addOnLoad(function() {
   GEOHandler.MCO1 = [ SysLoc.SOUTH_AFRICA ];
@@ -1715,4 +1833,10 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(restrictDuplicateAddrZA, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(validateCMRNoFORGMLLC, [ SysLoc.SOUTH_AFRICA ], null, true);
   GEOHandler.registerValidator(validateExistingCMRNoZA([...scenarioToSkipCMRValidationZA ] ), [ SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
+  
+  GEOHandler.addAfterTemplateLoad(resetVatRequired, GEOHandler.MCO1);
+  GEOHandler.addAfterConfig(resetVatExempt, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(resetVatExempt, GEOHandler.MCO1);
+  GEOHandler.addAfterTemplateLoad(vatExemptOnScenario, GEOHandler.MCO1);
+  
 });
