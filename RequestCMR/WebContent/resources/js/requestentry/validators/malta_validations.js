@@ -51,11 +51,6 @@ function lockEmbargo() {
   }
 }
 
-function afterConfigForMCO2() {
-  FormManager.setValue('capInd', true);
-  FormManager.readOnly('capInd');
-}
-
 function disableAddrFieldsCEWA() {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
@@ -768,6 +763,10 @@ function disableEnableFieldsForMT() {
   if (reqType == 'C') {
     FormManager.readOnly('sensitiveFlag');
   }
+
+  FormManager.setValue('capInd', true);
+  FormManager.readOnly('capInd');
+
   if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
@@ -777,6 +776,12 @@ function disableEnableFieldsForMT() {
     FormManager.enable('cmrNo');
     FormManager.enable('cmrOwner');
     FormManager.enable('specialTaxCd');
+    FormManager.enable('custPrefLang');
+  }
+
+  if (role == 'REQUESTER') {
+    FormManager.readOnly('custPrefLang');
+  } else {
     FormManager.enable('custPrefLang');
   }
 
@@ -884,7 +889,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
   GEOHandler.setRevertIsicBehavior(false);
 
-  GEOHandler.addAfterConfig(afterConfigForMCO2, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addHandlersForCEWA, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setAbbrvNmLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
