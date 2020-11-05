@@ -325,7 +325,7 @@ visibility: hidden !IMPORTANT;
         <cmr:gridCol width="70px" field="postCd" header="${ui.grid.zipCode}" />  
 
         <!-- Dept / Attn -->
-        <cmr:view forGEO="MCO,MCO1,MCO2,NORDX">
+        <cmr:view forGEO="MCO,MCO1,MCO2,NORDX" exceptForCountry="780">
           <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" />
         </cmr:view>
         
