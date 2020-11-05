@@ -1914,10 +1914,6 @@ function validateKenyaCBGmllc() {
         }
         if (custSubGrp != '' && (custSubGrp == 'XLLCX')) {
 
-          if (cmrNo == '') {
-            return new ValidationResult(null, true);
-          }
-
           var res = cmr.query('GET_LAND_CNTRY_ZS01', {
             REQ_ID : requestID
           });
