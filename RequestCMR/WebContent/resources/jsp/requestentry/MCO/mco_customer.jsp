@@ -106,8 +106,7 @@
         <cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
-  <%--New Fields for Malta --%> 
-  <cmr:column span="2" containerForField="CustClass" forCountry="780">
+     <cmr:column span="2" containerForField="CustClass" forCountry="780">
         <p>
           <cmr:label fieldId="custClass">
             <cmr:fieldLabel fieldId="CustClass" />:
@@ -115,8 +114,10 @@
           <cmr:field path="custClass" id="custClass" fieldId="CustClass" tabId="MAIN_CUST_TAB" />
         </p>
     </cmr:column>
-   </cmr:row>
-    </cmr:view>
+	</cmr:view>
+	</cmr:row>
+
+
   <cmr:view forCountry="XXXX">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="OrgNo">
