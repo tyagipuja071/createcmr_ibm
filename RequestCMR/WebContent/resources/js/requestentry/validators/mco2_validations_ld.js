@@ -1189,41 +1189,7 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
     }
   }
 }
-function requireTaxRegistrationForLocalScenario(fromAddress, scenario, scenarioChanged) {
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole');
-  var taxReg = FormManager.getActualValue('busnType');
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
 
-  if (reqType == 'C') {
-    // Creates (by model and by scratch) both requester and processor
-    // Mandatory for Local Scenarios except IBM employee and Private Customer
-    // (for those 2 optional)
-    if (scenario == 'BUSPR' || scenario == 'COMME' || scenario == 'GOVRN' || scenario == 'INTER' || scenario == 'THDPT') {
-      FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
-    } else {
-      // Optional for all Cross-border Scenarios
-      FormManager.removeValidator('busnType', Validators.REQUIRED);
-    }
-  } else {
-    // Locked on requester side if field has value
-    if (role == 'REQUESTER') {
-      if (taxReg != null && taxReg != '') {
-        FormManager.readOnly('busnType');
-      } else {
-        // If field is blank, then editable.
-        FormManager.enable('busnType');
-      }
-    } else if (role == 'PROCESSOR') {
-
-      // On Processor side editable in all instances
-      FormManager.enable('busnType');
-    }
-  }
-  if (scenarioChanged && !fromAddress && scenario != null && scenario != '') {
-    FormManager.clearValue('busnType');
-  }
-}
 function setTinNumberBehaviorForTz(fromAddress, scenario, scenarioChanged) {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole');
@@ -1579,8 +1545,11 @@ function resetNumeroRequired() {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
     if (cntry == '700') {
       if (dijit.byId('taxCd2').get('checked')) {
+        FormManager.clearValue('busnType');
+        FormManager.readOnly('busnType');
         FormManager.removeValidator('busnType', Validators.REQUIRED);
       } else {
+        FormManager.enable('busnType');
         FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
       }
     }
@@ -1993,6 +1962,18 @@ function preTickVatExempt(fromAddress, scenario, scenarioChanged) {
   resetVatRequired();
 }
 
+function preTickNumeroExempt(fromAddress, scenario, scenarioChanged) {
+
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'IBMEM' || scenario == 'PRICU') {
+      FormManager.setValue('taxCd2', true);
+    } else {
+      FormManager.setValue('taxCd2', false);
+    }
+  }
+  resetNumeroRequired();
+}
+
 function isVatRequired() {
   var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
   var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
@@ -2070,7 +2051,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(clearPOBoxFromGrid, GEOHandler.MCO2);
   GEOHandler.registerValidator(addAddressGridValidatorStreetPOBox, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addInternalDeptNumberValidator, GEOHandler.MCO2, null, true);
-  GEOHandler.addAfterTemplateLoad(requireTaxRegistrationForLocalScenario, SysLoc.MADAGASCAR);
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
@@ -2087,8 +2067,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(registerMCO2VatValidator, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, GEOHandler.MCO2);
+  GEOHandler.addAfterTemplateLoad(preTickNumeroExempt, SysLoc.MADAGASCAR);
   GEOHandler.addAfterTemplateLoad(resetTinRequired, SysLoc.TANZANIA);
-  GEOHandler.addAfterTemplateLoad(resetNumeroRequired, SysLoc.MADAGASCAR);
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
@@ -2104,4 +2084,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addSBOLengthValidator, GEOHandler.MCO2, null, true);
   GEOHandler.addAfterConfig(showVatExempt, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(resetVatRequired, GEOHandler.MCO2);
+  GEOHandler.addAfterConfig(resetNumeroRequired, SysLoc.MADAGASCAR);
 });
