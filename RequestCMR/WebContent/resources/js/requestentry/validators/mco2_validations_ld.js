@@ -1526,6 +1526,7 @@ function resetTinRequired() {
           FormManager.removeValidator('taxCd1', Validators.REQUIRED);
         } else {
           FormManager.enable('taxCd1');
+          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
         }
       }
     }
@@ -1557,6 +1558,7 @@ function resetNumeroRequired() {
           FormManager.removeValidator('busnType', Validators.REQUIRED);
         } else {
           FormManager.enable('busnType');
+          FormManager.removeValidator('busnType', Validators.REQUIRED);
         }
       }
     }
@@ -1865,6 +1867,7 @@ function resetVatRequired() {
       FormManager.removeValidator('vat', Validators.REQUIRED);
     } else {
       FormManager.enable('vat');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
     }
   }
 }
