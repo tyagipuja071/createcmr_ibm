@@ -851,7 +851,7 @@ public class FranceUtil extends AutomationUtil {
       }
     }
 
-    if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+    if (isRelevantFieldUpdated(changes) && addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
 
       LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
