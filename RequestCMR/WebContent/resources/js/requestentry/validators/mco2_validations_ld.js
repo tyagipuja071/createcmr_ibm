@@ -1859,15 +1859,6 @@ function resetVatRequired() {
       FormManager.enable('vat');
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
-  } else {
-    if (dijit.byId('vatExempt').get('checked')) {
-      FormManager.clearValue('vat');
-      FormManager.readOnly('vat');
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-    } else {
-      FormManager.enable('vat');
-      FormManager.removeValidator('vat', Validators.REQUIRED);
-    }
   }
 }
 
