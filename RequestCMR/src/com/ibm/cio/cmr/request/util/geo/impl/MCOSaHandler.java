@@ -431,9 +431,9 @@ public class MCOSaHandler extends MCOHandler {
         address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
       }
 
-      if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())) {
-        String seq = StringUtils.leftPad(currentRecord.getCmrAddrSeq(), 5, '0');
-        address.getId().setAddrSeq(seq);
+      if (currentRecord.getCmrAddrSeq() != null && CmrConstants.REQ_TYPE_CREATE.equals(admin.getReqType())
+          && "ZS01".equalsIgnoreCase(address.getId().getAddrType())) {
+        address.getId().setAddrSeq("00001");
       }
 
       if ("D".equals(address.getImportInd())) {
