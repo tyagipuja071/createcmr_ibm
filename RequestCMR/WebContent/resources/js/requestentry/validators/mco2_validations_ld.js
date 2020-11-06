@@ -994,8 +994,9 @@ function addAdditionalNameStreetContPOBoxValidator() {
 
         var isUpdate = FormManager.getActualValue('reqType') == 'U';
         var isLocalBasedOnLanded = FormManager.getActualValue('defaultLandedCountry') == FormManager.getActualValue('landCntry');
-
-        if (FormManager.getActualValue('custGrp') == 'LOCAL' || (isUpdate && isLocalBasedOnLanded)) {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        var isGmllcScenario = custSubGrp == 'LLC' || custSubGrp == 'LLCBP' || custSubGrp == 'LLCEX';
+        if ((FormManager.getActualValue('custGrp') == 'LOCAL' || (isUpdate && isLocalBasedOnLanded)) && !isGmllcScenario) {
           return new ValidationResult(null, true);
         }
 
