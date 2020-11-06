@@ -757,6 +757,7 @@ function setAddressDetailsForView() {
 function lockAbbrv() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType'); 
 
   if (viewOnlyPage == 'true') {
     FormManager.readOnly('abbrevLocn');
@@ -765,7 +766,7 @@ function lockAbbrv() {
     if (role == 'REQUESTER') {
       FormManager.readOnly('abbrevLocn');
       FormManager.readOnly('abbrevNm');
-    } else if (role == 'PROCESSOR') {
+    } else if (role == 'PROCESSOR' && reqType != 'U') {
       FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name' ], 'MAIN_CUST_TAB');
     }
   }
