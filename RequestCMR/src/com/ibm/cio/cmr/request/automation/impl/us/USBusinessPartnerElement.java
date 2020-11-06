@@ -12,6 +12,7 @@ import com.ibm.cio.cmr.request.automation.impl.OverridingElement;
 import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USBPHandler;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -44,6 +45,16 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     Data data = requestData.getData();
     AutomationResult<OverrideOutput> output = buildResult(reqId);
     Addr addr = requestData.getAddress("ZS01");
+
+    // CMR - 3999
+    boolean shouldSendToCMDE = AutomationUtil.checkCommentSection(entityManager, admin, data);
+    if (shouldSendToCMDE) {
+      String cmt = "The model CMR provided isn't consistent with the CMR type requested, please cancel this request and choose a compatible model CMR.";
+      output.setDetails(cmt);
+      output.setResults("Review Required.");
+      engineData.addNegativeCheckStatus("INCOMP_MODEL_CMR", cmt);
+      return output;
+    }
 
     if ("U".equals(admin.getReqType())) {
       LOG.debug("Request Type update is not supported by USBusinessPartnerElement - Skipping ");

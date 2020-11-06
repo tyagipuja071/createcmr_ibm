@@ -468,16 +468,6 @@ public class USUtil extends AutomationUtil {
       details.append("Processor review required since ISIC belongs to Healthcare/Education. Scenario verification needed.").append("\n");
       valid = true;
     }
-
-    // CMR - 3999
-    boolean shouldSendToCMDE = AutomationUtil.checkCommentSection(entityManager, admin, data);
-    if (shouldSendToCMDE) {
-      String cmt = "The model CMR provided isn't consistent with the CMR type requested, please cancel this request and choose a compatible model CMR.";
-      details.append(cmt).append("\n");
-      engineData.addNegativeCheckStatus("INCOMP_MODEL_CMR", cmt);
-      valid = true;
-    }
-
     return valid;
   }
 
