@@ -48,54 +48,6 @@ public class MaltaHandler extends BaseSOFHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
-  static {
-    LANDED_CNTRY_MAP.put(SystemLocation.MAURITIUS, "MU");
-    LANDED_CNTRY_MAP.put(SystemLocation.MALI, "ML");
-    LANDED_CNTRY_MAP.put(SystemLocation.EQUATORIAL_GUINEA, "GQ");
-    LANDED_CNTRY_MAP.put(SystemLocation.ANGOLA, "AO");
-    LANDED_CNTRY_MAP.put(SystemLocation.SENEGAL, "SN");
-    LANDED_CNTRY_MAP.put(SystemLocation.BOTSWANA, "BW");
-    LANDED_CNTRY_MAP.put(SystemLocation.IVORY_COAST, "CI");
-    LANDED_CNTRY_MAP.put(SystemLocation.BURUNDI, "BI");
-    LANDED_CNTRY_MAP.put(SystemLocation.GABON, "GA");
-    LANDED_CNTRY_MAP.put(SystemLocation.DEMOCRATIC_CONGO, "CD");
-    LANDED_CNTRY_MAP.put(SystemLocation.CONGO_BRAZZAVILLE, "CG");
-    LANDED_CNTRY_MAP.put(SystemLocation.CAPE_VERDE_ISLAND, "CV");
-    LANDED_CNTRY_MAP.put(SystemLocation.DJIBOUTI, "DJ");
-    LANDED_CNTRY_MAP.put(SystemLocation.GUINEA_CONAKRY, "GN");
-    LANDED_CNTRY_MAP.put(SystemLocation.CAMEROON, "CM");
-    LANDED_CNTRY_MAP.put(SystemLocation.ETHIOPIA, "ET");
-    LANDED_CNTRY_MAP.put(SystemLocation.MADAGASCAR, "MG");
-    LANDED_CNTRY_MAP.put(SystemLocation.MAURITANIA, "MR");
-    LANDED_CNTRY_MAP.put(SystemLocation.TOGO, "TG");
-    LANDED_CNTRY_MAP.put(SystemLocation.GHANA, "GH");
-    LANDED_CNTRY_MAP.put(SystemLocation.ERITREA, "ER");
-    LANDED_CNTRY_MAP.put(SystemLocation.GAMBIA, "GM");
-    LANDED_CNTRY_MAP.put(SystemLocation.KENYA, "KE");
-    LANDED_CNTRY_MAP.put(SystemLocation.MALAWI_CAF, "MW");
-    LANDED_CNTRY_MAP.put(SystemLocation.LIBERIA, "LR");
-    LANDED_CNTRY_MAP.put(SystemLocation.MOZAMBIQUE, "MZ");
-    LANDED_CNTRY_MAP.put(SystemLocation.NIGERIA, "NG");
-    LANDED_CNTRY_MAP.put(SystemLocation.CENTRAL_AFRICAN_REPUBLIC, "CF");
-    LANDED_CNTRY_MAP.put(SystemLocation.ZIMBABWE, "ZW");
-    LANDED_CNTRY_MAP.put(SystemLocation.SAO_TOME_ISLANDS, "ST");
-    LANDED_CNTRY_MAP.put(SystemLocation.RWANDA, "RW");
-    LANDED_CNTRY_MAP.put(SystemLocation.SIERRA_LEONE, "SL");
-    LANDED_CNTRY_MAP.put(SystemLocation.SOMALIA, "SO");
-    LANDED_CNTRY_MAP.put(SystemLocation.BENIN, "BJ");
-    LANDED_CNTRY_MAP.put(SystemLocation.BURKINA_FASO, "BF");
-    LANDED_CNTRY_MAP.put(SystemLocation.SOUTH_SUDAN, "SS");
-    LANDED_CNTRY_MAP.put(SystemLocation.TANZANIA, "TZ");
-    LANDED_CNTRY_MAP.put(SystemLocation.UGANDA, "UG");
-    LANDED_CNTRY_MAP.put(SystemLocation.SOUTH_AFRICA, "ZA");
-    LANDED_CNTRY_MAP.put(SystemLocation.MALTA, "MT");
-    LANDED_CNTRY_MAP.put(SystemLocation.SEYCHELLES, "SC");
-    LANDED_CNTRY_MAP.put(SystemLocation.GUINEA_BISSAU, "GW");
-    LANDED_CNTRY_MAP.put(SystemLocation.NIGER, "NE");
-    LANDED_CNTRY_MAP.put(SystemLocation.CHAD, "TD");
-    LANDED_CNTRY_MAP.put(SystemLocation.ZAMBIA, "ZM");
-  }
-
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
@@ -104,50 +56,33 @@ public class MaltaHandler extends BaseSOFHandler {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
 
+      record.setCmrName2Plain(record.getCmrName2Plain());
       if (!StringUtils.isEmpty(record.getCmrName4())) {
         // name4 in rdc is street con't
         record.setCmrStreetAddressCont(record.getCmrName4());
         record.setCmrName4(null);
       }
 
-      // name3 in rdc = attn on SOF
+      // name3 in rdc = cust nm3 on SOF
       if (!StringUtils.isEmpty(record.getCmrName3())) {
-        record.setCmrName4(record.getCmrName3());
-        record.setCmrName3(null);
+        record.setCmrName3(record.getCmrName3());
       }
 
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
         record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
       }
-      if (SystemLocation.MALTA.equals(mainRecord.getCmrIssuedBy())) {
-        record.setCmrAddrSeq(StringUtils.isEmpty(record.getCmrAddrSeq()) ? "1" : record.getCmrAddrSeq());
+
+      if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+        record.setCmrAddrSeq("00001");
       } else {
-        if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-          record.setCmrAddrSeq("00001");
-        } else {
-          record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
-        }
-      }
-
-      record.setCmrName2Plain(record.getCmrName2Plain());
-      record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
-      record.setCmrDept(null);
-
-      if (StringUtils.isEmpty(record.getCmrCustPhone())) {
-        record.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
+        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
       }
       converted.add(record);
     } else {
-
       // Import all address from RDC Main
       String reqType = reqEntry.getReqType();
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), reqType);
       if (CmrConstants.PROCESSING_TYPE_RDC_MAIN.equals(processingType)) {
-
-        // customer phone is in BillingPhone
-        if (StringUtils.isEmpty(mainRecord.getCmrCustPhone())) {
-          mainRecord.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
-        }
 
         Map<String, FindCMRRecordModel> zi01Map = new HashMap<String, FindCMRRecordModel>();
 
@@ -157,18 +92,6 @@ public class MaltaHandler extends BaseSOFHandler {
         if (source.getItems() != null) {
           for (FindCMRRecordModel record : source.getItems()) {
 
-            // if
-            // (!CmrConstants.ADDR_TYPE.ZS01.toString().equals(record.getCmrAddrTypeCode()))
-            // {
-            // LOG.trace("Non Sold-to will be ignored. Will get from SOF");
-            // this.rdcShippingRecords.add(record);
-            // continue;
-            // }
-            if ("5".equals(record.getCmrAddrSeq()) || "00005".equals(record.getCmrAddrSeq())) {
-              record.setCmrAddrTypeCode("ZS02");
-              record.setCmrAddrType("EPL");
-            }
-
             if (!StringUtils.isEmpty(record.getCmrName4())) {
               // name4 in rdc is street con't
               record.setCmrStreetAddressCont(record.getCmrName4());
@@ -177,53 +100,21 @@ public class MaltaHandler extends BaseSOFHandler {
 
             // name3 in rdc = attn on SOF
             if (!StringUtils.isEmpty(record.getCmrName3())) {
-              record.setCmrName4(record.getCmrName3());
-              record.setCmrName3(null);
+              record.setCmrName3(record.getCmrName3());
             }
 
             if (!StringUtils.isBlank(record.getCmrPOBox())) {
               record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
             }
-            if (SystemLocation.MALTA.equals(mainRecord.getCmrIssuedBy())) {
-              record.setCmrAddrSeq(StringUtils.isEmpty(record.getCmrAddrSeq()) ? "1" : record.getCmrAddrSeq());
+
+            if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+              record.setCmrAddrSeq("00001");
+            } else {
+              record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
             }
-
             converted.add(record);
-
           }
         }
-
-        // add the missing records
-        if (mainRecord != null) {
-
-          FindCMRRecordModel record = null;
-
-          // import all shipping from SOF
-          // List<String> sequences = this.shippingSequences;
-          // if (sequences != null && !sequences.isEmpty()) {
-          // LOG.debug("Shipping Sequences is not empty. Importing " +
-          // sequences.size() + " shipping addresses.");
-          // for (String seq : sequences) {
-          // record = createAddress(entityManager, cmrCountry,
-          // CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping_" + seq + "_",
-          // zi01Map);
-          // if (record != null) {
-          // converted.add(record);
-          // }
-          // }
-          // } else {
-          // LOG.debug("Shipping Sequences is empty. ");
-          // record = createAddress(entityManager, cmrCountry,
-          // CmrConstants.ADDR_TYPE.ZD01.toString(), "Shipping", zi01Map);
-          // if (record != null) {
-          // converted.add(record);
-          // }
-          // }
-
-          // importOtherSOFAddresses(entityManager, cmrCountry, zi01Map,
-          // converted);
-        }
-
       } else {
 
         // import process:
@@ -310,16 +201,13 @@ public class MaltaHandler extends BaseSOFHandler {
 
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted) {
+
     FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(), "Installing", zi01Map);
     if (record != null) {
       converted.add(record);
     }
 
     record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZP01.toString(), "Billing", zi01Map);
-    if (record != null) {
-      converted.add(record);
-    }
-    record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZS02.toString(), "EplMailing", zi01Map);
     if (record != null) {
       converted.add(record);
     }
@@ -380,23 +268,18 @@ public class MaltaHandler extends BaseSOFHandler {
 
     } else {
       // Domestic
-      // line2 = Name Con't
-      // line3 = Phone + Attention Person (Phone for Shipping & EPL only)
-      // line4 = Street
+      // line2 = Name 2
+      // line3 = Name 3
+      // line4 = Name 4
       // line5 = Street Con't + PO BOX
       // line6 = City / Postal Code or both
 
       LOG.debug("Local address..");
       address.setCmrName1Plain(line1);
-
       address.setCmrName2Plain(line2);
-
       handlePhoneAndAttn(line3, cmrIssuingCntry, address, addressKey);
-
       address.setCmrStreetAddress(line4);
-
       handleStreetContAndPoBox(line5, cmrIssuingCntry, address, addressKey);
-
       handleCityAndPostCode(line6, cmrIssuingCntry, address, addressKey);
     }
 
@@ -423,23 +306,17 @@ public class MaltaHandler extends BaseSOFHandler {
       address.setCmrCountryLanded(code);
     }
 
-    // Story 1718889: Tanzania: new mandatory TIN number field
-    if ((SystemLocation.TANZANIA.equals(cmrIssuingCntry)) && "ZP01".equalsIgnoreCase(address.getCmrAddrTypeCode())) {
-      address.setCmrDept(this.currentImportValues.get("TIN"));
-    }
     trimAddressToFit(address);
 
     LOG.trace(addressKey + " " + address.getCmrAddrSeq());
     LOG.trace("Name: " + address.getCmrName1Plain());
     LOG.trace("Name 2: " + address.getCmrName2Plain());
-    LOG.trace("Attn: " + address.getCmrName4());
+    LOG.trace("Name 3: " + address.getCmrName3());
     LOG.trace("Street: " + address.getCmrStreetAddress());
-    LOG.trace("Street 2: " + address.getCmrStreetAddressCont());
+    LOG.trace("Name 4: " + address.getCmrStreetAddressCont());
     LOG.trace("PO Box: " + address.getCmrPOBox());
     LOG.trace("Zip: " + address.getCmrPostalCode());
-    LOG.trace("Phone: " + address.getCmrCustPhone());
     LOG.trace("City: " + address.getCmrCity());
-    LOG.trace("Tin: " + address.getCmrDept());
     LOG.trace("State: " + address.getCmrState());
     LOG.trace("Country: " + address.getCmrCountryLanded());
 
@@ -769,7 +646,6 @@ public class MaltaHandler extends BaseSOFHandler {
   public void setDataDefaultsOnCreate(Data data, EntityManager entityManager) {
     data.setCustPrefLang("E");
     data.setCmrOwner("IBM");
-    // data.setSensitiveFlag(CmrConstants.REGULAR);
   }
 
   @Override
@@ -787,15 +663,6 @@ public class MaltaHandler extends BaseSOFHandler {
   public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
       List<UpdatedDataModel> results) {
     UpdatedDataModel update = null;
-
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())) {
-      update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
-      update.setNewData(newData.getModeOfPayment());
-      update.setOldData(oldData.getModeOfPayment());
-      results.add(update);
-    }
-
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCustClass(), newData.getCustClass())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "CustClass", "-"));
@@ -803,7 +670,6 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "CustClass", cmrCountry));
       results.add(update);
     }
-
     if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
       update = new UpdatedDataModel();
       update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
@@ -811,7 +677,6 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
       results.add(update);
     }
-
   }
 
   @Override
