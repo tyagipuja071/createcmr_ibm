@@ -1281,7 +1281,7 @@ function setClientTierValues(isuCd) {
       } else if (isuCd == '32') {
         clientTiers = [ 'S', 'N', 'T', 'C' ];
       }
-    } else if ('808' == cntry) {// 808(Afganistan/Pakistan)
+    } else if ('808' == cntry && FormManager.getActualValue('custSubGrp') != '') {// 808(Afganistan/Pakistan)
       if (FormManager.getActualValue('custSubGrp') == 'AFTP' || FormManager.getActualValue('custSubGrp') == 'AFPC' || FormManager.getActualValue('custSubGrp') == 'AFCOM') {
         if (isuCd == '34') {
           clientTiers = [ 'V', 'A' ];
@@ -1298,9 +1298,9 @@ function setClientTierValues(isuCd) {
         }
       } else {
         clientTiers = [ '7' ];
-      }// End of CMR6057
-    } else {
-      var qParams = {
+      }
+      // End of CMR6057
+    } var qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
         ISU : '%' + isuCd + '%'
@@ -2544,7 +2544,9 @@ function addIceFormatValidationMorocco() {
         var ice = FormManager.getActualValue('phone3');
         var reqType = FormManager.getActualValue('reqType');
         if (reqType == 'C') {
-          if (ice && ice.length > 0 && !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
+          // if (ice && ice.length > 0 &&
+          // !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
+          if (ice && ice.length > 0 && !ice.match("([0-9]{15})")) {
             return new ValidationResult({
               id : 'phone3',
               type : 'text',
@@ -2553,7 +2555,9 @@ function addIceFormatValidationMorocco() {
           }
         }
         if (reqType == 'U') {
-          if (ice && ice.length > 0 && !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$|^(@{1})$")) {
+          // if (ice && ice.length > 0 &&
+          // !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$|^(@{1})$")) {
+          if (ice && ice.length > 0 && !ice.match("([0-9]{15})")) {
             return new ValidationResult({
               id : 'phone3',
               type : 'text',
