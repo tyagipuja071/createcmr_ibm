@@ -2544,7 +2544,9 @@ function addIceFormatValidationMorocco() {
         var ice = FormManager.getActualValue('phone3');
         var reqType = FormManager.getActualValue('reqType');
         if (reqType == 'C') {
-          if (ice && ice.length > 0 && !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
+          // if (ice && ice.length > 0 &&
+          // !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$")) {
+          if (ice && ice.length > 0 && !ice.match("([0-9]{15})")) {
             return new ValidationResult({
               id : 'phone3',
               type : 'text',
@@ -2553,7 +2555,9 @@ function addIceFormatValidationMorocco() {
           }
         }
         if (reqType == 'U') {
-          if (ice && ice.length > 0 && !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$|^(@{1})$")) {
+          // if (ice && ice.length > 0 &&
+          // !ice.match("([0-9]{15})|^(X{3})$|^(x{3})$|^(@{1})$")) {
+          if (ice && ice.length > 0 && !ice.match("([0-9]{15})")) {
             return new ValidationResult({
               id : 'phone3',
               type : 'text',
