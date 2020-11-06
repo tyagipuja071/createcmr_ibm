@@ -619,15 +619,13 @@ function addAttachmentValidator() {
 
 function setAddressDetailsForView() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-
   if (viewOnlyPage == 'true') {
     $('label[for="custNm1_view"]').text('Customer Name:');
-    $('label[for="custNm2_view"]').text('Customer Name Continuation:');
+    $('label[for="custNm2_view"]').text('Name 2:');
+    $('label[for="custNm3_view"]').text('Name 3:');
     $('label[for="landCntry_view"]').text('Country (Landed):');
-    $('label[for="custNm4_view"]').text('Division/ Floor/ Building/ Department/ Attention Person:');
     $('label[for="addrTxt_view"]').text('Street:');
-    $('label[for="addrTxt2_view"]').text('Street Continuation:');
-    $('label[for="custPhone_view"]').text('Phone #:');
+    $('label[for="addrTxt2_view"]').text('Name 4:');
   }
 }
 
@@ -745,6 +743,7 @@ function addAfterConfigMalta() {
   }
   enterpriseMalta();
   disableEnableFieldsForMT();
+  setAddressDetailsForView();
 }
 
 function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
@@ -894,7 +893,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(crossborderScenariosAbbrvLoc, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(scenariosAbbrvLocOnChange, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(streetAvenueValidator, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(setAddressDetailsForView, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
@@ -928,4 +926,5 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addOrdBlkValidator, SysLoc.MALTA, null, true);
   GEOHandler.registerValidator(addISICValidatorForScenario, SysLoc.MALTA, null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, SysLoc.MALTA, null, true);
+
 });
