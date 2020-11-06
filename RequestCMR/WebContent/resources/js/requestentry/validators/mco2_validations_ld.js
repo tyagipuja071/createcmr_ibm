@@ -218,9 +218,13 @@ function afterConfigForMCO2() {
 
     var role = FormManager.getActualValue('userRole');
     var numero = FormManager.getActualValue('busnType');
+    var tin = FormManager.getActualValue('taxCd1');
     if (role == GEOHandler.ROLE_REQUESTER) {
       if (numero != null && numero != '') {
         FormManager.readOnly('busnType');
+      }
+      if (tin != null && tin != '') {
+        FormManager.readOnly('taxCd1');
       }
     }
   }
@@ -1190,30 +1194,6 @@ function retainImportValues(fromAddress, scenario, scenarioChanged) {
   }
 }
 
-function setTinNumberBehaviorForTz(fromAddress, scenario, scenarioChanged) {
-  var reqType = FormManager.getActualValue('reqType');
-  var role = FormManager.getActualValue('userRole');
-  var tinNo = FormManager.getActualValue('taxCd1');
-  var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
-
-  if (reqType == 'U') {
-    if (role == 'REQUESTER') {
-      if (tinNo != null && tinNo != '') {
-        FormManager.readOnly('taxCd1');
-      } else {
-        // If field is blank, then editable.
-        FormManager.enable('taxCd1');
-      }
-    } else if (role == 'PROCESSOR') {
-      // On Processor side editable in all instances
-      FormManager.enable('taxCd1');
-    }
-  }
-
-  if (scenarioChanged && !fromAddress && scenario != null && scenario != '') {
-    FormManager.clearValue('taxCd1');
-  }
-}
 function addTinNumberValidationTz() {
   FormManager.addFormValidator((function() {
     return {
@@ -1527,11 +1507,25 @@ function resetTinRequired() {
   }
   if (FormManager.getActualValue('reqType') == 'C') {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var tinRequired = isNumeroTinRequired();
     if (cntry == '851') {
-      if (dijit.byId('taxCd2').get('checked')) {
-        FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+      if (tinRequired) {
+        if (dijit.byId('taxCd2').get('checked')) {
+          FormManager.clearValue('taxCd1');
+          FormManager.readOnly('taxCd1');
+          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        } else {
+          FormManager.enable('taxCd1');
+          FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+        }
       } else {
-        FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
+        if (dijit.byId('taxCd2').get('checked')) {
+          FormManager.clearValue('taxCd1');
+          FormManager.readOnly('taxCd1');
+          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
+        } else {
+          FormManager.enable('taxCd1');
+        }
       }
     }
   }
@@ -1544,14 +1538,25 @@ function resetNumeroRequired() {
   }
   if (FormManager.getActualValue('reqType') == 'C') {
     var cntry = FormManager.getActualValue('cmrIssuingCntry');
+    var numeroRequired = isNumeroTinRequired();
     if (cntry == '700') {
-      if (dijit.byId('taxCd2').get('checked')) {
-        FormManager.clearValue('busnType');
-        FormManager.readOnly('busnType');
-        FormManager.removeValidator('busnType', Validators.REQUIRED);
+      if (numeroRequired) {
+        if (dijit.byId('taxCd2').get('checked')) {
+          FormManager.clearValue('busnType');
+          FormManager.readOnly('busnType');
+          FormManager.removeValidator('busnType', Validators.REQUIRED);
+        } else {
+          FormManager.enable('busnType');
+          FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+        }
       } else {
-        FormManager.enable('busnType');
-        FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
+        if (dijit.byId('taxCd2').get('checked')) {
+          FormManager.clearValue('busnType');
+          FormManager.readOnly('busnType');
+          FormManager.removeValidator('busnType', Validators.REQUIRED);
+        } else {
+          FormManager.enable('busnType');
+        }
       }
     }
   }
@@ -1687,102 +1692,6 @@ function addEmbargoCodeValidator() {
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
-}
-
-function resetNumeroExempt() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    var numero = FormManager.getActualValue('busnType');
-    var numeroExempt = dijit.byId('taxCd2').get('checked');
-
-    if (numero != null && numero.length > 0) {
-      if (numeroExempt == true) {
-        FormManager.getField('taxCd2').set('checked', false);
-      }
-    }
-  }
-}
-
-function resetTinExempt() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    var tin = FormManager.getActualValue('taxCd1');
-    var tinExempt = dijit.byId('taxCd2').get('checked');
-
-    if (tin != null && tin.length > 0) {
-      if (tinExempt == true) {
-        FormManager.getField('taxCd2').set('checked', false);
-      }
-    }
-  }
-}
-
-function numeroExemptOnScenario() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    var custSubType = FormManager.getActualValue('custSubGrp');
-    var numero = FormManager.getActualValue('busnType');
-    var found = false;
-    var subGrp = new Array();
-    subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
-    for (var i = 0; i < subGrp.length; i++) {
-      if (custSubType == subGrp[i]) {
-        if ((numero == null || numero.length == 0)) {
-          FormManager.getField('taxCd2').set('checked', true);
-          FormManager.removeValidator('busnType', Validators.REQUIRED);
-        } else {
-          FormManager.getField('taxCd2').set('checked', false);
-          FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
-        }
-        found = true;
-        break;
-      }
-    }
-    if (found != true) {
-      FormManager.getField('taxCd2').set('checked', false);
-      FormManager.addValidator('busnType', Validators.REQUIRED, [ 'Numero Statistique du Client' ], 'MAIN_CUST_TAB');
-    }
-  }
-}
-
-function tinExemptOnScenario() {
-  var viewOnly = FormManager.getActualValue('viewOnlyPage');
-  if (viewOnly != '' && viewOnly == 'true') {
-    return;
-  }
-  if (FormManager.getActualValue('reqType') == 'C') {
-    var custSubType = FormManager.getActualValue('custSubGrp');
-    var tin = FormManager.getActualValue('taxCd1');
-    var found = false;
-    var subGrp = new Array();
-    subGrp = [ 'IBMEM', 'PRICU', 'XBP', 'XCOM', 'XGOV', 'XIBME', 'XINTE', 'XLLCX', 'XPRIC', 'XTP' ];
-    for (var i = 0; i < subGrp.length; i++) {
-      if (custSubType == subGrp[i]) {
-        if ((tin == null || tin.length == 0)) {
-          FormManager.getField('taxCd2').set('checked', true);
-          FormManager.removeValidator('taxCd1', Validators.REQUIRED);
-        } else {
-          FormManager.getField('taxCd2').set('checked', false);
-          FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
-        }
-        found = true;
-        break;
-      }
-    }
-    if (found != true) {
-      FormManager.getField('taxCd2').set('checked', false);
-      FormManager.addValidator('taxCd1', Validators.REQUIRED, [ 'TIN Number' ], 'MAIN_CUST_TAB');
-    }
-  }
 }
 
 function addSalesBusOffValidator() {
@@ -1948,6 +1857,14 @@ function resetVatRequired() {
       FormManager.enable('vat');
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
+  } else {
+    if (dijit.byId('vatExempt').get('checked')) {
+      FormManager.clearValue('vat');
+      FormManager.readOnly('vat');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+    } else {
+      FormManager.enable('vat');
+    }
   }
 }
 
@@ -1973,6 +1890,28 @@ function preTickNumeroExempt(fromAddress, scenario, scenarioChanged) {
     }
   }
   resetNumeroRequired();
+}
+
+function preTickTinExempt(fromAddress, scenario, scenarioChanged) {
+
+  if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
+    if (scenario == 'IBMEM' || scenario == 'PRICU') {
+      FormManager.setValue('taxCd2', true);
+    } else {
+      FormManager.setValue('taxCd2', false);
+    }
+  }
+  resetTinRequired();
+}
+
+function isNumeroTinRequired() {
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  var scenarioRequired = [ 'BUSPR', 'COMME', 'GOVRN', 'INTER', 'LLC', 'LLCBP', 'LLCEX', 'THDPT' ];
+
+  if (scenarioRequired.indexOf(custSubGrp) >= 0) {
+    return true;
+  }
+  return false;
 }
 
 function isVatRequired() {
@@ -2055,7 +1994,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addTaxRegFormatValidationMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addAttachmentValidatorOnTaxRegMadagascar, [ SysLoc.MADAGASCAR ], null, true);
   GEOHandler.registerValidator(addTinNumberValidationTz, [ SysLoc.TANZANIA ], null, true);
-  GEOHandler.addAfterTemplateLoad(setTinNumberBehaviorForTz, SysLoc.TANZANIA);
   GEOHandler.addAfterTemplateLoad(retainImportValues, GEOHandler.MCO2);
 
   GEOHandler.registerValidator(validateCMRForMCO2GMLLCScenario, GEOHandler.MCO2, null, true);
@@ -2067,23 +2005,23 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(enableCMRNOMCO2GLLC, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(enableCmrNumForProcessor, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(registerMCO2VatValidator, GEOHandler.MCO2);
+
   GEOHandler.addAfterTemplateLoad(preTickVatExempt, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(preTickNumeroExempt, SysLoc.MADAGASCAR);
-  GEOHandler.addAfterTemplateLoad(resetTinRequired, SysLoc.TANZANIA);
+  GEOHandler.addAfterTemplateLoad(preTickTinExempt, SysLoc.TANZANIA);
+
   GEOHandler.addAfterConfig(addAbbrvNmAndLocValidator, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(setStreetContBehavior, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(limitClientTierValues, GEOHandler.MCO2);
   GEOHandler.registerValidator(validateCollectionCd, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addEmbargoCodeValidator, GEOHandler.MCO2, null, true);
-  GEOHandler.addAfterConfig(resetNumeroExempt, SysLoc.MADAGASCAR);
-  GEOHandler.addAfterTemplateLoad(resetNumeroExempt, SysLoc.MADAGASCAR);
-  GEOHandler.addAfterConfig(resetTinExempt, SysLoc.TANZANIA);
-  GEOHandler.addAfterTemplateLoad(resetTinExempt, SysLoc.TANZANIA);
-  GEOHandler.addAfterTemplateLoad(numeroExemptOnScenario, SysLoc.MADAGASCAR);
-  GEOHandler.addAfterTemplateLoad(tinExemptOnScenario, SysLoc.TANZANIA);
+
   GEOHandler.registerValidator(addSalesBusOffValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addSBOLengthValidator, GEOHandler.MCO2, null, true);
+
   GEOHandler.addAfterConfig(showVatExempt, GEOHandler.MCO2);
+
   GEOHandler.addAfterConfig(resetVatRequired, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(resetNumeroRequired, SysLoc.MADAGASCAR);
+  GEOHandler.addAfterConfig(resetTinRequired, SysLoc.TANZANIA);
 });
