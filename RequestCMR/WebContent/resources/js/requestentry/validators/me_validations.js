@@ -1299,7 +1299,8 @@ function setClientTierValues(isuCd) {
         clientTiers = [ '7' ];
       }
       // End of CMR6057
-    } var qParams = {
+    } else {
+      var qParams = {
         _qall : 'Y',
         ISSUING_CNTRY : cntry,
         ISU : '%' + isuCd + '%'
