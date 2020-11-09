@@ -703,7 +703,9 @@ function disableEnableFieldsForMT() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
 
-  if (reqType == 'C' && role == 'REQUESTER') {
+  if (reqType != 'C') {
+    FormManager.readOnly('cmrNo');
+  } else if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('specialTaxCd');
