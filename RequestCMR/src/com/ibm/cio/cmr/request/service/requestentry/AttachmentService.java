@@ -442,6 +442,19 @@ public class AttachmentService extends BaseService<AttachmentModel, Attachment> 
    * @return
    */
   public void removeAttachmentsOfType(EntityManager entityManager, long reqId, String docContent) {
+    removeAttachmentsOfType(entityManager, reqId, docContent, null);
+  }
+
+  /**
+   * Removes all current attachments with the given type starting with the given
+   * filename
+   * 
+   * @param entityManager
+   * @param reqId
+   * @param docContent
+   * @return
+   */
+  public void removeAttachmentsOfType(EntityManager entityManager, long reqId, String docContent, String fileNamePrefix) {
     String sql = ExternalizedQuery.getSql("ATTACHMENT.GET_BY_TYPE");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("REQ_ID", reqId);
@@ -450,12 +463,14 @@ public class AttachmentService extends BaseService<AttachmentModel, Attachment> 
     if (attachments != null) {
       for (Attachment attachment : attachments) {
         String link = attachment.getId().getDocLink();
-        this.log.debug("Removing file " + link + " from Request ID " + reqId);
-        File file = new File(link);
-        if (file.exists()) {
-          file.delete();
+        if (fileNamePrefix == null || link.contains("/" + fileNamePrefix)) {
+          this.log.debug("Removing file " + link + " from Request ID " + reqId);
+          File file = new File(link);
+          if (file.exists()) {
+            file.delete();
+          }
+          deleteEntity(attachment, entityManager);
         }
-        deleteEntity(attachment, entityManager);
       }
     }
   }

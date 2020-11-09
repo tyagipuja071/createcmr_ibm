@@ -285,4 +285,8 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(setCSPValues, [ SysLoc.USA ]);
   GEOHandler.addAfterTemplateLoad(enableUSSicMenForScenarios, [ SysLoc.USA ]);
   GEOHandler.addAfterConfig(enableUSSicMenForScenarios, [ SysLoc.USA ]);
+  
+  /* requireDPL check ad assessment for all users*/
+  GEOHandler.registerValidator(addDPLCheckValidator, [ SysLoc.USA ], GEOHandler.ROLE_REQUESTER, true);
+  GEOHandler.registerValidator(addDPLAssessmentValidator, [ SysLoc.USA ], null, true);
 });

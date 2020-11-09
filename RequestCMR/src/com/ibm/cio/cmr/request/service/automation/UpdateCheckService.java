@@ -48,9 +48,11 @@ public class UpdateCheckService extends BaseSimpleService<UpdateCheckModel> {
       Data data = requestData.getData();
       Admin admin = requestData.getAdmin();
       if (data != null) {
+        entityManager.detach(data);
         PropertyUtils.copyProperties(data, reqEntryModel);
       }
       if (admin != null) {
+        entityManager.detach(admin);
         PropertyUtils.copyProperties(admin, reqEntryModel);
       }
       AutomationEngineData engineData = new AutomationEngineData();

@@ -1144,6 +1144,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         }
 
         transformer.transformLegacyAddressDataMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data, legacyObjects);
+        capsAndFillNulls(legacyAddr, true);
         // DTN: Set again the CmrtCust object on the legacy objects
         // container just to be sure
         legacyObjects.setCustomer(cust);

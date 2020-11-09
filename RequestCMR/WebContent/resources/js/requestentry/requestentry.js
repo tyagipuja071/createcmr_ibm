@@ -587,9 +587,9 @@ function addCMRSearchHandler(readOnly) {
     FormManager.disable('dnbSearchBtn');
     dojo.removeClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-pri');
     dojo.addClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-disabled');
-    FormManager.disable('dplCheckBtn');
-    dojo.removeClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-pri');
-    dojo.addClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-disabled');
+    //FormManager.disable('dplCheckBtn');
+    //dojo.removeClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-pri');
+    //dojo.addClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-disabled');
   }
 }
 
@@ -1424,6 +1424,8 @@ function handleRequiredDnBSearch() {
   }
 }
 
+
+
 function checkIfFinalDnBCheckRequired() {
   var reqId = FormManager.getActualValue('reqId');
   var reqType = FormManager.getActualValue('reqType');
@@ -1590,4 +1592,19 @@ function showDocTypeConfirmDialog() {
 
 function doChangeDocType() {
   FormManager.doAction('frmCMR', 'CONFIRM_DOC_UPD', true, "Updating attachment types to 'Company Proof'...");
+}
+
+/**
+ * Save function
+ */
+function autoSaveRequest() {
+  // enable all checkboxes
+  var cb = dojo.query('[type=checkbox]');
+  for (var i = 0; i < cb.length; i++) {
+    if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
+      cb[i].disabled = false;
+      cb[i].removeAttribute('disabled');
+    }
+  }
+  FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }

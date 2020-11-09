@@ -169,6 +169,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         cmrIssuingCntry = "";
       }
 
+      model.setCmrIssuingCntry(data.getCmrIssuingCntry());
+
       if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (SwissUtil.isCountrySwissEnabled(entityManager, cmrIssuingCntry)) {
@@ -2991,6 +2993,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       MassUpdtPK massUpdtPK = new MassUpdtPK();
       massUpdt.setId(massUpdtPK);
       massService.copyValuesToEntity(massModel, massUpdt);
+      if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
+        massUpdt.setRowStatusCd("READY");
+      }
       createEntity(massUpdt, entityManager);
 
       MassUpdtData massUpdtData = new MassUpdtData();

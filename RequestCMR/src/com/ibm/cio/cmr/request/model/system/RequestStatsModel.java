@@ -143,6 +143,23 @@ public class RequestStatsModel {
   @Column(name = "COMPLETION_TS")
   private String completionTs;
 
+  @Column(name = "FIND_DNB_RESULT")
+  private String dnbResult;
+
+  @Column(name = "DPL_CHK_RESULT")
+  private String dplChkResult;
+
+  @Column(name = "DPL_ASSESSMENT_RESULT")
+  private String dnbAssessmentResult;
+
+  @Column(name = "CHILD_REQ_ID")
+  private long childReqId;
+
+  @Column(name = "POOL_CMR_INDC")
+  private String poolCmrIndc;
+
+  private String market;
+
   public String getCntryCd() {
     return cntryCd;
   }
@@ -493,5 +510,53 @@ public class RequestStatsModel {
 
   public void setAutoTat(long autoTat) {
     this.autoTat = autoTat;
+  }
+
+  public String getDnbResult() {
+    return dnbResult;
+  }
+
+  public void setDnbResult(String dnbResult) {
+    this.dnbResult = dnbResult;
+  }
+
+  public String getDplChkResult() {
+    return dplChkResult;
+  }
+
+  public void setDplChkResult(String dplChkResult) {
+    this.dplChkResult = dplChkResult;
+  }
+
+  public String getDnbAssessmentResult() {
+    return dnbAssessmentResult;
+  }
+
+  public void setDnbAssessmentResult(String dnbAssessmentResult) {
+    this.dnbAssessmentResult = dnbAssessmentResult;
+  }
+
+  public long getChildReqId() {
+    return childReqId;
+  }
+
+  public void setChildReqId(long childReqId) {
+    this.childReqId = childReqId;
+  }
+
+  public String getPoolCmrIndc() {
+    return poolCmrIndc;
+  }
+
+  public void setPoolCmrIndc(String poolCmrIndc) {
+    this.poolCmrIndc = poolCmrIndc;
+  }
+
+  public String getMarket() {
+    return market;
+  }
+
+  public void setMarket(String market) {
+    this.market = market;
   }
 }
