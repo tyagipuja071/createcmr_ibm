@@ -91,8 +91,9 @@ public class USCeIdMapping {
    * @return
    */
   public static USCeIdMapping getByEnterprise(String enterpriseNo) {
+    load(false);
     for (USCeIdMapping mapping : configurations.values()) {
-      if (enterpriseNo.equals(mapping.getEnterpriseNo())) {
+      if (mapping.getEnterpriseNo().equals(enterpriseNo)) {
         return mapping;
       }
     }
