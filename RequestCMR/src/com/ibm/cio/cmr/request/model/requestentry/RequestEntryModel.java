@@ -3026,7 +3026,7 @@ public class RequestEntryModel extends BaseModel {
   public void setMilitary(String military) {
     this.military = military;
   }
-  
+
   public String getPaygoProcessIndc() {
     return paygoProcessIndc;
   }
@@ -3081,38 +3081,6 @@ public class RequestEntryModel extends BaseModel {
 
   public void setCusInvoiceCopies(String cusInvoiceCopies) {
     this.cusInvoiceCopies = cusInvoiceCopies;
-  }
-
-  public String getIntDplAssessmentResult() {
-    return intDplAssessmentResult;
-  }
-
-  public void setIntDplAssessmentResult(String intDplAssessmentResult) {
-    this.intDplAssessmentResult = intDplAssessmentResult;
-  }
-
-  public String getIntDplAssessmentDate() {
-    return intDplAssessmentDate;
-  }
-
-  public void setIntDplAssessmentDate(String intDplAssessmentDate) {
-    this.intDplAssessmentDate = intDplAssessmentDate;
-  }
-
-  public String getIntDplAssessmentBy() {
-    return intDplAssessmentBy;
-  }
-
-  public void setIntDplAssessmentBy(String intDplAssessmentBy) {
-    this.intDplAssessmentBy = intDplAssessmentBy;
-  }
-
-  public String getIntDplAssessmentCmt() {
-    return intDplAssessmentCmt;
-  }
-
-  public void setIntDplAssessmentCmt(String intDplAssessmentCmt) {
-    this.intDplAssessmentCmt = intDplAssessmentCmt;
   }
 
 }
