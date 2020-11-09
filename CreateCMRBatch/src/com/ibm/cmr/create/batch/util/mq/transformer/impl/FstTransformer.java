@@ -134,7 +134,7 @@ public class FstTransformer extends MCOTransformer {
     legacyCust.setMailingCond("");
     legacyCust.setAuthRemarketerInd("0");
 
-    if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType)) {
+    if (MQMsgConstants.CUSTSUBGRP_BUSPR.equals(custType) || "XBP".equals(custType) || "LLCBP".equals(custType)) {
       legacyCust.setMrcCd("5");
       legacyCust.setAuthRemarketerInd("1");
     } else {
