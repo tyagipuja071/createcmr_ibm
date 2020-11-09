@@ -85,93 +85,45 @@ function addAddressTypeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.MALTA) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          return new ValidationResult(null, false, 'All address types are mandatory.');
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var zs01Cnt = 0;
+          var zp01Cnt = 0;
+          var zi01Cnt = 0;
+          var zd01Cnt = 0;
 
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              zs01Cnt++;
+            } else if (type == 'ZP01') {
+              zp01Cnt++;
+            } else if (type == 'ZI01') {
+              zi01Cnt++;
+            } else if (type == 'ZD01') {
+              zd01Cnt++;
+            }
+          }
+
+          if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
+          } else if (zs01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Billing address is allowed.');
+          } else if (zp01Cnt > 1) {
+            return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
           }
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-            var record = null;
-            var type = null;
-            var zs01Cnt = 0;
-            var zp01Cnt = 0;
-            var zi01Cnt = 0;
-            var zd01Cnt = 0;
-            var zs02Cnt = 0;
-
-            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-              if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                record = _allAddressData[i];
-              }
-              type = record.addrType;
-              if (typeof (type) == 'object') {
-                type = type[0];
-              }
-              if (type == 'ZS01') {
-                zs01Cnt++;
-              } else if (type == 'ZP01') {
-                zp01Cnt++;
-              } else if (type == 'ZI01') {
-                zi01Cnt++;
-              } else if (type == 'ZD01') {
-                zd01Cnt++;
-              } else if (type == 'ZS02') {
-                zs02Cnt++;
-              }
-            }
-
-            if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
-              return new ValidationResult(null, false, 'All address types are mandatory.');
-            } else if (zs01Cnt > 1) {
-              return new ValidationResult(null, false, 'Only one Billing address is allowed.');
-            } else if (zp01Cnt > 1) {
-              return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-            }
-            return new ValidationResult(null, true);
-          }
-        } else {
-          console.log("Address Type Validator Malta..............");
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-            return new ValidationResult(null, false, 'Mailing address is mandatory. Only multiple Shipping & Installing addresses are allowed.');
-          }
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-            var record = null;
-            var type = null;
-            var billingCnt = 0; // ZP01
-            var installCnt = 0; // ZI01 multiple
-            var mailingCnt = 0; // ZS01
-            var shippingCnt = 0; // ZD01 multiple
-            var eplCnt = 0;// ZS02
-            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-              if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                record = _allAddressData[i];
-              }
-              type = record.addrType;
-              if (typeof (type) == 'object') {
-                type = type[0];
-              }
-              if (type == 'ZI01') {
-                installCnt++;
-              } else if (type == 'ZS01') {
-                mailingCnt++;
-              } else if (type == 'ZP01') {
-                billingCnt++;
-              } else if (type == 'ZD01') {
-                shippingCnt++;
-              } else if (type == 'ZS02') {
-                eplCnt++;
-              }
-            }
-            if (billingCnt > 1) {
-              return new ValidationResult(null, false, 'What we need is to have only One Billing address. Please remove the additional Billing address.');
-            } else if (mailingCnt > 1) {
-              return new ValidationResult(null, false, 'What we need is to have only One Mailing address. Please remove the additional Mailing address.');
-            } else {
-              return new ValidationResult(null, true);
-            }
-          }
+          return new ValidationResult(null, true);
         }
       }
     };
