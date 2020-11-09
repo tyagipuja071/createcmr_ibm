@@ -81,7 +81,7 @@ function disableAddrFieldsCEWA() {
 }
 
 function addAddressTypeValidator() {
-  console.log("addAddressTypeValidator for MCO2..........");
+  console.log("addAddressTypeValidator for MALTA..........");
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
@@ -127,10 +127,6 @@ function addAddressTypeValidator() {
               return new ValidationResult(null, false, 'Only one Billing address is allowed.');
             } else if (zp01Cnt > 1) {
               return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-            } else if (zi01Cnt > 1) {
-              return new ValidationResult(null, false, 'Only one Installing address is allowed.');
-            } else if (zs02Cnt > 1) {
-              return new ValidationResult(null, false, 'Only one EPL address is allowed.');
             }
             return new ValidationResult(null, true);
           }
@@ -168,20 +164,10 @@ function addAddressTypeValidator() {
                 eplCnt++;
               }
             }
-            // if (installCnt == 0 || mailingCnt == 0 || billingCnt == 0 ||
-            // shippingCnt == 0
-            // || eplCnt == 0) {
-            // return new ValidationResult(null, false,
-            // 'Only mailing address is mandatory. Only multiple Shipping &
-            // Installing
-            // addresses are allowed.');
-            // } else
             if (billingCnt > 1) {
               return new ValidationResult(null, false, 'What we need is to have only One Billing address. Please remove the additional Billing address.');
             } else if (mailingCnt > 1) {
               return new ValidationResult(null, false, 'What we need is to have only One Mailing address. Please remove the additional Mailing address.');
-            } else if (eplCnt > 1) {
-              return new ValidationResult(null, false, 'What we need is to have only One EPL address. Please remove the additional EPL address.');
             } else {
               return new ValidationResult(null, true);
             }
@@ -902,7 +888,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
-  GEOHandler.registerValidator(addAddressTypeValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.MALTA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.MALTA ], null, true);
@@ -923,8 +908,9 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
-  GEOHandler.registerValidator(addOrdBlkValidator, SysLoc.MALTA, null, true);
-  GEOHandler.registerValidator(addISICValidatorForScenario, SysLoc.MALTA, null, true);
-  GEOHandler.registerValidator(addIsicClassificationCodeValidator, SysLoc.MALTA, null, true);
+  GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
+  GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
+  GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ], null, true);
+  GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
 
 });
