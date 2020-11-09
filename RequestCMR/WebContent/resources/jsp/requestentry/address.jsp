@@ -71,6 +71,17 @@ visibility: hidden !IMPORTANT;
         }
       }
       break;
+    case '649':
+      if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1){
+        cmr.hideNode('addAddressButton');
+      } else if (FormManager.getActualValue('reqType') == 'U'){
+        cmr.hideNode('addAddressButton');
+      } else {
+        if (dojo.byId('addAddressButton')){
+          dojo.byId('addAddressButton').style.display = 'inline';
+        }
+      }
+      break;
     case '631':
       if (CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 1){
         cmr.hideNode('addAddressButton');
@@ -305,10 +316,15 @@ visibility: hidden !IMPORTANT;
               <cmr:formatter functionName="customerNameFormatter" />
             </cmr:gridCol>
           </cmr:view>
-          
-          <cmr:view forGEO="FR">
-            <cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
-          </cmr:view>
+
+			<!-- MALTA LEGACY -->
+			<cmr:view forCountry="780">
+				<cmr:gridCol width="120px" field="custNm3" header="Name 3" />
+			</cmr:view>				
+
+			<cmr:view forGEO="FR">
+            	<cmr:gridCol width="120px" field="custNm3" header="Customer Name/ Additional Address Information" />
+          	</cmr:view>
         <%} %>
         
         <!-- Defect : 1444422 for FR-->
@@ -397,7 +413,7 @@ visibility: hidden !IMPORTANT;
         <cmr:gridCol width="70px" field="postCd" header="${ui.grid.zipCode}" />  
 
         <!-- Dept / Attn -->
-        <cmr:view forGEO="MCO,MCO1,MCO2,NORDX">
+        <cmr:view forGEO="MCO,MCO1,MCO2,NORDX" exceptForCountry="780">
           <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" />
         </cmr:view>
         
@@ -405,11 +421,6 @@ visibility: hidden !IMPORTANT;
         <cmr:view forCountry="851">
 			<cmr:gridCol width="100px" field="dept" header="TIN#"></cmr:gridCol>  		    	
         </cmr:view>
-        
-         <!-- ICE# -->
-        <cmr:view forCountry="642">
-			<cmr:gridCol width="100px" field="dept" header="ICE#"></cmr:gridCol>  		    	
-        </cmr:view> 
         
         <!-- Story : 1830918 -->
         
@@ -497,7 +508,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
 
         <!-- Phone -->
-        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
+        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
           <cmr:gridCol width="90px" field="custPhone" header="Phone #" />
         </cmr:view>
         

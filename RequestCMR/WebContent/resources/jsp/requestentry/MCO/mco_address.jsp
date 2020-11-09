@@ -35,7 +35,7 @@
         <cmr:label fieldId="ierpSitePrtyId" cssClass="cmr-inline">
           <cmr:fieldLabel fieldId="SitePartyID" />:</cmr:label>
         <cmr:delta text="-" id="delta-ierpSitePrtyId" />
-        <cmr:field fieldId="SitePartyID" id="ierpSitePrtyId" path="ierpSitePrtyId" />
+        <cmr:field fieldId="IERPSitePrtyId" id="ierpSitePrtyId" path="ierpSitePrtyId" />
       </p>
     </cmr:column>
   </cmr:row>
@@ -63,6 +63,20 @@
   </cmr:column>
 </cmr:row>
 
+<%-- MALTA LEGACY --%>
+<cmr:view forCountry="780">
+	<cmr:row addBackground="true" topPad="10">
+		<cmr:column span="4">
+			<cmr:label fieldId="custNm3">
+				<cmr:fieldLabel fieldId="CustomerName3" />: 
+			</cmr:label>
+			<cmr:field fieldId="CustomerName3" id="custNm3" path="custNm3"
+				size="400" />
+			<cmr:delta text="-" id="delta-custNm3" />
+		</cmr:column>
+	</cmr:row>
+</cmr:view>
+
 <cmr:row addBackground="true">  
   &nbsp;
 </cmr:row>
@@ -77,10 +91,13 @@
       <cmr:field fieldId="LandedCountry" id="landCntry" path="landCntry" />
     </p>
   </cmr:column>
-  <cmr:column span="2" width="370" containerForField="CustomerName4">
+  <cmr:column span="2" width="370" containerForField="CustomerName4" exceptForCountry="780">
     <cmr:label fieldId="custNm4">
       <cmr:fieldLabel fieldId="CustomerName4" />: 
       <cmr:delta text="-" id="delta-custNm4" />
+      <cmr:view forGEO="MCO2">
+      	<cmr:info text="${ui.info.addrAddlName}" />
+      </cmr:view>
     </cmr:label>
     <cmr:field fieldId="CustomerName4" id="custNm4" path="custNm4"/>
   </cmr:column>
@@ -118,7 +135,7 @@
   </cmr:column>
    <!-- We are using for Tin number -->
   <div id="tin">
-  <cmr:column span="2" containerForField="Department">
+  <cmr:column span="2" containerForField="Department" exceptForCountry="780,864">
     <p>
       <cmr:label fieldId="dept">
         <cmr:fieldLabel fieldId="Department" />:

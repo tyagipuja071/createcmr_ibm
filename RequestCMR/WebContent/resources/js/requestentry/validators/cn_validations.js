@@ -525,11 +525,11 @@ function setValuesForScenarios() {
             FormManager.setValue('rdcComment', 'Acquisition');
           }
         }
-      } else if(_custSubGrp == 'MRKT'){
-        FormManager.setValue('rdcComment', 'For Market place use only');       
-      }else if(_custSubGrp == 'BLUMX'){
-        FormManager.setValue('rdcComment', 'For Bluemix use only');       
-      }else {
+      } else if (_custSubGrp == 'MRKT') {
+        FormManager.setValue('rdcComment', 'For Market place use only');
+      } else if (_custSubGrp == 'BLUMX') {
+        FormManager.setValue('rdcComment', 'For Bluemix use only');
+      } else {
         FormManager.resetValidations('rdcComment');
       }
     }
@@ -647,12 +647,11 @@ function showHideCityCN() {
       FormManager.resetValidations('custPhone');
       FormManager.resetValidations('cnCustContJobTitle');
       FormManager.resetValidations('cnCustContNm');
-    } else if(_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX'){
+    } else if (_custSubGrp == 'MRKT' || _custSubGrp == 'BLUMX') {
       FormManager.resetValidations('custPhone');
       FormManager.resetValidations('cnCustContJobTitle');
-      FormManager.resetValidations('cnCustContNm');     
-    }
-    else {
+      FormManager.resetValidations('cnCustContNm');
+    } else {
       FormManager.addValidator('cnCity', Validators.REQUIRED, [ 'City Chinese' ], null);
       FormManager.addValidator('cnAddrTxt', Validators.REQUIRED, [ 'Street Address Chinese' ], null);
       FormManager.addValidator('cnCustName1', Validators.REQUIRED, [ 'Customer Name Chinese' ], null);
@@ -871,8 +870,7 @@ function addContactInfoValidator() {
     return {
       validate : function() {
         var custSubType = FormManager.getActualValue('custSubGrp');
-        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C'
-            && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0 && FormManager.getActualValue('reqType') == 'C' && (custSubType == 'EMBSA' || custSubType == 'NRML')) {
           var record = null;
           var type = null;
 

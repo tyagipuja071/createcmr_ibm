@@ -415,6 +415,7 @@ public class RequestEntryModel extends BaseModel {
   private String matchIndc;
   private String matchOverrideIndc;
   private String dupCmrReason;
+  private String paygoProcessIndc;
 
   // CMR-5910 - military flag
   private String military;
@@ -424,6 +425,10 @@ public class RequestEntryModel extends BaseModel {
   private String intDplAssessmentDate;
   private String intDplAssessmentBy;
   private String intDplAssessmentCmt;
+
+  // canada fields
+  private String invoiceDistCd;
+  private String cusInvoiceCopies;
 
   public String getMatchIndc() {
     return matchIndc;
@@ -3020,6 +3025,62 @@ public class RequestEntryModel extends BaseModel {
 
   public void setMilitary(String military) {
     this.military = military;
+  }
+  
+  public String getPaygoProcessIndc() {
+    return paygoProcessIndc;
+  }
+
+  public void setPaygoProcessIndc(String paygoProcessIndc) {
+    this.paygoProcessIndc = paygoProcessIndc;
+  }
+
+  public String getIntDplAssessmentResult() {
+    return intDplAssessmentResult;
+  }
+
+  public void setIntDplAssessmentResult(String intDplAssessmentResult) {
+    this.intDplAssessmentResult = intDplAssessmentResult;
+  }
+
+  public String getIntDplAssessmentDate() {
+    return intDplAssessmentDate;
+  }
+
+  public void setIntDplAssessmentDate(String intDplAssessmentDate) {
+    this.intDplAssessmentDate = intDplAssessmentDate;
+  }
+
+  public String getIntDplAssessmentBy() {
+    return intDplAssessmentBy;
+  }
+
+  public void setIntDplAssessmentBy(String intDplAssessmentBy) {
+    this.intDplAssessmentBy = intDplAssessmentBy;
+  }
+
+  public String getIntDplAssessmentCmt() {
+    return intDplAssessmentCmt;
+  }
+
+  public void setIntDplAssessmentCmt(String intDplAssessmentCmt) {
+    this.intDplAssessmentCmt = intDplAssessmentCmt;
+  }
+
+  public String getInvoiceDistCd() {
+    return invoiceDistCd;
+  }
+
+  public void setInvoiceDistCd(String invoiceDistCd) {
+    this.invoiceDistCd = invoiceDistCd;
+  }
+
+  public String getCusInvoiceCopies() {
+    return cusInvoiceCopies;
+  }
+
+  public void setCusInvoiceCopies(String cusInvoiceCopies) {
+    this.cusInvoiceCopies = cusInvoiceCopies;
   }
 
   public String getIntDplAssessmentResult() {

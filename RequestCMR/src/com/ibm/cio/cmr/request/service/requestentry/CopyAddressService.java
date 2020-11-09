@@ -131,6 +131,7 @@ public class CopyAddressService extends BaseService<CopyAddressModel, Addr> {
         sapNo = copyAddr.getSapNo();
         importInd = copyAddr.getImportInd();
         createDt = copyAddr.getRdcCreateDt();
+        
         if (typesToCopy.contains(copyAddr.getId().getAddrType()) && !createOnlyTypes.contains(copyAddr.getId().getAddrType())) {
           sourceAddr.setId(copyAddr.getId());
           PropertyUtils.copyProperties(copyAddr, sourceAddr);

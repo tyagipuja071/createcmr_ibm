@@ -21,7 +21,7 @@ import com.ibm.cio.cmr.request.entity.MqIntfReqQueue;
 import com.ibm.cio.cmr.request.entity.MqIntfReqQueuePK;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
-import com.ibm.cio.cmr.request.util.geo.impl.FRHandler;
+import com.ibm.cio.cmr.request.util.geo.impl.FranceHandler;
 import com.ibm.cmr.create.batch.service.BaseBatchService;
 import com.ibm.cmr.create.batch.util.mq.CEBOGenerate;
 import com.ibm.cmr.create.batch.util.mq.LandedCountryMap;
@@ -212,7 +212,7 @@ public class FranceTransformer extends MessageTransformer {
     Addr addrData = handler.addrData;
     Data cmrData = handler.cmrData;
 
-    if (FRHandler.DUMMY_SIRET_ADDRESS.equals(addrData.getId().getAddrType())) {
+    if (FranceHandler.DUMMY_SIRET_ADDRESS.equals(addrData.getId().getAddrType())) {
       // this is for a SIRET update. Send correct value for SIRET, even dummy or
       // not
 
