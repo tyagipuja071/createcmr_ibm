@@ -68,17 +68,20 @@ public class CMRRefreshService extends BaseBatchService {
     if (this.hours > 0) {
       hours = this.hours;
     }
-    LOG.debug("Getting records updated up to " + hours + " hours earlier..");
+    LOG.debug("Getting records updated up to " + hours + " hour(s) earlier..");
     cal.add(Calendar.HOUR, hours * -1);
     cal.add(Calendar.MINUTE, -15);
     LOG.debug("Timestamp to use: " + cal.getTime());
 
     LOG.debug("Getting CMR Nos. updated within the given timeframe..");
-    sql = "select KATR6, ZZKV_CUSNO, KUNNR from SAPR3.KNA1 where MANDT = :MANDT and LOEVM <> 'X' and SHAD_UPDATE_TS >= :TS";
+    sql = "select distinct KATR6, ZZKV_CUSNO ";
+    sql += "from SAPR3.KNA1 ";
+    sql += "where MANDT = :MANDT  ";
+    sql += "and LOEVM <> 'X'  ";
+    sql += "and SHAD_UPDATE_TS >= :TS ";
     if (this.country != null) {
       sql += " and KATR6 = :KATR6";
     }
-    sql += " order by KATR6, ZZKV_CUSNO, KUNNR";
     query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", mandt);
     query.setParameter("KATR6", this.country);
@@ -90,7 +93,7 @@ public class CMRRefreshService extends BaseBatchService {
     int error = 0;
 
     if (results != null && !results.isEmpty()) {
-      LOG.info("Processing " + results.size() + " distinct CMRs..");
+      LOG.info("Processing " + results.size() + " distinct CMR(s)..");
 
       IndexUpdateClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
           IndexUpdateClient.class);
@@ -105,23 +108,22 @@ public class CMRRefreshService extends BaseBatchService {
             request.setMandt(mandt);
             request.setKatr6((String) record[0]);
             request.setCmrNo((String) record[1]);
-            request.setKunnr((String) record[2]);
             request.setUpdate(true);
 
             try {
               IndexUpdateResponse response = client.executeAndWrap(IndexUpdateClient.BASIC_APP_ID, request, IndexUpdateResponse.class);
               if (response.isSuccess()) {
-                LOG.trace("CMR No. " + record[1] + " under " + record[1] + " updated.");
-                pw.println(record[0] + "\t" + record[1] + "\t" + record[2] + "\tSuccess");
+                LOG.trace("CMR No. " + record[1] + " under " + record[0] + " updated.");
+                pw.println(record[0] + "\t" + record[1] + "\tSuccess");
                 processed++;
               } else {
-                LOG.warn("CMR No. " + record[1] + " under " + record[1] + " not updated successfully. " + response.getMsg());
-                pw.println(record[0] + "\t" + record[1] + "\t" + record[2] + "\tError:" + response.getMsg());
+                LOG.warn("CMR No. " + record[1] + " under " + record[0] + " not updated successfully. " + response.getMsg());
+                pw.println(record[0] + "\t" + record[1] + "\tError:" + response.getMsg());
                 error++;
               }
             } catch (Exception e) {
-              LOG.warn("CMR No. " + record[1] + " under " + record[1] + " not updated successfully. " + e.getMessage());
-              pw.println(record[0] + "\t" + record[1] + "\t" + record[2] + "\tError:" + e.getMessage());
+              LOG.warn("CMR No. " + record[1] + " under " + record[0] + " not updated successfully. " + e.getMessage());
+              pw.println(record[0] + "\t" + record[1] + "\tError:" + e.getMessage());
               error++;
               if (LOG.isTraceEnabled()) {
                 LOG.error(e);
