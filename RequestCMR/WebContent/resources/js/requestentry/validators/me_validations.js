@@ -949,16 +949,33 @@ function addLatinCharValidator() {
     checkAndAddValidator('custNm3', Validators.LATIN, [ 'Customer Name (3)' ]);
     checkAndAddValidator('addrTxt', Validators.LATIN, [ 'Street Address' ]);
     checkAndAddValidator('city1', Validators.LATIN, [ 'City' ]);
-    checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+    // checkAndAddValidator('postCd', Validators.LATIN, [ 'Postal Code' ]);
+    checkAndAddValidator('postCd', LATINForME, [ 'Postal Code' ]);
   } else {
     FormManager.removeValidator('custNm1', Validators.LATIN);
     FormManager.removeValidator('custNm2', Validators.LATIN);
     FormManager.removeValidator('custNm3', Validators.LATIN);
     FormManager.removeValidator('addrTxt', Validators.LATIN);
     FormManager.removeValidator('city1', Validators.LATIN);
-    FormManager.removeValidator('postCd', Validators.LATIN);
+    // FormManager.removeValidator('postCd', Validators.LATIN);
+    FormManager.removeValidator('postCd', LATINForME);
   }
 }
+// Add Latin validation to ME, because common latin validation has issue when
+// add required validation to the field that already has latin validation
+function LATINForME(input) {
+  var value = FormManager.getActualValue(input);
+  if (!value || value == '' || value.length == 0) {
+    return new ValidationResult(input, true);
+  }
+  var reg = /[^\u0000-\u007f]/;
+  if (reg.test(value)) {
+    return new ValidationResult(input, false, MessageMgr.MESSAGES.LATIN);
+  } else {
+    return new ValidationResult(input, true);
+  }
+}
+
 function addGaddrValidatorForCEE() {
   FormManager.addFormValidator((function() {
     return {
