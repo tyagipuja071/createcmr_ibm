@@ -38,7 +38,7 @@ function addHandlersForCEWA() {
 /*
  * Order Block field
  */
-function lockEmbargo() {
+function lockOrderBlock() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
@@ -741,7 +741,7 @@ function addAfterConfigMalta() {
       setVatValidatorMalta();
     });
   }
-  lockEmbargo();
+  lockOrderBlock();
   enterpriseMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
