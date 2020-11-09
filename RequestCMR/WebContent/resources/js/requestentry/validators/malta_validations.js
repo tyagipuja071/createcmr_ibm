@@ -203,8 +203,8 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var postCd = FormManager.getActualValue('postCd');
-        var custGrp = FormManager.getActualValue('custGrp');
-        if (custGrp != 'LOCAL') {
+        var landCntry = FormManager.getActualValue('landCntry');
+        if (custGrp != 'MT') {
           return;
         }
         if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
