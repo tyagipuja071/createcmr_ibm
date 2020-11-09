@@ -1833,7 +1833,7 @@ function showVatExempt() {
   if (vatRequired) {
     // show
     FormManager.show('VATExempt', 'vatExempt');
-    FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+    checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
   } else {
     // hide
     FormManager.hide('VATExempt', 'vatExempt');
@@ -1857,7 +1857,7 @@ function resetVatRequired() {
       FormManager.removeValidator('vat', Validators.REQUIRED);
     } else {
       FormManager.enable('vat');
-      FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
+      checkAndAddValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
     }
   }
 }
