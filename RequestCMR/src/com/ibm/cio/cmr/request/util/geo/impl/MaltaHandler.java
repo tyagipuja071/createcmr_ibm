@@ -86,7 +86,7 @@ public class MaltaHandler extends BaseSOFHandler {
 
         Map<String, FindCMRRecordModel> zi01Map = new HashMap<String, FindCMRRecordModel>();
 
-        // parse the rdc records
+        // Parse the rdc records
         String cmrCountry = mainRecord != null ? mainRecord.getCmrIssuedBy() : "";
 
         if (source.getItems() != null) {
@@ -633,7 +633,8 @@ public class MaltaHandler extends BaseSOFHandler {
   public void setAddressValuesOnImport(Addr address, Admin admin, FindCMRRecordModel currentRecord, String cmrNo) throws Exception {
     address.setCustNm1(currentRecord.getCmrName1Plain());
     address.setCustNm2(currentRecord.getCmrName2Plain());
-    address.setCustNm4(currentRecord.getCmrName4());
+    address.setCustNm3(currentRecord.getCmrName3());
+    address.setAddrTxt(currentRecord.getCmrStreetAddress());
     address.setAddrTxt2(currentRecord.getCmrStreetAddressCont());
     address.setTransportZone("");
   }
