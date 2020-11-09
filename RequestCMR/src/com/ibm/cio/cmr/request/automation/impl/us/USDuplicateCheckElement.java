@@ -427,6 +427,9 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String restrictTo = StringUtils.isNotBlank(data.getRestrictTo()) ? data.getRestrictTo() : "";
+    String csoSite = StringUtils.isNotBlank(data.getCsoSite()) ? data.getCsoSite() : "";
+    String bpAccType = StringUtils.isNotBlank(data.getBpAcctTyp()) ? data.getBpAcctTyp() : "";
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
@@ -470,10 +473,18 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       break;
     case USUtil.SC_COMM_REGULAR:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-        if (((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
-            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
-                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo()))
-            && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
+        String usRestrictTo = StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) ? cmrCheckRecord.getUsRestrictTo() : "";
+        if (restrictTo.equals(usRestrictTo) && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
+    case USUtil.SC_BP_POOL:
+      // TODO
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        String usRestrictTo = StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) ? cmrCheckRecord.getUsRestrictTo() : "";
+        if (restrictTo.equals(usRestrictTo) && csoSite.equals(cmrCheckRecord.getUsCsoSite()) && "P".equals(cmrCheckRecord.getUsBpAccType())) {
           cmrCheckMatchesTmp.add(cmrCheckRecord);
         }
       }
@@ -521,8 +532,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     default:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
         if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
-            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
-                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo())) {
+            || ((StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
+                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo()))) {
           cmrCheckMatchesTmp.add(cmrCheckRecord);
         }
       }

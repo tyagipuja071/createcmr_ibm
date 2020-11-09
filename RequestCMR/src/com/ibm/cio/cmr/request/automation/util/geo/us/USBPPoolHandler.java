@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
@@ -15,6 +16,7 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
@@ -29,6 +31,8 @@ public class USBPPoolHandler extends USBPHandler {
   private static final String T2 = "T2";
   private String cmrType = "";
   private String csoSite = "";
+
+  private static final Logger LOG = Logger.getLogger(USBPPoolHandler.class);
 
   @Override
   public boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
@@ -132,6 +136,36 @@ public class USBPPoolHandler extends USBPHandler {
       hasFieldErrors = doFieldComputationsForT2CMR(entityManager, handler, requestData, engineData, details, overrides);
     } else if (POOL.equals(getCmrType())) {
       hasFieldErrors = doFieldComputationsForPoolCMR(entityManager, handler, requestData, engineData, details, overrides);
+    }
+
+    // check addresses if not add
+    Addr zi01 = requestData.getAddress("ZI01");
+    if (zi01 == null) {
+      AddrPK addrPk = new AddrPK();
+      addrPk.setAddrType("ZI01");
+      addrPk.setAddrSeq("1");
+      addrPk.setReqId(data.getId().getReqId());
+      zi01 = new Addr();
+      zi01.setId(addrPk);
+    }
+
+    LOG.debug("Updating invoice to address based on CSO Site: " + csoSite);
+
+    if (POOL.equals(cmrType)) {
+      details.append("\nUpdating invoice-to address to: \n IBM Credit LLC, 1 N Castle Dr MD NC313, Armonk, NY 10504-1725\n");
+      zi01.setDivn("IBM Credit LLC");
+      zi01.setAddrTxt("1 N Castle Dr MD NC313");
+      zi01.setCity1("Armonk");
+      zi01.setStateProv("NY");
+      zi01.setPostCd("10504-1725");
+    } else if (T2.equals(cmrType)) {
+      details.append("\nAligning invoice to and install at addresses.\n");
+      zi01.setDivn(zs01.getDivn());
+      zi01.setDept(zs01.getDept());
+      zi01.setAddrTxt(zs01.getAddrTxt());
+      zi01.setPostCd(zs01.getPostCd());
+      zi01.setCity1(zs01.getCity1());
+      zi01.setStateProv(zs01.getStateProv());
     }
 
     if (!hasFieldErrors) {
