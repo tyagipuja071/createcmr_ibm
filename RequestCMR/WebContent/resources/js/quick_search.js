@@ -157,7 +157,7 @@ app.controller('QuickSearchController', [ '$scope', '$document', '$http', '$time
     // FormManager.setValue('issuingCntry', '');
     FormManager.setValue('cmrNo', '');
     FormManager.setValue('name', '');
-    FormManager.setValue('countryCd', '');
+    //FormManager.setValue('countryCd', '');
     FormManager.setValue('stateProv', '');
     FormManager.setValue('city', '');
     FormManager.setValue('streetAddress1', '');
@@ -609,3 +609,192 @@ function quickSearchModal_onLoad() {
   console.log('on load');
   dojo.byId('quick-new-det').innerHTML = _currQuickDet;
 }
+
+var US_STATES = [
+  { code : 'AA', name : 'Armed Forces Americas' },
+  { code : 'AE', name : 'Armed Forces Europe' },
+  { code : 'AK', name : 'Alaska' },
+  { code : 'AL', name : 'Alabama' },
+  { code : 'AP', name : 'Armed Forces Pacific' },
+  { code : 'AR', name : 'Arkansas' },
+  { code : 'AS', name : 'American Samoa' },
+  { code : 'AZ', name : 'Arizona' },
+  { code : 'CA', name : 'California' },
+  { code : 'CO', name : 'Colorado' },
+  { code : 'CT', name : 'Connecticut' },
+  { code : 'DC', name : 'District of Columbia' },
+  { code : 'DE', name : 'Delaware' },
+  { code : 'FL', name : 'Florida' },
+  { code : 'GA', name : 'Georgia' },
+  { code : 'GU', name : 'Guam' },
+  { code : 'HI', name : 'Hawaii' },
+  { code : 'IA', name : 'Iowa' },
+  { code : 'ID', name : 'Idaho' },
+  { code : 'IL', name : 'Illinois' },
+  { code : 'IN', name : 'Indiana' },
+  { code : 'KS', name : 'Kansas' },
+  { code : 'KY', name : 'Kentucky' },
+  { code : 'LA', name : 'Louisiana' },
+  { code : 'MA', name : 'Massachusetts' },
+  { code : 'MD', name : 'Maryland' },
+  { code : 'ME', name : 'Maine' },
+  { code : 'MH', name : 'Marshall Islands' },
+  { code : 'MI', name : 'Michigan' },
+  { code : 'MN', name : 'Minnesota' },
+  { code : 'MO', name : 'Missouri' },
+  { code : 'MP', name : 'Mariana Islands' },
+  { code : 'MS', name : 'Mississippi' },
+  { code : 'MT', name : 'Montana' },
+  { code : 'NC', name : 'North Carolina' },
+  { code : 'ND', name : 'North Dakota' },
+  { code : 'NE', name : 'Nebraska' },
+  { code : 'NH', name : 'New Hampshire' },
+  { code : 'NJ', name : 'New Jersey' },
+  { code : 'NM', name : 'New Mexico' },
+  { code : 'NV', name : 'Nevada' },
+  { code : 'NY', name : 'New York' },
+  { code : 'OH', name : 'Ohio' },
+  { code : 'OK', name : 'Oklahoma' },
+  { code : 'OR', name : 'Oregon' },
+  { code : 'PA', name : 'Pennsylvania' },
+  { code : 'PR', name : 'Puerto Rico' },
+  { code : 'RI', name : 'Rhode Island' },
+  { code : 'SC', name : 'South Carolina' },
+  { code : 'SD', name : 'South Dakota' },
+  { code : 'TN', name : 'Tennessee' },
+  { code : 'TX', name : 'Texas' },
+  { code : 'UM', name : 'US Minor Outl. Isles' },
+  { code : 'UT', name : 'Utah' },
+  { code : 'VA', name : 'Virginia' },
+  { code : 'VI', name : 'Virgin Islands' },
+  { code : 'VT', name : 'Vermont' },
+  { code : 'WA', name : 'Washington' },
+  { code : 'WI', name : 'Wisconsin' },
+  { code : 'WV', name : 'West Virginia' },
+  { code : 'WY', name : 'Wyoming' }  
+]
+dojo.addOnLoad(function(){
+  if (!_furl){
+    return;
+  }
+  var findcmrUrl = _furl.substring(0, _furl.lastIndexOf('/'))+'/DnBSearch';
+  console.log('furl: '+findcmrUrl);
+  // Bloodhound is used for the Twitter Typeahead suggestion engine
+  var companies = new Bloodhound(
+      {
+        datumTokenizer : function(datum) {
+        },
+        queryTokenizer : Bloodhound.tokenizers.whitespace,
+        remote : {
+          url : findcmrUrl+'/proxy/v1/search/typeahead?',
+          replace : function(url, query) {
+            var companyfield = FormManager.getActualValue('name');
+            var country = FormManager.getActualValue('countryCd');
+            var city = FormManager.getActualValue('city');
+            var state = FormManager.getActualValue('stateProv');
+            var postCd = FormManager.getActualValue('postCd');
+            if (companyfield) {
+              url = url + '&searchTerm=' + encodeURIComponent(companyfield);
+            }
+            if (country) {
+              url = url + '&countryISOAlpha2Code=' + encodeURIComponent(country);
+            }
+            if (state && state != '\'\'') {
+              url = url + '&addressRegion=' + encodeURIComponent(state)
+            }
+            if (city) {
+              url = url + '&addressLocality=' + encodeURIComponent(city)
+            }
+            if (postCd) {
+              url = url + '&postalCode=' + encodeURIComponent(postCd)
+            }
+            return url;
+          },
+          ajax : {
+            beforeSend : function() {
+              $('#name').addClass('loading')
+            }, 
+            complete : function(data) {
+              $('#name').removeClass('loading')
+            } 
+          },
+          // filters the Direct 2.0 raw results into simple JSON
+          filter : function(parsedResponse) {
+            var results = getJsonElement(parsedResponse, 'searchCandidates');
+            var toReturn = [];
+            $.each(results, function(index, candidate) {
+              var object = candidate.organization;
+              var result = {
+                'DunsNumber' : getJsonElement(object, 'duns'),
+                'OrganizationName' : getJsonElement(object, 'primaryName'),
+                'LocationType' : getJsonElement(object, 'FamilyTreeMemberRole[0].FamilyTreeMemberRoleText.$', 'Unknown Type'),
+                'City' : getJsonElement(object, 'primaryAddress.addressLocality.name', 'Unknown'),
+                'Territory' : getJsonElement(object, 'primaryAddress.addressRegion.name', 'Unknown'),
+                'Street' : getJsonElement(object, 'primaryAddress.streetAddress.line1', ''),
+                'Street2' : getJsonElement(object, 'primaryAddress.streetAddress.line2', ''),
+                'PostalCode' : getJsonElement(object, 'primaryAddress.postalCode'),
+                'Country' : getJsonElement(object, 'primaryAddress.addressCountry.isoAlpha2Code'),
+                'MarketabilityIndicator' : getJsonElement(object, 'dunsControl.isMarketable', 'Unknown'),
+                'TerritoryCode' : getJsonElement(object, 'primaryAddress.addressRegion.abbreviatedName', 'Unknown'),
+              }
+              toReturn.push(result);
+            });
+            console.log(toReturn);
+            return toReturn;
+          }
+        },
+        limit : 6
+      });
+
+  companies.initialize();  
+  
+  
+  var $companyField = $("#name");
+  
+  // The actual typeahead declaration
+  $companyField.typeahead(
+      null,
+      {
+        name : 'company-search',
+        displayKey : 'OrganizationName',
+        source : companies.ttAdapter(),
+        templates : {
+          empty : [ '<div class="empty-message">', 'no results found', '</div>' ].join('\n'),
+          suggestion : function(data) {
+            var marketable = data.MarketabilityIndicator ? 'Yes' : 'No';
+            var html = '<div title="Click to fill in the fields" class="typeahead-suggestion"><span style="margin-left:0"><strong>' + data.OrganizationName
+                + '</strong></span><span class="sub-text">'
+                + data.Street + '</span><span class="sub-text">' + data.City + ', ' + data.Territory + ' ' + data.PostalCode
+                + '</span></div>';
+            return html;
+          }
+        }
+
+      }).on('typeahead:selected', handleSelection)
+
+  $companyField.focus();
+  $companyField.on("click", function() {
+    $(this).select();
+  });
+
+  function handleSelection(event, selected, dataset) {
+     var cntry = FormManager.getActualValue('issuingCntry');
+     FormManager.setValue('name', selected.OrganizationName);
+     FormManager.setValue('countryCd', selected.Country);
+     FormManager.setValue('streetAddress1', selected.Street);
+     if (selected.Street2){
+       FormManager.setValue('streetAddress2', selected.Street2);
+     }
+     FormManager.setValue('city', selected.City);
+     FormManager.setValue('postCd', selected.PostalCode);
+     if (cntry == '897' && selected.Country == 'US' && selected.Territory != 'Unknown'){
+       var code = '';
+       for (var i =0 ; i < US_STATES.length; i++){
+         if (US_STATES[i].name.toUpperCase() == selected.Territory.toUpperCase()){
+           FormManager.setValue('stateProv', US_STATES[i].code);
+         }
+       }
+     }
+  }
+  
+});

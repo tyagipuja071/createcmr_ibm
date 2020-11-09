@@ -136,6 +136,7 @@ public class DnBUtil {
     registerDnBVATCode("UZ", 17279); // Tax Registration Number (Uzbekistan)
     registerDnBVATCode("VE", 1396); // Venezuelan Registry of Fiscal Information
     registerDnBVATCode("VN", 1397); // Business Registration Number (Vietnam)
+    registerDnBVATCode("SG", 1386); // Singapore Registration File Number
     registerDnBVATCode("ZA", 15169); // Value Added Tax Number(ZA)
 
     // Tax Cd1
@@ -146,8 +147,6 @@ public class DnBUtil {
 
     // other codes
     registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
-    registerOtherDnBCode("SG", "SG_REG_NO", 1386); // Singapore Registration
-                                                   // File Number
 
   }
 

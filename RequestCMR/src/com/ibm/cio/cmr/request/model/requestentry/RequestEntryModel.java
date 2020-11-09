@@ -3083,4 +3083,36 @@ public class RequestEntryModel extends BaseModel {
     this.cusInvoiceCopies = cusInvoiceCopies;
   }
 
+  public String getIntDplAssessmentResult() {
+    return intDplAssessmentResult;
+  }
+
+  public void setIntDplAssessmentResult(String intDplAssessmentResult) {
+    this.intDplAssessmentResult = intDplAssessmentResult;
+  }
+
+  public String getIntDplAssessmentDate() {
+    return intDplAssessmentDate;
+  }
+
+  public void setIntDplAssessmentDate(String intDplAssessmentDate) {
+    this.intDplAssessmentDate = intDplAssessmentDate;
+  }
+
+  public String getIntDplAssessmentBy() {
+    return intDplAssessmentBy;
+  }
+
+  public void setIntDplAssessmentBy(String intDplAssessmentBy) {
+    this.intDplAssessmentBy = intDplAssessmentBy;
+  }
+
+  public String getIntDplAssessmentCmt() {
+    return intDplAssessmentCmt;
+  }
+
+  public void setIntDplAssessmentCmt(String intDplAssessmentCmt) {
+    this.intDplAssessmentCmt = intDplAssessmentCmt;
+  }
+
 }

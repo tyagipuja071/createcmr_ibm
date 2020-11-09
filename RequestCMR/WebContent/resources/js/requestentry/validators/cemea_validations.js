@@ -673,6 +673,12 @@ function setISUCTCOnIMSChange() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+	var reqType = FormManager.getActualValue('reqType');
+	if (reqType != 'C') return;
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+	
   if (!(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'PRICU' || custSubGrp == 'IBMEM' || custSubGrp == 'BUSPR' || custSubGrp == 'XBP')) {
     if ('32' == isuCd && 'S' == clientTier && subIndustryCd.startsWith('B')) {
       FormManager.setValue('clientTier', 'N');
