@@ -1385,12 +1385,13 @@ function gmllcExistingCustomerAdditionalValidations() {
             return new ValidationResult(null, true);
           }
 
-          var existInOrigCntry = checkIfCmrExist(cntry, requestCMR);
+          var landedCd = getCntryCdByLanded(landed);
+          var existInLandedCntry = checkIfCmrExist(landedCd, requestCMR);
           var existInDuplCntry = checkIfCmrExist(cntryDupl, requestCMR);
-          var cmrStatusOrig = getCMRStatus(cntry, requestCMR);
+          var cmrStatusLanded = getCMRStatus(landedCd, requestCMR);
           var cmrStatusDupl = getCMRStatus(cntryDupl, requestCMR);
 
-          if (!existInOrigCntry && !existInDuplCntry && action != 'PCM') {
+          if (!existInLandedCntry && !existInDuplCntry && action != 'PCM') {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1398,7 +1399,7 @@ function gmllcExistingCustomerAdditionalValidations() {
             }, false, 'CMR does not exist in either ' + landed + ' or Kenya. Please use GM LLC under ' + landed + '. Processors are able to enter specific CMR if needed.');
           }
 
-          if (!existInOrigCntry && cmrStatusDupl == 'C') {
+          if (!existInLandedCntry && cmrStatusDupl == 'C') {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1407,14 +1408,14 @@ function gmllcExistingCustomerAdditionalValidations() {
                 + ' and Kenya using GM LLC scenario under ' + landed + '.');
           }
 
-          if (cmrStatusOrig == 'C' && !existInDuplCntry) {
+          if (cmrStatusLanded == 'C' && !existInDuplCntry) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
             }, false, 'Please note CMR in ' + landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed
                 + ' country and Kenya using GM LLC scenario under ' + landed + '.');
-          } else if (cmrStatusOrig == 'C') {
+          } else if (cmrStatusLanded == 'C') {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1445,6 +1446,14 @@ function checkIfCmrExist(cntry, requestCMR) {
   }
 
   return false;
+}
+
+function getCntryCdByLanded(landed) {
+  var cntryCd = cmr.query('GET_CNTRY_CD_BY_LANDED', {
+    COUNTRY : landed,
+  });
+
+  return cntryCd.ret1;
 }
 
 function getCMRStatus(cntry, requestCMR) {
