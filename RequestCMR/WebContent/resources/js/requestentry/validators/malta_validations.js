@@ -36,7 +36,7 @@ function addHandlersForCEWA() {
 }
 
 /*
- * EmbargoCode field locked for REQUESTER
+ * Order Block field
  */
 function lockEmbargo() {
   if (FormManager.getActualValue('viewOnlyPage') == 'true') {
@@ -44,7 +44,7 @@ function lockEmbargo() {
   }
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  if (role == 'REQUESTER') {
+  if (reqType != 'U' && role == 'REQUESTER') {
     FormManager.readOnly('embargoCd');
   } else {
     FormManager.enable('embargoCd');
@@ -741,6 +741,7 @@ function addAfterConfigMalta() {
       setVatValidatorMalta();
     });
   }
+  lockEmbargo();
   enterpriseMalta();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
@@ -917,7 +918,6 @@ dojo.addOnLoad(function() {
 
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, GEOHandler.MCO2, GEOHandler.ROLE_PROCESSOR, true);
-  GEOHandler.addAfterConfig(lockEmbargo, GEOHandler.MCO2);
 
   // Malta Legacy
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
