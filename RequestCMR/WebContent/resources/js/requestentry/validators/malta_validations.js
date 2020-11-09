@@ -844,7 +844,7 @@ function addIsicClassificationCodeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('reqType') == 'U') {
+        if (FormManager.getActualValue('reqType') == 'C' || FormManager.getActualValue('reqType') == 'U') {
 
           var field = FormManager.getField('custClass');
           var value = FormManager.getActualValue('isicCd');
