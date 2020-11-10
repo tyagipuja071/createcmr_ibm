@@ -3,7 +3,7 @@ var fstCEWA = [ "373", "382", "383", "635", "637", "656", "662", "667", "670", "
 var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "770", "782", "804", "825", "827", "831", "833", "835", "842", "851", "857", "883", "780" ];
 var _vatExemptHandler = null;
 
-function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
+function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (!saving) {
     if (addressMode == 'newAddress') {
       FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
@@ -19,10 +19,9 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
  */
 var _ISUHandler = null;
 var _CTCHandler = null;
-var _SalesRepHandler = null;
-
-var _addrTypesForCEWA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
 var _addrTypeHandler = [];
+var _addrTypesForCEWA = [ 'ZS01', 'ZP01', 'ZI01', 'ZD01', 'ZS02' ];
+
 function addHandlersForCEWA() {
   for (var i = 0; i < _addrTypesForCEWA.length; i++) {
     _addrTypeHandler[i] = null;
@@ -32,7 +31,6 @@ function addHandlersForCEWA() {
       });
     }
   }
-
 }
 
 /*
@@ -85,93 +83,43 @@ function addAddressTypeValidator() {
   FormManager.addFormValidator((function() {
     return {
       validate : function() {
-        if (FormManager.getActualValue('cmrIssuingCntry') != SysLoc.MALTA) {
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          return new ValidationResult(null, false, 'All address types are mandatory.');
+        }
+        if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
+          var record = null;
+          var type = null;
+          var zs01MT = 0;
+          var zp01MT = 0;
+          var zi01MT = 0;
+          var zd01MT = 0;
 
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
+          for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
+            record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
+            if (record == null && _allAddressData != null && _allAddressData[i] != null) {
+              record = _allAddressData[i];
+            }
+            type = record.addrType;
+            if (typeof (type) == 'object') {
+              type = type[0];
+            }
+            if (type == 'ZS01') {
+              zs01MT++;
+            } else if (type == 'ZP01') {
+              zp01MT++;
+            } else if (type == 'ZI01') {
+              zi01MT++;
+            } else if (type == 'ZD01') {
+              zd01MT++;
+            }
+          }
+
+          if (zs01MT == 0 || zp01MT == 0 || zi01MT == 0 || zd01MT == 0) {
             return new ValidationResult(null, false, 'All address types are mandatory.');
+          } else if (zs01MT > 1) {
+            return new ValidationResult(null, false, 'Only one Sold-To address is allowed.');
           }
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-            var record = null;
-            var type = null;
-            var zs01Cnt = 0;
-            var zp01Cnt = 0;
-            var zi01Cnt = 0;
-            var zd01Cnt = 0;
-            var zs02Cnt = 0;
-
-            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-              if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                record = _allAddressData[i];
-              }
-              type = record.addrType;
-              if (typeof (type) == 'object') {
-                type = type[0];
-              }
-              if (type == 'ZS01') {
-                zs01Cnt++;
-              } else if (type == 'ZP01') {
-                zp01Cnt++;
-              } else if (type == 'ZI01') {
-                zi01Cnt++;
-              } else if (type == 'ZD01') {
-                zd01Cnt++;
-              } else if (type == 'ZS02') {
-                zs02Cnt++;
-              }
-            }
-
-            if (zs01Cnt == 0 || zp01Cnt == 0 || zi01Cnt == 0 || zd01Cnt == 0 || zs02Cnt == 0) {
-              return new ValidationResult(null, false, 'All address types are mandatory.');
-            } else if (zs01Cnt > 1) {
-              return new ValidationResult(null, false, 'Only one Billing address is allowed.');
-            } else if (zp01Cnt > 1) {
-              return new ValidationResult(null, false, 'Only one Mailing address is allowed.');
-            }
-            return new ValidationResult(null, true);
-          }
-        } else {
-          console.log("Address Type Validator Malta..............");
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount == 0) {
-            return new ValidationResult(null, false, 'Mailing address is mandatory. Only multiple Shipping & Installing addresses are allowed.');
-          }
-          if (CmrGrid.GRIDS.ADDRESS_GRID_GRID && CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount > 0) {
-            var record = null;
-            var type = null;
-            var billingCnt = 0; // ZP01
-            var installCnt = 0; // ZI01 multiple
-            var mailingCnt = 0; // ZS01
-            var shippingCnt = 0; // ZD01 multiple
-            var eplCnt = 0;// ZS02
-            for (var i = 0; i < CmrGrid.GRIDS.ADDRESS_GRID_GRID.rowCount; i++) {
-              record = CmrGrid.GRIDS.ADDRESS_GRID_GRID.getItem(i);
-              if (record == null && _allAddressData != null && _allAddressData[i] != null) {
-                record = _allAddressData[i];
-              }
-              type = record.addrType;
-              if (typeof (type) == 'object') {
-                type = type[0];
-              }
-              if (type == 'ZI01') {
-                installCnt++;
-              } else if (type == 'ZS01') {
-                mailingCnt++;
-              } else if (type == 'ZP01') {
-                billingCnt++;
-              } else if (type == 'ZD01') {
-                shippingCnt++;
-              } else if (type == 'ZS02') {
-                eplCnt++;
-              }
-            }
-            if (billingCnt > 1) {
-              return new ValidationResult(null, false, 'What we need is to have only One Billing address. Please remove the additional Billing address.');
-            } else if (mailingCnt > 1) {
-              return new ValidationResult(null, false, 'What we need is to have only One Mailing address. Please remove the additional Mailing address.');
-            } else {
-              return new ValidationResult(null, true);
-            }
-          }
+          return new ValidationResult(null, true);
         }
       }
     };
@@ -203,8 +151,8 @@ function addAddressFieldValidators() {
     return {
       validate : function() {
         var postCd = FormManager.getActualValue('postCd');
-        var custGrp = FormManager.getActualValue('custGrp');
-        if (custGrp != 'LOCAL') {
+        var landCntry = FormManager.getActualValue('landCntry');
+        if (custGrp != 'MT') {
           return;
         }
         if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
@@ -753,7 +701,9 @@ function disableEnableFieldsForMT() {
   FormManager.setValue('capInd', true);
   FormManager.readOnly('capInd');
 
-  if (reqType == 'C' && role == 'REQUESTER') {
+  if (reqType != 'C') {
+    FormManager.readOnly('cmrNo');
+  } else if (reqType == 'C' && role == 'REQUESTER') {
     FormManager.readOnly('cmrNo');
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('specialTaxCd');
@@ -869,7 +819,6 @@ dojo.addOnLoad(function() {
   GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
       '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
   console.log('adding MCO2 functions...');
-  GEOHandler.addAddrFunction(addMCO1LandedCountryHandler, GEOHandler.MCO2);
   GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.MCO2);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
@@ -907,6 +856,7 @@ dojo.addOnLoad(function() {
   // Malta Legacy
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
+  GEOHandler.addAddrFunction(addMaltaLandedCountryHandler, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
