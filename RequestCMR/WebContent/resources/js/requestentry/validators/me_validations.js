@@ -3264,7 +3264,8 @@ function cemeaCustomVATMandatory() {
   console.log('1cemeaCustomVATMandatory ');
   var landCntry = '';
   var addrType = 'ZP01';
-  var listVatReq = [ 'AT', 'AE', 'BG', 'HR', 'CS', 'CZ', 'EG', 'HU', 'KZ', 'PK', 'PL', 'RO', 'RU', 'SA', 'RS', 'SK', 'SI', 'UA' ];
+  var listVatReq = [ 'AT', 'BH', 'BE', 'BR', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EG', 'EE', 'FI', 'FR', 'DE', 'GR', 'GL', 'HU', 'IS', 'IE', 'IL', 'IT', 'KZ', 'LV', 'LT', 'LU', 'MT', 'MA', 'NL', 'NO',
+      'PK', 'PL', 'PT', 'RO', 'RU', 'SA', 'CS', 'SK', 'SI', 'ZA', 'ES', 'SE', 'CH', 'TR', 'UA', 'AE' ];
   var listVatMandatoryForLocal = [ '620', '677', '680', '865', '808', '832' ];
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -3275,8 +3276,8 @@ function cemeaCustomVATMandatory() {
       // Make Vat Mandatory
       FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       console.log("Vat is Mandatory");
+      return;
     }
-    return;
   }
   // Internal, Softlayer, & Private scenario - set vat to optional
   if (custSubType != null && custSubType != '' && (custSubType.includes('IN') || custSubType == 'SOFTL' || custSubType.includes('SL') || custSubType == 'PRICU' || custSubType.includes('PC'))) {
