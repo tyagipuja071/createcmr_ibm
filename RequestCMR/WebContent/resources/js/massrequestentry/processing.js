@@ -145,7 +145,10 @@ function actualAddToCMRList() {
     if (cmrCntry == '618') {
       landCntryToCheck = 'AT';
     }
-    
+    if (cmrCntry == '780') {
+      landCntryToCheck = 'MT';
+    }
+
     for (var i = 0; i < cmrsArr.length; i++) {
       var qParams = {
         KATR6 : cmrCntry,
@@ -193,6 +196,13 @@ function actualAddToCMRList() {
           invalidCountRnD++;
       }
 
+      if ((reqtype == 'R' || reqtype == 'D') && cmrCntry == SysLoc.MALTA) {
+        resultRnD = cmr.query('CHECK_VALID_R_D_AT', qParams);
+        invalidCmrRnD = resultRnD.ret1 > 0 ? true : false;
+        if (invalidCmrRnD == true)
+          invalidCountRnD++;
+      }
+
     }
     if (invalidCount > 0 && reqtype == 'R') {
       cmr.showAlert('Addresses can only be imported from inactive CMRs. The chosen CMRs has an invalid CMR.');
@@ -203,6 +213,11 @@ function actualAddToCMRList() {
     }
 
     if (invalidCountRnD > 0 && landCntryToCheck == 'AT') {
+      cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is an invalid record.');
+      return;
+    }
+
+    if (invalidCountRnD > 0 && landCntryToCheck == 'MT') {
       cmr.showAlert('Addresses can only be imported from active CMRs. The chosen CMR is an invalid record.');
       return;
     }
