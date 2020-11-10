@@ -1887,7 +1887,8 @@ function preTickVatExempt(fromAddress, scenario, scenarioChanged) {
 function preTickNumeroExempt(fromAddress, scenario, scenarioChanged) {
 
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
-    if (scenario == 'IBMEM' || scenario == 'PRICU') {
+    var numeroRequired = isNumeroTinRequired();
+    if (!numeroRequired) {
       FormManager.setValue('taxCd2', true);
     } else {
       FormManager.setValue('taxCd2', false);
@@ -1899,7 +1900,8 @@ function preTickNumeroExempt(fromAddress, scenario, scenarioChanged) {
 function preTickTinExempt(fromAddress, scenario, scenarioChanged) {
 
   if (FormManager.getActualValue('reqType') == 'C' && scenarioChanged) {
-    if (scenario == 'IBMEM' || scenario == 'PRICU') {
+    var tinRequired = isNumeroTinRequired();
+    if (!tinRequired) {
       FormManager.setValue('taxCd2', true);
     } else {
       FormManager.setValue('taxCd2', false);
