@@ -19,16 +19,41 @@
 <script>
   var _typeHandler = null;
   dojo.addOnLoad(function() {
-    var ids1 = cmr.query('SYSTEM.GET_AVAILABLE_GEOS', {_qall  : 'Y'});
     var model1 = { 
         identifier : "id", 
         label : "name",
         items : []
     };
     model1.items.push({id : '', name : ''});
-    for (var i =0; i < ids1.length; i++){
-      model1.items.push({id : ids1[i].ret1, name : ids1[i].ret1 + ' only'});
-    }
+    //AMERICAS,APAC,JP,EMEA
+    model1.items.push({id : 'GEO-AMERICAS', name : 'AMERICAS - All Markets'});
+    model1.items.push({id : 'GEO-APAC', name : 'APAC - All Markets'});
+    model1.items.push({id : 'GEO-EMEA', name : 'EMEA - All Markets'});
+    model1.items.push({id : 'GEO-JP', name : 'JP GEO/Market'});
+
+    // CND,CA,LA,US
+    model1.items.push({id : 'MKT-CND', name : 'AMERICAS - CND'});
+    model1.items.push({id : 'MKT-CA', name : 'AMERICAS - CA'});
+    model1.items.push({id : 'MKT-LA', name : 'AMERICAS - LA'});
+    model1.items.push({id : 'MKT-US', name : 'AMERICAS - US'});
+
+    //ANZ,ASEAN,GCG,ISA
+    model1.items.push({id : 'MKT-ANZ', name : 'APAC - ANZ'});
+    model1.items.push({id : 'MKT-ASEAN', name : 'APAC - ASEAN'});
+    model1.items.push({id : 'MKT-GCG', name : 'APAC - GCG'});
+    model1.items.push({id : 'MKT-ISA', name : 'APAC - ISA'});
+
+    // BENELUX,CEE,DACH,FRANCE,ITALY,MEA,NORDICS,SPGI,UKI
+    model1.items.push({id : 'MKT-BENELUX', name : 'EMEA - BENELUX'});
+    model1.items.push({id : 'MKT-CEE', name : 'EMEA - CEE'});
+    model1.items.push({id : 'MKT-DACH', name : 'EMEA - DACH'});
+    model1.items.push({id : 'MKT-FRANCE', name : 'EMEA - FRANCE'});
+    model1.items.push({id : 'MKT-ITALY', name : 'EMEA - ITALY'});
+    model1.items.push({id : 'MKT-MEA', name : 'EMEA - MEA'});
+    model1.items.push({id : 'MKT-NORDICS', name : 'EMEA - NORDICS'});
+    model1.items.push({id : 'MKT-SPGI', name : 'EMEA - SPGI'});
+    model1.items.push({id : 'MKT-UKI', name : 'EMEA - UKI'});
+
     var dropdown1 = {
         listItems : model1
     };
@@ -107,13 +132,13 @@ div#filterlabels table {
       <cmr:row>
         <cmr:column span="1" width="150">
           <p>
-            <cmr:label fieldId="reportType">GEO:</cmr:label>
+            <cmr:label fieldId="reportType">GEO/Market:</cmr:label>
           </p>
         </cmr:column>
         <cmr:column span="2" width="235">
           <p>
-            <form:select dojoType="dijit.form.FilteringSelect" id="groupByGeo" searchAttr="name" style="display: block; width:110px" maxHeight="200"
-              required="false" path="groupByGeo" placeHolder="Filter by GEO">
+            <form:select dojoType="dijit.form.FilteringSelect" id="groupByGeo" searchAttr="name" style="display: block;" maxHeight="200"
+              required="false" path="groupByGeo" placeHolder="Filter by GEO/Market">
             </form:select>
           </p>
         </cmr:column>
@@ -130,6 +155,21 @@ div#filterlabels table {
           <p>
             <form:select dojoType="dijit.form.FilteringSelect" id="groupByProcCenter" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="groupByProcCenter" placeHolder="Filter by Processing Center">
             </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row >
+        <cmr:column span="1" width="150">
+          <p>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="excludeUnsubmitted" value="Y"/>
+            <label for="OEMInd" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Exclude Non-submitted Requests</span>
+               <cmr:info text="Excludes all requests in Drafts status which have not yet been submitted for processing once. Requests which were rejected and now in Draft status will be included." />
+            </label>            
           </p>
         </cmr:column>
       </cmr:row>

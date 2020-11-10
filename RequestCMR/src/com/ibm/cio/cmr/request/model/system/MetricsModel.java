@@ -16,6 +16,8 @@ public class MetricsModel {
   private String groupByGeo;
   private String groupByProcCenter;
 
+  private String excludeUnsubmitted;
+
   public String getDateFrom() {
     return dateFrom;
   }
@@ -62,5 +64,13 @@ public class MetricsModel {
 
   public void setGroupByProcCenter(String groupByProcCenter) {
     this.groupByProcCenter = groupByProcCenter;
+  }
+
+  public String getExcludeUnsubmitted() {
+    return excludeUnsubmitted;
+  }
+
+  public void setExcludeUnsubmitted(String excludeUnsubmitted) {
+    this.excludeUnsubmitted = excludeUnsubmitted;
   }
 }

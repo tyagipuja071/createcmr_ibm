@@ -97,6 +97,20 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
   @NoLog
   private Date findDnbTs;
 
+  @Column(name = "DPL_ASSESSMENT_RESULT")
+  private String dplAssessmentResult;
+
+  @Column(name = "DPL_ASSESSMENT_DATE")
+  @Temporal(TemporalType.TIMESTAMP)
+  @NoLog
+  private Date dplAssessmentDate;
+
+  @Column(name = "DPL_ASSESSMENT_BY")
+  private String dplAssessmentBy;
+
+  @Column(name = "DPL_ASSESSMENT_CMT")
+  private String dplAssessmentCmt;
+
   public String getDplChkResult() {
     return this.dplChkResult;
   }
@@ -227,6 +241,38 @@ public class Scorecard extends BaseEntity<ScorecardPK> implements Serializable {
 
   public void setFindDnbTs(Date findDnbTs) {
     this.findDnbTs = findDnbTs;
+  }
+
+  public String getDplAssessmentResult() {
+    return dplAssessmentResult;
+  }
+
+  public void setDplAssessmentResult(String dplAssessmentResult) {
+    this.dplAssessmentResult = dplAssessmentResult;
+  }
+
+  public Date getDplAssessmentDate() {
+    return dplAssessmentDate;
+  }
+
+  public void setDplAssessmentDate(Date dplAssessmentDate) {
+    this.dplAssessmentDate = dplAssessmentDate;
+  }
+
+  public String getDplAssessmentBy() {
+    return dplAssessmentBy;
+  }
+
+  public void setDplAssessmentBy(String dplAssessmentBy) {
+    this.dplAssessmentBy = dplAssessmentBy;
+  }
+
+  public String getDplAssessmentCmt() {
+    return dplAssessmentCmt;
+  }
+
+  public void setDplAssessmentCmt(String dplAssessmentCmt) {
+    this.dplAssessmentCmt = dplAssessmentCmt;
   }
 
 }

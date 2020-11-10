@@ -424,6 +424,12 @@ function setISUCTCOnIMSChange() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+	if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   if (!(custSubGrp == 'CHINT' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')) {
     if ('32' == isuCd && 'S' == clientTier && subIndustryCd.startsWith('B')) {
       FormManager.setValue('clientTier', 'N');
