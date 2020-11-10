@@ -388,8 +388,15 @@ public class CEWATransformer extends MCOTransformer {
     String currentCOD = data.getCreditCd();
     boolean currCOFHasValidValue = "R".equals(currentCOF) || "S".equals(currentCOF) || "T".equals(currentCOF);
 
+    String enableCOFMailFlag = SystemParameters.getString("ENABLE_COF_MAIL");
     if (StringUtils.isBlank(oldCOF) && currCOFHasValidValue) {
-      return "COF";
+      if ("Y".equals(enableCOFMailFlag)) {
+        LOG.debug("Mail flag return - COF ");
+        return "COF";
+      } else {
+        LOG.debug("Mail flag return - NA ");
+        return "NA";
+      }
     } else if ((StringUtils.isBlank(oldCOD) || "N".equals(oldCOD)) && "Y".equals(currentCOD)) {
       return "COD";
     } else {
@@ -435,6 +442,12 @@ public class CEWATransformer extends MCOTransformer {
     params.setMailSubject(mailSubject);
     params.setStringToReplace("xxxxxx");
     params.setValToBeReplaceBy(data.getCmrNo());
+
+    params.setEnableAddlField1(true);
+    params.setAddtlField1Value(data.getCreditCd() != null ? data.getCreditCd() : "");
+    params.setEnableAddlField2(true);
+    params.setAddtlField2Value(data.getCommercialFinanced() != null ? data.getCommercialFinanced() : "");
+
     return params;
   }
 
