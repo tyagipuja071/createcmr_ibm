@@ -207,6 +207,18 @@ var CmrMetrics = (function() {
       document.forms['frmCMR'].action = cmr.CONTEXT_ROOT + "/metrics/squadexport";
       document.forms['frmCMR'].target = "exportFrame";
       document.forms['frmCMR'].submit();
+    },
+    exportRequesterStats : function() {
+      if (!FormManager.validate('frmCMR')) {
+        return;
+      }
+      if (!confirm('The Requester Statistics does not consider the Processing Center selected and the option to exclude non-submitted requests. Proceed?')){
+        return
+      }
+      cmr.showAlert('Please wait for the download prompt of the report file.', null, null, true);
+      document.forms['frmCMR'].action = cmr.CONTEXT_ROOT + "/metrics/requesterexport";
+      document.forms['frmCMR'].target = "exportFrame";
+      document.forms['frmCMR'].submit();
     }
   };
 })();
