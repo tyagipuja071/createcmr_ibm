@@ -126,7 +126,7 @@ function actualAddToCMRList() {
 
   cmr.cmrList = textAreaString;
   // validation added to not import invalid CMR number for Swiss
-  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.PORTUGAL) {
+  if (cmrCntry == SysLoc.SWITZERLAND || cmrCntry == SysLoc.SPAIN || cmrCntry == SysLoc.AUSTRIA || cmrCntry == SysLoc.GREECE || cmrCntry == SysLoc.CYPRUS || cmrCntry == SysLoc.MALTA || cmrCntry == SysLoc.PORTUGAL) {
     var cmrsArr = cmr.cmrList.split(',');
     var reqtype = FormManager.getActualValue('reqType');
     var invalidCount = 0;
