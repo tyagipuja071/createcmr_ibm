@@ -695,7 +695,6 @@ public class MaltaHandler extends BaseSOFHandler {
 
   @Override
   public void doBeforeAddrSave(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
-
     if (!"ZP01".equals(addr.getId().getAddrType())) {
       addr.setDept("");
     }
@@ -746,9 +745,6 @@ public class MaltaHandler extends BaseSOFHandler {
         if ("ZD01".equals(addrType)) {
           newSeq = "4";
         }
-        if ("ZS02".equals(addrType)) {
-          newSeq = "5";
-        }
       } else {
         if (Integer.parseInt(maxSeq) <= 5) {
           if ("ZS01".equals(addrType)) {
@@ -763,11 +759,7 @@ public class MaltaHandler extends BaseSOFHandler {
           if ("ZD01".equals(addrType)) {
             newSeq = "4";
           }
-          if ("ZS02".equals(addrType)) {
-            newSeq = "5";
-          }
         } else {
-          // newSeq = StringUtils.leftPad(maxSeq, 5, '0');
           newSeq = maxSeq;
         }
       }
