@@ -174,13 +174,16 @@ public class SouthAfricaTransformer extends MCOTransformer {
       } else {
         legacyAddr.setPoBox(poBox);
       }
+    } else if (StringUtils.isEmpty(poBox) && ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType()))) {
+      legacyAddr.setPoBox("");
     }
 
     String streetCont = currAddr.getAddrTxt2();
+    String street = currAddr.getAddrTxt();
     if ("ZS01".equals(currAddr.getId().getAddrType()) || "ZP01".equals(currAddr.getId().getAddrType())) {
-      if (!StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(streetCont)) {
+      if (StringUtils.isEmpty(street) && !StringUtils.isEmpty(poBox) && !StringUtils.isEmpty(streetCont)) {
         if (!poBox.startsWith("PO BOX ")) {
-          legacyAddr.setAddrLine4(streetCont + "," + "PO BOX " + currAddr.getPoBox());
+          legacyAddr.setAddrLine4(streetCont + ", " + "PO BOX " + currAddr.getPoBox());
         }
       }
     }
