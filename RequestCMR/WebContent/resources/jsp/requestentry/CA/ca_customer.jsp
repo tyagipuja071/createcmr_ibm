@@ -26,7 +26,17 @@
   </cmr:row>
   <%} %>
 
-
+  <cmr:row>
+  	<cmr:column span="2">
+  		<p>
+  			<cmr:label fieldId="ProfileNo">
+        		<cmr:fieldLabel fieldId="ProfileNo" />:
+          	</cmr:label>
+        	<cmr:field path="modelCmrNo" id="modelCmrNo" fieldId="ProfileNo" tabId="MAIN_CUST_TAB" />	
+  		</p>
+  	</cmr:column>
+  </cmr:row>
+  
   <cmr:row addBackground="true" >
     <cmr:column span="2" containerForField="LocalTax1">
       <p>
