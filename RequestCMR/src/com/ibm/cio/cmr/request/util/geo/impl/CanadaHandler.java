@@ -184,6 +184,7 @@ public class CanadaHandler extends GEOHandler {
    */
   private void setAddressRelatedData(EntityManager entityManager, Admin admin, Data data, Addr zs01) {
     Addr mainAddr = zs01;
+    List<String> caribNorthDistCntries = Arrays.asList("BS", "BB", "BM", "KY", "GY", "JM", "AW", "LC", "SR", "TT", "CW");
     if (mainAddr == null) {
       // reuse italy's ZS01
       String sql = ExternalizedQuery.getSql("ITALY.GETINSTALLING");
@@ -198,6 +199,41 @@ public class CanadaHandler extends GEOHandler {
     // set preferred language to F for Quebec
     if ("QC".equals(mainAddr.getStateProv())) {
       data.setCustPrefLang("F");
+    }
+
+    // set location number based on state/prov
+    if ("CA".equals(mainAddr.getLandCntry())) {
+      if ("AB".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("01999");
+      } else if ("BC".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("02999");
+      } else if ("MB".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("03999");
+      } else if ("NB".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("04999");
+      } else if ("NL".equals(mainAddr.getStateProv()) || "NF".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("05999");
+      } else if ("NT".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("06999");
+      } else if ("NS".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("07999");
+      } else if ("ON".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("08999");
+      } else if ("PE".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("09999");
+      } else if ("QC".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("10999");
+      } else if ("SK".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("11999");
+      } else if ("YT".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("12999");
+      } else if ("NU".equals(mainAddr.getStateProv())) {
+        data.setLocationNumber("13999");
+      }
+    } else if (caribNorthDistCntries.contains(mainAddr.getStateProv())) {
+      data.setLocationNumber("99000");
+    } else {
+      data.setLocationNumber("99999");
     }
 
     // set CS Branch to first 3 digits of postal code
