@@ -132,20 +132,14 @@ public class LegacyCommonUtil {
 
     if (!StringUtils.isBlank(addr.getCustNm2())) {
       legacyAddr.setAddrLine2(addr.getCustNm2());
-    } else {
-      legacyAddr.setAddrLine2("");
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
       legacyAddr.setStreet(addr.getAddrTxt());
-    } else {
-      legacyAddr.setStreet("");
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
       legacyAddr.setStreetNo(addr.getAddrTxt2());
-    } else {
-      legacyAddr.setStreetNo("");
     }
 
     if (!StringUtils.isBlank(addr.getCity1())) {
@@ -155,8 +149,6 @@ public class LegacyCommonUtil {
     String poBox = addr.getPoBox();
     if (!StringUtils.isEmpty(poBox)) {
       legacyAddr.setPoBox(addr.getPoBox());
-    } else {
-      legacyAddr.setPoBox("");
     }
   }
 
@@ -371,6 +363,18 @@ public class LegacyCommonUtil {
       return records.get(0);
     }
     return null;
+  }
+
+  public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
+    boolean isDummy = true;
+    if (!StringUtils.isBlank(massUpdtAddr.getCustNm1()) || !StringUtils.isBlank(massUpdtAddr.getCustNm2())
+        || !StringUtils.isBlank(massUpdtAddr.getCounty()) || !StringUtils.isBlank(massUpdtAddr.getAddrTxt())
+        || !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) || !StringUtils.isBlank(massUpdtAddr.getPoBox())
+        || !StringUtils.isBlank(massUpdtAddr.getCity1()) || !StringUtils.isBlank(massUpdtAddr.getPostCd())
+        || !StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
+      isDummy = false;
+    }
+    return isDummy;
   }
 
 }
