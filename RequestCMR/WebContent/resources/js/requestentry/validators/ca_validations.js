@@ -1,11 +1,12 @@
- /*
+/*
 
 Validations file for Canada
 
-*/
+ */
 
 /**
  * Adds the validator for the Install At and optional Invoice To
+ * 
  * @returns
  */
 function addAddressRecordTypeValidator() {
@@ -48,7 +49,9 @@ function addAddressRecordTypeValidator() {
 }
 
 /**
- * Toggles the Install At and Invoice To choices depending on the current address records
+ * Toggles the Install At and Invoice To choices depending on the current
+ * address records
+ * 
  * @param cntry
  * @param addressMode
  * @param details
@@ -81,6 +84,7 @@ function toggleAddrTypesForCA(cntry, addressMode, details) {
 
 /**
  * Sets the default country to CA
+ * 
  * @param cntry
  * @param addressMode
  * @param saving
@@ -98,7 +102,9 @@ function addCAAddressHandler(cntry, addressMode, saving) {
 }
 
 /**
- * Toggles the COPY function on the address tab if there are already 2 addresses - for initial release only
+ * Toggles the COPY function on the address tab if there are already 2 addresses -
+ * for initial release only
+ * 
  * @param value
  * @param rowIndex
  * @param grid
@@ -112,7 +118,9 @@ function canCopyAddress(value, rowIndex, grid) {
 }
 
 /**
- * Toggles the REMOVE function on the address tab and prevents removng the ZS01 address
+ * Toggles the REMOVE function on the address tab and prevents removng the ZS01
+ * address
+ * 
  * @param value
  * @param rowIndex
  * @param grid
@@ -124,22 +132,28 @@ function canRemoveAddress(value, rowIndex, grid) {
 }
 
 /**
- * After configuration for Canada
- * Add the scripts here and not via addAfterConfig calls to 
+ * After configuration for Canada Add the scripts here and not via
+ * addAfterConfig calls to
  */
 function afterConfigForCA() {
-
+  if (role.toUpperCase() == 'REQUESTER' || role.toUpperCase() == 'VIEWER') {
+    FormManager.readOnly('abbrevLocn');
+    FormManager.readOnly('abbrevNm');
+  } else {
+    FormManager.enable('abbrevLocn');
+    FormManager.enable('abbrevNm');
+  }
 }
-
 
 /* Register CA Javascripts */
 dojo.addOnLoad(function() {
   console.log('adding CA scripts...');
-  
+
   // validators - register one each
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA ], null, true);
-  
-  // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the functions on afterConfigForCA
+
+  // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
+  // functions on afterConfigForCA
   GEOHandler.addAfterConfig(afterConfigForCA, [ SysLoc.CANADA ]);
 
   GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForCA, [ SysLoc.CANADA ]);
