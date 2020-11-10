@@ -22,6 +22,10 @@ public class BatchEmailModel {
   String directUrlLink;
   String stringToReplace;
   String valToBeReplaceBy;
+  String addtlField1Value;
+  String addtlField2Value;
+  boolean enableAddlField1;
+  boolean enableAddlField2;
 
   public String getMailSubject() {
     return mailSubject;
@@ -117,6 +121,38 @@ public class BatchEmailModel {
 
   public void setValToBeReplaceBy(String valToBeReplaceBy) {
     this.valToBeReplaceBy = valToBeReplaceBy;
+  }
+
+  public String getAddtlField1Value() {
+    return addtlField1Value;
+  }
+
+  public void setAddtlField1Value(String addtlField1Value) {
+    this.addtlField1Value = addtlField1Value;
+  }
+
+  public String getAddtlField2Value() {
+    return addtlField2Value;
+  }
+
+  public void setAddtlField2Value(String addtlField2Value) {
+    this.addtlField2Value = addtlField2Value;
+  }
+
+  public boolean isEnableAddlField1() {
+    return enableAddlField1;
+  }
+
+  public void setEnableAddlField1(boolean enableAddlField1) {
+    this.enableAddlField1 = enableAddlField1;
+  }
+
+  public boolean isEnableAddlField2() {
+    return enableAddlField2;
+  }
+
+  public void setEnableAddlField2(boolean enableAddlField2) {
+    this.enableAddlField2 = enableAddlField2;
   }
 
 }

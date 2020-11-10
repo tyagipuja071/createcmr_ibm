@@ -96,7 +96,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     line2 = addrData.getCustNm2();
 
     String attnPerson = addrData.getCustNm4();
-    if (StringUtils.isNotBlank(attnPerson) && !hasAttnPrefix(attnPerson)) {
+    if (StringUtils.isNotBlank(attnPerson) && !hasAttnPrefix(attnPerson.toUpperCase())) {
       attnPerson = "Att: " + attnPerson;
     }
 
@@ -142,7 +142,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
   }
 
   private boolean hasAttnPrefix(String attnPerson) {
-    String[] attPersonPrefix = { "Att: ", "Att ", "Attention Person", "ATT: ", "ATT ", "att: ", "att " };
+    String[] attPersonPrefix = { "Att: ", "Att ", "Attention Person", "ATT: ", "ATT ", "att: ", "att ", "ATT:", "Att:" };
     boolean isPrefixFound = false;
 
     for (String prefix : attPersonPrefix) {
@@ -319,18 +319,6 @@ public class SouthAfricaTransformer extends MCOTransformer {
     legacyCust.setMrcCd("2");
     legacyCust.setCustType(data.getCrosSubTyp());
     legacyCust.setBankBranchNo("");
-
-    // append GM in AbbrevName for GM LLC
-    if (!StringUtils.isEmpty(data.getCustSubGrp()) && gmllcScenarios.contains(data.getCustSubGrp())) {
-      String abbrevNm = data.getAbbrevNm();
-      if (!StringUtils.isEmpty(abbrevNm) && !abbrevNm.toUpperCase().endsWith(" GM")) {
-        if (abbrevNm.length() > 19) {
-          abbrevNm = abbrevNm.substring(0, 19);
-        }
-        LOG.debug("Setting Abbreviated Name for GM LLC");
-        legacyCust.setAbbrevNm(abbrevNm + " GM");
-      }
-    }
 
     for (Addr addr : cmrObjects.getAddresses()) {
       if (MQMsgConstants.ADDR_ZS01.equals(addr.getId().getAddrType())) {
@@ -558,6 +546,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
           legacyCust.setSbo("0010000");
           legacyCust.setIbo("0010000");
           legacyCust.setInacCd("");
+          legacyCust.setMrcCd("5");
+          legacyCust.setLeadingAccNo(legacyCust.getId().getCustomerNo() + legacyCust.getMrcCd());
         } else {
           legacyCust.setIsuCd("32S");
           legacyCust.setSalesRepNo("DUMMY1");
@@ -638,6 +628,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
     params.setMailSubject(mailSubject);
     params.setStringToReplace("xxxxxx");
     params.setValToBeReplaceBy(data.getCmrNo());
+    params.setEnableAddlField1(true);
+    params.setAddtlField1Value(data.getCreditCd() != null ? data.getCreditCd() : "");
+    params.setEnableAddlField2(true);
+    params.setAddtlField2Value(data.getCommercialFinanced() != null ? data.getCommercialFinanced() : "");
     return params;
   }
 
