@@ -422,6 +422,12 @@ public class RequestEntryModel extends BaseModel {
   // canada fields
   private String invoiceDistCd;
   private String cusInvoiceCopies;
+  
+  // dpl assessment internal fields
+  private String intDplAssessmentResult;
+  private String intDplAssessmentDate;
+  private String intDplAssessmentBy;
+  private String intDplAssessmentCmt;  
 
   public String getMatchIndc() {
     return matchIndc;
@@ -3034,6 +3040,38 @@ public class RequestEntryModel extends BaseModel {
 
   public void setCusInvoiceCopies(String cusInvoiceCopies) {
     this.cusInvoiceCopies = cusInvoiceCopies;
+  }
+  
+  public String getIntDplAssessmentResult() {
+    return intDplAssessmentResult;
+  }
+
+  public void setIntDplAssessmentResult(String intDplAssessmentResult) {
+    this.intDplAssessmentResult = intDplAssessmentResult;
+  }
+
+  public String getIntDplAssessmentDate() {
+    return intDplAssessmentDate;
+  }
+
+  public void setIntDplAssessmentDate(String intDplAssessmentDate) {
+    this.intDplAssessmentDate = intDplAssessmentDate;
+  }
+
+  public String getIntDplAssessmentBy() {
+    return intDplAssessmentBy;
+  }
+
+  public void setIntDplAssessmentBy(String intDplAssessmentBy) {
+    this.intDplAssessmentBy = intDplAssessmentBy;
+  }
+
+  public String getIntDplAssessmentCmt() {
+    return intDplAssessmentCmt;
+  }
+
+  public void setIntDplAssessmentCmt(String intDplAssessmentCmt) {
+    this.intDplAssessmentCmt = intDplAssessmentCmt;
   }
 
 }

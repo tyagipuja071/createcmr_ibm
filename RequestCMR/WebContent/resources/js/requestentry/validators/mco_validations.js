@@ -19,6 +19,11 @@ function afterConfigPT() {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var reqType = FormManager.getActualValue('reqType');
+  var isProspect = FormManager.getActualValue('prospLegalInd');
+  if (dijit.byId('prospLegalInd')) {
+    isProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+  }
+  console.log("afterConfigPT ifProspect:" + isProspect);
 
   FormManager.readOnly('custPrefLang');
   FormManager.readOnly('subIndustryCd');
@@ -37,6 +42,8 @@ function afterConfigPT() {
   }
 
   if (role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+  } else if ('Y' == isProspect) {
     FormManager.readOnly('cmrNo');
   } else if (role == 'PROCESSOR' && reqType != 'U') {
     FormManager.enable('cmrNo');

@@ -61,7 +61,6 @@ import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
- * @author Rangoli Saxena
  * @author RoopakChugh
  *
  */
@@ -229,6 +228,7 @@ public class USUtil extends AutomationUtil {
     StringBuilder eleResults = new StringBuilder();
     String scenarioSubType = "";
     boolean boCodesCalculated = false;
+
     if ("C".equals(admin.getReqType()) && data != null) {
       scenarioSubType = data.getCustSubGrp();
       if (SC_BYMODEL.equals(scenarioSubType)) {
@@ -377,9 +377,7 @@ public class USUtil extends AutomationUtil {
         overrides.addOverride(AutomationElementRegistry.GBL_FIELD_COMPUTE, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
       }
 
-    } else if ("U".equals(admin.getReqType()))
-
-    {
+    } else if ("U".equals(admin.getReqType())) {
       eleResults.append("Skipped");
       details.append("Skipping BO codes computations for update requests.");
     }
@@ -493,11 +491,13 @@ public class USUtil extends AutomationUtil {
     query.setForReadOnly(true);
     if (query.exists() && "Y".equals(SystemParameters.getString("US.SKIP_UPDATE_CHECK"))) {
       // skip checks if requester is from USCMDE team
+      admin.setScenarioVerifiedIndc("Y");
       LOG.debug("Requester is from US CMDE team, skipping update checks.");
       output.setDetails("Requester is from US CMDE team, skipping update checks.\n");
       validation.setMessage("Skipped");
       validation.setSuccess(true);
     } else {
+      admin.setScenarioVerifiedIndc("N");
       EntityManager cedpManager = JpaManager.getEntityManager("CEDP");
       boolean hasNegativeCheck = false;
       USDetailsContainer detailsCont = determineUSCMRDetails(entityManager, requestData.getData().getCmrNo());
@@ -677,11 +677,12 @@ public class USUtil extends AutomationUtil {
           }
         }
 
-        // Admin update checks
-        if (changes.isLegalNameChanged()) {
-          failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is updated.");
-          hasNegativeCheck = true;
-        }
+        // // Admin update checks
+        // if (changes.isLegalNameChanged()) {
+        // failedChecks.put("CUST_NM_UPDATED", "Customer Name on the request is
+        // updated.");
+        // hasNegativeCheck = true;
+        // }
       } finally {
         cedpManager.clear();
         cedpManager.close();
@@ -724,7 +725,7 @@ public class USUtil extends AutomationUtil {
       throws Exception {
     Data data = requestData.getData();
     String updatedValue = updatedDataModel.getNewData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle .\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -736,7 +737,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 100000) {
-        return error;
+        return error + "\n- CMR with revenue > 100K";
       } else if (revenue.floatValue() == 0) {
         String dunsNo = "";
         if (StringUtils.isNotBlank(data.getDunsNo())) {
@@ -755,7 +756,7 @@ public class USUtil extends AutomationUtil {
           DnBCompany dnbData = DnBUtil.getDnBDetails(dunsNo);
           if (dnbData != null && StringUtils.isNotBlank(dnbData.getIbmIsic())) {
             if (!dnbData.getIbmIsic().equals(updatedValue)) {
-              return error;
+              return error + "\n- Requested ISIC did not match value in D&B";
             } else {
               sql = ExternalizedQuery.getSql("AUTO.US.GET_ISU_BY_ISIC");
               query = new PreparedQuery(entityManager, sql);
@@ -764,7 +765,7 @@ public class USUtil extends AutomationUtil {
               query.setForReadOnly(true);
               String brsch = query.getSingleResult(String.class);
               if (!data.getIsuCd().equals(brsch)) {
-                return error;
+                return error + "\n- ISU/Industry impact";
               } else {
                 // check if isic and sicmen are equal if not set them equal
                 if (data.getIsicCd() != null && !data.getIsicCd().equals(data.getUsSicmen())) {
@@ -778,10 +779,10 @@ public class USUtil extends AutomationUtil {
               }
             }
           } else {
-            return error;
+            return error + "\n- Isic is blank";
           }
         } else {
-          return error;
+          return error + "\n- Duns No. is blank";
         }
       }
     }
@@ -799,7 +800,7 @@ public class USUtil extends AutomationUtil {
    */
   private String performEnterpriseAffiliateCheck(EntityManager cedpManager, EntityManager entityManager, RequestData requestData) throws Exception {
     Data data = requestData.getData();
-    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+    String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
     String sql = ExternalizedQuery.getSql("AUTO.US.GET_CMR_REVENUE");
     PreparedQuery query = new PreparedQuery(cedpManager, sql);
     query.setParameter("CMR_NO", data.getCmrNo());
@@ -811,7 +812,7 @@ public class USUtil extends AutomationUtil {
         revenue = (BigDecimal) results.get(0)[1];
       }
       if (revenue.floatValue() > 0) {
-        return error;
+        return error + "\n- CMR with revenue";
       } else if (revenue.floatValue() == 0) {
         sql = ExternalizedQuery.getSql("AUTO.US.AFF_ENT_DUNS_CHECK");
         query = new PreparedQuery(entityManager, sql);
@@ -841,7 +842,7 @@ public class USUtil extends AutomationUtil {
           }
 
         } else {
-          return error;
+          return error + "\n- Target enterprise/affiliate is not under the same GU DUNs/parent";
         }
       }
     }
@@ -870,8 +871,19 @@ public class USUtil extends AutomationUtil {
         String creationCapChanged = (String) results.get(0)[2];
         String sicValidation = (String) results.get(0)[3];
         String revenue = (String) results.get(0)[4];
+        String error = "The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.\nLink:- https://jira.data.zc2.ibm.com/servicedesk/customer/portal/14";
         if (!"Ok".equals(creationCapChanged) || !"Ok".equals(sicValidation) || !"Ok".equals(revenue)) {
-          return "'The CMR does not fulfill the criteria to be updated in execution cycle, please contact CMDE via Jira to verify possibility of update in Preview cycle.";
+          if (!"Ok".equals(revenue)) {
+            error += "\n- CMR with revenue";
+          }
+          if (!"Ok".equals(creationCapChanged)) {
+            error += "\n- Not new CMR (for CMR pass the 30 days period)";
+          }
+          if (!"Ok".equals(sicValidation)) {
+            error += "\n- ISU-ISIC validation failed";
+          }
+          return error;
+
         } else {
           sql = ExternalizedQuery.getSql("AUTO.US.GET_CSP_AFFILIATE");
           query = new PreparedQuery(cedpManager, sql);
@@ -1333,7 +1345,7 @@ public class USUtil extends AutomationUtil {
 
       if (response != null && response.getMatched()) {
         for (DnBMatchingResponse dnbRecord : response.getMatches()) {
-          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn())) {
+          if (DnBUtil.closelyMatchesDnb(addr.getLandCntry(), addr, admin, dnbRecord, addr.getDivn(), false)) {
             closeMatches.add(dnbRecord);
           }
         }
@@ -1354,4 +1366,10 @@ public class USUtil extends AutomationUtil {
     engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
     engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
   }
+
+  @Override
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return Arrays.asList("E", "M");
+  }
+
 }

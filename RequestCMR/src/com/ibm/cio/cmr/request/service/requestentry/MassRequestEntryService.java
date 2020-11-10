@@ -169,6 +169,8 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         cmrIssuingCntry = "";
       }
 
+      model.setCmrIssuingCntry(data.getCmrIssuingCntry());
+
       if (LegacyDirectUtil.isCountryLegacyDirectEnabled(entityManager, cmrIssuingCntry)) {
         performLegacyDirectMassUpdate(model, entityManager, request);
       } else if (SwissUtil.isCountrySwissEnabled(entityManager, cmrIssuingCntry)) {
@@ -1313,7 +1315,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     String autoConfig = RequestUtils.getAutomationConfig(entityManager, cmrIssuingCntry);
 
     if (AutomationConst.AUTOMATE_PROCESSOR.equals(autoConfig) || AutomationConst.AUTOMATE_BOTH.equals(autoConfig)) {
-      if (!isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
+      if (!isMassRequestAutomationEnabled(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
         result = approvalService.processDefaultApproval(entityManager, model.getReqId(), model.getReqType(), user, model);
       } else {
         this.log.info("Processor automation enabled, skipping default approvals.");
@@ -1455,7 +1457,7 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         if ("PPN".equals(transrec.getNewReqStatus())) {
           String processingIndc = SystemUtil.getAutomationIndicator(entityManager, model.getCmrIssuingCntry());
           if ("P".equals(processingIndc) || "B".equals(processingIndc)) {
-            if (isRequestReactivationEnable(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
+            if (isMassRequestAutomationEnabled(entityManager, model.getCmrIssuingCntry(), model.getReqType())) {
               this.log.debug("Processor automation enabled for " + model.getCmrIssuingCntry() + ". Setting " + model.getReqId() + " to AUT");
               transrec.setNewReqStatus("AUT"); // set to automated processing
             }
@@ -2991,6 +2993,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       MassUpdtPK massUpdtPK = new MassUpdtPK();
       massUpdt.setId(massUpdtPK);
       massService.copyValuesToEntity(massModel, massUpdt);
+      if (SystemLocation.UNITED_STATES.equals(model.getCmrIssuingCntry())) {
+        massUpdt.setRowStatusCd("READY");
+      }
       createEntity(massUpdt, entityManager);
 
       MassUpdtData massUpdtData = new MassUpdtData();
@@ -5595,10 +5600,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
     return cd;
   }
 
-  public static boolean isRequestReactivationEnable(EntityManager entityManager, String country, String req) {
+  public static boolean isMassRequestAutomationEnabled(EntityManager entityManager, String country, String req) {
     int count = 0;
     String req_typ = (!StringUtils.isBlank(req)) ? "%" + req + "%" : "";
-    String sql = ExternalizedQuery.getSql("AUTOMATION.CHECK_REACTIVATION");
+    String sql = ExternalizedQuery.getSql("AUTOMATION.CHECK_MASS_REQUESTS");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     /* query.setForReadOnly(true); */
     query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
