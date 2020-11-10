@@ -514,17 +514,36 @@ public class CEWATransformer extends MCOTransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     LOG.debug("CEWA mass update >> Mapping address lines..");
-    legacyAddr.setForUpdate(true);
-    LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
+    if (!LegacyCommonUtil.isCheckDummyUpdate(muAddr)) {
+      legacyAddr.setForUpdate(true);
+      LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
 
-    if (!StringUtils.isBlank(muAddr.getPostCd())) {
-      legacyAddr.setZipCode(muAddr.getPostCd());
-    } else {
-      legacyAddr.setZipCode("");
+      if (!StringUtils.isBlank(muAddr.getAddrTxt())) {
+        legacyAddr.setStreet(muAddr.getAddrTxt());
+      } else {
+        legacyAddr.setStreet("");
+      }
+      if (!StringUtils.isBlank(muAddr.getAddrTxt2())) {
+        legacyAddr.setStreetNo(muAddr.getAddrTxt2());
+      } else {
+        legacyAddr.setStreetNo("");
+      }
+      if (!StringUtils.isEmpty(muAddr.getPoBox())) {
+        legacyAddr.setPoBox(muAddr.getPoBox());
+      } else {
+        legacyAddr.setPoBox("");
+      }
+      if (!StringUtils.isBlank(muAddr.getPostCd())) {
+        legacyAddr.setZipCode(muAddr.getPostCd());
+      } else {
+        legacyAddr.setZipCode("");
+      }
+
     }
 
     if (!StringUtils.isBlank(muAddr.getCustPhone())) {
       if (muAddr.getId().getAddrType().equals("ZD01")) {
+        legacyAddr.setForUpdate(true);
         if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone().trim())) {
           legacyAddr.setAddrPhone("");
         } else {
@@ -540,6 +559,10 @@ public class CEWATransformer extends MCOTransformer {
   @Override
   public void formatMassUpdateAddressLines(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr massUpdtAddr, boolean isFAddr) {
     LOG.debug("Start CEWA formatMassUpdateAddressLines...");
+    if (LegacyCommonUtil.isCheckDummyUpdate(massUpdtAddr)) {
+      LOG.debug("Dummy update , skip address update...");
+      return;
+    }
     boolean crossBorder = isCrossBorderForMass(massUpdtAddr, legacyAddr);
     LOG.debug("isCrossBorderForMass : " + crossBorder);
 
