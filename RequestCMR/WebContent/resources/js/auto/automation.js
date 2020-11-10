@@ -160,7 +160,7 @@ function matchImportFormatter(value, rowIndex) {
   } else {
     formattedString += '';
   }
-  if (keyValue.indexOf('CMR_NO') >= 0 || keyValue.indexOf('REQ_ID') >= 0 || keyValue.indexOf('DUNS_NO' >= 0)) {
+  if (keyValue.indexOf('CMR_NO') >= 0 || keyValue.indexOf('REQ_ID') >= 0 || keyValue.indexOf('DUNS_NO') >= 0) {
     var val = keyValue.substring(keyValue.indexOf('=') + 1).trim();
     if (keyValue.indexOf('CMR_NO') >= 0) {
       formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openCMRDetailsPage(\'' + val + '\')">';
