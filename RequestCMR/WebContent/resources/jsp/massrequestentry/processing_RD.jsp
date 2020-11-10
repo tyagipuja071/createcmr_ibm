@@ -92,7 +92,7 @@
       </cmr:row>
     </cmr:column>
     </cmr:view>
-    <cmr:view forCountry="838,866,754,758,822,666,780">
+    <cmr:view forCountry="838,866,754,758,822,780,666">
     <%if(!"E".equals(reqentry.getProcessedFlag())){%>
     <cmr:column span="2">
       <cmr:row>
