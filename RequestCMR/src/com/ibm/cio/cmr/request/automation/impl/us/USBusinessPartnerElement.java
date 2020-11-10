@@ -1141,6 +1141,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     String postalCd = "";
     String stateProv = "";
     String county = "";
+    String countyNm = "";
     String dept = "";
     String phone = "";
     String fax = "";
@@ -1160,6 +1161,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       postalCd = childInstallAt.getPostCd();
       stateProv = childInstallAt.getStateProv();
       county = childInstallAt.getCounty();
+      countyNm = childInstallAt.getCountyName();
       dept = childInstallAt.getDept();
       phone = childInstallAt.getCustPhone();
       fax = childInstallAt.getCustFax();
@@ -1179,7 +1181,8 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       city1 = ibmDirectCmr.getCmrCity();
       postalCd = ibmDirectCmr.getCmrPostalCode();
       stateProv = ibmDirectCmr.getCmrState();
-      county = ibmDirectCmr.getCmrCounty();
+      county = ibmDirectCmr.getCmrCountyCode();
+      countyNm = ibmDirectCmr.getCmrCounty();
       dept = ibmDirectCmr.getCmrDept();
       phone = ibmDirectCmr.getCmrCustPhone();
       fax = ibmDirectCmr.getCmrCustFax();
@@ -1256,36 +1259,48 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       }
       if (!StringUtils.equals(installAt.getCounty(), county)) {
         overrides.addOverride(getProcessCode(), "ZS01", "COUNTY", installAt.getCounty(), StringUtils.isNotBlank(county) ? county.trim() : "");
+      }
+
+      if (!StringUtils.equals(installAt.getCounty(), county)) {
         overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NAME", installAt.getCountyName(),
-            StringUtils.isNotBlank(county) ? county.trim() : "");
+            StringUtils.isNotBlank(countyNm) ? countyNm.trim() : "");
         details.append("Updated County to " + (StringUtils.isNotBlank(county) ? county.trim() : "-blank-")).append("\n");
       }
 
       if (!StringUtils.equals(installAt.getCustPhone(), phone)) {
         overrides.addOverride(getProcessCode(), "ZS01", "CUST_PHONE", installAt.getCustPhone(), StringUtils.isNotBlank(phone) ? phone.trim() : "");
-        details.append("Updated Phone to " + (StringUtils.isNotBlank(phone) ? phone.trim() : "-blank-")).append("\n");
+        // details.append("Updated Phone to " + (StringUtils.isNotBlank(phone) ?
+        // phone.trim() : "-blank-")).append("\n");
       }
 
       if (!StringUtils.equals(installAt.getCustFax(), fax)) {
         overrides.addOverride(getProcessCode(), "ZS01", "CUST_FAX", installAt.getCustFax(), StringUtils.isNotBlank(fax) ? fax.trim() : "");
-        details.append("Updated Fax to " + (StringUtils.isNotBlank(fax) ? fax.trim() : "-blank-")).append("\n");
+        // details.append("Updated Fax to " + (StringUtils.isNotBlank(fax) ?
+        // fax.trim() : "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getCity2(), district)) {
         overrides.addOverride(getProcessCode(), "ZS01", "CITY2", installAt.getCity2(), StringUtils.isNotBlank(district) ? district.trim() : "");
-        details.append("Updated District to " + (StringUtils.isNotBlank(district) ? district.trim() : "-blank-")).append("\n");
+        // details.append("Updated District to " +
+        // (StringUtils.isNotBlank(district) ? district.trim() :
+        // "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getBldg(), building)) {
         overrides.addOverride(getProcessCode(), "ZS01", "BLDG", installAt.getBldg(), StringUtils.isNotBlank(building) ? building.trim() : "");
-        details.append("Updated Building to " + (StringUtils.isNotBlank(building) ? building.trim() : "-blank-")).append("\n");
+        // details.append("Updated Building to " +
+        // (StringUtils.isNotBlank(building) ? building.trim() :
+        // "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getFloor(), floor)) {
         overrides.addOverride(getProcessCode(), "ZS01", "FLOOR", installAt.getFloor(), StringUtils.isNotBlank(floor) ? floor.trim() : "");
-        details.append("Updated Floor to " + (StringUtils.isNotBlank(floor) ? floor.trim() : "-blank-")).append("\n");
+        // details.append("Updated Floor to " + (StringUtils.isNotBlank(floor) ?
+        // floor.trim() : "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getTransportZone(), transportZone)) {
         overrides.addOverride(getProcessCode(), "ZS01", "TRANSPORT_ZONE", installAt.getTransportZone(),
             StringUtils.isNotBlank(transportZone) ? transportZone.trim() : "");
-        details.append("Updated Transport Zone to " + (StringUtils.isNotBlank(transportZone) ? transportZone.trim() : "-blank-")).append("\n");
+        // details.append("Updated Transport Zone to " +
+        // (StringUtils.isNotBlank(transportZone) ? transportZone.trim() :
+        // "-blank-")).append("\n");
       }
     }
 
