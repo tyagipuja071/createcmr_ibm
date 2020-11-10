@@ -1264,7 +1264,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       if (!StringUtils.equals(installAt.getCounty(), county)) {
         overrides.addOverride(getProcessCode(), "ZS01", "COUNTY_NAME", installAt.getCountyName(),
             StringUtils.isNotBlank(countyNm) ? countyNm.trim() : "");
-        details.append("Updated County to " + (StringUtils.isNotBlank(county) ? county.trim() : "-blank-")).append("\n");
+        details.append("Updated County to " + (StringUtils.isNotBlank(countyNm) ? countyNm.trim() : "-blank-")).append("\n");
       }
 
       if (!StringUtils.equals(installAt.getCustPhone(), phone)) {
