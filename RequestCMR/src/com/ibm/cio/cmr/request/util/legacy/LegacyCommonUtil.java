@@ -291,6 +291,12 @@ public class LegacyCommonUtil {
           mailparams.add(params.getSubregion());
           mailparams.add(params.getCustNm());
           mailparams.add(params.getCmrNumber());
+          if (params.isEnableAddlField1()) {
+            mailparams.add(params.getAddtlField1Value());
+          }
+          if (params.isEnableAddlField2()) {
+            mailparams.add(params.getAddtlField2Value());
+          }
           mailparams.add(params.getDirectUrlLink());
 
           email = StringUtils.replace(email, params.getStringToReplace(), params.getValToBeReplaceBy());

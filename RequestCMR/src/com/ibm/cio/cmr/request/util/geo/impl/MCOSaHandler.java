@@ -48,7 +48,7 @@ public class MCOSaHandler extends MCOHandler {
   protected static final String[] ZA_MASS_UPDATE_SHEET_NAMES = { "Data", "Billing Address", "Mailing Address", "Installing Address",
       "Shipping Address", "EPL Address" };
 
-  private static final String[] SA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CAP", "ModeOfPayment", "TransportZone" };
+  private static final String[] SA_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CAP", "ModeOfPayment", "TransportZone", "POBoxCity", "POBoxPostalCode" };
 
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
