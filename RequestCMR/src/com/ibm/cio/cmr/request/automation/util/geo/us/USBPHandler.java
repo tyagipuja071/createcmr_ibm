@@ -448,10 +448,10 @@ public abstract class USBPHandler {
         details.append("Updated Transport Zone to " + (StringUtils.isNotBlank(transportZone) ? transportZone.trim() : "-blank-")).append("\n");
       }
     }
-    InvoiceToOverrides(requestData, overrides, entityManager);
+    invoiceToOverrides(requestData, overrides, entityManager);
   }
 
-  public void InvoiceToOverrides(RequestData requestData, OverrideOutput overrides, EntityManager entityManager) {
+  public void invoiceToOverrides(RequestData requestData, OverrideOutput overrides, EntityManager entityManager) {
     // NOOP
   }
 

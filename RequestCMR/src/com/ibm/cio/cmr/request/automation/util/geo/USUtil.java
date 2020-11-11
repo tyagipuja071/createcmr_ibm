@@ -275,10 +275,10 @@ public class USUtil extends AutomationUtil {
       if (SC_LEASE_IPMA.equals(scenarioSubType) || SC_LEASE_LPMA.equals(scenarioSubType)) {
         Addr invoiceTo = requestData.getAddress("ZI01");
         if (invoiceTo != null) {
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "ADDR_TXT", invoiceTo.getAddrTxt(), "7100 Highlands Parkway");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "CITY1", invoiceTo.getCity1(), "Smyrna");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "STATE_PROV", invoiceTo.getStateProv(), "GA");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "POST_CD", invoiceTo.getPostCd(), "30082-4859");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", invoiceTo.getAddrTxt(), "7100 Highlands Parkway");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", invoiceTo.getCity1(), "Smyrna");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", invoiceTo.getStateProv(), "GA");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", invoiceTo.getPostCd(), "30082-4859");
         } else {
           AddrPK addrPk = new AddrPK();
           LOG.debug("Adding Invoice To Address to Request ID " + requestData.getAdmin().getId().getReqId());
