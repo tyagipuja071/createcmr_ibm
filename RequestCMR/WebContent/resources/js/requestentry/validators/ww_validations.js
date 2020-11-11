@@ -179,7 +179,7 @@ function isSkipDnbMatching() {
 				return false;
 			}
     } else {
-      qParams.CUST_SUB_GRP = "*";
+      qParams.CUST_SUB_TYP = "*";
       result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
       if (result.ret1 != null && result.ret1 != '') {
 				if(result.ret1 == 'Y'){
@@ -188,7 +188,7 @@ function isSkipDnbMatching() {
 					return false;
 				}
       } else {
-        qParams.CUST_GRP = "*";
+        qParams.CUST_TYP = "*";
         result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
         if (result.ret1 != null && result.ret1 != '') {
           if(result.ret1=='Y'){
