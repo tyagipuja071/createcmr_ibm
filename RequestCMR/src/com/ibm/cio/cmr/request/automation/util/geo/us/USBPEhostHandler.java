@@ -8,21 +8,25 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
+import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 public class USBPEhostHandler extends USBPHandler {
 
@@ -172,14 +176,158 @@ public class USBPEhostHandler extends USBPHandler {
   @Override
   public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmCmr, RequestData requestData,
       AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
-    // TODO Auto-generated method stub
+    Data data = requestData.getData();
+    // String custGrp = data.getCustGrp();
+    Addr zs01 = requestData.getAddress("ZS01");
+    if (ibmCmr != null) {
+      if (!StringUtils.isBlank(ibmCmr.getCmrSapNumber())) {
+        details.append(
+            "\nCopying IBM Codes from IBM CMR " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName() + " (" + ibmCmr.getCmrSapNumber() + "): \n");
+      } else {
+        details.append("\nCopying IBM Codes from IBM CMR " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName() + ": \n");
+      }
 
+      if (!StringUtils.isBlank(ibmCmr.getCmrIsu())) {
+        details.append(" - ISU: " + ibmCmr.getCmrIsu() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISU_CD", data.getIsuCd(), ibmCmr.getCmrIsu());
+        details.append(" - Client Tier: " + ibmCmr.getCmrTier() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CLIENT_TIER", data.getClientTier(), ibmCmr.getCmrTier());
+      }
+
+      if (!StringUtils.isBlank(ibmCmr.getCmrInac())) {
+        details.append(" - NAC/INAC: " + ("I".equals(ibmCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmCmr.getCmrInacType()) ? "NAC" : "-")) + " "
+            + ibmCmr.getCmrInac() + (ibmCmr.getCmrInacDesc() != null ? "( " + ibmCmr.getCmrInacDesc() + ")" : ""));
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_TYPE", data.getInacType(), ibmCmr.getCmrInacType());
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
+      }
+
+      // add here gbg and cov
+      LOG.debug("Getting Buying Group/Coverage values");
+      String bgId = ibmCmr.getCmrBuyingGroup();
+      GBGResponse calcGbg = new GBGResponse();
+      if (!StringUtils.isBlank(bgId)) {
+        calcGbg.setBgId(ibmCmr.getCmrBuyingGroup());
+        calcGbg.setBgName(ibmCmr.getCmrBuyingGroupDesc());
+        calcGbg.setCmrCount(1);
+        calcGbg.setGbgId(ibmCmr.getCmrGlobalBuyingGroup());
+        calcGbg.setGbgName(ibmCmr.getCmrGlobalBuyingGroupDesc());
+        calcGbg.setLdeRule(ibmCmr.getCmrLde());
+      } else {
+        calcGbg.setBgId("BGNONE");
+        calcGbg.setBgName("None");
+        calcGbg.setCmrCount(1);
+        calcGbg.setGbgId("GBGNONE");
+        calcGbg.setGbgName("None");
+        calcGbg.setLdeRule("BG_DEFAULT");
+      }
+      if (!StringUtils.isBlank(calcGbg.getGbgId())) {
+        details.append(" - GBG: " + calcGbg.getGbgId() + "(" + (StringUtils.isBlank(calcGbg.getGbgName()) ? "not specified" : calcGbg.getGbgName())
+            + ")" + "\n");
+      } else {
+        details.append(" - GBG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(
+            " - BG: " + calcGbg.getBgId() + "(" + (StringUtils.isBlank(calcGbg.getBgName()) ? "not specified" : calcGbg.getBgName()) + ")" + "\n");
+      } else {
+        details.append(" - BG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(" - LDE Rule: " + calcGbg.getLdeRule() + "\n");
+      } else {
+        details.append(" - LDE Rule: none\n");
+      }
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
+
+      LOG.debug("BG ID: " + calcGbg.getBgId());
+      String calcCovId = ibmCmr.getCmrCoverage();
+      if (StringUtils.isBlank(calcCovId)) {
+        calcCovId = RequestUtils.getDefaultCoverage(entityManager, "US");
+      }
+      details.append(" - Coverage: " + calcCovId + (ibmCmr.getCmrCoverageName() != null ? " (" + ibmCmr.getCmrCoverageName() + ")" : "") + "\n");
+      LOG.debug("Coverage: " + calcCovId);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      engineData.put(AutomationEngineData.COVERAGE_CALCULATED, calcCovId);
+
+      details.append(" - SICMEN: " + ibmCmr.getCmrIsic() + "\n");
+      details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
+      details.append(" - Subindustry: " + ibmCmr.getCmrSubIndustry() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "US_SICMEN", data.getUsSicmen(), ibmCmr.getCmrIsic());
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
+    }
+
+    if (T1.equals(cmrType)) {
+      details.append(" - Affiliate: " + data.getEnterprise() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
+
+      details.append(" - Tax Class / Code 1: J000\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "TAX_CD1", data.getTaxCd1(), "J000");
+
+      details.append(" - Tax Exempt Status: Z\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "Z");
+    } else {
+      details.append(" - Tax Class / Code 1: J666\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
+
+      details.append(" - Tax Exempt Status: -blank-\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
+    }
+
+    createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
+
+    details.append(" - Dept/Attn: E-HOSTING\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "E-HOSTING");
+    details.append(" - Restricted Ind: Y\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
+    details.append(" - Restricted to: BPQS\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "BPQS");
+    details.append(" - Misc Bill Code: I\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    details.append(" - Marketing Dept: EI3\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
+    details.append(" - SVC A/R Office: IKE\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
+    details.append(" - PCC A/R Dept: G8M\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
+    details.append(" - Marketing A/R Dept: DI3\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
+    details.append(" - BP Account Type: E\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "E");
+    details.append(" - BP Name: Managing IR\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
+
+    details.append("Branch Office codes computed successfully.");
+    engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
   }
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
       AutomationResult<OverrideOutput> result, FindCMRRecordModel ibmCmr) {
-    // TODO Auto-generated method stub
+
+    // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
+    Data data = requestData.getData();
+    details.append("\n");
+    String affiliate = data.getAffiliate();
+    if (ibmCmr != null && !StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+      affiliate = ibmCmr.getCmrAffiliate();
+    }
+    if (StringUtils.isBlank(affiliate)) {
+      details.append("\nAffiliate cannot be computed automatically.");
+      engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be computed automatically");
+    }
+
+    USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+    if (mapping != null) {
+      if (!mapping.getCompanyNo().equals(data.getCompany())) {
+        details.append("\nCompany No. updated to mapped value for the CEID (" + mapping.getCompanyNo() + ").");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
+      }
+    } else {
+      details.append("\nEnterprise No. cannot be validated automatically.");
+      engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. cannot be validated automatically.");
+    }
 
   }
 
@@ -221,13 +369,28 @@ public class USBPEhostHandler extends USBPHandler {
 
   @Override
   protected void setChildRequestScenario(Data data, Data childData, Admin childAdmin, StringBuilder details) {
-    // TODO Auto-generated method stub
+    childAdmin.setCustType(USUtil.BUSINESS_PARTNER);
+    childData.setCustGrp(USUtil.CG_THIRD_P_BUSINESS_PARTNER);
+    childData.setCustSubGrp(USUtil.SC_BP_POOL);
+    if (T1.equals(cmrType)) {
+      childData.setBpAcctTyp("P");
+    } else {
+      childData.setCsoSite("TT2");
+    }
+
+    details.append(" - Type: Third Party - Bus Partner \n");
+    details.append(" - Sub-type: Bus Part Pool \n");
 
   }
 
   @Override
   public boolean isChildRequestSupported() {
     return true;
+  }
+
+  @Override
+  protected void performAction(AutomationEngineData engineData, String msg) {
+    engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
   }
 
 }

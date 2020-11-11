@@ -44,7 +44,7 @@ public class USBPPoolHandler extends USBPHandler {
       return true;
     }
 
-    if (StringUtils.isNotBlank(data.getPpsceid()) && AutomationUtil.checkPPSCEID(data.getPpsceid())) {
+    if (StringUtils.isBlank(data.getPpsceid()) || !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
       output.setResults("Invalid CEID");
       output.setDetails("Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.");
       engineData.addRejectionComment("CEID", "Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.", "", "");
@@ -111,12 +111,8 @@ public class USBPPoolHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
     }
 
-    if (StringUtils.isBlank(zs01.getDept())) {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "POOL");
-    } else if (!zs01.getDept().toUpperCase().contains("POOL")) {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), zs01.getDept() + " POOL");
-    }
-
+    details.append(" - Dept/Attn: POOL\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "POOL");
     details.append(" - Restricted Ind: Y\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");
@@ -140,6 +136,29 @@ public class USBPPoolHandler extends USBPHandler {
 
     // check addresses if not add
     Addr zi01 = requestData.getAddress("ZI01");
+    LOG.debug("Updating invoice to address based on CSO Site: " + csoSite);
+
+    String divn = "";
+    String address = "";
+    String city = "";
+    String state = "";
+    String postCd = "";
+    if (POOL.equals(cmrType)) {
+      details.append("\nUpdating invoice-to address to: \n IBM Credit LLC, 1 N Castle Dr MD NC313, Armonk, NY 10504-1725\n");
+      divn = "IBM Credit LLC";
+      address = "1 N Castle Dr MD NC313";
+      city = "Armonk";
+      state = "NY";
+      postCd = "10504-1725";
+    } else if (T2.equals(cmrType)) {
+      details.append("\nAligning invoice to and install at addresses.\n");
+      divn = zs01.getDivn();
+      address = zs01.getAddrTxt();
+      city = zs01.getCity1();
+      state = zs01.getStateProv();
+      postCd = zs01.getPostCd();
+    }
+
     if (zi01 == null) {
       AddrPK addrPk = new AddrPK();
       addrPk.setAddrType("ZI01");
@@ -147,25 +166,22 @@ public class USBPPoolHandler extends USBPHandler {
       addrPk.setReqId(data.getId().getReqId());
       zi01 = new Addr();
       zi01.setId(addrPk);
-    }
-
-    LOG.debug("Updating invoice to address based on CSO Site: " + csoSite);
-
-    if (POOL.equals(cmrType)) {
-      details.append("\nUpdating invoice-to address to: \n IBM Credit LLC, 1 N Castle Dr MD NC313, Armonk, NY 10504-1725\n");
-      zi01.setDivn("IBM Credit LLC");
-      zi01.setAddrTxt("1 N Castle Dr MD NC313");
-      zi01.setCity1("Armonk");
-      zi01.setStateProv("NY");
-      zi01.setPostCd("10504-1725");
-    } else if (T2.equals(cmrType)) {
-      details.append("\nAligning invoice to and install at addresses.\n");
-      zi01.setDivn(zs01.getDivn());
-      zi01.setDept(zs01.getDept());
-      zi01.setAddrTxt(zs01.getAddrTxt());
-      zi01.setPostCd(zs01.getPostCd());
-      zi01.setCity1(zs01.getCity1());
-      zi01.setStateProv(zs01.getStateProv());
+      zi01.setDivn(divn);
+      zi01.setAddrTxt(address);
+      zi01.setCity1(city);
+      zi01.setPostCd(postCd);
+      zi01.setStateProv(state);
+      try {
+        entityManager.merge(zi01);
+      } catch (Exception e) {
+        LOG.error(e);
+      }
+    } else {
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
     }
 
     if (!hasFieldErrors) {
@@ -181,9 +197,6 @@ public class USBPPoolHandler extends USBPHandler {
 
     details.append(" - Marketing A/R Dept: DI3\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
-
-    // TODO invoice to Location - IBM Credit LLC, 1 N Castle Dr MD NC313,
-    // Armonk, NY 10504-1725
 
     details.append(" - BP Account Type: P\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "P");
@@ -202,8 +215,6 @@ public class USBPPoolHandler extends USBPHandler {
   private boolean doFieldComputationsForT2CMR(EntityManager entityManager, GEOHandler handler, RequestData requestData,
       AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides) {
     Data data = requestData.getData();
-
-    // TODO invoice to = install at
 
     details.append(" - Marketing A/R Dept: 7NZ\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
