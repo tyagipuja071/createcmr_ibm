@@ -25,55 +25,64 @@
   <form:hidden path="sitePartyId" />
   <form:hidden path="searchTerm" />
 
-  <cmr:row addBackground="false">
-<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
-      <p>
-        <cmr:label fieldId="locationNumber">
-          <cmr:fieldLabel fieldId="LocationNumber" />: 
-            <cmr:delta text="${rdcdata.locationNumber}" oldValue="${reqentry.locationNo}" id="delta-locationNumber" />
-        </cmr:label>
-            <cmr:field path="locationNo" id="locationNumber" fieldId="LocationNumber" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column> --%>
-    <cmr:view forGEO="MCO,MCO1,MCO2">
-      <cmr:column span="2" containerForField="SpecialTaxCd" exceptForCountry="780">
-        <p>
-        <label for="specialTaxCd"> 
-        	<cmr:fieldLabel fieldId="SpecialTaxCd" />: 
-        	<cmr:delta text="${rdcdata.specialTaxCd}" oldValue="${reqentry.specialTaxCd}" />
-        </label>
-        <cmr:field fieldId="SpecialTaxCd" id="specialTaxCd" path="specialTaxCd" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>
-    </cmr:view>
-    <cmr:column span="2" containerForField="AbbrevLocation">
-      <p>
-        <label for="abbrevLocn"> 
-          <cmr:fieldLabel fieldId="AbbrevLocation" />: 
-          <cmr:delta text="${rdcdata.abbrevLocn}" oldValue="${reqentry.abbrevLocn}" />
-        </label>
-        <cmr:field fieldId="AbbrevLocation" id="abbrevLocn" path="abbrevLocn" tabId="MAIN_CUST_TAB" />
-      </p>
-    </cmr:column>
+	<cmr:row addBackground="false">
 		<cmr:view forGEO="MCO,MCO1,MCO2">
+			<cmr:column span="2" containerForField="SpecialTaxCd"
+				exceptForCountry="780">
+				<p>
+					<label for="specialTaxCd"> <cmr:fieldLabel
+							fieldId="SpecialTaxCd" />: <cmr:delta
+							text="${rdcdata.specialTaxCd}"
+							oldValue="${reqentry.specialTaxCd}" />
+					</label>
+					<cmr:field fieldId="SpecialTaxCd" id="specialTaxCd"
+						path="specialTaxCd" tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+		</cmr:view>
+		<cmr:column span="2" containerForField="AbbrevLocation">
+			<p>
+				<label for="abbrevLocn"> <cmr:fieldLabel
+						fieldId="AbbrevLocation" />: <cmr:delta
+						text="${rdcdata.abbrevLocn}" oldValue="${reqentry.abbrevLocn}" />
+				</label>
+				<cmr:field fieldId="AbbrevLocation" id="abbrevLocn"
+					path="abbrevLocn" tabId="MAIN_CUST_TAB" />
+			</p>
+		</cmr:column>
+		<cmr:view forGEO="MCO,MCO1,MCO2" exceptForCountry="780">
 			<cmr:column span="2" containerForField="EmbargoCode">
 				<p>
 					<cmr:label fieldId="embargoCd">
 						<cmr:fieldLabel fieldId="EmbargoCode" />:
-            <cmr:delta text="${rdcdata.embargoCd}"
+            			<cmr:delta text="${rdcdata.embargoCd}"
 							oldValue="${reqentry.embargoCd}" />
 					</cmr:label>
 					<cmr:field path="embargoCd" id="embargoCd" fieldId="EmbargoCode"
 						tabId="MAIN_CUST_TAB" />
 				</p>
 			</cmr:column>
+		</cmr:view>
 
+		<cmr:view forCountry="780">
 			<%--New Fields for Malta --%>
+			<cmr:column span="2" containerForField="OrderBlock" forCountry="780">
+				<p>
+					<cmr:label fieldId="ordBlk">
+						<cmr:fieldLabel fieldId="OrderBlock" />:
+						<cmr:delta text="${rdcdata.ordBlk}"
+							oldValue="${reqentry.ordBlk}" />
+					</cmr:label>
+					<cmr:field path="ordBlk" id="ordBlk" fieldId="OrderBlock"
+						tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+			
 			<cmr:column span="2" containerForField="CustClass" forCountry="780">
 				<p>
 					<cmr:label fieldId="custClass">
 						<cmr:fieldLabel fieldId="CustClass" />:
-          </cmr:label>
+          			</cmr:label>
 					<cmr:field path="custClass" id="custClass" fieldId="CustClass"
 						tabId="MAIN_CUST_TAB" />
 				</p>
@@ -81,19 +90,21 @@
 		</cmr:view>
 
 		<cmr:view forGEO="MCO1">
-    <cmr:column span="2" containerForField="CommercialFinanced">
-      <p>
-        <cmr:label fieldId="commercialFinanced">
-          <cmr:fieldLabel fieldId="CommercialFinanced" />:
-            <cmr:delta text="${rdcdata.commercialFinanced}" oldValue="${reqentry.commercialFinanced}" />
-        </cmr:label>
-        <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
-      </p>
-    </cmr:column>
-    </cmr:view>
-  </cmr:row>
+			<cmr:column span="2" containerForField="CommercialFinanced">
+				<p>
+					<cmr:label fieldId="commercialFinanced">
+						<cmr:fieldLabel fieldId="CommercialFinanced" />:
+            		<cmr:delta text="${rdcdata.commercialFinanced}"
+							oldValue="${reqentry.commercialFinanced}" />
+					</cmr:label>
+					<cmr:field path="commercialFinanced" id="commercialFinanced"
+						fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB" />
+				</p>
+			</cmr:column>
+		</cmr:view>
+	</cmr:row>
 
-  <cmr:view forCountry="XXXX">
+	<cmr:view forCountry="XXXX">
     <cmr:row addBackground="false">
       <cmr:column span="2" containerForField="OrgNo">
         <p>
