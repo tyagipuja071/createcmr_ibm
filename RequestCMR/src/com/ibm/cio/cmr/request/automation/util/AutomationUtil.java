@@ -1166,11 +1166,11 @@ public abstract class AutomationUtil {
     query.setForReadOnly(true);
     List<String> comments = query.getResults(String.class);
     for (String cmt : comments) {
-      String cleanCmt = getCleanString(cmt);
+      String cleanCmt = " " + getCleanString(cmt) + " ";
       switch (restrictCd) {
       case "BPQS":
         for (String keyword : BP_CMT_1) {
-          if (cleanCmt.contains(getCleanString(keyword))) {
+          if (cleanCmt.contains(" " + getCleanString(keyword) + " ")) {
             rejectRequest = true;
             break;
           }
@@ -1178,7 +1178,7 @@ public abstract class AutomationUtil {
         break;
       case "IRCSO":
         for (String keyword : BP_CMT_2) {
-          if (cleanCmt.contains(getCleanString(keyword))) {
+          if (cleanCmt.contains(" " + getCleanString(keyword) + " ")) {
             rejectRequest = true;
             break;
           }
