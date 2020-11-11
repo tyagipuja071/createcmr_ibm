@@ -246,4 +246,10 @@ public class USBPPoolHandler extends USBPHandler {
     this.cmrType = cmrType;
   }
 
+  @Override
+  protected void performAction(AutomationEngineData engineData, String msg) {
+    // NOOP
+
+  }
+
 }

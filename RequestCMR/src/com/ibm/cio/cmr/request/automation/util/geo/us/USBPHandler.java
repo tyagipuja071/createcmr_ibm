@@ -117,6 +117,8 @@ public abstract class USBPHandler {
         return new USBPEndUserHandler();
       case USUtil.SC_BP_POOL:
         return new USBPPoolHandler();
+      case USUtil.SC_BP_DEVELOP:
+        return new USBPDevelopHandler();
       case USUtil.SC_BP_E_HOST:
         return new USBPEhostHandler();
       }

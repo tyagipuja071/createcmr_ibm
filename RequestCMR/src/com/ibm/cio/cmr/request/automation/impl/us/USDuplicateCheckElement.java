@@ -55,7 +55,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   private static DupCMRCheckElement dupCMRCheckElement = new DupCMRCheckElement(null, null, false, false);
 
   private static final List<String> negativeCheckScenarioList = Arrays.asList(USUtil.SC_IGS, USUtil.SC_IGSF, USUtil.SC_LEASE_NO_RESTRICT,
-      USUtil.SC_LEASE_32C, USUtil.SC_LEASE_IPMA, USUtil.SC_LEASE_LPMA, USUtil.SC_FED_REGULAR, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_TRIBAL_BUS,
+      USUtil.SC_LEASE_IPMA, USUtil.SC_LEASE_LPMA, USUtil.SC_FED_REGULAR, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_TRIBAL_BUS,
       USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_CLINIC, USUtil.SC_FED_NATIVE_CORP, USUtil.SC_FED_CAMOUFLAGED,
       USUtil.SC_STATE_STATE, USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_CITY, USUtil.SC_STATE_HOSPITALS, USUtil.SC_SCHOOL_PUBLIC,
       USUtil.SC_SCHOOL_CHARTER, USUtil.SC_STATE_DIST, USUtil.SC_SCHOOL_PRIV, USUtil.SC_BYMODEL);
@@ -529,6 +529,16 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         response.setMatches(cmrCheckMatchesTmp);
       }
+    case USUtil.SC_BP_DEVELOP:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(data.getCompany())
+            && data.getCompany().equalsIgnoreCase(cmrCheckRecord.getCompany()) && ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()))
+            && "D".equalsIgnoreCase(cmrCheckRecord.getUsBpAccType())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
     default:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
         if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
