@@ -1241,6 +1241,8 @@ function addAttachmentValidatorOnTaxRegMadagascar() {
       validate : function() {
         var numeroStat = FormManager.getActualValue('busnType');
         var reqId = FormManager.getActualValue('reqId');
+        var numeroRequired = isNumeroTinRequired();
+        var numeroExempt = dijit.byId('taxCd2').get('checked');
 
         if (FormManager.getActualValue('reqType') == 'U') {
           var result = cmr.query("GET.OLD_BUSN_TYP", {
@@ -1256,7 +1258,7 @@ function addAttachmentValidatorOnTaxRegMadagascar() {
         var ret = cmr.query('CHECK_VATD_ATTACHMENT', {
           ID : reqId
         });
-        if (numeroStat.length > 0) {
+        if (!numeroExempt && numeroRequired) {
           if (ret == null || ret.ret1 == null) {
             return new ValidationResult(null, false, 'VAT/TAX Documentation has not been attached to the request.');
           }
