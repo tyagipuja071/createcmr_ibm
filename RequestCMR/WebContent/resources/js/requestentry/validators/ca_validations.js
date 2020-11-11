@@ -143,6 +143,27 @@ function afterConfigForCA() {
     FormManager.enable('abbrevLocn');
     FormManager.enable('abbrevNm');
   }
+
+  addFieldHandlers();
+}
+
+var _inacCodeHandler = null;
+function addFieldHandlers() {
+
+  if (_inacCodeHandler == null) {
+    _inacCodeHandler = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
+      if (value != null && value.match(/^[0-9]+$/) && value.length == 4) {
+        FilteringDropdown['inacType'] = 'I';
+        FormManager.setValue('inacType', 'I');
+      } else if (value != null && value.match(/^[A-Za-z]+$/)) {
+        FilteringDropdown['inacType'] = 'N';
+        FormManager.setValue('inacType', 'N');
+      } else {
+        FilteringDropdown['inacType'] = '';
+        FormManager.setValue('inacType', '');
+      }
+    });
+  }
 }
 
 /* Register CA Javascripts */
