@@ -27,7 +27,7 @@ function addHandlersForCEWA() {
     _addrTypeHandler[i] = null;
     if (_addrTypeHandler[i] == null) {
       _addrTypeHandler[i] = dojo.connect(FormManager.getField('addrType_' + _addrTypesForCEWA[i]), 'onClick', function(value) {
-        disableAddrFieldsCEWA();
+        disableAddrFieldsMT();
       });
     }
   }
@@ -43,9 +43,9 @@ function lockOrderBlock() {
   var reqType = FormManager.getActualValue('reqType');
   var role = FormManager.getActualValue('userRole').toUpperCase();
   if (reqType != 'U' && role == 'REQUESTER') {
-    FormManager.readOnly('embargoCd');
+    FormManager.readOnly('ordBlk');
   } else {
-    FormManager.enable('embargoCd');
+    FormManager.enable('ordBlk');
   }
 }
 
@@ -70,7 +70,7 @@ function classFieldBehaviour() {
   }
 }
 
-function disableAddrFieldsCEWA() {
+function disableAddrFieldsMT() {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
 
@@ -79,22 +79,12 @@ function disableAddrFieldsCEWA() {
   } else {
     FormManager.enable('landCntry');
   }
-  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.MALTA) {
-    // Phone - for shipping
-    if (addrType == 'ZD01') {
-      FormManager.enable('custPhone');
-    } else {
-      FormManager.setValue('custPhone', '');
-      FormManager.disable('custPhone');
-    }
+  // Phone - for shipping
+  if (addrType == 'ZD01') {
+    FormManager.enable('custPhone');
   } else {
-    // Phone - for shipping and EPL addresses
-    if (addrType == 'ZD01' || addrType == 'ZS02') {
-      FormManager.enable('custPhone');
-    } else {
-      FormManager.setValue('custPhone', '');
-      FormManager.disable('custPhone');
-    }
+    FormManager.setValue('custPhone', '');
+    FormManager.disable('custPhone');
   }
 
 }
@@ -173,7 +163,7 @@ function addAddressFieldValidators() {
       validate : function() {
         var postCd = FormManager.getActualValue('postCd');
         var landCntry = FormManager.getActualValue('landCntry');
-        if (custGrp != 'MT') {
+        if (landCntry != 'MT') {
           return;
         }
         if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
@@ -751,7 +741,7 @@ function addOrdBlkValidator() {
     return {
       validate : function() {
         var reqType = null;
-        var ordBlk = FormManager.getActualValue('embargoCd');
+        var ordBlk = FormManager.getActualValue('ordBlk');
         if (typeof (_pagemodel) != 'undefined') {
           reqType = FormManager.getActualValue('reqType');
         }
@@ -859,7 +849,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
-  GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addAttachmentValidator, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(addGenericVATValidator(SysLoc.MALTA, 'MAIN_CUST_TAB', 'frmCMR'), [ SysLoc.MALTA ], null, true);
 
@@ -869,7 +858,6 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(requireVATForCrossBorder, GEOHandler.MCO2, null, true);
   GEOHandler.registerValidator(streetValidatorCustom, GEOHandler.MCO2, null, true);
 
-  GEOHandler.addAddrFunction(disableAddrFieldsCEWA, GEOHandler.MCO2);
   GEOHandler.addAddrFunction(changeAbbrevNmLocn, GEOHandler.MCO2);
 
   /* 1438717 - add DPL match validation for failed dpl checks */
@@ -877,11 +865,13 @@ dojo.addOnLoad(function() {
 
   // Malta Legacy
   GEOHandler.addAfterConfig(addAfterConfigMalta, [ SysLoc.MALTA ]);
+  GEOHandler.addAddrFunction(disableAddrFieldsMT, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addAddrValidatorMALTA, [ SysLoc.MALTA ]);
   GEOHandler.addAddrFunction(addMaltaLandedCountryHandler, [ SysLoc.MALTA ]);
   GEOHandler.addAfterTemplateLoad(addAfterTemplateLoadMalta, [ SysLoc.MALTA ]);
   GEOHandler.registerValidator(addOrdBlkValidator, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addAddressTypeValidator, [ SysLoc.MALTA ], null, true);
+  GEOHandler.registerValidator(addAddressFieldValidators, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addISICValidatorForScenario, [ SysLoc.MALTA ], null, true);
   GEOHandler.registerValidator(addIsicClassificationCodeValidator, [ SysLoc.MALTA ], null, true);
 
