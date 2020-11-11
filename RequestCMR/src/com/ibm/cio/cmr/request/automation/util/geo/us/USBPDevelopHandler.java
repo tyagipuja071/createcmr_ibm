@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.automation.impl.us.USDuplicateCheckElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -356,8 +357,12 @@ public class USBPDevelopHandler extends USBPHandler {
 
   @Override
   protected void setChildRequestScenario(Data data, Data childData, Admin childAdmin, StringBuilder details) {
-    // NOOP
+    if (childData != null) {
+      childData.setCustGrp(USUtil.CG_THIRD_P_BUSINESS_PARTNER);
+      childData.setCustSubGrp(USUtil.SC_BP_POOL);
+      childAdmin.setCustType(USUtil.BUSINESS_PARTNER);
 
+    }
   }
 
   @Override
