@@ -228,6 +228,15 @@ public class SouthAfricaTransformer extends MCOTransformer {
       } else {
         legacyCust.setSalesRepNo("");
       }
+
+      String subregion = data.getCountryUse();
+      if (!StringUtils.isBlank(subregion) && "864LS".equals(subregion)) {
+        legacyCust.setRealCtyCd("711");
+      } else if (!StringUtils.isBlank(subregion) && "864NA".equals(subregion)) {
+        legacyCust.setRealCtyCd("682");
+      } else if (!StringUtils.isBlank(subregion) && "864SZ".equals(subregion)) {
+        legacyCust.setRealCtyCd("853");
+      }
     }
 
     if (CmrConstants.REQ_TYPE_UPDATE.equals(admin.getReqType())) {
@@ -330,7 +339,8 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    if (dummyHandler != null && isCrossBorder && !StringUtils.isEmpty(dummyHandler.cmrData.getVat())) {
+    boolean skipVatPrefix = "LS".equals(landedCntry) || "NA".equals(landedCntry);
+    if (dummyHandler != null && isCrossBorder && !StringUtils.isEmpty(dummyHandler.cmrData.getVat()) && !skipVatPrefix) {
       if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
         legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
       } else {
