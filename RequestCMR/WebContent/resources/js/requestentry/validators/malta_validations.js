@@ -49,6 +49,27 @@ function lockOrderBlock() {
   }
 }
 
+/*
+ * Classification Code field
+ */
+function classFieldBehaviour() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+
+  if (reqType == 'C') {
+    FormManager.readOnly('custClass');
+  }
+
+  if (reqType == 'U' && role == 'REQUESTER') {
+    FormManager.readOnly('custClass');
+  } else {
+    FormManager.enable('custClass');
+  }
+}
+
 function disableAddrFieldsCEWA() {
   var custType = FormManager.getActualValue('custGrp');
   var addrType = FormManager.getActualValue('addrType');
@@ -677,6 +698,7 @@ function addAfterConfigMalta() {
   }
   lockOrderBlock();
   enterpriseMalta();
+  classFieldBehaviour();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
 }
