@@ -87,7 +87,7 @@ function addHandlersForZA() {
   if (FormManager.getActualValue('reqType') == 'C') {
     if (_vatExemptHandler == null) {
       _vatExemptHandler = dojo.connect(FormManager.getField('vatExempt'), 'onClick', function(value) {
-        resetVatRequired();
+        resetVatRequired(true);
       });
     }
   }
@@ -103,17 +103,29 @@ function setCtcSalesRepSBO(value) {
   var role = FormManager.getActualValue('userRole').toUpperCase();
   var internalBUScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN', 'LSXBP', 'LSBP', 'NAXBP', 'NABP', 'SZXBP', 'SZBP', 'ZAXBP', 'ZABP' ];
   var isuCtc = value + clientTier;
-  if (reqType != 'C' || role != 'REQUESTER') {
+  if (reqType != 'C') {
     return;
   }
 
-  if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '32S' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
-    FormManager.setValue('salesBusOffCd', '');
-    FormManager.setValue('repTeamMemberNo', '');
+  if(role == 'REQUESTER'){
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '32S' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
+      FormManager.setValue('salesBusOffCd', '');
+      FormManager.setValue('repTeamMemberNo', '');
+    }
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '32C' && countryUse == '864NA') {
+      FormManager.setValue('salesBusOffCd', '');
+      FormManager.setValue('repTeamMemberNo', '');
+    }
   }
-  if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '32C' && countryUse == '864NA') {
-    FormManager.setValue('salesBusOffCd', '');
-    FormManager.setValue('repTeamMemberNo', '');
+  if(role != 'REQUESTER' && _isScenarioChanged){
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '32S' && isuCtc != '34V' && (countryUse == '864' || countryUse == '864LS' || countryUse == '864SZ')) {
+      FormManager.setValue('salesBusOffCd', '');
+      FormManager.setValue('repTeamMemberNo', '');
+    }
+    if (scenario != null && !internalBUScenarios.includes(scenario) && isuCtc != '34V' && isuCtc != '32C' && countryUse == '864NA') {
+      FormManager.setValue('salesBusOffCd', '');
+      FormManager.setValue('repTeamMemberNo', '');
+    }
   }
 }
 
@@ -1692,7 +1704,7 @@ function requireVATForCrossBorder() {
           return new ValidationResult(null, true);
         }
         // MCO cross subType codes
-        if (custSubGrp != null && (custSubGrp.includes('XSOFT') || custSubGrp.includes('XSL') || custSubGrp.includes('XPRIC') || custSubGrp.includes('XPC') || custSubGrp.includes('XGO'))) {
+        if (custSubGrp != null && (custSubGrp.includes('XSOFT') || custSubGrp.includes('XSL') || custSubGrp.includes('XPRIC'))) {
           return new ValidationResult(null, true);
         }
 
@@ -1725,9 +1737,10 @@ function requireVATForCrossBorder() {
 var _isScenarioChanged = false;
 function checkScenarioChanged(fromAddress, scenario, scenarioChanged) {
   _isScenarioChanged = scenarioChanged;
+  setCtcSalesRepSBO(FormManager.getActualValue('isuCd'));
 }
 
-function resetVatRequired() {
+function resetVatRequired(value) {
   var viewOnly = FormManager.getActualValue('viewOnlyPage');
   if (viewOnly != '' && viewOnly == 'true') {
     return;
@@ -1747,12 +1760,9 @@ function resetVatRequired() {
       FormManager.enable('vatExempt');
       if ( dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
           FormManager.removeValidator('vat', Validators.REQUIRED);
-      } else {
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
-      if(_isScenarioChanged){
+      if(_isScenarioChanged  && !value){
         FormManager.getField('vatExempt').set('checked', false);
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
       }
     } else {
       FormManager.getField('vatExempt').set('checked', false);
