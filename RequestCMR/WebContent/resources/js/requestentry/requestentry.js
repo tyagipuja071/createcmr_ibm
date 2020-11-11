@@ -1608,3 +1608,4 @@ function autoSaveRequest() {
   }
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
+
