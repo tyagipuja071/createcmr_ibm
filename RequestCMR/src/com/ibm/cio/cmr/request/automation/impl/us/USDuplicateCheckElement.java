@@ -529,6 +529,16 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         response.setMatches(cmrCheckMatchesTmp);
       }
+    case USUtil.SC_BP_DEVELOP:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(data.getCompany())
+            && data.getCompany().equalsIgnoreCase(cmrCheckRecord.getCompany()) && ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()))
+            && "D".equalsIgnoreCase(cmrCheckRecord.getUsBpAccType())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
     default:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
         if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
