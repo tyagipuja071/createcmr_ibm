@@ -206,6 +206,10 @@ function lockCmrOwnerPrefLang() {
     FormManager.readOnly('cmrOwner');
     FormManager.readOnly('custPrefLang');
   }
+
+  if (reqType == 'U') {
+    FormManager.readOnly('custPrefLang');
+  }
 }
 function afterConfigForMCO2() {
   limitClientTierValues();
