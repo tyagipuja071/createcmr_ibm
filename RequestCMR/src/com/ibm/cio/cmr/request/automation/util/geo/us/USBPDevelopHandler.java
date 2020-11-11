@@ -356,6 +356,11 @@ public class USBPDevelopHandler extends USBPHandler {
   }
 
   @Override
+  protected void performAction(AutomationEngineData engineData, String msg) {
+    engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
+  }
+
+  @Override
   protected void setChildRequestScenario(Data data, Data childData, Admin childAdmin, StringBuilder details) {
     if (childData != null) {
       childData.setCustGrp(USUtil.CG_THIRD_P_BUSINESS_PARTNER);
