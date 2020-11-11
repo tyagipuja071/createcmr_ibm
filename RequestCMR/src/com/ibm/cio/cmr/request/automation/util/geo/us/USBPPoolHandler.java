@@ -61,7 +61,7 @@ public class USBPPoolHandler extends USBPHandler {
     Data data = requestData.getData();
 
     this.csoSite = data.getCsoSite();
-    if (StringUtils.isBlank(csoSite) && StringUtils.isNotBlank(data.getEnterprise())) {
+    if (StringUtils.isNotBlank(data.getEnterprise())) {
       USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
       if (mapping != null && mapping.isDistributor()) {
         this.csoSite = "YBV";
