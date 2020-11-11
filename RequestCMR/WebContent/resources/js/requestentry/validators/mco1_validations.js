@@ -126,6 +126,9 @@ function setCtcSalesRepSBO(value) {
       FormManager.setValue('salesBusOffCd', '');
       FormManager.setValue('repTeamMemberNo', '');
     }
+  } else if( role != 'REQUESTER' && !_isScenarioChanged){
+    FormManager.setValue('salesBusOffCd', _pagemodel.salesBusOffCd);
+    FormManager.setValue('repTeamMemberNo', _pagemodel.repTeamMemberNo);
   }
 }
 
