@@ -1079,6 +1079,7 @@ function validateCMRForExistingGMLLCScenario() {
         var targetCntryCd = '764';
         var activeCMRExistLanded = false;
         var activeCMRExistKenya = false;
+        var processingStatus= FormManager.getActualValue('rdcProcessingStatus');  
 
         if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'NAELC' || subCustGrp == 'SZELC' || subCustGrp == 'LSELC')) {
 
@@ -1112,7 +1113,7 @@ function validateCMRForExistingGMLLCScenario() {
             MANDT : cmr.MANDT
           });
 
-          if (exist3 && exist3.ret1 && exist3.ret2 == 'A' && action != 'PCM') {
+          if (exist3 && exist3.ret1 && exist3.ret2 == 'A' && action != 'PCM' && (processingStatus =='' || processingStatus== undefined)) {
             activeCMRExistLanded = true;
             return new ValidationResult({
               id : 'cmrNo',
@@ -1150,7 +1151,7 @@ function validateCMRForExistingGMLLCScenario() {
                 + ' and Kenya using GM LLC scenario under ' + landed);
           }
 
-          if (exist1.ret1 == undefined && exist3.ret1 == undefined && action != 'PCM') {
+          if (exist1.ret1 == undefined && exist3.ret1 == undefined && action != 'PCM' && (processingStatus =='' || processingStatus== undefined)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1463,6 +1464,7 @@ function validateCMRNoFORGMLLC() {
         var action = FormManager.getActualValue('yourAction');
         var requestID = FormManager.getActualValue('reqId');
         var landed = 'LANDED COUNTRY';
+        var processingStatus= FormManager.getActualValue('rdcProcessingStatus'); 
         if (FormManager.getActualValue('reqType') != 'C') {
           return new ValidationResult(null, true);
         }
@@ -1485,7 +1487,7 @@ function validateCMRNoFORGMLLC() {
             MANDT : cmr.MANDT
           });
 
-          if (exist1 && exist1.ret1 && action != 'PCM') {
+          if (exist1 && exist1.ret1 && action != 'PCM' && (processingStatus =='' || processingStatus== undefined)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1513,7 +1515,7 @@ function validateCMRNoFORGMLLC() {
             CMR_NO : cmrNo,
             MANDT : cmr.MANDT
           });
-          if (exist3 && exist3.ret1 && action != 'PCM') {
+          if (exist3 && exist3.ret1 && action != 'PCM' && (processingStatus =='' || processingStatus== undefined)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
