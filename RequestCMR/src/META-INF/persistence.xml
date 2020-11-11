@@ -210,6 +210,9 @@
 
       <property name="openjpa.RuntimeUnenhancedClasses" value="supported" />
       <property name="openjpa.Log" value="SQL=INFO" />
+      <property name="eclipselink.cache.shared.default" value="false"/>      
+      <property name="javax.persistence.lock.timeout" value="300000" />
+      <property name="javax.persistence.query.timeout" value="600000" />
 	  <!-- END ORIGINAL -->
 	  
 	  <!-- TEMP -->
