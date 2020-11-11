@@ -205,8 +205,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
           admin.setProspLegalInd(CmrConstants.YES_NO.Y.toString());
           admin.setDelInd(null);
           admin.setModelCmrNo(null);
-          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry() : searchModel
-              .getSearchIssuingCntry();
+          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry()
+              : searchModel.getSearchIssuingCntry();
           String desc = DropdownListController.getDescription("CMRIssuingCntry", sysLoc, sysLoc, false);
           if (StringUtils.isEmpty(desc)) {
             desc = sysLoc;
@@ -232,8 +232,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
             data.setCustSubGrp(CmrConstants.CREATE_BY_MODEL_SUB_GROUP);
           }
 
-          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry() : searchModel
-              .getSearchIssuingCntry();
+          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry()
+              : searchModel.getSearchIssuingCntry();
           String desc = DropdownListController.getDescription("CMRIssuingCntry", sysLoc, sysLoc, false);
           if (StringUtils.isEmpty(desc)) {
             desc = sysLoc;
@@ -257,8 +257,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
             data.setCustGrp(null);
             data.setCustSubGrp(null);
           }
-          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry() : searchModel
-              .getSearchIssuingCntry();
+          String sysLoc = StringUtils.isEmpty(searchModel.getSearchIssuingCntry()) ? searchModel.getCmrIssuingCntry()
+              : searchModel.getSearchIssuingCntry();
           String desc = DropdownListController.getDescription("CMRIssuingCntry", sysLoc, sysLoc, false);
           if (StringUtils.isEmpty(desc)) {
             desc = sysLoc;
@@ -442,34 +442,34 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
 
   private void removingBlankSpaceOfData(Data data) {
     LOG.debug("Removing blank spaces from data fields....");
-   data.setAbbrevLocn(!StringUtils.isEmpty(data.getAbbrevLocn()) ? data.getAbbrevLocn().trim() :""); 
-   data.setAbbrevNm(!StringUtils.isEmpty(data.getAbbrevNm()) ? data.getAbbrevNm().trim() :""); 
-   data.setAffiliate(!StringUtils.isEmpty(data.getAffiliate()) ? data.getAffiliate().trim() :""); 
-   data.setEmail2(!StringUtils.isEmpty(data.getEmail2()) ? data.getEmail2().trim() :""); 
-   data.setEmail3(!StringUtils.isEmpty(data.getEmail3()) ? data.getEmail3().trim() :""); 
-   data.setEnterprise(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise().trim() :""); 
-   data.setInacCd(!StringUtils.isEmpty(data.getInacCd()) ? data.getInacCd().trim() :""); 
-   data.setInacType(!StringUtils.isEmpty(data.getInacType()) ? data.getInacType().trim() :"");  
-   data.setTaxCd1(!StringUtils.isEmpty(data.getTaxCd1()) ? data.getTaxCd1().trim() :""); 
-   data.setTaxCd2(!StringUtils.isEmpty(data.getTaxCd2()) ? data.getTaxCd2().trim() :""); 
-   data.setVat(!StringUtils.isEmpty(data.getVat()) ? data.getVat().trim() :""); 
-   data.setCapInd(!StringUtils.isEmpty(data.getCapInd()) ? data.getCapInd().trim() :""); 
-   data.setClientTier(!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier().trim() :""); 
-   data.setCollectionCd(!StringUtils.isEmpty(data.getCollectionCd()) ? data.getCollectionCd().trim() :""); 
-   data.setCrosSubTyp(!StringUtils.isEmpty(data.getCrosSubTyp()) ? data.getCrosSubTyp().trim() :""); 
-   data.setCustClass(!StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass().trim() :""); 
-   data.setCustClass(!StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass().trim() :""); 
-   data.setHwSvcsRepTeamNo(!StringUtils.isEmpty(data.getHwSvcsRepTeamNo()) ? data.getHwSvcsRepTeamNo().trim() :""); 
-  
-   // Resolve Data issue (length of field ISIC_CD is 4 in db
-   data.setIsicCd(!StringUtils.isEmpty(data.getIsicCd()) ? data.getIsicCd().trim().substring(0, 4) :""); 
-   
-   data.setIsuCd(!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd().trim() :""); 
-   data.setRepTeamMemberNo(!StringUtils.isEmpty(data.getRepTeamMemberNo()) ? data.getRepTeamMemberNo().trim() :""); 
-   data.setSalesBusOffCd(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd().trim() :""); 
-   data.setCompany(!StringUtils.isEmpty(data.getCompany()) ? data.getCompany().trim() :"");
+    data.setAbbrevLocn(!StringUtils.isEmpty(data.getAbbrevLocn()) ? data.getAbbrevLocn().trim() : "");
+    data.setAbbrevNm(!StringUtils.isEmpty(data.getAbbrevNm()) ? data.getAbbrevNm().trim() : "");
+    data.setAffiliate(!StringUtils.isEmpty(data.getAffiliate()) ? data.getAffiliate().trim() : "");
+    data.setEmail2(!StringUtils.isEmpty(data.getEmail2()) ? data.getEmail2().trim() : "");
+    data.setEmail3(!StringUtils.isEmpty(data.getEmail3()) ? data.getEmail3().trim() : "");
+    data.setEnterprise(!StringUtils.isEmpty(data.getEnterprise()) ? data.getEnterprise().trim() : "");
+    data.setInacCd(!StringUtils.isEmpty(data.getInacCd()) ? data.getInacCd().trim() : "");
+    data.setInacType(!StringUtils.isEmpty(data.getInacType()) ? data.getInacType().trim() : "");
+    data.setTaxCd1(!StringUtils.isEmpty(data.getTaxCd1()) ? data.getTaxCd1().trim() : "");
+    data.setTaxCd2(!StringUtils.isEmpty(data.getTaxCd2()) ? data.getTaxCd2().trim() : "");
+    data.setVat(!StringUtils.isEmpty(data.getVat()) ? data.getVat().trim() : "");
+    data.setCapInd(!StringUtils.isEmpty(data.getCapInd()) ? data.getCapInd().trim() : "");
+    data.setClientTier(!StringUtils.isEmpty(data.getClientTier()) ? data.getClientTier().trim() : "");
+    data.setCollectionCd(!StringUtils.isEmpty(data.getCollectionCd()) ? data.getCollectionCd().trim() : "");
+    data.setCrosSubTyp(!StringUtils.isEmpty(data.getCrosSubTyp()) ? data.getCrosSubTyp().trim() : "");
+    data.setCustClass(!StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass().trim() : "");
+    data.setCustClass(!StringUtils.isEmpty(data.getCustClass()) ? data.getCustClass().trim() : "");
+    data.setHwSvcsRepTeamNo(!StringUtils.isEmpty(data.getHwSvcsRepTeamNo()) ? data.getHwSvcsRepTeamNo().trim() : "");
+
+    // Resolve Data issue (length of field ISIC_CD is 4 in db
+    data.setIsicCd(!StringUtils.isEmpty(data.getIsicCd()) ? data.getIsicCd().trim().substring(0, 4) : "");
+
+    data.setIsuCd(!StringUtils.isEmpty(data.getIsuCd()) ? data.getIsuCd().trim() : "");
+    data.setRepTeamMemberNo(!StringUtils.isEmpty(data.getRepTeamMemberNo()) ? data.getRepTeamMemberNo().trim() : "");
+    data.setSalesBusOffCd(!StringUtils.isEmpty(data.getSalesBusOffCd()) ? data.getSalesBusOffCd().trim() : "");
+    data.setCompany(!StringUtils.isEmpty(data.getCompany()) ? data.getCompany().trim() : "");
   }
- 
+
   private void clearChecklistAfterImport(EntityManager entityManager, AppUser user, long reqId) {
     LOG.debug("Clearing checklist details for request..");
     String sql = ExternalizedQuery.getSql("REQENTRY.GETCHECKLIST");
@@ -548,9 +548,10 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     data.setInacCd(record.getCmrInac());
     data.setInacType(record.getCmrInacType());
     // Resolve Data issue (length of field ISIC_CD is 4 in db
-   // data.setIsicCd(record.getCmrIsic());
-    data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic()) ? (record.getCmrIsic().trim().length()>4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
-    
+    // data.setIsicCd(record.getCmrIsic());
+    data.setIsicCd(!StringUtils.isEmpty(record.getCmrIsic())
+        ? (record.getCmrIsic().trim().length() > 4 ? record.getCmrIsic().trim().substring(0, 4) : record.getCmrIsic().trim()) : "");
+
     data.setIsuCd(record.getCmrIsu());
     data.setSearchTerm(record.getCmrSortl());
     data.setSitePartyId(record.getCmrSitePartyID());
@@ -591,6 +592,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
     // data.setClientTier(CmrConstants.CLIENT_TIER_UNASSIGNED);
     // }
 
+    data.setMilitary("X".equals(record.getMilitaryFlag()) ? "Y" : null);
+
     if (converter != null) {
       converter.setDataValuesOnImport(admin, data, results, record);
     }
@@ -605,8 +608,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
    * @throws InvocationTargetException
    * @throws NoSuchMethodException
    */
-  private void savePageData(RequestEntryModel model, Admin admin, Data data) throws IllegalAccessException, InvocationTargetException,
-      NoSuchMethodException {
+  private void savePageData(RequestEntryModel model, Admin admin, Data data)
+      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     PropertyUtils.copyProperties(admin, model);
     PropertyUtils.copyProperties(data, model);
   }
@@ -810,8 +813,8 @@ public class ImportCMRService extends BaseSimpleService<ImportCMRModel> {
    * @throws CmrException
    * @throws SQLException
    */
-  public void createCommentLog(BaseService<?, ?> service, EntityManager entityManager, String user, long reqId, String cmt) throws CmrException,
-      SQLException {
+  public void createCommentLog(BaseService<?, ?> service, EntityManager entityManager, String user, long reqId, String cmt)
+      throws CmrException, SQLException {
     ReqCmtLog reqCmtLog = new ReqCmtLog();
     ReqCmtLogPK reqCmtLogpk = new ReqCmtLogPK();
     reqCmtLogpk.setCmtId(SystemUtil.getNextID(entityManager, SystemConfiguration.getValue("MANDT"), "CMT_ID"));

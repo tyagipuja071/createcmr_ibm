@@ -9,19 +9,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.CmrException;
+import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
@@ -130,15 +136,16 @@ public class DnBUtil {
     registerDnBVATCode("UZ", 17279); // Tax Registration Number (Uzbekistan)
     registerDnBVATCode("VE", 1396); // Venezuelan Registry of Fiscal Information
     registerDnBVATCode("VN", 1397); // Business Registration Number (Vietnam)
+    registerDnBVATCode("SG", 1386); // Singapore Registration File Number
 
     // Tax Cd1
     registerDnBTaxCd1Code("NL", 6256); // NetherLand Tax Registration Number
     registerDnBTaxCd1Code("FR", 2081); // SIRET
+    registerDnBTaxCd1Code("GB", 2541); // UK CRO Number
+    registerDnBTaxCd1Code("IE", 9134); // Ireland CRO Number
 
     // other codes
     registerOtherDnBCode("FR", CODE_SIREN, 2078); // SIREN
-    registerOtherDnBCode("SG", "SG_REG_NO", 1386); // Singapore Registration
-                                                   // File Number
 
   }
 
@@ -174,6 +181,19 @@ public class DnBUtil {
       String[] parts = geoHandler.doSplitName(company.getCompanyName(), "", splitLength, splitLength2);
       cmrRecord.setCmrName1Plain(parts[0]);
       cmrRecord.setCmrName2Plain(parts[1]);
+      String completeNameAfterSplit = parts[0] + (StringUtils.isNotBlank(parts[1]) ? " " + parts[1] : "");
+      if (!company.getCompanyName().equals(completeNameAfterSplit)) {
+        if (company.getCompanyName().length() > splitLength) {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, splitLength).toUpperCase());
+          if (company.getCompanyName().length() > splitLength + splitLength2) {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength, splitLength + splitLength2).toUpperCase());
+          } else {
+            cmrRecord.setCmrName2Plain(company.getCompanyName().substring(splitLength).toUpperCase());
+          }
+        } else {
+          cmrRecord.setCmrName1Plain(company.getCompanyName().toUpperCase());
+        }
+      }
     } else {
       if (company.getCompanyName().length() > 30) {
         cmrRecord.setCmrName1Plain(company.getCompanyName().substring(0, 30).toUpperCase());
@@ -216,6 +236,15 @@ public class DnBUtil {
           vatValid = validateVAT(country, country + vat);
           if (vatValid) {
             vat = country + vat;
+          } else {
+            String countrySpeficPrefix = geoHandler.getCountrySpecificVatPrefix();
+            // validate for a third time
+            if (countrySpeficPrefix != null) {
+              vatValid = validateVAT(country, countrySpeficPrefix + vat);
+              if (vatValid) {
+                vat = countrySpeficPrefix + vat;
+              }
+            }
           }
         }
         cmrRecord.setCmrVat(vat);
@@ -418,7 +447,7 @@ public class DnBUtil {
    * @return
    */
   public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord) {
-    return closelyMatchesDnb(country, addr, admin, dnbRecord, null);
+    return closelyMatchesDnb(country, addr, admin, dnbRecord, null, false);
   }
 
   /**
@@ -433,34 +462,64 @@ public class DnBUtil {
    * @param nameToUse
    * @return
    */
-  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse) {
-
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse,
+      boolean useTradestyleName) {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
-
-    String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
-
-    if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbRecord.getDnbName())) {
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 12) {
-        return false;
-      }
-      if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbRecord.getDnbName().toUpperCase()) >= 6) {
-        // do a comparison of common words first
-        List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
-        List<String> commonB = CommonWordsUtil.getVariations(dnbRecord.getDnbName().toUpperCase());
-        boolean foundMinimal = false;
-        for (String phraseA : commonA) {
-          for (String phraseB : commonB) {
-            if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
-              foundMinimal = true;
+    List<String> dnbNames = new ArrayList<String>();
+    Boolean nameMatch = false;
+    if (useTradestyleName && !dnbRecord.getTradeStyleNames().isEmpty()) {
+      dnbNames.addAll(dnbRecord.getTradeStyleNames());
+    } else {
+      dnbNames.add(dnbRecord.getDnbName());
+    }
+    for (String dnbName : dnbNames) {
+      String compareName = nameToUse != null ? nameToUse : getCustomerName(handler, admin, addr);
+      String altCompareName = nameToUse != null ? null : getAltCustomerName(handler, admin, addr);
+      if (StringUtils.isNotBlank(compareName) && StringUtils.isNotBlank(dnbName)) {
+        if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 12
+            && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 12)) {
+          nameMatch = false;
+        }
+        if (StringUtils.getLevenshteinDistance(compareName.toUpperCase(), dnbName.toUpperCase()) >= 6
+            && (altCompareName == null || StringUtils.getLevenshteinDistance(altCompareName.toUpperCase(), dnbName.toUpperCase()) >= 6)) {
+          // do a comparison of common words first
+          List<String> commonA = CommonWordsUtil.getVariations(compareName.toUpperCase());
+          List<String> commonB = CommonWordsUtil.getVariations(dnbName.toUpperCase());
+          boolean foundMinimal = false;
+          for (String phraseA : commonA) {
+            for (String phraseB : commonB) {
+              if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                foundMinimal = true;
+              }
             }
           }
+          if (!foundMinimal) {
+            if (altCompareName != null) {
+              List<String> altCommonA = CommonWordsUtil.getVariations(altCompareName.toUpperCase());
+              for (String phraseA : altCommonA) {
+                for (String phraseB : commonB) {
+                  if (StringUtils.getLevenshteinDistance(phraseA, phraseB) < 6) {
+                    foundMinimal = true;
+                  }
+                }
+              }
+            }
+            if (!foundMinimal) {
+              nameMatch = false;
+            } else {
+              nameMatch = true;
+              break;
+            }
+          }
+        } else {
+          LOG.debug("Name " + compareName + " close to " + dnbName);
+          nameMatch = true;
+          break;
         }
-        if (!foundMinimal) {
-          return false;
-        }
-      } else {
-        LOG.debug("Name " + compareName + " close to " + dnbRecord.getDnbName());
       }
+    }
+    if (!nameMatch) {
+      return false;
     }
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
     address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
@@ -541,6 +600,25 @@ public class DnBUtil {
   }
 
   /**
+   * returns concatenated customerName from admin or address as per country
+   * settings
+   *
+   * @param handler
+   * @param admin
+   * @param soldTo
+   * @return
+   */
+  private static String getAltCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
+    String customerName = null;
+    if (handler != null && !handler.customerNamesOnAddress()) {
+      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : admin.getMainCustNm2());
+    } else {
+      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : soldTo.getCustNm2());
+    }
+    return customerName;
+  }
+
+  /**
    * checks if a DnB response contains valid matches i.e., Confidence Code>7
    * 
    * @param response
@@ -582,31 +660,33 @@ public class DnBUtil {
    * @return
    * @throws Exception
    */
-  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, String addrType) throws Exception {
+  public static MatchingResponse<DnBMatchingResponse> getMatches(RequestData requestData, AutomationEngineData engineData, String addrType)
+      throws Exception {
     MatchingResponse<DnBMatchingResponse> response = new MatchingResponse<DnBMatchingResponse>();
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     addrType = StringUtils.isNotBlank(addrType) ? addrType : "ZS01";
     Addr addr = requestData.getAddress(addrType);
+    boolean isTaxCdMatch = false;
+    AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+    if (countryUtil != null) {
+      isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
+    }
     GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
     GBGFinderRequest request = new GBGFinderRequest();
     request.setMandt(SystemConfiguration.getValue("MANDT"));
     if (addr != null) {
-      if (StringUtils.isNotBlank(data.getVat())) {
-        if (SystemLocation.SWITZERLAND.equalsIgnoreCase(data.getCmrIssuingCntry())) {
-          request.setOrgId(data.getVat().split("\\s")[0]);
-        } else {
+      if (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())) {
+        request.setOrgId(data.getTaxCd1());
+      } else if (!isTaxCdMatch) {
+        if (StringUtils.isNotBlank(data.getVat())) {
           request.setOrgId(data.getVat());
+        } else if (StringUtils.isNotBlank(addr.getVat())) {
+          request.setOrgId(addr.getVat());
         }
-      } else if (StringUtils.isNotBlank(addr.getVat())) {
-        request.setOrgId(addr.getVat());
       }
 
       request.setCity(addr.getCity1());
-      if (StringUtils.isBlank(request.getCity()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-        // here for now, find a way to move to common class
-        request.setCity("SINGAPORE");
-      }
       request.setCustomerName(getCustomerName(handler, admin, addr));
       request.setStreetLine1(addr.getAddrTxt());
       request.setStreetLine2(addr.getAddrTxt2());
@@ -614,6 +694,12 @@ public class DnBUtil {
       request.setPostalCode(addr.getPostCd());
       request.setStateProv(addr.getStateProv());
       request.setMinConfidence("4");
+
+      if (countryUtil != null) {
+        // Allow flexibility to tweak the request before matching
+        countryUtil.tweakDnBMatchingRequest(request, requestData, engineData);
+      }
+
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           MatchingServiceClient.class);
       client.setReadTimeout(1000 * 60 * 5);
@@ -657,4 +743,11 @@ public class DnBUtil {
     return res;
   }
 
+  public static boolean isDnbOverrideAttachmentProvided(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("QUERY.CHECK_DNB_MATCH_ATTACHMENT");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("ID", reqId);
+
+    return query.exists();
+  }
 }

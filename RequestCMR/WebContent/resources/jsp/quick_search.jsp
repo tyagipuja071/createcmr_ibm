@@ -1,3 +1,4 @@
+<%@page import="com.ibm.cio.cmr.request.config.SystemConfiguration"%>
 <%@page import="com.ibm.cio.cmr.request.user.AppUser"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles"%>
@@ -10,6 +11,9 @@
 <script src="${resourcesPath}/js/angular.min.js"></script>
 <script src="${resourcesPath}/js/angular-route.min.js"></script>
 <script src="${resourcesPath}/js/angular-sanitize.min.js"></script>
+<script src="${resourcesPath}/js/ext/jquery-1.10.2.js"></script>
+<script src="${resourcesPath}/js/ext/typeahead.bundle.js"></script>
+<script src="${resourcesPath}/js/ext/dnb_utilities.js"></script>
 <link rel="stylesheet" href="${resourcesPath}/css/quick_search.css?${cmrv}"/>
 <%
 AppUser user = AppUser.getUser(request);
@@ -20,6 +24,7 @@ form.ibm-column-form .dijitTextBox INPUT {
 }
 </style>
 <script>
+  var _furl = '<%=SystemConfiguration.getValue("FIND_CMR_URL")%>';
   dojo.addOnLoad(function() {
     dojo.byId('quick_search_btn').style.display = 'none';
     // load dropdown values
@@ -77,6 +82,9 @@ form.ibm-column-form .dijitTextBox INPUT {
         var cntry = value.length == 3 ? value : value.substring(0,3);
         cmr.hideNode('siret-cont');
         cmr.hideNode('restrict-cont');
+        cmr.hideNode('cRn-cont');
+        cmr.hideNode('cRn/siret-cont');
+        cmr.hideNode('uen-cont');
         FormManager.setValue('taxCd1','');
         FormManager.readOnly('taxCd1');
         FormManager.setValue('restrictTo','');
@@ -86,8 +94,17 @@ form.ibm-column-form .dijitTextBox INPUT {
           FormManager.enable('restrictTo');
         } else if (cntry == '706'){
           cmr.showNode('siret-cont');
+          cmr.showNode('cRn/siret-cont');
           FormManager.enable('taxCd1');
-        } 
+        } else if (cntry == '834'){
+          cmr.showNode('uen-cont');
+          cmr.showNode('cRn/siret-cont');
+          FormManager.enable('taxCd1');
+        } else if(cntry == '866' || cntry == '754'){
+          cmr.showNode('cRn-cont');
+          cmr.showNode('cRn/siret-cont');
+          FormManager.enable('taxCd1');
+        }
       }
     });
     var _landCntryHandler = dojo.connect(FormManager.getField('countryCd'), 'onChange', function(value) {
@@ -108,12 +125,24 @@ form.ibm-column-form .dijitTextBox INPUT {
           var crit = buildSearchCriteria();
           if (!crit.cmrNo){
             if (noCities.indexOf(crit.issuingCntry) >=0){
-              if (!crit.name || !crit.countryCd || !crit.streetAddress1){
-                return new ValidationResult({
-                  id : 'streetAddress1',
-                  type : 'text',
-                  name : 'streetAddress1'
-                }, false, 'Company Name, Country, and Street should be specified if CMR No. is blank.');
+              if (crit.issuingCntry == '834') {
+                var orgIdSearch = crit.vat || crit.taxCd1;
+                var nameSearch = crit.name && crit.streetAddress1 && crit.countryCd;
+                if (!orgIdSearch && !nameSearch){
+                  return new ValidationResult({
+                    id : 'streetAddress1',
+                    type : 'text',
+                    name : 'streetAddress1'
+                  }, false, 'VAT/Business Reg. or UEN, OR Company Name + Country + Street should be specified if CMR No. is blank.');
+                }
+              } else {
+                if (!crit.name || !crit.countryCd || !crit.streetAddress1){ 
+                  return new ValidationResult({
+                    id : 'streetAddress1',
+                    type : 'text',
+                    name : 'streetAddress1'
+                  }, false, 'Company Name, Country, and Street should be specified if CMR No. is blank.');
+                }
               }
             } else {
               var orgIdSearch = crit.vat || crit.taxCd1;
@@ -162,6 +191,48 @@ form.ibm-column-form .dijitTextBox INPUT {
     <%}%>
   }
 </script>
+<style>
+  span.twitter-typeahead, span.tt-dropdown-menu, span.tt-suggestions {
+    margin-left: 0 !important;
+  }
+  span.tt-dropdown-menu {
+    width: 400px;
+  }
+  span.tt-suggestions {
+    width: 400px;
+  }
+  span.tt-dropdown-menu {
+    background: #FFF;
+  }
+  div.tt-suggestion {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  div.typeahead-suggestion {
+    font-size:14px;
+    font-family: IBM Plex Sans;
+  }
+  #name {
+    border: 1px Solid #CCC !important;
+    line-height: 20px !important;
+    font-size: 14px !important;
+    font-family: HelvLightIBM, IBM Plex Sans, Calibri !important;
+  }
+  #name::placeholder {
+    font-style : italic;
+  }
+  .typeahead-suggestion {
+    margin: 0;
+    margin-bottom: 3px;
+  }
+  .typeahead-suggestion .sub-text {
+    color: black;
+  }
+  input.tt-hint {
+    display: none !important;
+  }
+</style>
 <cmr:boxContent>
   <cmr:tabs />
 
@@ -220,7 +291,7 @@ form.ibm-column-form .dijitTextBox INPUT {
         </cmr:column>
         <cmr:column span="4">
           <p>
-            <form:input path="name" placeHolder="Customer Name" dojoType="dijit.form.TextBox" maxlength="70" cssStyle="width:520px"/>
+            <form:input path="name" placeHolder="Customer Name" maxlength="70" cssStyle="width:520px"/>
           </p>
         </cmr:column>
       </cmr:row>
@@ -304,7 +375,7 @@ form.ibm-column-form .dijitTextBox INPUT {
             <cmr:info text="The primary tax identifier for the company. This can be VAT Number, ABN, NBN, and Tax Registration Number, to name a few. The value of this varies per country business rules on Tax."></cmr:info>
             </cmr:label>
           </p>
-        </cmr:column>
+        </cmr:column>     
         <cmr:column span="2" width="250" >
           <p> 
             <form:input path="vat" placeHolder="VAT# / Business Reg #" dojoType="dijit.form.TextBox" maxlength="16"/>
@@ -318,12 +389,33 @@ form.ibm-column-form .dijitTextBox INPUT {
               </cmr:label>
             </p>
           </cmr:column>
-          <cmr:column span="2" width="250">
-            <p> 
-              <form:input path="taxCd1" placeHolder="SIRET" dojoType="dijit.form.TextBox" maxlength="14"/>
+        </div>
+        <div id="uen-cont" style="display:none">
+          <cmr:column span="1" width="150">
+            <p>
+              <cmr:label fieldId="vat">UEN: 
+              <cmr:info text="Unique Entity No. For Singapore Companies only."></cmr:info>
+              </cmr:label>
             </p>
           </cmr:column>
         </div>
+        <div id="cRn-cont" style="display:none">
+          <cmr:column span="1" width="150">
+            <p>
+              <cmr:label fieldId="vat">CRN: 
+              <cmr:info text="For UKI companies only."></cmr:info>
+              </cmr:label>
+            </p>
+          </cmr:column>
+           </div>
+           <div id = "cRn/siret-cont" style="display:none">
+          <cmr:column span="2" width="250">
+            <p> 
+              <form:input path="taxCd1" placeHolder="Enter Value Here" dojoType="dijit.form.TextBox" maxlength="14"/>
+            </p>
+          </cmr:column>
+        </div>
+         
         <div id="restrict-cont" style="display:none">
           <cmr:column span="1" width="150">
             <p>

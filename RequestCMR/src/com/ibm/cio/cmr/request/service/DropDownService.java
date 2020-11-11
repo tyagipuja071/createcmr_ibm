@@ -192,7 +192,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         sb.append("( ");
       }
 
-      if (SystemLocation.UNITED_KINGDOM.equals(country) && "SalesBusOffMU".equals(fieldId)) {
+      if (SystemLocation.UNITED_KINGDOM.equals(country) && ("SalesBusOffUK".equals(fieldId) || "SalRepNameNoUK".equals(fieldId))) {
         sb.append("select distinct trim(" + bds.getCd() + ") CD, ");
       } else {
         sb.append("select trim(" + bds.getCd() + ") CD, ");
@@ -324,7 +324,7 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
         // Story 1720159: State/Province should be automatically assigned based
         // on first two digits of Postal code
         String postalCode = params.getParam("postCd") != null ? params.getParam("postCd").toString() : "";
-        if (!"".equals(postalCode)) {
+        if (!"".equals(postalCode) && "ES".equals(params.getParam("landCntry"))) {
           query.append(" and STATE_PROV_CD IN (select CD from creqcmr.lov where field_id='##StateProv' and cmr_issuing_cntry='838' and txt LIKE '%"
               + postalCode.substring(0, 2) + "%') and COMMENTS <> 'Spain CB'");
         } else {
@@ -473,7 +473,8 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
           && !PageManager.fromGeo("CEMEA", (String) params.getParam("cmrIssuingCntry"))
           && !PageManager.fromGeo("NORDX", (String) params.getParam("cmrIssuingCntry"))
           && !PageManager.fromGeo("BELUX", (String) params.getParam("cmrIssuingCntry"))
-          && !PageManager.fromGeo("NL", (String) params.getParam("cmrIssuingCntry"))) {
+          && !PageManager.fromGeo("NL", (String) params.getParam("cmrIssuingCntry"))
+          && !SystemLocation.PORTUGAL.equals(params.getParam("cmrIssuingCntry"))) {
         query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
         query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
       }
@@ -498,13 +499,31 @@ public class DropDownService extends BaseSimpleService<DropdownModel> {
       if (cntry2 == null) {
         cntry2 = country;
       }
-      if ("754".equals(cntry2) || "866".equals(cntry2)) {
+      if (SystemLocation.PORTUGAL.equals(cntry) || "754".equals(cntry2)) {
+        query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
+        query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
+      }
+    }
+
+    if ("SalesBusOffUK".equalsIgnoreCase(fieldId)) {
+      String cntry2 = (String) params.getParam("cmrIssuingCntry");
+      if (cntry2 == null) {
+        cntry2 = country;
+      }
+      if ("866".equals(cntry2)) {
         query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
         query.setParameter("ISSUING_CNTRY", cntry2);
       }
-      if (SystemLocation.PORTUGAL.equals(cntry)) {
+    }
+
+    if ("SalRepNameNoUK".equalsIgnoreCase(fieldId)) {
+      String cntry2 = (String) params.getParam("cmrIssuingCntry");
+      if (cntry2 == null) {
+        cntry2 = country;
+      }
+      if ("866".equals(cntry2)) {
         query.append("  and ISSUING_CNTRY = :ISSUING_CNTRY");
-        query.setParameter("ISSUING_CNTRY", params.getParam("cmrIssuingCntry"));
+        query.setParameter("ISSUING_CNTRY", cntry2);
       }
     }
 

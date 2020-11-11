@@ -6,6 +6,7 @@ package com.ibm.cio.cmr.request.automation;
 import java.util.HashMap;
 
 import com.ibm.cio.cmr.request.automation.impl.gbl.ANZBNValidationElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CMDERequesterCheck;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLCheckElement;
 import com.ibm.cio.cmr.request.automation.impl.gbl.DPLSearchElement;
@@ -58,6 +59,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
   public static final String GBL_FIELD_COMPUTE = "GBL_FIELD_COMPUTE";
   public static final String GBL_UPDATE_SWITCH = "GBL_UPDATE_SWITCH";
   public static final String GBL_DNB_CHECK = "GBL_DNB_CHECK";
+  public static final String GBL_CMDE_CHECK = "GBL_CMDE_CHECK";
   // Brazil
   public static final String BR_SCENARIO = "BR_SCENARIO";
   public static final String BR_CALCULATE = "BR_CALCULATE";
@@ -101,6 +103,7 @@ public class AutomationElementRegistry extends HashMap<String, Class<? extends A
     put(GBL_SCENARIO_CHECK, GBLScenarioCheckElement.class);
     put(GBL_UPDATE_SWITCH, UpdateSwitchElement.class);
     put(GBL_DNB_CHECK, DnBCheckElement.class);
+    put(GBL_CMDE_CHECK, CMDERequesterCheck.class);
     // Brazil - 631
     put(BR_SCENARIO, ScenarioCheckElement.class);
     put(BR_DUP_CHECK, BrazilDupCMRCheckElement.class);

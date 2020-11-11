@@ -75,7 +75,7 @@ public class CompanyFinder {
       if (isLatin(searchModel.getName())) {
         matches.addAll(findCMRs(searchModel));
         boolean searchDnb = false;
-        List<String> lowLevelMatches = Arrays.asList("F4", "F5", "VAT", "DUNS");
+        List<String> lowLevelMatches = Arrays.asList("F3", "F4", "F5", "VAT", "DUNS");
         if (!matches.isEmpty()) {
           for (CompanyRecordModel cmrMatch : matches) {
             if (lowLevelMatches.contains(cmrMatch.getMatchGrade())) {
@@ -154,12 +154,20 @@ public class CompanyFinder {
       }
       request.setAddrType(addrType);
       request.setUsRestrictTo(searchModel.getRestrictTo());
+      if (searchModel.isPoolRecord()) {
+        request.setIncludeDeleted("Y");
+      }
 
       LOG.debug("Connecting to CMR matching service for " + request.getIssuingCountry() + " - " + request.getCustomerName());
       // connect to the duplicate CMR check service
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           MatchingServiceClient.class);
       client.setReadTimeout(1000 * 60 * 5);
+
+      if (searchModel.isPoolRecord()) {
+        LOG.debug("Pool CMR search criteria:");
+        LOG.debug(new ObjectMapper().writeValueAsString(request));
+      }
 
       JSONObject retObj = client.execute(MatchingServiceClient.CMR_SERVICE_ID, request);
       ObjectMapper mapper = new ObjectMapper();

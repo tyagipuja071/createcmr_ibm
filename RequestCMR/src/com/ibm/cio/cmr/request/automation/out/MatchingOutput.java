@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.automation.out;
 
 import java.lang.reflect.Constructor;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,10 @@ public class MatchingOutput implements AutomationOutput {
     record.setMatchGradeValue(matchGradeValue);
     record.setMatchKeyName(matchKeyName);
     record.setMatchKeyValue(matchKeyValue);
+    if (record.getMatchKeyValue() != null && record.getMatchKeyValue().getBytes(Charset.forName("UTF-8")).length > 30) {
+      int delta = record.getMatchKeyValue().getBytes(Charset.forName("UTF-8")).length - 30;
+      record.setMatchKeyValue(record.getMatchKeyValue().substring(0, 30 - delta));
+    }
     record.setRecordType(recordType);
     record.setItemNo(itemNo);
     record.setProcessCode(processCode);
@@ -156,8 +161,9 @@ public class MatchingOutput implements AutomationOutput {
           match.setMatchGradeValue(record.getMatchGradeValue());
           match.setRecordTyp(record.getRecordType());
 
-          LOG.trace("Creating match record for " + record.getMatchKeyName() + " = " + record.getMatchKeyValue());
-          entityManager.persist(match);
+          LOG.debug("Creating match record for " + record.getMatchKeyName() + " = " + record.getMatchKeyValue());
+          entityManager.merge(match);
+          entityManager.flush();
 
           this.recordedMatches.add(match);
         }

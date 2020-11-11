@@ -203,6 +203,10 @@ function setVATOnScenario() {
       FormManager.readOnly('vat');
       FormManager.removeValidator('vat', Validators.REQUIRED);
 
+    } else if (custSubGrp == 'GOVRN' || custSubGrp == 'CBVRN') {
+      // RC: Temporary fix for story CMR-5134, until TAX exempt is implemented
+      FormManager.removeValidator('vat', Validators.REQUIRED);
+      FormManager.enable('vat');
     } else if (custSubGrp == 'COMME' || custSubGrp == 'FIBAB' || custSubGrp == 'BPIEU' || custSubGrp == 'BPUEU' || custSubGrp == 'GOVRN' || custSubGrp == 'INTER' || custSubGrp == 'INTSO'
         || custSubGrp == 'LCIFF' || custSubGrp == 'LCIFL' || custSubGrp == 'OTFIN' || custSubGrp == 'LEASE' || custSubGrp == 'LCOEM' || custSubGrp == 'HOSTC' || custSubGrp == 'THDPT') {
       if (countyCd == 'FR' || countyCd == 'AD') {
@@ -293,7 +297,11 @@ function setSBOOnScenario() {
       FormManager.readOnly('salesBusOffCd');
     } else {
       if (countyCd == "FR" || countyCd == "KM" || countyCd == "WF") {
-        FormManager.enable('salesBusOffCd');
+        if (role == 'Requester') {
+          FormManager.readOnly('salesBusOffCd');
+        } else if (role == 'Processor') {
+          FormManager.enable('salesBusOffCd');
+        }
       } else if (countyCd == "MC") {
         if (role == 'Requester') {
           FormManager.setValue('salesBusOffCd', '02M');
@@ -388,7 +396,7 @@ function setSBOOnScenario() {
       }
     }
     var sbo = FormManager.getActualValue('salesBusOffCd');
-    if (sbo == null || sbo == '' || sbo == undefined) {
+    if ((sbo == null || sbo == '' || sbo == undefined) && role != 'Requester') {
       FormManager.enable('salesBusOffCd');
     }
   }
@@ -442,16 +450,20 @@ function add32PostCdCntrySBOlogicOnISUChange() {
 
 function addIBOlogic() {
   var reqType = FormManager.getActualValue('reqType');
-  var role = null;
-  if (typeof (_pagemodel) != 'undefined') {
-    role = _pagemodel.userRole;
-  }
-
-  if (role == 'Processor') {
+  // var role = null;
+  // if (typeof (_pagemodel) != 'undefined') {
+  // role = _pagemodel.userRole;
+  // }
+  //
+  // if (role == 'Processor') {
+  // FormManager.enable('installBranchOffCd');
+  // return;
+  // }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
     return;
   }
 
-  if (reqType == 'C' && role == 'Requester') {
+  if (reqType == 'C') {
     addSboIboLogic();
   }
 }
@@ -1459,7 +1471,9 @@ function setHideFieldForFR() {
     FormManager.hide('InternalDept', 'InternalDept');
   }
   if ('GOVRN' == reqType || 'CBVRN' == reqType) {
+    FormManager.resetValidations('privIndc');
     FormManager.show('PrivIndc', 'PrivIndc');
+    FormManager.readOnly('privIndc');
   } else {
     FormManager.hide('PrivIndc', 'PrivIndc');
   }
@@ -2042,7 +2056,9 @@ function affacturageLogic() {
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   if (reqType == 'C') {
     if (custSubGrp == 'FIBAB' || custSubGrp == 'CBBAB') {
+      FormManager.resetValidations('dupCmrIndc');
       FormManager.show('dupCmrIndc', 'dupCmrIndc');
+      FormManager.readOnly('dupCmrIndc');
     } else {
       FormManager.setValue('bpSalesRepNo', '');
       FormManager.hide('dupCmrIndc', 'dupCmrIndc');
@@ -2123,20 +2139,47 @@ function addIBMAbbrevNmValidator() {
         var role = _pagemodel.userRole;
         var abbrevNm = FormManager.getActualValue('abbrevNm');
         var custSubGrp = FormManager.getActualValue('custSubGrp');
-        if (role == 'Processor' && (abbrevNm.toUpperCase().indexOf("IBM") != -1) && !(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO')) {
+        if (abbrevNm.toUpperCase().indexOf("IBM") != -1 && !(custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO')) {
           var ibmIndex = abbrevNm.toUpperCase().indexOf("IBM");
           var ibm = abbrevNm.substring(ibmIndex, ibmIndex + 3);
+          FormManager.enable('abbrevNm');
+          FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
           return new ValidationResult({
             id : 'abbrevNm',
             type : 'text',
             name : 'Abbreviated Name (TELX1)'
           }, false, 'Abbreviated Name (TELX1) should not contain "' + ibm + '" when scenario sub-type is other than Internal or Internal SO/FM');
+        } else if (abbrevNm.toUpperCase().indexOf("IBM") == -1 && (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO')) {
+          FormManager.enable('abbrevNm');
+          FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+          return new ValidationResult({
+            id : 'abbrevNm',
+            type : 'text',
+            name : 'Abbreviated Name (TELX1)'
+          }, false, 'Abbreviated Name (TELX1) should contain "IBM" when scenario sub-type is Internal or Internal SO/FM');
         } else {
           return new ValidationResult(null, true);
         }
       }
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
+}
+
+function unlockAbbrevNmForInternalScenario() {
+  var reqType = FormManager.getActualValue('reqType');
+  var custSubGrp = FormManager.getActualValue('custSubGrp');
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  if (reqType == 'C') {
+    if (custSubGrp == 'INTER' || custSubGrp == 'INTSO' || custSubGrp == 'CBTER' || custSubGrp == 'CBTSO') {
+      FormManager.enable('abbrevNm');
+      FormManager.addValidator('abbrevNm', Validators.REQUIRED, [ 'Abbreviated Name (TELX1)' ], 'MAIN_CUST_TAB');
+    } else {
+      FormManager.readOnly('abbrevNm');
+      FormManager.removeValidator('abbrevNm', Validators.REQUIRED);
+    }
+  }
 }
 
 function setAbbrNmOnIbmDeptChng() {
@@ -2170,6 +2213,40 @@ function addSoldToAddressValidator() {
       }
     };
   })(), null, 'frmCMR_addressModal');
+}
+
+function lockIBMTabForFR() {
+  var reqType = FormManager.getActualValue('reqType');
+  var role = FormManager.getActualValue('userRole').toUpperCase();
+  var custSubType = FormManager.getActualValue('custSubGrp');
+  if (reqType == 'C' && role == 'REQUESTER') {
+    FormManager.readOnly('cmrNo');
+    FormManager.readOnly('cmrOwner');
+    FormManager.readOnly('isuCd');
+    FormManager.readOnly('clientTier');
+    FormManager.readOnly('inacCd');
+    FormManager.readOnly('buyingGroupId');
+    FormManager.readOnly('globalBuyingGroupId');
+    FormManager.readOnly('covId');
+    FormManager.readOnly('geoLocationCode');
+    FormManager.readOnly('dunsNo');
+    if (custSubType != 'BPIEU' && custSubType != 'BPUEU' && custSubType != 'CBIEU' && custSubType != 'CBUEU') {
+      FormManager.readOnly('ppsceid');
+    } else {
+      FormManager.enable('ppsceid');
+    }
+    FormManager.readOnly('soeReqNo');
+    FormManager.readOnly('repTeamMemberNo');
+    FormManager.readOnly('salesBusOffCd');
+    FormManager.readOnly('installBranchOff');
+    if (custSubType != 'INTER' && custSubType != 'INTSO' && custSubType != 'CBTER' && custSubType != 'CBTSO') {
+      FormManager.readOnly('ibmDeptCostCenter');
+    } else {
+      FormManager.enable('ibmDeptCostCenter');
+    }
+    FormManager.readOnly('dupCmrIndc');
+    FormManager.readOnly('privIndc');
+  }
 }
 
 dojo.addOnLoad(function() {
@@ -2215,5 +2292,7 @@ dojo.addOnLoad(function() {
   /* 1438717 - add DPL match validation for failed dpl checks */
   GEOHandler.registerValidator(addFailedDPLValidator, [ '706' ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(addSoldToAddressValidator, '706');
-
+  GEOHandler.addAfterTemplateLoad(unlockAbbrevNmForInternalScenario, '706');
+  GEOHandler.addAfterConfig(lockIBMTabForFR, '706');
+  GEOHandler.addAfterTemplateLoad(lockIBMTabForFR, '706');
 });

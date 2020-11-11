@@ -149,10 +149,22 @@ public class IERPRequestUtils extends RequestUtils {
       String rejRes = "<tr><th style=\"text-align:left;width:200px\">Reject Reason:</th><td>{10}</td></tr>";
       temp.insert(insertstart, rejRes);
       email = temp.toString();
+
+      String cmrIssuingCountry = data.getCmrIssuingCntry();
+      String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+      country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+      email = StringUtils.replace(email, "$COUNTRY$", country);
+
       email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status,
           history.getCreateByNm() + " (" + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent,
           directUrlLink, rejectReason, feedbackLink);
     } else {
+
+      String cmrIssuingCountry = data.getCmrIssuingCntry();
+      String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+      country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+      email = StringUtils.replace(email, "$COUNTRY$", country);
+
       email = MessageFormat.format(email, history.getReqId() + "", customerName, siteId, cmrno, type, status,
           history.getCreateByNm() + " (" + history.getCreateById() + ")", CmrConstants.DATE_FORMAT().format(history.getCreateTs()), histContent,
           directUrlLink, "", feedbackLink);
@@ -179,6 +191,11 @@ public class IERPRequestUtils extends RequestUtils {
       params.add(rejectReason); // {10}
       params.add(feedbackLink); // {11}
 
+      String cmrIssuingCountry = data.getCmrIssuingCntry();
+      String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+      country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+      email = StringUtils.replace(email, "$COUNTRY$", country);
+
       ExternalSystemUtil.addExternalMailParams(entityManager, params, admin); // {12},{13}
       email = MessageFormat.format(email, params.toArray(new Object[0]));
     }
@@ -191,7 +208,39 @@ public class IERPRequestUtils extends RequestUtils {
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
 
-    mail.send(host);
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
+
+  }
+
+  /**
+   * String gets the fully qualified country name
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  private static String getIssuingCountry(EntityManager entityManager, String country) {
+    // TODO move to cmr-queries
+    try {
+      String sql = "select NM from CREQCMR.SUPP_CNTRY where CNTRY_CD = :CNTRY";
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", country);
+      query.setForReadOnly(true);
+      return query.getSingleResult(String.class);
+    } catch (Exception e) {
+      LOG.warn("Error in getting issuing country name", e);
+      return null;
+    }
   }
 
   private static void completeLastHistoryRecord(EntityManager entityManager, long reqId) {

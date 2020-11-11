@@ -131,6 +131,7 @@ public class CmrConstants {
   public static final String RDC_INSTALL_AT = "ZI01";
   public static final String RDC_SHIP_TO = "ZD01";
   public static final String RDC_SECONDARY_SOLD_TO = "ZS02";
+  public static final String RDC_SHIPPING = "ZH02";
 
   // REQUEST ACTIONS
   public static final String All_Processing_Complete() {

@@ -122,6 +122,38 @@ function addDnBSearchValidator() {
   })(), 'MAIN_GENERAL_TAB', 'frmCMR');
 }
 
+function addDnBMatchingAttachmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var reqId = FormManager.getActualValue('reqId');
+        var reqType = FormManager.getActualValue('reqType');
+        var reqStatus = FormManager.getActualValue('reqStatus');
+        var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+        var findDnbResult = FormManager.getActualValue('findDnbResult');
+        var userRole = FormManager.getActualValue('userRole');
+        var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+        if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B')
+            && !isSkipDnbMatching() && FormManager.getActualValue('matchOverrideIndc') == 'Y') {
+          // FOR US Temporary
+          var id = FormManager.getActualValue('reqId');
+          var ret = cmr.query('CHECK_DNB_MATCH_ATTACHMENT', {
+            ID : id
+          });
+          if (ret == null || ret.ret1 == null) {
+            return new ValidationResult(null, false, "By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - "
+                + "client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content "
+                + "of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.");
+          } else {
+            return new ValidationResult(null, true);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), 'MAIN_ATTACH_TAB', 'frmCMR');
+}
+
 /**
  * Method to check whether for a scenario dnb matching is allowed or not
  */
@@ -521,11 +553,13 @@ function addChecklistValidator() {
             return new ValidationResult(null, false, 'Checklist has not been fully accomplished. All items are required.');
           }
         }
-        
+
         // add check for checklist on DB
         var reqId = FormManager.getActualValue('reqId');
-        var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {REQID : reqId});
-        if (!record || !record.sectionA1){
+        var record = cmr.getRecord('GBL_CHECKLIST', 'ProlifChecklist', {
+          REQID : reqId
+        });
+        if (!record || !record.sectionA1) {
           return new ValidationResult(null, false, 'Checklist has not been registered yet. Please execute a \'Save\' action before sending for processing to avoid any data loss.');
         }
         return new ValidationResult(null, true);
@@ -650,6 +684,134 @@ function addINACValidator() {
   })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
+/*
+ * validate CMRNumber for Legacy Countries
+ */
+function validateCMRNumberForLegacy() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var _custSubGrp = FormManager.getActualValue('custSubGrp');
+
+        var numPattern = /^[0-9]+$/;
+        if (FormManager.getActualValue('reqType') != 'C') {
+          return new ValidationResult(null, true);
+        }
+        if (cmrNo == '') {
+          return new ValidationResult(null, true);
+        } else {
+          // Skip validation for Prospect Request
+          var ifProspect = FormManager.getActualValue('prospLegalInd');
+          if (dijit.byId('prospLegalInd')) {
+            ifProspect = dijit.byId('prospLegalInd').get('checked') ? 'Y' : 'N';
+          }
+          console.log("validateCMRNumberForLegacy ifProspect:" + ifProspect);
+          if ('Y' == ifProspect) {
+            return new ValidationResult(null, true);
+          }
+          // Validation for Internal Scenario
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT') {
+            if (!cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
+            }
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT') {
+            if (cmrNo.startsWith("99")) {
+              return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
+            }
+          }
+          if (cmrNo == '000000') {
+            return new ValidationResult(null, false, 'CMR Number should be number only Except -> 000000');
+          }
+          if (cmrNo.length >= 1 && cmrNo.length != 6) {
+            return new ValidationResult(null, false, 'CMR Number should be 6 digit long.');
+          }
+          if (cmrNo.length > 1 && !cmrNo.match(numPattern)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR Number should be number only.');
+          }
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+/*
+ * validate Existing CMRNo
+ */
+function validateExistingCMRNo() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        console.log('checking requested cmr number...');
+        var reqType = FormManager.getActualValue('reqType');
+        var cmrNo = FormManager.getActualValue('cmrNo');
+        var cntry = FormManager.getActualValue('cmrIssuingCntry');
+        var action = FormManager.getActualValue('yourAction');
+        if (reqType == 'C' && cmrNo) {
+          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
+            COUNTRY : cntry,
+            CMR_NO : cmrNo,
+            MANDT : cmr.MANDT
+          });
+          if (exists && exists.ret1 && action != 'PCM') {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+          } else {
+            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+              COUNTRY : cntry,
+              CMR_NO : cmrNo,
+              MANDT : cmr.MANDT
+            });
+            if (exists && exists.ret1) {
+              return new ValidationResult({
+                id : 'cmrNo',
+                type : 'text',
+                name : 'cmrNo'
+              }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            }
+          }
+        }
+        return new ValidationResult({
+          id : 'cmrNo',
+          type : 'text',
+          name : 'cmrNo'
+        }, true);
+      }
+    };
+  })(), 'MAIN_IBM_TAB', 'frmCMR');
+}
+
+/**
+ * Validator for the DPL Assessment
+ */
+function addDPLAssessmentValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var dplResult = FormManager.getActualValue('dplChkResult').toUpperCase();
+        if (dplResult != 'AF' && dplResult != 'SF'){
+          return new ValidationResult(null, true);
+        }
+        var result = typeof(_pagemodel) != 'undefined' ? _pagemodel.intDplAssessmentResult : 'X';
+        if (!result || result.trim() == '') {
+          return new ValidationResult(null, false, 'DPL Assessment is required for failed DPL checks. ');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
+}
+
+
 /* Register WW Validators */
 dojo.addOnLoad(function() {
   console.log('adding WW validators...');
@@ -680,6 +842,7 @@ dojo.addOnLoad(function() {
 
   GEOHandler.registerWWValidator(addCMRSearchValidator);
   GEOHandler.registerWWValidator(addDnBSearchValidator);
+  GEOHandler.registerWWValidator(addDnBMatchingAttachmentValidator);
   // Story 1185886 : Address Standardization is not required for LA countries
   // and Israel
   GEOHandler.skipTGMEForCountries(GEOHandler.NO_ADDR_STD);
@@ -695,11 +858,16 @@ dojo.addOnLoad(function() {
 
   // exclude for JP
   // GEOHandler.registerWWValidator(addDPLCheckValidator,GEOHandler.ROLE_PROCESSOR);
+
   GEOHandler.registerValidator(addDPLCheckValidator, [ '760' ], GEOHandler.ROLE_PROCESSOR, true, true);
 
   // not required anymore as part of 1308975
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
+
+  // For Legacy GR, CY and PT
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
   // exclude countries that will not be part of client tier logic

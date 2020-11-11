@@ -25,6 +25,7 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.impl.MatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.MatchingOutput;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
@@ -34,6 +35,7 @@ import com.ibm.cio.cmr.request.service.requestentry.ImportDnBService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
@@ -66,10 +68,24 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
     AutomationResult<MatchingOutput> result = buildResult(admin.getId().getReqId());
     MatchingOutput output = new MatchingOutput();
+
+    // skip dnb matching if dnb matches on UI are overriden and attachment is
+    // provided
+    if ("Y".equals(admin.getMatchOverrideIndc()) && DnBUtil.isDnbOverrideAttachmentProvided(entityManager, admin.getId().getReqId())) {
+      result.setResults("Overriden");
+      result.setDetails(
+          "D&B matches were chosen to be overridden by the requester.\nSupporting documentation is provided by the requester as attachment.");
+      List<String> dnbOverrideCountryList = SystemParameters.getList("DNB_OVR_CNTRY_LIST");
+      if (dnbOverrideCountryList == null || !dnbOverrideCountryList.contains(data.getCmrIssuingCntry())) {
+        engineData.addNegativeCheckStatus("_dnbOverride", "D&B matches were chosen to be overridden by the requester.");
+      }
+      return result;
+    }
+
     if (soldTo != null) {
       boolean shouldThrowError = !"Y".equals(admin.getCompVerifiedIndc());
       boolean hasValidMatches = false;
-      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, "ZS01");
+      MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, engineData, "ZS01");
       hasValidMatches = DnBUtil.hasValidMatches(response);
       if (response != null && response.getMatched()) {
         StringBuilder details = new StringBuilder();
@@ -85,7 +101,12 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
           // actions to be performed only when matches with high confidence are
           // found
           boolean isOrgIdMatched = false;
-          boolean vatFound = false;
+          boolean orgIdFound = false;
+          boolean isTaxCdMatch = false;
+          AutomationUtil countryUtil = AutomationUtil.getNewCountryUtil(data.getCmrIssuingCntry());
+          if (countryUtil != null) {
+            isTaxCdMatch = countryUtil.useTaxCd1ForDnbMatch(requestData);
+          }
 
           // process records and overrides
           DnBMatchingResponse highestCloseMatch = null;
@@ -93,34 +114,44 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
 
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
 
-            // check if the record closely matches D&B. This really validates
-            // input against record
-            boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
-            if (closelyMatches) {
-              LOG.debug("DUNS " + dnbRecord.getDunsNo() + " matches the request data.");
-              if (highestCloseMatch == null) {
-                highestCloseMatch = dnbRecord;
-                if (!scenarioExceptions.isCheckVATForDnB() || StringUtils.isBlank(data.getVat()) || "Y".equals(data.getVatExempt())) {
-                  // no D&B VAT check or no VAT on record or VAT exempt, this
-                  // match is the one we
-                  // need
+            if (dnbRecord.getConfidenceCode() > 7) {
+              // check if the record closely matches D&B. This really validates
+              // input against record
+              boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), soldTo, admin, dnbRecord);
+              if (closelyMatches) {
+                LOG.debug("DUNS " + dnbRecord.getDunsNo() + " matches the request data.");
+                if (highestCloseMatch == null) {
+                  highestCloseMatch = dnbRecord;
+                  if (!scenarioExceptions.isCheckVATForDnB()
+                      || (!isTaxCdMatch && (StringUtils.isBlank(data.getVat()) || "Y".equals(data.getVatExempt())))
+                      || (isTaxCdMatch && StringUtils.isBlank(data.getTaxCd1()))) {
+                    // IF no D&B VAT check
+                    // OR IF vatMatch && (no VAT on record or VAT exempt)
+                    // OR IF taxCd1Match && no TaxCd1 on record,
+                    // then this match is the one we
+                    // need
+                    perfectMatch = dnbRecord;
+                    break;
+                  }
+                }
+
+                isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
+                if (isTaxCdMatch) {
+                  orgIdFound = StringUtils.isNotBlank(DnBUtil.getTaxCode1(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                } else {
+                  orgIdFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
+                }
+                if (scenarioExceptions.isCheckVATForDnB()
+                    && ((!isTaxCdMatch && !StringUtils.isBlank(data.getVat())) || (isTaxCdMatch && !StringUtils.isBlank(data.getTaxCd1())))
+                    && ((!orgIdFound && engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED)) || (orgIdFound && isOrgIdMatched))) {
+                  // found the perfect match here
                   perfectMatch = dnbRecord;
                   break;
                 }
+
+              } else {
+                LOG.debug("DUNS " + dnbRecord.getDunsNo() + " does NOT match the request data.");
               }
-
-              isOrgIdMatched = "Y".equals(dnbRecord.getOrgIdMatch());
-              vatFound = StringUtils.isNotBlank(DnBUtil.getVAT(dnbRecord.getDnbCountry(), dnbRecord.getOrgIdDetails()));
-
-              if (scenarioExceptions.isCheckVATForDnB() && !StringUtils.isBlank(data.getVat())
-                  && ((!vatFound && engineData.hasPositiveCheckStatus(AutomationEngineData.VAT_VERIFIED)) || (vatFound && isOrgIdMatched))) {
-                // found the perfect match here
-                perfectMatch = dnbRecord;
-                break;
-              }
-
-            } else {
-              LOG.debug("DUNS " + dnbRecord.getDunsNo() + " does NOT match the request data.");
             }
 
           }
@@ -131,7 +162,9 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             result.setResults("Matched");
             details.append("High Quality match D&B record matched the request name/address information.\n");
             if (!"Y".equals(perfectMatch.getOrgIdMatch()) && !scenarioExceptions.isCheckVATForDnB()) {
-              details.append("VAT on the D&B record does not match VAT on the request but country is not configured to match VAT.\n");
+              details.append((isTaxCdMatch ? "Org ID " : "VAT ")
+                  + "on the D&B record does not match the one on the request but country is not configured to match "
+                  + (isTaxCdMatch ? "Org ID " : "VAT ") + ".\n");
             }
             processDnBFields(entityManager, data, perfectMatch, output, details, 1);
             if (scenarioExceptions.isImportDnbInfo()) {
@@ -144,12 +177,14 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
             }
             engineData.put("dnbMatching", perfectMatch);
             LOG.trace(new ObjectMapper().writeValueAsString(perfectMatch));
-          } else if (highestCloseMatch != null && scenarioExceptions.isCheckVATForDnB() && !StringUtils.isBlank(data.getVat())
-              && !"Y".equals(data.getVatExempt())) {
-            LOG.debug("High quality match was found with DUNS " + highestCloseMatch.getDunsNo() + " but incorrect VAT");
-            result.setResults("VAT not matched");
-            details.append(
-                "High Quality match D&B record matched the request name/address information but the VAT on record did not match request data.\n");
+          } else if (highestCloseMatch != null && scenarioExceptions.isCheckVATForDnB()
+              && ((!isTaxCdMatch && (StringUtils.isNotBlank(data.getVat()) && !"Y".equals(data.getVatExempt())))
+                  || (isTaxCdMatch && StringUtils.isNotBlank(data.getTaxCd1())))) {
+            LOG.debug(
+                "High quality match was found with DUNS " + highestCloseMatch.getDunsNo() + " but incorrect " + (isTaxCdMatch ? "Org ID " : "VAT "));
+            result.setResults((isTaxCdMatch ? "Org ID " : "VAT ") + " not matched");
+            details.append("High Quality match D&B record matched the request name/address information but the " + (isTaxCdMatch ? "Org ID " : "VAT ")
+                + " on record did not match request data.\n");
             processDnBFields(entityManager, data, highestCloseMatch, output, details, 1);
             if (scenarioExceptions.isImportDnbInfo()) {
               // Create Address Records only if Levenshtein Distance
@@ -159,7 +194,8 @@ public class DnBMatchingElement extends MatchingElement implements CompanyVerifi
                 processAddressFields(data.getCmrIssuingCntry(), highestCloseMatch, output, 1, scenarioExceptions, handler, eligibleAddresses);
               }
             }
-            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL", "VAT value did not match with the highest confidence D&B match.");
+            engineData.addNegativeCheckStatus("DNB_VAT_MATCH_CHECK_FAIL",
+                (isTaxCdMatch ? "Org ID " : "VAT ") + " value did not match with the highest confidence D&B match.");
             LOG.trace(new ObjectMapper().writeValueAsString(highestCloseMatch));
           } else {
 

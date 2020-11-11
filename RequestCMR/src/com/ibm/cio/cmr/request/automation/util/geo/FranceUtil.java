@@ -42,17 +42,14 @@ import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemParameters;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cmr.services.client.CmrServicesFactory;
 import com.ibm.cmr.services.client.MatchingServiceClient;
-import com.ibm.cmr.services.client.PPSServiceClient;
-import com.ibm.cmr.services.client.ServiceClient.Method;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
-import com.ibm.cmr.services.client.pps.PPSRequest;
-import com.ibm.cmr.services.client.pps.PPSResponse;
 
 public class FranceUtil extends AutomationUtil {
 
@@ -256,14 +253,7 @@ public class FranceUtil extends AutomationUtil {
         case "BPUEU":
           if (StringUtils.isNotBlank(data.getPpsceid())) {
             try {
-              PPSServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-                  PPSServiceClient.class);
-              client.setRequestMethod(Method.Get);
-              client.setReadTimeout(1000 * 60 * 5);
-              PPSRequest request = new PPSRequest();
-              request.setCeid(data.getPpsceid());
-              PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-              if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+              if (!checkPPSCEID(data.getPpsceid())) {
                 engineData.addRejectionComment("OTH", "PPS CE ID on the request is invalid.", "", "");
                 details.append("PPS CE ID on the request is invalid.");
                 valid = false;
@@ -346,13 +336,16 @@ public class FranceUtil extends AutomationUtil {
             }
           }
         }
-        if (admin.getSourceSystId() != null) {
-          if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review is required for MARKETPLACE requests.");
-          } else if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
-            engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is required for BP Portal requests.");
-          }
-        }
+        // if (admin.getSourceSystId() != null) {
+        // // if ("MARKETPLACE".equalsIgnoreCase(admin.getSourceSystId())) {
+        // // engineData.addNegativeCheckStatus("MARKETPLACE", "Processor review
+        // // is required for MARKETPLACE requests.");
+        // // } else
+        // if ("CreateCMR-BP".equalsIgnoreCase(admin.getSourceSystId())) {
+        // engineData.addNegativeCheckStatus("BP_PORTAL", "Processor review is
+        // required for BP Portal requests.");
+        // }
+        // }
       }
     } else {
       if (StringUtils.isBlank(scenario)) {
@@ -375,7 +368,7 @@ public class FranceUtil extends AutomationUtil {
   }
 
   @Override
-  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     String siret = requestData.getData().getTaxCd1();
     if (!StringUtils.isBlank(siret) && siret.length() > 9) {
       request.setOrgId(siret.substring(0, 9)); // SIREN
@@ -392,8 +385,7 @@ public class FranceUtil extends AutomationUtil {
     String coverageId = container.getFinalCoverage();
     Addr zs01 = requestData.getAddress("ZS01");
     details.append("\n");
-    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId)
-        && (CalculateCoverageElement.BG_CALC.equals(covFrom) || CalculateCoverageElement.BG_ODM.equals(covFrom))) {
+    if (isCoverageCalculated && StringUtils.isNotBlank(coverageId) && CalculateCoverageElement.COV_BG.equals(covFrom)) {
       // If calculated using buying group then skip any other calculation
       FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
       String sboValue = "";
@@ -435,8 +427,8 @@ public class FranceUtil extends AutomationUtil {
           CoverageContainer coverage = coverages.get(0);
           LOG.debug("Calculated Coverage using SIREN- Final Cov:" + coverage.getFinalCoverage() + ", Base Cov:" + coverage.getBaseCoverage()
               + ", ISU:" + coverage.getIsuCd() + ", CTC:" + coverage.getClientTierCd());
-          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, container, CalculateCoverageElement.FINAL, null,
-              null, true);
+          covElement.logCoverage(entityManager, engineData, requestData, null, details, overrides, null, coverage, CalculateCoverageElement.FINAL,
+              CalculateCoverageElement.COV_REQ, true);
           FieldResultKey sboKey = new FieldResultKey("DATA", "SALES_BO_CD");
           String sboValue = "";
           if (overrides.getData().containsKey(sboKey)) {
@@ -795,6 +787,8 @@ public class FranceUtil extends AutomationUtil {
         case "iERP Site Party ID":
           // SKIP THESE FIELDS
           break;
+        case "Abbreviated Name (TELX1)":
+          break;
         default:
           // Set Negative check status for any other fields updated.
           failedChecks.put(field, field + " updated.");
@@ -835,7 +829,8 @@ public class FranceUtil extends AutomationUtil {
     Addr billing = requestData.getAddress("ZP01");
     Addr installing = requestData.getAddress("ZS01");
     Addr payment = requestData.getAddress("ZP02");
-    StringBuilder detail = new StringBuilder();
+    String dataDetails = output.getDetails() != null ? output.getDetails() : "";
+    StringBuilder detail = new StringBuilder(dataDetails);
     Map<String, String> failedChecks = new HashMap<String, String>();
     DataRdc rdc = getDataRdc(entityManager, admin);
     if ("9500".equals(rdc.getIsicCd())) {
@@ -856,7 +851,7 @@ public class FranceUtil extends AutomationUtil {
       }
     }
 
-    if (addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
+    if (isRelevantFieldUpdated(changes) && addrTypesChanged.contains(CmrConstants.ADDR_TYPE.ZP01.toString())) {
 
       LOG.debug("Billing changed -> " + changes.isAddressChanged("ZP01"));
 
@@ -890,20 +885,37 @@ public class FranceUtil extends AutomationUtil {
 
       for (Addr addr : addrsToChk) {
         if ("Y".equals(addr.getImportInd())) {
-          if ((changes.isAddressFieldChanged(addr.getId().getAddrType(), "Contact Person")
-              || changes.isAddressFieldChanged(addr.getId().getAddrType(), "Phone #")) && isOnlyFieldUpdated(changes)
-              && engineData.getNegativeCheckStatus("RESTRICED_DATA_UPDATED") == null && failedChecks.isEmpty()) {
+          if (!isRelevantFieldUpdated(changes) && engineData.getNegativeCheckStatus("RESTRICED_DATA_UPDATED") == null && failedChecks.isEmpty()) {
             validation.setSuccess(true);
-            LOG.debug("Contact Person/Phone# is found to be updated.Updates verified.");
-            detail.append("Updates to relevant addresses found but have been marked as Verified.");
+            LOG.debug("Updates to " + ("ZS01".equals(addr.getId().getAddrType()) ? "Installing" : "Payment") + " have been verified.");
+            detail.append("Updates to " + ("ZS01".equals(addr.getId().getAddrType()) ? "Installing" : "Payment") + " have been verified.");
             validation.setMessage("Validated");
             hasNegativeCheck = false;
-            break;
-          }
-
-          else if (!isOnlyFieldUpdated(changes)) {
+          } else if (isRelevantFieldUpdated(changes) && changes.isAddressChanged("ZS01")) {
+            LOG.debug("Installing address updated");
+            List<DnBMatchingResponse> matches = getMatches(requestData, engineData, installing, false);
+            boolean matchesDnb = false;
+            if (matches != null) {
+              for (DnBMatchingResponse dnb : matches) {
+                boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), addr, admin, dnb);
+                String siret = DnBUtil.getTaxCode1(dnb.getDnbCountry(), dnb.getOrgIdDetails());
+                if (closelyMatches && StringUtils.isNotBlank(siret) && data.getTaxCd1().equalsIgnoreCase(siret)) {
+                  matchesDnb = true;
+                  break;
+                }
+              }
+              if (matchesDnb) {
+                detail.append("Updates to Installing address have been verified.\n");
+                validation.setMessage("Validated");
+                hasNegativeCheck = false;
+              } else {
+                hasNegativeCheck = true;
+                failedChecks.put("INSTALLING_UPDATED", "Updates to Installing address need verification as it does not match D&B.");
+              }
+            }
+          } else if (isRelevantFieldUpdated(changes) && (changes.isAddressChanged("ZP02"))) {
             hasNegativeCheck = true;
-            failedChecks.put("ADDR_FIELDS_UPDTD", "Installing / Payment addresses cannot be modified.");
+            failedChecks.put("ADDR_FIELDS_UPDTD", "Payment addresses cannot be modified.");
           }
 
         }
@@ -923,6 +935,7 @@ public class FranceUtil extends AutomationUtil {
       validation.setMessage("Review needed.");
       validation.setSuccess(false);
       output.setDetails(details.toString());
+      output.setDetails(detail.toString());
     } else {
       validation.setSuccess(true);
       detail.append("Updates to relevant addresses found but have been marked as Verified.");
@@ -932,8 +945,8 @@ public class FranceUtil extends AutomationUtil {
     return true;
   }
 
-  private boolean isOnlyFieldUpdated(RequestChangeContainer changes) {
-    boolean isOnlyFieldUpdated = true;
+  private boolean isRelevantFieldUpdated(RequestChangeContainer changes) {
+    boolean isRelevantFieldUpdated = false;
     List<UpdatedNameAddrModel> updatedAddrList = changes.getAddressUpdates();
     String[] addressFields = { "Customer Name", "Customer Name Continuation", "Customer Name/ Additional Address Information", "Country (Landed)",
         "Street", "Street Continuation", "Postal Code", "City", "PostBox" };
@@ -941,11 +954,11 @@ public class FranceUtil extends AutomationUtil {
     for (UpdatedNameAddrModel updatedAddrModel : updatedAddrList) {
       String fieldId = updatedAddrModel.getDataField();
       if (StringUtils.isNotEmpty(fieldId) && relevantFieldNames.contains(fieldId)) {
-        isOnlyFieldUpdated = false;
+        isRelevantFieldUpdated = true;
         break;
       }
     }
 
-    return isOnlyFieldUpdated;
+    return isRelevantFieldUpdated;
   }
 }

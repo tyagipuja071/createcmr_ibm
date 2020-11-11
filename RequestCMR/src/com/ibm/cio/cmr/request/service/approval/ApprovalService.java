@@ -51,6 +51,7 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.Person;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.SystemParameters;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.approval.ApprovalUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
@@ -191,10 +192,19 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
     // get the logical name of the updated status
     getLogicalStatus(req, approval, entityManager);
 
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
     // send generic mail
     ApprovalTyp type = getApprovalType(entityManager, req);
-    sendGenericMail(entityManager, type, approval, admin);
-
+    if (skip == false) {
+      sendGenericMail(entityManager, type, approval, admin);
+    }
     // create the comment
 
     String approvalComment = StringUtils.isEmpty(approval.getComments()) ? "(no comments specified)" : approval.getComments();
@@ -483,17 +493,94 @@ public class ApprovalService extends BaseService<ApprovalResponseModel, Approval
       admin.setLockTs(null);
 
       updateEntity(admin, entityManager);
-      this.log.debug("Creating workflow history and sending notifications.");
       String user = SystemConfiguration.getValue("BATCH_USERID");
       String comment = "Request has been rejected due to rejected approvals. Please check the approval comments.";
       AppUser appuser = new AppUser();
       appuser.setIntranetId(user);
       appuser.setBluePagesName(user);
-      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", null, null, false, null, null);
+      List<ApprovalComments> rejApprovalComments = getRejectionCmtAsRejRsn(entityManager, admin);
+      String rejectReasonCmt = null;
+      String rejectReasonCd = null;
+      // filter automated comments out
+      if (!rejApprovalComments.isEmpty()) {
+        for (ApprovalComments apprCmt : rejApprovalComments) {
+          this.log.debug("Iterating through approval comments...");
+          String createBy = StringUtils.isNotBlank(apprCmt.getCreateBy()) ? apprCmt.getCreateBy() : "";
+          Person p = null;
+          try {
+            p = BluePagesHelper.getPerson(createBy);
+          } catch (Exception e) {
+            this.log.debug("Error in Querying BluepagesHelper service in ApprovalService.java");
+          }
+          String rsn = StringUtils.isNotBlank(apprCmt.getRejReason()) ? apprCmt.getRejReason() : "";
+          if (p != null && !"Automatically rejected.".equalsIgnoreCase(rsn) && rsn != "") {
+            this.log.debug("Approval Comments are -> " + apprCmt.getComments() + " \n Reject reason is -> " + apprCmt.getRejReason());
+            rejectReasonCmt = apprCmt.getComments();
+            rejectReasonCd = apprCmt.getRejReason();
+            break;
+          }
+        }
+      }
+
+      if (StringUtils.isNotBlank(rejectReasonCmt)) {
+        this.log.debug("Appending the rejection reason comment with general comments.");
+        comment = comment + "\n" + rejectReasonCmt;
+      }
+      this.log.debug("Creating workflow history and sending notifications.");
+      RequestUtils.createWorkflowHistory(this, entityManager, user, admin, comment, "Approval", null, null, false, rejectReasonCmt, rejectReasonCd);
       RequestUtils.createCommentLog(this, entityManager, appuser, admin.getId().getReqId(), comment);
+
     } else {
       this.log.debug("The request " + admin.getId().getReqId() + " is not in any automation statuses.");
     }
+  }
+
+  private List<ApprovalComments> getRejectionCmtAsRejRsn(EntityManager entityManager, Admin admin) {
+    this.log.debug("Started executing function getRejectionCmtAsRejRsn() ... ");
+    List<ApprovalReq> records = getApprovalRecords(entityManager, admin.getId().getReqId());
+    ApprovalComments comment = null;
+    List<ApprovalComments> comments = new ArrayList<ApprovalComments>();
+
+    if (!records.isEmpty()) {
+      for (ApprovalReq request : records) {
+        this.log.debug("Processing Approval Request ID " + request.getId().getApprovalId());
+
+        // get approval comments for rejection
+        try {
+          String sql = ExternalizedQuery.getSql("BATCH.APPR.GET_REJ_CMT");
+          PreparedQuery query = new PreparedQuery(entityManager, sql);
+          query.setParameter("APPROVAL_ID", request.getId().getApprovalId());
+          query.setForReadOnly(true);
+          comment = query.getSingleResult(ApprovalComments.class);
+        } catch (Exception e) {
+          this.log.debug("Error while querying for comments in table APPROVAL_COMMENTS for req_id -> " + admin.getId().getReqId());
+        }
+
+        if (comment != null) {
+          this.log.debug("Adding comment with approval Id -> " + request.getId().getApprovalId());
+          comments.add(comment);
+        }
+      }
+    } else {
+      this.log.debug("Records from CREQCMR.APPROVAL_REQ is empty for req id ->  " + admin.getId().getReqId());
+    }
+
+    return comments;
+
+  }
+
+  private List<ApprovalReq> getApprovalRecords(EntityManager entityManager, Long reqId) {
+    List<ApprovalReq> records = null;
+    try {
+      String sql = ExternalizedQuery.getSql("BATCH.APPR.GET_REJ_RECORDS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      records = query.getResults(ApprovalReq.class);
+    } catch (Exception e) {
+      this.log.debug("Error while querying for approval records in APPROVAL_REQ table for req id -> " + reqId);
+    }
+    return records;
+
   }
 
   /**

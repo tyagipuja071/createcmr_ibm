@@ -131,11 +131,19 @@ function processRequestAction() {
     if (_pagemodel.approvalResult == 'Rejected') {
       cmr.showAlert('The request\'s approvals have been rejected. Please re-submit or override the rejected approvals. ');
     } else if (FormManager.validate('frmCMR')) {
-      if (cmrCntry == '821') {
-        executeBeforeSubmit();
+			if(checkForConfirmationAttachments()){
+				showDocTypeConfirmDialog();
+			} else if (checkIfFinalDnBCheckRequired()) {
+        matchDnBForAutomationCountries();
+      } else if (checkIfUpfrontUpdateChecksRequired()) {
+        addUpdateChecksExecution(frmCMR);
       } else {
-        // if there are no errors, show the Address Verification modal window
-        cmr.showModal('addressVerificationModal');
+        if (cmrCntry == '821') {
+          executeBeforeSubmit();
+        } else {
+          // if there are no errors, show the Address Verification modal window
+          cmr.showModal('addressVerificationModal');
+        }
       }
     } else {
       cmr.showAlert('The request contains errors. Please check the list of errors on the page.');
@@ -579,9 +587,9 @@ function addCMRSearchHandler(readOnly) {
     FormManager.disable('dnbSearchBtn');
     dojo.removeClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-pri');
     dojo.addClass(dojo.byId('dnbSearchBtn'), 'ibm-btn-cancel-disabled');
-    FormManager.disable('dplCheckBtn');
-    dojo.removeClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-pri');
-    dojo.addClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-disabled');
+    //FormManager.disable('dplCheckBtn');
+    //dojo.removeClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-pri');
+    //dojo.addClass(dojo.byId('dplCheckBtn'), 'ibm-btn-cancel-disabled');
   }
 }
 
@@ -950,23 +958,27 @@ function connectToCmrServices() {
         errorMsg += (showError ? ', ' : '') + 'DUNS No.';
         showError = true;
       } else {
-//        var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
-//        var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA, SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA, SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
-//            SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA, SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY, SysLoc.VENEZUELA, SysLoc.JAPAN ];
-//        if (COUNTRIES.indexOf(sysLocCd) == -1) {
-//          FormManager.setValue('dunsNo', data.dunsNo);
-//        } else {
-          var dunsNo = FormManager.getActualValue('dunsNo');
+        // var sysLocCd = FormManager.getActualValue('cmrIssuingCntry');
+        // var COUNTRIES = [ SysLoc.BRAZIL, SysLoc.MEXICO, SysLoc.ARGENTINA,
+        // SysLoc.BOLIVIA, SysLoc.CHILE, SysLoc.COLOMBIA, SysLoc.COSTA_RICA,
+        // SysLoc.DOMINICAN_REPUBLIC, SysLoc.ECUADOR,
+        // SysLoc.GUATEMALA, SysLoc.HONDURAS, SysLoc.NICARAGUA, SysLoc.PANAMA,
+        // SysLoc.PARAGUAY, SysLoc.PERU, SysLoc.EL_SALVADOR, SysLoc.URUGUAY,
+        // SysLoc.VENEZUELA, SysLoc.JAPAN ];
+        // if (COUNTRIES.indexOf(sysLocCd) == -1) {
+        // FormManager.setValue('dunsNo', data.dunsNo);
+        // } else {
+        var dunsNo = FormManager.getActualValue('dunsNo');
 
-          if (dunsNo == '' && data.dunsNo != '') {
-            FormManager.setValue('dunsNo', data.dunsNo);
-          } else {
-            if (dunsNo && data.dunsNo){
-              cmr.showAlert('DUNS '+data.dunsNo+' was retrieved but an existing DUNS '+dunsNo+' was found. The value was not overwritten.');
-            }
+        if (dunsNo == '' && data.dunsNo != '') {
+          FormManager.setValue('dunsNo', data.dunsNo);
+        } else {
+          if (dunsNo && data.dunsNo) {
+            cmr.showAlert('DUNS ' + data.dunsNo + ' was retrieved but an existing DUNS ' + dunsNo + ' was found. The value was not overwritten.');
           }
+        }
 
-//        }
+        // }
       }
       if (showError) {
         if (covError) {
@@ -1191,7 +1203,7 @@ function dnbAutoChk() {
   var findDnbResult = FormManager.getActualValue('findDnbResult');
   var userRole = FormManager.getActualValue('userRole');
   if (requestId > 0 && reqType == 'C' && reqStatus == 'DRA' && matchIndc == 'D' && !matchOverrideIndc && findDnbResult != 'Rejected' && findDnbResult != 'Accepted' && userRole != 'Viewer') {
-    cmr.showModal('DnbAutoCheckModal');
+    showDnBMatchModal();
   }
 }
 
@@ -1231,7 +1243,11 @@ function DnbAutoCheckModal_onClose() {
  * Override Dnb Matches
  */
 function overrideDnBMatch() {
-  cmr.showConfirm('doOverrideDnBMatch()', 'Dnb Matches will be overriden. Proceed?', 'Warning', null, null);
+  cmr
+      .showConfirm(
+          'doOverrideDnBMatch()',
+          'This action will override the D&B Matching Process.<br> By overriding the D&B matching, you\'re obliged to provide either one of the following documentation as backup - client\'s official website, Secretary of State business registration proof, client\'s confirmation email and signed PO, attach it under the file content of <strong>Company Proof</strong>. Please note that the sources from Wikipedia, Linked In and social medias are not acceptable.<br>Proceed?',
+          'Warning', null, null);
 }
 
 /**
@@ -1246,7 +1262,13 @@ function doOverrideDnBMatch() {
 function autoDnbImportActFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   if (rowData) {
-    return '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo + '\')">';
+    var formattedString = '<input type="button" class="cmr-grid-btn-h" style="font-size:11px" value="Import" onClick="autoDnbImportMatch(\'' + rowData.autoDnbDunsNo + '\', \'' + rowData.itemNo
+        + '\')">';
+    var dunsNo = rowData.autoDnbDunsNo[0];
+    if (dunsNo) {
+      formattedString += '<input type="button" class="cmr-grid-btn" style="font-size:11px" value="View Details" onClick="openDNBDetailsPage(\'' + dunsNo.trim() + '\')">';
+    }
+    return formattedString;
   } else {
     return '';
   }
@@ -1401,3 +1423,189 @@ function handleRequiredDnBSearch() {
     });
   }
 }
+
+
+
+function checkIfFinalDnBCheckRequired() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var matchOverrideIndc = FormManager.getActualValue('matchOverrideIndc');
+  var findDnbResult = FormManager.getActualValue('findDnbResult');
+  var userRole = FormManager.getActualValue('userRole');
+  var ifReprocessAllowed = FormManager.getActualValue('autoEngineIndc');
+  if (reqId > 0 && reqType == 'C' && reqStatus == 'DRA' && userRole == 'Requester' && (ifReprocessAllowed == 'R' || ifReprocessAllowed == 'P' || ifReprocessAllowed == 'B') && !isSkipDnbMatching()
+      && matchOverrideIndc != 'Y') {
+    // currently Enabled Only For US
+    return true;
+  }
+  return false;
+}
+
+function matchDnBForAutomationCountries() {
+  var reqId = FormManager.getActualValue('reqId');
+  console.log("Checking if the request matches D&B...");
+  var nm1 = _pagemodel.mainCustNm1 == null ? '' : _pagemodel.mainCustNm1;
+  var nm2 = _pagemodel.mainCustNm2 == null ? '' : _pagemodel.mainCustNm2;
+  if (nm1 != FormManager.getActualValue('mainCustNm1') || nm2 != FormManager.getActualValue('mainCustNm2')) {
+    cmr.showAlert("The Customer Name/s have changed. The record has to be saved first. Please select Save from the actions.");
+    return;
+  }
+  cmr.showProgress('Checking request data with D&B...');
+  dojo
+      .xhrGet({
+        url : cmr.CONTEXT_ROOT + '/request/dnb/checkMatch.json',
+        handleAs : 'json',
+        method : 'GET',
+        content : {
+          'reqId' : reqId
+        },
+        timeout : 50000,
+        sync : false,
+        load : function(data, ioargs) {
+          cmr.hideProgress();
+          console.log(data);
+          if (data && data.success) {
+            if (data.match) {
+              cmr.showModal('addressVerificationModal');
+            } else if (data.tradeStyleMatch) {
+              cmr
+                  .showConfirm(
+                      'autoDnbImportMatch("' + data.dunsNo + '","0")',
+                      'The customer name on the request is a tradestyle name. For CMR creation, legal name should be used. <strong>Tradestyle name can be placed on the address’s division line.</strong> Do you want to override the customer name on the request with <strong><u>'
+                          + data.legalName + '</u></strong>?' + '?', 'Warning', 'doOverrideDnBMatch()', {
+                        OK : 'Yes',
+                        CANCEL : 'No'
+                      });
+            } else {
+              showDnBMatchModal();
+            }
+          } else {
+            // continue
+            console.log("An error occurred while matching dnb.");
+            cmr.showConfirm("cmr.showModal('addressVerificationModal')", 'An error occurred while matching dnb. Do you want to proceed with this request?', 'Warning', null, {
+              OK : 'Yes',
+              CANCEL : 'No'
+            });
+          }
+        },
+        error : function(error, ioargs) {
+        }
+      });
+
+}
+
+function checkIfUpfrontUpdateChecksRequired() {
+  var reqId = FormManager.getActualValue('reqId');
+  var reqType = FormManager.getActualValue('reqType');
+  var reqStatus = FormManager.getActualValue('reqStatus');
+  var cntry = FormManager.getActualValue('cmrIssuingCntry');
+  var result = cmr.query('SYS_PARAM_VALUE_VERIFY', {
+    CD : 'UPD_UI_CNTRY_LIST',
+    VALUE : '%' + cntry + '%'
+  });
+
+  if (reqId > 0 && reqType == 'U' && reqStatus == 'DRA' && result && result.ret1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
+ * Generic Validator to execute UpdateChecks Automation
+ */
+function addUpdateChecksExecution(frmCMR) {
+  console.log("addUpdateChecksExecution..............");
+  var reqType = FormManager.getActualValue('reqType');
+  var elementResData = "";
+
+  if (reqType != 'U') {
+    cmr.showModal('addressVerificationModal');
+    return;
+  }
+  console.log('Running Update Checks Element...');
+  cmr.showProgress('Validating requested updates...');
+  dojo.xhrPost({
+    url : cmr.CONTEXT_ROOT + '/auto/element/updateCheck.json',
+    handleAs : 'json',
+    method : 'POST',
+    content : dojo.formToObject(frmCMR),
+    timeout : 500000,
+    sync : true,
+    load : function(data, ioargs) {
+      cmr.hideProgress();
+      if (data != '' && data != undefined) {
+        if (data.rejectionMsg != null && data.rejectionMsg != '') {
+          console.log('UpdateChecks Element Executed Successfully.');
+          cmr.showAlert('Request cannot be submitted for update because of the following reasons.<br/><strong>' + data.rejectionMsg + '</strong>');
+        }
+        // else if (data.negativeChksMsg != '' && data.negativeChksMsg != null)
+        // {
+        // cmr.showConfirm('showAddrVerificationModal()', '<strong>' +
+        // data.negativeChksMsg + '</strong> <br/> The request will require CMDE
+        // review. Do you want to proceed ?', 'Warning', null, {
+        // OK : 'Ok',
+        // CANCEL : 'Cancel'
+        // });
+        // }
+        else {
+          cmr.showModal('addressVerificationModal');
+        }
+      } else {
+        cmr.showModal('addressVerificationModal');
+      }
+    },
+    error : function(error, ioargs) {
+      success = false;
+      console.log('An error occurred while running UpdateSwitchElement. Please contact your system administrator');
+      reject('Error occurred in Update Checks.');
+    }
+  });
+}
+
+function showAddrVerificationModal() {
+  cmr.showModal('addressVerificationModal');
+}
+
+
+function checkForConfirmationAttachments(){
+	var id = FormManager.getActualValue('reqId');
+  var ret = cmr.query('CHECK_CONFIRMATION_ATTACHMENTS', {
+    ID : id
+  });
+  if (ret && ret.ret1) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function showDocTypeConfirmDialog() {
+	cmr
+	.showConfirm(
+		'doChangeDocType()',
+		'There are Legal Name Confirmation and/or Address Confirmation attachment(s) attached with the request. '+
+		'These attachment types are not supported anymore and will be sunset. Do you want to use <strong>Company Proof</strong> instead?',
+		'Warning', null, null);
+}
+
+function doChangeDocType() {
+  FormManager.doAction('frmCMR', 'CONFIRM_DOC_UPD', true, "Updating attachment types to 'Company Proof'...");
+}
+
+/**
+ * Save function
+ */
+function autoSaveRequest() {
+  // enable all checkboxes
+  var cb = dojo.query('[type=checkbox]');
+  for (var i = 0; i < cb.length; i++) {
+    if (cb[i].id.indexOf('dijit') < 0 && cb[i].disabled) {
+      cb[i].disabled = false;
+      cb[i].removeAttribute('disabled');
+    }
+  }
+  FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
+}
+

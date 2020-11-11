@@ -97,7 +97,20 @@ var SysLoc = (function() {
     RUSSIA : '821',
     ROMANIA : '826',
     UKRAINE : '889',
-    UNITED_ARAB_EMIRATES : '677'
+    UNITED_ARAB_EMIRATES : '677',
+    AZERBAIJAN : '358',
+    TURKMENISTAN : '359',
+    TAJIKISTAN : '363',
+    ARMENIA : '607',
+    ALBANIA : '603',
+    BELARUS: '626',
+    GEORGIA : '651',
+    KYRGYZSTAN : '695',
+    MACEDONIA : '705',
+    UZBEKISTAN : '741',
+    MOLDOVA : '787',
+    BOSNIA_HERZEGOVINA : '699'
+    
   };
 })();
 

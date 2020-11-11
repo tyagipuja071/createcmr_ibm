@@ -281,6 +281,19 @@ public class RequestUtils {
   }
 
   public static void sendEmailNotifications(EntityManager entityManager, Admin admin, WfHist history) {
+
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip) {
+      return;
+    }
+
     sendEmailNotifications(entityManager, admin, history, false, false);
   }
 
@@ -444,7 +457,7 @@ public class RequestUtils {
 
     boolean includeUser = false;
     String embeddedLink = "";
-    if ("COM".equals(history.getReqStatus())) {
+    if ("COM".equals(history.getReqStatus()) || "COM".equals(admin.getReqStatus())) {
       embeddedLink = Feedback.generateEmeddedFeedbackLink(data);
     } else if ("PPN".equals(history.getReqStatus())) {
       embeddedLink = Feedback.generateEmeddedContactLink(data);
@@ -524,6 +537,11 @@ public class RequestUtils {
     params.add(rejectReason); // {10}
     params.add(embeddedLink); // {11}
 
+    String country = getIssuingCountry(entityManager, cmrIssuingCountry);
+    country = cmrIssuingCountry + (StringUtils.isBlank(country) ? "" : " - " + country);
+
+    email = StringUtils.replace(email, "$COUNTRY$", country);
+
     if (!StringUtils.isBlank(admin.getSourceSystId())) {
       ExternalSystemUtil.addExternalMailParams(entityManager, params, admin);
     }
@@ -540,8 +558,39 @@ public class RequestUtils {
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
 
-    mail.send(host);
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
 
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
+
+  }
+
+  /**
+   * String gets the fully qualified country name
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  private static String getIssuingCountry(EntityManager entityManager, String country) {
+    // TODO move to cmr-queries
+    try {
+      String sql = "select NM from CREQCMR.SUPP_CNTRY where CNTRY_CD = :CNTRY";
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("CNTRY", country);
+      query.setForReadOnly(true);
+      return query.getSingleResult(String.class);
+    } catch (Exception e) {
+      LOG.warn("Error in getting issuing country name", e);
+      return null;
+    }
   }
 
   private static String formatRejectionInfo(String current, WfHist rejection) {
@@ -790,7 +839,14 @@ public class RequestUtils {
     entityManager.persist(hist);
     entityManager.flush();
 
-    if (sendMail) {
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (sendMail && (skip == false)) {
       sendEmailNotifications(entityManager, admin, hist);
     }
 
@@ -955,7 +1011,19 @@ public class RequestUtils {
     mail.setFrom(from);
     mail.setMessage(email);
     mail.setType(MessageType.HTML);
-    mail.send(host);
+
+    Admin admin = new Admin();
+    String sourceSysSkip = admin.getSourceSystId() + ".SKIP";
+    String onlySkipPartner = SystemParameters.getString(sourceSysSkip);
+    boolean skip = false;
+
+    if (StringUtils.isNotBlank(admin.getSourceSystId()) && "Y".equals(onlySkipPartner)) {
+      skip = true;
+    }
+
+    if (skip == false) {
+      mail.send(host);
+    }
     batchemailTemplate = null;
     refresh();
   }
@@ -1267,6 +1335,23 @@ public class RequestUtils {
   }
 
   /**
+   * Checks the usage configuration for tradestyle names
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String getTradestyleUsage(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.GET_TRADESTYLE_USAGE");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    String result = query.getSingleResult(String.class);
+    return StringUtils.isNotBlank(result) ? result : "";
+
+  }
+
+  /**
    * Checks whether automation is configued for a particular country or not
    * 
    * @param entityManager
@@ -1275,6 +1360,22 @@ public class RequestUtils {
    */
   public static String isDnBCountry(EntityManager entityManager, String country) {
     String sql = ExternalizedQuery.getSql("AUTOMATION.IS_DNB_COUNTRY");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setForReadOnly(true);
+    query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
+    return query.getSingleResult(String.class);
+  }
+
+  /**
+   * Checks whether quick search is configued as first interface for a
+   * particular country or not
+   * 
+   * @param entityManager
+   * @param country
+   * @return
+   */
+  public static String isQuickSearchFirstEnabled(EntityManager entityManager, String country) {
+    String sql = ExternalizedQuery.getSql("AUTOMATION.START_FROM_QUICK_SEARCH");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setForReadOnly(true);
     query.setParameter("CNTRY", country != null && country.length() > 3 ? country.substring(0, 3) : country);
@@ -1314,6 +1415,33 @@ public class RequestUtils {
       }
     } catch (Exception e) {
       LOG.warn("Status of requester automation cannot be determined", e);
+      return false;
+    }
+  }
+
+  /**
+   * Checks whether quick search is configued as first interface for a
+   * particular country or not
+   * 
+   * @param country
+   * @return
+   */
+  public static boolean isQuickSearchFirstEnabled(String country) {
+    try {
+      EntityManager entityManager = JpaManager.getEntityManager();
+      try {
+        String quickSearchFirst = isQuickSearchFirstEnabled(entityManager, country);
+        if ("Y".equals(quickSearchFirst)) {
+          return true;
+        } else {
+          return false;
+        }
+      } finally {
+        entityManager.clear();
+        entityManager.close();
+      }
+    } catch (Exception e) {
+      LOG.warn("Status of Quick Search cannot be determined", e);
       return false;
     }
   }

@@ -18,6 +18,7 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.approval.ApprovalService;
 import com.ibm.cio.cmr.request.user.AppUser;
+import com.ibm.cio.cmr.request.util.BluePagesHelper;
 
 /**
  * {@link ApprovalsElement} implementing the default approvals workflow
@@ -44,11 +45,16 @@ public class DefaultApprovalsElement extends ApprovalsElement {
     AppUser requester = new AppUser();
     requester.setIntranetId(admin.getRequesterId());
     requester.setBluePagesName(admin.getRequesterNm());
+    String cnum = BluePagesHelper.getCNUMByIntranetAddr(admin.getRequesterId());
+    requester.setUserCnum(cnum);
 
     AutomationResult<EmptyOutput> result = buildResult(reqId);
     result.setProcessOutput(new EmptyOutput());
 
     LOG.info("Checking and generating required approvals for Request " + reqId);
+
+    LOG.debug("Merging admin entity before checking for default approvals.");
+    entityManager.merge(admin);
 
     ApprovalService service = new ApprovalService();
     String approvalsResult = service.processDefaultApproval(entityManager, reqId, admin.getReqType(), requester, model);

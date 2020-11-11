@@ -23,6 +23,10 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.model.ParamContainer;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
@@ -83,28 +87,39 @@ public class DPLCheckElement extends ValidatingElement {
 
         recomputeDPLResult(user, entityManager, requestData);
 
-        if ("U".equals(admin.getReqType()) && StringUtils.isNotEmpty(data.getEmbargoCd()) && !"N".equals(data.getEmbargoCd())) {
-          validation.setSuccess(false);
-          output.setOnError(true);
-          engineData.addRejectionComment("OTH", "This is a CMR record with a DPL/Embargo Code.ERC approval will be needed to process this request.",
-              "", "");
-          log.debug(
-              "This is a CMR record with a DPL/Embargo Code. ERC approval will be needed to process this request.Hence sending back to processor.");
-          details.append(details.toString());
-          output.setResults("CMR with DPL/Embargo Code");
-          output.setDetails(details.toString());
-          output.setProcessOutput(validation);
-          return output;
-        }
+        // if ("U".equals(admin.getReqType()) &&
+        // StringUtils.isNotEmpty(data.getEmbargoCd()) &&
+        // !"N".equals(data.getEmbargoCd())) {
+        // validation.setSuccess(false);
+        // output.setOnError(true);
+        // engineData.addRejectionComment("OTH", "This is a CMR record with a
+        // DPL/Embargo Code.ERC approval will be needed to process this
+        // request.",
+        // "", "");
+        // log.debug(
+        // "This is a CMR record with a DPL/Embargo Code. ERC approval will be
+        // needed to process this request.Hence sending back to processor.");
+        // details.append(details.toString());
+        // output.setResults("CMR with DPL/Embargo Code");
+        // output.setDetails(details.toString());
+        // output.setProcessOutput(validation);
+        // return output;
+        // }
 
         if (StringUtils.isNotEmpty(scorecard.getDplChkResult())
             && ("AF".equals(scorecard.getDplChkResult()) || "SF".equals(scorecard.getDplChkResult()))) {
-          validation.setSuccess(false);
-          output.setOnError(true);
-          engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
-          validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
+          if (!isDPLApprovalPresent(entityManager, data.getCmrIssuingCntry(), admin.getReqType())) {
+            validation.setSuccess(false);
+            validation.setMessage("AF".equals(scorecard.getDplChkResult()) ? "All Failed" : "Some Failed");
+            output.setOnError(true);
+            engineData.addRejectionComment("OTH", "DPL check failed for one or more addresses on the request.", "", "");
+            output.setDetails("DPL check failed for one or more addresses on the request.");
+          } else {
+            validation.setSuccess(true);
+            validation.setMessage("Approval Required");
+            output.setDetails("DPL check failed for one or more addresses but DPL Approvals are configured.");
+          }
           output.setResults(validation.getMessage());
-          output.setDetails("DPL check failed for one or more addresses on the request.");
         } else {
           validation.setSuccess(true);
           validation.setMessage("No DPL check needed.");
@@ -320,8 +335,38 @@ public class DPLCheckElement extends ValidatingElement {
       scorecard.setDplChkUsrId(user.getIntranetId());
       scorecard.setDplChkUsrNm(user.getBluePagesName());
     }
+    if (failed > 0) {
+      log.debug("Performing DPL Search for Request " + reqId + " with DPL Status: " + scorecard.getDplChkResult());
+
+      ParamContainer params = new ParamContainer();
+      params.addParam("processType", "ATTACH");
+      params.addParam("reqId", reqId);
+      params.addParam("user", user);
+      params.addParam("filePrefix", "AutoDPLSearch_");
+
+      try {
+        DPLSearchService dplService = new DPLSearchService();
+        dplService.process(null, params);
+      } catch (Exception e) {
+        log.warn("DPL results not attached to the request", e);
+      }
+    }
+
     log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
+
     updateEntity(scorecard, entityManager);
+  }
+
+  private boolean isDPLApprovalPresent(EntityManager entityManager, String cmrIssuingCntry, String reqType) {
+    if (StringUtils.isNotBlank(cmrIssuingCntry) && StringUtils.isNotBlank(reqType)) {
+      String sql = ExternalizedQuery.getSql("AUTO.CHECK_DPL_APPROVAL");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("ISSUING_CNTRY", "%" + cmrIssuingCntry + "%");
+      query.setParameter("REQ_TYPE", reqType);
+      query.setForReadOnly(true);
+      return query.exists();
+    }
+    return false;
   }
 
   @Override

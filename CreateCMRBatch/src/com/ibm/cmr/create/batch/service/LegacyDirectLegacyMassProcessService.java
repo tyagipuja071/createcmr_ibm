@@ -1092,7 +1092,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
 
     if (transformer.hasCmrtCustExt()) {
       CmrtCustExt custExt = legacyObjects.getCustomerExt();
-      if (transformer != null) {
+      if (transformer != null && custExt != null) {
         try {
           transformer.transformLegacyCustomerExtDataMassUpdate(entityManager, custExt, cmrObjects, muData, massUpdt.getCmrNo());
         } catch (Exception e) {
@@ -1105,10 +1105,11 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
           return legacyObjects;
         }
       }
-      custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
-      custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
-      legacyObjects.setCustomerExt(custExt);
-
+      if (custExt != null) {
+        custExt.setUpdateTs(SystemUtil.getCurrentTimestamp());
+        custExt.setAeciSubDt(SystemUtil.getDummyDefaultDate());
+        legacyObjects.setCustomerExt(custExt);
+      }
     }
 
     capsAndFillNulls(cust, true);
@@ -1143,6 +1144,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         }
 
         transformer.transformLegacyAddressDataMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data, legacyObjects);
+        capsAndFillNulls(legacyAddr, true);
         // DTN: Set again the CmrtCust object on the legacy objects
         // container just to be sure
         legacyObjects.setCustomer(cust);

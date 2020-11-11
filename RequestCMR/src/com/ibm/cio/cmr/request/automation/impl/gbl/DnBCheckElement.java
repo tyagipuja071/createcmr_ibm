@@ -89,7 +89,7 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
             || (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && !admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES))) {
           MatchingResponse<DnBMatchingResponse> dnbMatchingResult = new MatchingResponse<DnBMatchingResponse>();
           try {
-            dnbMatchingResult = DnBUtil.getMatches(requestData, "ZS01");
+            dnbMatchingResult = DnBUtil.getMatches(requestData, engineData, "ZS01");
           } catch (Exception e) {
             LOG.debug("Error on DNB Matching" + e.getMessage());
           }
@@ -121,15 +121,17 @@ public class DnBCheckElement extends ValidatingElement implements CompanyVerifie
           }
         } else if (!StringUtils.isEmpty(admin.getMatchOverrideIndc()) && admin.getMatchOverrideIndc().equalsIgnoreCase(MATCH_INDC_YES)) {
           validation.setSuccess(true);
-          validation.setMessage("Review Needed");
-          result.setDetails("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
-          /*
-           * engineData.addNegativeCheckStatus("DNBCheck",
-           * "D&B matches were chosen to be overridden by the requester and needs to be reviewed"
-           * );
-           */
-          engineData.addNegativeCheckStatus("DNBCheck", "D&B matches were chosen to be overridden by the requester");
-          LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+          String message = "D&B matches were chosen to be overridden by the requester.";
+          if (DnBUtil.isDnbOverrideAttachmentProvided(entityManager, reqId)) {
+            validation.setMessage("Overridden");
+            result.setDetails(message + "\nSupporting documentation is provided by the requester as attachment.");
+          } else {
+            validation.setMessage("Review required.");
+            result.setDetails(message + "\nNo supporting documentation is provided by the requester.");
+            engineData.addNegativeCheckStatus("DNBCheck", "D&B matches were chosen to be overridden by the requester");
+            LOG.debug("D&B matches were chosen to be overridden by the requester and needs to be reviewed");
+          }
+
         }
       } else if (ifDnBAccepted) {
 

@@ -833,4 +833,21 @@ public abstract class GEOHandler {
     return colVal;
   }
 
+  public String getCountrySpecificVatPrefix() {
+    return null;
+  }
+
+  
+  /**
+   * Called while copying address, and checks whether the current address is to be copied to additional address or not
+   * @param entityManager
+   * @param addr
+   * @param cmrIssuingCntry
+   * @return 
+   * @throws Exception
+   */
+  public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    // noop. override on converter if needed
+    return false;
+  }
 }

@@ -108,60 +108,137 @@ visibility: hidden !IMPORTANT;
     }
   }
 </script>
+<style>
+ .btn-search, .btn-reset {
+   min-width: 100px;
+   height: 30px !important;
+ }
+</style>
 <cmr:section id="NAME_REQ_TAB" hidden="true">
   <jsp:include page="detailstrip.jsp" />
 
   <cmr:row addBackground="true" topPad="10">
-    <cmr:column span="1" width="180">
+    <cmr:column span="1" width="190">
+      <p>
+        <cmr:label fieldId="dplCheck">
+              DPL Check Result:
+              <%if ("Processor".equalsIgnoreCase(reqentry.getUserRole())){%>
+                <span class="ibm-required cmr-required-spacer">*</span>
+              <%} %>
+              <cmr:info text="The results of the automated DPL check done against Export Validation Services (EVS). Results are returned as pass or fail only per address." />
+        </cmr:label>
+        <div>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'AP'}">
+            All Passed
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF'}">
+            <span style="color:red;font-weight:bold">All Failed</span>
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'SF'}">
+            <span style="color:red;font-weight:bold">Some Failed</span>
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'Not Done'}">
+            Not Done
+          </c:if>
+          <c:if test="${fn:trim(reqentry.dplChkResult) == 'NR'}">
+            Not Required
+          </c:if>
+        </div>
+      </p>
+    </cmr:column>
+    <cmr:column span="1" width="190">
+      <p>
+        <cmr:label fieldId="dplCheck">
+          Performed By:
+        </cmr:label>
+        <div>
+          ${reqentry.dplChkUsrId}
+        </div>
+      </p>
+    </cmr:column>
+    <cmr:column span="1" width="170">
+      <p>
+        <cmr:label fieldId="dplCheck">
+          DPL Check Date:
+        </cmr:label>
+        <div>
+          ${reqentry.dplChkDate}
+        </div>
+      </p>
+    </cmr:column>
+    <cmr:column span="1" width="170">
+      <%if (!readOnly){ %>
+      <p>
+        <input type="button" value="DPL Check" class="cmr-grid-btn-h btn-search" onclick="doDplCheck()"> 
+        <cmr:info text="${ui.info.dplCheck}" />
+      </p>
+      <%} %>
+    </cmr:column>
+  </cmr:row>
+
+  <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF' || fn:trim(reqentry.dplChkResult) == 'SF'}">
+    <cmr:row>
+      <cmr:column span="1" width="190">
+        <p>
+          <cmr:label fieldId="dplCheck">
+              DPL Assessment Result:
+              <cmr:info text="The final assessment made by a user when searching directly against the DPL database and comparing the customer information against the list of DPL entities returned." />
+          </cmr:label>
+          <div>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'Y'}">
+              <span style="color:red;font-weight:bold">Matched DPL entities</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'N'}">
+              <span>No Actual Matches</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == 'U'}">
+              <span>Cannot determine, needs further review</span>
+            </c:if>
+            <c:if test="${fn:trim(reqentry.intDplAssessmentResult) == ''}">
+              <span>Not Done</span>
+            </c:if>
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="190">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            Assessed By:
+          </cmr:label>
+          <div>
+            ${reqentry.intDplAssessmentBy}
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="170">
+        <p>
+          <cmr:label fieldId="dplCheck">
+            Assessment Date:
+          </cmr:label>
+          <div>
+            ${reqentry.intDplAssessmentDate}
+          </div>
+        </p>
+      </cmr:column>
+      <cmr:column span="1" width="250">
+        <p>
+          <%if (!readOnly) {%>
+            <input type="button" title="Assess DPL Results" value="Search and Assess DPL Matches" class="cmr-grid-btn-h btn-search" onclick="openDPLSearch()">
+            <cmr:info text="Opens a new window and searches directly against the DPL Database" />
+          <%}%>
+        </p>
+      </cmr:column>
+    </cmr:row>
+  </c:if>
+
+  <cmr:row addBackground="true" topPad="10">
+    <cmr:column span="1" width="170">
       <p>
         <cmr:label fieldId="addressList">
               ${ui.addressList}:
         </cmr:label>
       </p>
     </cmr:column>
-    <cmr:column span="1">
-      <cmr:button label="${ui.btn.dplChk}" id="dplCheckBtn" onClick="doDplCheck()" highlight="true" styleClass="cmr-reqentry-btn"/>
-      <%if ("Processor".equalsIgnoreCase(reqentry.getUserRole())){%>
-      <span class="ibm-required cmr-required-spacer">*</span>
-      <%} else {%>
-      <span class="ibm-required cmr-required-spacer" style="visibility:hidden">*</span>
-      <%} %>
-      <cmr:info text="${ui.info.dplCheck}" />
-    </cmr:column>
-    <cmr:column span="1" width="120">
-    <p>
-        <label>${ui.dplChkStatus}:</label> 
-        </p>
-    </cmr:column>
-    <cmr:column span="1" width="100">
-    <p>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'AP'}">
-                  All Passed
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'AF'}">
-                  All Failed
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'SF'}">
-                  Some Failed
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'Not Done'}">
-                  Not Done
-                  </c:if>
-                  <c:if test="${fn:trim(reqentry.dplChkResult) == 'NR'}">
-                  Not Required
-                  </c:if>
-                  </p>
-    </cmr:column>
-    <cmr:column span="1" width="125">
-    <p>
-        <label>${ui.dplChkDate}:</label>
-        </p>
-    </cmr:column>
-    <cmr:column span="1" width="100">
-    <p>
-        ${reqentry.dplChkDate}
-        </p>
-     </cmr:column>
   </cmr:row>
   <%
   String contextPath = request.getContextPath();
@@ -245,6 +322,10 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="70px" field="custNm3" header="${ui.grid.custNm3}" />
         </cmr:view>
         
+        <cmr:view forCountry="862">
+          <cmr:gridCol width="70px" field="custNm4" header="Name 4" />
+        </cmr:view>
+        
         <!-- Street and Street Con't except BELUX,JP -->
         <cmr:view exceptForGEO="BELUX,JP,AP">
           <cmr:gridCol width="130px" field="addrTxt" header="${ui.grid.addrTxt}" >
@@ -297,8 +378,12 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
+        <cmr:view forCountry="666">
+          <cmr:gridCol width="90px" field="addrTxt2" header="${ui.grid.occupation}" />
+        </cmr:view>
+        
         <!-- PO Box for ES/PT/IL/GR/CY/TU/UKI -->
-        <cmr:view forCountry="838,755,822,726,666,862,866,754">
+        <cmr:view forCountry="838,755,822,726,666,866,754">
           <cmr:gridCol width="90px" field="poBox" header="PO Box" />
         </cmr:view>
         
@@ -356,8 +441,12 @@ visibility: hidden !IMPORTANT;
           </cmr:gridCol>
         </cmr:view>
         
-        <cmr:view forGEO="EMEA" exceptForCountry="862,758">
+        <cmr:view forGEO="EMEA" exceptForCountry="862,758,726,666">
           <cmr:gridCol width="100px" field="dept" header="Dept/Attn" />
+        </cmr:view>
+		<!-- Attn for Greece & Cyprus-->
+        <cmr:view forCountry="726,666">
+          <cmr:gridCol width="100px" field="custNm4" header="Dept/Attn" />
         </cmr:view>
         <!--  District for Turkey -->
         <cmr:view forCountry="862">
@@ -408,7 +497,7 @@ visibility: hidden !IMPORTANT;
         </cmr:view>
 
         <!-- Phone -->
-        <cmr:view exceptForCountry="758,760">
+        <cmr:view exceptForCountry="758,760,603,607,626,644,651,668,693,694,695,699,704,705,707,708,740,741,787,820,821,826,889,358,359,363">
           <cmr:gridCol width="90px" field="custPhone" header="Phone #" />
         </cmr:view>
         
@@ -422,12 +511,6 @@ visibility: hidden !IMPORTANT;
           <cmr:gridCol width="90px" field="bldg" header="Name Abbrev." />
           <cmr:gridCol width="90px" field="divn" header="Street Abbrev." />
           <cmr:gridCol width="90px" field="custFax" header="Loc. Abbrev." />
-        </cmr:view>
-
-        <!-- Tax Office and Occupation for Greece/Cyprus -->
-        <cmr:view forCountry="726,666">
-          <cmr:gridCol width="90px" field="taxOffice" header="Tax Office" />
-          <cmr:gridCol width="90px" field="addrTxt2" header="Occupation" />
         </cmr:view>
 
         <!-- Tax Office for Turkey -->

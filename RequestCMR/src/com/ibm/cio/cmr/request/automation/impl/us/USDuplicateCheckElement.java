@@ -177,7 +177,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
                 duplicateList.add(cmrCheckRecord.getCmrNo());
                 soldToKunnrsList.add(getZS01Kunnr(cmrCheckRecord.getCmrNo(), SystemLocation.UNITED_STATES));
 
-                dupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
+                DupCMRCheckElement.logDuplicateCMR(details, cmrCheckRecord);
                 if (!StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())) {
                   details.append("US Restrict To =  " + cmrCheckRecord.getUsRestrictTo()).append("\n");
                 } else {
@@ -277,7 +277,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         LOG.error("Unable to determine CMR details for create by model scenario", e);
         return true;
       }
-    } else if (negativeCheckScenarioList.contains(custSubGrp) || "CreateCMR".equals(requestData.getAdmin().getSourceSystId())) {
+    } else if (negativeCheckScenarioList.contains(custSubGrp)
+        || (requestData.getAdmin().getSourceSystId() != null && requestData.getAdmin().getSourceSystId().contains("CreateCMR"))) {
       return true;
     }
     return false;
@@ -467,6 +468,17 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
       response.setMatches(cmrCheckMatchesTmp);
       break;
+    case USUtil.SC_COMM_REGULAR:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if (((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
+            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
+                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo()))
+            && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
     case USUtil.SC_BYMODEL:
       USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
       switch (usDetails.getCustTypCd()) {
@@ -499,7 +511,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
               && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
               && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
                   && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
-                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))) {
+                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))
+              && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
             cmrCheckMatchesTmp.add(cmrCheckRecord);
           }
         }
@@ -603,6 +616,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     // reverify
     if (response.getMatches().size() == 0) {
+      response.setSuccess(true);
       response.setMatched(false);
       response.setMessage("No matches found for the given search criteria.");
     }
@@ -656,7 +670,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
    * @return
    * @throws Exception
    */
-  private MatchingResponse<DuplicateCMRCheckResponse> getCMRMatches(EntityManager entityManager, RequestData requestData,
+  public MatchingResponse<DuplicateCMRCheckResponse> getCMRMatches(EntityManager entityManager, RequestData requestData,
       AutomationEngineData engineData) throws Exception {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
@@ -664,8 +678,22 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Addr zi01 = requestData.getAddress("ZI01");
     MatchingResponse<DuplicateCMRCheckResponse> response = new MatchingResponse<DuplicateCMRCheckResponse>();
     ScenarioExceptionsUtil scenarioExceptions = getScenarioExceptions(entityManager, requestData, engineData);
-    // check if End user and has divn value
-    if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
+    String subScenario = data.getCustSubGrp();
+    if (USUtil.SC_BYMODEL.equals(subScenario)) {
+      subScenario = USUtil.determineCustSubScenario(entityManager, admin.getModelCmrNo(), engineData, requestData);
+    }
+
+    // check if End user
+    if (USUtil.SC_BP_END_USER.equals(subScenario) && "C".equals(admin.getReqType())) {
+
+      ScenarioExceptionsUtil bpScenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
+          USUtil.CG_THIRD_P_BUSINESS_PARTNER, USUtil.SC_BP_END_USER);
+      engineData.addPositiveCheckStatus("BP_EU_REQ");
+      if (bpScenarioExceptions != null) {
+        // set cmr check mappings to bp
+        scenarioExceptions.setAddressTypesForDuplicateCMRCheck(bpScenarioExceptions.getAddressTypesForDuplicateCMRCheck());
+      }
+
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
         response.setMatched(false);
@@ -732,6 +760,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     // reverify
     if (response.getMatches().size() == 0) {
+      response.setSuccess(true);
       response.setMatched(false);
       response.setMessage("No matches found for the given search criteria.");
     }
@@ -759,7 +788,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     return true;
   }
 
-  private String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
+  public String getZS01Kunnr(String cmrNo, String cntry) throws Exception {
     String kunnr = "";
 
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
@@ -814,7 +843,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
   }
 
-  private List<String> removeDupEntriesFrmList(List<String> duplList) {
+  public List<String> removeDupEntriesFrmList(List<String> duplList) {
     Set<String> s = new LinkedHashSet<String>();
     s.addAll(duplList);
     duplList.clear();

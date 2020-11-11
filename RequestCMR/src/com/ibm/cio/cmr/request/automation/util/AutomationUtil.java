@@ -17,16 +17,21 @@ import org.codehaus.jackson.type.TypeReference;
 
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
+import com.ibm.cio.cmr.request.automation.impl.gbl.CMDERequesterCheck;
 import com.ibm.cio.cmr.request.automation.impl.gbl.CalculateCoverageElement;
+import com.ibm.cio.cmr.request.automation.impl.gbl.DnBMatchingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.geo.AustraliaUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.AustriaUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.BrazilUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.FranceUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.GermanyUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SingaporeUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.SwitzerlandUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
@@ -91,6 +96,10 @@ public abstract class AutomationUtil {
 
       put(SystemLocation.SWITZERLAND, SwitzerlandUtil.class);
       put(SystemLocation.LIECHTENSTEIN, SwitzerlandUtil.class);
+      put(SystemLocation.AUSTRIA, AustriaUtil.class);
+      put(SystemLocation.SPAIN, SpainUtil.class);
+      put(SystemLocation.UNITED_KINGDOM, UKIUtil.class);
+      put(SystemLocation.IRELAND, UKIUtil.class);
 
     }
   };
@@ -179,6 +188,21 @@ public abstract class AutomationUtil {
    * @return
    * @throws Exception
    */
+
+  public String getAddressTypeForGbgCovCalcs(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) throws Exception {
+    return "ZS01";
+  }
+
+  /**
+   * This method should be overridden by implementing classes and
+   * <strong>always</strong>
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   */
+
   public boolean performCountrySpecificCoverageCalculations(CalculateCoverageElement covElement, EntityManager entityManager,
       AutomationResult<OverrideOutput> results, StringBuilder details, OverrideOutput overrides, RequestData requestData,
       AutomationEngineData engineData, String covFrom, CoverageContainer container, boolean isCoverageCalculated) throws Exception {
@@ -359,9 +383,32 @@ public abstract class AutomationUtil {
    * @param entityManager
    * @param request
    * @param requestData
+   * @param engineData
    */
-  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData) {
+  public void tweakGBGFinderRequest(EntityManager entityManager, GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
     // NOOP
+  }
+
+  /**
+   * Hooks to be able to manipulate the data to be sent to DNB Matching services
+   * 
+   * @param request
+   * @param requestData
+   * @param engineData
+   */
+  public void tweakDnBMatchingRequest(GBGFinderRequest request, RequestData requestData, AutomationEngineData engineData) {
+    // NOOP
+  }
+
+  /**
+   * Tells {@link DnBMatchingElement} if it needs to use TaxCd1 for
+   * orgIdMatching instead of VAT
+   * 
+   * @param requestData
+   * @return
+   */
+  public boolean useTaxCd1ForDnbMatch(RequestData requestData) {
+    return false;
   }
 
   /**
@@ -476,6 +523,73 @@ public abstract class AutomationUtil {
     if (hasLegalEndings(name)) {
       engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be Commercial.", "", "");
       details.append("Scenario chosen is incorrect, should be Commercial.").append("\n");
+      return false;
+    }
+
+    PrivatePersonCheckResult checkResult = checkPrivatePersonRecord(country, landCntry, name, checkBluepages);
+    PrivatePersonCheckStatus checkStatus = checkResult.getStatus();
+
+    switch (checkStatus) {
+    case BluepagesError:
+      engineData.addNegativeCheckStatus("BLUEPAGES_NOT_VALIDATED", "Not able to check the name against bluepages.");
+      break;
+    case DuplicateCMR:
+      details.append("The name already matches a current record with CMR No. " + checkResult.getCmrNo()).append("\n");
+      engineData.addRejectionComment("DUPC", "The name already has matches a current record with CMR No. " + checkResult.getCmrNo(),
+          checkResult.getCmrNo(), "");
+      return false;
+    case DuplicateCheckError:
+      details.append("Duplicate CMR check using customer name match failed to execute.").append("\n");
+      engineData.addNegativeCheckStatus("DUPLICATE_CHECK_ERROR", "Duplicate CMR check using customer name match failed to execute.");
+      break;
+    case NoIBMRecord:
+      engineData.addRejectionComment("OTH", "Employee details not found in IBM BluePages.", "", "");
+      details.append("Employee details not found in IBM BluePages.").append("\n");
+      break;
+    case Passed:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      break;
+    case PassedBoth:
+      details.append("No Duplicate CMRs were found.").append("\n");
+      details.append("Name validated against IBM BluePages successfully.").append("\n");
+      break;
+    }
+    return true;
+  }
+
+  /**
+   * Overloaded method does the private person and IBM employee checks
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param result
+   * @param details
+   * @param output
+   * @return
+   */
+  protected boolean doPrivatePersonChecks(AutomationEngineData engineData, String country, String landCntry, String name, StringBuilder details,
+      boolean checkBluepages, RequestData reqData) {
+    boolean legalEndingExists = false;
+    for (Addr addr : reqData.getAddresses()) {
+      String customerName = getCustomerFullName(addr);
+      if (hasLegalEndings(customerName)) {
+        legalEndingExists = true;
+        break;
+      }
+    }
+    if (legalEndingExists) {
+      String commentSpecific = "Commercial.";
+      String commentGeneric = "Changed.";
+      String[] arrCntries = { "834", "616" };
+      List<String> genericCmtCntries = Arrays.asList(arrCntries);
+      if (genericCmtCntries.contains(country)) {
+        engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentGeneric, "", "");
+        details.append("Scenario chosen is incorrect, should be " + commentGeneric).append("\n");
+      } else {
+        engineData.addRejectionComment("OTH", "Scenario chosen is incorrect, should be " + commentSpecific, "", "");
+        details.append("Scenario chosen is incorrect, should be " + commentSpecific).append("\n");
+      }
       return false;
     }
 
@@ -642,9 +756,9 @@ public abstract class AutomationUtil {
     client.setRequestMethod(Method.Get);
     client.setReadTimeout(1000 * 60 * 5);
     PPSRequest request = new PPSRequest();
-    request.setCeid(ppsCeId);
+    request.setCeid(ppsCeId.toLowerCase());
     PPSResponse ppsResponse = client.executeAndWrap(request, PPSResponse.class);
-    if (!ppsResponse.isSuccess() || ppsResponse.getProfiles().size() == 0) {
+    if (!ppsResponse.isSuccess()) {
       return false;
     } else {
       return true;
@@ -823,6 +937,9 @@ public abstract class AutomationUtil {
   public static String getCleanString(String str) {
     if (StringUtils.isNotBlank(str)) {
       str = str.trim().replaceAll("[^a-zA-Z0-9\\s\\-]", " ").toUpperCase();
+      if (str.length() > 0) {
+        str = str.trim();
+      }
       return str;
     }
     return "";
@@ -927,6 +1044,11 @@ public abstract class AutomationUtil {
     return kunnr;
   }
 
+  /**
+   * Skips execution for all elements
+   * 
+   * @param engineData
+   */
   public void skipAllChecks(AutomationEngineData engineData) {
     if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
       ScenarioExceptionsUtil scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
@@ -936,4 +1058,95 @@ public abstract class AutomationUtil {
     }
   }
 
+  /**
+   * 
+   * Gets scenario exceptions for a particular request
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   */
+  public static ScenarioExceptionsUtil getScenarioExceptions(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
+    ScenarioExceptionsUtil scenarioExceptions = null;
+    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
+      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
+      return scenarioExceptions;
+    } else {
+      Data data = requestData.getData();
+      scenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getCustGrp(),
+          data.getCustSubGrp());
+      if (engineData != null) {
+        engineData.put("SCENARIO_EXCEPTIONS", scenarioExceptions);
+      }
+      return scenarioExceptions;
+    }
+
+  }
+
+  /**
+   * Filter Duplicate CMR Matches on the basis of some country specific
+   * criteria. Note: Update the matches in response with the filtered list.
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @param response
+   */
+  public void filterDuplicateCMRMatches(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      MatchingResponse<DuplicateCMRCheckResponse> response) {
+    LOG.debug("No Country Specific Filter for Duplicate CMR Checks Defined.");
+    // NOOP
+  }
+
+  public boolean addressEquals(Addr addr1, Addr addr2) {
+    String addr1Details = null;
+    String addr2Details = null;
+    if (addr1 != null && addr2 != null) {
+      addr1Details = (StringUtils.isNotBlank(addr1.getCustNm1()) ? addr1.getCustNm1().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getCustNm2()) ? addr1.getCustNm2().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getAddrTxt()) ? addr1.getAddrTxt().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getCity1()) ? addr1.getCity1().trim() : "")
+          + (StringUtils.isNotBlank(addr1.getPostCd()) ? addr1.getPostCd().trim() : "");
+      addr2Details = (StringUtils.isNotBlank(addr2.getCustNm1()) ? addr2.getCustNm1().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getCustNm2()) ? addr2.getCustNm2().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getAddrTxt()) ? addr2.getAddrTxt().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getCity1()) ? addr2.getCity1().trim() : "")
+          + (StringUtils.isNotBlank(addr2.getPostCd()) ? addr2.getPostCd().trim() : "");
+    }
+    if (addr1Details.equalsIgnoreCase(addr2Details)) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
+  protected String getCustomerFullName(Addr addr) {
+    String custNm1 = addr.getCustNm1();
+    String custNm2 = StringUtils.isNotBlank(addr.getCustNm2()) ? addr.getCustNm2() : "";
+    String custNm3 = StringUtils.isNotBlank(addr.getCustNm3()) ? addr.getCustNm3() : "";
+    String custNm4 = StringUtils.isNotBlank(addr.getCustNm4()) ? addr.getCustNm4() : "";
+    return custNm1 + custNm2 + custNm3 + custNm4;
+  }
+
+  /**
+   * returns the country-wise request types for {@link CMDERequesterCheck}
+   * element to skip all checks if the requester is CMDE
+   * 
+   * @return
+   */
+  public List<String> getSkipChecksRequestTypesforCMDE() {
+    return new ArrayList<String>();
+  }
+
+  public static boolean isLegalNameChanged(Admin admin) {
+    String newName = admin.getMainCustNm1().toUpperCase();
+    newName += !StringUtils.isBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2().toUpperCase() : "";
+
+    String oldName = !StringUtils.isBlank(admin.getOldCustNm1()) ? admin.getOldCustNm1().toUpperCase() : "";
+    oldName += !StringUtils.isBlank(admin.getOldCustNm2()) ? " " + admin.getOldCustNm2().toUpperCase() : "";
+
+    return !newName.equals(oldName);
+  }
 }

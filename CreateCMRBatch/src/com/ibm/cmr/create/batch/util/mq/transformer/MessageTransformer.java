@@ -353,4 +353,16 @@ public abstract class MessageTransformer {
     return false;
   }
 
+  public boolean sequenceNoUpdateLogic(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    return true;
+  }
+
+  public boolean enableTempReactOnUpdates() {
+    return false;
+  }
+
+  public boolean isUpdateNeededOnAllAddressType(EntityManager entityManager, CMRRequestContainer cmrObjects) {
+    return false;
+  }
+
 }

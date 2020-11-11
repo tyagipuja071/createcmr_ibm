@@ -260,6 +260,7 @@ public class USBranchOffcMapping {
       calculatedMtkgArDept = StringUtils.isBlank(data.getMtkgArDept()) ? "" : data.getMtkgArDept();
       break;
     case LOGIC:
+      LOG.debug("Calculating Mktg Ar BO using logic");
       if (USUtil.SC_FED_POA.equals(scenario)) {
         if (data != null && StringUtils.isNotBlank(data.getCompany()) && COMP_NO_LIST != null && COMP_NO_LIST.contains(data.getCompany())) {
           calculatedMtkgArDept = "14W";
@@ -276,6 +277,7 @@ public class USBranchOffcMapping {
         }
       } else {
         if (data != null && StringUtils.isNotBlank(data.getEnterprise())) {
+          LOG.debug("Getting Marketing A/R BO with highest CMR count belonging to the enterprise=" + data.getEnterprise());
           String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
           String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
           String sql = ExternalizedQuery.getSql("AUTO.GET_MKTG_AR_DEPT_USCMR", usSchema);
@@ -295,10 +297,12 @@ public class USBranchOffcMapping {
           }
         }
         if (StringUtils.isBlank(calculatedMtkgArDept)) {
+          LOG.debug("Marketing A/R BO Blank. Calculating using Sub Industry Mapping");
           String indToMatch = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd().substring(0, 1);
           // iterate and display values
           for (Entry<String, List<String>> entry : indARBOMap.entrySet()) {
             List<String> industryList = entry.getValue();
+            LOG.debug("Checking Entry for ARBO>>" + entry.getKey());
             if (industryList != null && industryList.size() != 0 && industryList.contains(indToMatch)) {
               calculatedMtkgArDept = entry.getKey();
               break;
@@ -312,7 +316,7 @@ public class USBranchOffcMapping {
       calculatedMtkgArDept = StringUtils.isBlank(mtkgArDept) ? "" : mtkgArDept;
       break;
     }
-
+    LOG.debug("Calculated MktgARBO=" + calculatedMtkgArDept);
     return calculatedMtkgArDept;
   }
 
