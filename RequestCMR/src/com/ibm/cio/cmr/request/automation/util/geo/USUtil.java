@@ -32,6 +32,7 @@ import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
+import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
@@ -132,8 +133,6 @@ public class USUtil extends AutomationUtil {
   public static final String SC_SCHOOL_COLLEGE = "SCHOOL COLLEGE";
   // Leasing
   public static final String SC_LEASE_NO_RESTRICT = "NO RESTRICT";
-  public static final String SC_LEASE_32C = "32C";
-  public static final String SC_LEASE_TPPS = "TPPS";
   public static final String SC_LEASE_3CC = "3CC";
   public static final String SC_LEASE_IPMA = "IPMA";
   public static final String SC_LEASE_LPMA = "LPMA";
@@ -273,6 +272,30 @@ public class USUtil extends AutomationUtil {
         }
       }
 
+      if (SC_LEASE_IPMA.equals(scenarioSubType) || SC_LEASE_LPMA.equals(scenarioSubType)) {
+        Addr invoiceTo = requestData.getAddress("ZI01");
+        if (invoiceTo != null) {
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", invoiceTo.getAddrTxt(), "7100 Highlands Parkway");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", invoiceTo.getCity1(), "Smyrna");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", invoiceTo.getStateProv(), "GA");
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", invoiceTo.getPostCd(), "30082-4859");
+        } else {
+          AddrPK addrPk = new AddrPK();
+          LOG.debug("Adding Invoice To Address to Request ID " + requestData.getAdmin().getId().getReqId());
+          addrPk.setReqId(requestData.getAdmin().getId().getReqId());
+          addrPk.setAddrType("ZI01");
+          addrPk.setAddrSeq("1");
+          invoiceTo = new Addr();
+          invoiceTo.setId(addrPk);
+          invoiceTo.setDivn("IBM Credit LLC");
+          invoiceTo.setDept(SC_LEASE_IPMA.equals(scenarioSubType) ? "IPMA" : "LPMA");
+          invoiceTo.setAddrTxt("7100 Highlands Parkway");
+          invoiceTo.setCity1("Smyrna");
+          invoiceTo.setStateProv("GA");
+          invoiceTo.setPostCd("30082-4859");
+        }
+      }
+
       LOG.debug("US : Performing field computations for req_id : " + admin.getId().getReqId());
       // computation start
       if (engineData.hasPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION)) {
@@ -401,11 +424,10 @@ public class USUtil extends AutomationUtil {
     Data data = requestData.getData();
     boolean valid = true;
     String[] scenarioList = { SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_STATE_STATE,
-        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_32C, SC_LEASE_TPPS, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_BP_DEVELOP, SC_BP_E_HOST,
-        SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA,
-        SC_FED_TRIBAL_BUS };
-    String[] skipCompanyChecksScenarioList = { SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL, SC_DUMMY,
-        SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
+        SC_STATE_DIST, SC_STATE_COUNTY, SC_STATE_CITY, SC_LEASE_LPMA, SC_BP_POOL, SC_BP_DEVELOP, SC_BP_E_HOST, SC_FED_REGULAR, SC_FED_CLINIC,
+        SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL, SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS };
+    String[] skipCompanyChecksScenarioList = { SC_BP_POOL, SC_BP_DEVELOP, SC_BP_E_HOST, SC_BP_END_USER, SC_LEASE_3CC, SC_LEASE_SVR_CONT, SC_INTERNAL,
+        SC_DUMMY, SC_IGS, SC_IGSF, SC_REST_SSI, SC_STATE_DIST, SC_FED_REGULAR, SC_FED_CLINIC, SC_FED_FEDSTATE, SC_FED_HEALTHCARE, SC_FED_HOSPITAL,
         SC_FED_INDIAN_TRIBE, SC_FED_NATIVE_CORP, SC_FED_POA, SC_FED_TRIBAL_BUS, SC_STATE_COUNTY, SC_STATE_CITY, SC_STATE_STATE, SC_STATE_HOSPITALS,
         SC_SCHOOL_PUBLIC, SC_SCHOOL_CHARTER, SC_SCHOOL_PRIV, SC_SCHOOL_PAROCHL, SC_SCHOOL_COLLEGE, SC_LEASE_LPMA, SC_PVT_HOUSEHOLD };
     String scenarioSubType = "";
