@@ -83,6 +83,7 @@ public abstract class USBPHandler {
   private static final Logger LOG = Logger.getLogger(USBPHandler.class);
   public static final String RESTRICT_TO_END_USER = "BPQS";
   public static final String RESTRICT_TO_MAINTENANCE = "IRCSO";
+  public static final String RESTRICT_ICC = "ICC";
 
   public static final String BP_MANAGING_IR = "MIR";
   public static final String BP_INDIRECT_REMARKETER = "IRMR";
@@ -91,6 +92,7 @@ public abstract class USBPHandler {
   public static final String TYPE_FEDERAL = "9";
   public static final String TYPE_COMMERCIAL = "1";
   public static final String TYPE_BUSINESS_PARTNER = "5";
+  public static final String TYPE_LEASING = "6";
 
   public static final String SUB_TYPE_STATE_AND_LOCAL_STATE = "STATE";
   public static final String SUB_TYPE_STATE_AND_LOCAL_DISTRICT = "SPEC DIST";
@@ -101,6 +103,11 @@ public abstract class USBPHandler {
   public static final String SUB_TYPE_COMMERCIAL_REGULAR = "REGULAR";
   public static final String SUB_TYPE_BUSINESS_PARTNER_END_USER = "END USER";
   public static final String AFFILIATE_FEDERAL = "9200000";
+  public static final String SUB_TYPE_LEASE_NO_RESTRICT = "NO RESTRICT";
+  public static final String SUB_TYPE_LEASE_3CC = "3CC";
+  public static final String SUB_TYPE_LEASE_IPMA = "IPMA";
+  public static final String SUB_TYPE_LEASE_LPMA = "LPMA";
+  public static final String SUB_TYPE_LEASE_SVR_CONT = "SVR CONT";
 
   private boolean waiting;
 
@@ -117,6 +124,8 @@ public abstract class USBPHandler {
         return new USBPEndUserHandler();
       case USUtil.SC_BP_POOL:
         return new USBPPoolHandler();
+      case USUtil.SC_BP_DEVELOP:
+        return new USBPDevelopHandler();
       }
     } else if (USUtil.CG_BY_MODEL.equals(custGrp)) {
       String type = admin.getCustType();
@@ -125,7 +134,11 @@ public abstract class USBPHandler {
           && (RESTRICT_TO_END_USER.equals(data.getRestrictTo()) || RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))
           && !(deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host"))) {
         return new USBPEndUserHandler();
+      } else if (USUtil.LEASING.equals(custGrp)) {
+        return new USLeasingHandler();
       }
+    } else if (USUtil.CG_THIRD_P_LEASING.equals(custGrp)) {
+      return new USLeasingHandler();
     }
 
     return null;
@@ -229,7 +242,7 @@ public abstract class USBPHandler {
             "Y");
         details.append("- A current active CMR exists for the company.");
       } else {
-        engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
+        performAction(engineData, msg);
       }
       details.append("\n");
       return null;
@@ -252,6 +265,8 @@ public abstract class USBPHandler {
     }
 
   }
+
+  protected abstract void performAction(AutomationEngineData engineData, String msg);
 
   /**
    * 
@@ -435,7 +450,11 @@ public abstract class USBPHandler {
         details.append("Updated Transport Zone to " + (StringUtils.isNotBlank(transportZone) ? transportZone.trim() : "-blank-")).append("\n");
       }
     }
+    invoiceToOverrides(requestData, overrides, entityManager);
+  }
 
+  public void invoiceToOverrides(RequestData requestData, OverrideOutput overrides, EntityManager entityManager) {
+    // NOOP
   }
 
   /**

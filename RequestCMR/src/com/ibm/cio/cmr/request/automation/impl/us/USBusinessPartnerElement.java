@@ -68,7 +68,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     if (bpHandler == null) {
       LOG.debug("No BP Handler could be determined for the request");
       output.setResults("Skipped");
-      output.setDetails("Request is either of a non-BP scenario or is not currently supported by the element.");
+      output.setDetails("Request is either of a non-BP scenario or non-leasing scenario or is not currently supported by the element.");
       return output;
     }
 
