@@ -126,14 +126,24 @@ public abstract class USBPHandler {
         return new USBPPoolHandler();
       case USUtil.SC_BP_DEVELOP:
         return new USBPDevelopHandler();
+      case USUtil.SC_BP_E_HOST:
+        return new USBPEhostHandler();
       }
     } else if (USUtil.CG_BY_MODEL.equals(custGrp)) {
       String type = admin.getCustType();
       String deptAttn = addr.getDept() != null ? addr.getDept().toLowerCase() : "";
-      if (USUtil.BUSINESS_PARTNER.equals(type) && "E".equals(data.getBpAcctTyp())
-          && (RESTRICT_TO_END_USER.equals(data.getRestrictTo()) || RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))
-          && !(deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host"))) {
-        return new USBPEndUserHandler();
+      if (USUtil.BUSINESS_PARTNER.equals(type)) {
+        if ("E".equals(data.getBpAcctTyp())
+            && (RESTRICT_TO_END_USER.equals(data.getRestrictTo()) || RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo()))) {
+          if (!(deptAttn.contains("ehost") || deptAttn.contains("e-host") || deptAttn.contains("e host"))) {
+            return new USBPEndUserHandler();
+          } else {
+            return new USBPEhostHandler();
+          }
+        } else if (RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && deptAttn.contains("pool")
+            && ("P".equals(data.getBpAcctTyp()) || "TT2".equals(data.getCsoSite()))) {
+          return new USBPPoolHandler();
+        }
       } else if (USUtil.LEASING.equals(custGrp)) {
         return new USLeasingHandler();
       }
@@ -266,7 +276,9 @@ public abstract class USBPHandler {
 
   }
 
-  protected abstract void performAction(AutomationEngineData engineData, String msg);
+  protected void performAction(AutomationEngineData engineData, String msg) {
+    engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
+  }
 
   /**
    * 
