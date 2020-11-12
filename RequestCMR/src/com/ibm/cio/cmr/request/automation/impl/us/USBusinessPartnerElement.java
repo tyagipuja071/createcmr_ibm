@@ -86,6 +86,7 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     RequestData childRequest = null;
     boolean childCompleted = false;
     if (childReqId > 0 && bpHandler.isChildRequestSupported()) {
+      childRequest = new RequestData(entityManager, childReqId);
       childCompleted = bpHandler.checkIfChildRequestCompleted(entityManager, engineData, requestData, childRequest, details, output, ibmCmr, handler);
       if (!childCompleted) {
         this.waiting = bpHandler.isWaiting();

@@ -972,7 +972,7 @@ public abstract class USBPHandler {
 
     // check child reqId processing first
     LOG.debug("Getting child request data for Request " + childReqId);
-    childRequest = new RequestData(entityManager, childReqId);
+
     if (childRequest == null || childRequest.getAdmin() == null) {
       String msg = "Child request " + childReqId + " missing. The request needs to be manually processed.";
       details.append(msg);
