@@ -395,10 +395,14 @@ public class SouthAfricaTransformer extends MCOTransformer {
       MassUpdtData muData, String cmr) throws Exception {
 
     if (!StringUtils.isBlank(muData.getTaxCd1())) {
-      if (DEFAULT_CLEAR_CHAR.equals(muData.getTaxCd1())) {
+      if (DEFAULT_CLEAR_NUM.equals(muData.getTaxCd1())) {
         custExt.setTeleCovRep("");
       } else {
-        custExt.setTeleCovRep(muData.getTaxCd1());
+        String collBO = muData.getTaxCd1();
+        if (!StringUtils.isEmpty(collBO) && collBO.length() == 4) {
+          collBO = "Z1" + collBO;
+        }
+        custExt.setTeleCovRep(collBO);
       }
     }
 
@@ -447,6 +451,12 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
+    if (!StringUtils.isBlank(muData.getVat())) {
+      if (DEFAULT_CLEAR_CHAR.equals(muData.getVat())) {
+        legacyCust.setVat("");
+      }
+    }
+
     if (!StringUtils.isBlank(muData.getAffiliate())) {
       if (muData.getAffiliate().length() == 6) {
         legacyCust.setDeptCd(muData.getAffiliate().substring(2, 6));
@@ -455,9 +465,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    if (!StringUtils.isBlank(muData.getCustNm1())) {
-      legacyCust.setSbo(muData.getCustNm1());
-      legacyCust.setIbo(muData.getCustNm1());
+    if (!StringUtils.isBlank(muData.getCustNm1()) && !DEFAULT_CLEAR_CHAR.equals(muData.getCustNm1())) {
+      String formatSBO = muData.getCustNm1() + "000";
+      legacyCust.setSbo(formatSBO);
+      legacyCust.setIbo(formatSBO);
     }
 
     if (!StringUtils.isBlank(muData.getRepTeamMemberNo())) {
