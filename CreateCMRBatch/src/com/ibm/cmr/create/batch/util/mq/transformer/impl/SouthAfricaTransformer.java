@@ -339,20 +339,12 @@ public class SouthAfricaTransformer extends MCOTransformer {
       }
     }
 
-    boolean skipVatPrefix = "LS".equals(landedCntry) || "NA".equals(landedCntry);
-    if (dummyHandler != null && isCrossBorder && !StringUtils.isEmpty(dummyHandler.cmrData.getVat()) && !skipVatPrefix) {
-      if (dummyHandler.cmrData.getVat().matches("^[A-Z]{2}.*")) {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
-      } else {
-        legacyCust.setVat(landedCntry + dummyHandler.cmrData.getVat());
-      }
+    if (dummyHandler != null && !StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
+      legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
     } else {
-      if (dummyHandler != null && !StringUtils.isEmpty(dummyHandler.messageHash.get("VAT"))) {
-        legacyCust.setVat(dummyHandler.messageHash.get("VAT"));
-      } else {
-        legacyCust.setVat(data.getVat());
-      }
+      legacyCust.setVat(data.getVat());
     }
+
   }
 
   private void blankOrdBlockFromData(EntityManager entityManager, Data data) {
