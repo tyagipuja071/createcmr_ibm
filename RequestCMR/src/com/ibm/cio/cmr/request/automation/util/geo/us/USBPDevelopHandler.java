@@ -46,11 +46,9 @@ public class USBPDevelopHandler extends USBPHandler {
       mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
     }
     if (mapping != null) {
-      String reqCompNo = data.getCompany() != null ? data.getCompany() : "";
-      String mappingCompNo = mapping.getCompanyNo();
-      String reqCompnayNme = data.getCompanyNm() != null ? data.getCompanyNm() : "";
-      String mappingCompName = mapping.getName();
-      if (reqCompNo.equalsIgnoreCase(mappingCompNo) && reqCompnayNme.equalsIgnoreCase(mappingCompName)) {
+      String req_CompNo = data.getCompany() != null ? data.getCompany() : "";
+      String map_CompNo = mapping.getCompanyNo();
+      if (StringUtils.isNotBlank(req_CompNo) && req_CompNo.equalsIgnoreCase(map_CompNo)) {
         addRejection = false;
       }
     }
@@ -94,8 +92,8 @@ public class USBPDevelopHandler extends USBPHandler {
       String dept = StringUtils.isNotBlank(addr.getDept()) ? addr.getDept() : "";
       String custNm1 = StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "";
       String custNm2 = StringUtils.isNotBlank(admin.getMainCustNm2()) ? admin.getMainCustNm2() : "";
-      String endUser = divn.concat(dept);
-      String legalName = custNm1.concat(custNm2);
+      String endUser = AutomationUtil.getCleanString(divn.concat(dept));
+      String legalName = AutomationUtil.getCleanString(custNm1.concat(custNm2));
 
       if (StringUtils.isNotBlank(legalName) && legalName.equalsIgnoreCase(endUser)) {
         // scenario 1
@@ -231,84 +229,85 @@ public class USBPDevelopHandler extends USBPHandler {
       Data childData = childRequest.getData();
       if ("BPQS".equalsIgnoreCase(childData.getRestrictTo()) && "P".equalsIgnoreCase(childData.getBpAcctTyp())) {
 
-        details.append(" - Affiliate: " + data.getEnterprise() + "\n");
+        details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrEnterpriseNumber());
 
-        details.append(" - Tax Class / Code 1: " + data.getTaxCd1() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX CLASS / CODE 1", data.getTaxCd1(), "J000");
+        details.append(" - Tax Class / Code 1: " + "J000" + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J000");
 
-        details.append(" - Tax Exempt Status: " + data.getSpecialTaxCd() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "TAX EXEMPT", data.getSpecialTaxCd(), "Z");
+        details.append(" - Tax Exempt Status: " + "Z" + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "Z");
 
-        details.append(" - Subindustry: " + data.getSubIndustryCd() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUBINDUSTRY", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
+        details.append(" - Subindustry: " + ibmCmr.getCmrSubIndustry() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(),
+            ibmCmr.getCmrSubIndustry());
 
-        details.append(" - ISIC: " + data.getIsicCd() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC", data.getIsicCd(), ibmCmr.getCmrIsic());
+        details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
 
-        details.append(" - INAC: " + data.getIsicCd() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC", data.getInacCd(), ibmCmr.getCmrInac());
+        details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
 
       } else if ("BPQS".equalsIgnoreCase(childData.getRestrictTo()) && "TT2".equalsIgnoreCase(childData.getCsoSite())) {
-        details.append(" - DIVISION: " + zs01.getDivn() + "\n");
+        details.append(" - DIVISION: " + ibmCmr.getCmrName() + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADDR", "DIVISION", zs01.getDivn(), ibmCmr.getCmrName());
 
-        details.append(" - ISIC: " + data.getIsicCd() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC", data.getIsicCd(), ibmCmr.getCmrIsic());
+        details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
 
-        details.append(" - AFFILIATE: " + zs01.getDivn() + "\n");
+        details.append(" - AFFILIATE: " + ibmCmr.getCmrAffiliate() + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrAffiliate());
 
-        details.append(" - INAC: " + data.getIsicCd() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC", data.getInacCd(), ibmCmr.getCmrInac());
+        details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
 
-        details.append(" - Tax Class / Code 1: " + data.getTaxCd1() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX CLASS / CODE 1", data.getTaxCd1(), "J666");
+        details.append(" - Tax Class / Code 1: " + "J666" + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J666");
 
-        details.append(" - Tax Exempt Status: " + data.getSpecialTaxCd() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "TAX EXEMPT", data.getSpecialTaxCd(), "");
+        details.append(" - Tax Exempt Status: " + "" + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
 
       }
 
-      details.append(" - Restrict To: " + data.getRestrictTo() + "\n");
+      details.append(" - Restrict To: " + ibmCmr.getUsCmrRestrictTo() + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT TO", data.getRestrictTo(), ibmCmr.getUsCmrRestrictTo());
 
-      details.append(" - BP Account Type: " + data.getBpAcctTyp() + "\n");
+      details.append(" - BP Account Type: " + "D" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP ACCOUNT TYPE", data.getBpAcctTyp(), "D");
 
-      details.append(" - Marketing Dept: " + data.getMktgDept() + "\n");
+      details.append(" - Marketing Dept: " + "EI3" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MARKETING DEPT", data.getMktgDept(), "EI3");
 
-      details.append(" - Miscellaneous Bill Code: " + data.getMiscBillCd() + "\n");
+      details.append(" - Miscellaneous Bill Code: " + "I" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISCELLANEOUS BILL CD", data.getMiscBillCd(), "I");
 
-      details.append(" - Business Partner Name: " + data.getBpName() + "\n");
+      details.append(" - Business Partner Name: " + "Managing IR" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BUSINESS PARTNER NAME", data.getBpName(), "Managing IR");
 
-      details.append(" - PCC A/R Dept: " + data.getPccArDept() + "\n");
+      details.append(" - PCC A/R Dept: " + "G8M" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC A/R Dept", data.getPccArDept(), "G8M");
 
-      details.append(" - SVC A/R Office : " + data.getSvcArOffice() + "\n");
+      details.append(" - SVC A/R Office : " + "IKE" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC A/R Office ", data.getSvcArOffice(), "IKE");
 
     }
 
     createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
 
-    String divn_attn = StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn().concat(zs01.getDept()) : "";
+    String divn_attn = StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn().concat(zs01.getDept()).toUpperCase() : "";
 
     if (demoDev.contains(divn_attn)) {
-      details.append(" - CSO Site : " + data.getCsoSite() + "\n");
+      details.append(" - CSO Site : " + "YBV" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO SITE", data.getCsoSite(), "YBV");
 
-      details.append(" - Marketing A/R Dept  : " + data.getMtkgArDept() + "\n");
+      details.append(" - Marketing A/R Dept  : " + "DI3" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MARKETING A/R DEPT", data.getMtkgArDept(), "DI3");
 
     } else if (leaseDev.contains(divn_attn)) {
-      details.append(" - CSO Site : " + data.getCsoSite() + "\n");
+      details.append(" - CSO Site : " + "TF7" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO SITE", data.getCsoSite(), "TF7");
 
-      details.append(" - Marketing A/R Dept  : " + data.getMtkgArDept() + "\n");
+      details.append(" - Marketing A/R Dept  : " + "DI2" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MARKETING A/R DEPT", data.getMtkgArDept(), "DI2");
     }
   }
