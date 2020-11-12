@@ -33,11 +33,10 @@
 					<lovId>CollectionCd</lovId>
 					<length>6</length>
 				</column>
-				<column>
+				<column number="true" exactLength="true">
 					<label>Collection Branch Office</label>
 					<dbColumn>TAX_CD1</dbColumn>
 					<width>30</width>
-					<lovId>CollBranchOff</lovId>
 					<length>4</length>
 				</column>
 				<column>
@@ -94,7 +93,7 @@
 					<label>VAT</label>
 					<dbColumn>VAT</dbColumn>
 					<width>5</width>
-					<length>10</length>
+					<length>20</length>
 				</column>
 				<column exactLength="false">
 					<label>Phone #</label>
