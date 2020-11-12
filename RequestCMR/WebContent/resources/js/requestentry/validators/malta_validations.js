@@ -167,7 +167,7 @@ function addAddressFieldValidators() {
           return;
         }
         if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
-          return new ValidationResult(null, false, postCd + ' is not a valid value for Postal Code. Only alphabets, numbers, and spaces combination is valid.');
+          return new ValidationResult(null, false, postCd + ' is not a valid format for Postal Code."ABC 1234"');
         }
         return new ValidationResult(null, true);
       }
@@ -664,12 +664,17 @@ function ADDRESS_GRID_showCheck(value, rowIndex, grid) {
   return canRemoveAddress(value, rowIndex, grid);
 }
 
-function hideCustName4() {
-  var custGroup = FormManager.getActualValue('custGrp');
-  if (custGroup == "CROSS") {
-    FormManager.hide('CustomerName4', 'custNm4');
+function hidePpsceidExceptBP() {
+  var reqType = FormManager.getActualValue('reqType');
+  if (reqType != 'C') {
+    return;
+  }
+  var custType = FormManager.getActualValue('custSubGrp');
+
+  if (custType == 'BUSPR' || custType == 'XBP') {
+    FormManager.show('PPSCEID', 'ppsceid');
   } else {
-    FormManager.show('CustomerName4', 'custNm4');
+    FormManager.hide('PPSCEID', 'ppsceid');
   }
 }
 
@@ -688,6 +693,7 @@ function addAfterConfigMalta() {
   }
   lockOrderBlock();
   enterpriseMalta();
+  hidePpsceidExceptBP();
   classFieldBehaviour();
   disableEnableFieldsForMT();
   setAddressDetailsForView();
@@ -700,6 +706,7 @@ function addAfterTemplateLoadMalta(fromAddress, scenario, scenarioChanged) {
     }
   }
   enterpriseMalta();
+  hidePpsceidExceptBP();
 }
 
 function disableEnableFieldsForMT() {
@@ -828,9 +835,8 @@ function addIsicClassificationCodeValidator() {
 
 /* End 1430539 */
 dojo.addOnLoad(function() {
-  GEOHandler.MCO2 = [ '373', '382', '383', '610', '635', '636', '637', '645', '656', '662', '667', '669', '670', '691', '692', '698', '700', '717', '718', '725', '745', '753', '764', '769', '770',
-      '780', '782', '804', '810', '825', '827', '831', '833', '835', '840', '841', '842', '851', '857', '876', '879', '880', '881', '883' ];
-  console.log('adding MCO2 functions...');
+  GEOHandler.MCO2 = [ '780' ];
+  console.log('adding MALTA functions...');
   GEOHandler.enableCopyAddress(GEOHandler.MCO2, validateMCOCopy, [ 'ZD01' ]);
   GEOHandler.enableCustomerNamesOnAddress(GEOHandler.MCO2);
   GEOHandler.addAddrFunction(updateMainCustomerNames, GEOHandler.MCO2);
@@ -844,8 +850,6 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockAbbrv, GEOHandler.MCO2);
   // GEOHandler.addAfterTemplateLoad(setSalesRepValue, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(setScenarioBehaviour, GEOHandler.MCO2);
-  GEOHandler.addAfterTemplateLoad(hideCustName4, GEOHandler.MCO2);
-  GEOHandler.addAfterConfig(hideCustName4, GEOHandler.MCO2);
   GEOHandler.addAfterTemplateLoad(addValidatorStreet, GEOHandler.MCO2);
   GEOHandler.addAfterConfig(addValidatorStreet, GEOHandler.MCO2);
 
