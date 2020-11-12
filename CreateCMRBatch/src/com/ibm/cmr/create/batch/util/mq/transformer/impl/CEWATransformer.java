@@ -527,10 +527,10 @@ public class CEWATransformer extends MCOTransformer {
   public void transformLegacyAddressDataMassUpdate(EntityManager entityManager, CmrtAddr legacyAddr, MassUpdtAddr muAddr, String cntry, CmrtCust cust,
       Data data, LegacyDirectObjectContainer legacyObjects) {
     LOG.debug("CEWA mass update >> Mapping address lines..");
+    LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
+    legacyAddr.setForUpdate(true);
     if (!LegacyCommonUtil.isCheckDummyUpdate(muAddr)) {
-      legacyAddr.setForUpdate(true);
-      LegacyCommonUtil.transformBasicLegacyAddressMassUpdate(entityManager, legacyAddr, muAddr, cntry, cust, data);
-
+      LOG.debug("isCheckDummyUpdate false...");
       if (!StringUtils.isBlank(muAddr.getAddrTxt())) {
         legacyAddr.setStreet(muAddr.getAddrTxt());
       } else {
@@ -551,12 +551,10 @@ public class CEWATransformer extends MCOTransformer {
       } else {
         legacyAddr.setZipCode("");
       }
-
     }
 
     if (!StringUtils.isBlank(muAddr.getCustPhone())) {
       if (muAddr.getId().getAddrType().equals("ZD01")) {
-        legacyAddr.setForUpdate(true);
         if (DEFAULT_CLEAR_NUM.equals(muAddr.getCustPhone().trim())) {
           legacyAddr.setAddrPhone("");
         } else {
