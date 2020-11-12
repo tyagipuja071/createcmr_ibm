@@ -1763,12 +1763,14 @@ function resetVatRequired(value) {
 
     if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && custSubType != '' ) {
       FormManager.enable('vatExempt');
+      if(_isScenarioChanged  && !value && (custSubType != '' && 
+          !(custSubType.includes('XPC') || custSubType.includes('XIB') || custSubType.includes('IB') || custSubType.includes('PC')))){
+        FormManager.getField('vatExempt').set('checked', false);
+      }
       if ( dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
           FormManager.removeValidator('vat', Validators.REQUIRED);
       }
-      if(_isScenarioChanged  && !value){
-        FormManager.getField('vatExempt').set('checked', false);
-      }
+      
     } else {
       FormManager.getField('vatExempt').set('checked', false);
       FormManager.hide('VATExempt', 'vatExempt');
