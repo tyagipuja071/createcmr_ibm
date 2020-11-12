@@ -705,7 +705,7 @@ function afterConfigChange() {
       FormManager.show('DeactivateToActivateCMR', 'func');
       if (dijit.byId('func')) {
         FormManager.getField('func').set('checked', true);
-      } else {
+      } else if (dojo.byId('func')) {
         dojo.byId('func').checked = true;
       }
       FormManager.disable('func');
