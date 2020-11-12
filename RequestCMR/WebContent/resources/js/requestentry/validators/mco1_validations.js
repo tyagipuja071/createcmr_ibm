@@ -101,7 +101,7 @@ function setCtcSalesRepSBO(value) {
   var sbo = FormManager.getActualValue('salesBusOffCd');
   var scenario = FormManager.getActualValue('custSubGrp');
   var role = FormManager.getActualValue('userRole').toUpperCase();
-  var internalBUScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN', 'LSXBP', 'LSBP', 'NAXBP', 'NABP', 'SZXBP', 'SZBP', 'ZAXBP', 'ZABP' ];
+  var internalBUScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN', 'LSXBP', 'LSBP', 'NAXBP', 'NABP', 'SZXBP', 'SZBP', 'ZAXBP', 'ZABP', 'SZBLC', 'LSBLC' , 'NABLC' ];
   var isuCtc = value + clientTier;
   if (reqType != 'C') {
     return;
