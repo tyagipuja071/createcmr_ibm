@@ -209,7 +209,7 @@ public class USBPPoolHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
     }
 
-    return true;
+    return false;
   }
 
   private boolean doFieldComputationsForT2CMR(EntityManager entityManager, GEOHandler handler, RequestData requestData,
@@ -222,7 +222,7 @@ public class USBPPoolHandler extends USBPHandler {
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "P");
 
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
-    return true;
+    return false;
   }
 
   @Override
