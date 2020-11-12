@@ -1101,7 +1101,7 @@ public class METransformer extends EMEATransformer {
           && CMR_REQUEST_REASON_TEMP_REACT_EMBARGO.equals(admin.getReqReason()) && admin.getReqStatus() != null
           && admin.getReqStatus().equals(CMR_REQUEST_STATUS_CPR) && (rdcEmbargoCd != null && !StringUtils.isBlank(rdcEmbargoCd))
           && "E".equals(rdcEmbargoCd) && (dataEmbargoCd == null || StringUtils.isBlank(dataEmbargoCd))) {
-        legacyCust.setEmbargoCd("");
+        legacyCust.setEmbargoCd(rdcEmbargoCd);
         blankOrdBlockFromData(entityManager, data);
       }
 
