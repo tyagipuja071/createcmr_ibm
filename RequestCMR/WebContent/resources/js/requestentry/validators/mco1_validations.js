@@ -417,8 +417,10 @@ function addAddressFieldValidators() {
         var landCntry = FormManager.getActualValue('landCntry');
 
         if (landCntry != 'ZA') {
-          if (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('poBox') != '') {
-            return new ValidationResult(null, false, 'Customer Name Con\'t, Street Con\'t and POBox cannot be filled at once for cross-borders');
+          if ((FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '' && FormManager.getActualValue('poBox') != '') 
+              || ((FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '') 
+              || (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('poBox') != ''))) {
+            return new ValidationResult(null, false, 'Please fill-out either Customer Name Con\'t or Street Con\'t and/or POBox only for cross-borders.');
           }
         }
         return new ValidationResult(null, true);
@@ -426,23 +428,6 @@ function addAddressFieldValidators() {
     };
   })(), null, 'frmCMR_addressModal');
   
-  // Name Con't, Address Con't can't or POXBOX be filled together
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        var cntryRegion = FormManager.getActualValue('countryUse');
-        var landCntry = FormManager.getActualValue('landCntry');
-
-        if (landCntry != 'ZA') {
-          if ((FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('addrTxt2') != '') 
-              || (FormManager.getActualValue('custNm2') != '' && FormManager.getActualValue('poBox') != '')) {
-            return new ValidationResult(null, false, 'Customer Name Con\'t and Street Con\'t or POBox cannot be filled at once for cross-borders');
-          }
-        }
-        return new ValidationResult(null, true);
-      }
-    };
-  })(), null, 'frmCMR_addressModal');
 }
 
 function hasAttPersonPrefix(attPerson) {
@@ -1752,6 +1737,7 @@ function resetVatRequired(value) {
   }
   if (FormManager.getActualValue('reqType') == 'C') {
     var custSubType = FormManager.getActualValue('custSubGrp');
+    var isIBPriv = custSubType != '' && (custSubType.includes('XPC') || custSubType.includes('XIB') || custSubType.includes('IB') || custSubType.includes('PC'));
     var zs01Cntry = FormManager.getActualValue('cmrIssuingCntry');
     var ret = cmr.query('VAT.GET_ZS01_CNTRY', {
       REQID : FormManager.getActualValue('reqId'),
@@ -1763,17 +1749,18 @@ function resetVatRequired(value) {
 
     if (GEOHandler.VAT_RQD_CROSS_LNDCNTRY.indexOf(zs01Cntry) >= 0 && custSubType != '' ) {
       FormManager.enable('vatExempt');
-      if(_isScenarioChanged  && !value && (custSubType != '' && 
-          !(custSubType.includes('XPC') || custSubType.includes('XIB') || custSubType.includes('IB') || custSubType.includes('PC')))){
+      if(_isScenarioChanged  && !value && (custSubType != '' && !isIBPriv)){
         FormManager.getField('vatExempt').set('checked', false);
       }
-      if ( dijit.byId('vatExempt') != undefined && dijit.byId('vatExempt').get('checked')) {
+      if ( dijit.byId('vatExempt') != undefined && (dijit.byId('vatExempt').get('checked')  
+          || ( !dijit.byId('vatExempt').get('checked') && isIBPriv))) {
           FormManager.removeValidator('vat', Validators.REQUIRED);
       }
       
     } else {
       FormManager.getField('vatExempt').set('checked', false);
       FormManager.hide('VATExempt', 'vatExempt');
+      FormManager.removeValidator('vat', Validators.REQUIRED);
       
     }
     
@@ -1804,13 +1791,10 @@ function vatExemptOnScenario() {
   var vatExempt = dijit.byId('vatExempt').get('checked');
 
   if (custSubType != '' && (custSubType.includes('XPC') || custSubType.includes('XIB') || custSubType.includes('IB') || custSubType.includes('PC'))) {
-      if ((vat == null || vat.length == 0) && vatExempt != true) {
+      if (_isScenarioChanged && (vat == null || vat.length == 0) && vatExempt != true) {
         FormManager.getField('vatExempt').set('checked', true);
         FormManager.removeValidator('vat', Validators.REQUIRED);
-      } else {
-        FormManager.getField('vatExempt').set('checked', false);
-        FormManager.addValidator('vat', Validators.REQUIRED, [ 'VAT' ], 'MAIN_CUST_TAB');
-      }
+      } 
    }
 }
 
