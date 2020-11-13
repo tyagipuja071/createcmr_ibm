@@ -3269,13 +3269,14 @@ span.ibm-thumbnail span.ibm-video-play {
 	margin-top: 40px;
 	min-width: 980px
 }
-
+/* renovation */
 #ibm-pcon {
 	width: 778px;
 	margin: 20px auto;
 	padding: 0 0 10px 202px;
 	background: #FFF;
-	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95)
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+	margin-top: 0px;
 }
 
 #ibm-pcon:after {
@@ -3746,7 +3747,9 @@ span.ibm-thumbnail span.ibm-video-play {
 	background-position: 0 -316px !important
 }
 
+/* renovation */
 .ibm-columns {
+	width: 1060px;
 	padding: 0 10px;
 	margin: 0 auto;
 	clear: both
@@ -3833,12 +3836,14 @@ span.ibm-thumbnail span.ibm-video-play {
 	width: 748px
 }
 
+/* renovation */
 .ibm-col-6-1 {
-	width: 140px
+	width: 150px
 }
 
+/* renovation */
 .ibm-col-6-2 {
-	width: 300px
+	width: 330px
 }
 
 .ibm-col-6-4 {
@@ -4911,10 +4916,11 @@ a.ibm-ribbon-prev {
 	background: linear-gradient(top, transparent, rgba(0, 0, 0, 0.05))
 }
 
+/* renovation */
 #ibm-content-nav #ibm-primary-tabs ul.ibm-tabs {
 	margin: 0 auto;
 	padding: 0 20px;
-	width: 100%;
+	width: 1060px;
 }
 
 #ibm-content-nav #ibm-primary-tabs ul.ibm-tabs li {
@@ -4996,10 +5002,11 @@ a.ibm-ribbon-prev {
 	text-align: center
 }
 
+/* renovation */
 #ibm-content-nav #ibm-secondary-tabs ul.ibm-tabs, .dj_ie7 #ibm-content-nav #ibm-secondary-tab-list.ibm-columns
 	{
 	margin: 0 auto;
-	width: 100%;
+	width: 1060px;
 }
 
 .ibm-landing-page #ibm-content-nav #ibm-secondary-tabs ul.ibm-tabs li {

@@ -12,6 +12,9 @@
     height: 20px;
     vertical-align: sub;
   }
+  div.cmr-message-box-error, #cmr-info-box p, #cmr-error-box p {
+    margin-left: 100px;
+  } 
 </style>
 <script src="${resourcesPath}/js/login.js?${cmrv}" type="text/javascript"></script>
 
@@ -22,6 +25,9 @@
       <div class="ibm-columns">
         <form:form method="POST" action="performLogin" id="login-form" name="frmCMR" class="ibm-column-form ibm-styled-form"
           modelAttribute="loginUser">
+          <div class="ibm-col-2-1" style="width:100px">
+            &nbsp;
+          </div>
           <div class="ibm-col-2-1">
             <form:hidden path="r" />
             <!-- Username Field -->

@@ -36,6 +36,17 @@ function openRequestgrid_GRID_onLoad(){
   }
 }
 </script>
+<style>
+.ibm-columns {
+  width: 1150px;
+}
+.ibm-col-1-1 {
+  width: 1150px;
+}
+div.cmr-sub {
+  padding-left: 0;
+}
+</style>
 <form:form method="POST" action="${contextPath}/workflow/open" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="wfreq">
 
   <form:hidden path="reqId" id="mainReqId" />
@@ -48,7 +59,7 @@ function openRequestgrid_GRID_onLoad(){
 
     <cmr:section id="GRIDSECTION">
       <br>
-      <cmr:grid url="/workflow/open/list.json" id="openRequestgrid" useFilter="true">
+      <cmr:grid url="/workflow/open/list.json" id="openRequestgrid" useFilter="true" width="1120" innerWidth="1120">
         <cmr:gridCol width="80px" field="reqId" header="${ui.grid.requestID}" align="right">
           <cmr:formatter functionName="requestIdFormatter" />
         </cmr:gridCol>

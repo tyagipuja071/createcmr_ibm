@@ -454,7 +454,14 @@ div.cmr-actions {
   position: fixed;
   bottom: 0;
   border-top: 1px Solid #666;
-  background: #367aa3 !important;
+  background: #367aa3;
+
+  background: #a9db80; /* Old browsers */
+  background: -moz-linear-gradient(top, #a9db80 0%, #96c56f 100%);
+  background: -webkit-linear-gradient(top, #a9db80 0%, #96c56f 100%);
+  background: linear-gradient(to bottom, #a9db80 0%, #96c56f 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a9db80',
+    endColorstr='#96c56f', GradientType=0); /* IE6-9 */
 }
 
 div.cmr-action-dd {
@@ -484,7 +491,7 @@ div.cmr-source-sys-txt {
   letter-spacing: 0.5px;
   text-shadow: none;
   border-radius: 3px;
-  background: green;
+  background: #888;
   padding-left: 5px;
   padding-right: 5px;
   padding-top: 2px;
@@ -505,6 +512,7 @@ div#widget_yourAction span.dijitPlaceHolder {
 
 input#yourAction {
   padding-left: 2px !important;
+  font-weight: bold;
 }
 
 img.cmr-proceed-icon {
@@ -868,14 +876,10 @@ div.cmr-quick-search-btn {
   z-index: 999;
   color: white;
   font-weight: 300 !important;
-  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#a9db80+0,96c56f+100;Green+3D+%232 */
   background: #a9db80; /* Old browsers */
   background: -moz-linear-gradient(top, #a9db80 0%, #96c56f 100%);
-  /* FF3.6-15 */
   background: -webkit-linear-gradient(top, #a9db80 0%, #96c56f 100%);
-  /* Chrome10-25,Safari5.1-6 */
   background: linear-gradient(to bottom, #a9db80 0%, #96c56f 100%);
-  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a9db80',
     endColorstr='#96c56f', GradientType=0); /* IE6-9 */
   text-shadow: none;
@@ -884,4 +888,48 @@ div.cmr-quick-search-btn {
 
 div.login-info {
 	font-size: 14px;
+}
+
+.nihilo .dijitMenuItem {
+  font-family: IBM Plex Sans, Arial !important;	 
+}
+
+div.cmr-overall-status {
+	border: 1px Solid #AAA;
+	border-radius : 20px;
+	padding: 10px;
+	text-align: center;
+	font-weight: bold;
+	text-shadow: 1px 1px #DDD;
+	float:right;
+	min-width: 150px;
+	background: #a7c7dc; /* Old browsers */
+	background: -moz-linear-gradient(top,  #a7c7dc 0%, #85b2d3 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #a7c7dc 0%,#85b2d3 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #a7c7dc 0%,#85b2d3 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a7c7dc', endColorstr='#85b2d3',GradientType=0 ); /* IE6-9 */
+}
+
+div.cmr-overall-status-dra {
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top,  #ffffff 0%, #e5e5e5 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #ffffff 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #ffffff 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+}
+
+div.cmr-overall-status-rej {
+	background: #febbbb; /* Old browsers */
+	background: -moz-linear-gradient(top,  #febbbb 0%, #fe9090 45%, #ff5c5c 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #febbbb 0%,#fe9090 45%,#ff5c5c 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #febbbb 0%,#fe9090 45%,#ff5c5c 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#febbbb', endColorstr='#ff5c5c',GradientType=0 ); /* IE6-9 */
+}
+
+div.cmr-overall-status-com {
+	background: #cdeb8e; /* Old browsers */
+	background: -moz-linear-gradient(top,  #cdeb8e 0%, #a5c956 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #cdeb8e 0%,#a5c956 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #cdeb8e 0%,#a5c956 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cdeb8e', endColorstr='#a5c956',GradientType=0 ); /* IE6-9 */
 }

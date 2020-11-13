@@ -164,7 +164,7 @@ function getRandomColor() {
   }
   div.logo-text {
    display: inline-block;
-   width: 370px;
+   width: 470px;
    vertical-align: top;
    padding-bottom: 20px;
   }
@@ -193,7 +193,7 @@ function getRandomColor() {
 				<div class="ibm-col-1-1">
 							
 					<div class="ibm-columns">
-						<div class="ibm-col-4-2" style="width:500px">
+						<div class="ibm-col-4-2" style="width:600px">
 							<div id="welcome_note_id">
                  <div class="logo">
                    <img src="${resourcesPath}/images/CreateCMRLogo.png" class="logo">

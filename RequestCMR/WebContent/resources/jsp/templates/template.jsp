@@ -112,8 +112,11 @@ System.out.println("hello");
 		<div id="ibm-leadspace-head" class="ibm-alternate ibm-no-tabs">
 			<div id="ibm-leadspace-body">
 				<div class="ibm-columns">
-					<div class="ibm-col-1-1">
-						<h1>Login</h1>
+          <div class="ibm-col-1-1">
+            &nbsp;
+          </div>
+					<div class="ibm-col-1-1" style="padding-bottom:20px;">
+						<h1 style="margin-left:100px;">Login</h1>
 					</div>
 				</div>
 			</div>

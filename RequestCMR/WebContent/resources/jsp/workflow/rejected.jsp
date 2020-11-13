@@ -34,6 +34,17 @@ function rejectedRequestgrid_GRID_onLoad(){
 
 }
 </script>
+<style>
+.ibm-columns {
+  width: 1150px;
+}
+.ibm-col-1-1 {
+  width: 1150px;
+}
+div.cmr-sub {
+  padding-left: 0;
+}
+</style>
 
 <form:form method="POST" action="${contextPath}/workflow/rejected" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="wfreq">
 
@@ -47,7 +58,7 @@ function rejectedRequestgrid_GRID_onLoad(){
 
     <cmr:section id="GRIDSECTION">
       <br>
-      <cmr:grid url="/workflow/rejected/list.json" id="rejectedRequestgrid" useFilter="true">
+      <cmr:grid url="/workflow/rejected/list.json" id="rejectedRequestgrid" useFilter="true" width="1120" innerWidth="1120">
         <cmr:gridCol width="80px" field="reqId" header="${ui.grid.requestID}" align="right">
           <cmr:formatter functionName="requestIdFormatter" />
         </cmr:gridCol>

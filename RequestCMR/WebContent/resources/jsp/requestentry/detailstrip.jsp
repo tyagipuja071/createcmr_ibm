@@ -11,8 +11,16 @@ boolean newEntry = BaseModel.STATE_NEW == reqentry.getState();
 if (readOnly == null){
   readOnly = false;
 }
+String extraClass = "";
+if ("DRA".equals(reqentry.getReqStatus())){
+    extraClass= " cmr-overall-status-dra";
+} else if ("PRJ".equals(reqentry.getReqStatus())){
+    extraClass= " cmr-overall-status-rej";
+} else if ("COM".equals(reqentry.getReqStatus())){
+  extraClass= " cmr-overall-status-com";
+}
 %><cmr:row topPad="10">
-  <cmr:column span="2" width="100">
+  <cmr:column span="2" width="170">
     <p>
       <cmr:label fieldId="reqId"><cmr:fieldLabel fieldId="RequestID" />:</cmr:label>
       <c:if test="${reqentry.reqId > 0}">
@@ -23,13 +31,7 @@ if (readOnly == null){
       </c:if>
     </p>
   </cmr:column>
-  <cmr:column span="2" width="200">
-    <p>
-      <cmr:label fieldId="genReqStat">${ui.genReqStat}:</cmr:label>
-      ${reqentry.overallStatus}
-    </p>
-  </cmr:column>
-  <cmr:column span="2" width="170">
+  <cmr:column span="2" width="250" >
     <p>
       <cmr:label fieldId="lockedBy">${ui.lockedBy}:</cmr:label>
       ${reqentry.lockByNm}
@@ -37,22 +39,30 @@ if (readOnly == null){
   </cmr:column>
   <cmr:column span="1" width="200">
             <p>
-              <label for="lockTs">${ui.procStatus}: </label>
-             ${reqentry.processingStatus}
+              <label for="lockTs">${ui.yourRole}: </label>
+             ${reqentry.userRole}
             </p>
           </cmr:column>
 <%if (!newEntry){ %>
-  <cmr:column span="1" width="180">
+  <cmr:column span="1" width="200">
     <div style="padding-top:8px">
         <cmr:button label="${ui.btn.requestSummary}" onClick="showSummaryScreen(${reqentry.reqId}, '${reqentry.reqType}')" highlight="false" pad="false"/>
             <img class="pdf" title="Export Request Details to PDF" onclick="exportToPdf()" src="${resourcesPath}/images/pdf-icon.png">
      </div>
   </cmr:column>
 <%} %>
+  
+  <div class="ibm-col-6-1" style="width:180px;float:right;">
+    <div class="cmr-overall-status<%=extraClass%>" style="margin-top:0;">
+      ${reqentry.overallStatus}<br>
+    </div>
+  </div>  
 
 </cmr:row>
+<div class="cmr-role-tag">
+</div>
       <cmr:row topPad="10">
-<%if (!readOnly){ %>
+<%if (!readOnly && false){ %>
         <cmr:column span="2" >
           <span style="color:red;font-size:16px;font-weight:bold">*</span> 
         <span style="font-size:14px;font-style:italic;color:#333">
