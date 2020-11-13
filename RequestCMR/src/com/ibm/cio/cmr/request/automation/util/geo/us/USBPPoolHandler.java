@@ -217,7 +217,7 @@ public class USBPPoolHandler extends USBPHandler {
     Data data = requestData.getData();
 
     details.append(" - Marketing A/R Dept: 7NZ\n");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "7NZ");
 
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "P");
 
