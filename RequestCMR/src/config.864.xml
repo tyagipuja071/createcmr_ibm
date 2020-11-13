@@ -47,7 +47,7 @@
 				</column>
 				<column>
 					<label>SBO/Search Term</label>
-					<dbColumn>SALES_BO_CD</dbColumn>
+					<dbColumn>CUST_NM1</dbColumn>
 					<width>20</width>
 					<length>4</length>
 				</column>
