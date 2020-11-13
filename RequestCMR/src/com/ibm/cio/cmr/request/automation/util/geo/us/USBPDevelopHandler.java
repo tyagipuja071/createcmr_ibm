@@ -164,10 +164,41 @@ public class USBPDevelopHandler extends USBPHandler {
           ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, null);
           if (ibmCmr != null && StringUtils.isNotBlank(ibmCmr.getCmrNum())) {
             // existing CMR so , create BP Pool CMR
-            output.setResults("BP Pool CMR will be created...");
-            output.setDetails("No existing T2 pool CMR , hence BP Pool CMR will be created.");
-            output.setOnError(false);
-            return true;
+            childReqId = createChildRequest(entityManager, requestData, engineData);
+            {
+              String childErrorMsg = "- Pool request creation cannot be done, errors were encountered -";
+              if (childReqId <= 0) {
+                details.append(childErrorMsg + "\n");
+                engineData.addRejectionComment("OTH", childErrorMsg, "", "");
+                output.setDetails(details.toString());
+                output.setOnError(true);
+                output.setResults("Issues Encountered");
+                return false;
+              } else {
+                requestData.getData().setRestrictTo("BPQS");
+                requestData.getData().setBpAcctTyp("P");
+                String childDetails = completeChildRequestDataAndAddress(entityManager, requestData, engineData, childReqId, null);
+                if (childDetails == null) {
+                  details.append(childErrorMsg + "\n");
+                  engineData.addRejectionComment("OTH", childErrorMsg, "", "");
+                  output.setOnError(true);
+                  output.setResults("Issues Encountered");
+                  output.setDetails(details.toString());
+                  return false;
+                } else {
+                  details.append("Child Request " + childReqId + " created for the Pool CMR record of " + addr.getDivn()
+                      + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
+                      + ".\nThe system will wait for completion of the child record before processing the request.\n");
+                  details.append(childDetails + "\n");
+                  setWaiting(true);
+                  output.setDetails(details.toString());
+                  output.setResults("Waiting on Child Request...");
+                  output.setOnError(false);
+                  return true;
+                }
+
+              }
+            }
           } else {
             // validate legal name in DnB
             DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr == null);
