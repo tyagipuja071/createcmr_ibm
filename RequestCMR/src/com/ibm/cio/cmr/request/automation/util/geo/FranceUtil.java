@@ -159,6 +159,7 @@ public class FranceUtil extends AutomationUtil {
             request.setCustomerName(name);
             request.setIssuingCountry(data.getCmrIssuingCntry());
             request.setLandedCountry(zs01.getLandCntry());
+            request.setNameMatch("Y");
             client.setReadTimeout(1000 * 60 * 5);
             LOG.debug("Connecting to the Duplicate CMR Check Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
             MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.CMR_SERVICE_ID, request, MatchingResponse.class);
