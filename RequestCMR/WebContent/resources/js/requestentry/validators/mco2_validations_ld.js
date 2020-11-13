@@ -1303,9 +1303,11 @@ function validateCMRForMCO2GMLLCScenario() {
         var landed = 'LANDED COUNTRY';
         var subCustGrp = FormManager.getActualValue('custSubGrp');
         var targetCntry = 'Kenya';
+        var kenyaCntryCd = '764';
 
         if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'LLCEX' || subCustGrp == 'XLLCX')) {
           var cmrStatusOrig = getCMRStatus(cntry, requestCMR);
+          var cmrStatusDupl = getCMRStatus(kenyaCntryCd, requestCMR);
 
           if (requestCMR.length < 6) {
             return new ValidationResult({
@@ -1322,6 +1324,8 @@ function validateCMRForMCO2GMLLCScenario() {
           if (res && res.ret1) {
             landed = res.ret1;
           }
+          var landedCd = getCntryCdByLanded(landed);
+          var cmrStatusLanded = getCMRStatus(landedCd, requestCMR);
 
           if (!validGmllcCntry.includes(landed)) {
             return new ValidationResult(null, true);
@@ -1332,7 +1336,7 @@ function validateCMRForMCO2GMLLCScenario() {
             CMR_NO : requestCMR,
             MANDT : cmr.MANDT
           });
-          if (exists && exists.ret1 && action != 'PCM' && cmrStatusOrig != 'C') {
+          if (exists && exists.ret1 && action != 'PCM' && cmrStatusOrig != 'C' && cmrStatusDupl != 'C' && cmrStatusLanded != 'C') {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1344,7 +1348,7 @@ function validateCMRForMCO2GMLLCScenario() {
               CMR_NO : requestCMR,
               MANDT : cmr.MANDT
             });
-            if (exists && exists.ret1 && cmrStatusOrig != 'C') {
+            if (exists && exists.ret1 && cmrStatusOrig != 'C' && cmrStatusDupl != 'C' && cmrStatusLanded != 'C') {
               return new ValidationResult({
                 id : 'cmrNo',
                 type : 'text',
@@ -1377,7 +1381,7 @@ function gmllcExistingCustomerAdditionalValidations() {
         var landed = 'LANDED COUNTRY';
         var subCustGrp = FormManager.getActualValue('custSubGrp');
         var targetCntry = 'Kenya';
-        var cntryDupl = '764';
+        var kenyaCntryCd = '764';
 
         if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'LLCEX' || subCustGrp == 'XLLCX')) {
           if (requestCMR.length < 6) {
@@ -1398,10 +1402,11 @@ function gmllcExistingCustomerAdditionalValidations() {
 
           var landedCd = getCntryCdByLanded(landed);
           var existInLandedCntry = checkIfCmrExist(landedCd, requestCMR);
-          var existInDuplCntry = checkIfCmrExist(cntryDupl, requestCMR);
+          var existInDuplCntry = checkIfCmrExist(kenyaCntryCd, requestCMR);
           var cmrStatusLanded = getCMRStatus(landedCd, requestCMR);
-          var cmrStatusDupl = getCMRStatus(cntryDupl, requestCMR);
+          var cmrStatusDupl = getCMRStatus(kenyaCntryCd, requestCMR);
 
+          // 1 all cewa
           if (!existInLandedCntry && !existInDuplCntry && action != 'PCM') {
             return new ValidationResult({
               id : 'cmrNo',
@@ -1409,8 +1414,8 @@ function gmllcExistingCustomerAdditionalValidations() {
               name : 'cmrNo'
             }, false, 'CMR does not exist in either ' + landed + ' or Kenya. Please use GM LLC under ' + landed + '. Processors are able to enter specific CMR if needed.');
           }
-
-          if (!existInLandedCntry && cmrStatusDupl == 'C') {
+          // 2A - All Cewa except kenya
+          if (!existInLandedCntry && cmrStatusDupl == 'C' && cntry != kenyaCntryCd) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1419,20 +1424,27 @@ function gmllcExistingCustomerAdditionalValidations() {
                 + ' and Kenya using GM LLC scenario under ' + landed + '.');
           }
 
-          if (cmrStatusLanded == 'C' && !existInDuplCntry) {
+          // 2B - For Kenya only
+          if (cmrStatusLanded == 'C' && !existInDuplCntry && cntry == kenyaCntryCd) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
             }, false, 'Please note CMR in ' + landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed
                 + ' country and Kenya using GM LLC scenario under ' + landed + '.');
-          } else if (cmrStatusLanded == 'C') {
+          } else if ((cmrStatusLanded == 'C' && existInDuplCntry) || (cmrStatusDupl == 'C' && existInLandedCntry)) {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
             }, false, 'Please note CMR in ' + landed + ' is Cancelled. It needs to be either reactivated, or you can create a new CMR under both ' + landed
                 + ' country and Kenya using GM LLC scenario under ' + landed + '.');
+          } else if ((cmrStatusLanded == 'C' && !existInDuplCntry) || (cmrStatusDupl == 'C' && cntry == kenyaCntryCd && !existInLandedCntry)) {
+            return new ValidationResult({
+              id : 'cmrNo',
+              type : 'text',
+              name : 'cmrNo'
+            }, false, 'CMR: ' + requestCMR + ' is already in use in ' + cntry + '. Please use GM LLC sub-scenario in ' + landed + ' to create new CMR under both ' + targetCntry + ' and ' + landed);
           }
         }
         return new ValidationResult({
