@@ -1414,7 +1414,6 @@ function gmllcExistingCustomerAdditionalValidations() {
               name : 'cmrNo'
             }, false, 'CMR does not exist in either ' + landed + ' or Kenya. Please use GM LLC under ' + landed + '. Processors are able to enter specific CMR if needed.');
           }
-          // FREY
           // 2A - All Cewa except kenya
           if (!existInLandedCntry && cmrStatusDupl == 'C' && cntry != kenyaCntryCd) {
             return new ValidationResult({
