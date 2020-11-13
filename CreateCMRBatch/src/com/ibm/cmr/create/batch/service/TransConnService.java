@@ -26,6 +26,7 @@ import com.ibm.cio.cmr.create.entity.NotifyReq;
 import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.AddrPK;
@@ -1583,7 +1584,7 @@ public class TransConnService extends BaseBatchService {
     if (SystemLocation.UNITED_STATES.equals(issuingCntry) && !StringUtils.isBlank(data.getCmrNo())
         && (!StringUtils.isBlank(data.getAffiliate()) || !StringUtils.isBlank(data.getEnterprise()) || !StringUtils.isBlank(data.getIccTaxClass())
             || !StringUtils.isBlank(data.getIccTaxExemptStatus()) || !StringUtils.isBlank(data.getNonIbmCompanyInd())
-            || !StringUtils.isBlank(data.getUsSicmen()) || !StringUtils.isBlank(data.getSpecialTaxCd()))) {
+            || !StringUtils.isBlank(data.getUsSicmen()) || !StringUtils.isBlank(data.getSpecialTaxCd()) || isT2PoolCMRRequest(admin, data))) {
       LOG.info("Required update needed for Request " + reqId + " - Force to Update");
 
       admin.setReqStatus(CmrConstants.REQUEST_STATUS.PCP.toString());
@@ -1596,6 +1597,13 @@ public class TransConnService extends BaseBatchService {
       admin.setProcessedFlag(CmrConstants.YES_NO.N.toString());
       admin.setProcessedTs(null);
       updateEntity(admin, entityManager);
+
+      if (isT2PoolCMRRequest(admin, data)) {
+        LOG.info("Blanking out BP Acc Type and BP Name after CMR creation for BP T2 Pool request");
+        data.setBpAcctTyp("");
+        data.setBpName("");
+        updateEntity(data, entityManager);
+      }
 
       RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, FORCED_UPDATE_COMMENT, FORCED_CHANGE_ACTION, null, null,
           "COM".equals(admin.getReqStatus()));
@@ -1642,6 +1650,15 @@ public class TransConnService extends BaseBatchService {
       RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, reqId, FORCED_UPDATE_COMMENT);
 
       partialCommit(entityManager);
+    }
+  }
+
+  private boolean isT2PoolCMRRequest(Admin admin, Data data) {
+    if (USUtil.BUSINESS_PARTNER.equals(admin.getCustType()) && "TT2".equals(data.getCsoSite()) && "P".equals(data.getBpAcctTyp())
+        && "IRMR".equals(data.getBpName())) {
+      return true;
+    } else {
+      return false;
     }
   }
 
