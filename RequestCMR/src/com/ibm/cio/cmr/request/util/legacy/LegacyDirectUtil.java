@@ -89,6 +89,7 @@ public class LegacyDirectUtil {
     FIELDS_CLEAR_LIST.add("CommercialFinanced");
     FIELDS_CLEAR_LIST.add("EmbargoCode");
     FIELDS_CLEAR_LIST.add("Enterprise");
+    FIELDS_CLEAR_LIST.add("TypeOfCustomer");
 
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }

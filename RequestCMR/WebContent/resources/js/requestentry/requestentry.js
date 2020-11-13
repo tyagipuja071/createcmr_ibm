@@ -705,7 +705,7 @@ function afterConfigChange() {
       FormManager.show('DeactivateToActivateCMR', 'func');
       if (dijit.byId('func')) {
         FormManager.getField('func').set('checked', true);
-      } else {
+      } else if (dojo.byId('func')) {
         dojo.byId('func').checked = true;
       }
       FormManager.disable('func');
@@ -1383,18 +1383,30 @@ function isSkipDnbMatching() {
       SUBREGION_CD : subRegionCd
     };
     var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-    if (result.ret1 != null && result.ret1 == "Y") {
-      return true;
+    if (result.ret1 != null && result.ret1 != "") {
+      if(result.ret1=='Y'){
+      	return true;
+			} else if (result.ret1=='N'){
+				return false;
+			}
     } else {
-      qParams.CUST_SUB_GRP = "*";
+      qParams.CUST_SUB_TYP = "*";
       result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-      if (result.ret1 != null && result.ret1 == 'Y') {
-        return true;
+      if (result.ret1 != null && result.ret1 != '') {
+        if(result.ret1=='Y'){
+	      	return true;
+				} else if (result.ret1=='N'){
+					return false;
+				}
       } else {
-        qParams.CUST_GRP = "*";
+        qParams.CUST_TYP = "*";
         result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-        if (result.ret1 != null && result.ret1 == 'Y') {
-          return true;
+        if (result.ret1 != null && result.ret1 != '') {
+          if(result.ret1=='Y'){
+	        	return true;
+					} else if (result.ret1=='N'){
+						return false;
+					}
         }
       }
     }
@@ -1608,3 +1620,4 @@ function autoSaveRequest() {
   }
   FormManager.doAction('frmCMR', 'SAV', true, 'Saving the request...');
 }
+
