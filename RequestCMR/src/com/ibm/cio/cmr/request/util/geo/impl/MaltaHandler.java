@@ -671,11 +671,11 @@ public class MaltaHandler extends BaseSOFHandler {
       update.setOldData(service.getCodeAndDescription(oldData.getCustClass(), "CustClass", cmrCountry));
       results.add(update);
     }
-    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getEmbargoCd(), newData.getEmbargoCd())) {
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrdBlk(), newData.getOrdBlk())) {
       update = new UpdatedDataModel();
-      update.setDataField(PageManager.getLabel(cmrCountry, "EmbargoCode", "-"));
-      update.setNewData(service.getCodeAndDescription(newData.getEmbargoCd(), "EmbargoCode", cmrCountry));
-      update.setOldData(service.getCodeAndDescription(oldData.getEmbargoCd(), "EmbargoCode", cmrCountry));
+      update.setDataField(PageManager.getLabel(cmrCountry, "OrderBlock", "-"));
+      update.setNewData(service.getCodeAndDescription(newData.getOrdBlk(), "OrderBlock", cmrCountry));
+      update.setOldData(service.getCodeAndDescription(oldData.getOrdBlk(), "OrderBlock", cmrCountry));
       results.add(update);
     }
   }
@@ -729,35 +729,34 @@ public class MaltaHandler extends BaseSOFHandler {
   @Override
   public String generateAddrSeq(EntityManager entityManager, String addrType, long reqId, String cmrIssuingCntry) {
     if (SystemLocation.MALTA.equals(cmrIssuingCntry)) {
-
       String newSeq = null;
       String maxSeq = getMaxSeqNumber(entityManager, addrType, reqId, cmrIssuingCntry);
       if (maxSeq == null) {
         if ("ZS01".equals(addrType)) {
-          newSeq = "1";
+          newSeq = "00001";
         }
         if ("ZP01".equals(addrType)) {
-          newSeq = "2";
+          newSeq = "00002";
         }
         if ("ZI01".equals(addrType)) {
-          newSeq = "3";
+          newSeq = "00003";
         }
         if ("ZD01".equals(addrType)) {
-          newSeq = "4";
+          newSeq = "00004";
         }
       } else {
-        if (Integer.parseInt(maxSeq) <= 5) {
+        if (Integer.parseInt(maxSeq) <= 4) {
           if ("ZS01".equals(addrType)) {
-            newSeq = "1";
+            newSeq = "00001";
           }
           if ("ZP01".equals(addrType)) {
-            newSeq = "2";
+            newSeq = "00002";
           }
           if ("ZI01".equals(addrType)) {
-            newSeq = "3";
+            newSeq = "00003";
           }
           if ("ZD01".equals(addrType)) {
-            newSeq = "4";
+            newSeq = "00004";
           }
         } else {
           newSeq = maxSeq;
