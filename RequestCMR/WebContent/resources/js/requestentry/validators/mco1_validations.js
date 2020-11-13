@@ -27,6 +27,7 @@ function addMCO1LandedCountryHandler(cntry, addressMode, saving, finalSave) {
   if (_landCntryHandler == null && FormManager.getField('landCntry')) {
     _landCntryHandler = dojo.connect(FormManager.getField('landCntry'), 'onChange', function(value) {
       disablePOBox();
+      postalCodeRequired();
     });
   }
 }
@@ -92,6 +93,20 @@ function addHandlersForZA() {
     }
   }
 
+}
+
+function postalCodeRequired(){
+  var reqType = FormManager.getActualValue('reqType');
+  if(reqType !='C'){
+    return;
+  }
+  var landCntry = FormManager.getActualValue('landCntry');
+  // Postal Code - mandatory for ZA, optional for CROSS
+  if (landCntry == 'ZA') {
+    FormManager.addValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ]);
+  } else {
+    FormManager.removeValidator('postCd', Validators.REQUIRED);
+  }
 }
 
 function setCtcSalesRepSBO(value) {
@@ -160,11 +175,6 @@ function afterConfigForZA() {
 
   if (custType != null && custType.includes('CRO')) {
     custType = 'CROSS';
-  }
-
-  // Postal Code - mandatory for ZA, optional for CROSS
-  if (landCntry == 'ZA' && custType != 'CROSS') {
-    checkAndAddValidator('postCd', Validators.REQUIRED, [ 'Postal Code' ]);
   }
 
   if (reqType == 'U') {
