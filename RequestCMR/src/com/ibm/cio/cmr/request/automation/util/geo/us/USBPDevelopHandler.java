@@ -137,7 +137,7 @@ public class USBPDevelopHandler extends USBPHandler {
                   output.setDetails(details.toString());
                   output.setResults("Waiting on Child Request...");
                   output.setOnError(false);
-                  return false;
+                  return true;
                 }
 
               }
@@ -164,6 +164,9 @@ public class USBPDevelopHandler extends USBPHandler {
           ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, null);
           if (ibmCmr != null && StringUtils.isNotBlank(ibmCmr.getCmrNum())) {
             // existing CMR so , create BP Pool CMR
+            output.setResults("BP Pool CMR will be created...");
+            output.setDetails("No existing T2 pool CMR , hence BP Pool CMR will be created.");
+            output.setOnError(false);
             return true;
           } else {
             // validate legal name in DnB
@@ -270,25 +273,25 @@ public class USBPDevelopHandler extends USBPHandler {
       }
 
       details.append(" - Restrict To: " + ibmCmr.getUsCmrRestrictTo() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT TO", data.getRestrictTo(), ibmCmr.getUsCmrRestrictTo());
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), ibmCmr.getUsCmrRestrictTo());
 
       details.append(" - BP Account Type: " + "D" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP ACCOUNT TYPE", data.getBpAcctTyp(), "D");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "D");
 
       details.append(" - Marketing Dept: " + "EI3" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MARKETING DEPT", data.getMktgDept(), "EI3");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
 
       details.append(" - Miscellaneous Bill Code: " + "I" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISCELLANEOUS BILL CD", data.getMiscBillCd(), "I");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
 
-      details.append(" - Business Partner Name: " + "Managing IR" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BUSINESS PARTNER NAME", data.getBpName(), "Managing IR");
+      details.append(" - Business Partner Name: " + "MIR" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), "MIR");
 
       details.append(" - PCC A/R Dept: " + "G8M" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC A/R Dept", data.getPccArDept(), "G8M");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
 
       details.append(" - SVC A/R Office : " + "IKE" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC A/R Office ", data.getSvcArOffice(), "IKE");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
     }
 
@@ -298,17 +301,17 @@ public class USBPDevelopHandler extends USBPHandler {
 
     if (demoDev.contains(divn_attn)) {
       details.append(" - CSO Site : " + "YBV" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO SITE", data.getCsoSite(), "YBV");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
 
       details.append(" - Marketing A/R Dept  : " + "DI3" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MARKETING A/R DEPT", data.getMtkgArDept(), "DI3");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
 
     } else if (leaseDev.contains(divn_attn)) {
       details.append(" - CSO Site : " + "TF7" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO SITE", data.getCsoSite(), "TF7");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "TF7");
 
       details.append(" - Marketing A/R Dept  : " + "DI2" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MARKETING A/R DEPT", data.getMtkgArDept(), "DI2");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI2");
     }
   }
 
