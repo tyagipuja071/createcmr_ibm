@@ -55,13 +55,13 @@ if (readOnly == null){
       </cmr:column>
     </cmr:row>
     <cmr:row addBackground="true">
-      <cmr:column span="4">
+      <cmr:column span="5">
         <cmr:grid url="/request/notify/list.json" id="NOTIFY_LIST_GRID" span="4" usePaging="false" height="250">
           <cmr:gridParam fieldId="reqId" value="${reqentry.reqId}" />
-          <cmr:gridCol width="150px" field="notifNm" header="${ui.grid.notifNm}" />
-          <cmr:gridCol width="150px" field="notifId" header="${ui.grid.notifId}" />
+          <cmr:gridCol width="200px" field="notifNm" header="${ui.grid.notifNm}" />
+          <cmr:gridCol width="auto" field="notifId" header="${ui.grid.notifId}" />
           <cmr:gridCol width="100px" field="noEmail" header="${ui.grid.optOut}" />
-          <cmr:gridCol width="auto" field="actions" header="${ui.grid.actions}">
+          <cmr:gridCol width="100px" field="actions" header="${ui.grid.actions}">
 <%if (!readOnly) {%>
             <cmr:formatter functionName="notifyListActionsFormatter" />
 <%}%>

@@ -18,6 +18,9 @@ img.logo {
   border-radius: 10px;
   border: 1px Solid #AAA;
 }
+#ibm-content .ibm-columns {
+  margin-top: 10px;
+}
 </style>
 <script>
 dojo.addOnLoad(function(){

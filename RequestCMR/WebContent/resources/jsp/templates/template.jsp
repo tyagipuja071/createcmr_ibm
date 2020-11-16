@@ -18,7 +18,6 @@ UIMgr.inject(request);
 request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 AppUser user = AppUser.getUser(request);
 boolean approver = user != null && user.isApprover();
-System.out.println("hello");
 %>
 
 <%-- Layout Tiles This layout create a html page with 
@@ -93,6 +92,13 @@ System.out.println("hello");
 <script>
   window.jQuery = null;
 </script>
+<style>
+.ibm-spinner-large {
+  background:
+    url(${resourcesPath}/images/animated-progress-38x38c.webp)
+    no-repeat center center transparent;
+}
+</style>
 <jsp:include page="xbrowser.jsp" />
 </head>
 <body id="ibm-com" class="nihilo ibm-type" role="main" >

@@ -3276,7 +3276,6 @@ span.ibm-thumbnail span.ibm-video-play {
 	padding: 0 0 10px 202px;
 	background: #FFF;
 	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
-	margin-top: 0px;
 }
 
 #ibm-pcon:after {
@@ -3838,7 +3837,7 @@ span.ibm-thumbnail span.ibm-video-play {
 
 /* renovation */
 .ibm-col-6-1 {
-	width: 150px
+	width: 165px
 }
 
 /* renovation */
