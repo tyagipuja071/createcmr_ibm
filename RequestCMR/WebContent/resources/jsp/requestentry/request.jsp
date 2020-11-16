@@ -413,6 +413,7 @@ div#ibm-content-main {
         <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/go.png" onclick="processRequestAction()">
       </div>
       <div class="cmr-action-txt" id="viewOnlyText" style="display: none">View Only</div>
+      <div class="cmr-action-txt" id="superUserModeText" style="display: none">SUPER USER MODE</div>
     </div>
     <script>
       addMoveHandler();

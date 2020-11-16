@@ -80,12 +80,14 @@ public class StatisticsService extends BaseSimpleService<RequestStatsContainer> 
     String sql = ExternalizedQuery.getSql("METRICS.REQUEST_STAT");
     String geoMarket = model.getGroupByGeo();
 
-    String[] parts = geoMarket.split("[-]");
-    if (parts.length == 2) {
-      if ("GEO".equals(parts[0])) {
-        sql += " and data.CMR_ISSUING_CNTRY in (" + MarketUtil.createCountryFilterForGeo(parts[1]) + ")";
-      } else if ("MKT".equals(parts[0])) {
-        sql += " and data.CMR_ISSUING_CNTRY in (" + MarketUtil.createCountryFilterForMarket(parts[1]) + ")";
+    if (!StringUtils.isBlank(geoMarket)) {
+      String[] parts = geoMarket.split("[-]");
+      if (parts.length == 2) {
+        if ("GEO".equals(parts[0])) {
+          sql += " and data.CMR_ISSUING_CNTRY in (" + MarketUtil.createCountryFilterForGeo(parts[1]) + ")";
+        } else if ("MKT".equals(parts[0])) {
+          sql += " and data.CMR_ISSUING_CNTRY in (" + MarketUtil.createCountryFilterForMarket(parts[1]) + ")";
+        }
       }
     }
 
