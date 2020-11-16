@@ -9,7 +9,7 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="resourcesPath" value="${contextPath}/resources" />
-<link href="//1.www.s81c.com/common/v17e/css/data.css" rel="stylesheet" title="www" type="text/css" />
+<link href="${resourcesPath}/css/ext/data.css" rel="stylesheet" title="www" type="text/css" />
 <%
 	ModelMap map = (ModelMap) request.getAttribute("map");
     String error = null;
@@ -77,7 +77,7 @@ a.back:hover {
 				                </caption>
 				                <thead>
 				                  <tr>
-				                    <th scope="col" width="25%">Name</th>
+				                    <th scope="col" width="23%">Name</th>
 				                    <th scope="col" width="*">Description</th>
 				                    <th scope="col" width="10%">Required</th>
 				                    <th scope="col" width="25%">Value</th>

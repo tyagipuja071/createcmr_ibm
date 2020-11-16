@@ -35,7 +35,7 @@ dojo.addOnLoad(function(){
     msg += 'Some functions of the application may not work correctly until you update to the required version.';
     cmr.showAlert(msg);
   }
-  window.setTimeout('generateCharts()', 500);
+  window.setTimeout('generateCharts()', 150);
 });
 
 function generateCharts(){
