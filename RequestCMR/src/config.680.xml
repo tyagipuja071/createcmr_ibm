@@ -1,4 +1,4 @@
-<template id="707" for="UPDATE">
+<template id="680" for="UPDATE">
 	<tabs>
 		<tab name="Data" type="Data">
 			<columns>
@@ -56,7 +56,7 @@
 					<label>SBO</label>
 					<dbColumn>SALES_BO_CD</dbColumn>
 					<width>15</width>
-					<length>3</length>
+					<length>7</length>
 				</column>
 				<column>
 					<label>Sales rep</label>
@@ -64,6 +64,12 @@
 					<width>15</width>
 					<length>6</length>
 				</column>
+				<column>
+					<label>Tele-coverage rep</label>
+					<dbColumn>AFFILIATE</dbColumn>
+					<width>15</width>
+					<length>6</length>
+				</column>				
 				<column number="true">
 					<label>Company number</label>
 					<dbColumn>COMPANY</dbColumn>
@@ -75,15 +81,13 @@
 					<dbColumn>ENTERPRISE</dbColumn>
 					<width>15</width>
 					<length>6</length>
-				</column>	
-				
+				</column>		
 				<column>
 					<label>Engineering BO</label>
 					<dbColumn>ENGINEERING_BO</dbColumn>
 					<width>15</width>
 					<length>7</length>					
-				</column>
-				
+				</column>	
 				<column>
 					<label>Order block code</label>
 					<dbColumn>EMBARGO_CD</dbColumn>
@@ -91,7 +95,7 @@
 					<length>1</length>
 				</column>
 				<column>
-					<label>Customer Classification Code</label>
+					<label>Classification Code</label>
 					<dbColumn>CUST_CLASS</dbColumn>
 					<width>10</width>
 					<lovId>CustClass</lovId>
@@ -107,15 +111,21 @@
 					<dbColumn>COLLECTION_CD</dbColumn>
 					<width>30</width>
 					<length>6</length>
-					
 				</column>
 				<column>
-					<label>CoF</label>
+					<label>CoF (Commercial Financed)</label>
 					<dbColumn>RESTRICT_TO</dbColumn>
 					<length>1</length>
 					<width>20</width>
 					<lovId>CommercialFinanced</lovId>
 				</column>
+				<column>
+					<label>Type of Customer</label>
+					<dbColumn>CURRENCY_CD</dbColumn>
+					<length>2</length>
+					<width>20</width>
+					<lovId>TypeOfCustomer</lovId>
+				</column>	
 				<column number="true">
 					<label>Phone</label>
 					<dbColumn>EMAIL1</dbColumn>
@@ -182,6 +192,12 @@
 					<length>10</length>
 				</column>
 				<column>
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
@@ -193,12 +209,6 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>				
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -259,6 +269,12 @@
 					<length>10</length>
 				</column>
 				<column>
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
@@ -270,12 +286,6 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>				
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -336,6 +346,12 @@
 					<length>10</length>
 				</column>
 				<column>
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
@@ -347,12 +363,6 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>				
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -413,6 +423,12 @@
 					<length>10</length>
 				</column>
 				<column>
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
@@ -424,12 +440,6 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>				
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -490,6 +500,12 @@
 					<length>10</length>
 				</column>
 				<column>
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
@@ -501,12 +517,6 @@
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
 				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
-				</column>				
 				<column>
 					<label>Hardware Master</label>
 					<dbColumn>HW_INSTL_MSTR_FLG</dbColumn>
@@ -568,6 +578,12 @@
 					<length>10</length>
 				</column>
 				<column>
+					<label>PO Box</label>
+					<dbColumn>PO_BOX</dbColumn>
+					<width>20</width>
+					<length>10</length>
+				</column>
+				<column>
 					<label>City</label>
 					<dbColumn>CITY1</dbColumn>
 					<width>40</width>
@@ -578,12 +594,6 @@
 					<dbColumn>LAND_CNTRY</dbColumn>
 					<width>18</width>
 					<bdsId>LandedCountry</bdsId>
-				</column>
-				<column>
-					<label>Local Country Name</label>
-					<dbColumn>DIVN</dbColumn>
-					<width>18</width>
-					<length>50</length>
 				</column>
 				<column>
 					<label>Hardware Master</label>
