@@ -4,6 +4,8 @@ Validations file for Canada
 
  */
 
+var regexNumeric = /^[0-9]+$/;
+var regexAlphanumeric = /^[0-9a-zA-Z]+$/;
 /**
  * Adds the validator for the Install At and optional Invoice To
  * 
@@ -46,6 +48,21 @@ function addAddressRecordTypeValidator() {
     };
   })(), 'MAIN_NAME_TAB', 'frmCMR');
 
+}
+
+function addInacCdValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var inacCd = FormManager.getActualValue('inacCd');
+        if (inacCd != null && inacCd != '' && !inacCd.match(regexAlphanumeric)) {
+          return new ValidationResult(null, false, 'NAT/INAC contains special character');
+        } else {
+          return new ValidationResult(null, true);
+        }
+      }
+    };
+  })(), 'MAIN_NAME_TAB', 'frmCMR');
 }
 
 /**
@@ -136,6 +153,7 @@ function canRemoveAddress(value, rowIndex, grid) {
  * addAfterConfig calls to
  */
 function afterConfigForCA() {
+
   if (role.toUpperCase() == 'REQUESTER' || role.toUpperCase() == 'VIEWER') {
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('abbrevNm');
@@ -152,10 +170,13 @@ function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
     _inacCodeHandler = dojo.connect(FormManager.getField('inacCd'), 'onChange', function(value) {
-      if (value != null && value.match(/^[0-9]+$/) && value.length == 4) {
+      if (value.match(regexNumeric) && value.length == 4) {
         FilteringDropdown['inacType'] = 'I';
         FormManager.setValue('inacType', 'I');
-      } else if (value != null && value.match(/^[A-Za-z]+$/)) {
+      } else if (value.match(regexNumeric) && value.length < 4) {
+        FilteringDropdown['inacType'] = '';
+        FormManager.setValue('inacType', '');
+      } else if (value != null && value.match(regexAlphanumeric)) {
         FilteringDropdown['inacType'] = 'N';
         FormManager.setValue('inacType', 'N');
       } else {
@@ -172,6 +193,7 @@ dojo.addOnLoad(function() {
 
   // validators - register one each
   GEOHandler.registerValidator(addAddressRecordTypeValidator, [ SysLoc.CANADA ], null, true);
+  GEOHandler.registerValidator(addInacCdValidator, [ SysLoc.CANADA ], null, true);
 
   // NOTE: do not add multiple addAfterConfig calls to avoid confusion, club the
   // functions on afterConfigForCA
