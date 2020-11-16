@@ -357,6 +357,7 @@ public class CEEProcessService extends LegacyDirectService {
 
   }
 
+  @Override
   public String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
     if (entityManager == null) {
       return null;
@@ -377,6 +378,7 @@ public class CEEProcessService extends LegacyDirectService {
     return res;
   }
 
+  @Override
   public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
       boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
@@ -737,6 +739,7 @@ public class CEEProcessService extends LegacyDirectService {
             }
             // Fix for CEE Dup IGF seqno
             if (CEE_COUNTRY_LIST.contains(cntry)) {
+              newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
               if ("598".equals(addr.getId().getAddrSeq()) || "599".equals(addr.getId().getAddrSeq())) {
                 newAddrSeq = addr.getId().getAddrSeq();
               } else {
