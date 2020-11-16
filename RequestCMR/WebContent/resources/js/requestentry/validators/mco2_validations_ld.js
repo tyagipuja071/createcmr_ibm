@@ -1336,7 +1336,7 @@ function validateCMRForMCO2GMLLCScenario() {
             CMR_NO : requestCMR,
             MANDT : cmr.MANDT
           });
-          if (exists && exists.ret1 && action != 'PCM' && cmrStatusLanded != 'C') {
+          if (exists && exists.ret1 && action != 'PCM' && cmrStatusOrig != 'C') {
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
@@ -1348,7 +1348,7 @@ function validateCMRForMCO2GMLLCScenario() {
               CMR_NO : requestCMR,
               MANDT : cmr.MANDT
             });
-            if (exists && exists.ret1 && cmrStatusLanded != 'C') {
+            if (exists && exists.ret1 && cmrStatusOrig != 'C') {
               return new ValidationResult({
                 id : 'cmrNo',
                 type : 'text',
@@ -1382,6 +1382,7 @@ function gmllcExistingCustomerAdditionalValidations() {
         var subCustGrp = FormManager.getActualValue('custSubGrp');
         var targetCntry = 'Kenya';
         var kenyaCntryCd = '764';
+        var targetCntryCd = 'KE';
 
         if (reqType == 'C' && requestCMR != '' && cmrNo && (subCustGrp == 'LLCEX' || subCustGrp == 'XLLCX')) {
           if (requestCMR.length < 6) {
@@ -1432,12 +1433,16 @@ function gmllcExistingCustomerAdditionalValidations() {
               name : 'cmrNo'
             }, false, 'Please note CMR in ' + landed + ' is Cancelled. It needs to be first reactivated, then you can proceed. Or you can create a new CMR under both ' + landed
                 + ' country and Kenya using GM LLC scenario under ' + landed + '.');
-          } else if ((cmrStatusLanded == 'C' && existInDuplCntry) || (cmrStatusDupl == 'C' && existInLandedCntry && cntry == kenyaCntryCd)) {
+          } else if ((cmrStatusLanded == 'C' && existInDuplCntry && cntry != kenyaCntryCd) || (cmrStatusDupl == 'C' && existInLandedCntry && cntry == kenyaCntryCd)) {
+            var issuingCd = landed;
+            if (cntry == kenyaCntryCd && cmrStatusDupl == 'C' && cmrStatusLanded != 'C') {
+              issuingCd = 'KE';
+            }
             return new ValidationResult({
               id : 'cmrNo',
               type : 'text',
               name : 'cmrNo'
-            }, false, 'Please note CMR in ' + landed + ' is Cancelled. It needs to be either reactivated, or you can create a new CMR under both ' + landed
+            }, false, 'Please note CMR in ' + issuingCd + ' is Cancelled. It needs to be either reactivated, or you can create a new CMR under both ' + landed
                 + ' country and Kenya using GM LLC scenario under ' + landed + '.');
           } else if ((cmrStatusLanded == 'C' && !existInDuplCntry) || (cmrStatusDupl == 'C' && cntry == kenyaCntryCd && !existInLandedCntry)) {
             return new ValidationResult({
