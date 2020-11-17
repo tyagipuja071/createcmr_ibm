@@ -27,6 +27,8 @@ public class AutoExceptionEntryModel {
   private List<AddressKeyModel> dupAddressChecks;
   private String status;
   private String region;
+  private String manualReviewIndc;
+  private String reviewExtReqIndc;
 
   public String cleanDupAddressChecks() {
     StringBuilder sb = new StringBuilder();
@@ -140,6 +142,22 @@ public class AutoExceptionEntryModel {
 
   public void setSkipVerificationIndc(String skipVerificationIndc) {
     this.skipVerificationIndc = skipVerificationIndc;
+  }
+
+  public String getManualReviewIndc() {
+    return manualReviewIndc;
+  }
+
+  public void setManualReviewIndc(String manualReviewIndc) {
+    this.manualReviewIndc = manualReviewIndc;
+  }
+
+  public String getReviewExtReqIndc() {
+    return reviewExtReqIndc;
+  }
+
+  public void setReviewExtReqIndc(String reviewExtReqIndc) {
+    this.reviewExtReqIndc = reviewExtReqIndc;
   }
 
 }
