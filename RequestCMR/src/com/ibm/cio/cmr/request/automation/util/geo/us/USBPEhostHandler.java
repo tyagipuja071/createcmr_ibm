@@ -308,6 +308,8 @@ public class USBPEhostHandler extends USBPHandler {
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "E");
     details.append(" - BP Name: Managing IR\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
+    details.append(" - CSO Site: YBV\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
 
     details.append("Branch Office codes computed successfully.");
     engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
