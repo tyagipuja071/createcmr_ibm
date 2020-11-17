@@ -542,7 +542,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
 
-          if (!"760".equals(oldData.getCmrIssuingCntry())) {
+          if (!("760".equals(oldData.getCmrIssuingCntry()) || "864".equals(oldData.getCmrIssuingCntry()))) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CodFlag"))) {
               update = new UpdatedDataModel();

@@ -5599,6 +5599,13 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "SUB_INDUSTRY_CD":
         muModel.setSubIndustryCd(tempVal);
         break;
+      case "TAX_CD1":
+        muModel.setTaxCd1(tempVal);
+        ;
+        break;
+      case "MILITARY":
+        muModel.setMilitary(tempVal);
+        break;
       case "SVC_AR_OFFICE":
         muModel.setSvcArOffice(tempVal);
         break;

@@ -723,11 +723,12 @@ function validateCMRNumberForLegacy() {
             return new ValidationResult(null, true);
           }
           // Validation for Internal Scenario
-          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT') {
+          var internalScenarios = [ 'ZAINT', 'NAINT', 'LSINT', 'SZINT', 'ZAXIN', 'NAXIN', 'LSXIN', 'SZXIN' ];
+          if (_custSubGrp == 'INTER' || _custSubGrp == 'CRINT' || _custSubGrp == 'XINT' || internalScenarios.includes(_custSubGrp)) {
             if (!cmrNo.startsWith("99")) {
               return new ValidationResult(null, false, 'Internal CMR should begin with 99.');
             }
-          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT') {
+          } else if (_custSubGrp != 'INTER' || _custSubGrp != 'CRINT' || _custSubGrp != 'XINT' || !internalScenarios.includes(_custSubGrp)) {
             if (cmrNo.startsWith("99")) {
               return new ValidationResult(null, false, 'CMR Starting with 99 is allowed for Internal Scenario Only.');
             }
@@ -756,49 +757,50 @@ function validateCMRNumberForLegacy() {
  * validate Existing CMRNo
  */
 function validateExistingCMRNo() {
-  FormManager.addFormValidator((function() {
-    return {
-      validate : function() {
-        console.log('checking requested cmr number...');
-        var reqType = FormManager.getActualValue('reqType');
-        var cmrNo = FormManager.getActualValue('cmrNo');
-        var cntry = FormManager.getActualValue('cmrIssuingCntry');
-        var action = FormManager.getActualValue('yourAction');
-        if (reqType == 'C' && cmrNo) {
-          var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
-            COUNTRY : cntry,
-            CMR_NO : cmrNo,
-            MANDT : cmr.MANDT
-          });
-          if (exists && exists.ret1 && action != 'PCM') {
-            return new ValidationResult({
-              id : 'cmrNo',
-              type : 'text',
-              name : 'cmrNo'
-            }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
-          } else {
-            exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          console.log('checking requested cmr number...');
+          var reqType = FormManager.getActualValue('reqType');
+          var cmrNo = FormManager.getActualValue('cmrNo');
+          var cntry = FormManager.getActualValue('cmrIssuingCntry');
+          var action = FormManager.getActualValue('yourAction');
+          var _custSubGrp = FormManager.getActualValue('custSubGrp');
+          if (reqType == 'C' && cmrNo) {
+            var exists = cmr.query('LD.CHECK_EXISTING_CMR_NO', {
               COUNTRY : cntry,
               CMR_NO : cmrNo,
               MANDT : cmr.MANDT
             });
-            if (exists && exists.ret1) {
+            if (exists && exists.ret1 && action != 'PCM') {
               return new ValidationResult({
                 id : 'cmrNo',
                 type : 'text',
                 name : 'cmrNo'
               }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+            } else {
+              exists = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (exists && exists.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
             }
           }
+          return new ValidationResult({
+            id : 'cmrNo',
+            type : 'text',
+            name : 'cmrNo'
+          }, true);
         }
-        return new ValidationResult({
-          id : 'cmrNo',
-          type : 'text',
-          name : 'cmrNo'
-        }, true);
-      }
-    };
-  })(), 'MAIN_IBM_TAB', 'frmCMR');
+      };
+    })(), 'MAIN_IBM_TAB', 'frmCMR');
 }
 
 /**
@@ -881,7 +883,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.ROLE_PROCESSOR);
 
   // For Legacy GR, CY and PT
-  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
+  GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.CYPRUS, SysLoc.GREECE, SysLoc.SOUTH_AFRICA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE ], GEOHandler.ROLE_PROCESSOR, true);
 
   GEOHandler.addAfterConfig(initGenericTemplateHandler, GEOHandler.COUNTRIES_FOR_GEN_TEMPLATE);
