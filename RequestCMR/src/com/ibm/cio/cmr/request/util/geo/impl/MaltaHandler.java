@@ -48,6 +48,10 @@ public class MaltaHandler extends BaseSOFHandler {
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
 
+  private static final String[] MT_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
+      "CustClassCode", "LocalTax2", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County",
+      "City2", "Department", "CustomerName4" };
+
   @Override
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
@@ -702,7 +706,7 @@ public class MaltaHandler extends BaseSOFHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
-    return false;
+    return Arrays.asList(MT_SKIP_ON_SUMMARY_UPDATE_FIELDS).contains(field);
   }
 
   @Override
