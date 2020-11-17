@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -18,12 +19,16 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.DataPK;
+import com.ibm.cio.cmr.request.entity.DataRdc;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
+import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
+import com.ibm.cio.cmr.request.ui.PageManager;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -64,6 +69,12 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setDataValuesOnImport(Admin admin, Data data, FindCMRResultModel results, FindCMRRecordModel mainRecord) throws Exception {
+    if (mainRecord != null && StringUtils.isBlank(mainRecord.getCmrShortName())) {
+      String custName = mainRecord.getCmrName1Plain();
+      if (StringUtils.isNotBlank(custName)) {
+        data.setAbbrevNm(custName.length() > 20 ? custName.substring(0, 20).toUpperCase() : custName);
+      }
+    }
   }
 
   @Override
@@ -102,6 +113,120 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void handleImportByType(String requestType, Admin admin, Data data, boolean importing) {
+  }
+
+  @Override
+  public void addSummaryUpdatedFields(RequestSummaryService service, String type, String cmrCountry, Data newData, DataRdc oldData,
+      List<UpdatedDataModel> results) {
+    UpdatedDataModel update = null;
+
+    // PPS CEID
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getPpsceid(), newData.getPpsceid())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "PPSCEID", "-"));
+      update.setNewData(newData.getPpsceid());
+      update.setOldData(oldData.getPpsceid());
+      results.add(update);
+    }
+    // VAD-VAD Number
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getTaxCd2(), newData.getTaxCd2())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "VADNumber", "-"));
+      update.setNewData(newData.getTaxCd2());
+      update.setOldData(oldData.getTaxCd2());
+      results.add(update);
+    }
+    // Sales Branch Office
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSalesBusOffCd(), newData.getSalesBusOffCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalesBusOff", "-"));
+      update.setNewData(newData.getSalesBusOffCd());
+      update.setOldData(oldData.getSalesBusOffCd());
+      results.add(update);
+    }
+    // Install Branch Office
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getInstallBranchOff(), newData.getInstallBranchOff())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "InstallBranchOff", "-"));
+      update.setNewData(newData.getInstallBranchOff());
+      update.setOldData(oldData.getInstallBranchOff());
+      results.add(update);
+    }
+    // Mktg Rep @ Team Number
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getRepTeamMemberNo(), newData.getRepTeamMemberNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SalesSR", "-"));
+      update.setNewData(newData.getRepTeamMemberNo());
+      update.setOldData(oldData.getRepTeamMemberNo());
+      results.add(update);
+    }
+    // CS Branch
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getSalesTeamCd(), newData.getSalesTeamCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CsBo", "-"));
+      update.setNewData(newData.getSalesTeamCd());
+      update.setOldData(oldData.getSalesTeamCd());
+      results.add(update);
+    }
+    // Distribution Mktg Branch TODO: uncomment once DM changes in DATA_RDC is
+    // done
+    /*
+     * if (RequestSummaryService.TYPE_CUSTOMER.equals(type) &&
+     * !equals(oldData.get, newData.getInvoiceDistCd())) { update = new
+     * UpdatedDataModel(); update.setDataField(PageManager.getLabel(cmrCountry,
+     * "DistMktgBranch", "-")); update.setNewData(newData.getInvoiceDistCd());
+     * update.setOldData(oldData.get); results.add(update); }
+     */
+    // AR-FAAR
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getAdminDeptCd(), newData.getAdminDeptCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "MarketingARDept", "-"));
+      update.setNewData(newData.getAdminDeptCd());
+      update.setOldData(oldData.getAdminDeptCd());
+      results.add(update);
+    }
+    // Credit Code
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "CreditCd", "-"));
+      update.setNewData(newData.getCreditCd());
+      update.setOldData(oldData.getCreditCd());
+      results.add(update);
+    }
+    // S/W Billing Frequency
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectorNo(), newData.getCollectorNameNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "BillingProcCd", "-"));
+      update.setNewData(newData.getCollectorNameNo());
+      update.setOldData(oldData.getCollectorNo());
+      results.add(update);
+    }
+    // insert Customer Data here
+    // Location/Province Code
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getLoc(), newData.getLocationNumber())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "LocationCode", "-"));
+      update.setNewData(newData.getLocationNumber());
+      update.setOldData(oldData.getLoc());
+      results.add(update);
+    }
+    // Employee Size
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getOrgNo(), newData.getOrgNo())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "SizeCode", "-"));
+      update.setNewData(newData.getOrgNo());
+      update.setOldData(oldData.getOrgNo());
+      results.add(update);
+    }
+    // Number of Invoices
+    if (RequestSummaryService.TYPE_CUSTOMER.equals(type) && !equals(oldData.getInvoiceSplitCd(), newData.getInvoiceSplitCd())) {
+      update = new UpdatedDataModel();
+      update.setDataField(PageManager.getLabel(cmrCountry, "InvoiceSplitCd", "-"));
+      update.setNewData(newData.getInvoiceSplitCd());
+      update.setOldData(oldData.getInvoiceSplitCd());
+      results.add(update);
+    }
+
   }
 
   @Override
@@ -149,7 +274,7 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public boolean skipOnSummaryUpdate(String cntry, String field) {
-    return false;
+    return Arrays.asList("PPSCEID", "LocalTax2", "Company", "Enterprise", "SearchTerm").contains(field);
   }
 
   @Override
@@ -247,9 +372,30 @@ public class CanadaHandler extends GEOHandler {
     // set abbreviated name
     String name = admin.getMainCustNm1();
     if (name != null) {
-      data.setAbbrevNm(name.length() > 12 ? name.substring(0, 12).toUpperCase() : name);
+      data.setAbbrevNm(name.length() > 20 ? name.substring(0, 20).toUpperCase() : name);
     }
 
     entityManager.merge(data);
   }
+
+  /**
+   * Checks absolute equality between the strings
+   * 
+   * @param val1
+   * @param val2
+   * @return
+   */
+  private boolean equals(String val1, String val2) {
+    if (val1 == null && val2 != null) {
+      return StringUtils.isEmpty(val2.trim());
+    }
+    if (val1 != null && val2 == null) {
+      return StringUtils.isEmpty(val1.trim());
+    }
+    if (val1 == null && val2 == null) {
+      return true;
+    }
+    return val1.trim().equals(val2.trim());
+  }
+
 }
