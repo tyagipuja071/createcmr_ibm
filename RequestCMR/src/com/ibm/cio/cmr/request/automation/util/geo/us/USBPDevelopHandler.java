@@ -152,7 +152,7 @@ public class USBPDevelopHandler extends USBPHandler {
         return true;
       } else {
         // scenario 2
-        if (StringUtils.isNotBlank(data.getPpsceid()) && AutomationUtil.checkPPSCEID(data.getPpsceid())) {
+        if (StringUtils.isNotBlank(data.getPpsceid()) && !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
           output.setResults("Invalid CEID");
           output.setDetails("Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.");
           engineData.addRejectionComment("CEID", "Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.", "", "");
