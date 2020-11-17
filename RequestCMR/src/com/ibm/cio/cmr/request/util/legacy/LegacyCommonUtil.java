@@ -359,7 +359,7 @@ public class LegacyCommonUtil {
 
     return oldData;
   }
-  
+
   public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
     boolean isDummy = true;
     if (!StringUtils.isBlank(massUpdtAddr.getCustNm1()) || !StringUtils.isBlank(massUpdtAddr.getCustNm2())
@@ -371,7 +371,6 @@ public class LegacyCommonUtil {
     }
     return isDummy;
   }
-  
 
   public static Admin getAdminByReqId(EntityManager entityManager, long reqId) {
     String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADMIN.SEARCH_BY_REQID");
@@ -382,18 +381,6 @@ public class LegacyCommonUtil {
       return records.get(0);
     }
     return null;
-  }
-
-  public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
-    boolean isDummy = true;
-    if (!StringUtils.isBlank(massUpdtAddr.getCustNm1()) || !StringUtils.isBlank(massUpdtAddr.getCustNm2())
-        || !StringUtils.isBlank(massUpdtAddr.getCounty()) || !StringUtils.isBlank(massUpdtAddr.getAddrTxt())
-        || !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) || !StringUtils.isBlank(massUpdtAddr.getPoBox())
-        || !StringUtils.isBlank(massUpdtAddr.getCity1()) || !StringUtils.isBlank(massUpdtAddr.getPostCd())
-        || !StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
-      isDummy = false;
-    }
-    return isDummy;
   }
 
 }
