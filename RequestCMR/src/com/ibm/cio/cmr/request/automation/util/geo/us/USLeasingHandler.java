@@ -1,10 +1,13 @@
 package com.ibm.cio.cmr.request.automation.util.geo.us;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
@@ -17,13 +20,21 @@ import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.util.CompanyFinder;
+import com.ibm.cio.cmr.request.util.RequestUtils;
+import com.ibm.cio.cmr.request.util.SystemLocation;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
+import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
+import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
 /**
  * 
  * @author Shivangi
  *
  */
-public class USLeasingHandler extends USBPEndUserHandler {
+public class USLeasingHandler extends USBPHandler {
   private static final Logger LOG = Logger.getLogger(USLeasingHandler.class);
 
   @Override
@@ -57,28 +68,6 @@ public class USLeasingHandler extends USBPEndUserHandler {
   }
 
   @Override
-  public void dofinalchecks(RequestData requestData, StringBuilder details, Data data, OverrideOutput overrides) {
-    // do final checks on request data
-    Admin admin = requestData.getAdmin();
-    String custSubGrp = data.getCustSubGrp();
-    Addr installAt = requestData.getAddress("ZS01");
-    if (SUB_TYPE_LEASE_NO_RESTRICT.equals(custSubGrp) && !StringUtils.isBlank(installAt.getDivn())) {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMIN", "MAIN_CUST_NM1", admin.getMainCustNm1(), "");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ENTERPRISE", data.getEnterprise(), "");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "");
-    } else if (SUB_TYPE_LEASE_3CC.equals(custSubGrp) || SUB_TYPE_LEASE_SVR_CONT.equals(custSubGrp)) {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMIN", "MAIN_CUST_NM1", admin.getMainCustNm1(), "IBM Credit LLC");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ENTERPRISE", data.getEnterprise(), "4482735");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "COMPANY", data.getCompany(), "12003567");
-      if (SUB_TYPE_LEASE_3CC.equals(custSubGrp)) {
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "ICC");
-      } else if (SUB_TYPE_LEASE_SVR_CONT.equals(custSubGrp)) {
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "");
-      }
-    }
-  }
-
-  @Override
   public void invoiceToOverrides(RequestData requestData, OverrideOutput overrides, EntityManager entityManager) {
     Data data = requestData.getData();
     String custSubGrp = data.getCustSubGrp();
@@ -107,9 +96,316 @@ public class USLeasingHandler extends USBPEndUserHandler {
   }
 
   @Override
+  public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmDirectCmr, RequestData requestData,
+      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+
+    Data data = requestData.getData();
+    if (ibmDirectCmr != null) {
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrSapNumber())) {
+        details.append("\nCopying IBM Codes from IBM CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
+            + ibmDirectCmr.getCmrSapNumber() + "): \n");
+      } else {
+        details.append("\nCopying IBM Codes from IBM CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + ": \n");
+      }
+
+      String affiliate = ibmDirectCmr.getCmrAffiliate();
+      String isic = ibmDirectCmr.getCmrIsic();
+      boolean federalPoa = isic != null && (isic.startsWith("90") || isic.startsWith("91") || isic.startsWith("92"));
+      if (federalPoa) {
+        affiliate = ibmDirectCmr.getCmrEnterpriseNumber();
+      }
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
+        details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
+      }
+
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrIsu())) {
+        details.append(" - ISU: " + ibmDirectCmr.getCmrIsu() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISU_CD", data.getIsuCd(), ibmDirectCmr.getCmrIsu());
+        details.append(" - Client Tier: " + ibmDirectCmr.getCmrTier() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CLIENT_TIER", data.getClientTier(), ibmDirectCmr.getCmrTier());
+      }
+
+      if (!StringUtils.isBlank(ibmDirectCmr.getCmrInac())) {
+        details
+            .append(" - NAC/INAC: " + ("I".equals(ibmDirectCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmDirectCmr.getCmrInacType()) ? "NAC" : "-"))
+                + " " + ibmDirectCmr.getCmrInac() + (ibmDirectCmr.getCmrInacDesc() != null ? "( " + ibmDirectCmr.getCmrInacDesc() + ")" : ""));
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_TYPE", data.getInacType(), ibmDirectCmr.getCmrInacType());
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
+      }
+
+      // add here gbg and cov
+      LOG.debug("Getting Buying Group/Coverage values");
+      String bgId = ibmDirectCmr.getCmrBuyingGroup();
+      GBGResponse calcGbg = new GBGResponse();
+      if (!StringUtils.isBlank(bgId)) {
+        calcGbg.setBgId(ibmDirectCmr.getCmrBuyingGroup());
+        calcGbg.setBgName(ibmDirectCmr.getCmrBuyingGroupDesc());
+        calcGbg.setCmrCount(1);
+        calcGbg.setGbgId(ibmDirectCmr.getCmrGlobalBuyingGroup());
+        calcGbg.setGbgName(ibmDirectCmr.getCmrGlobalBuyingGroupDesc());
+        calcGbg.setLdeRule(ibmDirectCmr.getCmrLde());
+      } else {
+        calcGbg.setBgId("BGNONE");
+        calcGbg.setBgName("None");
+        calcGbg.setCmrCount(1);
+        calcGbg.setGbgId("GBGNONE");
+        calcGbg.setGbgName("None");
+        calcGbg.setLdeRule("BG_DEFAULT");
+      }
+      if (!StringUtils.isBlank(calcGbg.getGbgId())) {
+        details.append(" - GBG: " + calcGbg.getGbgId() + "(" + (StringUtils.isBlank(calcGbg.getGbgName()) ? "not specified" : calcGbg.getGbgName())
+            + ")" + "\n");
+      } else {
+        details.append(" - GBG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(
+            " - BG: " + calcGbg.getBgId() + "(" + (StringUtils.isBlank(calcGbg.getBgName()) ? "not specified" : calcGbg.getBgName()) + ")" + "\n");
+      } else {
+        details.append(" - BG: none\n");
+      }
+      if (!StringUtils.isBlank(calcGbg.getBgId())) {
+        details.append(" - LDE Rule: " + calcGbg.getLdeRule() + "\n");
+      } else {
+        details.append(" - LDE Rule: none\n");
+      }
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_GBG);
+      engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
+
+      LOG.debug("BG ID: " + calcGbg.getBgId());
+      String calcCovId = ibmDirectCmr.getCmrCoverage();
+      if (StringUtils.isBlank(calcCovId)) {
+        calcCovId = RequestUtils.getDefaultCoverage(entityManager, "US");
+      }
+      details.append(
+          " - Coverage: " + calcCovId + (ibmDirectCmr.getCmrCoverageName() != null ? " (" + ibmDirectCmr.getCmrCoverageName() + ")" : "") + "\n");
+      LOG.debug("Coverage: " + calcCovId);
+      engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
+      engineData.put(AutomationEngineData.COVERAGE_CALCULATED, calcCovId);
+
+      details.append(" - SICMEN: " + ibmDirectCmr.getCmrIsic() + "\n");
+      details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
+      details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "US_SICMEN", data.getUsSicmen(), ibmDirectCmr.getCmrIsic());
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(),
+          ibmDirectCmr.getCmrSubIndustry());
+    }
+
+    // do final checks on request data
+    Admin admin = requestData.getAdmin();
+    String custSubGrp = data.getCustSubGrp();
+    Addr installAt = requestData.getAddress("ZS01");
+    if (SUB_TYPE_LEASE_NO_RESTRICT.equals(custSubGrp) && !StringUtils.isBlank(installAt.getDivn())) {
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMIN", "MAIN_CUST_NM1", admin.getMainCustNm1(), "");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ENTERPRISE", data.getEnterprise(), "");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "");
+    } else if (SUB_TYPE_LEASE_3CC.equals(custSubGrp) || SUB_TYPE_LEASE_SVR_CONT.equals(custSubGrp)) {
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMIN", "MAIN_CUST_NM1", admin.getMainCustNm1(), "IBM Credit LLC");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ENTERPRISE", data.getEnterprise(), "4482735");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "COMPANY", data.getCompany(), "12003567");
+      if (SUB_TYPE_LEASE_3CC.equals(custSubGrp)) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "ICC");
+      } else if (SUB_TYPE_LEASE_SVR_CONT.equals(custSubGrp)) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "");
+      }
+    }
+
+    createAddressOverrides(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides, childRequest);
+
+    details.append("Branch Office codes computed successfully.");
+    engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
+
+  }
+
+  @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
       AutomationResult<OverrideOutput> result, FindCMRRecordModel ibmCmr) {
     // NOOP
+  }
+
+  @Override
+  public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
+      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, FindCMRRecordModel ibmCmr, RequestData childRequest,
+      GEOHandler handler, OverrideOutput overrides) throws Exception {
+
+    Admin admin = requestData.getAdmin();
+    Addr addr = requestData.getAddress("ZS01");
+    long childReqId = admin.getChildReqId();
+
+    String childCmrNo = null;
+
+    if (childRequest != null) {
+      childCmrNo = childRequest.getData().getCmrNo();
+    }
+    // prioritize child request here
+    if (childCompleted) {
+      details.append("Copying CMR values direct CMR " + childCmrNo + " from Child Request " + childReqId + ".\n");
+      ibmCmr = createIBMCMRFromChild(childRequest);
+    } else {
+      // check IBM Direct CMR
+      if (ibmCmr == null) {
+        // if a rejected child caused the retrieval of a child cmr
+        ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
+      }
+      if (ibmCmr != null) {
+        details.append("Copying CMR values CMR " + ibmCmr.getCmrNum() + " from FindCMR.\n");
+        LOG.debug("IBM Direct CMR Found: " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName());
+      }
+    }
+
+    // match against D&B
+    DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
+
+    if (ibmCmr == null) {
+
+      LOG.debug("No IBM Direct CMR for the end user.");
+      childReqId = createChildRequest(entityManager, requestData, engineData);
+      details.append("No IBM Direct CMR for the end user.\n");
+
+      if (childCompleted) {
+        String childError = "Child Request " + childReqId + " was completed but Direct CMR cannot be determined. Manual validation needed.";
+        details.append(childError + "\n");
+        engineData.addNegativeCheckStatus("_usChildError", childError);
+        output.setDetails(details.toString());
+        output.setResults("Issues Encountered");
+        return false;
+      } else {
+        String childErrorMsg = "- IBM Direct CMR request creation cannot be done, errors were encountered -";
+        if (childReqId <= 0) {
+          details.append(childErrorMsg + "\n");
+          // engineData.addNegativeCheckStatus("_usBpRejected", childErrorMsg);
+          engineData.addRejectionComment("OTH", childErrorMsg, "", "");
+          output.setDetails(details.toString());
+          output.setOnError(true);
+          output.setResults("Issues Encountered");
+          return false;
+        } else {
+          String childDetails = completeChildRequestDataAndAddress(entityManager, requestData, engineData, childReqId, dnbMatch);
+          if (childDetails == null) {
+            details.append(childErrorMsg + "\n");
+            // engineData.addNegativeCheckStatus("_usBpRejected",
+            // childErrorMsg);
+            engineData.addRejectionComment("OTH", childErrorMsg, "", "");
+            output.setOnError(true);
+            output.setResults("Issues Encountered");
+            output.setDetails(details.toString());
+            return false;
+          } else {
+            details.append("Child Request " + childReqId + " created for the IBM Direct CMR record of " + addr.getDivn()
+                + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
+                + ".\nThe system will wait for completion of the child record bfore processing the request.\n");
+            details.append(childDetails + "\n");
+            setWaiting(true);
+            output.setDetails(details.toString());
+            output.setResults("Waiting on Child Request");
+            output.setOnError(false);
+            return false;
+          }
+
+        }
+      }
+    }
+    return true;
+  }
+
+  @Override
+  protected FindCMRRecordModel getIBMCMRBestMatch(AutomationEngineData engineData, RequestData requestData, List<DuplicateCMRCheckResponse> matches)
+      throws CmrException {
+    for (DuplicateCMRCheckResponse record : matches) {
+      LOG.debug(" - Duplicate: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")" + record.getCompany() + " - "
+          + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
+      if (StringUtils.isBlank(record.getUsRestrictTo())) {
+        // check US CMR DB first to confirm no restriction
+        if (hasBlankRestrictionCodeInUSCMR(record.getCmrNo())) {
+
+          // IBM Direct CMRs have blank restrict to
+          LOG.debug("CMR No. " + record.getCmrNo() + " has BLANK restriction code in US CMR. Getting CMR Details..");
+          String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
+          FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 5, null, overrides);
+          if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
+            return result.getItems().get(0);
+          }
+        } else {
+          LOG.debug("CMR No. " + record.getCmrNo() + " has non-blank restriction code in US CMR");
+        }
+      }
+    }
+    return null;
+  }
+
+  @Override
+  protected void setChildRequestScenario(Data data, Data childData, Admin childAdmin, StringBuilder details) {
+
+    String isic = data.getUsSicmen();
+    if (StringUtils.isBlank(isic)) {
+      isic = data.getIsicCd();
+    }
+    if (StringUtils.isBlank(isic)) {
+      isic = "";
+    }
+
+    String affiliate = data.getAffiliate();
+
+    String typeDesc = null;
+    String subTypeDesc = null;
+    String type = null;
+    String subType = null;
+    String custType = null;
+
+    int isicNumeric = 0;
+    if (StringUtils.isNumeric(isic.substring(0, 2))) {
+      isicNumeric = Integer.parseInt(isic.substring(0, 2));
+    }
+
+    if (isicNumeric >= 94 && isicNumeric <= 97) {
+      typeDesc = "State and Local";
+      type = TYPE_STATE_AND_LOCAL;
+      custType = USUtil.STATE_LOCAL;
+      switch (isicNumeric) {
+      case 94:
+        subTypeDesc = "State and Local - State";
+        subType = SUB_TYPE_STATE_AND_LOCAL_STATE;
+        break;
+      case 95:
+        subTypeDesc = "State and Local - County";
+        subType = SUB_TYPE_STATE_AND_LOCAL_COUNTY;
+        break;
+      case 96:
+        subTypeDesc = "State and Local - City";
+        subType = SUB_TYPE_STATE_AND_LOCAL_CITY;
+        break;
+      case 97:
+        subTypeDesc = "State and Local - District";
+        subType = SUB_TYPE_STATE_AND_LOCAL_DISTRICT;
+        break;
+      }
+    } else if (isicNumeric >= 90 && isicNumeric <= 92) {
+      typeDesc = "Federal";
+      type = TYPE_FEDERAL;
+      if (AFFILIATE_FEDERAL.equals(affiliate)) {
+        subTypeDesc = "Federal Gov't Regular";
+        subType = SUB_TYPE_FEDERAL_REGULAR_GOVT;
+        custType = USUtil.FEDERAL;
+      } else {
+        subTypeDesc = "Power of Attorney";
+        subType = SUB_TYPE_FEDERAL_POA;
+        custType = USUtil.POWER_OF_ATTORNEY;
+      }
+    } else {
+      typeDesc = "Commercial";
+      type = TYPE_COMMERCIAL;
+      subTypeDesc = "Regular Commercial CMR";
+      subType = SUB_TYPE_COMMERCIAL_REGULAR;
+      custType = USUtil.COMMERCIAL;
+    }
+
+    details.append(" - Type: " + typeDesc + "\n");
+    details.append(" - Sub-type: " + subTypeDesc + "\n");
+    childData.setCustGrp(type);
+    childData.setCustSubGrp(subType);
+    childAdmin.setCustType(custType);
   }
 
 }
