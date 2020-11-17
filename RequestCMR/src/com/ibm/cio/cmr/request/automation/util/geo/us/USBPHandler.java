@@ -1170,6 +1170,10 @@ public abstract class USBPHandler {
       childData.setIsicCd(data.getIsicCd());
       childData.setSubIndustryCd(data.getSubIndustryCd());
     }
+    // set ppsceid if pool scenario request
+    if (USUtil.CG_THIRD_P_BUSINESS_PARTNER.equals(childData.getCustGrp()) && USUtil.SC_BP_POOL.equals(childData.getCustSubGrp())) {
+      childData.setPpsceid(data.getPpsceid());
+    }
     childData.setUsSicmen(childData.getIsicCd());
     Scorecard childScoreCard = childReqData.getScorecard();
     childScoreCard.setFindCmrResult(CmrConstants.RESULT_NO_RESULT);
