@@ -69,13 +69,14 @@ public class USBPEhostHandler extends USBPHandler {
       return true;
     }
 
-    if (StringUtils.isNotBlank(data.getPpsceid()) && AutomationUtil.checkPPSCEID(data.getPpsceid())) {
+    if (StringUtils.isNotBlank(data.getPpsceid()) && !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
       output.setResults("Invalid CEID");
-      output.setDetails("Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.");
-      engineData.addRejectionComment("CEID", "Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.", "", "");
+      output.setDetails("The CEID provided on the request is not valid, please check and confirm.\n");
+      engineData.addRejectionComment("CEID", "The CEID provided on the request is not valid, please check and confirm.", "", "");
       output.setOnError(true);
       return true;
     }
+
     return false;
 
   }
@@ -93,8 +94,18 @@ public class USBPEhostHandler extends USBPHandler {
         + (StringUtils.isNotBlank(zs01.getDept()) ? " " + zs01.getDept() : "");
     if (data.getEnterprise().equals(data.getAffiliate()) && mainCustNm.equals(endUserNm)) {
       this.cmrType = T1;
+      details.append("Processing BP E-host request for Scenario #1\n");
     } else {
       this.cmrType = T2;
+      details.append("Processing BP E-host request for Scenario #2\n");
+    }
+
+    if (T2.equals(this.cmrType) && !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
+      output.setResults("Invalid CEID");
+      output.setDetails("Only BP with valid CEID is allowed to setup a T2 Ehost record, please check and confirm.");
+      engineData.addRejectionComment("CEID", "Only BP with valid CEID is allowed to setup a T2 Ehost record, please check and confirm.", "", "");
+      output.setOnError(true);
+      return false;
     }
 
     String childCmrNo = null;
@@ -258,7 +269,7 @@ public class USBPEhostHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
     }
 
-    if (T1.equals(cmrType)) {
+    if (T1.equals(this.cmrType)) {
       details.append(" - Affiliate: " + data.getEnterprise() + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
@@ -339,7 +350,7 @@ public class USBPEhostHandler extends USBPHandler {
       LOG.debug(" - Duplicate: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")" + record.getCompany() + " - "
           + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
       // IBM Direct CMRs have blank restrict to
-      if (T1.equals(cmrType)) {
+      if (T1.equals(this.cmrType)) {
         if (RESTRICT_TO_END_USER.equals(record.getUsRestrictTo()) && "P".equals(record.getUsBpAccType())) {
           LOG.debug("CMR No. " + record.getCmrNo() + " matches Pool CMR Criteria. Getting CMR Details..");
           String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
@@ -350,7 +361,7 @@ public class USBPEhostHandler extends USBPHandler {
         } else {
           LOG.debug("CMR No. " + record.getCmrNo() + " does not meet the Pool CMR criteria");
         }
-      } else if (T2.equals(cmrType)) {
+      } else if (T2.equals(this.cmrType)) {
         if (RESTRICT_TO_END_USER.equals(record.getUsRestrictTo()) && "TT2".equals(record.getUsCsoSite())) {
           LOG.debug("CMR No. " + record.getCmrNo() + " matches T2 Pool CMR criteria. Getting CMR Details..");
           String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
@@ -372,7 +383,7 @@ public class USBPEhostHandler extends USBPHandler {
     childAdmin.setCustType(USUtil.BUSINESS_PARTNER);
     childData.setCustGrp(USUtil.CG_THIRD_P_BUSINESS_PARTNER);
     childData.setCustSubGrp(USUtil.SC_BP_POOL);
-    if (T1.equals(cmrType)) {
+    if (T1.equals(this.cmrType)) {
       childData.setBpAcctTyp("P");
     } else {
       childData.setCsoSite("TT2");
