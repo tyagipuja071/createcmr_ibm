@@ -53,6 +53,7 @@ import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.BdsTblInfo;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
+import com.ibm.cio.cmr.request.entity.CmrtAddr;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.MassUpdt;
@@ -628,6 +629,10 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       initLogger().error("there was an error while performing cmr search : " + ex.getMessage());
       throw new CmrException(MessageUtil.ERROR_GENERAL);
     }
+
+    // CMR-7562 - append legacy only addresses here
+    cmrs.addAll(getAddressesNotInRdc(cmrs, entityManager, cmrNo, cmrCntry));
+
     if (cmrs.size() > 0) {
       String type = null;
       Map<String, Integer> seqMap = new HashMap<String, Integer>();
@@ -706,6 +711,56 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       // entityManager.merge(muAddr);
     }
     return mapTrans;
+  }
+
+  /**
+   * Retrieves the address records which are not found in FindCMR (legacy only)
+   * 
+   * @param entityManager
+   * @param cmrNo
+   * @param cmrCntry
+   * @return
+   */
+  private List<FindCMRRecordModel> getAddressesNotInRdc(List<FindCMRRecordModel> cmrs, EntityManager entityManager, String cmrNo, String cmrCntry) {
+    // get the address sequences in rdc, prefilter
+    StringBuilder sequences = new StringBuilder();
+    for (FindCMRRecordModel cmr : cmrs) {
+      String seqNo = cmr.getCmrAddrSeq();
+      if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+        sequences.append(sequences.length() > 0 ? "," : "");
+        sequences.append("'" + LegacyDirectUtil.handleLDSeqNoScenario(seqNo, true) + "'");
+      }
+    }
+    LOG.debug("Retreiving addresses not in RDC for RCYAA " + cmrCntry + " and RCUXA " + cmrNo);
+    String extAddrSql = ExternalizedQuery.getSql("GET.LD_MASS_UPDT_EXT_ADDR");
+    PreparedQuery extAddrQuery = new PreparedQuery(entityManager, extAddrSql);
+    if (sequences.length() > 0) {
+      // those are already in rdc, skip them
+      extAddrQuery.append("and ADDRNO not in (" + sequences.toString() + ")");
+    }
+    extAddrQuery.setParameter("CNTRY", cmrCntry);
+    extAddrQuery.setParameter("CMR_NO", cmrNo);
+    extAddrQuery.setForReadOnly(true);
+    List<CmrtAddr> addresses = extAddrQuery.getResults(CmrtAddr.class);
+    List<FindCMRRecordModel> extAddresses = new ArrayList<FindCMRRecordModel>();
+    if (addresses != null && !addresses.isEmpty()) {
+      for (CmrtAddr addr : addresses) {
+        FindCMRRecordModel rec = new FindCMRRecordModel();
+
+        rec.setCmrAddrSeq(addr.getId().getAddrNo());
+        rec.setCmrAddrTypeCode("EXT1");
+        rec.setCmrCountryLanded(PageManager.getDefaultLandedCountry(cmrCntry));
+        rec.setCmrName1Plain(addr.getAddrLine1());
+        rec.setCmrName2(addr.getAddrLine2());
+        rec.setCmrStreetAddress(addr.getAddrLine3());
+        rec.setCmrStreetAddressCont(addr.getAddrLine4());
+        rec.setCmrCity(addr.getAddrLine5()); // does not matter, DPL check only
+                                             // does name + country
+        extAddresses.add(rec);
+      }
+    }
+    LOG.debug("Extracted " + extAddresses.size() + " from legacy DB2..");
+    return extAddresses;
   }
 
   private Map<String, String> doCheckCmrAddressForCurrRow(RequestEntryModel model, EntityManager entityManager, String custToUse, String cmrNo)
@@ -5256,6 +5311,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
       case "CUST_NM2":
         muaModel.setCustNm2(tempVal);
         break;
+      case "CUST_NM3":
+        muaModel.setCustNm3(tempVal);
+        break;
       case "CUST_NM4":
         muaModel.setCustNm4(tempVal);
         break;
@@ -5315,6 +5373,9 @@ public class MassRequestEntryService extends BaseService<RequestEntryModel, Comp
         break;
       case "COUNTY":
         muaModel.setCounty(tempVal);
+        break;
+      case "DIVN":
+        muaModel.setDivn(tempVal);
         break;
       default:
         LOG.debug("Default condition was executed [nothing is saved] for DB column >> " + col.getLabel());
