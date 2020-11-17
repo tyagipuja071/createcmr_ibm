@@ -56,9 +56,9 @@ public class USBPDevelopHandler extends USBPHandler {
     if (addRejection) {
       String msg = "BP Development records only allow to create under Distributors, please check and confirm the Distributor for this transaction.";
       engineData.addRejectionComment("DISTRIBUTOR", msg, "", "");
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   @Override
@@ -95,7 +95,7 @@ public class USBPDevelopHandler extends USBPHandler {
       String endUser = AutomationUtil.getCleanString(divn.concat(dept));
       String legalName = AutomationUtil.getCleanString(custNm1.concat(custNm2));
 
-      if (StringUtils.isNotBlank(legalName) && legalName.equalsIgnoreCase(endUser)) {
+      if (StringUtils.isNotBlank(legalName) && (legalName.contains(endUser) || endUser.contains(legalName))) {
         // scenario 1
         // check for existing Pool CMR
         checkForPoolCMR = true;
@@ -104,7 +104,7 @@ public class USBPDevelopHandler extends USBPHandler {
           // if no pool CMR exists, validate the legal name and address by
           // matching
           // against D&B
-          DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr == null);
+          DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, false);
           if (dnbMatch != null) {
             // create a new pool cmr through child request
             childReqId = createChildRequest(entityManager, requestData, engineData);
@@ -329,15 +329,29 @@ public class USBPDevelopHandler extends USBPHandler {
     createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
 
     String divn_attn = StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn().concat(zs01.getDept()).toUpperCase() : "";
+    String addressCategory = "";
+    for (String demo : demoDev) {
+      if (divn_attn.contains(demo)) {
+        addressCategory = "DEMO";
+        break;
+      }
+    }
 
-    if (demoDev.contains(divn_attn)) {
+    for (String lease : leaseDev) {
+      if (divn_attn.contains(lease)) {
+        addressCategory = "LEASE";
+        break;
+      }
+    }
+
+    if ("DEMO".equalsIgnoreCase(addressCategory)) {
       details.append(" - CSO Site : " + "YBV" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
 
       details.append(" - Marketing A/R Dept  : " + "DI3" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
 
-    } else if (leaseDev.contains(divn_attn)) {
+    } else if ("LEASE".equalsIgnoreCase(addressCategory)) {
       details.append(" - CSO Site : " + "TF7" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "TF7");
 
