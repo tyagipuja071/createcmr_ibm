@@ -114,6 +114,10 @@ public class LegacyCommonUtil {
       cust.setVat(muData.getVat());
     }
 
+    if (!StringUtils.isBlank(muData.getSubIndustryCd())) {
+      cust.setImsCd(muData.getSubIndustryCd());
+    }
+
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
     // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
@@ -132,7 +136,6 @@ public class LegacyCommonUtil {
 
     if (!StringUtils.isBlank(addr.getAddrTxt())) {
       legacyAddr.setStreet(addr.getAddrTxt());
-
     }
 
     if (!StringUtils.isBlank(addr.getAddrTxt2())) {
@@ -369,5 +372,28 @@ public class LegacyCommonUtil {
     return isDummy;
   }
   
+
+  public static Admin getAdminByReqId(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADMIN.SEARCH_BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Admin> records = query.getResults(1, Admin.class);
+    if (records != null && records.size() > 0) {
+      return records.get(0);
+    }
+    return null;
+  }
+
+  public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
+    boolean isDummy = true;
+    if (!StringUtils.isBlank(massUpdtAddr.getCustNm1()) || !StringUtils.isBlank(massUpdtAddr.getCustNm2())
+        || !StringUtils.isBlank(massUpdtAddr.getCounty()) || !StringUtils.isBlank(massUpdtAddr.getAddrTxt())
+        || !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) || !StringUtils.isBlank(massUpdtAddr.getPoBox())
+        || !StringUtils.isBlank(massUpdtAddr.getCity1()) || !StringUtils.isBlank(massUpdtAddr.getPostCd())
+        || !StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
+      isDummy = false;
+    }
+    return isDummy;
+  }
 
 }
