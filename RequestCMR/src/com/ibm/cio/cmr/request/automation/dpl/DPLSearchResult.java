@@ -10,6 +10,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
+import com.ibm.cmr.services.client.dpl.DPLRecord;
+import com.ibm.cmr.services.client.dpl.DPLSearchResults;
 
 /**
  * Contains the information about a DPL name search done against the DPL web
@@ -20,24 +22,28 @@ import com.ibm.cio.cmr.request.automation.util.CommonWordsUtil;
  */
 public class DPLSearchResult {
 
-  private String name;
-  private String user;
-  private String date;
-  private String resultId;
-  private List<DPLSearchItem> items = new ArrayList<DPLSearchItem>();
-
   /**
    * Computes for the top matches
    * 
    * @return
    */
-  public List<DPLSearchItem> getTopMatches() {
-    DPLSearchItem topMatch = null;
+  public static List<DPLRecord> getTopMatches(DPLSearchResults results) {
+    if (results == null || results.getDeniedPartyRecords() == null) {
+      return Collections.emptyList();
+    }
+    DPLRecord topMatch = null;
 
-    List<DPLSearchItem> topMatches = new ArrayList<DPLSearchItem>();
+    List<DPLRecord> topMatches = new ArrayList<DPLRecord>();
     int lowestDistance = Integer.MAX_VALUE;
-    for (DPLSearchItem item : this.items) {
-      int distance = StringUtils.getLevenshteinDistance(this.name.toUpperCase(), item.getPartyName().toUpperCase());
+    for (DPLRecord item : results.getDeniedPartyRecords()) {
+      String dplName = item.getCompanyName();
+      if (StringUtils.isBlank(dplName) && !StringUtils.isBlank(item.getCustomerLastName())) {
+        dplName = item.getCustomerFirstName() + " " + item.getCustomerLastName();
+      }
+      if (dplName == null) {
+        dplName = "";
+      }
+      int distance = StringUtils.getLevenshteinDistance(results.getSearchArgument().toUpperCase(), dplName.toUpperCase());
       item.setDistance(distance);
       if (distance < lowestDistance) {
         lowestDistance = distance;
@@ -62,9 +68,23 @@ public class DPLSearchResult {
    * 
    * @return
    */
-  public boolean exactMatchFound() {
-    for (DPLSearchItem item : this.items) {
-      if (item.getPartyName().toUpperCase().equals(this.name.toUpperCase())) {
+  public static boolean exactMatchFound(DPLSearchResults results) {
+    if (results == null || results.getDeniedPartyRecords() == null) {
+      return false;
+    }
+    for (DPLRecord item : results.getDeniedPartyRecords()) {
+      String dplName = item.getCompanyName();
+      if (StringUtils.isBlank(dplName) && !StringUtils.isBlank(item.getCustomerLastName())) {
+        dplName = item.getCustomerFirstName() + " " + item.getCustomerLastName();
+      }
+      if (dplName == null) {
+        dplName = "";
+      }
+      if (results.getSearchArgument().toUpperCase().equals(dplName.toUpperCase())) {
+        return true;
+      }
+      if (dplName.toUpperCase().contains(results.getSearchArgument().toUpperCase())
+          || results.getSearchArgument().toUpperCase().contains(dplName.toUpperCase())) {
         return true;
       }
     }
@@ -76,60 +96,26 @@ public class DPLSearchResult {
    * 
    * @return
    */
-  public boolean partialMatchFound() {
-    for (DPLSearchItem item : this.items) {
-      if (item.getPartyName().toUpperCase().contains(this.name.toUpperCase())) {
+  public static boolean partialMatchFound(DPLSearchResults results) {
+    if (results == null || results.getDeniedPartyRecords() == null) {
+      return false;
+    }
+    for (DPLRecord item : results.getDeniedPartyRecords()) {
+      String dplName = item.getCompanyName();
+      if (StringUtils.isBlank(dplName) && !StringUtils.isBlank(item.getCustomerLastName())) {
+        dplName = item.getCustomerFirstName() + " " + item.getCustomerLastName();
+      }
+      if (dplName == null) {
+        dplName = "";
+      }
+      if (dplName.toUpperCase().contains(results.getSearchArgument().toUpperCase())) {
         return true;
       }
-      if (item.getPartyName().toUpperCase().contains(CommonWordsUtil.minimize(this.name.toUpperCase()))) {
+      if (dplName.toUpperCase().contains(CommonWordsUtil.minimize(results.getSearchArgument().toUpperCase()))) {
         return true;
       }
     }
     return false;
-  }
-
-  public void addItem(DPLSearchItem item) {
-    this.items.add(item);
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDate() {
-    return date;
-  }
-
-  public void setDate(String date) {
-    this.date = date;
-  }
-
-  public List<DPLSearchItem> getItems() {
-    return items;
-  }
-
-  public void setItems(List<DPLSearchItem> items) {
-    this.items = items;
-  }
-
-  public String getUser() {
-    return user;
-  }
-
-  public void setUser(String user) {
-    this.user = user;
-  }
-
-  public String getResultId() {
-    return resultId;
-  }
-
-  public void setResultId(String resultId) {
-    this.resultId = resultId;
   }
 
 }

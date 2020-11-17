@@ -497,7 +497,7 @@ public class UKIUtil extends AutomationUtil {
         }
 
         for (DnBMatchingResponse dnbRecord : response) {
-          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord, custNmTrimmed);
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord, custNmTrimmed, false);
           if (closelyMatches) {
             engineData.put("ZI01_DNB_MATCH", dnbRecord);
             highQualityMatchExists = true;

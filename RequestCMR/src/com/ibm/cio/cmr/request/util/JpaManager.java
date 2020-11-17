@@ -20,11 +20,19 @@ public class JpaManager {
     return s;
   }
 
+  private static String getActualPersistenceUnitName(String name) {
+    if ("RDC".equals(UNIT) && "CEDP".equals(name)) {
+      return "CEDP_UI";
+    }
+    return name;
+  }
+
   public static EntityManager getEntityManager() {
     return getEntityManager(UNIT);
   }
 
   protected static synchronized EntityManagerFactory getSessionFactory(String name) {
+    name = getActualPersistenceUnitName(name);
     EntityManagerFactory sf = managerMap.get(name);
     if (sf == null) {
       try {

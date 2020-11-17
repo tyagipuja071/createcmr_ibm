@@ -67,10 +67,12 @@ public class UpdateSwitchElement extends ValidatingElement {
       log.debug("Processing is skipped for non Update requests.");
     } else if ("U".equals(admin.getReqType())) {
 
-      RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, reqId);
       GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
 
-      if (changes.hasDataChanges() || (handler != null && !handler.customerNamesOnAddress() && changes.isLegalNameChanged())) {
+      boolean isLegalNameUpdtd = handler != null && !handler.customerNamesOnAddress() && AutomationUtil.isLegalNameChanged(admin);
+      RequestChangeContainer changes = new RequestChangeContainer(entityManager, data.getCmrIssuingCntry(), admin, requestData);
+
+      if (changes.hasDataChanges() || isLegalNameUpdtd) {
         boolean hasCountryLogic = false;
         if (automationUtil != null) {
           hasCountryLogic = automationUtil.runUpdateChecksForData(entityManager, engineData, requestData, changes, output, validation);
@@ -147,7 +149,8 @@ public class UpdateSwitchElement extends ValidatingElement {
 
         }
 
-      } else if (NCHECK_NO_UPD_COUNTRIES.contains(data.getCmrIssuingCntry()) && !changes.hasDataChanges() && !changes.hasAddressChanges()) {
+      } else if (NCHECK_NO_UPD_COUNTRIES.contains(data.getCmrIssuingCntry()) && !changes.hasDataChanges() && !changes.hasAddressChanges()
+          && !AutomationUtil.isLegalNameChanged(admin)) {
         // Set negative check if country is part of the list and there are no
         // updates/changes at all on the request
         validation.setSuccess(true);
@@ -155,6 +158,12 @@ public class UpdateSwitchElement extends ValidatingElement {
         output.setDetails("No data/address changes made on request.");
         engineData.addNegativeCheckStatus("NO_UPD", "No data/address changes made on request.");
         log.debug("No data/address changes made on request.");
+      } else if (!changes.hasDataChanges() && !changes.hasAddressChanges() && AutomationUtil.isLegalNameChanged(admin)) {
+        validation.setSuccess(true);
+        validation.setMessage("Review Required");
+        String details = output.getDetails() + "\n" + "Legal Name changes made on request.";
+        output.setDetails(details);
+        log.debug("Legal Name changes made on request.");
       } else if (!changes.hasDataChanges() && !changes.hasAddressChanges()) {
         // no updates/changes at all on the request
         validation.setSuccess(false);

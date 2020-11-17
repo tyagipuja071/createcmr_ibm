@@ -661,7 +661,17 @@
     <put-attribute name="body" value="/resources/jsp/windows/legacydetails.jsp" />
   </definition>
 
+  <definition name="dplrequest" extends="window">
+    <put-attribute name="title" value="CreateCMR | Denied Parties List Search" />
+    <put-attribute name="body" value="/resources/jsp/windows/dplrequest.jsp" />
+  </definition>
 
+  <definition name="dplsearch" extends="base">
+    <put-attribute name="title" value="CreateCMR | Denied Parties List Search" />
+    <put-attribute name="body" value="/resources/jsp/dpl/dplsearch.jsp" />
+  </definition>
+
+  
   <definition name="searchhome" extends="base">
     <put-attribute name="title" value="CreateCMR | Search" />
     <put-attribute name="body" value="/resources/jsp/legacy/searchhome.jsp" />
@@ -670,6 +680,11 @@
   <definition name="mqsearch" extends="base">
     <put-attribute name="title" value="CreateCMR | Search SOF/WTAAS" />
     <put-attribute name="body" value="/resources/jsp/legacy/mqsearch.jsp" />
+  </definition>
+
+  <definition name="attachlist" extends="base">
+    <put-attribute name="title" value="CreateCMR | Get Attachments" />
+    <put-attribute name="body" value="/resources/jsp/legacy/attachlist.jsp" />
   </definition>
 
   

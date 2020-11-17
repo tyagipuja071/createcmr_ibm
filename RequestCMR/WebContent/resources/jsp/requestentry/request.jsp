@@ -90,7 +90,7 @@
     <%if (null != reqentry.getCmrIssuingCntry() && ("852".equals(reqentry.getCmrIssuingCntry()) || "720".equals(reqentry.getCmrIssuingCntry()) || "738".equals(reqentry.getCmrIssuingCntry()) || "736".equals(reqentry.getCmrIssuingCntry()) || "646".equals(reqentry.getCmrIssuingCntry()) || "714".equals(reqentry.getCmrIssuingCntry()))) {%>
     getChecklistStatus();
     <%}%>
-    <%if (fromQs){%>
+    <%if (fromQs && "C".equals(reqentry.getReqType())){%>
       cmr.showProgress('Check and verify address created.<br>Please wait while the system opens the address...');
       window.setTimeout('forceAddressValidationFromQS()', 1000);
     <%}%>
@@ -360,7 +360,7 @@ div#ibm-content-main {
       <form:hidden path="findDnbTs" />
     </c:if>
     
-    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862,838,866,754,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838">
+    <cmr:view exceptForGEO="IERP,CND,CN,JP,SWISS" exceptForCountry="618,862,644,668,693,704,708,740,820,821,826,358,359,363,603,607,626,651,694,695,699,705,707,787,741,889,838,620,642,675,677,680,752,762,767,768,772,805,808,823,832,849,850,865,729">
     <form:hidden path="custClass" />
     </cmr:view>
     
@@ -404,6 +404,7 @@ div#ibm-content-main {
         <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/go.png" onclick="processRequestAction()">
       </div>
       <div class="cmr-action-txt" id="viewOnlyText" style="display: none">View Only</div>
+      <div class="cmr-action-txt" id="superUserModeText" style="display: none">SUPER USER MODE</div>
     </div>
     <script>
       addMoveHandler();
@@ -576,9 +577,7 @@ div#ibm-content-main {
 
 <%if (!newEntry) {%>
   <jsp:include page="commentLog.jsp" />
-   <c:if test="${reqentry.findDnbResult != 'Accepted'}">
   <jsp:include page="dnbautocheck.jsp" />
-  </c:if>
 <%} %>
 
 <cmr:section alwaysShown="true">

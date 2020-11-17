@@ -45,6 +45,14 @@
             ${summary.data.commercialFinanced}
       </cmr:column>
     </cmr:view>
+    <cmr:view forCountry="642">
+      <cmr:column span="1" width="130">
+        <label><cmr:fieldLabel fieldId="Phone3" />: </label>
+      </cmr:column>
+      <cmr:column span="1" width="200">
+            ${summary.data.phone3}
+      </cmr:column>
+    </cmr:view>
    </cmr:row>
    
   <cmr:row addBackground="true">
