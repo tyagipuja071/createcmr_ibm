@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -92,6 +93,8 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
   private static final String MASS_UPDATE_LEGACYDONE = "LDONE";
   private static final String MASS_UDPATE_LEGACY_FAIL_MSG = "Errors happened in legacy mass updates. Pleaes see request summary for details.";
   private static final int MASS_UPDATE_TXT_LEN = 10000;
+
+  private static final List<String> SKIP_RDc_COUNTRY_LIST = Arrays.asList("675");
 
   @Override
   protected Boolean executeBatch(EntityManager entityManager) throws Exception {
@@ -179,7 +182,17 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
      * else { admin.setReqStatus("PCO"); }
      */
 
-    admin.setReqStatus("PCO");
+    String sql = ExternalizedQuery.getSql("QUERY.GET.COUNTRY");
+    PreparedQuery queryData = new PreparedQuery(entityManager, sql);
+    queryData.setForReadOnly(true);
+    queryData.setParameter("REQ_ID", admin.getId().getReqId());
+    String country = queryData.getSingleResult(String.class);
+
+    if (SKIP_RDc_COUNTRY_LIST.contains(country)) {
+      admin.setReqStatus("COM");
+    } else {
+      admin.setReqStatus("PCO");
+    }
     admin.setLastUpdtBy(BATCH_USER_ID);
     updateEntity(admin, entityManager);
 
@@ -192,7 +205,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
     // "Errors happened in LEGACY mass updates. Please see request summary for
     // details.";
 
-    WfHist hist = createHistory(entityManager, message, "PCO", "Legacy Processing", admin.getId().getReqId());
+    WfHist hist = createHistory(entityManager, message, admin.getReqStatus(), "Legacy Processing", admin.getId().getReqId());
 
     // DTN: 1795577: Spain - Mass Update - processing should not stop when
     // template contains non-existent CNs
@@ -1144,6 +1157,7 @@ public class LegacyDirectLegacyMassProcessService extends TransConnService {
         }
 
         transformer.transformLegacyAddressDataMassUpdate(entityManager, legacyAddr, addr, cntry, cust, data, legacyObjects);
+        capsAndFillNulls(legacyAddr, true);
         // DTN: Set again the CmrtCust object on the legacy objects
         // container just to be sure
         legacyObjects.setCustomer(cust);

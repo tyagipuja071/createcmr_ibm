@@ -500,7 +500,7 @@ public class TransConnService extends BaseBatchService {
             continue;
           }
           updateEntity(admin, entityManager);
-          partialCommit(entityManager);
+          // partialCommit(entityManager);
           LOG.info("CMR no does not exist on reserved. Continuing...");
           // Update CREQCMR.DATA set CMR_NO = from pool CMR, set CREQCMR.ADMIN
           // REQ_STATUS to 'COM', put CMR_NO in RESERVED_CMR_NOS
@@ -559,7 +559,7 @@ public class TransConnService extends BaseBatchService {
             updateEntity(kna1, entityManager);
           }
 
-          partialCommit(entityManager);
+          // partialCommit(entityManager);
 
           // Workflow history creation
           RequestUtils.createWorkflowHistoryFromBatch(entityManager, BATCH_USER_ID, admin, "Completed using Pool CMR assignment", "Pool Assignment",
@@ -711,6 +711,7 @@ public class TransConnService extends BaseBatchService {
           RequestUtils.createCommentLogFromBatch(entityManager, BATCH_USER_ID, admin.getId().getReqId(),
               "Child Update Request " + reqId + " created.");
 
+          partialCommit(entityManager);
           break;
         }
 
@@ -1917,6 +1918,13 @@ public class TransConnService extends BaseBatchService {
         ENTERPRISE_Record.setField("ZZKV_NODE2");
         ENTERPRISE_Record.setValue(massUpdtData.getEnterprise());
         requestDataValueRecords.add(ENTERPRISE_Record);
+      }
+
+      if (!StringUtils.isBlank(massUpdtData.getAbbrevNm())) {
+        RequestValueRecord telx1 = new RequestValueRecord();
+        telx1.setField("TELX1");
+        telx1.setValue(massUpdtData.getAbbrevNm());
+        requestDataValueRecords.add(telx1);
       }
 
       // set requestDataValueRecords list updatDataRec

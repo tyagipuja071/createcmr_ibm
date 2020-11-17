@@ -28,6 +28,8 @@ public class SuppCountryModel extends BaseModel {
   private String autoEngineIndc;
   private String recoveryDirection;
   private String dnbPrimaryIndc;
+  private String startQuickSearch;
+  private String tradestyleNmUsage;
 
   @Override
   public boolean allKeysAssigned() {
@@ -157,6 +159,22 @@ public class SuppCountryModel extends BaseModel {
 
   public void setDnbPrimaryIndc(String dnbPrimaryIndc) {
     this.dnbPrimaryIndc = dnbPrimaryIndc;
+  }
+
+  public String getStartQuickSearch() {
+    return startQuickSearch;
+  }
+
+  public void setStartQuickSearch(String startQuickSearch) {
+    this.startQuickSearch = startQuickSearch;
+  }
+
+  public String getTradestyleNmUsage() {
+    return tradestyleNmUsage;
+  }
+
+  public void setTradestyleNmUsage(String tradestyleNmUsage) {
+    this.tradestyleNmUsage = tradestyleNmUsage;
   }
 
 }
