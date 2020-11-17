@@ -72,7 +72,7 @@ public class CanadaHandler extends GEOHandler {
     if (mainRecord != null && StringUtils.isBlank(mainRecord.getCmrShortName())) {
       String custName = mainRecord.getCmrName1Plain();
       if (StringUtils.isNotBlank(custName)) {
-        data.setAbbrevNm(custName.length() > 12 ? custName.substring(0, 12).toUpperCase() : custName);
+        data.setAbbrevNm(custName.length() > 20 ? custName.substring(0, 20).toUpperCase() : custName);
       }
     }
   }
@@ -372,7 +372,7 @@ public class CanadaHandler extends GEOHandler {
     // set abbreviated name
     String name = admin.getMainCustNm1();
     if (name != null) {
-      data.setAbbrevNm(name.length() > 12 ? name.substring(0, 12).toUpperCase() : name);
+      data.setAbbrevNm(name.length() > 20 ? name.substring(0, 20).toUpperCase() : name);
     }
 
     entityManager.merge(data);
