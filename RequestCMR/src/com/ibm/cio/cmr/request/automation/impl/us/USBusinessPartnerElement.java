@@ -103,7 +103,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
       bpHandler.copyAndFillIBMData(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
 
       bpHandler.doFinalValidations(engineData, requestData, details, overrides, output, ibmCmr);
-      output.setResults("Success");
+      output.setResults("Successful Execution.");
+    } else {
+      output.setResults("Execution Failed.");
     }
 
     output.setProcessOutput(overrides);
