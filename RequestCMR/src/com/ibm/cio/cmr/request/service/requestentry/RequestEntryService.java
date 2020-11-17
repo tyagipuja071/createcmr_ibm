@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.service.requestentry;
 
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,8 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,6 +27,7 @@ import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.AdminPK;
+import com.ibm.cio.cmr.request.entity.Attachment;
 import com.ibm.cio.cmr.request.entity.CmrInternalTypes;
 import com.ibm.cio.cmr.request.entity.CompoundEntity;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -65,15 +65,13 @@ import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.dnb.DnBUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
-import com.ibm.cmr.services.client.CmrServicesFactory;
-import com.ibm.cmr.services.client.MatchingServiceClient;
 import com.ibm.cmr.services.client.dnb.DnBCompany;
 import com.ibm.cmr.services.client.dnb.DnbData;
 import com.ibm.cmr.services.client.matching.MatchingResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
-import com.ibm.cmr.services.client.matching.gbg.GBGFinderRequest;
 
 /**
  * Main Service for request entry
@@ -113,6 +111,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
       performSave(model, entityManager, request, true);
     } else if ("OVERRIDE_DNB".equalsIgnoreCase(action)) {
       performSave(model, entityManager, request, true);
+    } else if ("CONFIRM_DOC_UPD".equalsIgnoreCase(action)) {
+      updateDeprecatedAttachmentTypes(model, entityManager, request);
     } else {
       // Claim conditionally approved request (Edit Request)
       /*
@@ -160,6 +160,28 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
         performCancelRequest(trans, model, entityManager, request);
       }
     }
+  }
+
+  private void updateDeprecatedAttachmentTypes(RequestEntryModel model, EntityManager entityManager, HttpServletRequest request) {
+
+    long reqId = model.getReqId();
+    if (reqId > 0) {
+      String sql = ExternalizedQuery.getSql("AUTO.US.GET_ATTACHMENTS");
+      PreparedQuery query = new PreparedQuery(entityManager, sql);
+      query.setParameter("REQ_ID", reqId);
+      List<Attachment> attachments = query.getResults(Attachment.class);
+      if (attachments != null && attachments.size() > 0) {
+        for (Attachment attachment : attachments) {
+          if ("NAM".equals(attachment.getDocContent()) || "ADDR".equals(attachment.getDocContent())) {
+            attachment.setDocContent("COMP");
+            log.debug("Updated attachment type for attachment - " + attachment.getId().getDocLink());
+            entityManager.merge(attachment);
+          }
+        }
+      }
+
+    }
+
   }
 
   /**
@@ -812,6 +834,15 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     to.setCanClaim((String) from.getValue("CAN_CLAIM"));
     to.setCanClaimAll((String) from.getValue("CAN_CLAIM_ALL"));
     to.setAutoProcessing((String) from.getValue("AUTO_PROCESSING"));
+
+    // copy internal dpl fields, for display only
+    SimpleDateFormat dateFormat = CmrConstants.DATE_FORMAT();
+    to.setIntDplAssessmentResult(score.getDplAssessmentResult());
+    to.setIntDplAssessmentBy(score.getDplAssessmentBy());
+    to.setIntDplAssessmentCmt(score.getDplAssessmentCmt());
+    if (score.getDplAssessmentDate() != null) {
+      to.setIntDplAssessmentDate(dateFormat.format(score.getDplAssessmentDate()));
+    }
   }
 
   @Override
@@ -1265,33 +1296,14 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
     List<AutoDNBDataModel> resultList = new ArrayList<AutoDNBDataModel>();
     EntityManager entityManager = JpaManager.getEntityManager();
     try {
+      if (reqId == 0) {
+        return new ArrayList<AutoDNBDataModel>();
+      }
+
       RequestData requestData = new RequestData(entityManager, reqId);
       Addr soldTo = requestData.getAddress("ZS01");
-      Admin admin = requestData.getAdmin();
-      Data data = requestData.getData();
-
-      // if the request is not Create, if there's no match indc, if no Dnb mtch
-      // in match indc, or matches overridde, skip
-      if (!"C".equals(admin.getReqType()) || admin.getMatchIndc() == null || !admin.getMatchIndc().contains("D")
-          || "Y".equals(admin.getMatchOverrideIndc())) {
-        this.log.debug("Skipping D&B matches..");
-        return resultList;
-      }
-      GEOHandler handler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
       if (soldTo != null) {
-        GBGFinderRequest request = createRequest(handler, admin, data, soldTo);
-        MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
-            MatchingServiceClient.class);
-        client.setReadTimeout(1000 * 60 * 5);
-        this.log.debug("Connecting to the Advanced D&B Matching Service at " + SystemConfiguration.getValue("BATCH_SERVICES_URL"));
-        MatchingResponse<?> rawResponse = client.executeAndWrap(MatchingServiceClient.DNB_SERVICE_ID, request, MatchingResponse.class);
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(rawResponse);
-
-        TypeReference<MatchingResponse<DnBMatchingResponse>> ref = new TypeReference<MatchingResponse<DnBMatchingResponse>>() {
-        };
-        MatchingResponse<DnBMatchingResponse> response = mapper.readValue(json, ref);
-
+        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
         if (response != null && response.getMatched()) {
           List<DnBMatchingResponse> dnbMatches = response.getMatches();
           this.log.debug("DnB Response recieved and no. of matches found. = " + dnbMatches.size());
@@ -1300,42 +1312,44 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           StringBuilder ibmIsic = null;
           int itemNo = 1;
           for (DnBMatchingResponse dnbRecord : dnbMatches) {
+            if (dnbRecord.getConfidenceCode() >= 8) {
 
-            resultModel = new AutoDNBDataModel();
-            address = new StringBuilder();
-            ibmIsic = new StringBuilder();
-            resultModel.setItemNo(itemNo);
-            resultModel.setAutoDnbDunsNo(dnbRecord.getDunsNo());
-            resultModel.setAutoDnbMatchGrade("Confidence Code = " + dnbRecord.getConfidenceCode());
-            resultModel.setAutoDnbName(dnbRecord.getDnbName());
-            // resultModel.setAutoDnbImportedIndc(autoDnbImportedIndc);
-            address.append(dnbRecord.getDnbStreetLine1()).append("\n");
-            if (!StringUtils.isBlank(dnbRecord.getDnbStreetLine2())) {
-              address.append(dnbRecord.getDnbStreetLine2()).append("\n");
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
-              address.append(dnbRecord.getDnbCity());
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbStateProv())) {
-              address.append(", " + dnbRecord.getDnbStateProv());
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
-              address.append("\n" + dnbRecord.getDnbCountry());
-            }
-            if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
-              address.append(" " + dnbRecord.getDnbPostalCode());
-            }
-            resultModel.setFullAddress(address.toString());
+              resultModel = new AutoDNBDataModel();
+              address = new StringBuilder();
+              ibmIsic = new StringBuilder();
 
-            this.log.debug("Connecting to D&B details service..");
-            DnBCompany dnbDetailsUI = getDnBDetailsUI(dnbRecord.getDunsNo());
-            if (dnbDetailsUI != null) {
-              ibmIsic.append("ISIC =  " + dnbDetailsUI.getIbmIsic() + " (" + dnbDetailsUI.getIbmIsicDesc() + ")").append("\n");
-            }
-            resultModel.setIbmIsic(ibmIsic.toString());
+              resultModel.setItemNo(itemNo);
+              resultModel.setAutoDnbDunsNo(dnbRecord.getDunsNo());
+              resultModel.setAutoDnbMatchGrade("Confidence Code = " + dnbRecord.getConfidenceCode());
+              resultModel.setAutoDnbName(dnbRecord.getDnbName());
+              address.append(dnbRecord.getDnbStreetLine1()).append("\n");
+              if (!StringUtils.isBlank(dnbRecord.getDnbStreetLine2())) {
+                address.append(dnbRecord.getDnbStreetLine2()).append("\n");
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbCity())) {
+                address.append(dnbRecord.getDnbCity());
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbStateProv())) {
+                address.append(", " + dnbRecord.getDnbStateProv());
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbCountry())) {
+                address.append("\n" + dnbRecord.getDnbCountry());
+              }
+              if (!StringUtils.isBlank(dnbRecord.getDnbPostalCode())) {
+                address.append(" " + dnbRecord.getDnbPostalCode());
+              }
+              resultModel.setFullAddress(address.toString());
 
-            resultList.add(resultModel);
-            itemNo++;
+              this.log.debug("Connecting to D&B details service..");
+              DnBCompany dnbDetailsUI = getDnBDetailsUI(dnbRecord.getDunsNo());
+              if (dnbDetailsUI != null) {
+                ibmIsic.append("ISIC =  " + dnbDetailsUI.getIbmIsic() + " (" + dnbDetailsUI.getIbmIsicDesc() + ")").append("\n");
+              }
+              resultModel.setIbmIsic(ibmIsic.toString());
+
+              resultList.add(resultModel);
+              itemNo++;
+            }
           }
         } else {
           this.log.debug("No D&B record was found using advanced matching.");
@@ -1352,57 +1366,76 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
   }
 
   /**
-   * prepares and returns a dnb request based on requestData
+   * Matches Request Data (ZS01) with DnB and returns the matching result
    * 
-   * @param handler
-   * @param admin
-   * @param data
-   * @param soldTo
+   * @param model
+   * @param reqId
    * @return
    */
-  private GBGFinderRequest createRequest(GEOHandler handler, Admin admin, Data data, Addr soldTo) {
-    GBGFinderRequest request = new GBGFinderRequest();
-    request.setMandt(SystemConfiguration.getValue("MANDT"));
-    if (StringUtils.isNotBlank(data.getVat())) {
-      request.setOrgId(data.getVat());
-    } else if (StringUtils.isNotBlank(soldTo.getVat())) {
-      request.setOrgId(soldTo.getVat());
-    }
-    if (soldTo != null) {
-      request.setCity(soldTo.getCity1());
-      if (StringUtils.isBlank(soldTo.getCity1()) && SystemLocation.SINGAPORE.equals(data.getCmrIssuingCntry())) {
-        // here for now, find a way to move to common class
-        request.setCity("SINGAPORE");
+  public ModelMap isDnBMatch(AutoDNBDataModel model, long reqId) {
+    ModelMap map = new ModelMap();
+    EntityManager entityManager = null;
+    try {
+      if (reqId > 0) {
+        entityManager = JpaManager.getEntityManager();
+        RequestData requestData = new RequestData(entityManager, reqId);
+        Data data = requestData.getData();
+        Admin admin = requestData.getAdmin();
+        Scorecard scorecard = requestData.getScorecard();
+        Addr zs01 = requestData.getAddress("ZS01");
+        DnBMatchingResponse tradeStyleName = null;
+        boolean checkTradestyleNames = ("R".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry()))
+            || "O".equals(RequestUtils.getTradestyleUsage(entityManager, data.getCmrIssuingCntry())));
+        MatchingResponse<DnBMatchingResponse> response = DnBUtil.getMatches(requestData, null, "ZS01");
+        if (response != null && response.getSuccess()) {
+          map.put("success", true);
+          boolean match = false;
+          if (response.getMatched() && (("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
+              || "Rejected".equals(scorecard.getFindDnbResult()))) {
+            for (DnBMatchingResponse record : response.getMatches()) {
+              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record)) {
+                match = true;
+                break;
+              } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
+                  && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, true)) {
+                tradeStyleName = record;
+              }
+            }
+          }
+          map.put("match", match);
+          if (!match && tradeStyleName != null) {
+            map.put("tradeStyleMatch", true);
+            map.put("legalName", tradeStyleName.getDnbName());
+            map.put("dunsNo", tradeStyleName.getDunsNo());
+          }
+        } else {
+          map.put("success", false);
+          map.put("match", false);
+          String message = "An error occurred while matching with DnB.";
+          if (response != null) {
+            message = response.getMessage();
+          }
+          map.put("message", message);
+        }
+      } else {
+        map.put("success", false);
+        map.put("match", false);
+        String message = "Invalid request Id";
+        map.put("message", message);
       }
-      request.setCustomerName(getCustomerName(handler, admin, soldTo));
-      request.setStreetLine1(soldTo.getAddrTxt());
-      request.setStreetLine2(soldTo.getAddrTxt2());
-      request.setLandedCountry(soldTo.getLandCntry());
-      request.setPostalCode(soldTo.getPostCd());
-      request.setStateProv(soldTo.getStateProv());
-      request.setMinConfidence("8");
+    } catch (Exception e) {
+      log.debug("Error occurred while checking DnB Matches." + e);
+      map.put("success", false);
+      map.put("match", false);
+      String message = "An error occurred while matching with DnB.";
+      map.put("message", message);
+    } finally {
+      if (entityManager != null) {
+        entityManager.close();
+      }
     }
+    return map;
 
-    return request;
-  }
-
-  /**
-   * returns concatenated customerName from admin or address as per country
-   * settings
-   * 
-   * @param handler
-   * @param admin
-   * @param soldTo
-   * @return
-   */
-  private String getCustomerName(GEOHandler handler, Admin admin, Addr soldTo) {
-    String customerName = null;
-    if (!handler.customerNamesOnAddress()) {
-      customerName = admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2());
-    } else {
-      customerName = soldTo.getCustNm1() + (StringUtils.isBlank(soldTo.getCustNm2()) ? "" : " " + soldTo.getCustNm2());
-    }
-    return customerName;
   }
 
   /**
@@ -1496,7 +1529,8 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           cmrRecord.setCmrTier("");
           cmrRecord.setCmrInacType("");
           cmrRecord.setCmrIsic(!StringUtils.isEmpty(kna1.getZzkvSic())
-              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim()) : "");
+              ? (kna1.getZzkvSic().trim().length() > 4 ? kna1.getZzkvSic().trim().substring(0, 4) : kna1.getZzkvSic().trim())
+              : "");
           cmrRecord.setCmrSortl("");
           cmrRecord.setCmrIssuedByDesc("");
           cmrRecord.setCmrRdcCreateDate("");

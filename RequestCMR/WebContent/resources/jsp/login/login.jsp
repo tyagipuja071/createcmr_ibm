@@ -49,15 +49,15 @@
             <div id="forgotpwd">
               <div class="login-info" style="padding-bottom:10px">
                 <img src="${resourcesPath}/images/lock.png" class="key">
-                  Site secured by <a href="https://w3.ibm.com/profile/update/password/en-us/index.html">IBM Intranet Password</a>
+                  Site secured by <a href="https://w3.ibm.com/profile/update/password/en-us/index.html" target="_blank">IBM Intranet Password</a>
                 </a>
               </div>
               <div class="login-info" style="padding-bottom:10px">
                 <img src="${resourcesPath}/images/key.png" class="key">
                   Access to the tool can be requested using AccessHUB. 
                   For access instructions and the user guide please follow this 
-                  <a href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR%20Access%20and%20Support">link</a> or go to 
-                  <a href="https://ibm.idaccesshub.com/ECM/login/index">AccessHUB</a> directly              
+                  <a href="https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/FindCMR%20Access%20and%20Support" target="_blank">link</a> or go to 
+                  <a href="https://ibm.idaccesshub.com/ECM/login/index" target="_blank">AccessHUB</a> directly              
               </div> 
               <div class="login-info" style="padding-bottom:10px">
                 <img src="${resourcesPath}/images/question.png" class="key">

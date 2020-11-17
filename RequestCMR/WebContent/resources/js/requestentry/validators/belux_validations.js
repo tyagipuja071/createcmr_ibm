@@ -391,6 +391,7 @@ function setAccountTeamNumberValues(clientTier) {
   if (isuCd != '') {
     var isuCtc = isuCd + clientTier;
     var qParams = null;
+    var qSelectedParams = null;
     var results = null;
     var selectedResult = null;
 
@@ -403,6 +404,13 @@ function setAccountTeamNumberValues(clientTier) {
       // CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
       };
       results = cmr.query('GET.SRLIST.BYISU', qParams);
+      qSelectedParams = {
+        _qall : 'Y',
+        ISSUING_CNTRY : cntry + geoCd,
+        ISU : '%' + isuCd + clientTier + '%',
+        CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
+      };
+      selectedResult = cmr.query('GET.SRLIST.BYISUCTC', qSelectedParams);
     } else {
       qParams = {
         _qall : 'Y',
@@ -410,17 +418,18 @@ function setAccountTeamNumberValues(clientTier) {
         ISU : '%' + isuCd + clientTier + '%'
       };
       results = cmr.query('GET.SRLIST.BYISU', qParams);
+      selectedResult = results;
     }
 
-    if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
-      qParams = {
-        _qall : 'Y',
-        ISSUING_CNTRY : cntry + geoCd,
-        ISU : '%' + isuCd + clientTier + '%',
-        CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
-      };
-      selectedResult = cmr.query('GET.SRLIST.BYISUCTC', qParams);
-    }
+    // if (ims != '' && ims.length > 1 && (isuCtc == '32S')) {
+    // qParams = {
+    // _qall : 'Y',
+    // ISSUING_CNTRY : cntry + geoCd,
+    // ISU : '%' + isuCd + clientTier + '%',
+    // CLIENT_TIER : '%' + ims.substring(0, 1) + '%'
+    // };
+    // selectedResult = cmr.query('GET.SRLIST.BYISUCTC', qParams);
+    // }
 
     if (results != null || selectedResult != null) {
       if (results != null) {
@@ -445,9 +454,14 @@ function setAccountTeamNumberValues(clientTier) {
       console.log('pagemodel subIndustryCd==' + _pagemodel.subIndustryCd);
 
       if (FormManager.getActualValue('custSubGrp') != '' && FormManager.getActualValue('custSubGrp') != null && FormManager.getActualValue('custSubGrp') != _pagemodel.custSubGrp
-          || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd))
-        FormManager.setValue('searchTerm', selectedAaccountTeamNumber);
-
+          || (FormManager.getActualValue('custSubGrp') == _pagemodel.custSubGrp && FormManager.getActualValue('subIndustryCd') != _pagemodel.subIndustryCd)) {
+        var custSubGrp = FormManager.getActualValue('custSubGrp');
+        if (custSubGrp != 'BEBUS' && custSubGrp != 'CBBUS') {
+          FormManager.setValue('searchTerm', selectedAaccountTeamNumber[0]);
+        } else if (custSubGrp == 'BEBUS' || custSubGrp == 'CBBUS') {
+          FormManager.setValue('searchTerm', 'BP0000');
+        }
+      }
     }
 
     var custGrp = FormManager.getActualValue('custGrp');
