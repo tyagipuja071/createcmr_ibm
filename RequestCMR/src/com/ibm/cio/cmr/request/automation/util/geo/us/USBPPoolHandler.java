@@ -111,8 +111,8 @@ public class USBPPoolHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
     }
 
-    details.append(" - Dept/Attn: POOL\n");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "POOL");
+    details.append(" - Dept/Attn: --------POOL--------\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "--------POOL--------");
     details.append(" - Restricted Ind: Y\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");
@@ -255,12 +255,6 @@ public class USBPPoolHandler extends USBPHandler {
 
   public void setCmrType(String cmrType) {
     this.cmrType = cmrType;
-  }
-
-  @Override
-  protected void performAction(AutomationEngineData engineData, String msg) {
-    // NOOP
-
   }
 
 }
