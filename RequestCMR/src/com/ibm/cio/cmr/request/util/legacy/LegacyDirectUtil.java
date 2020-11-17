@@ -90,6 +90,7 @@ public class LegacyDirectUtil {
     FIELDS_CLEAR_LIST.add("EmbargoCode");
     FIELDS_CLEAR_LIST.add("Enterprise");
     FIELDS_CLEAR_LIST.add("TypeOfCustomer");
+    FIELDS_CLEAR_LIST.add("CodFlag");
 
     // LD_BYPASS_MASS_UPDT_DUP_FILLS_VAL.add("758");
   }
@@ -259,8 +260,8 @@ public class LegacyDirectUtil {
 
   }
 
-  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo,
-      MassUpdtData muData, boolean readOnly) throws CmrException {
+  public static LegacyDirectObjectContainer getLegacyDBValuesForITMass(EntityManager entityManager, String country, String cmrNo, MassUpdtData muData,
+      boolean readOnly) throws CmrException {
     LegacyDirectObjectContainer legacyObjects = new LegacyDirectObjectContainer();
 
     // DENNIS: Grab first the CMRTCEXT record of the CMR
@@ -1349,8 +1350,9 @@ public class LegacyDirectUtil {
 
     return isFisCodeUsed;
   }
+
   public static List<CmrtAddr> checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
-    
+
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("COUNTRY", country);

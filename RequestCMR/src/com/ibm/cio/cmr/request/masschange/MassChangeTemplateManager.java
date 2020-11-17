@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
@@ -17,6 +18,7 @@ import com.ibm.cio.cmr.request.masschange.obj.MassChangeTemplate;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateColumn;
 import com.ibm.cio.cmr.request.masschange.obj.TemplateTab;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
+import com.ibm.cio.cmr.request.util.SystemLocation;
 
 /**
  * Initializes and manages the templates from the XML configurations
@@ -87,6 +89,49 @@ public class MassChangeTemplateManager {
     configList.put("666", "config.666.xml");
 		configList.put("864", "config.864.xml");
     // configList.put("848", "config.SWISS.xml");
+    configList.put("610", "config.CEWA.xml");
+    configList.put("636", "config.CEWA.xml");
+    configList.put("645", "config.CEWA.xml");
+    configList.put("669", "config.CEWA.xml");
+    configList.put("698", "config.CEWA.xml");
+    configList.put("725", "config.CEWA.xml");
+    configList.put("745", "config.CEWA.xml");
+    configList.put("764", "config.CEWA.xml");
+    configList.put("769", "config.CEWA.xml");
+    configList.put("770", "config.CEWA.xml");
+    configList.put("782", "config.CEWA.xml");
+    configList.put("804", "config.CEWA.xml");
+    configList.put("825", "config.CEWA.xml");
+    configList.put("827", "config.CEWA.xml");
+    configList.put("831", "config.CEWA.xml");
+    configList.put("833", "config.833.xml");
+    configList.put("835", "config.CEWA.xml");
+    configList.put("842", "config.CEWA.xml");
+    configList.put("851", "config.851.xml");
+    configList.put("857", "config.CEWA.xml");
+    configList.put("883", "config.CEWA.xml");
+    configList.put("373", "config.FST.xml");
+    configList.put("382", "config.FST.xml");
+    configList.put("383", "config.FST.xml");
+    configList.put("635", "config.FST.xml");
+    configList.put("637", "config.FST.xml");
+    configList.put("656", "config.FST.xml");
+    configList.put("662", "config.FST.xml");
+    configList.put("667", "config.FST.xml");
+    configList.put("670", "config.FST.xml");
+    configList.put("691", "config.FST.xml");
+    configList.put("692", "config.FST.xml");
+    configList.put("700", "config.700.xml");
+    configList.put("717", "config.FST.xml");
+    configList.put("718", "config.FST.xml");
+    configList.put("753", "config.FST.xml");
+    configList.put("810", "config.FST.xml");
+    configList.put("840", "config.FST.xml");
+    configList.put("841", "config.FST.xml");
+    configList.put("876", "config.FST.xml");
+    configList.put("879", "config.FST.xml");
+    configList.put("880", "config.FST.xml");
+    configList.put("881", "config.FST.xml");
   }
 
   /**
@@ -98,7 +143,7 @@ public class MassChangeTemplateManager {
   public static void initTemplatesAndValidators(String issuingCntry) throws IOException, SAXException {
     templateMapCreate.clear();
     templateMapUpdate.clear();
-    init(configList.get(issuingCntry));
+    init(configList.get(issuingCntry), issuingCntry);
   }
 
   /**
@@ -110,7 +155,7 @@ public class MassChangeTemplateManager {
   public static void initTemplatesAndValidatorsSwiss() throws IOException, SAXException {
     templateMapCreate.clear();
     templateMapUpdate.clear();
-    init("config.SWISS.xml");
+    init("config.SWISS.xml", SystemLocation.SWITZERLAND);
   }
 
   /**
@@ -120,7 +165,7 @@ public class MassChangeTemplateManager {
    * @throws IOException
    * @throws SAXException
    */
-  private static void init(String configName) throws IOException, SAXException {
+  private static void init(String configName, String issuingCountry) throws IOException, SAXException {
     try (InputStream is = ConfigUtil.getResourceStream(configName)) {
       MassChangeTemplateDigester digester = new MassChangeTemplateDigester();
       MassChangeTemplate template = (MassChangeTemplate) digester.parse(is);
@@ -172,6 +217,10 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassUpdateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapUpdate.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }
@@ -188,6 +237,10 @@ public class MassChangeTemplateManager {
    */
   public static MassChangeTemplate getMassCreateTemplate(String templateId) throws IOException, SAXException {
     String configName = templateMapCreate.get(templateId);
+    if (configName == null && StringUtils.isNumeric(templateId)) {
+      // secondary check
+      configName = configList.get(templateId);
+    }
     if (configName != null) {
       return initTemplate(configName);
     }

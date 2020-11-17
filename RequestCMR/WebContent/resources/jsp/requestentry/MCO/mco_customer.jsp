@@ -26,6 +26,48 @@
 	<form:hidden path="sitePartyId" />
 	<form:hidden path="searchTerm" />
 
+  <cmr:view forCountry="851">
+  	<cmr:row addBackground="true">
+  	  <cmr:column span="2" containerForField="LocalTax1">
+        <p>
+          <cmr:label fieldId="taxCd1"> <cmr:fieldLabel fieldId="LocalTax1" />: </cmr:label>
+          <cmr:field path="taxCd1" id="taxCd1" fieldId="LocalTax1" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <c:if test="${reqentry.reqType != 'U'}">
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="LocalTax2" />
+          </cmr:label>
+        </p>
+      </cmr:column>
+      </c:if>
+  	</cmr:row>
+  </cmr:view>
+  <cmr:view forCountry="700">
+  	<cmr:row addBackground="true">
+  	  <cmr:column span="2" containerForField="BusinessType">
+        <p>
+          <cmr:label fieldId="busnType"> <cmr:fieldLabel fieldId="BusinessType" />: </cmr:label>
+          <cmr:field path="busnType" id="busnType" fieldId="BusinessType" tabId="MAIN_CUST_TAB" />
+        </p>
+      </cmr:column>
+      <c:if test="${reqentry.reqType != 'U'}">
+      <cmr:column span="2" containerForField="LocalTax2">
+        <p>
+       	  <cmr:label fieldId="vatExempt2">&nbsp;</cmr:label>
+          <cmr:field path="taxCd2" id="taxCd2" fieldId="LocalTax2" tabId="MAIN_CUST_TAB" />
+          <cmr:label fieldId="taxCd2" forRadioOrCheckbox="true">
+            <cmr:fieldLabel fieldId="LocalTax2" />
+          </cmr:label>
+        </p>
+      </cmr:column>
+      </c:if>
+  	</cmr:row>
+  </cmr:view>
 	<cmr:row addBackground="false">
 		<%--     <cmr:column span="2" containerForField="LocationNumber" forCountry="838">
       <p>
@@ -254,5 +296,38 @@
 			<form:hidden path="crosSubTyp" id="crosSubTyp" />
 		</c:if>
 	</cmr:view>
+  <cmr:view forGEO="MCO2" exceptForCountry="780">
+	<cmr:row addBackground="true">
+	  <cmr:column span="2" containerForField="CrosSubTyp">
+		<p>
+		  <cmr:label fieldId="crosSubTyp">
+			<cmr:fieldLabel fieldId="CrosSubTyp" />:
+		  </cmr:label>
+		  <cmr:field path="crosSubTyp" id="crosSubTyp" fieldId="CrosSubTyp"
+			tabId="MAIN_CUST_TAB" />
+		</p>
+	  </cmr:column>
+	</cmr:row>
+	  <c:if test="${reqentry.reqType != 'C'}">	
+	  <cmr:row addBackground="false">
+	    <cmr:column span="2" containerForField="CommercialFinanced">
+	      <p>
+	          <cmr:label fieldId="commercialFinanced">
+	          <cmr:fieldLabel fieldId="CommercialFinanced" />:
+	          </cmr:label>
+	          <cmr:field path="commercialFinanced" id="commercialFinanced" fieldId="CommercialFinanced" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    <cmr:column span="2" containerForField="CodFlag">
+	      <p>
+	          <cmr:label fieldId="codFlag">
+	          <cmr:fieldLabel fieldId="CodFlag" />:
+	          </cmr:label>
+	          <cmr:field path="creditCd" id="codFlag" fieldId="CodFlag" tabId="MAIN_CUST_TAB"/>
+	      </p>
+	    </cmr:column>
+	    </cmr:row>
+	    </c:if>
+  </cmr:view>	
 	<form:hidden path="economicCd" id="economicCd" />
 </cmr:view>
