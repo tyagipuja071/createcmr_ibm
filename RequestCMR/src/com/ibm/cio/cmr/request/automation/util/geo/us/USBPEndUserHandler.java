@@ -84,7 +84,6 @@ public class USBPEndUserHandler extends USBPHandler {
     Admin admin = requestData.getAdmin();
     Addr addr = requestData.getAddress("ZS01");
     long childReqId = admin.getChildReqId();
-    String custGrp = data.getCustGrp();
 
     String childCmrNo = null;
 
@@ -111,14 +110,12 @@ public class USBPEndUserHandler extends USBPHandler {
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
 
     // check CEID
-    if (TYPE_BUSINESS_PARTNER.equals(custGrp)) {
-      boolean t1 = isTier1BP(data);
-      if (!t1) {
-        details.append("BP is NOT a Tier 1.\n");
-        engineData.addNegativeCheckStatus("_usBpT1", "BP is not a T1 or status cannot be determined via PPS profile.");
-      } else {
-        details.append("BP is a Tier 1.\n");
-      }
+    boolean t1 = isTier1BP(data);
+    if (!t1) {
+      details.append("BP is NOT a Tier 1.\n");
+      engineData.addNegativeCheckStatus("_usBpT1", "BP is not a T1 or status cannot be determined via PPS profile.");
+    } else {
+      details.append("BP is a Tier 1.\n");
     }
 
     if (ibmCmr == null) {
@@ -178,7 +175,6 @@ public class USBPEndUserHandler extends USBPHandler {
       AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
 
     Data data = requestData.getData();
-    String custGrp = data.getCustGrp();
     if (ibmDirectCmr != null) {
       if (!StringUtils.isBlank(ibmDirectCmr.getCmrSapNumber())) {
         details.append("\nCopying IBM Codes from IBM CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
@@ -272,67 +268,6 @@ public class USBPEndUserHandler extends USBPHandler {
           ibmDirectCmr.getCmrSubIndustry());
     }
 
-    dofinalchecks(requestData, details, data, overrides);
-
-    boolean hasFieldError = false;
-    if (TYPE_BUSINESS_PARTNER.equals(custGrp)) {
-      if (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
-        String msg = "Restrict To value is incorrect for BP End User request.";
-        engineData.addNegativeCheckStatus("_usBpData", msg);
-        details.append(msg + "\n");
-        hasFieldError = true;
-      } else {
-        if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())) {
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8G");
-        } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "2NS");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
-        }
-      }
-
-      USCeIdMapping mapping = null;
-      String mappingRule = null;
-      if (!StringUtils.isBlank(data.getEnterprise())) {
-        mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
-        mappingRule = "E";
-      }
-      if (mapping == null && !StringUtils.isBlank(data.getPpsceid())) {
-        mapping = USCeIdMapping.getByCeid(data.getPpsceid());
-        mappingRule = "C";
-      }
-      details.append("\n");
-      if (mapping == null) {
-        String msg = "Cannot determine distributor status based on request data.";
-        engineData.addNegativeCheckStatus("_usBpData", msg);
-        details.append(msg + "\n");
-        hasFieldError = true;
-      } else {
-        if (StringUtils.isBlank(data.getCompany())) {
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
-        }
-        boolean distributor = mapping.isDistributor();
-        details.append("BP is a distributor based on (" + ("E".equals(mappingRule) ? "Enterprise No." : "CE ID") + ").\n");
-        if (distributor) {
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
-        } else {
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "DV4");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
-        }
-      }
-    }
-
-    createAddressOverrides(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides, childRequest);
-
-    if (!hasFieldError) {
-      details.append("Branch Office codes computed successfully.");
-      engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
-    }
-
-  }
-
-  public void dofinalchecks(RequestData requestData, StringBuilder details, Data data, OverrideOutput overrides) {
     // do final checks on request data
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
@@ -347,6 +282,61 @@ public class USBPEndUserHandler extends USBPHandler {
     }
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
+
+    boolean hasFieldError = false;
+    if (!RESTRICT_TO_END_USER.equals(data.getRestrictTo()) && !RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
+      String msg = "Restrict To value is incorrect for BP End User request.";
+      engineData.addNegativeCheckStatus("_usBpData", msg);
+      details.append(msg + "\n");
+      hasFieldError = true;
+    } else {
+      if (RESTRICT_TO_END_USER.equals(data.getRestrictTo())) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8G");
+      } else if (RESTRICT_TO_MAINTENANCE.equals(data.getRestrictTo())) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "2NS");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
+      }
+    }
+
+    USCeIdMapping mapping = null;
+    String mappingRule = null;
+    if (!StringUtils.isBlank(data.getEnterprise())) {
+      mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+      mappingRule = "E";
+    }
+    if (mapping == null && !StringUtils.isBlank(data.getPpsceid())) {
+      mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+      mappingRule = "C";
+    }
+    details.append("\n");
+    if (mapping == null) {
+      String msg = "Cannot determine distributor status based on request data.";
+      engineData.addNegativeCheckStatus("_usBpData", msg);
+      details.append(msg + "\n");
+      hasFieldError = true;
+    } else {
+      if (StringUtils.isBlank(data.getCompany())) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
+      }
+      boolean distributor = mapping.isDistributor();
+      details.append("BP is a distributor based on (" + ("E".equals(mappingRule) ? "Enterprise No." : "CE ID") + ").\n");
+      if (distributor) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
+      } else {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "DV4");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_INDIRECT_REMARKETER);
+      }
+    }
+
+    createAddressOverrides(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides, childRequest);
+
+    if (!hasFieldError) {
+      details.append("Branch Office codes computed successfully.");
+      engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
+    }
+
   }
 
   @Override
