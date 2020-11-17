@@ -635,7 +635,15 @@ public class CEETransformer extends EMEATransformer {
         } else if ("707ME".equals(cntryUse)) {
           line6 = "Montenegro";
         } else {
-          line6 = "Serbia";
+          if (cmrData.getCustGrp().contains("CRO") || crossBorder) {
+            if (!StringUtils.isBlank(addrData.getLandCntry())) {
+              line6 = LandedCountryMap.getCountryName(addrData.getLandCntry());
+            } else {
+              line6 = "";
+            }
+          } else {
+            line6 = "Serbia";
+          }
         }
 
       }
@@ -807,9 +815,14 @@ public class CEETransformer extends EMEATransformer {
 
     }
 
-    if (!StringUtils.isEmpty(addr.getLandCntry())) {
-      legacyAddr.setAddrLine6(addr.getLandCntry());
-
+    if (SystemLocation.SERBIA.equals(cntry)) {
+      if (!StringUtils.isBlank(addr.getDivn())) {
+        legacyAddr.setAddrLine6(addr.getDivn());
+      }
+    } else {
+      if (!StringUtils.isBlank(addr.getLandCntry())) {
+        legacyAddr.setAddrLine6(LandedCountryMap.getCountryName(addr.getLandCntry()));
+      }
     }
 
     // boolean crossBorder = false;

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ibm.cio.cmr.request.model.system.RequestStatsModel;
+import com.ibm.cio.cmr.request.model.system.RequesterStatsModel;
 import com.ibm.cio.cmr.request.model.system.SquadStatisticsModel;
 
 /**
@@ -18,6 +19,7 @@ public class RequestStatsContainer {
   private List<RequestStatsModel> records;
   private Map<Long, List<String>> rejectionReasons;
   private List<SquadStatisticsModel> squadRecords;
+  private List<RequesterStatsModel> requesterRecords;
 
   public List<RequestStatsModel> getRecords() {
     return records;
@@ -41,5 +43,13 @@ public class RequestStatsContainer {
 
   public void setSquadRecords(List<SquadStatisticsModel> squadRecords) {
     this.squadRecords = squadRecords;
+  }
+
+  public List<RequesterStatsModel> getRequesterRecords() {
+    return requesterRecords;
+  }
+
+  public void setRequesterRecords(List<RequesterStatsModel> requesterRecords) {
+    this.requesterRecords = requesterRecords;
   }
 }
