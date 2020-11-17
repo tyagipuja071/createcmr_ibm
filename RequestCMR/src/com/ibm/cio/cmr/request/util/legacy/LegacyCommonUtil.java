@@ -280,6 +280,12 @@ public class LegacyCommonUtil {
           mailparams.add(params.getSubregion());
           mailparams.add(params.getCustNm());
           mailparams.add(params.getCmrNumber());
+          if (params.isEnableAddlField1()) {
+            mailparams.add(params.getAddtlField1Value());
+          }
+          if (params.isEnableAddlField2()) {
+            mailparams.add(params.getAddtlField2Value());
+          }
           mailparams.add(params.getDirectUrlLink());
 
           email = StringUtils.replace(email, params.getStringToReplace(), params.getValToBeReplaceBy());
@@ -350,5 +356,18 @@ public class LegacyCommonUtil {
 
     return oldData;
   }
+  
+  public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
+    boolean isDummy = true;
+    if (!StringUtils.isBlank(massUpdtAddr.getCustNm1()) || !StringUtils.isBlank(massUpdtAddr.getCustNm2())
+        || !StringUtils.isBlank(massUpdtAddr.getCounty()) || !StringUtils.isBlank(massUpdtAddr.getAddrTxt())
+        || !StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) || !StringUtils.isBlank(massUpdtAddr.getPoBox())
+        || !StringUtils.isBlank(massUpdtAddr.getCity1()) || !StringUtils.isBlank(massUpdtAddr.getPostCd())
+        || !StringUtils.isBlank(massUpdtAddr.getLandCntry())) {
+      isDummy = false;
+    }
+    return isDummy;
+  }
+  
 
 }

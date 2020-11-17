@@ -1389,5 +1389,21 @@ public class LegacyDirectUtil {
     }
     return false;
   }
-    
+
+  public static DataRdc getOldData(EntityManager entityManager, String reqId) {
+    String sql = ExternalizedQuery.getSql("SUMMARY.OLDDATA");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    query.setForReadOnly(true);
+    List<DataRdc> records = query.getResults(DataRdc.class);
+    DataRdc oldData = new DataRdc();
+
+    if (records != null && records.size() > 0) {
+      oldData = records.get(0);
+    } else {
+      oldData = null;
+    }
+
+    return oldData;
+  }
 }
