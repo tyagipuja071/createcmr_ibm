@@ -392,10 +392,12 @@ public abstract class USBPHandler {
         details.append("Updated Department to " + (StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "-blank-")).append("\n");
       }
 
-      if (StringUtils.isBlank(installAt.getDept()) && StringUtils.isNotBlank(dept)) {
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", installAt.getDept(), dept);
-        details.append("Updated Department to " + dept).append("\n");
-      }
+      // if (StringUtils.isBlank(installAt.getDept()) &&
+      // StringUtils.isNotBlank(dept)) {
+      // overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01",
+      // "DEPT", installAt.getDept(), dept);
+      // details.append("Updated Department to " + dept).append("\n");
+      // }
 
       if (!StringUtils.equals(installAt.getAddrTxt(), streetAddress1)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "ADDR_TXT", installAt.getAddrTxt(),
@@ -1141,7 +1143,8 @@ public abstract class USBPHandler {
     Admin childAdmin = childReqData.getAdmin();
     childAdmin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     childAdmin.setSourceSystId("CreateCMR");
-    String customerName = bpAddr.getDivn() + (!StringUtils.isBlank(bpAddr.getDept()) ? " " + bpAddr.getDept() : "");
+    String customerName = bpAddr.getDivn() + ((!StringUtils.isBlank(bpAddr.getDept()) && !bpAddr.getDept().toUpperCase().contains("POOL")
+        && !bpAddr.getDept().toUpperCase().contains("E-HOST")) ? " " + bpAddr.getDept() : "");
     customerName = customerName.toUpperCase();
     if (customerName.contains("C/O")) {
       customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
