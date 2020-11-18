@@ -1098,4 +1098,22 @@ public abstract class AutomationUtil {
     return custNm1 + custNm2 + custNm3 + custNm4;
   }
 
+  /**
+   * Returns true if the partner is accredited for the Pay-Go process
+   * 
+   * @param entityManager
+   * @param sourceSystId
+   * @return
+   */
+  public static boolean isPayGoAccredited(EntityManager entityManager, String sourceSystId) {
+    if (StringUtils.isBlank(sourceSystId)) {
+      return false;
+    }
+    String sql = ExternalizedQuery.getSql("AUTO.PAYGO.CHECK");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("SYST_ID", sourceSystId);
+    query.setForReadOnly(true);
+    return query.exists();
+  }
+
 }
