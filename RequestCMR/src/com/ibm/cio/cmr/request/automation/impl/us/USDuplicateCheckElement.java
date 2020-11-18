@@ -63,6 +63,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       USUtil.SC_FED_FEDSTATE, USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_NATIVE_CORP,
       USUtil.SC_FED_REGULAR, USUtil.SC_FED_TRIBAL_BUS, USUtil.SC_STATE_CITY, USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_DIST, USUtil.SC_STATE_HOSPITALS,
       USUtil.SC_STATE_STATE);
+  private static final List<String> END_USER_SCENARIOS = Arrays.asList(USUtil.SC_BP_END_USER, USUtil.SC_BP_DEVELOP, USUtil.SC_BP_E_HOST);
 
   public USDuplicateCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -429,7 +430,8 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Data data = requestData.getData();
     String restrictTo = StringUtils.isNotBlank(data.getRestrictTo()) ? data.getRestrictTo() : "";
     String csoSite = StringUtils.isNotBlank(data.getCsoSite()) ? data.getCsoSite() : "";
-    String bpAccType = StringUtils.isNotBlank(data.getBpAcctTyp()) ? data.getBpAcctTyp() : "";
+    // String bpAccType = StringUtils.isNotBlank(data.getBpAcctTyp()) ?
+    // data.getBpAcctTyp() : "";
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
@@ -481,7 +483,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       response.setMatches(cmrCheckMatchesTmp);
       break;
     case USUtil.SC_BP_POOL:
-      // TODO
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
         String usRestrictTo = StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) ? cmrCheckRecord.getUsRestrictTo() : "";
         if (restrictTo.equals(usRestrictTo) && csoSite.equals(cmrCheckRecord.getUsCsoSite()) && "P".equals(cmrCheckRecord.getUsBpAccType())) {
@@ -572,7 +573,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     boolean requiresZI01Match = false;
 
     // check if End user and has divn value
-    if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
+    if (END_USER_SCENARIOS.contains(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
         response.setMatched(false);
@@ -705,10 +706,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     }
 
     // check if End user
-    if (USUtil.SC_BP_END_USER.equals(subScenario) && "C".equals(admin.getReqType())) {
+    if (END_USER_SCENARIOS.contains(subScenario) && "C".equals(admin.getReqType())) {
 
       ScenarioExceptionsUtil bpScenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
-          USUtil.CG_THIRD_P_BUSINESS_PARTNER, USUtil.SC_BP_END_USER);
+          USUtil.CG_THIRD_P_BUSINESS_PARTNER, subScenario);
       engineData.addPositiveCheckStatus("BP_EU_REQ");
       if (bpScenarioExceptions != null) {
         // set cmr check mappings to bp
