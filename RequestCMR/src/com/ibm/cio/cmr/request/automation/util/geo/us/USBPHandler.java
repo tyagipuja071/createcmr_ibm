@@ -1204,6 +1204,8 @@ public abstract class USBPHandler {
     childScoreCard.setFindDnbUsrId("CreateCMR");
     childScoreCard.setFindDnbUsrNm("CreateCMR");
 
+    modifyChildDataValues(requestData, childReqData, details);
+
     entityManager.merge(childData);
     entityManager.merge(childScoreCard);
 
@@ -1220,6 +1222,18 @@ public abstract class USBPHandler {
     entityManager.merge(admin);
 
     return details.toString();
+  }
+
+  /**
+   * Allows to modify child request data values after all template values are
+   * loaded
+   * 
+   * @param requestData
+   * @param childReqData
+   * @param details
+   */
+  protected void modifyChildDataValues(RequestData requestData, RequestData childReqData, StringBuilder details) {
+    // NOOP
   }
 
   /**
