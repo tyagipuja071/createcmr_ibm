@@ -1153,7 +1153,8 @@ public abstract class AutomationUtil {
     return query.exists();
   }
 
-  * returns the country-wise request types for {@link CMDERequesterCheck}
+  /**
+   * returns the country-wise request types for {@link CMDERequesterCheck}
    * element to skip all checks if the requester is CMDE
    * 
    * @return
