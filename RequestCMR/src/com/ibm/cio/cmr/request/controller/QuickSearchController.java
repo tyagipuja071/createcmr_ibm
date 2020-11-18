@@ -42,9 +42,7 @@ public class QuickSearchController extends BaseController {
   @Autowired
   private QuickSearchService service;
 
-  @RequestMapping(
-      value = "/quick_search",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/quick_search", method = RequestMethod.GET)
   public @ResponseBody ModelAndView openQuickSearch(HttpServletRequest request, ModelMap model) {
     // access granted
     ModelAndView mv = new ModelAndView("quick_search", "search", new CompanyRecordModel());
@@ -52,16 +50,14 @@ public class QuickSearchController extends BaseController {
     return mv;
   }
 
-  @RequestMapping(
-      value = "/quick_search/find")
+  @RequestMapping(value = "/quick_search/find")
   public @ResponseBody ModelMap searchCompany(HttpServletRequest request, CompanyRecordModel search) throws Exception {
     List<CompanyRecordModel> records = CompanyFinder.findCompanies(search);
     return wrapAsPlainSearchResult(records);
 
   }
 
-  @RequestMapping(
-      value = "/quick_search/details")
+  @RequestMapping(value = "/quick_search/details")
   public @ResponseBody ModelMap getDetails(HttpServletRequest request) throws Exception {
     ModelMap map = new ModelMap();
     String issuingCountry = request.getParameter("issuingCountry");
@@ -103,8 +99,7 @@ public class QuickSearchController extends BaseController {
 
   }
 
-  @RequestMapping(
-      value = "/quick_search/process")
+  @RequestMapping(value = "/quick_search/process")
   public @ResponseBody ModelMap processRequest(HttpServletRequest request, CompanyRecordModel company) throws Exception {
     ModelMap map = new ModelMap();
 
@@ -128,10 +123,7 @@ public class QuickSearchController extends BaseController {
   }
 
   // Changes for Update API Framework change- Start
-  @RequestMapping(
-      value = "/update",
-      method = RequestMethod.POST,
-      consumes = "application/json")
+  @RequestMapping(value = "/update", method = RequestMethod.POST, consumes = "application/json")
   public @ResponseBody ModelMap getUpdate(@RequestBody CompanyRecordModel company, @Context HttpServletRequest request) throws Exception {
     ModelMap map = new ModelMap();
     AppUser user = new AppUser();
