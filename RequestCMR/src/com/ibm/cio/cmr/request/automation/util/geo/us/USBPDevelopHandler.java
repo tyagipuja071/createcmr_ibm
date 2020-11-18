@@ -72,6 +72,7 @@ public class USBPDevelopHandler extends USBPHandler {
     long childReqId = admin.getChildReqId();
 
     USDuplicateCheckElement dupCheckElement = new USDuplicateCheckElement(null, null, false, false);
+    LOG.debug("Checking for existing BP Development CMR...");
     MatchingResponse<DuplicateCMRCheckResponse> response = dupCheckElement.getCMRMatches(entityManager, requestData, engineData);
     List<String> existingCmrList = new ArrayList<String>();
     if (response.getSuccess() && !response.getMatches().isEmpty()) {
@@ -85,9 +86,11 @@ public class USBPDevelopHandler extends USBPHandler {
       output.setDetails(details.toString());
       output.setOnError(true);
       output.setResults("BP Development CMR Exists.");
+      LOG.debug("Request rejected because of existing BP Development CMR(s) - " + existingCmrList);
       return false;
     } else {
-      // check if end user is same as BP
+      LOG.debug("No existing BP Development CMR found , checking if end user is same as BP...");
+
       String divn = StringUtils.isNotBlank(addr.getDivn()) ? addr.getDivn() : "";
       String dept = StringUtils.isNotBlank(addr.getDept()) ? addr.getDept() : "";
       String custNm1 = StringUtils.isNotBlank(admin.getMainCustNm1()) ? admin.getMainCustNm1() : "";
@@ -97,15 +100,14 @@ public class USBPDevelopHandler extends USBPHandler {
 
       if (StringUtils.isNotBlank(legalName) && (legalName.contains(endUser) || endUser.contains(legalName))) {
         // scenario 1
-        // check for existing Pool CMR
         checkForPoolCMR = true;
+        LOG.debug("Checking for existing Pool CMR...");
         ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, null);
         if (ibmCmr == null) {
-          // if no pool CMR exists, validate the legal name and address by
-          // matching
-          // against D&B
+          LOG.debug("No Pool CMR exists , validating legal name and address against DnB...");
           DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, false);
           if (dnbMatch != null) {
+            LOG.debug("DnB match exists hence creating Pool CMR through child request...");
             // create a new pool cmr through child request
             childReqId = createChildRequest(entityManager, requestData, engineData);
             {
@@ -116,6 +118,7 @@ public class USBPDevelopHandler extends USBPHandler {
                 output.setDetails(details.toString());
                 output.setOnError(true);
                 output.setResults("Issues Encountered");
+                LOG.debug(childErrorMsg);
                 return false;
               } else {
                 requestData.getData().setRestrictTo("BPQS");
@@ -127,8 +130,11 @@ public class USBPDevelopHandler extends USBPHandler {
                   output.setOnError(true);
                   output.setResults("Issues Encountered");
                   output.setDetails(details.toString());
+                  LOG.debug("Issues Encountered while completing child request.");
                   return false;
                 } else {
+                  LOG.debug("Child Request " + childReqId + " created for the Pool CMR.");
+
                   details.append("Child Request " + childReqId + " created for the Pool CMR record of " + addr.getDivn()
                       + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
                       + ".\nThe system will wait for completion of the child record before processing the request.\n");
@@ -143,15 +149,15 @@ public class USBPDevelopHandler extends USBPHandler {
               }
             }
           } else {
-            // if legal name and address cannot be validated
+            LOG.debug("Legal name and address could not be validated in DnB.");
             output.setResults("Review Required.");
             output.setDetails("Legal name and address could not be validated in DnB.");
             engineData.addNegativeCheckStatus("notValidated_DnB", "Legal name and address could not be validated in DnB.");
+            return false;
           }
         }
-        return true;
       } else {
-        // scenario 2
+        LOG.debug("Legal names of end user and BP did not match.");
         if (StringUtils.isNotBlank(data.getPpsceid()) && !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
           output.setResults("Invalid CEID");
           output.setDetails("Only BP with valid CEID is allowed to setup a Pool record, please check and confirm.");
@@ -159,11 +165,11 @@ public class USBPDevelopHandler extends USBPHandler {
           output.setOnError(true);
           return false;
         } else {
-          // check for T2 BP Pool CMR
+          LOG.debug("Checking for T2 BP Pool CMR...");
           checkForT2PoolCMR = true;
           ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, null);
           if (ibmCmr != null && StringUtils.isNotBlank(ibmCmr.getCmrNum())) {
-            // existing CMR so , create BP Pool CMR
+            LOG.debug("Existing BP Pool CMR, creating child request...");
             childReqId = createChildRequest(entityManager, requestData, engineData);
             {
               String childErrorMsg = "- Pool request creation cannot be done, errors were encountered -";
@@ -173,6 +179,7 @@ public class USBPDevelopHandler extends USBPHandler {
                 output.setDetails(details.toString());
                 output.setOnError(true);
                 output.setResults("Issues Encountered");
+                LOG.debug("Issues encountered in child request creation.");
                 return false;
               } else {
                 requestData.getData().setRestrictTo("BPQS");
@@ -184,8 +191,10 @@ public class USBPDevelopHandler extends USBPHandler {
                   output.setOnError(true);
                   output.setResults("Issues Encountered");
                   output.setDetails(details.toString());
+                  LOG.debug("Issues encountered in child completion.");
                   return false;
                 } else {
+                  LOG.debug("Child Request " + childReqId + " created for the Pool CMR");
                   details.append("Child Request " + childReqId + " created for the Pool CMR record of " + addr.getDivn()
                       + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
                       + ".\nThe system will wait for completion of the child record before processing the request.\n");
@@ -200,10 +209,10 @@ public class USBPDevelopHandler extends USBPHandler {
               }
             }
           } else {
-            // validate legal name in DnB
+            LOG.debug("Validating legal name in DnB.");
             DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr == null);
             if (dnbMatch != null) {
-              // create a new T2 pool cmr through child request
+              LOG.debug("Legal name and address validated and hence ceating child request...");
               childReqId = createChildRequest(entityManager, requestData, engineData);
               {
                 String childErrorMsg = "- Pool request creation cannot be done, errors were encountered -";
@@ -212,6 +221,7 @@ public class USBPDevelopHandler extends USBPHandler {
                   engineData.addRejectionComment("OTH", childErrorMsg, "", "");
                   output.setDetails(details.toString());
                   output.setOnError(true);
+                  LOG.debug("Isuses encountered while child creation.");
                   output.setResults("Issues Encountered");
                   return false;
                 } else {
@@ -223,9 +233,11 @@ public class USBPDevelopHandler extends USBPHandler {
                     engineData.addRejectionComment("OTH", childErrorMsg, "", "");
                     output.setOnError(true);
                     output.setResults("Issues Encountered");
+                    LOG.debug("Isuses encountered while child completion.");
                     output.setDetails(details.toString());
                     return false;
                   } else {
+                    LOG.debug("Child Request " + childReqId + " created for the Pool CMR");
                     details.append("Child Request " + childReqId + " created for the Pool CMR record of " + addr.getDivn()
                         + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
                         + ".\nThe system will wait for completion of the child record before processing the request.\n");
@@ -234,22 +246,22 @@ public class USBPDevelopHandler extends USBPHandler {
                     output.setDetails(details.toString());
                     output.setResults("Waiting on Child Request...");
                     output.setOnError(false);
-                    return false;
+                    return true;
                   }
 
                 }
               }
             } else {
-              // if legal name and address cannot be validated
               output.setResults("Review Required.");
               output.setDetails("Legal name and address could not be validated in DnB.");
               engineData.addNegativeCheckStatus("notValidated_DnB", "Legal name and address could not be validated in DnB.");
+              return false;
             }
 
           }
         }
       }
-      return true;
+      return false;
     }
   }
 
@@ -259,9 +271,10 @@ public class USBPDevelopHandler extends USBPHandler {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
 
-    if (childRequest != null) {
+    if (ibmCmr != null && childRequest != null) {
       Data childData = childRequest.getData();
       if ("BPQS".equalsIgnoreCase(childData.getRestrictTo()) && "P".equalsIgnoreCase(childData.getBpAcctTyp())) {
+        LOG.debug("Overriding details for Pool CMR.");
 
         details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrEnterpriseNumber());
@@ -283,6 +296,8 @@ public class USBPDevelopHandler extends USBPHandler {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
 
       } else if ("BPQS".equalsIgnoreCase(childData.getRestrictTo()) && "TT2".equalsIgnoreCase(childData.getCsoSite())) {
+        LOG.debug("Overriding details for T2 Pool CMR.");
+
         details.append(" - DIVISION: " + ibmCmr.getCmrName() + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADDR", "DIVISION", zs01.getDivn(), ibmCmr.getCmrName());
 
@@ -324,9 +339,12 @@ public class USBPDevelopHandler extends USBPHandler {
       details.append(" - SVC A/R Office : " + "IKE" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
+      createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
+    } else {
+      details.append("No child request created.");
+      engineData.addNegativeCheckStatus("noChildRequest", "Overrides skipped as child request could not be created.");
+      LOG.debug("No child request created.");
     }
-
-    createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
 
     String divn_attn = StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn().concat(zs01.getDept()).toUpperCase() : "";
     String addressCategory = "";
@@ -345,6 +363,7 @@ public class USBPDevelopHandler extends USBPHandler {
     }
 
     if ("DEMO".equalsIgnoreCase(addressCategory)) {
+      LOG.debug("Address category is Demo Development.");
       details.append(" - CSO Site : " + "YBV" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
 
@@ -352,6 +371,7 @@ public class USBPDevelopHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
 
     } else if ("LEASE".equalsIgnoreCase(addressCategory)) {
+      LOG.debug("Address category is Lease Development.");
       details.append(" - CSO Site : " + "TF7" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "TF7");
 
@@ -370,6 +390,7 @@ public class USBPDevelopHandler extends USBPHandler {
   protected FindCMRRecordModel getIBMCMRBestMatch(AutomationEngineData engineData, RequestData requestData, List<DuplicateCMRCheckResponse> matches)
       throws CmrException {
     if (checkForPoolCMR) {
+      LOG.debug("Checking for Pool CMR ...");
       for (DuplicateCMRCheckResponse record : matches) {
         LOG.debug(" - Duplicate Record with: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")"
             + record.getCompany() + " - " + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
@@ -386,6 +407,7 @@ public class USBPDevelopHandler extends USBPHandler {
       }
     } else if (checkForT2PoolCMR) {
       // checking for TT2 Pool CMR
+      LOG.debug("Checking for T2 Pool CMR ...");
       for (DuplicateCMRCheckResponse record : matches) {
         LOG.debug(" - Duplicate Record with: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")"
             + record.getCompany() + " - " + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
@@ -399,6 +421,7 @@ public class USBPDevelopHandler extends USBPHandler {
         }
       }
     }
+    LOG.debug("No best match for IBM CMR found. ");
     return null;
   }
 
@@ -410,6 +433,7 @@ public class USBPDevelopHandler extends USBPHandler {
   @Override
   protected void setChildRequestScenario(Data data, Data childData, Admin childAdmin, StringBuilder details) {
     if (childData != null) {
+      LOG.debug("Setting child request's scenarios ...");
       childData.setCustGrp(USUtil.CG_THIRD_P_BUSINESS_PARTNER);
       childData.setCustSubGrp(USUtil.SC_BP_POOL);
       childAdmin.setCustType(USUtil.BUSINESS_PARTNER);
