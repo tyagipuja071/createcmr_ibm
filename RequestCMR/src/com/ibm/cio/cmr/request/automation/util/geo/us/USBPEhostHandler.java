@@ -387,12 +387,13 @@ public class USBPEhostHandler extends USBPHandler {
     childData.setCustSubGrp(USUtil.SC_BP_POOL);
     if (T1.equals(this.cmrType)) {
       childData.setBpAcctTyp("P");
+      childData.setCsoSite("YBV");
     } else {
       childData.setCsoSite("TT2");
     }
 
     details.append(" - Type: Third Party - Bus Partner \n");
-    details.append(" - Sub-type: Bus Part Pool \n");
+    details.append(" - Sub-type: Bus Part Pool (" + this.cmrType + ")\n");
 
   }
 
