@@ -385,13 +385,6 @@ public class USBPEhostHandler extends USBPHandler {
     childAdmin.setCustType(USUtil.BUSINESS_PARTNER);
     childData.setCustGrp(USUtil.CG_THIRD_P_BUSINESS_PARTNER);
     childData.setCustSubGrp(USUtil.SC_BP_POOL);
-    if (T1.equals(this.cmrType)) {
-      childData.setBpAcctTyp("P");
-      childData.setCsoSite("YBV");
-    } else {
-      childData.setCsoSite("TT2");
-    }
-
     details.append(" - Type: Third Party - Bus Partner \n");
     details.append(" - Sub-type: Bus Part Pool (" + this.cmrType + ")\n");
 
@@ -405,6 +398,17 @@ public class USBPEhostHandler extends USBPHandler {
   @Override
   protected void performAction(AutomationEngineData engineData, String msg) {
     engineData.addNegativeCheckStatus("_usBpNoMatch", msg);
+  }
+
+  @Override
+  protected void modifyChildDataValues(RequestData requestData, RequestData childReqData, StringBuilder details) {
+    Data childData = childReqData.getData();
+    if (T1.equals(this.cmrType)) {
+      childData.setBpAcctTyp("P");
+      childData.setCsoSite("YBV");
+    } else {
+      childData.setCsoSite("TT2");
+    }
   }
 
 }
