@@ -193,16 +193,16 @@ public class USLeasingHandler extends USBPHandler {
           ibmDirectCmr.getCmrSubIndustry());
     }
 
+    createAddressOverrides(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides, childRequest);
+
     // do final checks on request data
     Admin admin = requestData.getAdmin();
     String custSubGrp = data.getCustSubGrp();
     Addr installAt = requestData.getAddress("ZS01");
     if (SUB_TYPE_LEASE_NO_RESTRICT.equals(custSubGrp) && !StringUtils.isBlank(installAt.getDivn())) {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMIN", "MAIN_CUST_NM1", admin.getMainCustNm1(), "");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ENTERPRISE", data.getEnterprise(), "");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "");
     } else if (SUB_TYPE_LEASE_3CC.equals(custSubGrp) || SUB_TYPE_LEASE_SVR_CONT.equals(custSubGrp)) {
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMIN", "MAIN_CUST_NM1", admin.getMainCustNm1(), "IBM Credit LLC");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "MAIN_CUST_NM1", admin.getMainCustNm1(), "IBM Credit LLC");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ENTERPRISE", data.getEnterprise(), "4482735");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "COMPANY", data.getCompany(), "12003567");
       if (SUB_TYPE_LEASE_3CC.equals(custSubGrp)) {
@@ -211,8 +211,6 @@ public class USLeasingHandler extends USBPHandler {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "");
       }
     }
-
-    createAddressOverrides(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides, childRequest);
 
     details.append("Branch Office codes computed successfully.");
     engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
