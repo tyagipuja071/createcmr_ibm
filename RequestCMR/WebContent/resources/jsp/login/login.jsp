@@ -15,6 +15,10 @@
   div.cmr-message-box-error, #cmr-info-box p, #cmr-error-box p {
     margin-left: 100px;
   } 
+  
+div#ibm-top {
+  min-height: 450px;
+}  
 </style>
 <script src="${resourcesPath}/js/login.js?${cmrv}" type="text/javascript"></script>
 

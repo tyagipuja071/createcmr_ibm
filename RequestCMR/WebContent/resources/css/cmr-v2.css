@@ -93,3 +93,11 @@ div#ibm-content-nav {
 table.dojoxGridRowTable td, table.dojoxGridRowTable th {
 	font-size: 12px !important;
 }
+ 
+body.ibm-type input {
+  font-family: IBM Plex Sans !important;
+}
+
+div#ibm-top {
+	min-height: 520px;
+}

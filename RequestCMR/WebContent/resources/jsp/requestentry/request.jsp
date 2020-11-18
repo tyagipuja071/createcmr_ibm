@@ -259,7 +259,7 @@ div#ibm-content-main {
   padding-top: 20px;
 }
 
-div#cmr-info-box, div#cmr-error-box {
+div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
   padding-top: 15px !important;
 }
 

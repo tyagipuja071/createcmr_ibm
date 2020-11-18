@@ -111,7 +111,7 @@ boolean approver = user != null && user.isApprover();
 
 	<div id="ibm-loader-screen"></div>
  
-	<div id="ibm-top" class="ibm-landing-page ibm-liquid" style="min-height:520px !important">
+	<div id="ibm-top" class="ibm-landing-page ibm-liquid">
   <tiles:insertAttribute name="header" />
 
 <%if (!AppUser.isLoggedOn(request)){%>	 
@@ -121,8 +121,9 @@ boolean approver = user != null && user.isApprover();
           <div class="ibm-col-1-1">
             &nbsp;
           </div>
-					<div class="ibm-col-1-1" style="padding-bottom:20px;">
-						<h1 style="margin-left:100px;">Login</h1>
+					<div class="ibm-col-1-1" style="padding-bottom:20px;margin-left:100px;">
+            <img src="${resourcesPath}/images/CreateCMRLogo.png" style="width:60px;height:60px;border-radius:8px;margin-right:10px">
+						<h1 style="width:300px;display:inline-block;vertical-align:top">Login</h1>
 					</div>
 				</div>
 			</div>
