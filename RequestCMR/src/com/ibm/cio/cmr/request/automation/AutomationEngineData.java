@@ -221,6 +221,22 @@ public class AutomationEngineData extends HashMap<String, Object> {
     }
   }
 
+<<<<<<< HEAD
+=======
+  public boolean isTrackNegativeChecks() {
+    return trackNegativeChecks;
+  }
+
+  public void setTrackNegativeChecks(boolean trackNegativeChecks) {
+    this.trackNegativeChecks = trackNegativeChecks;
+  }
+
+  public int getTrackedNegativeCheckCount() {
+    return trackedNegativeCheckCount;
+  }
+  
+
+>>>>>>> refs/remotes/origin/saas_paygo_us
   @SuppressWarnings("unchecked")
   public List<RejectionContainer> getRejectionReasons() {
     List<RejectionContainer> container = (List<RejectionContainer>) get(REJECTIONS);
@@ -241,6 +257,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
     } else {
       return checks;
     }
+<<<<<<< HEAD
   }
   
   public boolean isTrackNegativeChecks() {
@@ -253,5 +270,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
 
   public int getTrackedNegativeCheckCount() {
     return trackedNegativeCheckCount;
+=======
+>>>>>>> refs/remotes/origin/saas_paygo_us
   }
 }
