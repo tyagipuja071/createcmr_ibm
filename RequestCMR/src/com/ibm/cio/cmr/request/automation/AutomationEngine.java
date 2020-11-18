@@ -335,10 +335,6 @@ public class AutomationEngine {
         rejectInfo = engineData.get().getRejectionReasons();
         HashMap<String, String> pendingChecks = engineData.get().getPendingChecks();
 
-<<<<<<< HEAD
-=======
-
->>>>>>> refs/remotes/origin/saas_paygo_us
         boolean moveForPayGo = false;
         // CMR-5954 - paygo solution - move to next step if only company checks
         // failed
@@ -441,20 +437,10 @@ public class AutomationEngine {
           // check configured setting for what to do upon completion
           boolean processOnCompletion = isProcessOnCompletion(entityManager, data.getCmrIssuingCntry(), admin.getReqType());
 
-<<<<<<< HEAD
-          // if any element reported an error, it should always be reviewed by
-          // processor
-=======
->>>>>>> refs/remotes/origin/saas_paygo_us
           if (moveForPayGo) {
             // for paygo, ignore errors
             processOnCompletion = true;
           } else {
-<<<<<<< HEAD
-=======
-         // if any element reported an error, it should always be reviewed by
-            // processor
->>>>>>> refs/remotes/origin/saas_paygo_us
             processOnCompletion = processOnCompletion && actionsOnError.isEmpty() && !scenarioExceptions.isManualReviewIndc()
                 && (StringUtils.isBlank(admin.getSourceSystId()) || !scenarioExceptions.isReviewExtReqIndc());
           }
