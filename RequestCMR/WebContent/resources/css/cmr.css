@@ -572,6 +572,21 @@ input.cmr-grid-btn-h {
   margin-bottom: 3px;
   height: 20px;
 }
+input.cmr-grid-btn-o {
+  font-size: 12px;
+  border-radius: 3px;
+	background: #fac695; 
+	background: -moz-linear-gradient(top,  #fac695 0%, #f5ab66 47%, #ef8d31 100%); 
+	background: -webkit-linear-gradient(top,  #fac695 0%,#f5ab66 47%,#ef8d31 100%); 
+	background: linear-gradient(to bottom,  #fac695 0%,#f5ab66 47%,#ef8d31 100%); 
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fac695', endColorstr='#ef8d31',GradientType=0 ); 
+  cursor: pointer;
+  border: 1px solid #555;
+  margin-left: 5px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  height: 20px;
+}
 
 input.cmr-grid-btn:hover {
   background-image: -moz-linear-gradient(center top, rgba(255, 255, 255, 0.1),

@@ -514,7 +514,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             results.add(update);
           }
 
-          if ("838".equals(oldData.getCmrIssuingCntry())) {
+          if ("838".equals(oldData.getCmrIssuingCntry()) || "822".equals(oldData.getCmrIssuingCntry())) {
             if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getCollectionCd(), newData.getCollectionCd())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CollectionCd"))) {
               update = new UpdatedDataModel();
@@ -542,13 +542,24 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             }
           }
 
-          if (!"760".equals(oldData.getCmrIssuingCntry())) {
+          if (!("760".equals(oldData.getCmrIssuingCntry()) || "864".equals(oldData.getCmrIssuingCntry()))) {
             if (TYPE_IBM.equals(type) && !equals(oldData.getCreditCd(), newData.getCreditCd())
                 && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "CodFlag"))) {
               update = new UpdatedDataModel();
               update.setDataField(PageManager.getLabel(cmrCountry, "CodFlag", "-"));
               update.setNewData(newData.getCreditCd());
               update.setOldData(oldData.getCreditCd());
+              results.add(update);
+            }
+          }
+
+          if ("726".equals(oldData.getCmrIssuingCntry())) {
+            if (TYPE_CUSTOMER.equals(type) && !equals(oldData.getModeOfPayment(), newData.getModeOfPayment())
+                && (geoHandler == null || !geoHandler.skipOnSummaryUpdate(cmrCountry, "ModeOfPayment"))) {
+              update = new UpdatedDataModel();
+              update.setDataField(PageManager.getLabel(cmrCountry, "ModeOfPayment", "-"));
+              update.setNewData(getCodeAndDescription(newData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
+              update.setOldData(getCodeAndDescription(oldData.getModeOfPayment(), "ModeOfPayment", cmrCountry));
               results.add(update);
             }
           }
@@ -561,7 +572,7 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
             update.setOldData("Y".equals(oldData.getMilitary()) ? "Yes" : "");
             results.add(update);
           }
-
+          
           if (geoHandler != null) {
             geoHandler.addSummaryUpdatedFields(this, type, cmrCountry, newData, oldData, results);
           }
@@ -914,15 +925,15 @@ public class RequestSummaryService extends BaseSimpleService<RequestSummaryModel
           if (!"ZS01".equals(addr.getId().getAddrType()) && SystemLocation.TURKEY.equals(cmrCountry)) {
             // if Turkey and non sold-to address, do nothing
           } else {
-            update = new UpdatedNameAddrModel();
-            update.setAddrTypeCode(addrType);
-            update.setAddrType(addrTypeDesc);
-            update.setAddrSeq(seqNo);
-            update.setSapNumber(sapNumber);
-            update.setDataField(PageManager.getLabel(cmrCountry, "CustPhone", "-"));
-            update.setNewData(addr.getCustPhone());
-            update.setOldData(addr.getCustPhoneOld());
-            results.add(update);
+          update = new UpdatedNameAddrModel();
+          update.setAddrTypeCode(addrType);
+          update.setAddrType(addrTypeDesc);
+          update.setAddrSeq(seqNo);
+          update.setSapNumber(sapNumber);
+          update.setDataField(PageManager.getLabel(cmrCountry, "CustPhone", "-"));
+          update.setNewData(addr.getCustPhone());
+          update.setOldData(addr.getCustPhoneOld());
+          results.add(update);
           }
         }
         if (!equals(addr.getTransportZone(), addr.getTransportZoneOld())

@@ -30,6 +30,26 @@
           return 'Disabled';
         }
       },
+      tradestyleFormatter : function(value, rowIndex) {
+        var rowData = this.grid.getItem(rowIndex);
+        var processingType = rowData.processingTyp;
+        if (value == 'R') {
+          return '<b>Reject</b>';
+        } else if (value == 'O') {
+          return '<b>Override</b>';
+        } else {
+          return 'Allowed';
+        }
+      },
+      startQSFormatter : function(value, rowIndex) {
+        var rowData = this.grid.getItem(rowIndex);
+        var processingType = rowData.processingTyp;
+        if (value == 'Y') {
+          return '<b>Enabled</b>';
+        } else {
+          return 'Disabled';
+        }
+      },
       reqTypeFormatter : function(value, rowIndex) {
         var types = value.split("");
         var formattedTypes = '';
@@ -141,23 +161,29 @@
       <cmr:row topPad="10" addBackground="false">
         <cmr:column span="6">
           <cmr:grid url="/code/suppcountrylisting.json" id="suppcountrylistingId" span="6" useFilter="true">
-            <cmr:gridCol width="8%" field="cntryCd" header="Country Code" >
+            <cmr:gridCol width="5%" field="cntryCd" header="Country Code" >
              <cmr:formatter functionName="SuppCountryService.suppFormatter" />
             </cmr:gridCol>
-            <cmr:gridCol width="12%" field="nm" header="Country Name" />
+            <cmr:gridCol width="10%" field="nm" header="Country Name" />
             <cmr:gridCol width="10%" field="autoProcEnabled" header="Automatic Processing" >
               <cmr:formatter functionName="SuppCountryService.autoProcFormatter" />
             </cmr:gridCol>
-            <cmr:gridCol width="12%" field="hostSysTyp" header="Host System Type" />
+            <cmr:gridCol width="10%" field="hostSysTyp" header="Host System Type" />
             <cmr:gridCol width="auto" field="suppReqType" header="Supported Request Types" >
               <cmr:formatter functionName="SuppCountryService.reqTypeFormatter" />
             </cmr:gridCol>
-            <cmr:gridCol width="10%" field="defaultLandedCntry" header="Default Landed Country" />
+            <cmr:gridCol width="5%" field="defaultLandedCntry" header="Default Landed Country" />
             <cmr:gridCol width="10%" field="autoEngineIndc" header="Automation Engine" >
               <cmr:formatter functionName="SuppCountryService.autoEngineFormatter" />
             </cmr:gridCol>
             <cmr:gridCol width="10%" field="recoveryDirection" header="Recovery Direction" >
               <cmr:formatter functionName="SuppCountryService.recoveryFormatter" />
+            </cmr:gridCol>
+            <cmr:gridCol width="8%" field="startQuickSearch" header="Start From Quick Search" >
+              <cmr:formatter functionName="SuppCountryService.startQSFormatter" />
+            </cmr:gridCol>
+            <cmr:gridCol width="8%" field="tradestyleNmUsage" header="TradeStyle Name Usage" >
+              <cmr:formatter functionName="SuppCountryService.tradestyleFormatter" />
             </cmr:gridCol>
           </cmr:grid>
         </cmr:column>

@@ -176,6 +176,9 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
   @Column(name = "EMAIL3")
   private String email3;
 
+  @Column(name = "MILITARY")
+  private String military;
+
   public String getAbbrevNm() {
     return this.abbrevNm;
   }
@@ -534,6 +537,14 @@ public class MassUpdtData extends BaseEntity<MassUpdtDataPK> implements Serializ
 
   public void setEmail3(String email3) {
     this.email3 = email3;
+  }
+  
+  public String getMilitary() {
+    return military;
+  }
+
+  public void setMilitary(String military) {
+    this.military = military;
   }
 
 }

@@ -36,7 +36,7 @@ function afterConfigForFR() {
     FormManager.readOnly('taxCd2');
     FormManager.readOnly('poBox');
     FormManager.readOnly('embargoCd');
-    FormManager.readOnly('currencyCd');
+    // FormManager.readOnly('currencyCd');
     if (reqType == 'U') {
       FormManager.enable('taxCd2');
       FormManager.enable('currencyCd');
@@ -2295,4 +2295,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterTemplateLoad(unlockAbbrevNmForInternalScenario, '706');
   GEOHandler.addAfterConfig(lockIBMTabForFR, '706');
   GEOHandler.addAfterTemplateLoad(lockIBMTabForFR, '706');
+
 });

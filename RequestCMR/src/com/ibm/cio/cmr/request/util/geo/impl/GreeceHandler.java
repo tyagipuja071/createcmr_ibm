@@ -170,14 +170,12 @@ public class GreeceHandler extends BaseSOFHandler {
       if (SystemLocation.CYPRUS.equals(record.getCmrIssuedBy())) {
         LOG.debug("CY Nickname: " + record.getCmrName2Plain());
         record.setCmrName2Plain(record.getCmrName2Plain());
-        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
         record.setCmrDept(null);
       }
 
       if (SystemLocation.GREECE.equals(record.getCmrIssuedBy())) {
         LOG.debug("GR Nickname: " + record.getCmrName2Plain());
         record.setCmrName2Plain(record.getCmrName2Plain());
-        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
         record.setCmrDept(null);
         if (!StringUtils.isBlank(record.getCmrPOBox())) {
           record.setCmrPOBox(record.getCmrPOBox());
@@ -186,7 +184,6 @@ public class GreeceHandler extends BaseSOFHandler {
 
       if (SystemLocation.TURKEY.equals(record.getCmrIssuedBy())) {
         record.setCmrName2Plain(record.getCmrName2Plain());
-        record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
         record.setCmrDept(record.getCmrCity2());
       }
 
@@ -353,8 +350,6 @@ public class GreeceHandler extends BaseSOFHandler {
               // greece/cyprus/turkey only ZS01; ZP01 and ZD01
               // from SOF directly
               continue;
-            } else {
-              record.setCmrTaxOffice(this.currentImportValues.get("InstallingAddressT"));
             }
 
             // name4 in rdc = Attn on SOF
@@ -1256,14 +1251,12 @@ public class GreeceHandler extends BaseSOFHandler {
     String street = this.currentImportValues.get(addressKey + "Address4");
     String cityAndPostCode = this.currentImportValues.get(addressKey + "Address5");
     String country = this.currentImportValues.get(addressKey + "Address6");
-    String taxOffice = this.currentImportValues.get(addressKey + "AddressT");
     String vat = this.currentImportValues.get(addressKey + "AddressU");
     String phone = this.currentImportValues.get(addressKey + "Phone");
 
     address.setCmrName1Plain(name);
     address.setCmrTaxNumber(vat);
-    address.setCmrTaxOffice(taxOffice);
-
+    
     if (nickName == null || "*".equals(nickName)) {
       nickName = "";
     }
@@ -1390,14 +1383,12 @@ public class GreeceHandler extends BaseSOFHandler {
     String streetCont = this.currentImportValues.get(addressKey + "Address4");
     String districtCityPostCode = this.currentImportValues.get(addressKey + "Address5");
     String country = this.currentImportValues.get(addressKey + "Address6");
-    String taxOffice = this.currentImportValues.get(addressKey + "AddressT");
     String vat = this.currentImportValues.get(addressKey + "AddressU");
     String phone = this.currentImportValues.get(addressKey + "Phone");
 
     address.setCmrName1Plain(name);
     address.setCmrName2Plain(nameCont);
     address.setCmrTaxNumber(vat);
-    address.setCmrTaxOffice(taxOffice);
     address.setCmrStreetAddress(street);
     address.setCmrStreetAddressCont(streetCont);
 
@@ -1712,7 +1703,6 @@ public class GreeceHandler extends BaseSOFHandler {
 
       address.setPairedAddrSeq(currentRecord.getTransAddrNo());
       address.setVat(currentRecord.getCmrTaxNumber());
-      address.setTaxOffice(currentRecord.getCmrTaxOffice());
       address.setVat(currentRecord.getCmrTaxNumber());
 
       if (!StringUtils.isBlank(currentRecord.getCmrName4())) {
@@ -2044,9 +2034,6 @@ public class GreeceHandler extends BaseSOFHandler {
           addr.setCustPhone("");
         }
 
-        if (!StringUtils.isEmpty(addr.getTaxOffice()) && !"ZS01".equals(addr.getId().getAddrType())) {
-          addr.setTaxOffice("");
-        }
       }
 
       break;
@@ -2123,8 +2110,7 @@ public class GreeceHandler extends BaseSOFHandler {
         addressDataMap.put("postCd", addr.getPostCd());
         addressDataMap.put("stateProv", addr.getStateProv());
         addressDataMap.put("stdCityNm", addr.getStdCityNm());
-        addressDataMap.put("taxOffice", addr.getTaxOffice());
-
+        
         for (String key : addressDataMap.keySet()) {
           for (char problematicChar : problematicCharList) {
             if (!(StringUtils.isEmpty(addressDataMap.get(key)))) {
@@ -2249,9 +2235,6 @@ public class GreeceHandler extends BaseSOFHandler {
           }
           if (!(StringUtils.isEmpty(addressDataMap.get("stdCityNm"))) && !(addressDataMap.get("stdCityNm").equals(addr.getStdCityNm()))) {
             addr.setStdCityNm(addressDataMap.get("stdCityNm"));
-          }
-          if (!(StringUtils.isEmpty(addressDataMap.get("taxOffice"))) && !(addressDataMap.get("taxOffice").equals(addr.getTaxOffice()))) {
-            addr.setTaxOffice(addressDataMap.get("taxOffice"));
           }
         }
       }
@@ -3096,7 +3079,8 @@ public class GreeceHandler extends BaseSOFHandler {
   private String getShippingPhoneFromLegacyGR(FindCMRRecordModel address) {
     List<CmrtAddr> cmrtAddrs = this.legacyObjects.getAddresses();
     for (CmrtAddr cmrtAddr : cmrtAddrs) {
-      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && address.getCmrAddrSeq().equals(cmrtAddr.getId().getAddrNo())) {
+      String seqNo = (address.getCmrAddrSeq().length() != 5) ? StringUtils.leftPad(address.getCmrAddrSeq(), 5, '0') : address.getCmrAddrSeq();
+      if ("Y".equals(cmrtAddr.getIsAddrUseShipping()) && seqNo.equals(cmrtAddr.getId().getAddrNo())) {
         return cmrtAddr.getAddrPhone();
       }
     }
@@ -3494,19 +3478,7 @@ public class GreeceHandler extends BaseSOFHandler {
   @Override
   public void addSummaryUpdatedFieldsForAddress(RequestSummaryService service, String cmrCountry, String addrTypeDesc, String sapNumber,
       UpdatedAddr addr, List<UpdatedNameAddrModel> results, EntityManager entityManager) {
-    if (SystemLocation.GREECE.equals(cmrCountry) || SystemLocation.CYPRUS.equals(cmrCountry)) {
-      if (!equals(addr.getTaxOffice(), addr.getTaxOfficeOld())) {
-        UpdatedNameAddrModel update = new UpdatedNameAddrModel();
-        update.setAddrType(addrTypeDesc);
-        update.setSapNumber(sapNumber);
-        update.setDataField(PageManager.getLabel(cmrCountry, "", "TaxOffice"));
-        update.setNewData(addr.getTaxOffice());
-        update.setOldData(addr.getTaxOfficeOld());
-        results.add(update);
-      }
-    }
-
-    if (SystemLocation.UNITED_KINGDOM.equals(cmrCountry) || SystemLocation.IRELAND.equals(cmrCountry)) {
+   if (SystemLocation.UNITED_KINGDOM.equals(cmrCountry) || SystemLocation.IRELAND.equals(cmrCountry)) {
       if (!equals(addr.getHwInstlMstrFlg(), addr.getHwInstlMstrFlgOld())) {
         UpdatedNameAddrModel update = new UpdatedNameAddrModel();
         update.setAddrType(addrTypeDesc);
@@ -3917,10 +3889,6 @@ public class GreeceHandler extends BaseSOFHandler {
       if (!StringUtils.isBlank(record.getCmrPOBox())) {
         localTransAddr.setCmrPOBox(poBox);
       }
-    }
-
-    if (custExt != null) {
-      localTransAddr.setCmrTaxOffice(custExt.getiTaxCode());
     }
 
     return localTransAddr;

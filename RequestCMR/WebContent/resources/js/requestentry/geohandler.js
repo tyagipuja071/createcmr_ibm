@@ -82,6 +82,7 @@ var SysLoc = (function() {
     THAILAND : "856",
     TANZANIA : "851",
     MOROCCO : "642",
+    TUNISIA : "729",
     TURKEY : '862',
     TRINIDAD_TOBAGO : '859',
     UK : '866',
@@ -103,14 +104,15 @@ var SysLoc = (function() {
     TAJIKISTAN : '363',
     ARMENIA : '607',
     ALBANIA : '603',
-    BELARUS: '626',
+    BELARUS : '626',
     GEORGIA : '651',
     KYRGYZSTAN : '695',
     MACEDONIA : '705',
     UZBEKISTAN : '741',
     MOLDOVA : '787',
-    BOSNIA_HERZEGOVINA : '699'
-    
+    BOSNIA_HERZEGOVINA : '699',
+		MADAGASCAR : '700',
+    CANADA : '649'
   };
 })();
 
@@ -165,6 +167,9 @@ var GEOHandler = (function() {
       return nameAddressType;
     },
     registerWWValidator : function(validator, roleCode, existingRequestOnly) {
+      if (validator == null) {
+        return;
+      }
       if (existingRequestOnly && (dojo.byId("reqId").value == '0' || (typeof (_pagemodel) != 'undefined' && _pagemodel.reqId == 0))) {
         console.log('skipping WW validator for new entry: ' + validator.name);
         return;
@@ -185,6 +190,9 @@ var GEOHandler = (function() {
 
     // register a country specific validator, can be except for that country
     registerValidator : function(validator, arrayOfCountryCodes, roleCode, existingRequestOnly, excludeCountries) {
+      if (validator == null) {
+        return;
+      }
       if (existingRequestOnly && (dojo.byId("reqId").value == '0' || (typeof (_pagemodel) != 'undefined' && _pagemodel.reqId == 0))) {
         console.log('skipping validator for new entry: ' + validator.name + ", countries: " + getCMRIssuingCountry());
         return;
@@ -241,13 +249,13 @@ var GEOHandler = (function() {
       }
       console.log('Executing after configuration load functions...');
       // execute globals
-      for ( var i = 0; i < afterConfigFunctions['WW'].length; i++) {
+      for (var i = 0; i < afterConfigFunctions['WW'].length; i++) {
         afterConfigFunctions['WW'][i]();
       }
 
       var cntry = getCMRIssuingCountry();
       if (cntry != '' && afterConfigFunctions[cntry] != null) {
-        for ( var i = 0; i < afterConfigFunctions[cntry].length; i++) {
+        for (var i = 0; i < afterConfigFunctions[cntry].length; i++) {
           afterConfigFunctions[cntry][i]();
         }
       }
@@ -279,13 +287,13 @@ var GEOHandler = (function() {
       }
       console.log('Executing after template load functions...');
       // execute globals
-      for ( var i = 0; i < afterTemplateLoadFunctions['WW'].length; i++) {
+      for (var i = 0; i < afterTemplateLoadFunctions['WW'].length; i++) {
         afterTemplateLoadFunctions['WW'][i](fromAddress, scenario, scenarioChanged);
       }
 
       var cntry = getCMRIssuingCountry();
       if (cntry != '' && afterTemplateLoadFunctions[cntry] != null) {
-        for ( var i = 0; i < afterTemplateLoadFunctions[cntry].length; i++) {
+        for (var i = 0; i < afterTemplateLoadFunctions[cntry].length; i++) {
           afterTemplateLoadFunctions[cntry][i](fromAddress, scenario, scenarioChanged);
         }
       }
@@ -339,14 +347,14 @@ var GEOHandler = (function() {
     executeAddrFuncs : function(saving, afterValidate, copying) {
       console.log('Executing before address load functions...');
       // execute globals
-      for ( var i = 0; i < beforeAddrLoadFunctions['WW'].length; i++) {
+      for (var i = 0; i < beforeAddrLoadFunctions['WW'].length; i++) {
         beforeAddrLoadFunctions['WW'][i]();
       }
 
       var cntry = getCMRIssuingCountry();
       var addressMode = cmr.addressMode;
       if (cntry != '' && beforeAddrLoadFunctions[cntry] != null) {
-        for ( var i = 0; i < beforeAddrLoadFunctions[cntry].length; i++) {
+        for (var i = 0; i < beforeAddrLoadFunctions[cntry].length; i++) {
           beforeAddrLoadFunctions[cntry][i](cntry, copying ? 'COPY' : addressMode, saving, afterValidate);
         }
       }
@@ -354,13 +362,13 @@ var GEOHandler = (function() {
     executeToggleTypeFuncs : function(addressMode, details) {
       console.log('Executing toggle functions...');
       // execute globals
-      for ( var i = 0; i < toggleAddrTypeFunctions['WW'].length; i++) {
+      for (var i = 0; i < toggleAddrTypeFunctions['WW'].length; i++) {
         toggleAddrTypeFunctions['WW'][i](cntry, addressMode, details);
       }
 
       var cntry = getCMRIssuingCountry();
       if (cntry != '' && toggleAddrTypeFunctions[cntry] != null) {
-        for ( var i = 0; i < toggleAddrTypeFunctions[cntry].length; i++) {
+        for (var i = 0; i < toggleAddrTypeFunctions[cntry].length; i++) {
           toggleAddrTypeFunctions[cntry][i](cntry, addressMode, details);
         }
       }
@@ -373,7 +381,7 @@ var GEOHandler = (function() {
       }
     },
     isTGMERequired : function(cntry) {
-      for ( var i = 0; i < noTGME.length; i++) {
+      for (var i = 0; i < noTGME.length; i++) {
         if (noTGME[i] == cntry) {
           return false;
         }
@@ -399,7 +407,7 @@ var GEOHandler = (function() {
     },
     getCreateOnlyAddresses : function() {
       var list = '';
-      for ( var i = 0; i < doNotCopyTypes.length; i++) {
+      for (var i = 0; i < doNotCopyTypes.length; i++) {
         list += list.length > 0 ? '|' : '';
         list += doNotCopyTypes[i];
       }

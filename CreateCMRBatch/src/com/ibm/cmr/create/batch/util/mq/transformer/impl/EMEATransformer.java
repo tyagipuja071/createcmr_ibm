@@ -5,10 +5,13 @@ package com.ibm.cmr.create.batch.util.mq.transformer.impl;
 
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cmr.create.batch.util.CMRRequestContainer;
 import com.ibm.cmr.create.batch.util.mq.MQMsgConstants;
 import com.ibm.cmr.create.batch.util.mq.handler.MQMessageHandler;
 import com.ibm.cmr.create.batch.util.mq.transformer.MessageTransformer;
@@ -53,4 +56,13 @@ public abstract class EMEATransformer extends MessageTransformer {
       messageHash.put("FSLICAM", "");
     }
   }
+
+  @Override
+  public boolean skipLegacyAddressData(EntityManager entityManager, CMRRequestContainer cmrObjects, Addr currAddr, boolean flag) {
+    if ("PG01".equals(currAddr.getId().getAddrType())) {
+      return true;
+    }
+    return false;
+  }
+
 }

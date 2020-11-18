@@ -22,6 +22,7 @@ var cmr = {
   alertShown : false,
   progressShown : false,
   confirmShown : false,
+  superUser : false,
   clearAndHideElements : function(elementIdArray) {
     for ( var idx in elementIdArray) {
       var elId = elementIdArray[idx];
@@ -801,6 +802,30 @@ var cmr = {
         // do nothing
       }
     }, 1000);
+  },
+  superUserMode : function(){
+    if (this.superUser){
+      cmr.showAlert('Already in Super User Mode');
+      return;
+    }
+    var msg = 'Super User Mode unlocks all fields and enables a processor to specify values manually on the request form.';
+    msg += '<strong>This function should only be used with caution and the immediate next action should be <span style="color:red">';
+    msg += 'Create/Upd CMR</span></strong>. Executing other actions (apart from Check Request) will cause the page to reload and the normal locking, computed values, and dependencies to be executed.<br>Proceed?';
+    cmr.showConfirm('cmr.executeSuperUserMode()', msg, 'Warning', null);
+  },
+  executeSuperUserMode() {
+    if (typeof(_pagemodel) != 'undefined'){
+      for (var nm in _pagemodel){
+        if (nm != 'cmrIssuingCntry' && nm != 'reqType'){
+          FormManager.enable(nm);
+        }
+      }
+    }
+    cmr.showNode('superUserModeText');
+    this.superUser = true;
+  },
+  isSuperUserMode : function(){
+   return this.superUser; 
   }
 };
 

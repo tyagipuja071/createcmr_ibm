@@ -8,9 +8,9 @@ import javax.persistence.EntityManager;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.entity.BaseEntity;
-import com.ibm.cio.cmr.request.entity.Data;
 
 /**
  * An object that can be configured and ran via the {@link AutomationEngine}
@@ -69,6 +69,29 @@ public abstract class AutomationElement<R extends AutomationOutput> {
    */
   public abstract AutomationResult<R> executeElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
       throws Exception;
+
+  /**
+   * Executes the {@link AutomationElement} and returns an
+   * {@link AutomationResult} containing the results of the process<br>
+   * <br>
+   * Each {@link AutomationElement} can put or get data on the current
+   * {@link AutomationEngineData} passed on, to be able to share data.
+   * <strong>The processing of each element though is expected to work even
+   * without the needed data to be fully independent.</strong> Having the needed
+   * data will only avoid duplicate executions or database queries or service
+   * calls, whenever applicable
+   * 
+   * @param entityManager
+   * @param requestData
+   * @param engineData
+   * @return
+   * @throws Exception
+   */
+  public AutomationResult<R> executeAutomationElement(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData)
+      throws Exception {
+    engineData.setTrackNegativeChecks(!(this instanceof CompanyVerifier));
+    return executeElement(entityManager, requestData, engineData);
+  }
 
   /**
    * Builds the base results for {@link AutomationEngine}.
@@ -192,19 +215,7 @@ public abstract class AutomationElement<R extends AutomationOutput> {
   }
 
   public ScenarioExceptionsUtil getScenarioExceptions(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
-    ScenarioExceptionsUtil scenarioExceptions = null;
-    if (engineData != null && engineData.containsKey("SCENARIO_EXCEPTIONS")) {
-      scenarioExceptions = (ScenarioExceptionsUtil) engineData.get("SCENARIO_EXCEPTIONS");
-      return scenarioExceptions;
-    } else {
-      Data data = requestData.getData();
-      scenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(), data.getCustGrp(),
-          data.getCustSubGrp());
-      if (engineData != null) {
-        engineData.put("SCENARIO_EXCEPTIONS", scenarioExceptions);
-      }
-      return scenarioExceptions;
-    }
-
+    return AutomationUtil.getScenarioExceptions(entityManager, requestData, engineData);
   }
+
 }

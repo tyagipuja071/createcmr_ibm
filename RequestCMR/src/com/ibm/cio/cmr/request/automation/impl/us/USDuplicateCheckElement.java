@@ -55,7 +55,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
   private static DupCMRCheckElement dupCMRCheckElement = new DupCMRCheckElement(null, null, false, false);
 
   private static final List<String> negativeCheckScenarioList = Arrays.asList(USUtil.SC_IGS, USUtil.SC_IGSF, USUtil.SC_LEASE_NO_RESTRICT,
-      USUtil.SC_LEASE_32C, USUtil.SC_LEASE_IPMA, USUtil.SC_LEASE_LPMA, USUtil.SC_FED_REGULAR, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_TRIBAL_BUS,
+      USUtil.SC_LEASE_IPMA, USUtil.SC_LEASE_LPMA, USUtil.SC_FED_REGULAR, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_TRIBAL_BUS,
       USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_CLINIC, USUtil.SC_FED_NATIVE_CORP, USUtil.SC_FED_CAMOUFLAGED,
       USUtil.SC_STATE_STATE, USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_CITY, USUtil.SC_STATE_HOSPITALS, USUtil.SC_SCHOOL_PUBLIC,
       USUtil.SC_SCHOOL_CHARTER, USUtil.SC_STATE_DIST, USUtil.SC_SCHOOL_PRIV, USUtil.SC_BYMODEL);
@@ -63,6 +63,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       USUtil.SC_FED_FEDSTATE, USUtil.SC_FED_HEALTHCARE, USUtil.SC_FED_HOSPITAL, USUtil.SC_FED_INDIAN_TRIBE, USUtil.SC_FED_NATIVE_CORP,
       USUtil.SC_FED_REGULAR, USUtil.SC_FED_TRIBAL_BUS, USUtil.SC_STATE_CITY, USUtil.SC_STATE_COUNTY, USUtil.SC_STATE_DIST, USUtil.SC_STATE_HOSPITALS,
       USUtil.SC_STATE_STATE);
+  private static final List<String> END_USER_SCENARIOS = Arrays.asList(USUtil.SC_BP_END_USER, USUtil.SC_BP_DEVELOP, USUtil.SC_BP_E_HOST);
 
   public USDuplicateCheckElement(String requestTypes, String actionOnError, boolean overrideData, boolean stopOnError) {
     super(requestTypes, actionOnError, overrideData, stopOnError);
@@ -427,6 +428,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
 
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
+    String restrictTo = StringUtils.isNotBlank(data.getRestrictTo()) ? data.getRestrictTo() : "";
+    String csoSite = StringUtils.isNotBlank(data.getCsoSite()) ? data.getCsoSite() : "";
+    // String bpAccType = StringUtils.isNotBlank(data.getBpAcctTyp()) ?
+    // data.getBpAcctTyp() : "";
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
@@ -468,6 +473,24 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
       }
       response.setMatches(cmrCheckMatchesTmp);
       break;
+    case USUtil.SC_COMM_REGULAR:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        String usRestrictTo = StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) ? cmrCheckRecord.getUsRestrictTo() : "";
+        if (restrictTo.equals(usRestrictTo) && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
+    case USUtil.SC_BP_POOL:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        String usRestrictTo = StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) ? cmrCheckRecord.getUsRestrictTo() : "";
+        if (restrictTo.equals(usRestrictTo) && csoSite.equals(cmrCheckRecord.getUsCsoSite()) && "P".equals(cmrCheckRecord.getUsBpAccType())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
     case USUtil.SC_BYMODEL:
       USDetailsContainer usDetails = USUtil.determineUSCMRDetails(entityManager, requestData.getAdmin().getModelCmrNo());
       switch (usDetails.getCustTypCd()) {
@@ -500,17 +523,28 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
               && cmrCheckRecord.getCompany().equalsIgnoreCase(usDetails.getCompanyNo())
               && ((StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()) && StringUtils.isNotBlank(usDetails.getUsRestrictTo())
                   && cmrCheckRecord.getUsRestrictTo().equalsIgnoreCase(usDetails.getUsRestrictTo()))
-                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))) {
+                  || (StringUtils.isBlank(usDetails.getUsRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo())))
+              && !cmrCheckRecord.getSubIndustryCd().startsWith("Y")) {
             cmrCheckMatchesTmp.add(cmrCheckRecord);
           }
         }
         response.setMatches(cmrCheckMatchesTmp);
       }
+    case USUtil.SC_BP_DEVELOP:
+      for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
+        if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(data.getCompany())
+            && data.getCompany().equalsIgnoreCase(cmrCheckRecord.getCompany()) && ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()))
+            && "D".equalsIgnoreCase(cmrCheckRecord.getUsBpAccType())) {
+          cmrCheckMatchesTmp.add(cmrCheckRecord);
+        }
+      }
+      response.setMatches(cmrCheckMatchesTmp);
+      break;
     default:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
         if ((StringUtils.isBlank(data.getRestrictTo()) && StringUtils.isBlank(cmrCheckRecord.getUsRestrictTo()))
-            || (StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
-                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo())) {
+            || ((StringUtils.isNotBlank(data.getRestrictTo()) && StringUtils.isNotBlank(cmrCheckRecord.getUsRestrictTo()))
+                && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo()))) {
           cmrCheckMatchesTmp.add(cmrCheckRecord);
         }
       }
@@ -539,7 +573,7 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     boolean requiresZI01Match = false;
 
     // check if End user and has divn value
-    if (USUtil.SC_BP_END_USER.equals(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
+    if (END_USER_SCENARIOS.contains(data.getCustSubGrp()) && "C".equals(admin.getReqType())) {
       if (zs01 != null && StringUtils.isBlank(zs01.getDivn())) {
         response.setSuccess(false);
         response.setMatched(false);
@@ -672,10 +706,10 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     }
 
     // check if End user
-    if (USUtil.SC_BP_END_USER.equals(subScenario) && "C".equals(admin.getReqType())) {
+    if (END_USER_SCENARIOS.contains(subScenario) && "C".equals(admin.getReqType())) {
 
       ScenarioExceptionsUtil bpScenarioExceptions = new ScenarioExceptionsUtil(entityManager, data.getCmrIssuingCntry(), data.getCountryUse(),
-          USUtil.CG_THIRD_P_BUSINESS_PARTNER, USUtil.SC_BP_END_USER);
+          USUtil.CG_THIRD_P_BUSINESS_PARTNER, subScenario);
       engineData.addPositiveCheckStatus("BP_EU_REQ");
       if (bpScenarioExceptions != null) {
         // set cmr check mappings to bp
