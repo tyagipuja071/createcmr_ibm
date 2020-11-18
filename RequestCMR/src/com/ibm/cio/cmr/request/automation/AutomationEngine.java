@@ -437,8 +437,6 @@ public class AutomationEngine {
           // check configured setting for what to do upon completion
           boolean processOnCompletion = isProcessOnCompletion(entityManager, data.getCmrIssuingCntry(), admin.getReqType());
 
-          // if any element reported an error, it should always be reviewed by
-          // processor
           if (moveForPayGo) {
             // for paygo, ignore errors
             processOnCompletion = true;

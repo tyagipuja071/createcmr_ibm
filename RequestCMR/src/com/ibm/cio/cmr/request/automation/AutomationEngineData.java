@@ -86,7 +86,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
     checks.put(checkKey, userFriendlyCheckMessage);
     if (this.trackNegativeChecks) {
       this.trackedNegativeCheckCount++;
-  }
+    }
   }
 
   /**
@@ -242,7 +242,7 @@ public class AutomationEngineData extends HashMap<String, Object> {
       return checks;
     }
   }
-  
+
   public boolean isTrackNegativeChecks() {
     return trackNegativeChecks;
   }
