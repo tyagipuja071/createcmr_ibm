@@ -283,6 +283,7 @@ var CmrMetrics = (function() {
               html += '<div class="ibm-columns">&nbsp;';
               html += '</div>';
             }  
+            // create the charts
             dojo.byId('charts-cont').innerHTML = html;
             for (var cntry in data){
               var stat = data[cntry];
