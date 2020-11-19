@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
@@ -30,8 +31,11 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 
@@ -397,8 +401,29 @@ public class MCOSaHandler extends MCOHandler {
         data.setCreditCd("");
         data.setCommercialFinanced("");
       }
+
+      data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+      data.setAdminDeptLine(data.getIbmDeptCostCenter());
     }
 
+  }
+
+  private String getInternalDepartment(String cmrNo) throws Exception {
+    String department = "";
+    List<String> results = new ArrayList<String>();
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYCMR");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + "864" + "'");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      department = results.get(0);
+    }
+    return department;
   }
 
   @Override
