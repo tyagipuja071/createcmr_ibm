@@ -1045,9 +1045,7 @@ public class MCOSaHandler extends MCOHandler {
 
             boolean isDummyUpdate = true;
 
-            List<String> checkList = null;
             List<String> checkListSubRegion = null;
-            long count = 0;
             long countSubRegion = 0;
             if (row.getRowNum() == 2001) {
               continue;
@@ -1109,9 +1107,6 @@ public class MCOSaHandler extends MCOHandler {
 
             }
 
-            checkList = Arrays.asList(nameCont, streetCont, poBox);
-            count = checkList.stream().filter(field -> !field.isEmpty()).count();
-
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
             countSubRegion = checkListSubRegion.stream().filter(field -> !field.isEmpty()).count();
 
@@ -1167,11 +1162,10 @@ public class MCOSaHandler extends MCOHandler {
             if (!isDummyUpdate) {
 
               if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
-                if (count > 1 && !("ZA").equals(landCountry)) {
-                  LOG.trace("Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time.");
+                if (((!nameCont.isEmpty() && !streetCont.isEmpty()) || (!nameCont.isEmpty() && !poBox.isEmpty())) && !("ZA").equals(landCountry)) {
+                  LOG.trace("Out of Name Con't and Street Con't/PO BOX only 1 can be filled at the same time.");
                   error.addError(row.getRowNum(), "Name Con't, Street Con't, PO BOX",
-                      "Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time. ");
-                  count = 0;
+                      "Out of Name Con't and Street Con't/PO BOX only 1 can be filled at the same time. ");
                 }
               }
 
