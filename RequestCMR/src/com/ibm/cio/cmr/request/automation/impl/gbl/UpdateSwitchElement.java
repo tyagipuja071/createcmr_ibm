@@ -172,7 +172,7 @@ public class UpdateSwitchElement extends ValidatingElement {
         output.setDetails("No data/address changes made on request.");
         engineData.addNegativeCheckStatus("NO_UPD", "No data/address changes made on request.");
         log.debug("No data/address changes made on request.");
-      } else if (!changes.hasDataChanges() && !changes.hasAddressChanges() && AutomationUtil.isLegalNameChanged(admin)) {
+      } else if (!changes.hasDataChanges() && !changes.hasAddressChanges() && isLegalNameUpdtd) {
         validation.setSuccess(true);
         validation.setMessage("Review Required");
         String details = output.getDetails() + "\n" + "Legal Name changes made on request.";
