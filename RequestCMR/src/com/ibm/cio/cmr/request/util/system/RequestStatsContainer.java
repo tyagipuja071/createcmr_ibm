@@ -6,6 +6,8 @@ package com.ibm.cio.cmr.request.util.system;
 import java.util.List;
 import java.util.Map;
 
+import com.ibm.cio.cmr.request.model.system.AutomationStatsModel;
+import com.ibm.cio.cmr.request.model.system.AutomationSummaryModel;
 import com.ibm.cio.cmr.request.model.system.RequestStatsModel;
 import com.ibm.cio.cmr.request.model.system.RequesterStatsModel;
 import com.ibm.cio.cmr.request.model.system.SquadStatisticsModel;
@@ -20,6 +22,8 @@ public class RequestStatsContainer {
   private Map<Long, List<String>> rejectionReasons;
   private List<SquadStatisticsModel> squadRecords;
   private List<RequesterStatsModel> requesterRecords;
+  private List<AutomationStatsModel> automationRecords;
+  private Map<String, AutomationSummaryModel> automationSummary;
 
   public List<RequestStatsModel> getRecords() {
     return records;
@@ -51,5 +55,21 @@ public class RequestStatsContainer {
 
   public void setRequesterRecords(List<RequesterStatsModel> requesterRecords) {
     this.requesterRecords = requesterRecords;
+  }
+
+  public List<AutomationStatsModel> getAutomationRecords() {
+    return automationRecords;
+  }
+
+  public void setAutomationRecords(List<AutomationStatsModel> automationRecords) {
+    this.automationRecords = automationRecords;
+  }
+
+  public Map<String, AutomationSummaryModel> getAutomationSummary() {
+    return automationSummary;
+  }
+
+  public void setAutomationSummary(Map<String, AutomationSummaryModel> automationSummary) {
+    this.automationSummary = automationSummary;
   }
 }

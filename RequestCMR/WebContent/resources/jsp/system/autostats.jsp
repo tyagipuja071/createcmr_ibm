@@ -60,6 +60,7 @@
     
     FilteringDropdown.loadFixedItems('groupByGeo', null, dropdown1);
     FilteringDropdown.loadItems('groupByProcCenter', 'groupByProcCenter_spinner', 'proc_center');
+    FilteringDropdown.loadItems('country', 'country_spinner', 'bds', 'fieldId=CMRIssuingCountry');
     FormManager.addValidator('dateFrom', Validators.REQUIRED, [ 'Date (from)' ]);
     FormManager.addValidator('dateTo', Validators.REQUIRED, [ 'Date (to)' ]);
     FormManager.addValidator('dateFrom', Validators.DATE('YYYY-MM-DD'), [ 'Date (from)' ]);
@@ -78,7 +79,6 @@
         }
       };
     })(), null, 'frmCMR');
-    
     FormManager.ready();
   });
 </script>
@@ -112,7 +112,7 @@ div#filterlabels table {
     <form:form method="GET" action="${contextPath}/metrics/statexport" id="frmCMR" name="frmCMR" class="ibm-column-form ibm-styled-form"
       modelAttribute="metrics">
       <cmr:row>
-        <h3>Request Statistics</h3>
+        <h3>Automation Statistics</h3>
       </cmr:row>
       <cmr:row>
         <cmr:column span="6" >
@@ -175,31 +175,45 @@ div#filterlabels table {
       <cmr:row >
         <cmr:column span="1" width="150">
           <p>
+            <cmr:label fieldId="country">
+              CMR Issuing Country:
+            </cmr:label>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="235">
+          <p>
+            <form:select dojoType="dijit.form.FilteringSelect" id="country" searchAttr="name" style="display: block;" maxHeight="200" required="false" path="country" placeHolder="Filter by Issuing Country">
+            </form:select>
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row >
+        <cmr:column span="1" width="150">
+          <p>
           </p>
         </cmr:column>
         <cmr:column span="2" width="300">
           <p>
             <form:checkbox path="excludeUnsubmitted" value="Y"/>
             <label for="OEMInd" class=" cmr-radio-check-label">
-               <span id="cmr-fld-lbl-OEMInd">Exclude Non-submitted Requests</span>
-               <cmr:info text="Excludes all requests in Drafts status which have not yet been submitted for processing once. Requests which were rejected and now in Draft status will be included." />
+               <span id="cmr-fld-lbl-OEMInd">Completed Requests Only</span>
+               <cmr:info text="Generates statistics for requests that have be completed already." />
             </label>            
           </p>
         </cmr:column>
       </cmr:row>
       <cmr:row topPad="10">
         <cmr:column span="6">
-          <cmr:button label="Export Request Statistics" onClick="CmrMetrics.exportStats()" highlight="true" pad="true" />
-          <cmr:button label="Export Squad Report" onClick="CmrMetrics.exportSquadStats()" highlight="false" pad="true" />
-          <cmr:button label="Export Requester Statistics" onClick="CmrMetrics.exportRequesterStats()" highlight="false" pad="true" />
+          <cmr:button label="Generate Charts" onClick="CmrMetrics.visualizeAutoStats()" highlight="true" pad="true" />
+          <cmr:button label="Export Statistics" onClick="CmrMetrics.exportAutoStats()" highlight="false" pad="true" />
         </cmr:column>
       </cmr:row>
     </form:form>
     <cmr:row topPad="10">
-      <div style="width: 100%">
-        <canvas id="canvas" style="height:20px"></canvas>
-      </div>
+      &nbsp;
     </cmr:row>
+    <div id="charts-cont">
+    </div>
     <iframe id="exportFrame" name="exportFrame" style="display:none">
   </cmr:section>
 
