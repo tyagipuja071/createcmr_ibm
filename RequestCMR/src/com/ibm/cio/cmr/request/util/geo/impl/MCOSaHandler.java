@@ -1128,7 +1128,7 @@ public class MCOSaHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !StringUtils.isNumeric(zs01Phone)) {
+            if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !zs01Phone.matches("\\d+.\\d*")) {
               LOG.trace("Phone Number should contain only digits.");
               error.addError(row.getRowNum(), "Phone #", "Phone Number should contain only digits.");
               validations.add(error);
