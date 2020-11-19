@@ -440,10 +440,10 @@ public class DnBUtil {
    * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
    * comparison of the address data against the DnB record and determines if
    * they match
-   *
-   * @param handler
+   * 
+   * @param country
+   * @param addr
    * @param admin
-   * @param addresses
    * @param dnbRecord
    * @return
    */
@@ -455,19 +455,48 @@ public class DnBUtil {
    * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
    * comparison of the address data against the DnB record and determines if
    * they match
-   *
-   * @param handler
+   * 
+   * @param country
+   * @param addr
    * @param admin
-   * @param addresses
    * @param dnbRecord
    * @param nameToUse
+   * @param useTradestyleName
    * @return
    */
   public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse,
       boolean useTradestyleName) {
+    return closelyMatchesDnb(country, addr, admin, dnbRecord, nameToUse, useTradestyleName, false);
+  }
+
+  /**
+   * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
+   * comparison of the address data against the DnB record and determines if
+   * they match
+   * 
+   * @param country
+   * @param addr
+   * @param admin
+   * @param dnbRecord
+   * @param nameToUse
+   * @param useTradestyleName
+   * @param allowLongNameAddress
+   * @return
+   */
+  public static boolean closelyMatchesDnb(String country, Addr addr, Admin admin, DnBMatchingResponse dnbRecord, String nameToUse,
+      boolean useTradestyleName, boolean allowLongNameAddress) {
     GEOHandler handler = RequestUtils.getGEOHandler(country);
+    int maxLength = 60;
+    if (handler != null) {
+      maxLength = handler.getName1Length() + handler.getName2Length();
+    }
+
+    // Name/TradestyleName close matching - BEGIN
+
     List<String> dnbNames = new ArrayList<String>();
-    Boolean nameMatch = false;
+    boolean nameMatch = false;
+    boolean longNameMatch = false;
+
     if (useTradestyleName && !dnbRecord.getTradeStyleNames().isEmpty()) {
       dnbNames.addAll(dnbRecord.getTradeStyleNames());
     } else {
@@ -517,11 +546,25 @@ public class DnBUtil {
           nameMatch = true;
           break;
         }
+
+        try {
+          if (!nameMatch && allowLongNameAddress && !longNameMatch && StringUtils.isNotBlank(compareName)
+              && compareName.getBytes("UTF-8").length >= maxLength
+              && StringUtils.startsWith(dnbName.replaceAll("\\s", ""), compareName.replaceAll("\\s", ""))) {
+            LOG.debug("Name Match failed for - " + compareName + ", but long name match passed.");
+            longNameMatch = true;
+          }
+        } catch (Exception e) {
+          LOG.error("Unable to get bytelength of compareName", e);
+        }
       }
     }
-    if (!nameMatch) {
+    if (!nameMatch && !longNameMatch) {
       return false;
     }
+    // Name/TradestyleName close matching - END
+
+    // Address close matching - BEGIN
     String address = addr.getAddrTxt() != null ? addr.getAddrTxt() : "";
     address += StringUtils.isNotBlank(addr.getAddrTxt2()) ? " " + addr.getAddrTxt2() : "";
     address = address.trim();
@@ -531,9 +574,11 @@ public class DnBUtil {
     dnbAddress = dnbAddress.trim();
 
     if (StringUtils.isNotBlank(address) && StringUtils.isNotBlank(dnbAddress)
-        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8) {
+        && StringUtils.getLevenshteinDistance(address.toUpperCase(), dnbAddress.toUpperCase()) > 8
+        && !(allowLongNameAddress && dnbAddress.replaceAll("\\s", "").contains(address.replaceAll("\\s", "")))) {
       return false;
     }
+
     if (StringUtils.isNotBlank(addr.getPostCd()) && StringUtils.isNotBlank(dnbRecord.getDnbPostalCode())) {
       String currentPostalCode = addr.getPostCd();
       String dnbPostalCode = dnbRecord.getDnbPostalCode();
@@ -554,18 +599,20 @@ public class DnBUtil {
       return false;
     }
 
+    // Address close matching - END
+
     return true;
+
   }
 
   /**
    * Does a {@link StringUtils#getLevenshteinDistance(String, String)}
    * comparison of the address data against the DnB record and determines if
    * they match
-   *
+   * 
+   * @param country
    * @param addr
-   * @param handler
    * @param admin
-   * @param addresses
    * @param dnbRecord
    * @return
    */
