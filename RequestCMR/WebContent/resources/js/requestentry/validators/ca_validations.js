@@ -153,7 +153,6 @@ function canRemoveAddress(value, rowIndex, grid) {
  * addAfterConfig calls to
  */
 function afterConfigForCA() {
-
   if (role.toUpperCase() == 'REQUESTER' || role.toUpperCase() == 'VIEWER') {
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('abbrevNm');
@@ -166,6 +165,7 @@ function afterConfigForCA() {
 }
 
 var _inacCodeHandler = null;
+var _custSubGrpHandler = null;
 function addFieldHandlers() {
 
   if (_inacCodeHandler == null) {
@@ -182,6 +182,19 @@ function addFieldHandlers() {
       } else {
         FilteringDropdown['inacType'] = '';
         FormManager.setValue('inacType', '');
+      }
+    });
+  }
+
+  if (_custSubGrpHandler == null) {
+    _custSubGrpHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
+      if (FormManager.getActualValue('reqType') == 'U') {
+        return;
+      }
+
+      var custSubGrp = FormManager.getActualValue('custSubGrp');
+      if (custSubGrp == 'OEM') {
+        FormManager.enable('abbrevNm');
       }
     });
   }
