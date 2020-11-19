@@ -109,6 +109,9 @@ public abstract class USBPHandler {
   public static final String SUB_TYPE_LEASE_LPMA = "LPMA";
   public static final String SUB_TYPE_LEASE_SVR_CONT = "SVR CONT";
 
+  public static final List<String> DEPARTMENT_IDENTIFIERS = Arrays.asList("E-HOST", "EHOST", "DEMO DEVELOPMENT", "DEMO DEV", "DEVELOPMENT",
+      "ICC LEASE DEVELOPMENT/DEV", "IDL LEASE DEVELOPMENT/DEV", "POOL");
+
   private boolean waiting;
 
   public static USBPHandler getBPHandler(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
@@ -243,9 +246,10 @@ public abstract class USBPHandler {
       StringBuilder details, OverrideOutput overrides, boolean hasExistingCmr) throws Exception {
     List<DnBMatchingResponse> dnbMatches = USUtil.getMatchesForBPEndUser(handler, requestData, engineData);
     if (dnbMatches.isEmpty()) {
-      LOG.debug("No D&B matches found for the End User " + addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : ""));
+      LOG.debug("No D&B matches found for the End User " + addr.getDivn()
+          + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : ""));
       String msg = "No high quality D&B matches for the End User " + addr.getDivn()
-          + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "");
+          + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : "");
       details.append(msg + "\n");
       if (hasExistingCmr) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADMN", "COMP_VERIFIED_INDC", requestData.getAdmin().getCompVerifiedIndc(),
@@ -258,10 +262,11 @@ public abstract class USBPHandler {
       return null;
     } else {
       DnBMatchingResponse dnbMatch = dnbMatches.get(0);
-      LOG.debug("D&B match found for " + addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "") + " with DUNS "
+      LOG.debug("D&B match found for " + addr.getDivn()
+          + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : "") + " with DUNS "
           + dnbMatch.getDunsNo());
-      details.append("D&B match/es found for the End User " + addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "")
-          + ". Highest Match:\n");
+      details.append("D&B match/es found for the End User " + addr.getDivn()
+          + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : "") + ". Highest Match:\n");
       details.append("\n");
       details.append(dnbMatch.getDnbName() + "\n");
       details.append(dnbMatch.getDnbStreetLine1() + "\n");
@@ -565,8 +570,7 @@ public abstract class USBPHandler {
     } else {
       LOG.debug("Checking IBM direct CMR for " + addr.getDivn());
 
-      String customerName = addr.getDivn() + ((!StringUtils.isBlank(addr.getDept()) && !addr.getDept().toUpperCase().contains("POOL")
-          && !addr.getDept().toUpperCase().contains("EHOST") && !addr.getDept().toUpperCase().contains("E-HOST")) ? " " + addr.getDept() : "");
+      String customerName = addr.getDivn() + ((!StringUtils.isBlank(addr.getDept()) && useDeptForMatching(requestData)) ? " " + addr.getDept() : "");
       customerName = customerName.toUpperCase();
       if (customerName.contains("C/O")) {
         customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
@@ -1144,8 +1148,8 @@ public abstract class USBPHandler {
     Admin childAdmin = childReqData.getAdmin();
     childAdmin.setReqStatus(AutomationConst.STATUS_AUTOMATED_PROCESSING);
     childAdmin.setSourceSystId("CreateCMR");
-    String customerName = bpAddr.getDivn() + ((!StringUtils.isBlank(bpAddr.getDept()) && !bpAddr.getDept().toUpperCase().contains("POOL")
-        && !bpAddr.getDept().toUpperCase().contains("E-HOST")) ? " " + bpAddr.getDept() : "");
+    String customerName = bpAddr.getDivn()
+        + ((!StringUtils.isBlank(bpAddr.getDept()) && useDeptForMatching(requestData)) ? " " + bpAddr.getDept() : "");
     customerName = customerName.toUpperCase();
     if (customerName.contains("C/O")) {
       customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
@@ -1320,6 +1324,21 @@ public abstract class USBPHandler {
     name = name.replaceAll("[^A-Za-z0-9&\\-/]", " ");
     name = name.replaceAll("  ", " ").toUpperCase();
     return name;
+  }
+
+  public static boolean useDeptForMatching(RequestData requestData) {
+    Addr addr = requestData.getAddress("ZS01");
+    if (addr != null && StringUtils.isNotBlank(addr.getDept())) {
+      String dept = addr.getDept().toUpperCase();
+
+      for (String identifier : DEPARTMENT_IDENTIFIERS) {
+        if (dept.contains(identifier)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
 }
