@@ -92,7 +92,8 @@ public class USBPEhostHandler extends USBPHandler {
     String mainCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
     String endUserNm = (StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : "")
         + (StringUtils.isNotBlank(zs01.getDept()) ? " " + zs01.getDept() : "");
-    if (data.getEnterprise().equals(data.getAffiliate()) && mainCustNm.equals(endUserNm)) {
+    if (data.getEnterprise().equals(data.getAffiliate())
+        && AutomationUtil.getCleanString(mainCustNm).equals(AutomationUtil.getCleanString(endUserNm))) {
       this.cmrType = T1;
       details.append("Processing BP E-host request for Scenario #1\n");
     } else {

@@ -108,7 +108,6 @@ public class USBPDevelopHandler extends USBPHandler {
           DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, false);
           if (dnbMatch != null) {
             LOG.debug("DnB match exists hence creating Pool CMR through child request...");
-            // create a new pool cmr through child request
             childReqId = createChildRequest(entityManager, requestData, engineData);
             {
               String childErrorMsg = "- Pool request creation cannot be done, errors were encountered -";
@@ -121,6 +120,7 @@ public class USBPDevelopHandler extends USBPHandler {
                 LOG.debug(childErrorMsg);
                 return false;
               } else {
+                LOG.debug("Child is being created with child requestID -> " + childReqId);
                 requestData.getData().setRestrictTo("BPQS");
                 requestData.getData().setBpAcctTyp("P");
                 String childDetails = completeChildRequestDataAndAddress(entityManager, requestData, engineData, childReqId, dnbMatch);
@@ -143,7 +143,7 @@ public class USBPDevelopHandler extends USBPHandler {
                   output.setDetails(details.toString());
                   output.setResults("Waiting on Child Request...");
                   output.setOnError(false);
-                  return true;
+                  return false;
                 }
 
               }
@@ -203,7 +203,7 @@ public class USBPDevelopHandler extends USBPHandler {
                   output.setDetails(details.toString());
                   output.setResults("Waiting on Child Request...");
                   output.setOnError(false);
-                  return true;
+                  return false;
                 }
 
               }
@@ -246,7 +246,7 @@ public class USBPDevelopHandler extends USBPHandler {
                     output.setDetails(details.toString());
                     output.setResults("Waiting on Child Request...");
                     output.setOnError(false);
-                    return true;
+                    return false;
                   }
 
                 }
@@ -261,7 +261,7 @@ public class USBPDevelopHandler extends USBPHandler {
           }
         }
       }
-      return false;
+      return true;
     }
   }
 

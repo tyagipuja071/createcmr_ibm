@@ -104,10 +104,9 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
 
       bpHandler.doFinalValidations(engineData, requestData, details, overrides, output, ibmCmr);
       output.setResults("Successful Execution.");
-    } else if (!this.waiting) {
-      output.setResults("Execution Failed.");
+    } else if (this.waiting) {
+      output.setResults("Waiting for Child request completion.");
     }
-
     output.setProcessOutput(overrides);
     output.setDetails(details.toString());
     return output;

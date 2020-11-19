@@ -565,7 +565,8 @@ public abstract class USBPHandler {
     } else {
       LOG.debug("Checking IBM direct CMR for " + addr.getDivn());
 
-      String customerName = addr.getDivn() + (!StringUtils.isBlank(addr.getDept()) ? " " + addr.getDept() : "");
+      String customerName = addr.getDivn() + ((!StringUtils.isBlank(addr.getDept()) && !addr.getDept().toUpperCase().contains("POOL")
+          && !addr.getDept().toUpperCase().contains("EHOST") && !addr.getDept().toUpperCase().contains("E-HOST")) ? " " + addr.getDept() : "");
       customerName = customerName.toUpperCase();
       if (customerName.contains("C/O")) {
         customerName = customerName.substring(0, customerName.lastIndexOf("C/O")).trim();
