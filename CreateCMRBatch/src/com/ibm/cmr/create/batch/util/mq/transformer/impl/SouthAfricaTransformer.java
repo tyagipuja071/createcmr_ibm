@@ -713,6 +713,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     legacyAddr.setPoBox(poBox);
+    legacyAddr.setStreetNo("");
     line5 = streetContPoBox;
 
     String cityPostalCode = massUpdtAddr.getCity1();
