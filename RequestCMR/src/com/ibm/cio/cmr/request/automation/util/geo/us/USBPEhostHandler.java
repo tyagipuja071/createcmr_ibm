@@ -90,8 +90,7 @@ public class USBPEhostHandler extends USBPHandler {
     long childReqId = admin.getChildReqId();
     Addr zs01 = requestData.getAddress("ZS01");
     String mainCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
-    String endUserNm = (StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : "")
-        + (StringUtils.isNotBlank(zs01.getDept()) ? " " + zs01.getDept() : "");
+    String endUserNm = (StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : "");
     if (data.getEnterprise().equals(data.getAffiliate())
         && AutomationUtil.getCleanString(mainCustNm).equals(AutomationUtil.getCleanString(endUserNm))) {
       this.cmrType = T1;
