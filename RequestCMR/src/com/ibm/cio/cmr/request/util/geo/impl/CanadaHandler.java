@@ -327,7 +327,7 @@ public class CanadaHandler extends GEOHandler {
     }
 
     // set location number based on state/prov
-    if ("CA".equals(mainAddr.getLandCntry())) {
+    if ("CA".equals(mainAddr.getLandCntry()) && !("USA".equals(data.getCustSubGrp()) || "CND".equals(data.getCustSubGrp()))) {
       if ("AB".equals(mainAddr.getStateProv())) {
         data.setLocationNumber("01999");
       } else if ("BC".equals(mainAddr.getStateProv())) {
@@ -355,9 +355,9 @@ public class CanadaHandler extends GEOHandler {
       } else if ("NU".equals(mainAddr.getStateProv())) {
         data.setLocationNumber("13999");
       }
-    } else if (caribNorthDistCntries.contains(mainAddr.getStateProv())) {
+    } else if (caribNorthDistCntries.contains(mainAddr.getLandCntry())) {
       data.setLocationNumber("99000");
-    } else {
+    } else if ("USA".equals(data.getCustSubGrp())) {
       data.setLocationNumber("99999");
     }
 
@@ -372,7 +372,11 @@ public class CanadaHandler extends GEOHandler {
     // set abbreviated name
     String name = admin.getMainCustNm1();
     if (name != null) {
-      data.setAbbrevNm(name.length() > 20 ? name.substring(0, 20).toUpperCase() : name);
+      if ("OEM".equalsIgnoreCase(data.getCustSubGrp())) {
+        data.setAbbrevNm(name.length() > 16 ? name.substring(0, 16).toUpperCase() + "/SWG" : name + "/SWG");
+      } else {
+        data.setAbbrevNm(name.length() > 20 ? name.substring(0, 20).toUpperCase() : name);
+      }
     }
 
     entityManager.merge(data);
