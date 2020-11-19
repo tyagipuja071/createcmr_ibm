@@ -91,6 +91,7 @@ public class USLeasingHandler extends USBPHandler {
         invoiceTo.setCity1("Smyrna");
         invoiceTo.setStateProv("GA");
         invoiceTo.setPostCd("30082-4859");
+        entityManager.persist(invoiceTo);
       }
     }
   }
