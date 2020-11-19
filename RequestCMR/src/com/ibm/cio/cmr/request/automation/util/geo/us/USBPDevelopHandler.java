@@ -265,7 +265,7 @@ public class USBPDevelopHandler extends USBPHandler {
         LOG.debug("Overriding details for Pool CMR.");
 
         details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrEnterpriseNumber());
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
         details.append(" - Tax Class / Code 1: " + "J000" + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J000");
@@ -319,7 +319,7 @@ public class USBPDevelopHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
 
       details.append(" - Business Partner Name: " + "MIR" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), "MIR");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
 
       details.append(" - PCC A/R Dept: " + "G8M" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
@@ -328,10 +328,6 @@ public class USBPDevelopHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
       createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
-    } else {
-      details.append("No child request created.");
-      engineData.addNegativeCheckStatus("noChildRequest", "Overrides skipped as child request could not be created.");
-      LOG.debug("No child request created.");
     }
 
     String department = StringUtils.isNotBlank(zs01.getDept()) ? zs01.getDept().toUpperCase() : "";
