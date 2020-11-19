@@ -60,7 +60,7 @@
       <p>
         <label for="taxCd2"> 
           <cmr:fieldLabel fieldId="VADNumber" />: 
-          <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd1}" />
+          <cmr:delta text="${rdcdata.taxCd2}" oldValue="${reqentry.taxCd2}" />
         </label>
         <cmr:field path="taxCd2" id="taxCd2" fieldId="VADNumber" tabId="MAIN_CUST_TAB" />
       </p>
@@ -111,9 +111,7 @@
       <p>
         <label for="invoiceDistCd"> 
           <cmr:fieldLabel fieldId="DistMktgBranch" />: 
-          <%-- uncomment after DM changes to RDC_DATA 
           <cmr:delta text="${rdcdata.mtkgArDept}" oldValue="${reqentry.invoiceDistCd}" />
-          --%>
         </label>
         <cmr:field path="invoiceDistCd" id="invoiceDistCd" fieldId="DistMktgBranch" tabId="MAIN_CUST_TAB" />
       </p>
@@ -122,9 +120,7 @@
       <p>
         <label for="adminDeptCd"> 
           <cmr:fieldLabel fieldId="MarketingARDept" />: 
-          <%-- uncomment after DM changes or field remap 
           <cmr:delta text="${rdcdata.adminDeptCd}" oldValue="${reqentry.adminDeptCd}" />
-          --%>
         </label>
         <cmr:field path="adminDeptCd" id="adminDeptCd" fieldId="MarketingARDept" tabId="MAIN_CUST_TAB" />
       </p>
@@ -167,8 +163,10 @@
     <cmr:column span="2" containerForField="LocationCode">
       <p>
         <label for="locationNumber"> 
-          <cmr:fieldLabel fieldId="LocationCode" />: 
+          <cmr:fieldLabel fieldId="LocationCode" />:
+          <%-- uncomment after DM changes or remap field 
           <cmr:delta text="${rdcdata.locationNumber}" oldValue="${reqentry.locationNumber}" />
+          --%>
         </label>
         <cmr:field path="locationNumber" id="locationNumber" fieldId="LocationCode" tabId="MAIN_CUST_TAB" />
       </p>
@@ -176,10 +174,8 @@
     <cmr:column span="2" containerForField="SizeCode">
       <p>
         <label for="orgNo"> 
-          <cmr:fieldLabel fieldId="SizeCode" />: 
-          <%-- uncomment after DM changes or field remap 
+          <cmr:fieldLabel fieldId="SizeCode" />:
           <cmr:delta text="${rdcdata.orgNo}" oldValue="${reqentry.orgNo}" />
-          --%>
         </label>
         <cmr:field path="orgNo" id="orgNo" fieldId="SizeCode" tabId="MAIN_CUST_TAB" />
       </p>
@@ -187,17 +183,14 @@
     <cmr:column span="2" containerForField="InvoiceSplitCd">
       <p>
         <label for="cusInvoiceCopies"> 
-          <cmr:fieldLabel fieldId="InvoiceSplitCd" />: 
-          <%-- uncomment after DM changes or field remap 
-          <cmr:delta text="${rdcdata.invoiceSplitCd}" oldValue="${reqentry.invoiceSplitCd}" />
+          <cmr:fieldLabel fieldId="InvoiceSplitCd" />:
+          <%-- uncomment after DM changes or remap field 
+          <cmr:delta text="${rdcdata.cusInvoiceCopies}" oldValue="${reqentry.cusInvoiceCopies}" />
           --%>
         </label>
         <cmr:field path="cusInvoiceCopies" id="cusInvoiceCopies" fieldId="InvoiceSplitCd" tabId="MAIN_CUST_TAB" />
       </p>
     </cmr:column>
   </cmr:row>
-
-
-
   
 </cmr:view>
