@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.CmrtAddr;
@@ -30,8 +31,11 @@ import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.ImportCMRModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
+import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.JpaManager;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.legacy.LegacyCommonUtil;
 
@@ -397,8 +401,29 @@ public class MCOSaHandler extends MCOHandler {
         data.setCreditCd("");
         data.setCommercialFinanced("");
       }
+
+      data.setIbmDeptCostCenter(getInternalDepartment(mainRecord.getCmrNum()));
+      data.setAdminDeptLine(data.getIbmDeptCostCenter());
     }
 
+  }
+
+  private String getInternalDepartment(String cmrNo) throws Exception {
+    String department = "";
+    List<String> results = new ArrayList<String>();
+
+    EntityManager entityManager = JpaManager.getEntityManager();
+    String mandt = SystemConfiguration.getValue("MANDT");
+    String sql = ExternalizedQuery.getSql("GET.DEPT.KNA1.BYCMR");
+    sql = StringUtils.replace(sql, ":ZZKV_CUSNO", "'" + cmrNo + "'");
+    sql = StringUtils.replace(sql, ":MANDT", "'" + mandt + "'");
+    sql = StringUtils.replace(sql, ":KATR6", "'" + "864" + "'");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    results = query.getResults(String.class);
+    if (results != null && results.size() > 0) {
+      department = results.get(0);
+    }
+    return department;
   }
 
   @Override
@@ -1020,9 +1045,7 @@ public class MCOSaHandler extends MCOHandler {
 
             boolean isDummyUpdate = true;
 
-            List<String> checkList = null;
             List<String> checkListSubRegion = null;
-            long count = 0;
             long countSubRegion = 0;
             if (row.getRowNum() == 2001) {
               continue;
@@ -1084,9 +1107,6 @@ public class MCOSaHandler extends MCOHandler {
 
             }
 
-            checkList = Arrays.asList(nameCont, streetCont, poBox);
-            count = checkList.stream().filter(field -> !field.isEmpty()).count();
-
             checkListSubRegion = Arrays.asList(nameCont, streetCont);
             countSubRegion = checkListSubRegion.stream().filter(field -> !field.isEmpty()).count();
 
@@ -1108,7 +1128,7 @@ public class MCOSaHandler extends MCOHandler {
               validations.add(error);
             }
 
-            if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !StringUtils.isNumeric(zs01Phone)) {
+            if (!StringUtils.isBlank(zs01Phone) && !zs01Phone.contains("@") && !zs01Phone.matches("\\d+.\\d*")) {
               LOG.trace("Phone Number should contain only digits.");
               error.addError(row.getRowNum(), "Phone #", "Phone Number should contain only digits.");
               validations.add(error);
@@ -1142,11 +1162,10 @@ public class MCOSaHandler extends MCOHandler {
             if (!isDummyUpdate) {
 
               if ("Mailing Address".equalsIgnoreCase(sheet.getSheetName()) || "Billing Address".equalsIgnoreCase(sheet.getSheetName())) {
-                if (count > 1 && !("ZA").equals(landCountry)) {
-                  LOG.trace("Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time.");
+                if (((!nameCont.isEmpty() && !streetCont.isEmpty()) || (!nameCont.isEmpty() && !poBox.isEmpty())) && !("ZA").equals(landCountry)) {
+                  LOG.trace("Out of Name Con't and Street Con't/PO BOX only 1 can be filled at the same time.");
                   error.addError(row.getRowNum(), "Name Con't, Street Con't, PO BOX",
-                      "Out of Name Con't, Street Con't and PO BOX only 1 can be filled at the same time. ");
-                  count = 0;
+                      "Out of Name Con't and Street Con't/PO BOX only 1 can be filled at the same time. ");
                 }
               }
 

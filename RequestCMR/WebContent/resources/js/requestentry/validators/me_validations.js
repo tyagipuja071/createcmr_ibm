@@ -2893,6 +2893,45 @@ function lenValidator(len, cmrcntry) {
   })(), null, 'frmCMR_addressModal');
 }
 
+function postCdFormatValidator() {
+  FormManager.addFormValidator((function() {
+    return {
+      validate : function() {
+        var postCd = FormManager.getActualValue('postCd');
+        var landed = FormManager.getActualValue('landCntry');
+        if (postCd != undefined && postCd != null && postCd != '') {
+          switch (landed) {
+          case 'EG':
+            return postCdLengthDigitValidation(5, postCd);
+          case 'JO':
+            return postCdLengthDigitValidation(5, postCd);
+          case 'LB':
+            return postCdLengthDigitValidation(6, postCd);
+          case 'MA':
+            return postCdLengthDigitValidation(5, postCd);
+          case 'OM':
+            return postCdLengthDigitValidation(3, postCd);
+          case 'PK':
+            return postCdLengthDigitValidation(5, postCd);
+          case 'SA':
+            return postCdLengthDigitValidation(5, postCd);
+          case 'TN':
+            return postCdLengthDigitValidation(4, postCd);
+          }
+        }
+        return new ValidationResult(null, true);
+      }
+    };
+  })(), null, 'frmCMR_addressModal');
+}
+
+function postCdLengthDigitValidation(length, value) {
+  if (value.length != length || !value.match("^[0-9]+$")) {
+    return new ValidationResult(FormManager.getField('postCd'), false, 'Postal Code should be exactly ' + length + ' digits long.');
+  }
+  return new ValidationResult(null, true);
+}
+
 function resetVatExempt() {
   var val = FormManager.getActualValue('vat');
   var custSubType = FormManager.getActualValue('custSubGrp');
@@ -3269,6 +3308,10 @@ function cemeaCustomVATMandatory() {
   var listVatMandatoryForLocal = [ '620', '677', '680', '865', '808', '832' ];
   var cntry = FormManager.getActualValue('cmrIssuingCntry');
   var custSubType = FormManager.getActualValue('custSubGrp');
+  if (cntry == '642' && FormManager.getActualValue('custGrp').includes('LOC')) {
+    FormManager.resetValidations('vat');
+    return;
+  }
   if (listVatMandatoryForLocal.indexOf(cntry) > -1 && custSubType != undefined && custSubType != null && custSubType != '') {
     var scenario = FormManager.getActualValue('custGrp');
     // CMR-6020 Local or GBM SBM Local
@@ -4203,6 +4246,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addAddressFieldValidators, GEOHandler.CEMEA, null, true);
   GEOHandler.registerValidator(addCrossBorderValidatorForCEMEA, [ '707', '762', '808', '620', '767', '805', '823', '677', '680', '832' ], null, true);
   GEOHandler.registerValidator(addGaddrValidatorForCEE, GEOHandler.CEE, null, true);
+  GEOHandler.registerValidator(postCdFormatValidator, GEOHandler.ME, null, true);
   // GEOHandler.registerValidator(postCdLenChecks, GEOHandler.CEMEA, null,
   // true);
   GEOHandler.registerValidator(requireVATForCrossBorderAT, [ SysLoc.AUSTRIA ], null, true);
