@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckRequest;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
@@ -91,8 +92,8 @@ public class USBPEhostHandler extends USBPHandler {
     Addr zs01 = requestData.getAddress("ZS01");
     String mainCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
     String endUserNm = (StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : "");
-    if (data.getEnterprise().equals(data.getAffiliate())
-        && AutomationUtil.getCleanString(mainCustNm).equals(AutomationUtil.getCleanString(endUserNm))) {
+    if ((StringUtils.isNotBlank(data.getEnterprise()) && data.getEnterprise().equals(data.getAffiliate()))
+        || (StringUtils.isBlank(data.getAffiliate()) && AutomationUtil.getCleanString(mainCustNm).equals(AutomationUtil.getCleanString(endUserNm)))) {
       this.cmrType = T1;
       details.append("Processing BP E-host request for Scenario #1\n");
     } else {
@@ -352,32 +353,33 @@ public class USBPEhostHandler extends USBPHandler {
       LOG.debug(" - Duplicate: (Restrict To: " + record.getUsRestrictTo() + ", Grade: " + record.getMatchGrade() + ")" + record.getCompany() + " - "
           + record.getCmrNo() + " - " + record.getAddrType() + " - " + record.getStreetLine1());
       // IBM Direct CMRs have blank restrict to
-      if (T1.equals(this.cmrType)) {
-        if (RESTRICT_TO_END_USER.equals(record.getUsRestrictTo()) && "P".equals(record.getUsBpAccType())) {
-          LOG.debug("CMR No. " + record.getCmrNo() + " matches Pool CMR Criteria. Getting CMR Details..");
-          String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
-          FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 5, null, overrides);
-          if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
-            return result.getItems().get(0);
-          }
-        } else {
-          LOG.debug("CMR No. " + record.getCmrNo() + " does not meet the Pool CMR criteria");
-        }
-      } else if (T2.equals(this.cmrType)) {
-        if (RESTRICT_TO_END_USER.equals(record.getUsRestrictTo()) && "TT2".equals(record.getUsCsoSite())) {
-          LOG.debug("CMR No. " + record.getCmrNo() + " matches T2 Pool CMR criteria. Getting CMR Details..");
-          String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
-          FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 5, null, overrides);
-          if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
-            return result.getItems().get(0);
-          }
-        } else {
-          LOG.debug("CMR No. " + record.getCmrNo() + " does not meet the T2 Pool CMR criteria");
-        }
+      LOG.debug("CMR No. " + record.getCmrNo() + " matches " + this.cmrType + " Pool CMR Criteria. Getting CMR Details..");
+      String overrides = "addressType=ZS01&cmrOwner=IBM&showCmrType=R&customerNumber=" + record.getCmrNo();
+      FindCMRResultModel result = CompanyFinder.getCMRDetails(SystemLocation.UNITED_STATES, record.getCmrNo(), 5, null, overrides);
+      if (result != null && result.getItems() != null && !result.getItems().isEmpty()) {
+        return result.getItems().get(0);
       }
     }
     return null;
 
+  }
+
+  @Override
+  protected void tweakFindCMRRequest(EntityManager entityManager, GEOHandler handler, RequestData requestData, DuplicateCMRCheckRequest request) {
+    if (T1.equals(this.cmrType)) {
+      LOG.debug("adding scenario specific request params >>>> ");
+      LOG.debug("Restricted To: " + RESTRICT_TO_END_USER);
+      request.setUsRestrictTo(RESTRICT_TO_END_USER);
+      LOG.debug("BP Acc Type: P");
+      request.setUsBpAccType("P");
+    } else if (T2.equals(this.cmrType)) {
+      LOG.debug("adding scenario specific request params >>>> ");
+      LOG.debug("Restricted To: " + RESTRICT_TO_END_USER);
+      request.setUsRestrictTo(RESTRICT_TO_END_USER);
+      LOG.debug("CSO Site: TT2");
+      request.setUsCsoSite("TT2");
+    }
+    LOG.trace(request);
   }
 
   @Override
@@ -409,6 +411,8 @@ public class USBPEhostHandler extends USBPHandler {
     } else {
       childData.setCsoSite("TT2");
     }
+
+    childData.setEnterprise(requestData.getData().getAffiliate());
   }
 
 }

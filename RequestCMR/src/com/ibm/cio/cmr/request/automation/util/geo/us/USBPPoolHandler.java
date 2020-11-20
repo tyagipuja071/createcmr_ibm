@@ -61,15 +61,19 @@ public class USBPPoolHandler extends USBPHandler {
     Data data = requestData.getData();
 
     this.csoSite = data.getCsoSite();
+    USCeIdMapping mapping = null;
     if (StringUtils.isNotBlank(data.getEnterprise())) {
-      USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
-      if (mapping != null && mapping.isDistributor()) {
-        this.csoSite = "YBV";
-      } else if (isTier1BP(data)) {
-        this.csoSite = "DV4";
-      } else if (isTier2BP(data)) {
-        this.csoSite = "TT2";
-      }
+      mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+    } else if (StringUtils.isNotBlank(data.getPpsceid())) {
+      mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+    }
+
+    if (mapping != null && mapping.isDistributor()) {
+      this.csoSite = "YBV";
+    } else if (isTier1BP(data)) {
+      this.csoSite = "DV4";
+    } else if (isTier2BP(data)) {
+      this.csoSite = "TT2";
     }
 
     if (POOL_CSO_SITES.contains(this.csoSite)) {
