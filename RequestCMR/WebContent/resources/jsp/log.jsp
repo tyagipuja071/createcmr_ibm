@@ -53,7 +53,7 @@ ul {
       <th width="*">Changes</th>
     </tr>
     <tr>
-      <td>R5.0 b-R5300</td>
+      <td>R5.0 b-R5296</td>
       <td>November 21, 2020</td>
       <td>
         <ul>
