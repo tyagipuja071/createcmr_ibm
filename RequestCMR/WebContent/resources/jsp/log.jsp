@@ -53,6 +53,16 @@ ul {
       <th width="*">Changes</th>
     </tr>
     <tr>
+      <td>R5.0 b-R5296</td>
+      <td>November 21, 2020</td>
+      <td>
+        <ul>
+          <li>South Africa & African countries Legacy Consolidation</li>
+          <li>Internal CreateCMR Fixes & Enhancements</li>
+        </ul>
+      </td>
+    </tr> 
+    <tr>
       <td>R5.0 b-R5272</td>
       <td>November 07, 2020</td>
       <td>
