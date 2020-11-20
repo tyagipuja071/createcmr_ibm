@@ -69,6 +69,8 @@ public class AutomationStatsModel {
   @Column(name = "PROC_CENTER")
   private String procCenter;
 
+  private String cmt;
+
   public StatsPK getId() {
     return id;
   }
@@ -227,6 +229,14 @@ public class AutomationStatsModel {
 
   public void setReqStatus(String reqStatus) {
     this.reqStatus = reqStatus;
+  }
+
+  public String getCmt() {
+    return cmt;
+  }
+
+  public void setCmt(String cmt) {
+    this.cmt = cmt;
   }
 
 }
