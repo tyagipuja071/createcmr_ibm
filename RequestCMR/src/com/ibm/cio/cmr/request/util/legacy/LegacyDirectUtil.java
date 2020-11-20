@@ -1349,8 +1349,9 @@ public class LegacyDirectUtil {
 
     return isFisCodeUsed;
   }
+
   public static List<CmrtAddr> checkLDAddress(EntityManager entityManager, String cmrNo, String country) throws CmrException {
-    
+
     String sql = ExternalizedQuery.getSql("LEGACYD.GETADDR");
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("COUNTRY", country);
@@ -1362,8 +1363,8 @@ public class LegacyDirectUtil {
     }
     return addresses;
   }
-  
-   public static boolean checkFieldsUpdated(EntityManager entityManager, String cmrIssuingCntry, Admin admin, long reqId) throws Exception {
+
+  public static boolean checkFieldsUpdated(EntityManager entityManager, String cmrIssuingCntry, Admin admin, long reqId) throws Exception {
     RequestChangeContainer changes = new RequestChangeContainer(entityManager, cmrIssuingCntry, admin, reqId);
     if (changes != null && changes.hasDataChanges()) {
       for (UpdatedDataModel updatedDataModel : changes.getDataUpdates()) {
@@ -1389,5 +1390,35 @@ public class LegacyDirectUtil {
     }
     return false;
   }
-    
+
+  public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
+
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    boolean isDR = false;
+    String sql = ExternalizedQuery.getSql("DR.GET_SUPP_CNTRY_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setForReadOnly(true);
+    List<Integer> records = query.getResults(Integer.class);
+    Integer singleObject = null;
+
+    if (records != null && records.size() > 0) {
+      singleObject = records.get(0);
+      Integer val = singleObject != null ? singleObject : null;
+
+      if (val != null) {
+        isDR = true;
+      } else {
+        isDR = false;
+      }
+
+    } else {
+      isDR = false;
+    }
+
+    return isDR;
+  }
 }
