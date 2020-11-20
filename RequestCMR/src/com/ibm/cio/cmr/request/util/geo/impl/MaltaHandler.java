@@ -14,6 +14,9 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -47,6 +50,8 @@ public class MaltaHandler extends BaseSOFHandler {
   private static final Logger LOG = Logger.getLogger(MaltaHandler.class);
 
   public static Map<String, String> LANDED_CNTRY_MAP = new HashMap<String, String>();
+
+  protected static final String[] MT_MASS_UPDATE_SHEET_NAMES = { "Data", "Sold-To", "Bill-To", "Install-At", "Ship-To" };
 
   private static final String[] MT_SKIP_ON_SUMMARY_UPDATE_FIELDS = { "CustLang", "GeoLocationCode", "Affiliate", "Company", "CAP", "CMROwner",
       "CustClassCode", "LocalTax2", "Division", "POBoxCity", "POBoxPostalCode", "CustFAX", "TransportZone", "Office", "Floor", "Building", "County",
@@ -727,7 +732,7 @@ public class MaltaHandler extends BaseSOFHandler {
 
   @Override
   public boolean isNewMassUpdtTemplateSupported(String issuingCountry) {
-    return false;
+    return true;
   }
 
   @Override
@@ -822,6 +827,148 @@ public class MaltaHandler extends BaseSOFHandler {
   @Override
   public void validateMassUpdateTemplateDupFills(List<TemplateValidation> validations, XSSFWorkbook book, int maxRows, String country) {
     super.validateMassUpdateTemplateDupFills(validations, book, maxRows, country);
+    XSSFCell currCell = null;
+    for (String name : MT_MASS_UPDATE_SHEET_NAMES) {
+      XSSFSheet sheet = book.getSheet(name);
+      if (sheet != null) {
+        for (Row row : sheet) {
+          if (row.getRowNum() > 0 && row.getRowNum() < 2002) {
+
+            String cmrNo = ""; // 0
+
+            // Address Sheet
+            String seqNo = ""; // 1
+            String custName1 = ""; // 2
+            String name2 = ""; // 3
+            String name3 = ""; // 4
+            String name4 = ""; // 5
+            String street = ""; // 6
+            String city = "";// 7
+            String postalCode = ""; // 8
+            String poBox = ""; // 09
+            String landCntry = ""; // 10
+            String phone = "";// 11
+
+            // Data Sheet
+            String isic = ""; // 3
+            String classificationCd = ""; // 10
+            String inac = ""; // 7
+            String ordBlk = ""; // 11
+
+            if (row.getRowNum() == 2001) {
+              continue;
+            }
+
+            if (!"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              // iterate all the rows and check each column value
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(1);
+              seqNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(2);
+              custName1 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              name2 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(4);
+              name3 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(5);
+              name4 = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(6);
+              street = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              city = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(8);
+              postalCode = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(9);
+              poBox = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              landCntry = validateColValFromCell(currCell);
+
+              if ("Ship-To".equalsIgnoreCase(sheet.getSheetName())) {
+                currCell = (XSSFCell) row.getCell(11);
+                phone = validateColValFromCell(currCell);
+              }
+
+            } else if ("Data".equalsIgnoreCase(sheet.getSheetName())) {
+              currCell = (XSSFCell) row.getCell(0);
+              cmrNo = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(3);
+              isic = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(7);
+              inac = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(10);
+              classificationCd = validateColValFromCell(currCell);
+
+              currCell = (XSSFCell) row.getCell(11);
+              ordBlk = validateColValFromCell(currCell);
+            }
+
+            TemplateValidation error = new TemplateValidation(name);
+
+            if (!StringUtils.isBlank(inac) && inac.length() == 4 && !StringUtils.isNumeric(inac) && !"@@@@".equals(inac)
+                && !inac.matches("^[a-zA-Z][a-zA-Z][0-9][0-9]$")) {
+              LOG.trace("INAC should have all 4 digits or 2 letters and 2 digits in order.");
+              error.addError(row.getRowNum(), "INAC/NAC", "INAC should have all 4 digits or 2 letters and 2 digits in order.");
+              validations.add(error);
+            }
+
+            if (StringUtils.isEmpty(cmrNo)) {
+              LOG.trace("Note that CMR No. is mandatory. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "CMR No.", "Note that CMR No. is mandatory. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            if (!StringUtils.isBlank(cmrNo) && StringUtils.isBlank(seqNo) && !"Data".equalsIgnoreCase(sheet.getSheetName())) {
+              LOG.trace("Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Address Sequence No.",
+                  "Note that CMR No. and Sequence No. should be filled at same time. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            if (!StringUtils.isBlank(isic) && !StringUtils.isBlank(classificationCd)
+                && ((!"9500".equals(isic) && "60".equals(classificationCd)) || ("9500".equals(isic) && !"60".equals(classificationCd)))) {
+              LOG.trace(
+                  "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Classification Code",
+                  "Note that ISIC value 9500 can be entered only for CMR with Classification code 60. Please fix and upload the template again.");
+              validations.add(error);
+            }
+            if (!StringUtils.isBlank(ordBlk) && !("88".equals(ordBlk) || "94".equals(ordBlk) || "@".equals(ordBlk))) {
+              LOG.trace("Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
+              error.addError(row.getRowNum(), "Classification Code",
+                  "Note that value of Order block can only be 88 or 94 or @ or blank. Please fix and upload the template again.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(phone) && !phone.contains("@") && !StringUtils.isNumeric(phone)) {
+              LOG.trace("Phone Number should contain only digits.");
+              error.addError(row.getRowNum(), "Phone #", "Phone Number should contain only digits.");
+              validations.add(error);
+            }
+
+            if (!StringUtils.isBlank(city) && !StringUtils.isBlank(postalCode)) {
+              int count = city.length() + postalCode.length();
+              if (count > 28) {
+                LOG.trace("Total computed length of City and Postal Code should not exceed 28 characters.");
+                error.addError(row.getRowNum(), "City", "Total computed length of City and Postal Code should not exceed 28 characters.");
+                validations.add(error);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   @Override
