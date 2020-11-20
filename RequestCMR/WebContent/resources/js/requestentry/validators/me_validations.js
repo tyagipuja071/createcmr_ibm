@@ -2919,9 +2919,10 @@ function postCdFormatValidator() {
           case 'JO':
             return postCdLengthDigitValidation(5, postCd);
           case 'LB':
-            if (!postCd.match("^\d{4}[ ]\d{4}$")) {
+            if (!postCd.match("^[0-9]{4}[ ][0-9]{4}$")) {
               return new ValidationResult(FormManager.getField('postCd'), false, 'Postal Code should be NNNN NNNN.');
             }
+            break;
           case 'MA':
             return postCdLengthDigitValidation(5, postCd);
           case 'OM':
