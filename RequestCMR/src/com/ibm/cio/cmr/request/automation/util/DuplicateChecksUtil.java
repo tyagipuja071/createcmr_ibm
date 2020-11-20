@@ -98,18 +98,26 @@ public class DuplicateChecksUtil {
           request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
         }
       }
+      if (StringUtils.isNotBlank(addr.getDept()) && addr.getDept().toUpperCase().contains("POOL")) {
+        if ("TT2".equals(data.getCsoSite())) {
+          request.setUsCsoSite("TT2");
+        } else if ("P".equals(data.getBpAcctTyp())) {
+          request.setUsBpAccType("P");
+        }
+      }
+
       request.setUsRestrictTo(data.getRestrictTo());
       break;
     case SystemLocation.SPAIN:
-      if(SpainUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
+      if (SpainUtil.SCENARIO_INTERNAL.equals(data.getCustSubGrp())) {
         if ("ZI01".equals(addr.getId().getAddrType())) {
-                request.setCustClass("81");
-              }
+          request.setCustClass("81");
+        }
       }
-      if(SpainUtil.SCENARIO_INTERNAL_SO.equals(data.getCustSubGrp())) {
+      if (SpainUtil.SCENARIO_INTERNAL_SO.equals(data.getCustSubGrp())) {
         if ("ZI01".equals(addr.getId().getAddrType())) {
           request.setCustClass("85");
-              }
+        }
       }
       break;
     case SystemLocation.UNITED_KINGDOM:

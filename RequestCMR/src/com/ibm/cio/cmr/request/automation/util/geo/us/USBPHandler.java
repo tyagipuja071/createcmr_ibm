@@ -589,6 +589,8 @@ public abstract class USBPHandler {
       request.setPostalCode(addr.getPostCd());
       request.setAddrType("ZS01");
 
+      tweakFindCMRRequest(entityManager, handler, requestData, request);
+
       MatchingServiceClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("BATCH_SERVICES_URL"),
           MatchingServiceClient.class);
       client.setReadTimeout(1000 * 60 * 5);
@@ -650,6 +652,10 @@ public abstract class USBPHandler {
     }
     LOG.debug("No IBM Direct CMRs found.");
     return null;
+  }
+
+  protected void tweakFindCMRRequest(EntityManager entityManager, GEOHandler handler, RequestData requestData, DuplicateCMRCheckRequest request) {
+    // NOOP
   }
 
   /**
