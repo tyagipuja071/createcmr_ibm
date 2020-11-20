@@ -2321,6 +2321,19 @@ function addCmrNoValidatorForME() {
             var results = cmr.query('GET.CMR.ME', qParams);
             if (results.ret1 != null) {
               return new ValidationResult(null, false, 'The CMR Number already exists.');
+            } else {
+              results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (results && results.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
             }
           }
         }
@@ -2906,17 +2919,19 @@ function postCdFormatValidator() {
           case 'JO':
             return postCdLengthDigitValidation(5, postCd);
           case 'LB':
-            return postCdLengthDigitValidation(6, postCd);
+            if (!postCd.match("^\d{4}[ ]\d{4}$")) {
+              return new ValidationResult(FormManager.getField('postCd'), false, 'Postal Code should be NNNN NNNN.');
+            }
           case 'MA':
             return postCdLengthDigitValidation(5, postCd);
           case 'OM':
             return postCdLengthDigitValidation(3, postCd);
           case 'PK':
             return postCdLengthDigitValidation(5, postCd);
-          case 'SA':
-            return postCdLengthDigitValidation(5, postCd);
-          case 'TN':
-            return postCdLengthDigitValidation(4, postCd);
+            // case 'SA':
+            // return postCdLengthDigitValidation(5, postCd);
+            // case 'TN':
+            // return postCdLengthDigitValidation(4, postCd);
           }
         }
         return new ValidationResult(null, true);
