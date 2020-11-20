@@ -240,6 +240,7 @@ var CmrMetrics = (function() {
       var groupByProcCenter = FormManager.getActualValue('groupByProcCenter');
       var country = FormManager.getActualValue('country');
       var excludeUnsubmitted = FormManager.getActualValue('excludeUnsubmitted');
+      var reqType = FormManager.getActualValue('reqType');
       
       cmr.showProgress('Generating charts, please wait...');
 
@@ -253,9 +254,10 @@ var CmrMetrics = (function() {
           groupByProcCenter : groupByProcCenter,
           country : country,
           groupByGeo : groupByGeo,
-          excludeUnsubmitted : excludeUnsubmitted
+          excludeUnsubmitted : excludeUnsubmitted,
+          reqType : reqType
         },
-        timeout : 90000,
+        timeout : 180000,
         sync : false,
         load : function(data, ioargs) {
           console.log('success');

@@ -116,7 +116,7 @@ div#filterlabels table {
       </cmr:row>
       <cmr:row>
         <cmr:column span="6" >
-        <cmr:note text="Generates statistics per request including Request Number, CMR No., Status, Turn-around Times, and responsible person for each major process."></cmr:note>
+        <cmr:note text="Generates statistics for request automation.  Includes only requests which have been processed by automation at least once and only for countries that have full automation enabled."></cmr:note>
         </cmr:column>
       </cmr:row>
       <cmr:row>
@@ -198,6 +198,21 @@ div#filterlabels table {
             <label for="OEMInd" class=" cmr-radio-check-label">
                <span id="cmr-fld-lbl-OEMInd">Completed Requests Only</span>
                <cmr:info text="Generates statistics for requests that have be completed already." />
+            </label>            
+          </p>
+        </cmr:column>
+      </cmr:row>
+      <cmr:row >
+        <cmr:column span="1" width="150">
+          <p>
+          </p>
+        </cmr:column>
+        <cmr:column span="2" width="300">
+          <p>
+            <form:checkbox path="reqType" value="Y"/>
+            <label for="RequestType" class=" cmr-radio-check-label">
+               <span id="cmr-fld-lbl-OEMInd">Create Requests Only</span>
+               <cmr:info text="Generates statistics for create requests only." />
             </label>            
           </p>
         </cmr:column>

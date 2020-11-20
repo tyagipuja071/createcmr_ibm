@@ -98,12 +98,20 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
       sql += "and admin.REQ_STATUS = 'COM' ";
 
     }
+
+    if ("Y".equals(model.getReqType())) {
+      sql += "and admin.REQ_TYPE = 'C' ";
+
+    }
+
     String issuingCntry = model.getCountry();
     if (!StringUtils.isBlank(issuingCntry)) {
       sql += "and data.CMR_ISSUING_CNTRY = :COUNTRY ";
     }
 
-    sql += " order by admin.REQ_ID";
+    if (!"Y".equals(params.getParam("buildSummary"))) {
+      sql += " order by admin.REQ_ID";
+    }
     sql = StringUtils.replaceOnce(sql, ":FROM", model.getDateFrom());
     sql = StringUtils.replaceOnce(sql, ":TO", model.getDateTo());
 
@@ -146,6 +154,8 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
         String processCd = stat.getProcessCd();
         if ("S".equals(stat.getFailureIndc())) {
           processCd = "System Error";
+        } else if ("CHECKS".equals(processCd)) {
+          processCd = extractProcessCause(stat);
         }
         if (summary.getReviewMap().get(processCd) == null) {
           summary.getReviewMap().put(processCd, (long) 0);
@@ -156,6 +166,31 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     }
 
     return map;
+  }
+
+  private String extractProcessCause(AutomationStatsModel stat) {
+    String cmt = stat.getCmt();
+    if (StringUtils.isBlank(cmt)) {
+      return "Other Checks";
+    }
+    cmt = cmt.toUpperCase();
+    if (cmt.contains("SCENARIO")) {
+      return "Non-auto Scenario";
+    } else if (cmt.contains("BRANCH OFFICE CODES")) {
+      return "BO Codes";
+    } else if (cmt.contains("CITY AND/OR COUNTY")) {
+      return "City/County";
+    } else if (cmt.contains("BUYING GROUP ID UNDER COVERAGE")) {
+      return "BG/GBG Issue";
+    } else if (cmt.contains("D&B matches were chosen to be overridden".toUpperCase())) {
+      return "D&B Overrides";
+    } else if (cmt.contains("D&B".toUpperCase())) {
+      return "D&B - Others";
+    } else if (cmt.contains("UPDATED ELEMENTS CANNOT")) {
+      return "Update Checks";
+    }
+
+    return "Other Checks";
   }
 
   /**
@@ -354,9 +389,15 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
   private Object getValue(String columnName, AutomationStatsModel request) throws IllegalArgumentException, IllegalAccessException {
     Column col = null;
 
-    if ("TOUCHLESS".equals(columnName)) {
-      return "Y".equals(request.getFullAuto()) && !"Y".equals(request.getLegacy()) && !"Y".equals(request.getReview())
-          && !"Y".equals(request.getReject()) ? "Y" : "";
+    if ("ERROR_CHECKS".equals(columnName)) {
+      if (!"Y".equals(request.getReview())) {
+        return "";
+      }
+      if ("CHECKS".equals(request.getProcessCd())) {
+        return extractProcessCause(request);
+      } else {
+        return "";
+      }
     }
     if (columnName.equals("REQ_ID") && (request instanceof AutomationStatsModel)) {
       return request.getId().getReqId();
@@ -394,6 +435,7 @@ public class AutoStatsService extends BaseSimpleService<RequestStatsContainer> {
     config.add(new StatXLSConfig("Legacy Issue", "LEGACY", 16, "Indicates whether the processing encountered errors during legacy processing."));
     config.add(new StatXLSConfig("Review Required", "REVIEW", 16, "Indicates whether the request needed manual CMDE review."));
     config.add(new StatXLSConfig("Review Cause", "PROCESS_CD", 25, "Specifies the first automation element that caused automation to stop."));
+    config.add(new StatXLSConfig("Error Checks", "ERROR_CHECKS", 25, "Indicates the checks that caused the review"));
     config.add(new StatXLSConfig("Failure Type", "FAILURE_INDC", 16,
         "Specifies the automation element that caused automation to stop. S - System Error, P - Processing Error"));
     config.add(new StatXLSConfig("Rejected", "REJECT", 16, "Indicates whether the request was rejected by the automation engine."));
