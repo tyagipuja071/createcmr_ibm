@@ -1,5 +1,6 @@
 package com.ibm.cio.cmr.request.automation.util.geo.us;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -14,6 +15,7 @@ import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
+import com.ibm.cio.cmr.request.automation.util.CopyAttachmentUtil;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
@@ -343,6 +345,23 @@ public class USLeasingHandler extends USBPHandler {
       }
     }
     return true;
+  }
+
+  @Override
+  protected void modifyChildDataValues(EntityManager entityManager, RequestData requestData, RequestData childReqData, StringBuilder details) {
+    Admin admin = requestData.getAdmin();
+    if ("Y".equals(admin.getMatchOverrideIndc())) {
+      childReqData.getAdmin().setMatchOverrideIndc("Y");
+      try {
+        CopyAttachmentUtil.copyAttachmentsByType(entityManager, requestData, childReqData.getAdmin().getChildReqId(), "COMP");
+      } catch (CmrException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
