@@ -355,15 +355,16 @@ public class USBPDevelopHandler extends USBPHandler {
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
       AutomationResult<OverrideOutput> result, FindCMRRecordModel ibmCmr) {
     Data data = requestData.getData();
-    details.append("\n");
-    String affiliate = data.getAffiliate();
-    if (ibmCmr != null && !StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
-      affiliate = ibmCmr.getCmrAffiliate();
-    }
-    if (StringUtils.isBlank(affiliate)) {
-      details.append("\nAffiliate cannot be computed automatically.");
-      engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be computed automatically");
-    }
+    // details.append("\n");
+    // String affiliate = data.getAffiliate();
+    // if (ibmCmr != null && !StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+    // affiliate = ibmCmr.getCmrAffiliate();
+    // }
+    // if (StringUtils.isBlank(affiliate)) {
+    // details.append("\nAffiliate cannot be computed automatically.");
+    // engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be
+    // computed automatically");
+    // }
 
     USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
     if (mapping != null) {
@@ -443,6 +444,10 @@ public class USBPDevelopHandler extends USBPHandler {
       childData.setCsoSite("YBV");
     } else {
       childData.setCsoSite("TT2");
+    }
+
+    if (StringUtils.isNotBlank(childData.getPpsceid())) {
+      childData.setMemLvl("IM");
     }
 
     childData.setEnterprise(requestData.getData().getAffiliate());
