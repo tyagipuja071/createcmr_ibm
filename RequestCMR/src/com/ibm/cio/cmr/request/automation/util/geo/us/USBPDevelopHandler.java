@@ -349,6 +349,10 @@ public class USBPDevelopHandler extends USBPHandler {
       details.append(" - Marketing A/R Dept  : " + "DI2" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI2");
     }
+
+    details.append("Branch Office codes computed successfully.");
+    engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
+
   }
 
   @Override
