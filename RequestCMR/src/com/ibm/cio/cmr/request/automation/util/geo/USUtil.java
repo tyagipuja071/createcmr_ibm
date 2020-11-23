@@ -27,20 +27,24 @@ import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.out.ValidationOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.RequestChangeContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.us.USDetailsContainer;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.BaseModel;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedDataModel;
 import com.ibm.cio.cmr.request.model.window.UpdatedNameAddrModel;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.CmrClientService;
+import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.BluePagesHelper;
 import com.ibm.cio.cmr.request.util.ConfigUtil;
 import com.ibm.cio.cmr.request.util.JpaManager;
@@ -273,27 +277,66 @@ public class USUtil extends AutomationUtil {
       }
 
       if (SC_LEASE_IPMA.equals(scenarioSubType) || SC_LEASE_LPMA.equals(scenarioSubType)) {
-        Addr invoiceTo = requestData.getAddress("ZI01");
-        if (invoiceTo != null) {
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", invoiceTo.getAddrTxt(), "7100 Highlands Parkway");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", invoiceTo.getCity1(), "Smyrna");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", invoiceTo.getStateProv(), "GA");
-          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", invoiceTo.getPostCd(), "30082-4859");
+        Addr zi01 = requestData.getAddress("ZI01");
+
+        String divn = "";
+        String dept = "";
+        String address = "";
+        String address2 = "";
+        String city = "";
+        String state = "";
+        String postCd = "";
+        String landCntry = "";
+        divn = "IBM Credit LLC";
+        dept = SC_LEASE_IPMA.equals(scenarioSubType) ? "IPMA" : "LPMA";
+        address = "7100 Highlands Parkway";
+        city = "Smyrna";
+        state = "GA";
+        postCd = "30082-4859";
+        landCntry = "US";
+
+        if (zi01 == null) {
+
+          LOG.debug("Adding the main address..");
+          AddressService addrService = new AddressService();
+          AddressModel addrModel = new AddressModel();
+          addrModel.setReqId(data.getId().getReqId());
+          addrModel.setDivn(divn);
+          addrModel.setDept(dept);
+          addrModel.setLandCntry(landCntry);
+          addrModel.setAddrTxt(address);
+          addrModel.setAddrTxt2(address2);
+          addrModel.setCity1(city);
+          addrModel.setStateProv(state);
+          addrModel.setPostCd(postCd);
+          addrModel.setState(BaseModel.STATE_NEW);
+          addrModel.setAction("ADD_ADDRESS");
+
+          addrModel.setAddrType(CmrConstants.ADDR_TYPE.ZI01.toString());
+          addrModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
+          try {
+            AppUser user = new AppUser();
+            user.setIntranetId(requestData.getAdmin().getRequesterId());
+            user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+            DummyServletRequest dummyReq = new DummyServletRequest();
+            if (dummyReq.getSession() != null) {
+              LOG.trace("Session found for dummy req");
+              dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+            } else {
+              LOG.warn("Session not found for dummy req");
+            }
+            addrService.performTransaction(addrModel, entityManager, dummyReq);
+          } catch (Exception e) {
+            LOG.error("An error occurred while adding ZI01 address", e);
+          }
+          entityManager.flush();
         } else {
-          AddrPK addrPk = new AddrPK();
-          LOG.debug("Adding Invoice To Address to Request ID " + requestData.getAdmin().getId().getReqId());
-          addrPk.setReqId(requestData.getAdmin().getId().getReqId());
-          addrPk.setAddrType("ZI01");
-          addrPk.setAddrSeq("1");
-          invoiceTo = new Addr();
-          invoiceTo.setId(addrPk);
-          invoiceTo.setDivn("IBM Credit LLC");
-          invoiceTo.setDept(SC_LEASE_IPMA.equals(scenarioSubType) ? "IPMA" : "LPMA");
-          invoiceTo.setAddrTxt("7100 Highlands Parkway");
-          invoiceTo.setCity1("Smyrna");
-          invoiceTo.setStateProv("GA");
-          invoiceTo.setPostCd("30082-4859");
-          entityManager.persist(invoiceTo);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DEPT", zi01.getDept(), dept);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
         }
       }
 
