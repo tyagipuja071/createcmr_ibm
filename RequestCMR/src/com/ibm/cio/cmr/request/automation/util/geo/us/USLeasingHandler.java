@@ -81,18 +81,12 @@ public class USLeasingHandler extends USBPHandler {
       Addr zi01 = requestData.getAddress("ZI01");
 
       String divn = "";
-      String address = "";
+      String address = "7100 Highlands Parkway";
       String address2 = "";
-      String city = "";
-      String state = "";
-      String postCd = "";
-      String landCntry = "";
-
-      address = "7100 Highlands Parkway";
-      city = "Smyrna";
-      state = "GA";
-      postCd = "30082-4859";
-      landCntry = "US";
+      String city = "Smyrna";
+      String state = "GA";
+      String postCd = "30082-4859";
+      String landCntry = "US";
 
       if (zi01 == null) {
 
@@ -133,6 +127,7 @@ public class USLeasingHandler extends USBPHandler {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "CITY1", zi01.getCity1(), city);
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "STATE_PROV", zi01.getStateProv(), state);
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "POST_CD", zi01.getPostCd(), postCd);
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "LAND_CNTRY", zi01.getLandCntry(), landCntry);
       }
     }
   }
