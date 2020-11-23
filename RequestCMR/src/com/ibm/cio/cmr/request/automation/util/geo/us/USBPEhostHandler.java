@@ -84,8 +84,8 @@ public class USBPEhostHandler extends USBPHandler {
 
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, FindCMRRecordModel ibmCmr, RequestData childRequest,
-      GEOHandler handler, OverrideOutput overrides) throws Exception {
+      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
+      OverrideOutput overrides) throws Exception {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     long childReqId = admin.getChildReqId();
@@ -186,8 +186,8 @@ public class USBPEhostHandler extends USBPHandler {
   }
 
   @Override
-  public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmCmr, RequestData requestData,
-      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+  public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
     Data data = requestData.getData();
     // String custGrp = data.getCustGrp();
     Addr zs01 = requestData.getAddress("ZS01");
@@ -287,7 +287,7 @@ public class USBPEhostHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
     }
 
-    createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
+    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest);
 
     details.append(" - Dept/Attn: -------E-HOSTING-------\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-------E-HOSTING-------");
@@ -318,7 +318,7 @@ public class USBPEhostHandler extends USBPHandler {
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result, FindCMRRecordModel ibmCmr) {
+      AutomationResult<OverrideOutput> result) {
 
     // // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
     Data data = requestData.getData();
