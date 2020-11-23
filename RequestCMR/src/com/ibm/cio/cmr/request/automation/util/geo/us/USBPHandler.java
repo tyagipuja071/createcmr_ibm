@@ -113,6 +113,7 @@ public abstract class USBPHandler {
       "ICC LEASE DEVELOPMENT/DEV", "IDL LEASE DEVELOPMENT/DEV", "POOL");
 
   private boolean waiting;
+  protected FindCMRRecordModel ibmCmr;
 
   public static USBPHandler getBPHandler(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
     Data data = requestData.getData();
@@ -183,7 +184,6 @@ public abstract class USBPHandler {
    * @param output
    * @param details
    * @param childCompleted
-   * @param ibmCmr
    * @param childRequest
    * @param handler
    * @param overrides
@@ -191,21 +191,23 @@ public abstract class USBPHandler {
    * @throws Exception
    */
   public abstract boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, FindCMRRecordModel ibmCmr, RequestData childRequest,
-      GEOHandler handler, OverrideOutput overrides) throws Exception;
+      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
+      OverrideOutput overrides) throws Exception;
 
   /**
    * Copies the IBM codes from the CMRs and fills the BO codes with the given
    * rules
    * 
+   * @param entityManager
    * @param handler
    * @param requestData
-   * @param addr
    * @param engineData
    * @param details
+   * @param overrides
+   * @param childRequest
    */
-  public abstract void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmCmr, RequestData requestData,
-      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest);
+  public abstract void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest);
 
   /**
    * Performs final Validations on the request before allowing for completion
@@ -215,10 +217,9 @@ public abstract class USBPHandler {
    * @param details
    * @param overrides
    * @param result
-   * @param ibmCmr
    */
   public abstract void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result, FindCMRRecordModel ibmCmr);
+      AutomationResult<OverrideOutput> result);
 
   /**
    * Filters through the IBM CMR matches found to find the best match
@@ -291,15 +292,14 @@ public abstract class USBPHandler {
    * 
    * @param entityManager
    * @param handler
-   * @param ibmCmr
    * @param requestData
    * @param engineData
    * @param details
    * @param overrides
    * @param childRequest
    */
-  public void createAddressOverrides(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmCmr, RequestData requestData,
-      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+  public void createAddressOverrides(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
     Addr installAt = requestData.getAddress("ZS01");
     boolean createAddressOverrides = false;
     String mainCustNm1 = "";
@@ -486,15 +486,15 @@ public abstract class USBPHandler {
     if (childRequest == null || !"COM".equals(childRequest.getAdmin().getReqStatus())) {
       return null;
     }
-    FindCMRRecordModel ibmCmr = new FindCMRRecordModel();
+    FindCMRRecordModel ibmCmrModel = new FindCMRRecordModel();
     Data completedChildData = childRequest.getData();
     // make sure we switch the codes to use directly from child
-    ibmCmr.setCmrNum(completedChildData.getCmrNo());
+    ibmCmrModel.setCmrNum(completedChildData.getCmrNo());
     String affiliate = completedChildData.getAffiliate();
     if (StringUtils.isBlank(affiliate)) {
       affiliate = getUSCMRAffiliate(completedChildData.getCmrNo());
     }
-    ibmCmr.setCmrAffiliate(affiliate);
+    ibmCmrModel.setCmrAffiliate(affiliate);
 
     String childIsic = completedChildData.getIsicCd();
     boolean federalPoa = childIsic != null && (childIsic.startsWith("90") || childIsic.startsWith("91") || childIsic.startsWith("92"));
@@ -503,42 +503,42 @@ public abstract class USBPHandler {
       if (StringUtils.isBlank(enterprise)) {
         enterprise = getUSCMREnterprise(completedChildData.getCmrNo());
       }
-      ibmCmr.setCmrEnterpriseNumber(enterprise);
+      ibmCmrModel.setCmrEnterpriseNumber(enterprise);
     }
 
-    ibmCmr.setCmrIsu(completedChildData.getIsuCd());
-    ibmCmr.setCmrTier(completedChildData.getClientTier());
-    ibmCmr.setCmrInac(completedChildData.getInacCd());
-    ibmCmr.setCmrInacType(completedChildData.getInacType());
-    ibmCmr.setCmrSubIndustry(completedChildData.getSubIndustryCd());
-    ibmCmr.setCmrIsic(completedChildData.getUsSicmen());
+    ibmCmrModel.setCmrIsu(completedChildData.getIsuCd());
+    ibmCmrModel.setCmrTier(completedChildData.getClientTier());
+    ibmCmrModel.setCmrInac(completedChildData.getInacCd());
+    ibmCmrModel.setCmrInacType(completedChildData.getInacType());
+    ibmCmrModel.setCmrSubIndustry(completedChildData.getSubIndustryCd());
+    ibmCmrModel.setCmrIsic(completedChildData.getUsSicmen());
     Addr childInstallAt = childRequest.getAddress("ZS01");
-    ibmCmr.setCmrCountyCode(childInstallAt.getCounty());
-    ibmCmr.setCmrCounty(childInstallAt.getCountyName());
-    ibmCmr.setCmrName4(childInstallAt.getCustNm4());
-    ibmCmr.setCmrStreetAddress(
+    ibmCmrModel.setCmrCountyCode(childInstallAt.getCounty());
+    ibmCmrModel.setCmrCounty(childInstallAt.getCountyName());
+    ibmCmrModel.setCmrName4(childInstallAt.getCustNm4());
+    ibmCmrModel.setCmrStreetAddress(
         childInstallAt.getAddrTxt() + (StringUtils.isNotBlank(childInstallAt.getAddrTxt2()) ? childInstallAt.getAddrTxt2() : ""));
-    ibmCmr.setCmrCity(childInstallAt.getCity1());
-    ibmCmr.setCmrPostalCode(childInstallAt.getPostCd());
-    ibmCmr.setCmrState(childInstallAt.getStateProv());
-    ibmCmr.setCmrCountryLanded(childInstallAt.getLandCntry());
-    ibmCmr.setCmrDept(childInstallAt.getDept());
-    ibmCmr.setCmrCustPhone(childInstallAt.getCustPhone());
-    ibmCmr.setCmrCustFax(childInstallAt.getCustFax());
-    ibmCmr.setCmrTransportZone(childInstallAt.getTransportZone());
-    ibmCmr.setCmrCity2(childInstallAt.getCity2());
-    ibmCmr.setCmrBldg(childInstallAt.getBldg());
-    ibmCmr.setCmrFloor(childInstallAt.getFloor());
-    ibmCmr.setCmrBuyingGroup(completedChildData.getBgId());
-    ibmCmr.setCmrBuyingGroupDesc(completedChildData.getBgDesc());
-    ibmCmr.setCmrGlobalBuyingGroup(completedChildData.getGbgId());
-    ibmCmr.setCmrGlobalBuyingGroupDesc(completedChildData.getGbgDesc());
-    ibmCmr.setCmrLde(completedChildData.getBgRuleId());
-    ibmCmr.setCmrCoverage(completedChildData.getCovId());
-    ibmCmr.setCmrCoverageName(completedChildData.getCovDesc());
-    ibmCmr.setCmrName(childRequest.getAdmin().getMainCustNm1());
+    ibmCmrModel.setCmrCity(childInstallAt.getCity1());
+    ibmCmrModel.setCmrPostalCode(childInstallAt.getPostCd());
+    ibmCmrModel.setCmrState(childInstallAt.getStateProv());
+    ibmCmrModel.setCmrCountryLanded(childInstallAt.getLandCntry());
+    ibmCmrModel.setCmrDept(childInstallAt.getDept());
+    ibmCmrModel.setCmrCustPhone(childInstallAt.getCustPhone());
+    ibmCmrModel.setCmrCustFax(childInstallAt.getCustFax());
+    ibmCmrModel.setCmrTransportZone(childInstallAt.getTransportZone());
+    ibmCmrModel.setCmrCity2(childInstallAt.getCity2());
+    ibmCmrModel.setCmrBldg(childInstallAt.getBldg());
+    ibmCmrModel.setCmrFloor(childInstallAt.getFloor());
+    ibmCmrModel.setCmrBuyingGroup(completedChildData.getBgId());
+    ibmCmrModel.setCmrBuyingGroupDesc(completedChildData.getBgDesc());
+    ibmCmrModel.setCmrGlobalBuyingGroup(completedChildData.getGbgId());
+    ibmCmrModel.setCmrGlobalBuyingGroupDesc(completedChildData.getGbgDesc());
+    ibmCmrModel.setCmrLde(completedChildData.getBgRuleId());
+    ibmCmrModel.setCmrCoverage(completedChildData.getCovId());
+    ibmCmrModel.setCmrCoverageName(completedChildData.getCovDesc());
+    ibmCmrModel.setCmrName(childRequest.getAdmin().getMainCustNm1());
 
-    return ibmCmr;
+    return ibmCmrModel;
   }
 
   /**
@@ -978,8 +978,7 @@ public abstract class USBPHandler {
    * @throws Exception
    */
   public boolean checkIfChildRequestCompleted(EntityManager entityManager, AutomationEngineData engineData, RequestData requestData,
-      RequestData childRequest, StringBuilder details, AutomationResult<OverrideOutput> output, FindCMRRecordModel ibmCmr, GEOHandler handler)
-      throws Exception {
+      RequestData childRequest, StringBuilder details, AutomationResult<OverrideOutput> output, GEOHandler handler) throws Exception {
     long childReqId = childRequest.getAdmin().getId().getReqId();
     Addr addr = requestData.getAddress("ZS01");
 
