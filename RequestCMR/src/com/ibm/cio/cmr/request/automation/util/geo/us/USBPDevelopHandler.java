@@ -446,6 +446,10 @@ public class USBPDevelopHandler extends USBPHandler {
       childData.setCsoSite("TT2");
     }
 
+    if (StringUtils.isNotBlank(childData.getPpsceid())) {
+      childData.setMemLvl("IM");
+    }
+
     childData.setEnterprise(requestData.getData().getAffiliate());
 
   }
