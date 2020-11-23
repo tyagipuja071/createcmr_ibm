@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.ibm.cio.cmr.request.CmrConstants;
 import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.automation.AutomationElementRegistry;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
@@ -15,11 +16,15 @@ import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.out.OverrideOutput;
 import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
+import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.entity.Addr;
-import com.ibm.cio.cmr.request.entity.AddrPK;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.BaseModel;
+import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
+import com.ibm.cio.cmr.request.service.requestentry.AddressService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
@@ -144,9 +149,11 @@ public class USBPPoolHandler extends USBPHandler {
 
     String divn = "";
     String address = "";
+    String address2 = "";
     String city = "";
     String state = "";
     String postCd = "";
+    String landCntry = "";
     if (POOL.equals(cmrType)) {
       details.append("\nUpdating invoice-to address to: \n IBM Credit LLC, 1 N Castle Dr MD NC313, Armonk, NY 10504-1725\n");
       divn = "IBM Credit LLC";
@@ -154,32 +161,52 @@ public class USBPPoolHandler extends USBPHandler {
       city = "Armonk";
       state = "NY";
       postCd = "10504-1725";
+      landCntry = "US";
     } else if (T2.equals(cmrType)) {
       details.append("\nAligning invoice to and install at addresses.\n");
       divn = zs01.getDivn();
       address = zs01.getAddrTxt();
+      address2 = zs01.getAddrTxt2();
       city = zs01.getCity1();
       state = zs01.getStateProv();
       postCd = zs01.getPostCd();
+      landCntry = zs01.getLandCntry();
     }
 
     if (zi01 == null) {
-      AddrPK addrPk = new AddrPK();
-      addrPk.setAddrType("ZI01");
-      addrPk.setAddrSeq("1");
-      addrPk.setReqId(data.getId().getReqId());
-      zi01 = new Addr();
-      zi01.setId(addrPk);
-      zi01.setDivn(divn);
-      zi01.setAddrTxt(address);
-      zi01.setCity1(city);
-      zi01.setPostCd(postCd);
-      zi01.setStateProv(state);
+
+      LOG.debug("Adding the main address..");
+      AddressService addrService = new AddressService();
+      AddressModel addrModel = new AddressModel();
+      addrModel.setReqId(data.getId().getReqId());
+      addrModel.setDivn(divn);
+      addrModel.setLandCntry(landCntry);
+      addrModel.setAddrTxt(address);
+      addrModel.setAddrTxt2(address2);
+      addrModel.setCity1(city);
+      addrModel.setStateProv(state);
+      addrModel.setPostCd(postCd);
+      addrModel.setState(BaseModel.STATE_NEW);
+      addrModel.setAction("ADD_ADDRESS");
+
+      addrModel.setAddrType(CmrConstants.ADDR_TYPE.ZI01.toString());
+      addrModel.setCmrIssuingCntry(data.getCmrIssuingCntry());
       try {
-        entityManager.merge(zi01);
+        AppUser user = new AppUser();
+        user.setIntranetId(requestData.getAdmin().getRequesterId());
+        user.setBluePagesName(requestData.getAdmin().getRequesterNm());
+        DummyServletRequest dummyReq = new DummyServletRequest();
+        if (dummyReq.getSession() != null) {
+          LOG.trace("Session found for dummy req");
+          dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+        } else {
+          LOG.warn("Session not found for dummy req");
+        }
+        addrService.performTransaction(addrModel, entityManager, dummyReq);
       } catch (Exception e) {
-        LOG.error(e);
+        LOG.error("An error occurred while adding ZI01 address", e);
       }
+      entityManager.flush();
     } else {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "DIVN", zi01.getDivn(), divn);
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZI01", "ADDR_TXT", zi01.getAddrTxt(), address);
