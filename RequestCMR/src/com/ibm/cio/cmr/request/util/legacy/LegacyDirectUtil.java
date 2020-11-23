@@ -1427,4 +1427,35 @@ public class LegacyDirectUtil {
 
     return oldData;
   }
+  
+  public static boolean isCountryDREnabled(EntityManager entityManager, String cntry) {
+
+    if (entityManager == null) {
+      entityManager = JpaManager.getEntityManager();
+    }
+
+    boolean isDR = false;
+    String sql = ExternalizedQuery.getSql("DR.GET_SUPP_CNTRY_BY_ID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("CNTRY", cntry);
+    query.setForReadOnly(true);
+    List<Integer> records = query.getResults(Integer.class);
+    Integer singleObject = null;
+
+    if (records != null && records.size() > 0) {
+      singleObject = records.get(0);
+      Integer val = singleObject != null ? singleObject : null;
+
+      if (val != null) {
+        isDR = true;
+      } else {
+        isDR = false;
+      }
+
+    } else {
+      isDR = false;
+    }
+
+    return isDR;
+  }
 }
