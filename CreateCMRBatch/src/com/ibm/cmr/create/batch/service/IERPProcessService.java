@@ -31,6 +31,7 @@ import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.util.IERPRequestUtils;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
+import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.CNHandler;
 import com.ibm.cio.cmr.request.util.geo.impl.DEHandler;
 import com.ibm.cmr.create.batch.model.CmrServiceInput;
@@ -565,8 +566,11 @@ public class IERPProcessService extends BaseBatchService {
 
       if (CNHandler.isCNIssuingCountry(data.getCmrIssuingCntry())) {
         isDataUpdated = CNHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
-      } else {
+      } else if (CmrConstants.DE_CND_ISSUING_COUNTRY_VAL.contains(data.getCmrIssuingCntry())) {
         isDataUpdated = DEHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+      } else {
+        GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
+        isDataUpdated = cntryHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
       }
 
       if (isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) {
