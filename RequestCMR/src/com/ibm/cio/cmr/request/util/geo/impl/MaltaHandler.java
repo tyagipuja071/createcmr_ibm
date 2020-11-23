@@ -21,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.CmrException;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -36,6 +37,7 @@ import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
 import com.ibm.cio.cmr.request.service.window.RequestSummaryService;
 import com.ibm.cio.cmr.request.ui.PageManager;
+import com.ibm.cio.cmr.request.util.MessageUtil;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cmr.services.client.wodm.coverage.CoverageInput;
 
@@ -61,67 +63,83 @@ public class MaltaHandler extends BaseSOFHandler {
   protected void handleSOFConvertFrom(EntityManager entityManager, FindCMRResultModel source, RequestEntryModel reqEntry,
       FindCMRRecordModel mainRecord, List<FindCMRRecordModel> converted, ImportCMRModel searchModel) throws Exception {
 
+    if ("MT".equals(mainRecord.getCmrCountryLanded())) {
+      if (!StringUtils.isBlank(mainRecord.getCmrOwner())) {
+        if (!"IBM".equals(mainRecord.getCmrOwner())) {
+          throw new CmrException(MessageUtil.ERROR_LEGACY_RETRIEVE);
+        }
+      }
+    }
+
     if (CmrConstants.REQ_TYPE_CREATE.equals(reqEntry.getReqType())) {
       // only add zs01 equivalent for create by model
       FindCMRRecordModel record = mainRecord;
 
       record.setCmrName2Plain(record.getCmrName2Plain());
-      if (!StringUtils.isEmpty(record.getCmrName4())) {
-        // name4 in rdc is street con't
-        record.setCmrStreetAddressCont(record.getCmrName4());
-        record.setCmrName4(null);
-      }
 
-      // name3 in rdc = cust nm3 on SOF
+      // Name3 in rdc = CustNm3 on SOF
       if (!StringUtils.isEmpty(record.getCmrName3())) {
         record.setCmrName3(record.getCmrName3());
       }
 
-      if (!StringUtils.isBlank(record.getCmrPOBox())) {
-        record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
+      // name4 in rdc is street con't
+      if (!StringUtils.isEmpty(record.getCmrName4())) {
+        record.setCmrStreetAddressCont(record.getCmrName4());
       }
 
-      if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-        record.setCmrAddrSeq("00001");
-      } else {
-        record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+      if (!StringUtils.isBlank(record.getCmrPOBox())) {
+        record.setCmrPOBox(record.getCmrPOBox());
       }
+
+      record.setCmrAddrSeq("00001");
+
       converted.add(record);
+
     } else {
       // Import all address from RDC Main
       String reqType = reqEntry.getReqType();
       String processingType = PageManager.getProcessingType(mainRecord.getCmrIssuedBy(), reqType);
-      if (CmrConstants.PROCESSING_TYPE_RDC_MAIN.equals(processingType)) {
-
-        Map<String, FindCMRRecordModel> zi01Map = new HashMap<String, FindCMRRecordModel>();
-
-        // Parse the rdc records
-        String cmrCountry = mainRecord != null ? mainRecord.getCmrIssuedBy() : "";
-
+      if (CmrConstants.PROCESSING_TYPE_IERP.equals(processingType)) {
         if (source.getItems() != null) {
+          String addrType = null;
+          String seqNo = null;
+          List<String> sofUses = null;
+          FindCMRRecordModel addr = null;
+
+          // map RDc - SOF - CreateCMR by sequence no
           for (FindCMRRecordModel record : source.getItems()) {
+            seqNo = record.getCmrAddrSeq();
+            if (!StringUtils.isBlank(seqNo) && StringUtils.isNumeric(seqNo)) {
+              sofUses = this.legacyObjects.getUsesBySequenceNo(seqNo);
+              for (String sofUse : sofUses) {
+                addrType = getAddressTypeByUse(sofUse);
+                if (!StringUtils.isEmpty(addrType)) {
+                  addr = cloneAddress(record, addrType);
+                  LOG.trace("Adding address type " + addrType + " for sequence " + seqNo);
+                  addr.setCmrStreetAddressCont(record.getCmrName3());
 
-            if (!StringUtils.isEmpty(record.getCmrName4())) {
-              // name4 in rdc is street con't
-              record.setCmrStreetAddressCont(record.getCmrName4());
-              record.setCmrName4(null);
-            }
+                  // Name3 in rdc = CustNm3 on SOF
+                  if (StringUtils.isEmpty(record.getCmrName3())) {
+                    addr.setCmrName3(record.getCmrName3());
+                  }
 
-            // name3 in rdc = attn on SOF
-            if (!StringUtils.isEmpty(record.getCmrName3())) {
-              record.setCmrName3(record.getCmrName3());
-            }
+                  // Name4 In rdc = Street Address Con't on SOF
+                  if (StringUtils.isEmpty(record.getCmrName4())) {
+                    addr.setCmrStreetAddressCont(record.getCmrName4());
+                  }
 
-            if (!StringUtils.isBlank(record.getCmrPOBox())) {
-              record.setCmrPOBox("PO BOX " + record.getCmrPOBox());
-            }
+                  // PO BOX
+                  if (!StringUtils.isBlank(record.getCmrPOBox())) {
+                    record.setCmrPOBox(record.getCmrPOBox());
+                  }
 
-            if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
-              record.setCmrAddrSeq("00001");
-            } else {
-              record.setCmrAddrSeq(StringUtils.leftPad(record.getCmrAddrSeq(), 5, '0'));
+                  if (StringUtils.isEmpty(record.getCmrAddrSeq())) {
+                    addr.setCmrAddrSeq("00001");
+                  }
+                  converted.add(addr);
+                }
+              }
             }
-            converted.add(record);
           }
         }
       } else {
@@ -132,7 +150,6 @@ public class MaltaHandler extends BaseSOFHandler {
         // c. Import EplMailing from RDc, if found. This will also be an
         // installing in RDc
         // d. Import all shipping, fiscal, and mailing from SOF
-
         // customer phone is in BillingPhone
         if (StringUtils.isEmpty(mainRecord.getCmrCustPhone())) {
           mainRecord.setCmrCustPhone(this.currentImportValues.get("BillingPhone"));
@@ -211,13 +228,20 @@ public class MaltaHandler extends BaseSOFHandler {
   protected void importOtherSOFAddresses(EntityManager entityManager, String cmrCountry, Map<String, FindCMRRecordModel> zi01Map,
       List<FindCMRRecordModel> converted) {
 
-    FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(), "Installing", zi01Map);
+    FindCMRRecordModel record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZI01.toString(), "Install-At", zi01Map);
     if (record != null) {
       converted.add(record);
     }
 
-    record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZP01.toString(), "Billing", zi01Map);
+    record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZP01.toString(), "Bill-To", zi01Map);
     if (record != null) {
+      record.setCmrBldg(null);
+      converted.add(record);
+    }
+
+    record = createAddress(entityManager, cmrCountry, CmrConstants.ADDR_TYPE.ZD01.toString(), "Ship-To", zi01Map);
+    if (record != null) {
+      record.setCmrBldg(null);
       converted.add(record);
     }
 
