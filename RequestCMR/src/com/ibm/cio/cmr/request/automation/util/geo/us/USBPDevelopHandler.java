@@ -79,8 +79,8 @@ public class USBPDevelopHandler extends USBPHandler {
 
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, FindCMRRecordModel ibmCmr, RequestData childRequest,
-      GEOHandler handler, OverrideOutput overrides) throws Exception {
+      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
+      OverrideOutput overrides) throws Exception {
 
     LOG.debug(">>>> Executing process requests  <<<<");
 
@@ -185,8 +185,8 @@ public class USBPDevelopHandler extends USBPHandler {
   }
 
   @Override
-  public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmCmr, RequestData requestData,
-      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+  public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
     LOG.debug(">>>> Executing copyAndFillIBMData  <<<<");
@@ -296,7 +296,7 @@ public class USBPDevelopHandler extends USBPHandler {
 
     }
 
-    createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
+    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest);
 
     details.append(" - Dept/Attn: -----DEVELOPEMENT-----\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-----DEVELOPMENT-----");
@@ -349,11 +349,15 @@ public class USBPDevelopHandler extends USBPHandler {
       details.append(" - Marketing A/R Dept  : " + "DI2" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI2");
     }
+
+    details.append("Branch Office codes computed successfully.");
+    engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
+
   }
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result, FindCMRRecordModel ibmCmr) {
+      AutomationResult<OverrideOutput> result) {
     Data data = requestData.getData();
     // details.append("\n");
     // String affiliate = data.getAffiliate();

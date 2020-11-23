@@ -77,8 +77,8 @@ public class USBPEndUserHandler extends USBPHandler {
 
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
-      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, FindCMRRecordModel ibmCmr, RequestData childRequest,
-      GEOHandler handler, OverrideOutput overrides) throws Exception {
+      AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
+      OverrideOutput overrides) throws Exception {
 
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
@@ -171,55 +171,54 @@ public class USBPEndUserHandler extends USBPHandler {
   }
 
   @Override
-  public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, FindCMRRecordModel ibmDirectCmr, RequestData requestData,
-      AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+  public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
 
     Data data = requestData.getData();
-    if (ibmDirectCmr != null) {
-      if (!StringUtils.isBlank(ibmDirectCmr.getCmrSapNumber())) {
-        details.append("\nCopying IBM Codes from IBM CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + " ("
-            + ibmDirectCmr.getCmrSapNumber() + "): \n");
+    if (ibmCmr != null) {
+      if (!StringUtils.isBlank(ibmCmr.getCmrSapNumber())) {
+        details.append(
+            "\nCopying IBM Codes from IBM CMR " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName() + " (" + ibmCmr.getCmrSapNumber() + "): \n");
       } else {
-        details.append("\nCopying IBM Codes from IBM CMR " + ibmDirectCmr.getCmrNum() + " - " + ibmDirectCmr.getCmrName() + ": \n");
+        details.append("\nCopying IBM Codes from IBM CMR " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName() + ": \n");
       }
 
-      String affiliate = ibmDirectCmr.getCmrAffiliate();
-      String isic = ibmDirectCmr.getCmrIsic();
+      String affiliate = ibmCmr.getCmrAffiliate();
+      String isic = ibmCmr.getCmrIsic();
       boolean federalPoa = isic != null && (isic.startsWith("90") || isic.startsWith("91") || isic.startsWith("92"));
       if (federalPoa) {
-        affiliate = ibmDirectCmr.getCmrEnterpriseNumber();
+        affiliate = ibmCmr.getCmrEnterpriseNumber();
       }
-      if (!StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
-        details.append(" - Affiliate: " + ibmDirectCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
+      if (!StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+        details.append(" - Affiliate: " + ibmCmr.getCmrAffiliate() + (federalPoa ? " (Enterprise from Federal/POA)" : "") + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), affiliate);
       }
 
-      if (!StringUtils.isBlank(ibmDirectCmr.getCmrIsu())) {
-        details.append(" - ISU: " + ibmDirectCmr.getCmrIsu() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISU_CD", data.getIsuCd(), ibmDirectCmr.getCmrIsu());
-        details.append(" - Client Tier: " + ibmDirectCmr.getCmrTier() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CLIENT_TIER", data.getClientTier(), ibmDirectCmr.getCmrTier());
+      if (!StringUtils.isBlank(ibmCmr.getCmrIsu())) {
+        details.append(" - ISU: " + ibmCmr.getCmrIsu() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISU_CD", data.getIsuCd(), ibmCmr.getCmrIsu());
+        details.append(" - Client Tier: " + ibmCmr.getCmrTier() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CLIENT_TIER", data.getClientTier(), ibmCmr.getCmrTier());
       }
 
-      if (!StringUtils.isBlank(ibmDirectCmr.getCmrInac())) {
-        details
-            .append(" - NAC/INAC: " + ("I".equals(ibmDirectCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmDirectCmr.getCmrInacType()) ? "NAC" : "-"))
-                + " " + ibmDirectCmr.getCmrInac() + (ibmDirectCmr.getCmrInacDesc() != null ? "( " + ibmDirectCmr.getCmrInacDesc() + ")" : ""));
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_TYPE", data.getInacType(), ibmDirectCmr.getCmrInacType());
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmDirectCmr.getCmrInac());
+      if (!StringUtils.isBlank(ibmCmr.getCmrInac())) {
+        details.append(" - NAC/INAC: " + ("I".equals(ibmCmr.getCmrInacType()) ? "INAC" : ("N".equals(ibmCmr.getCmrInacType()) ? "NAC" : "-")) + " "
+            + ibmCmr.getCmrInac() + (ibmCmr.getCmrInacDesc() != null ? "( " + ibmCmr.getCmrInacDesc() + ")" : ""));
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_TYPE", data.getInacType(), ibmCmr.getCmrInacType());
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
       }
 
       // add here gbg and cov
       LOG.debug("Getting Buying Group/Coverage values");
-      String bgId = ibmDirectCmr.getCmrBuyingGroup();
+      String bgId = ibmCmr.getCmrBuyingGroup();
       GBGResponse calcGbg = new GBGResponse();
       if (!StringUtils.isBlank(bgId)) {
-        calcGbg.setBgId(ibmDirectCmr.getCmrBuyingGroup());
-        calcGbg.setBgName(ibmDirectCmr.getCmrBuyingGroupDesc());
+        calcGbg.setBgId(ibmCmr.getCmrBuyingGroup());
+        calcGbg.setBgName(ibmCmr.getCmrBuyingGroupDesc());
         calcGbg.setCmrCount(1);
-        calcGbg.setGbgId(ibmDirectCmr.getCmrGlobalBuyingGroup());
-        calcGbg.setGbgName(ibmDirectCmr.getCmrGlobalBuyingGroupDesc());
-        calcGbg.setLdeRule(ibmDirectCmr.getCmrLde());
+        calcGbg.setGbgId(ibmCmr.getCmrGlobalBuyingGroup());
+        calcGbg.setGbgName(ibmCmr.getCmrGlobalBuyingGroupDesc());
+        calcGbg.setLdeRule(ibmCmr.getCmrLde());
       } else {
         calcGbg.setBgId("BGNONE");
         calcGbg.setBgName("None");
@@ -249,23 +248,21 @@ public class USBPEndUserHandler extends USBPHandler {
       engineData.put(AutomationEngineData.GBG_MATCH, calcGbg);
 
       LOG.debug("BG ID: " + calcGbg.getBgId());
-      String calcCovId = ibmDirectCmr.getCmrCoverage();
+      String calcCovId = ibmCmr.getCmrCoverage();
       if (StringUtils.isBlank(calcCovId)) {
         calcCovId = RequestUtils.getDefaultCoverage(entityManager, "US");
       }
-      details.append(
-          " - Coverage: " + calcCovId + (ibmDirectCmr.getCmrCoverageName() != null ? " (" + ibmDirectCmr.getCmrCoverageName() + ")" : "") + "\n");
+      details.append(" - Coverage: " + calcCovId + (ibmCmr.getCmrCoverageName() != null ? " (" + ibmCmr.getCmrCoverageName() + ")" : "") + "\n");
       LOG.debug("Coverage: " + calcCovId);
       engineData.addPositiveCheckStatus(AutomationEngineData.SKIP_COVERAGE);
       engineData.put(AutomationEngineData.COVERAGE_CALCULATED, calcCovId);
 
-      details.append(" - SICMEN: " + ibmDirectCmr.getCmrIsic() + "\n");
-      details.append(" - ISIC: " + ibmDirectCmr.getCmrIsic() + "\n");
-      details.append(" - Subindustry: " + ibmDirectCmr.getCmrSubIndustry() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmDirectCmr.getCmrIsic());
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "US_SICMEN", data.getUsSicmen(), ibmDirectCmr.getCmrIsic());
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(),
-          ibmDirectCmr.getCmrSubIndustry());
+      details.append(" - SICMEN: " + ibmCmr.getCmrIsic() + "\n");
+      details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
+      details.append(" - Subindustry: " + ibmCmr.getCmrSubIndustry() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "US_SICMEN", data.getUsSicmen(), ibmCmr.getCmrIsic());
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
     }
 
     // do final checks on request data
@@ -330,7 +327,7 @@ public class USBPEndUserHandler extends USBPHandler {
       }
     }
 
-    createAddressOverrides(entityManager, handler, ibmDirectCmr, requestData, engineData, details, overrides, childRequest);
+    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest);
 
     if (!hasFieldError) {
       details.append("Branch Office codes computed successfully.");
@@ -341,13 +338,13 @@ public class USBPEndUserHandler extends USBPHandler {
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result, FindCMRRecordModel ibmDirectCmr) {
+      AutomationResult<OverrideOutput> result) {
     // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
     Data data = requestData.getData();
     details.append("\n");
     String affiliate = data.getAffiliate();
-    if (ibmDirectCmr != null && !StringUtils.isBlank(ibmDirectCmr.getCmrAffiliate())) {
-      affiliate = ibmDirectCmr.getCmrAffiliate();
+    if (ibmCmr != null && !StringUtils.isBlank(ibmCmr.getCmrAffiliate())) {
+      affiliate = ibmCmr.getCmrAffiliate();
     }
     if (StringUtils.isBlank(affiliate)) {
       details.append("\nAffiliate cannot be computed automatically.");
