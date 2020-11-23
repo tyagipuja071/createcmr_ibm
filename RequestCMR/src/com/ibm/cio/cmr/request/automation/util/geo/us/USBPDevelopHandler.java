@@ -273,7 +273,7 @@ public class USBPDevelopHandler extends USBPHandler {
     if ("T1".equals(this.cmrType)) {
       LOG.debug("Overriding details for Pool CMR.");
 
-      details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + "\n");
+      details.append(" - Affiliate: " + data.getEnterprise() + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
       details.append(" - Tax Class / Code 1: " + "J000" + "\n");
@@ -282,29 +282,11 @@ public class USBPDevelopHandler extends USBPHandler {
       details.append(" - Tax Exempt Status: " + "Z" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "Z");
 
-      details.append(" - Subindustry: " + ibmCmr.getCmrSubIndustry() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
-
-      details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
-
-      details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
-
     } else if ("T2".equals(this.cmrType)) {
       LOG.debug("Overriding details for T2 Pool CMR.");
 
-      details.append(" - DIVISION: " + ibmCmr.getCmrName() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADDR", "DIVISION", zs01.getDivn(), ibmCmr.getCmrName());
-
-      details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
-
-      details.append(" - AFFILIATE: " + ibmCmr.getCmrAffiliate() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrAffiliate());
-
-      details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
+      details.append(" - Affiliate: " + data.getEnterprise() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
       details.append(" - Tax Class / Code 1: " + "J666" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J666");
@@ -312,29 +294,28 @@ public class USBPDevelopHandler extends USBPHandler {
       details.append(" - Tax Exempt Status: " + "" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
 
-      details.append(" - Restrict To: " + ibmCmr.getUsCmrRestrictTo() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), ibmCmr.getUsCmrRestrictTo());
-
-      details.append(" - BP Account Type: " + "D" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "D");
-
-      details.append(" - Marketing Dept: " + "EI3" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
-
-      details.append(" - Miscellaneous Bill Code: " + "I" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
-
-      details.append(" - Business Partner Name: " + "MIR" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
-
-      details.append(" - PCC A/R Dept: " + "G8M" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
-
-      details.append(" - SVC A/R Office : " + "IKE" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
-
-      createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
     }
+
+    createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
+
+    details.append(" - Dept/Attn: -------DEVELOPEMENT-------\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-------DEVELOPMENT-------");
+    details.append(" - Restricted Ind: Y\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
+    details.append(" - Restricted to: BPQS\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), "BPQS");
+    details.append(" - BP Account Type: " + "D" + "\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_ACCT_TYP", data.getBpAcctTyp(), "D");
+    details.append(" - Marketing Dept: " + "EI3" + "\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), "EI3");
+    details.append(" - Miscellaneous Bill Code: " + "I" + "\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MISC_BILL_CD", data.getMiscBillCd(), "I");
+    details.append(" - Business Partner Name: " + "MIR" + "\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "BP_NAME", data.getBpName(), BP_MANAGING_IR);
+    details.append(" - PCC A/R Dept: " + "G8M" + "\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
+    details.append(" - SVC A/R Office : " + "IKE" + "\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), "IKE");
 
     String department = StringUtils.isNotBlank(zs01.getDept()) ? zs01.getDept().toUpperCase() : "";
     String addressCategory = "";
