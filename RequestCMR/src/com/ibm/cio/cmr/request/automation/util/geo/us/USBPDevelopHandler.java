@@ -41,31 +41,48 @@ public class USBPDevelopHandler extends USBPHandler {
 
   @Override
   public boolean doInitialValidations(Admin admin, Data data, Addr addr, AutomationResult<OverrideOutput> output, AutomationEngineData engineData) {
-    USCeIdMapping mapping = null;
-    boolean addRejection = true;
-    if (!StringUtils.isBlank(data.getEnterprise())) {
-      mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
-    }
-    if (mapping != null) {
-      String req_CompNo = data.getCompany() != null ? data.getCompany() : "";
-      String map_CompNo = mapping.getCompanyNo();
-      if (StringUtils.isNotBlank(req_CompNo) && req_CompNo.equalsIgnoreCase(map_CompNo)) {
-        addRejection = false;
+    LOG.debug(">>>> Executing inital validations <<<<");
+    if (StringUtils.isNotBlank(data.getEnterprise())) {
+      USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+      if (mapping == null || !mapping.isDistributor()) {
+        output.setResults("Non-Distributor BP");
+        output.setDetails(
+            "BP Development records are only allowed to be created under Distributors, please check and confirm with the Distributor for this transaction.");
+        engineData.addRejectionComment("ENT",
+            "BP Development records are only allowed to be created under Distributors, please check and confirm with the Distributor for this transaction.",
+            "", "");
+        output.setOnError(true);
+        return true;
       }
-    }
-
-    if (addRejection) {
-      String msg = "BP Development records only allow to create under Distributors, please check and confirm the Distributor for this transaction.";
-      engineData.addRejectionComment("DISTRIBUTOR", msg, "", "");
+    } else {
+      output.setResults("Invalid Enterprise");
+      output.setDetails(
+          "BP Development records are only allowed to be created under Distributors, please check and confirm with the Distributor for this transaction.");
+      engineData.addRejectionComment("ENT",
+          "BP Development records are only allowed to be created under Distributors, please check and confirm with the Distributor for this transaction.",
+          "", "");
+      output.setOnError(true);
       return true;
     }
+
+    if (StringUtils.isNotBlank(data.getPpsceid()) && !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
+      output.setResults("Invalid CEID");
+      output.setDetails("The CEID provided on the request is not valid, please check and confirm.\n");
+      engineData.addRejectionComment("CEID", "The CEID provided on the request is not valid, please check and confirm.", "", "");
+      output.setOnError(true);
+      return true;
+    }
+
     return false;
+
   }
 
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, FindCMRRecordModel ibmCmr, RequestData childRequest,
       GEOHandler handler, OverrideOutput overrides) throws Exception {
+
+    LOG.debug(">>>> Executing process requests  <<<<");
 
     Admin admin = requestData.getAdmin();
     Addr zs01 = requestData.getAddress("ZS01");
@@ -172,7 +189,7 @@ public class USBPDevelopHandler extends USBPHandler {
       AutomationEngineData engineData, StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
-
+    LOG.debug(">>>> Executing copyAndFillIBMData  <<<<");
     if (ibmCmr != null) {
 
       if (!StringUtils.isBlank(ibmCmr.getCmrSapNumber())) {
@@ -251,51 +268,49 @@ public class USBPDevelopHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "US_SICMEN", data.getUsSicmen(), ibmCmr.getCmrIsic());
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
+    }
 
-      if ("T1".equals(this.cmrType)) {
-        LOG.debug("Overriding details for Pool CMR.");
+    if ("T1".equals(this.cmrType)) {
+      LOG.debug("Overriding details for Pool CMR.");
 
-        details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
+      details.append(" - Affiliate: " + ibmCmr.getCmrEnterpriseNumber() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
-        details.append(" - Tax Class / Code 1: " + "J000" + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J000");
+      details.append(" - Tax Class / Code 1: " + "J000" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J000");
 
-        details.append(" - Tax Exempt Status: " + "Z" + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "Z");
+      details.append(" - Tax Exempt Status: " + "Z" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "Z");
 
-        details.append(" - Subindustry: " + ibmCmr.getCmrSubIndustry() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(),
-            ibmCmr.getCmrSubIndustry());
+      details.append(" - Subindustry: " + ibmCmr.getCmrSubIndustry() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
 
-        details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
+      details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
 
-        details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
+      details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
 
-      } else if ("T2".equals(this.cmrType)) {
-        LOG.debug("Overriding details for T2 Pool CMR.");
+    } else if ("T2".equals(this.cmrType)) {
+      LOG.debug("Overriding details for T2 Pool CMR.");
 
-        details.append(" - DIVISION: " + ibmCmr.getCmrName() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADDR", "DIVISION", zs01.getDivn(), ibmCmr.getCmrName());
+      details.append(" - DIVISION: " + ibmCmr.getCmrName() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ADDR", "DIVISION", zs01.getDivn(), ibmCmr.getCmrName());
 
-        details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
+      details.append(" - ISIC: " + ibmCmr.getCmrIsic() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
 
-        details.append(" - AFFILIATE: " + ibmCmr.getCmrAffiliate() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrAffiliate());
+      details.append(" - AFFILIATE: " + ibmCmr.getCmrAffiliate() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), ibmCmr.getCmrAffiliate());
 
-        details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
+      details.append(" - INAC: " + ibmCmr.getCmrInac() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "INAC_CD", data.getInacCd(), ibmCmr.getCmrInac());
 
-        details.append(" - Tax Class / Code 1: " + "J666" + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J666");
+      details.append(" - Tax Class / Code 1: " + "J666" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J666");
 
-        details.append(" - Tax Exempt Status: " + "" + "\n");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
-
-      }
+      details.append(" - Tax Exempt Status: " + "" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
 
       details.append(" - Restrict To: " + ibmCmr.getUsCmrRestrictTo() + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_TO", data.getRestrictTo(), ibmCmr.getUsCmrRestrictTo());
@@ -367,6 +382,17 @@ public class USBPDevelopHandler extends USBPHandler {
     if (StringUtils.isBlank(affiliate)) {
       details.append("\nAffiliate cannot be computed automatically.");
       engineData.addNegativeCheckStatus("_usBpAff", "Affiliate cannot be computed automatically");
+    }
+
+    USCeIdMapping mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
+    if (mapping != null) {
+      if (!mapping.getCompanyNo().equals(data.getCompany())) {
+        details.append("\nCompany No. updated to mapped value for the CEID (" + mapping.getCompanyNo() + ").");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "COMPANY", data.getCompany(), mapping.getCompanyNo());
+      }
+    } else {
+      details.append("\nEnterprise No. cannot be validated automatically.");
+      engineData.addNegativeCheckStatus("_usBpEnt", "Enterprise No. cannot be validated automatically.");
     }
   }
 
