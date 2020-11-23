@@ -577,12 +577,13 @@ function setAddressDetailsForView() {
 function lockAbbrv() {
   var viewOnlyPage = FormManager.getActualValue('viewOnlyPage');
   var role = FormManager.getActualValue('userRole').toUpperCase();
+  var reqType = FormManager.getActualValue('reqType').toUpperCase();
 
   if (viewOnlyPage == 'true') {
     FormManager.readOnly('abbrevLocn');
     FormManager.readOnly('abbrevNm');
   } else {
-    if (role == 'REQUESTER') {
+    if (role == 'REQUESTER' && reqType == 'C') {
       FormManager.readOnly('abbrevLocn');
       FormManager.readOnly('abbrevNm');
     }
