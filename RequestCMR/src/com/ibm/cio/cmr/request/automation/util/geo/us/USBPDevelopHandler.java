@@ -299,7 +299,7 @@ public class USBPDevelopHandler extends USBPHandler {
     createAddressOverrides(entityManager, handler, ibmCmr, requestData, engineData, details, overrides, childRequest);
 
     details.append(" - Dept/Attn: -----DEVELOPEMENT-----\n");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-------DEVELOPMENT-------");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-----DEVELOPMENT-----");
     details.append(" - Restricted Ind: Y\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");
