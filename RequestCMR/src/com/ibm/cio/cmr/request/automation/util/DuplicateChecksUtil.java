@@ -108,6 +108,16 @@ public class DuplicateChecksUtil {
         }
       }
 
+      if (USUtil.SC_BP_DEVELOP.equals(data.getCustSubGrp()) || (StringUtils.isNotBlank(addr.getDept())
+          && (addr.getDept().toUpperCase().contains("DEMO DEV") || addr.getDept().toUpperCase().contains("DEVELOPMENT")))) {
+        request.setUsBpAccType("D");
+      }
+
+      if (USUtil.SC_BP_E_HOST.equals(data.getCustSubGrp()) || (StringUtils.isNotBlank(addr.getDept())
+          && (addr.getDept().toUpperCase().contains("E-HOST") || addr.getDept().toUpperCase().contains("EHOST")))) {
+        request.setUsBpAccType("E");
+      }
+
       request.setUsRestrictTo(data.getRestrictTo());
       break;
     case SystemLocation.SPAIN:
