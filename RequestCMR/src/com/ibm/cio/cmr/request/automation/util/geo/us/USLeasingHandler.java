@@ -1,6 +1,7 @@
 package com.ibm.cio.cmr.request.automation.util.geo.us;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -18,6 +19,7 @@ import com.ibm.cio.cmr.request.automation.util.CopyAttachmentUtil;
 import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
+import com.ibm.cio.cmr.request.config.SystemConfiguration;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -25,15 +27,20 @@ import com.ibm.cio.cmr.request.model.BaseModel;
 import com.ibm.cio.cmr.request.model.requestentry.AddressModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
+import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemLocation;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
+import com.ibm.cmr.services.client.CmrServicesFactory;
+import com.ibm.cmr.services.client.QueryClient;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
+import com.ibm.cmr.services.client.query.QueryRequest;
+import com.ibm.cmr.services.client.query.QueryResponse;
 
 /**
  * 
@@ -228,6 +235,23 @@ public class USLeasingHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
     }
 
+    if (childRequest == null) {
+      try {
+        getMktgSvcUsCmr(childRequest, overrides, data);
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    } else {
+      if (!StringUtils.isBlank(childRequest.getData().getMktgDept())) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), childRequest.getData().getMktgDept());
+      }
+      if (!StringUtils.isBlank(childRequest.getData().getSvcArOffice())) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(),
+            childRequest.getData().getSvcArOffice());
+      }
+    }
+
     createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest, ibmCmr);
 
     // do final checks on request data
@@ -250,6 +274,35 @@ public class USLeasingHandler extends USBPHandler {
     details.append("Branch Office codes computed successfully.");
     engineData.addPositiveCheckStatus(AutomationEngineData.BO_COMPUTATION);
 
+  }
+
+  private void getMktgSvcUsCmr(RequestData childRequest, OverrideOutput overrides, Data data) throws Exception {
+    String cmrNo = childRequest.getAdmin().getModelCmrNo();
+    String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
+    String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
+    String sql = ExternalizedQuery.getSql("AUTO.GET_MKTG_SVC_USCMR", usSchema);
+    sql = StringUtils.replace(sql, ":CMR_NO", "'" + cmrNo + "'");
+    String dbId = QueryClient.USCMR_APP_ID;
+    QueryRequest query = new QueryRequest();
+    query.setSql(sql);
+    query.setRows(1);
+    query.addField("MKTG_DEPT");
+    query.addField("SVC_AR_OFFICE");
+    QueryClient client;
+    QueryResponse response;
+    client = CmrServicesFactory.getInstance().createClient(url, QueryClient.class);
+    response = client.executeAndWrap(dbId, query, QueryResponse.class);
+    if (response.isSuccess()) {
+      Map<String, Object> record = response.getRecords().get(0);
+      String mtkgDept = (String) record.get("MKTG_DEPT");
+      String svcArDept = (String) record.get("SVC_AR_OFFICE");
+      if (!StringUtils.isBlank(mtkgDept)) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), mtkgDept);
+      }
+      if (!StringUtils.isBlank(svcArDept)) {
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArDept);
+      }
+    }
   }
 
   @Override
@@ -324,15 +377,12 @@ public class USLeasingHandler extends USBPHandler {
 
   @Override
   protected void modifyChildDataValues(EntityManager entityManager, RequestData requestData, RequestData childReqData, StringBuilder details) {
-    Admin admin = requestData.getAdmin();
-    if ("Y".equals(admin.getMatchOverrideIndc())) {
-      childReqData.getAdmin().setMatchOverrideIndc("Y");
-      long childRequestId = childReqData.getAdmin().getChildReqId();
-      try {
-        CopyAttachmentUtil.copyAttachmentsByType(entityManager, requestData, childRequestId, "COMP");
-      } catch (Exception e) {
-        LOG.error("An error occurred while copying the attachment to child request - " + childRequestId, e);
-      }
+    long childRequestId = childReqData.getAdmin().getChildReqId();
+    try {
+      CopyAttachmentUtil.copyAttachmentsByType(entityManager, requestData, childRequestId, "COMP");
+      childReqData.getAdmin().setMatchOverrideIndc(requestData.getAdmin().getMatchOverrideIndc());
+    } catch (Exception e) {
+      LOG.error("An error occurred while copying the attachment to child request - " + childRequestId, e);
     }
   }
 
