@@ -1229,7 +1229,7 @@ public abstract class USBPHandler {
     childScoreCard.setFindDnbUsrId("CreateCMR");
     childScoreCard.setFindDnbUsrNm("CreateCMR");
 
-    modifyChildDataValues(requestData, childReqData, details);
+    modifyChildDataValues(entityManager, requestData, childReqData, details);
 
     entityManager.merge(childData);
     entityManager.merge(childScoreCard);
@@ -1257,7 +1257,7 @@ public abstract class USBPHandler {
    * @param childReqData
    * @param details
    */
-  protected void modifyChildDataValues(RequestData requestData, RequestData childReqData, StringBuilder details) {
+  protected void modifyChildDataValues(EntityManager entityManager, RequestData requestData, RequestData childReqData, StringBuilder details) {
     // NOOP
   }
 
