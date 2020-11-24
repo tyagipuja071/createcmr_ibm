@@ -404,7 +404,7 @@ public class USBPEhostHandler extends USBPHandler {
   }
 
   @Override
-  protected void modifyChildDataValues(RequestData requestData, RequestData childReqData, StringBuilder details) {
+  protected void modifyChildDataValues(EntityManager entityManager, RequestData requestData, RequestData childReqData, StringBuilder details) {
     Data childData = childReqData.getData();
     if (T1.equals(this.cmrType)) {
       childData.setBpAcctTyp("P");
