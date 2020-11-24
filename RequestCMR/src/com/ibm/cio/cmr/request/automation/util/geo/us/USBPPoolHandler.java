@@ -28,6 +28,12 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
+
 public class USBPPoolHandler extends USBPHandler {
 
   private static final List<String> POOL_CSO_SITES = Arrays.asList("YBV", "DV4");

@@ -1,6 +1,5 @@
 package com.ibm.cio.cmr.request.automation.util.geo.us;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -328,14 +327,11 @@ public class USLeasingHandler extends USBPHandler {
     Admin admin = requestData.getAdmin();
     if ("Y".equals(admin.getMatchOverrideIndc())) {
       childReqData.getAdmin().setMatchOverrideIndc("Y");
+      long childRequestId = childReqData.getAdmin().getChildReqId();
       try {
-        CopyAttachmentUtil.copyAttachmentsByType(entityManager, requestData, childReqData.getAdmin().getChildReqId(), "COMP");
-      } catch (CmrException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        CopyAttachmentUtil.copyAttachmentsByType(entityManager, requestData, childRequestId, "COMP");
+      } catch (Exception e) {
+        LOG.error("An error occurred while copying the attachment to child request - " + childRequestId, e);
       }
     }
   }

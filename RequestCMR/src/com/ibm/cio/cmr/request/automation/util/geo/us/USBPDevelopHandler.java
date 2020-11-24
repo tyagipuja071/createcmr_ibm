@@ -264,8 +264,9 @@ public class USBPDevelopHandler extends USBPHandler {
     } else if ("T2".equals(this.cmrType)) {
       LOG.debug("Overriding details for T2 Pool CMR.");
 
-      details.append(" - Affiliate: " + data.getEnterprise() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
+      // details.append(" - Affiliate: " + data.getEnterprise() + "\n");
+      // overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA",
+      // "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
       details.append(" - Tax Class / Code 1: " + "J666" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J666");

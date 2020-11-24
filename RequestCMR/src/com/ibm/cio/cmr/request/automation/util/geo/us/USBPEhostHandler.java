@@ -29,6 +29,11 @@ import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 import com.ibm.cmr.services.client.matching.dnb.DnBMatchingResponse;
 import com.ibm.cmr.services.client.matching.gbg.GBGResponse;
 
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
 public class USBPEhostHandler extends USBPHandler {
 
   private static final Logger LOG = Logger.getLogger(USBPEhostHandler.class);
