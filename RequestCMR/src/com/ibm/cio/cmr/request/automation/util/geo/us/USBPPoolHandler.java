@@ -28,6 +28,12 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
 import com.ibm.cmr.services.client.matching.cmr.DuplicateCMRCheckResponse;
 
+/**
+ * 
+ * @author RoopakChugh
+ *
+ */
+
 public class USBPPoolHandler extends USBPHandler {
 
   private static final List<String> POOL_CSO_SITES = Arrays.asList("YBV", "DV4");
@@ -62,7 +68,7 @@ public class USBPPoolHandler extends USBPHandler {
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
-      OverrideOutput overrides) throws Exception {
+      FindCMRRecordModel ibmCmr, OverrideOutput overrides) throws Exception {
     Data data = requestData.getData();
 
     this.csoSite = data.getCsoSite();
@@ -102,7 +108,7 @@ public class USBPPoolHandler extends USBPHandler {
 
   @Override
   public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
     Data data = requestData.getData();
     Addr zs01 = requestData.getAddress("ZS01");
 
@@ -258,7 +264,7 @@ public class USBPPoolHandler extends USBPHandler {
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result) {
+      FindCMRRecordModel ibmCmr, AutomationResult<OverrideOutput> result) {
     // NOOP
   }
 
@@ -276,7 +282,7 @@ public class USBPPoolHandler extends USBPHandler {
   }
 
   @Override
-  public boolean isChildRequestSupported() {
+  public boolean isEndUserSupported() {
     return false;
   }
 
