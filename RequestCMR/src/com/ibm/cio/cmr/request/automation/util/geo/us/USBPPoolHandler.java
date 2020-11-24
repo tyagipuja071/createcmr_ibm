@@ -83,8 +83,9 @@ public class USBPPoolHandler extends USBPHandler {
     if (mapping != null) {
       if (mapping.isDistributor()) {
         this.csoSite = "YBV";
+      } else {
+        this.csoSite = "DV4";
       }
-      this.csoSite = "DV4";
     } else {
       this.csoSite = "TT2";
     }
