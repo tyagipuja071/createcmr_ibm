@@ -75,15 +75,17 @@ public class USBPPoolHandler extends USBPHandler {
     USCeIdMapping mapping = null;
     if (StringUtils.isNotBlank(data.getEnterprise())) {
       mapping = USCeIdMapping.getByEnterprise(data.getEnterprise());
-    } else if (StringUtils.isNotBlank(data.getPpsceid())) {
-      mapping = USCeIdMapping.getByCeid(data.getPpsceid());
     }
+    // else if (StringUtils.isNotBlank(data.getPpsceid())) {
+    // mapping = USCeIdMapping.getByCeid(data.getPpsceid());
+    // }
 
-    if (mapping != null && mapping.isDistributor()) {
-      this.csoSite = "YBV";
-    } else if (isTier1BP(data)) {
+    if (mapping != null) {
+      if (mapping.isDistributor()) {
+        this.csoSite = "YBV";
+      }
       this.csoSite = "DV4";
-    } else if (isTier2BP(data)) {
+    } else {
       this.csoSite = "TT2";
     }
 

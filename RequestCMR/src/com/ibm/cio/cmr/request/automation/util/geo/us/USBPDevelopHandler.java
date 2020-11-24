@@ -426,15 +426,15 @@ public class USBPDevelopHandler extends USBPHandler {
     if (T1.equals(this.cmrType)) {
       childData.setBpAcctTyp("P");
       childData.setCsoSite("YBV");
+      childData.setEnterprise(requestData.getData().getEnterprise());
     } else {
       childData.setCsoSite("TT2");
+      childData.setEnterprise(requestData.getData().getAffiliate());
     }
 
     if (StringUtils.isNotBlank(childData.getPpsceid())) {
       childData.setMemLvl("IM");
     }
-
-    childData.setEnterprise(requestData.getData().getAffiliate());
 
   }
 }
