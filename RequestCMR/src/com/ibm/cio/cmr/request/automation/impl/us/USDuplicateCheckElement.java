@@ -429,9 +429,6 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
     Admin admin = requestData.getAdmin();
     Data data = requestData.getData();
     String restrictTo = StringUtils.isNotBlank(data.getRestrictTo()) ? data.getRestrictTo() : "";
-    String csoSite = StringUtils.isNotBlank(data.getCsoSite()) ? data.getCsoSite() : "";
-    // String bpAccType = StringUtils.isNotBlank(data.getBpAcctTyp()) ?
-    // data.getBpAcctTyp() : "";
     String subIndCode = StringUtils.isBlank(data.getSubIndustryCd()) ? "" : data.getSubIndustryCd();
     String scenarioSubType = "";
     if ("C".equals(admin.getReqType()) && data != null) {
@@ -521,11 +518,11 @@ public class USDuplicateCheckElement extends DuplicateCheckElement {
         }
         response.setMatches(cmrCheckMatchesTmp);
       }
-    case USUtil.SC_BP_DEVELOP:
+    case USUtil.SC_BP_E_HOST:
       for (DuplicateCMRCheckResponse cmrCheckRecord : cmrCheckMatches) {
-        if (StringUtils.isNotBlank(cmrCheckRecord.getCompany()) && StringUtils.isNotBlank(data.getCompany())
-            && data.getCompany().equalsIgnoreCase(cmrCheckRecord.getCompany()) && ("BPQS".equalsIgnoreCase(cmrCheckRecord.getUsRestrictTo()))
-            && "D".equalsIgnoreCase(cmrCheckRecord.getUsBpAccType())) {
+        if (StringUtils.isNotBlank(data.getRestrictTo()) && data.getRestrictTo().equals(cmrCheckRecord.getUsRestrictTo())
+            && StringUtils.isNotBlank(cmrCheckRecord.getDept())
+            && (cmrCheckRecord.getDept().toUpperCase().contains("E-HOST") || cmrCheckRecord.getDept().toUpperCase().contains("EHOST"))) {
           cmrCheckMatchesTmp.add(cmrCheckRecord);
         }
       }

@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -98,12 +99,23 @@ public class DuplicateChecksUtil {
           request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
         }
       }
-      if (StringUtils.isNotBlank(addr.getDept()) && addr.getDept().toUpperCase().contains("POOL")) {
+      if (USUtil.SC_BP_POOL.equals(data.getCustSubGrp())
+          || (StringUtils.isNotBlank(addr.getDept()) && addr.getDept().toUpperCase().contains("POOL"))) {
         if ("TT2".equals(data.getCsoSite())) {
           request.setUsCsoSite("TT2");
         } else if ("P".equals(data.getBpAcctTyp())) {
           request.setUsBpAccType("P");
         }
+      }
+
+      if (USUtil.SC_BP_DEVELOP.equals(data.getCustSubGrp()) || (StringUtils.isNotBlank(addr.getDept())
+          && (addr.getDept().toUpperCase().contains("DEMO DEV") || addr.getDept().toUpperCase().contains("DEVELOPMENT")))) {
+        request.setUsBpAccType("D");
+      }
+
+      if (USUtil.SC_BP_E_HOST.equals(data.getCustSubGrp()) || (StringUtils.isNotBlank(addr.getDept())
+          && (addr.getDept().toUpperCase().contains("E-HOST") || addr.getDept().toUpperCase().contains("EHOST")))) {
+        request.setUsBpAccType("E");
       }
 
       request.setUsRestrictTo(data.getRestrictTo());

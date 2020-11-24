@@ -256,7 +256,7 @@ public class USBPDevelopHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
       details.append(" - Tax Class / Code 1: " + "J000" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J000");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "TAX_CD1", data.getTaxCd1(), "J000");
 
       details.append(" - Tax Exempt Status: " + "Z" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "Z");
@@ -269,7 +269,7 @@ public class USBPDevelopHandler extends USBPHandler {
       // "AFFILIATE", data.getAffiliate(), data.getEnterprise());
 
       details.append(" - Tax Class / Code 1: " + "J666" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", " TAX_CD1", data.getTaxCd1(), "J666");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "TAX_CD1", data.getTaxCd1(), "J666");
 
       details.append(" - Tax Exempt Status: " + "" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
