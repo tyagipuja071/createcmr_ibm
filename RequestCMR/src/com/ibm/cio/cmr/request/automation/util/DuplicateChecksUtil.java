@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import com.ibm.cio.cmr.request.automation.AutomationEngineData;
 import com.ibm.cio.cmr.request.automation.util.geo.SpainUtil;
 import com.ibm.cio.cmr.request.automation.util.geo.UKIUtil;
+import com.ibm.cio.cmr.request.automation.util.geo.USUtil;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
@@ -98,7 +99,8 @@ public class DuplicateChecksUtil {
           request.setCustomerName(admin.getMainCustNm1() + (StringUtils.isBlank(admin.getMainCustNm2()) ? "" : " " + admin.getMainCustNm2()));
         }
       }
-      if (StringUtils.isNotBlank(addr.getDept()) && addr.getDept().toUpperCase().contains("POOL")) {
+      if (USUtil.SC_BP_POOL.equals(data.getCustSubGrp())
+          || (StringUtils.isNotBlank(addr.getDept()) && addr.getDept().toUpperCase().contains("POOL"))) {
         if ("TT2".equals(data.getCsoSite())) {
           request.setUsCsoSite("TT2");
         } else if ("P".equals(data.getBpAcctTyp())) {
