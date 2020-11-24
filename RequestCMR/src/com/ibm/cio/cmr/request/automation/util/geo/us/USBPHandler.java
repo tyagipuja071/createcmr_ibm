@@ -113,7 +113,7 @@ public abstract class USBPHandler {
       "ICC LEASE DEVELOPMENT/DEV", "IDL LEASE DEVELOPMENT/DEV", "POOL");
 
   private boolean waiting;
-  protected FindCMRRecordModel ibmCmr;
+  private FindCMRRecordModel ibmCmr;
 
   public static USBPHandler getBPHandler(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData) {
     Data data = requestData.getData();
@@ -186,13 +186,14 @@ public abstract class USBPHandler {
    * @param childCompleted
    * @param childRequest
    * @param handler
+   * @param ibmCmr
    * @param overrides
    * @return
    * @throws Exception
    */
   public abstract boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
-      OverrideOutput overrides) throws Exception;
+      FindCMRRecordModel ibmCmr, OverrideOutput overrides) throws Exception;
 
   /**
    * Copies the IBM codes from the CMRs and fills the BO codes with the given
@@ -205,9 +206,10 @@ public abstract class USBPHandler {
    * @param details
    * @param overrides
    * @param childRequest
+   * @param ibmCmr
    */
   public abstract void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      StringBuilder details, OverrideOutput overrides, RequestData childRequest);
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr);
 
   /**
    * Performs final Validations on the request before allowing for completion
@@ -216,10 +218,11 @@ public abstract class USBPHandler {
    * @param requestData
    * @param details
    * @param overrides
+   * @param ibmCmr
    * @param result
    */
   public abstract void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result);
+      FindCMRRecordModel ibmCmr, AutomationResult<OverrideOutput> result);
 
   /**
    * Filters through the IBM CMR matches found to find the best match
@@ -299,7 +302,7 @@ public abstract class USBPHandler {
    * @param childRequest
    */
   public void createAddressOverrides(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
     Addr installAt = requestData.getAddress("ZS01");
     boolean createAddressOverrides = false;
     String mainCustNm1 = "";
@@ -310,7 +313,7 @@ public abstract class USBPHandler {
     String postalCd = "";
     String stateProv = "";
     String county = "";
-    String dept = "";
+    String countyNm = "";
     String phone = "";
     String fax = "";
     String transportZone = "";
@@ -329,7 +332,7 @@ public abstract class USBPHandler {
       postalCd = childInstallAt.getPostCd();
       stateProv = childInstallAt.getStateProv();
       county = childInstallAt.getCounty();
-      dept = childInstallAt.getDept();
+      countyNm = childInstallAt.getCountyName();
       phone = childInstallAt.getCustPhone();
       fax = childInstallAt.getCustFax();
       transportZone = childInstallAt.getTransportZone();
@@ -348,8 +351,8 @@ public abstract class USBPHandler {
       city1 = ibmCmr.getCmrCity();
       postalCd = ibmCmr.getCmrPostalCode();
       stateProv = ibmCmr.getCmrState();
-      county = ibmCmr.getCmrCounty();
-      dept = ibmCmr.getCmrDept();
+      county = ibmCmr.getCmrCountyCode();
+      countyNm = ibmCmr.getCmrCounty();
       phone = ibmCmr.getCmrCustPhone();
       fax = ibmCmr.getCmrCustFax();
       transportZone = ibmCmr.getCmrTransportZone();
@@ -432,41 +435,53 @@ public abstract class USBPHandler {
       if (!StringUtils.equals(installAt.getCounty(), county)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "COUNTY", installAt.getCounty(),
             StringUtils.isNotBlank(county) ? county.trim() : "");
+      }
+
+      if (!StringUtils.equals(installAt.getCounty(), county)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "COUNTY_NAME", installAt.getCountyName(),
-            StringUtils.isNotBlank(county) ? county.trim() : "");
-        details.append("Updated County to " + (StringUtils.isNotBlank(county) ? county.trim() : "-blank-")).append("\n");
+            StringUtils.isNotBlank(countyNm) ? countyNm.trim() : "");
+        details.append("Updated County to " + (StringUtils.isNotBlank(countyNm) ? countyNm.trim() : "-blank-")).append("\n");
       }
 
       if (!StringUtils.equals(installAt.getCustPhone(), phone)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "CUST_PHONE", installAt.getCustPhone(),
             StringUtils.isNotBlank(phone) ? phone.trim() : "");
-        details.append("Updated Phone to " + (StringUtils.isNotBlank(phone) ? phone.trim() : "-blank-")).append("\n");
+        // details.append("Updated Phone to " + (StringUtils.isNotBlank(phone) ?
+        // phone.trim() : "-blank-")).append("\n");
       }
 
       if (!StringUtils.equals(installAt.getCustFax(), fax)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "CUST_FAX", installAt.getCustFax(),
             StringUtils.isNotBlank(fax) ? fax.trim() : "");
-        details.append("Updated Fax to " + (StringUtils.isNotBlank(fax) ? fax.trim() : "-blank-")).append("\n");
+        // details.append("Updated Fax to " + (StringUtils.isNotBlank(fax) ?
+        // fax.trim() : "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getCity2(), district)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "CITY2", installAt.getCity2(),
             StringUtils.isNotBlank(district) ? district.trim() : "");
-        details.append("Updated District to " + (StringUtils.isNotBlank(district) ? district.trim() : "-blank-")).append("\n");
+        // details.append("Updated District to " +
+        // (StringUtils.isNotBlank(district) ? district.trim() :
+        // "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getBldg(), building)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "BLDG", installAt.getBldg(),
             StringUtils.isNotBlank(building) ? building.trim() : "");
-        details.append("Updated Building to " + (StringUtils.isNotBlank(building) ? building.trim() : "-blank-")).append("\n");
+        // details.append("Updated Building to " +
+        // (StringUtils.isNotBlank(building) ? building.trim() :
+        // "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getFloor(), floor)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "FLOOR", installAt.getFloor(),
             StringUtils.isNotBlank(floor) ? floor.trim() : "");
-        details.append("Updated Floor to " + (StringUtils.isNotBlank(floor) ? floor.trim() : "-blank-")).append("\n");
+        // details.append("Updated Floor to " + (StringUtils.isNotBlank(floor) ?
+        // floor.trim() : "-blank-")).append("\n");
       }
       if (!StringUtils.equals(installAt.getTransportZone(), transportZone)) {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "TRANSPORT_ZONE", installAt.getTransportZone(),
             StringUtils.isNotBlank(transportZone) ? transportZone.trim() : "");
-        details.append("Updated Transport Zone to " + (StringUtils.isNotBlank(transportZone) ? transportZone.trim() : "-blank-")).append("\n");
+        // details.append("Updated Transport Zone to " +
+        // (StringUtils.isNotBlank(transportZone) ? transportZone.trim() :
+        // "-blank-")).append("\n");
       }
     }
     invoiceToOverrides(requestData, overrides, entityManager);
@@ -1020,8 +1035,8 @@ public abstract class USBPHandler {
 
       // try to check once if an ibm direct cmr is available
       LOG.debug("Trying to check once for a CMR for the record");
-      ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, rejectionCmrNo);
-      if (ibmCmr != null) {
+      this.ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, rejectionCmrNo);
+      if (this.ibmCmr != null) {
         setError = false;
       }
 
@@ -1043,8 +1058,8 @@ public abstract class USBPHandler {
         output.setResults("Issues Encountered");
         return false;
       } else {
-        LOG.debug("Child Request was not completed, but CMR " + ibmCmr.getCmrNum() + "(" + ibmCmr.getCmrName() + ") was found.");
-        details.append("Child Request was not completed, but CMR " + ibmCmr.getCmrNum() + "(" + ibmCmr.getCmrName() + ") was found.\n");
+        LOG.debug("Child Request was not completed, but CMR " + this.ibmCmr.getCmrNum() + "(" + this.ibmCmr.getCmrName() + ") was found.");
+        details.append("Child Request was not completed, but CMR " + this.ibmCmr.getCmrNum() + "(" + this.ibmCmr.getCmrName() + ") was found.\n");
         return true;
       }
     } else if (!"COM".equals(childReqStatus)) {
@@ -1287,12 +1302,11 @@ public abstract class USBPHandler {
   }
 
   /**
-   * returns true if the child request checks are to be performed for a certain
-   * scenario
+   * returns true if the End user scenario type scenario
    *
    * @return
    */
-  public boolean isChildRequestSupported() {
+  public boolean isEndUserSupported() {
     return true;
   }
 
@@ -1344,6 +1358,41 @@ public abstract class USBPHandler {
     }
 
     return true;
+  }
+
+  public FindCMRRecordModel getIbmCmr(EntityManager entityManager, GEOHandler handler, RequestData requestData, StringBuilder details, Addr zs01,
+      AutomationEngineData engineData, RequestData childRequest, boolean childCompleted) throws Exception {
+    if (this.ibmCmr == null) {
+      String childCmrNo = null;
+
+      if (childRequest != null) {
+        childCmrNo = childRequest.getData().getCmrNo();
+      }
+      // prioritize child request here
+      if (childCompleted) {
+        details.append("Copying CMR values direct CMR " + childCmrNo + " from Child Request " + childRequest.getAdmin().getId().getReqId() + ".\n");
+        this.ibmCmr = createIBMCMRFromChild(childRequest);
+      } else {
+        // check IBM Direct CMR
+        if (this.ibmCmr == null) {
+          // if a rejected child caused the retrieval of a child cmr
+          this.ibmCmr = findIBMCMR(entityManager, handler, requestData, zs01, engineData, childCmrNo);
+        }
+        if (this.ibmCmr != null) {
+          details.append("Copying CMR values CMR " + ibmCmr.getCmrNum() + " from FindCMR.\n");
+          LOG.debug("IBM Direct CMR Found: " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName());
+        }
+      }
+    }
+    return this.ibmCmr;
+  }
+
+  public FindCMRRecordModel getIbmCmr() {
+    return this.ibmCmr;
+  }
+
+  public void setIbmCmr(FindCMRRecordModel ibmCmr) {
+    this.ibmCmr = ibmCmr;
   }
 
 }

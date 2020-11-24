@@ -78,33 +78,12 @@ public class USBPEndUserHandler extends USBPHandler {
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
-      OverrideOutput overrides) throws Exception {
+      FindCMRRecordModel ibmCmr, OverrideOutput overrides) throws Exception {
 
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     Addr addr = requestData.getAddress("ZS01");
     long childReqId = admin.getChildReqId();
-
-    String childCmrNo = null;
-
-    if (childRequest != null) {
-      childCmrNo = childRequest.getData().getCmrNo();
-    }
-    // prioritize child request here
-    if (childCompleted) {
-      details.append("Copying CMR values direct CMR " + childCmrNo + " from Child Request " + childReqId + ".\n");
-      ibmCmr = createIBMCMRFromChild(childRequest);
-    } else {
-      // check IBM Direct CMR
-      if (ibmCmr == null) {
-        // if a rejected child caused the retrieval of a child cmr
-        ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
-      }
-      if (ibmCmr != null) {
-        details.append("Copying CMR values CMR " + ibmCmr.getCmrNum() + " from FindCMR.\n");
-        LOG.debug("IBM Direct CMR Found: " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName());
-      }
-    }
 
     // match against D&B
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);
@@ -172,7 +151,7 @@ public class USBPEndUserHandler extends USBPHandler {
 
   @Override
   public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
 
     Data data = requestData.getData();
     if (ibmCmr != null) {
@@ -327,7 +306,7 @@ public class USBPEndUserHandler extends USBPHandler {
       }
     }
 
-    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest);
+    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest, ibmCmr);
 
     if (!hasFieldError) {
       details.append("Branch Office codes computed successfully.");
@@ -338,7 +317,7 @@ public class USBPEndUserHandler extends USBPHandler {
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result) {
+      FindCMRRecordModel ibmCmr, AutomationResult<OverrideOutput> result) {
     // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
     Data data = requestData.getData();
     details.append("\n");

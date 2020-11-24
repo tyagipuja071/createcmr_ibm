@@ -134,7 +134,7 @@ public class USLeasingHandler extends USBPHandler {
 
   @Override
   public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
 
     Data data = requestData.getData();
     if (ibmCmr != null) {
@@ -227,7 +227,7 @@ public class USLeasingHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
     }
 
-    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest);
+    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest, ibmCmr);
 
     // do final checks on request data
     Admin admin = requestData.getAdmin();
@@ -253,39 +253,18 @@ public class USLeasingHandler extends USBPHandler {
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result) {
+      FindCMRRecordModel ibmCmr, AutomationResult<OverrideOutput> result) {
     // NOOP
   }
 
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
-      OverrideOutput overrides) throws Exception {
+      FindCMRRecordModel ibmCmr, OverrideOutput overrides) throws Exception {
 
     Admin admin = requestData.getAdmin();
     Addr addr = requestData.getAddress("ZS01");
     long childReqId = admin.getChildReqId();
-
-    String childCmrNo = null;
-
-    if (childRequest != null) {
-      childCmrNo = childRequest.getData().getCmrNo();
-    }
-    // prioritize child request here
-    if (childCompleted) {
-      details.append("Copying CMR values direct CMR " + childCmrNo + " from Child Request " + childReqId + ".\n");
-      ibmCmr = createIBMCMRFromChild(childRequest);
-    } else {
-      // check IBM Direct CMR
-      if (ibmCmr == null) {
-        // if a rejected child caused the retrieval of a child cmr
-        ibmCmr = findIBMCMR(entityManager, handler, requestData, addr, engineData, childCmrNo);
-      }
-      if (ibmCmr != null) {
-        details.append("Copying CMR values CMR " + ibmCmr.getCmrNum() + " from FindCMR.\n");
-        LOG.debug("IBM Direct CMR Found: " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName());
-      }
-    }
 
     // match against D&B
     DnBMatchingResponse dnbMatch = matchAgainstDnB(handler, requestData, addr, engineData, details, overrides, ibmCmr != null);

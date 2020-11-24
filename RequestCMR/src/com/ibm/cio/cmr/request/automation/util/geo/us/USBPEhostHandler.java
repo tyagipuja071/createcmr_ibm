@@ -78,6 +78,15 @@ public class USBPEhostHandler extends USBPHandler {
       return true;
     }
 
+    String mainCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
+    String endUserNm = (StringUtils.isNotBlank(addr.getDivn()) ? addr.getDivn() : "");
+    if ((StringUtils.isNotBlank(data.getEnterprise()) && data.getEnterprise().equals(data.getAffiliate()))
+        || (StringUtils.isBlank(data.getAffiliate()) && AutomationUtil.getCleanString(mainCustNm).equals(AutomationUtil.getCleanString(endUserNm)))) {
+      this.cmrType = T1;
+    } else {
+      this.cmrType = T2;
+    }
+
     return false;
 
   }
@@ -85,21 +94,13 @@ public class USBPEhostHandler extends USBPHandler {
   @Override
   public boolean processRequest(EntityManager entityManager, RequestData requestData, AutomationEngineData engineData,
       AutomationResult<OverrideOutput> output, StringBuilder details, boolean childCompleted, RequestData childRequest, GEOHandler handler,
-      OverrideOutput overrides) throws Exception {
+      FindCMRRecordModel ibmCmr, OverrideOutput overrides) throws Exception {
     Data data = requestData.getData();
     Admin admin = requestData.getAdmin();
     long childReqId = admin.getChildReqId();
     Addr zs01 = requestData.getAddress("ZS01");
-    String mainCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
-    String endUserNm = (StringUtils.isNotBlank(zs01.getDivn()) ? zs01.getDivn() : "");
-    if ((StringUtils.isNotBlank(data.getEnterprise()) && data.getEnterprise().equals(data.getAffiliate()))
-        || (StringUtils.isBlank(data.getAffiliate()) && AutomationUtil.getCleanString(mainCustNm).equals(AutomationUtil.getCleanString(endUserNm)))) {
-      this.cmrType = T1;
-      details.append("Processing BP E-host request for Scenario #1\n");
-    } else {
-      this.cmrType = T2;
-      details.append("Processing BP E-host request for Scenario #2\n");
-    }
+
+    details.append("Processing BP Development request for Scenario #" + (T1.equals(this.cmrType) ? "1" : "2") + "\n");
 
     if (T2.equals(this.cmrType) && !AutomationUtil.checkPPSCEID(data.getPpsceid())) {
       output.setResults("Invalid CEID");
@@ -107,27 +108,6 @@ public class USBPEhostHandler extends USBPHandler {
       engineData.addRejectionComment("CEID", "Only BP with valid CEID is allowed to setup a T2 Ehost record, please check and confirm.", "", "");
       output.setOnError(true);
       return false;
-    }
-
-    String childCmrNo = null;
-
-    if (childRequest != null) {
-      childCmrNo = childRequest.getData().getCmrNo();
-    }
-    // prioritize child request here
-    if (childCompleted) {
-      details.append("Copying CMR values direct CMR " + childCmrNo + " from Child Request " + childReqId + ".\n");
-      ibmCmr = createIBMCMRFromChild(childRequest);
-    } else {
-      // check IBM Direct CMR
-      if (ibmCmr == null) {
-        // if a rejected child caused the retrieval of a child cmr
-        ibmCmr = findIBMCMR(entityManager, handler, requestData, zs01, engineData, childCmrNo);
-      }
-      if (ibmCmr != null) {
-        details.append("Copying CMR values CMR " + ibmCmr.getCmrNum() + " from FindCMR.\n");
-        LOG.debug("IBM Direct CMR Found: " + ibmCmr.getCmrNum() + " - " + ibmCmr.getCmrName());
-      }
     }
 
     // match against D&B
@@ -187,7 +167,7 @@ public class USBPEhostHandler extends USBPHandler {
 
   @Override
   public void copyAndFillIBMData(EntityManager entityManager, GEOHandler handler, RequestData requestData, AutomationEngineData engineData,
-      StringBuilder details, OverrideOutput overrides, RequestData childRequest) {
+      StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
     Data data = requestData.getData();
     // String custGrp = data.getCustGrp();
     Addr zs01 = requestData.getAddress("ZS01");
@@ -287,7 +267,7 @@ public class USBPEhostHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SPECIAL_TAX_CD", data.getSpecialTaxCd(), "");
     }
 
-    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest);
+    createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest, ibmCmr);
 
     details.append(" - Dept/Attn: -------E-HOSTING-------\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-------E-HOSTING-------");
@@ -318,7 +298,7 @@ public class USBPEhostHandler extends USBPHandler {
 
   @Override
   public void doFinalValidations(AutomationEngineData engineData, RequestData requestData, StringBuilder details, OverrideOutput overrides,
-      AutomationResult<OverrideOutput> result) {
+      FindCMRRecordModel ibmCmr, AutomationResult<OverrideOutput> result) {
 
     // // CMR-3334 - do some last checks on Enterprise/Affiliate/Company
     Data data = requestData.getData();
@@ -394,7 +374,7 @@ public class USBPEhostHandler extends USBPHandler {
   }
 
   @Override
-  public boolean isChildRequestSupported() {
+  public boolean isEndUserSupported() {
     return true;
   }
 
