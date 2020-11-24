@@ -17,6 +17,7 @@ import com.ibm.cio.cmr.request.automation.util.geo.us.USBPHandler;
 import com.ibm.cio.cmr.request.entity.Addr;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
+import com.ibm.cio.cmr.request.model.requestentry.FindCMRRecordModel;
 import com.ibm.cio.cmr.request.util.geo.impl.USHandler;
 
 /**
@@ -79,28 +80,30 @@ public class USBusinessPartnerElement extends OverridingElement implements Proce
     USHandler handler = new USHandler();
     OverrideOutput overrides = new OverrideOutput(false);
     StringBuilder details = new StringBuilder();
+    FindCMRRecordModel ibmCmr = null;
 
     long childReqId = admin.getChildReqId();
     RequestData childRequest = null;
     boolean childCompleted = false;
-    if (childReqId > 0 && bpHandler.isChildRequestSupported()) {
+    if (childReqId > 0 && bpHandler.isEndUserSupported()) {
       childRequest = new RequestData(entityManager, childReqId);
       childCompleted = bpHandler.checkIfChildRequestCompleted(entityManager, engineData, requestData, childRequest, details, output, handler);
       if (!childCompleted) {
         this.waiting = bpHandler.isWaiting();
         return output;
       }
+      ibmCmr = bpHandler.getIbmCmr(entityManager, handler, requestData, details, addr, engineData, childRequest, childCompleted);
     }
 
     boolean processed = bpHandler.processRequest(entityManager, requestData, engineData, output, details, childCompleted, childRequest, handler,
-        overrides);
+        ibmCmr, overrides);
     // check if request should wait
     this.waiting = bpHandler.isWaiting();
     if (processed && !this.waiting) {
       // copy from IBM Direct if found, and fill the rest of BO codes
-      bpHandler.copyAndFillIBMData(entityManager, handler, requestData, engineData, details, overrides, childRequest);
+      bpHandler.copyAndFillIBMData(entityManager, handler, requestData, engineData, details, overrides, childRequest, ibmCmr);
 
-      bpHandler.doFinalValidations(engineData, requestData, details, overrides, output);
+      bpHandler.doFinalValidations(engineData, requestData, details, overrides, ibmCmr, output);
       output.setResults("Successful Execution.");
     } else if (this.waiting) {
       output.setResults("Waiting for Child request completion.");
