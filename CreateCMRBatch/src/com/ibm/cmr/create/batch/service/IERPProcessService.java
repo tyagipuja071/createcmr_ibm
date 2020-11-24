@@ -570,7 +570,7 @@ public class IERPProcessService extends BaseBatchService {
         isDataUpdated = DEHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
       } else {
         GEOHandler cntryHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
-        isDataUpdated = cntryHandler.isDataUpdated(data, dataRdc, data.getCmrIssuingCntry());
+        isDataUpdated = cntryHandler.isDataUpdate(data, dataRdc, data.getCmrIssuingCntry());
       }
 
       if (isDataUpdated && (notProcessed != null && notProcessed.size() > 0)) {

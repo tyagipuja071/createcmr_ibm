@@ -621,7 +621,8 @@ public abstract class BaseSOFHandler extends GEOHandler {
     return null;
   }
 
-  public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     return null;
   }
 }

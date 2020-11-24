@@ -868,7 +868,7 @@ public abstract class GEOHandler {
    * @param cmrIssuingCntry
    * @return
    */
-  public boolean isDataUpdated(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
+  public boolean isDataUpdate(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
     String srcName = null;
     Column srcCol = null;
     Field trgField = null;
@@ -883,7 +883,7 @@ public abstract class GEOHandler {
         }
 
         // check if at least one of the fields is updated
-        if (getDataFieldsForUpdateCheck(cmrIssuingCntry).contains(srcName)) {
+        if (getDataFieldsForUpdate(cmrIssuingCntry).contains(srcName)) {
           try {
             trgField = DataRdc.class.getDeclaredField(field.getName());
 
@@ -933,7 +933,7 @@ public abstract class GEOHandler {
   /**
    * @param cmrIssuingCntry
    */
-  public List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     // TODO Auto-generated method stub
     return null;
   }

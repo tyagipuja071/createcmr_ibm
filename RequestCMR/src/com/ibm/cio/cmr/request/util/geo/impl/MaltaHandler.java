@@ -1004,7 +1004,8 @@ public class MaltaHandler extends BaseSOFHandler {
     return newSeq;
   }
 
-  public static List<String> getDataFieldsForUpdateCheck(String cmrIssuingCntry) {
+  @Override
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
     List<String> fields = new ArrayList<>();
     // CMR-3171 - add ORB_BLK here
     fields.addAll(Arrays.asList("ABBREV_NM", "CLIENT_TIER", "CUST_CLASS", "CUST_PREF_LANG", "INAC_CD", "ISU_CD", "SEARCH_TERM", "ISIC_CD",
