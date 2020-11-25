@@ -9,7 +9,27 @@
   dojo.addOnLoad(function() {
     FilteringDropdown.loadItems('docContent', 'docContent_spinner', 'lov', 'fieldId=DocContent');
     FormManager.addValidator('filename', Validators.REQUIRED, [ '${ui.filename}' ]);
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var value = FormManager.getActualValue('filename');
+          console.log('value: '+value);
+          if (!value || value == '' || value.length == 0) {
+            return new ValidationResult(null, true);
+          } else {
+            console.log('filename: '+value);
+            var regex = /[^\u0000-\u007f]/;
+            console.log('test: '+regex.test(value));
+            if (regex.test(value) || value.indexOf('~') >= 0){
+              return new ValidationResult(null, false, 'Filename must not contain non-Latin characters and tilde(~).');
+            }
+          }
+          return new ValidationResult(null, true);
+        }
+      };
+    })(), null, 'frmCMR_addAttachmentModal');
     FormManager.addValidator('docContent', Validators.REQUIRED, [ '${ui.content}' ]);
+    console.log('added..');
   });
 </script>
 
