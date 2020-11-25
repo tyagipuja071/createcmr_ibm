@@ -21,6 +21,17 @@ function requestResultGrid_GRID_onLoad(data){
   
 }
 </script>
+<style>
+.ibm-columns {
+  width: 1150px;
+}
+.ibm-col-1-1 {
+  width: 1150px;
+}
+div.cmr-sub {
+  padding-left: 0;
+}
+</style>
 
 <form:form method="POST" action="${contextPath}/workflow/results" name="frmCMR" class="ibm-column-form ibm-styled-form" modelAttribute="requestSearchCriteriaModel">
 
@@ -66,7 +77,7 @@ function requestResultGrid_GRID_onLoad(data){
 
     <cmr:section id="GRIDSECTION">
       <br>
-      <cmr:grid url="/workflow/search/results/list.json" id="requestResultGrid" useFilter="true">
+      <cmr:grid url="/workflow/search/results/list.json" id="requestResultGrid" useFilter="true" width="1120" innerWidth="1120">
         <cmr:gridParam fieldId="wfProcCentre" value="${requestSearchCriteriaModel.wfProcCentre}" />
         <cmr:gridParam fieldId="customerName" value="${requestSearchCriteriaModel.customerName}" />
         <cmr:gridParam fieldId="requestId" value="${requestSearchCriteriaModel.requestId}" />

@@ -1066,6 +1066,7 @@ var _moveOk = false;
 
 function addMoveHandler() {
   window.addEventListener('scroll', moveYourActions);
+  moveYourActions();
   return;
 }
 /**
@@ -1077,7 +1078,7 @@ function moveYourActions(e) {
   var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   if ((scrollTop) > 157) {
     elem.css({
-      'top' : 33
+      'top' : 0
     });
   } else {
     var pos = $('#ibm-secondary-tabs').offset();

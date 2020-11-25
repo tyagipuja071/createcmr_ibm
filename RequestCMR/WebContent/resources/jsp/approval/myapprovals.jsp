@@ -30,6 +30,16 @@
   font-size: 10px;
   padding-right: 3px;
 }
+.ibm-columns {
+  width: 1150px;
+}
+.ibm-col-1-1 {
+  width: 1150px;
+}
+div.cmr-sub {
+  padding-left: 0;
+}
+
 </style>
 <script src="${resourcesPath}/js/requestentry/attachment.js?${cmrv}" type="text/javascript"></script>
 <script src="${resourcesPath}/js/requestentry/myapprovals.js?${cmrv}" type="text/javascript"></script>
@@ -61,7 +71,7 @@
           <h3>List of <%="Y".equals(pending) ? "My Pending Approvals" : "All My Approvals"%></h3>
         </cmr:column>
       </cmr:row>
-      <cmr:grid url="/myappr/list.json" id="myApprovalsGrid" useFilter="true" hasCheckbox="true" checkBoxKeys="reqId,approvalId">
+      <cmr:grid url="/myappr/list.json" id="myApprovalsGrid" useFilter="true" hasCheckbox="true" checkBoxKeys="reqId,approvalId" width="1120" innerWidth="1120">
         <cmr:gridParam fieldId="approverId" value="<%=user.getIntranetId()%>" />
         <cmr:gridParam fieldId="pendingOnly" value="<%=pending%>" />
         <cmr:gridCol width="60px" field="reqId" header="Request ID" align="right">

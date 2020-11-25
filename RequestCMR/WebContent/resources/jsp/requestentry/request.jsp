@@ -258,6 +258,11 @@ div.cmr-tabs {
 div#ibm-content-main {
   padding-top: 20px;
 }
+
+div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
+  padding-top: 15px !important;
+}
+
 </style>
 <cmr:model model="reqentry" />
 <cmr:boxContent>
@@ -395,7 +400,7 @@ div#ibm-content-main {
       <form:hidden path="paygoProcessIndc" />
 	
     <!-- Your Actions Dropdown -->
-    <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : ""}" style="display: none">
+    <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? " view-only" : " cmr-actions-locked"}" style="display: none">
       <c:if test="${sourceSystem != null }">
       <div class="cmr-source-sys-txt"><span class="cmr-source-sub">Source:</span> ${sourceSystem}</div>
       </c:if>
