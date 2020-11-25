@@ -552,6 +552,7 @@ public abstract class USBPHandler {
     ibmCmrModel.setCmrCoverage(completedChildData.getCovId());
     ibmCmrModel.setCmrCoverageName(completedChildData.getCovDesc());
     ibmCmrModel.setCmrName(childRequest.getAdmin().getMainCustNm1());
+    ibmCmrModel.setUsCmrCsoSite(completedChildData.getCsoSite());
 
     return ibmCmrModel;
   }

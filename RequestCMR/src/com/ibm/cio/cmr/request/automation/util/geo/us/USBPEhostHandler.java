@@ -83,11 +83,21 @@ public class USBPEhostHandler extends USBPHandler {
       return true;
     }
 
-    String mainCustNm = admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : "");
-    String endUserNm = (StringUtils.isNotBlank(addr.getDivn()) ? addr.getDivn() : "");
-    if ((StringUtils.isNotBlank(data.getEnterprise()) && data.getEnterprise().equals(data.getAffiliate()))
-        || (StringUtils.isBlank(data.getAffiliate()) && AutomationUtil.getCleanString(mainCustNm).equals(AutomationUtil.getCleanString(endUserNm)))) {
+    String mainCustNm = AutomationUtil
+        .getCleanString(admin.getMainCustNm1() + (StringUtils.isNotBlank(admin.getMainCustNm2()) ? " " + admin.getMainCustNm2() : ""));
+    String endUserNm = AutomationUtil.getCleanString(StringUtils.isNotBlank(addr.getDivn()) ? addr.getDivn() : "");
+    if (StringUtils.isNotBlank(data.getEnterprise()) && data.getEnterprise().equals(data.getAffiliate())) {
       this.cmrType = T1;
+    } else if (StringUtils.isBlank(data.getAffiliate())) {
+      if (((mainCustNm.contains("ARROW ENTERPRISE") || mainCustNm.contains("ARROW ELECTRONICS"))
+          && (endUserNm.contains("ARROW ENTERPRISE") || endUserNm.contains("ARROW ELECTRONICS")))
+          || (mainCustNm.contains("INGRAM MICRO") && endUserNm.contains("INGRAM MICRO"))
+          || ((mainCustNm.contains("AVT TECHNOLOGY") || mainCustNm.contains("AVNET") || mainCustNm.contains("TECH DATA"))
+              && (endUserNm.contains("AVT TECHNOLOGY") || endUserNm.contains("AVNET") || endUserNm.contains("TECH DATA")))) {
+        this.cmrType = T1;
+      } else {
+        this.cmrType = T2;
+      }
     } else {
       this.cmrType = T2;
     }

@@ -56,8 +56,8 @@ public class CopyAttachmentUtil {
     user.setBluePagesName(requestData.getAdmin().getRequesterNm());
     if (attachment != null) {
       String docLink = attachment.getId().getDocLink();
-      String fileName = docLink + ".zip";
-      File file = new File(fileName);
+      // String fileName = docLink + ".zip";
+      File file = new File(docLink);
       // JZ: add here the last 3 historical locations of the file
       if (!file.exists()) {
         String name = file.getName();
