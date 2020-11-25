@@ -1,8 +1,8 @@
 package com.ibm.cio.cmr.request.automation.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -85,7 +85,7 @@ public class CopyAttachmentUtil {
         Enumeration<?> entry = zip.entries();
         if (entry.hasMoreElements()) {
           ZipEntry document = (ZipEntry) entry.nextElement();
-          ByteArrayInputStream is = (ByteArrayInputStream) zip.getInputStream(document);
+          InputStream is = zip.getInputStream(document);
           try {
             String dlfileName = docLink.substring(docLink.lastIndexOf("/") + 1);
             String type = "";
