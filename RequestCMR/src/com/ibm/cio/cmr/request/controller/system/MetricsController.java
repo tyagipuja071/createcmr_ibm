@@ -24,6 +24,7 @@ import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.code.FieldInfoModel;
 import com.ibm.cio.cmr.request.model.system.MetricsChart;
 import com.ibm.cio.cmr.request.model.system.MetricsModel;
+import com.ibm.cio.cmr.request.service.system.AutoStatsService;
 import com.ibm.cio.cmr.request.service.system.MetricsService;
 import com.ibm.cio.cmr.request.service.system.RequesterStatService;
 import com.ibm.cio.cmr.request.service.system.SquadStatisticsService;
@@ -55,6 +56,9 @@ public class MetricsController extends BaseController {
 
   @Autowired
   private RequesterStatService requesterService;
+
+  @Autowired
+  private AutoStatsService autoStatsService;
 
   /**
    * Handles the metrics page
@@ -180,6 +184,38 @@ public class MetricsController extends BaseController {
     metrics.setDateTo(now);
     ModelAndView mv = new ModelAndView("requesterstats", "metrics", metrics);
     setPageKeys("METRICS", "METRICS_RSTATS", mv);
+    return mv;
+
+  }
+
+  /**
+   * Handles the metrics page
+   * 
+   * @param request
+   * @param model
+   * @return
+   */
+  @RequestMapping(value = "/metrics/autostats", method = RequestMethod.GET)
+  public ModelAndView showAutomationStatsPage(HttpServletRequest request, ModelMap model) {
+    AppUser user = AppUser.getUser(request);
+    if (!user.isAdmin() && !user.isCmde() && !user.isProcessor()) {
+      LOG.warn("User " + user.getIntranetId() + " (" + user.getBluePagesName() + ") tried accessing the Fields system function.");
+      ModelAndView mv = new ModelAndView("noaccess", "fields", new FieldInfoModel());
+      return mv;
+    }
+    MetricsModel metrics = new MetricsModel();
+    Calendar cal = new GregorianCalendar();
+    cal.setTime(new Date());
+    String now = MetricsService.FORMATTER.format(cal.getTime());
+    for (int i = 1; i <= 29; i++) {
+      cal.add(Calendar.DATE, -1);
+    }
+    String prev = MetricsService.FORMATTER.format(cal.getTime());
+
+    metrics.setDateFrom(prev);
+    metrics.setDateTo(now);
+    ModelAndView mv = new ModelAndView("autostats", "metrics", metrics);
+    setPageKeys("METRICS", "METRICS_ASTATS", mv);
     return mv;
 
   }
@@ -342,6 +378,48 @@ public class MetricsController extends BaseController {
     } catch (Exception e) {
       LOG.debug("Cannot export Requester statistics", e);
     }
+  }
+
+  @RequestMapping(value = "/metrics/autoexport")
+  public void generateAutomationStatistics(HttpServletRequest request, HttpServletResponse response, MetricsModel model) throws CmrException {
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", model);
+    try {
+      RequestStatsContainer container = autoStatsService.process(request, params);
+      if (container != null) {
+        autoStatsService.exportToExcel(container, model, response);
+      }
+    } catch (Exception e) {
+      LOG.debug("Cannot export Requester statistics", e);
+    }
+  }
+
+  /**
+   * Handles the param listing page
+   * 
+   * @param request
+   * @param model
+   * @return
+   * @throws CmrException
+   */
+  @RequestMapping(value = "/metrics/autochart")
+  public ModelMap generateAutomationChart(HttpServletRequest request, MetricsModel model) throws CmrException {
+    ModelMap map = new ModelMap();
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", model);
+    params.addParam("export", false);
+    params.addParam("buildSummary", "Y");
+    try {
+      RequestStatsContainer container = autoStatsService.process(request, params);
+      map.addAttribute("success", true);
+      map.addAttribute("error", null);
+      map.addAttribute("data", container.getAutomationSummary());
+    } catch (Exception e) {
+      map.addAttribute("success", false);
+      map.addAttribute("data", null);
+      map.addAttribute("error", e.getMessage());
+    }
+    return map;
   }
 
 }

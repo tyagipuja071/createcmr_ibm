@@ -154,6 +154,9 @@ dojo.addOnLoad(function() {
   div#ibm-content-main {
     padding-top: 20px;
   }
+  div#cmr-info-box, div#cmr-error-box, div#cmr-validation-box {
+    padding-top: 15px !important;
+  }
 </style>
 
 <cmr:boxContent>
@@ -211,7 +214,7 @@ dojo.addOnLoad(function() {
     <%}%>
     
     <!-- Your Actions Dropdown -->
-    <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? "view-only" : ""}" style="display:none">
+    <div title="Your Actions" id="cmr-your-actions" class="cmr-actions ${yourActionsViewOnly == true ? "view-only" : " cmr-actions-locked"}" style="display:none">
       <div class="cmr-action-dd">
         <form:select cssStyle="width:260px" dojoType="dijit.form.FilteringSelect" id="yourAction" searchAttr="name" style="display: inline-block;" maxHeight="200" required="false" path="yourAction" placeHolder="${ui.yourAction}" />
         <img title="Proceed with the selected Action" class="cmr-proceed-icon" src="${resourcesPath}/images/go.png" onclick="processRequestAction()">

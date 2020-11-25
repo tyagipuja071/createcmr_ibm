@@ -205,8 +205,8 @@ public class LegacyDirectDuplicateProcessService extends LegacyDirectService {
 
         legacyAddr.setStreet(addr.getAddrTxt());
 
-        if (!StringUtils.isEmpty(addr.getCustPhone())) {
-          legacyAddr.setAddrPhone("TF" + addr.getCustPhone().trim());
+        if ("ZD01".equals(addr.getId().getAddrType()) && !StringUtils.isEmpty(addr.getCustPhone())) {
+          legacyAddr.setAddrPhone(addr.getCustPhone());
         }
         legacyAddr.setCity(addr.getCity1());
         legacyAddr.setContact(addr.getDept());

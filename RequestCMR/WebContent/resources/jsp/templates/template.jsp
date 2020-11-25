@@ -18,7 +18,6 @@ UIMgr.inject(request);
 request.setAttribute("cmrv", SystemConfiguration.getSystemProperty("BUILD"));
 AppUser user = AppUser.getUser(request);
 boolean approver = user != null && user.isApprover();
-
 %>
 
 <%-- Layout Tiles This layout create a html page with 
@@ -47,10 +46,10 @@ boolean approver = user != null && user.isApprover();
 	content="Web Application" />
 <meta name="Description" content="CMR Search" />
 <meta name="feedback" content="CMR Search Feedback" />
-
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
 
 <title><tiles:getAsString name="title" /></title>
-<script src="${resourcesPath}/js/w3.js" type="text/javascript">
+<script src="${resourcesPath}/js/w3.js?${cmrv}" type="text/javascript">
 	//
 </script>
 
@@ -71,63 +70,66 @@ boolean approver = user != null && user.isApprover();
 <script src="${resourcesPath}/js/cmr-windows.js?${cmrv}" type="text/javascript"></script>
 <script src="${resourcesPath}/js/facestypeahead-0.4.4.js"></script>
 <script src="${resourcesPath}/js/moment.js" type="text/javascript"></script>
-<link rel="stylesheet" href="${resourcesPath}/css/ext/w3.css"/>
+<link rel="stylesheet" href="${resourcesPath}/css/ext/w3.css?${cmrv}"/>
 <link rel="stylesheet" href="${resourcesPath}/css/ext/form.css"/>
 <link rel="stylesheet" href="${resourcesPath}/css/facestypeahead-0.4.4.css"/>
 
-<!-- nihilo grid --> 
+<!-- nihilo grid -->  
 <link rel="stylesheet" type="text/css" href="https://1.w3.s81c.com/common/js/dojo/1.6/dojox/grid/resources/nihiloGrid.css" />
 <link rel="stylesheet" type="text/css" href="https://1.w3.s81c.com/common/js/dojo/1.6/dijit/themes/nihilo/nihilo.css"/>
 
 <!-- nihilo grid end -->
 <link rel="stylesheet" type="text/css" href="https://1.w3.s81c.com/common/js/dojo/1.6/dojox/grid/enhanced/resources/EnhancedGrid.css" />
 <link rel="stylesheet" type="text/css" href="https://1.w3.s81c.com/common/js/dojo/1.6/dojox/grid/enhanced/resources/EnhancedGrid_rtl.css" />
-
+ 
 <link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr.css?${cmrv}" />
 <link rel="stylesheet" href="${resourcesPath}/css/ext/jquery-ui.css"/>
 <script src="${resourcesPath}/js/ext/jquery-1.10.2.js"></script>
 <script src="${resourcesPath}/js/ext/jquery-ui.js"></script>
+<link rel="stylesheet" type="text/css" href="${resourcesPath}/css/cmr-v2.css?${cmrv}" />
 
 <!-- typeahead, dates -->
 <script>
   window.jQuery = null;
 </script>
+<style>
+.ibm-spinner-large {
+  background:
+    url(${resourcesPath}/images/animated-progress-38x38c.webp)
+    no-repeat center center transparent;
+}
+</style>
 <jsp:include page="xbrowser.jsp" />
 </head>
 <body id="ibm-com" class="nihilo ibm-type" role="main" >
-
 	<tiles:useAttribute name="primaryTabId" ignore="true" />
 	<tiles:useAttribute name="secondaryTabId" ignore="true" />
 
 
-	<!-- OVERLAYS -->
+	<!-- OVERLAYS --> 
 	<jsp:include page="/resources/jsp/templates/overlays.jsp" />
 
 	<div id="ibm-loader-screen"></div>
-
+ 
 	<div id="ibm-top" class="ibm-landing-page ibm-liquid">
-		<tiles:insertAttribute name="header" />
-		<img id="ibm-print-masthead" width="43" height="15"
-			src="https://www.ibm.com/i/v17/t/ibm_logo_print.png" alt="" />
+  <tiles:insertAttribute name="header" />
 
 <%if (!AppUser.isLoggedOn(request)){%>	 
 		<div id="ibm-leadspace-head" class="ibm-alternate ibm-no-tabs">
 			<div id="ibm-leadspace-body">
 				<div class="ibm-columns">
-					<div class="ibm-col-1-1">
-						<h1>Login</h1>
+          <div class="ibm-col-1-1">
+            &nbsp;
+          </div>
+					<div class="ibm-col-1-1" style="padding-bottom:20px;margin-left:100px;">
+            <img src="${resourcesPath}/images/CreateCMRLogo.png" style="width:60px;height:60px;border-radius:8px;margin-right:10px">
+						<h1 style="width:300px;display:inline-block;vertical-align:top">Login</h1>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div id="ibm-content-nav"></div>
 <%} else {%>
-		<div id="ibm-leadspace-head" class="ibm-alternate ibm-no-tabs">
-			<div id="ibm-leadspace-body">
-				<tiles:insertAttribute name="breadcrumbs" /><br />
-			</div>
-		</div>
-
 		<div id="ibm-content-nav">
 			<tiles:insertAttribute name="tabs" />
 		</div>
@@ -159,23 +161,12 @@ boolean approver = user != null && user.isApprover();
 						
 					</div>
 				</div>
-				<!-- FEATURES_BEGIN -->
-				<div id="ibm-content-sidebar">
-					<div id="ibm-contact-module">
-						<!--IBM Contact Module-->
-					</div>
-					<div id="ibm-merchandising-module">
-						<!--IBM Web Merchandising Module-->
-					</div>
-				</div>
-				<!-- FEATURES_END --
 					<!-- CONTENT_BODY_END -->
 			</div>
 		</div>
 	</div>
 	<!-- CONTENT_END -->
 	<div>
-		<tiles:insertAttribute name="footer" />
 	</div>
 <%if (user != null && !user.isApprover()){%>
 <jsp:include page="../system/newrequest.jsp" />

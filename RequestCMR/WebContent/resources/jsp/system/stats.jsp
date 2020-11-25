@@ -64,6 +64,20 @@
     FormManager.addValidator('dateTo', Validators.REQUIRED, [ 'Date (to)' ]);
     FormManager.addValidator('dateFrom', Validators.DATE('YYYY-MM-DD'), [ 'Date (from)' ]);
     FormManager.addValidator('dateTo', Validators.DATE('YYYY-MM-DD'), [ 'Date (to)' ]);
+    FormManager.addFormValidator((function() {
+      return {
+        validate : function() {
+          var from = moment(FormManager.getActualValue('dateFrom'), "YYYY-MM-DD");
+          var to = moment(FormManager.getActualValue('dateTo'), "YYYY-MM-DD");
+          
+          var duration = moment.duration(to.diff(from));
+          if (duration.asDays() > 180){
+            return new ValidationResult(null, false, 'Dates should not be more than 6 months.');
+          } 
+          return new ValidationResult(null, true);
+        }
+      };
+    })(), null, 'frmCMR');
     
     FormManager.ready();
   });

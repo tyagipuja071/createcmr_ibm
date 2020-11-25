@@ -6,22 +6,27 @@ package com.ibm.cio.cmr.request.controller;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.ibm.cio.cmr.request.CmrConstants;
+import com.ibm.cio.cmr.request.automation.util.DummyServletRequest;
 import com.ibm.cio.cmr.request.model.CompanyRecordModel;
 import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.model.requestentry.FindCMRResultModel;
 import com.ibm.cio.cmr.request.model.requestentry.RequestEntryModel;
 import com.ibm.cio.cmr.request.service.QuickSearchService;
+import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.CompanyFinder;
 import com.ibm.cmr.services.client.dnb.DnbData;
 
@@ -105,6 +110,42 @@ public class QuickSearchController extends BaseController {
       if (reqEntry != null && reqEntry.getReqId() > 0) {
         map.addAttribute("success", true);
         map.addAttribute("model", reqEntry);
+      } else {
+        map.addAttribute("success", false);
+        map.addAttribute("msg", "An unexpected error occured. Please try again later.");
+      }
+    } catch (Exception e) {
+      LOG.error("An error was encountered in processing the request creation", e);
+      map.addAttribute("success", false);
+      map.addAttribute("msg", e.getMessage());
+    }
+    return map;
+  }
+
+  // Changes for Update API Framework change- Start
+  @RequestMapping(value = "/update", method = RequestMethod.POST, consumes = "application/json")
+  public @ResponseBody ModelMap getUpdate(@RequestBody CompanyRecordModel company, @Context HttpServletRequest request) throws Exception {
+    ModelMap map = new ModelMap();
+    AppUser user = new AppUser();
+    user.setIntranetId("CREATECMR");
+    user.setBluePagesName("CREATECMR");
+    user.setDefaultLineOfBusn("XCRM");
+    user.setDefaultRequestRsn("OTH");
+    DummyServletRequest dummyReq = new DummyServletRequest();
+    if (dummyReq.getSession() != null) {
+      LOG.trace("Session found for dummy req");
+      dummyReq.getSession().setAttribute(CmrConstants.SESSION_APPUSER_KEY, user);
+    } else {
+      LOG.warn("Session not found for dummy req");
+    }
+
+    ParamContainer params = new ParamContainer();
+    params.addParam("model", company);
+    try {
+      RequestEntryModel reqEntry = service.process(dummyReq, params);
+      if (reqEntry != null && reqEntry.getReqId() > 0) {
+        map.addAttribute("success", true);
+        map.addAttribute("model", reqEntry.getReqId());
       } else {
         map.addAttribute("success", false);
         map.addAttribute("msg", "An unexpected error occured. Please try again later.");

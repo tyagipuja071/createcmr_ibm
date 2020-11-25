@@ -57,8 +57,6 @@ var role = "${reqentry.userRole}";
       </cmr:column>
   </cmr:row>
   <%}%>
-  <cmr:row>
-    <cmr:column span="6">
       <cmr:row addBackground="true">
         <cmr:column span="6">
           <cmr:grid url="/approval/list.json" id="APPROVALS_GRID" span="6" height="250" usePaging="false">
@@ -76,10 +74,10 @@ var role = "${reqentry.userRole}";
               <cmr:formatter functionName="actionsFormatterBlank" />
               <%} %>
             </cmr:gridCol>
-            <cmr:gridCol width="50px" field="requiredIndc" header="${ui.grid.approvalsRequired}">
+            <cmr:gridCol width="60px" field="requiredIndc" header="${ui.grid.approvalsRequired}">
               <cmr:formatter functionName="requiredFormatter" />
             </cmr:gridCol>
-            <cmr:gridCol width="80px" field="comments" header="${ui.grid.approvalsComments}">
+            <cmr:gridCol width="auto" field="comments" header="${ui.grid.approvalsComments}">
               <cmr:formatter functionName="commentsFormatter" />
             </cmr:gridCol>          
           </cmr:grid>
@@ -99,8 +97,6 @@ var role = "${reqentry.userRole}";
           </div>
         <br><br>
       </cmr:row>
-    </cmr:column>
-  </cmr:row>
 </form:form>
 <style>
 div.approval-notif {
