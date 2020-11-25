@@ -39,7 +39,7 @@
     <div id="wwq-content">
 
       <div class="ibm-columns">
-        <div class="ibm-col-1-1" style="width: 915px">
+        <div class="ibm-col-1-1" style="width:1060px">
           <div ng-app="CodeApp" ng-controller="CodeController">
           <table id="codeTable" cellspacing="0" cellpadding="0" border="0" summary="System Parameters" class="ibm-data-table ibm-sortable-table ibm-alternating">
             <caption>

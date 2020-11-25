@@ -3625,6 +3625,10 @@
       };
       var _1f5 = "className";
       dojo.hasClass = function(node, _1f6) {
+        var node = byId(node);
+        if (!node){
+          return false;
+        }
         return ((" " + byId(node)[_1f5] + " ").indexOf(" " + _1f6 + " ") >= 0);
       };
       var _1f7 = /\s+/,
