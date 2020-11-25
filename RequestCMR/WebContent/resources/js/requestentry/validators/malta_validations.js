@@ -4,6 +4,9 @@ var othCEWA = [ "610", "636", "645", "669", "698", "725", "745", "764", "769", "
 var _vatExemptHandler = null;
 
 function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
+  var addrType = FormManager.getActualValue('addrType');
+  var custGrp = FormManager.getActualValue('custGrp');
+
   if (!saving) {
     if (addressMode == 'newAddress') {
       FilteringDropdown['val_landCntry'] = FormManager.getActualValue('defaultLandedCountry');
@@ -11,6 +14,11 @@ function addMaltaLandedCountryHandler(cntry, addressMode, saving, finalSave) {
     } else {
       FilteringDropdown['val_landCntry'] = null;
     }
+  }
+
+  if (custGrp != 'LOCAL' && addrType == 'ZS01') {
+    FormManager.enable('landCntry');
+    FormManager.resetDropdownValues(FormManager.getField('landCntry'));
   }
 }
 
@@ -167,7 +175,7 @@ function addAddressFieldValidators() {
           return;
         }
         if (postCd && postCd.length > 0 && !postCd.match(/^[A-Z]{3} [\d]{4}/)) {
-          return new ValidationResult(null, false, postCd + ' is not a valid format for Postal Code."ABC 1234"');
+          return new ValidationResult(null, false, postCd + ' is not a valid format for Postal Code, the correct format for postal code is -> "ABC 1234"');
         }
         return new ValidationResult(null, true);
       }
