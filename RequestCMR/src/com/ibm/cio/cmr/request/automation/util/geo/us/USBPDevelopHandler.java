@@ -299,12 +299,12 @@ public class USBPDevelopHandler extends USBPHandler {
 
     String department = StringUtils.isNotBlank(zs01.getDept()) ? zs01.getDept().toUpperCase() : "";
     String addressCategory = "";
-    for (String demo : demoDev) {
-      if (department.contains(demo)) {
-        addressCategory = "DEMO";
-        break;
-      }
-    }
+    // for (String demo : demoDev) {
+    // if (department.contains(demo)) {
+    // addressCategory = "DEMO";
+    // break;
+    // }
+    // }
 
     for (String lease : leaseDev) {
       if (department.contains(lease)) {
@@ -312,8 +312,14 @@ public class USBPDevelopHandler extends USBPHandler {
         break;
       }
     }
+    if ("LEASE".equals(addressCategory)) {
+      LOG.debug("Address category is Lease Development.");
+      details.append(" - CSO Site : " + "TF7" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "TF7");
 
-    if ("DEMO".equals(addressCategory)) {
+      details.append(" - Marketing A/R Dept  : " + "DI2" + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI2");
+    } else {
       LOG.debug("Address category is Demo Development.");
       details.append(" - CSO Site : " + "YBV" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "YBV");
@@ -321,13 +327,6 @@ public class USBPDevelopHandler extends USBPHandler {
       details.append(" - Marketing A/R Dept  : " + "DI3" + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI3");
 
-    } else if ("LEASE".equals(addressCategory)) {
-      LOG.debug("Address category is Lease Development.");
-      details.append(" - CSO Site : " + "TF7" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "TF7");
-
-      details.append(" - Marketing A/R Dept  : " + "DI2" + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "DI2");
     }
 
     details.append("Branch Office codes computed successfully.");
