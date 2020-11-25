@@ -2388,6 +2388,19 @@ function addCmrNoValidatorForCEE() {
             var results = cmr.query('GET.CMR.CEE', qParams);
             if (results.ret1 != null) {
               return new ValidationResult(null, false, 'The CMR Number already exists.');
+            } else {
+              results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                COUNTRY : cntry,
+                CMR_NO : cmrNo,
+                MANDT : cmr.MANDT
+              });
+              if (results && results.ret1) {
+                return new ValidationResult({
+                  id : 'cmrNo',
+                  type : 'text',
+                  name : 'cmrNo'
+                }, false, 'The requested CMR Number ' + cmrNo + ' already exists in the system.');
+              }
             }
             // CMR4606 add cmr exist check for duplicate issued country
             if (cntry == '821' && dijit.byId('cisServiceCustIndc').get('checked')) {
@@ -2400,6 +2413,19 @@ function addCmrNoValidatorForCEE() {
               var resultsD = cmr.query('GET.CMR.CEE', qParamsDup);
               if (resultsD.ret1 != null) {
                 return new ValidationResult(null, false, 'The CMR Number already exists For the Country of Duplicate CMR.');
+              } else {
+                results = cmr.query('LD.CHECK_EXISTING_CMR_NO_RESERVED', {
+                  COUNTRY : cntryDup,
+                  CMR_NO : cmrNo,
+                  MANDT : cmr.MANDT
+                });
+                if (results && results.ret1) {
+                  return new ValidationResult({
+                    id : 'cmrNo',
+                    type : 'text',
+                    name : 'cmrNo'
+                  }, false, 'The requested CMR Number ' + cmrNo + ' already exists for the Country of Duplicate CMR.');
+                }
               }
             }
           }
