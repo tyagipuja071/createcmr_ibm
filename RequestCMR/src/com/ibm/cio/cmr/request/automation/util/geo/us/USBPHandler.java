@@ -345,7 +345,7 @@ public abstract class USBPHandler {
       String parts[] = handler.doSplitName(ibmCmr.getCmrName(), "", 24, 24);
       mainCustNm1 = parts[0];
       mainCustNm2 = parts[1];
-      parts = handler.doSplitAddress(ibmCmr.getCmrStreetAddress(), ibmCmr.getCmrName4(), 24, 24);
+      parts = handler.doSplitAddress(ibmCmr.getCmrStreetAddress(), ibmCmr.getCmrStreetAddressCont(), 24, 24);
       streetAddress1 = parts[0];
       streetAddress2 = parts[1];
       city1 = ibmCmr.getCmrCity();
