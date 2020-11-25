@@ -379,7 +379,7 @@ public class USLeasingHandler extends USBPHandler {
 
   @Override
   protected void modifyChildDataValues(EntityManager entityManager, RequestData requestData, RequestData childReqData, StringBuilder details) {
-    long childRequestId = childReqData.getAdmin().getChildReqId();
+    long childRequestId = childReqData.getAdmin().getId().getReqId();
     try {
       CopyAttachmentUtil.copyAttachmentsByType(entityManager, requestData, childRequestId, "COMP");
       childReqData.getAdmin().setMatchOverrideIndc(requestData.getAdmin().getMatchOverrideIndc());
