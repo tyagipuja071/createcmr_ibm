@@ -3,17 +3,21 @@
  */
 package com.ibm.cio.cmr.request.util.geo;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -837,17 +841,101 @@ public abstract class GEOHandler {
     return null;
   }
 
-  
   /**
-   * Called while copying address, and checks whether the current address is to be copied to additional address or not
+   * Called while copying address, and checks whether the current address is to
+   * be copied to additional address or not
+   * 
    * @param entityManager
    * @param addr
    * @param cmrIssuingCntry
-   * @return 
+   * @return
    * @throws Exception
    */
   public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
     // noop. override on converter if needed
     return false;
   }
+
+  /**
+   * Checks if this {@link Data} record has been updated. This method compares
+   * with the {@link DataRdc} equivalent and compares per field and filters
+   * given the configuration on the corresponding {@link GEOHandler} for the
+   * given CMR issuing country. If at least one field is not empty, it will
+   * return true.
+   * 
+   * @param data
+   * @param dataRdc
+   * @param cmrIssuingCntry
+   * @return
+   */
+  public boolean isDataUpdate(Data data, DataRdc dataRdc, String cmrIssuingCntry) {
+    String srcName = null;
+    Column srcCol = null;
+    Field trgField = null;
+
+    for (Field field : Data.class.getDeclaredFields()) {
+      if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) || Modifier.isAbstract(field.getModifiers()))) {
+        srcCol = field.getAnnotation(Column.class);
+        if (srcCol != null) {
+          srcName = srcCol.name();
+        } else {
+          srcName = field.getName().toUpperCase();
+        }
+
+        // check if at least one of the fields is updated
+        if (getDataFieldsForUpdate(cmrIssuingCntry).contains(srcName)) {
+          try {
+            trgField = DataRdc.class.getDeclaredField(field.getName());
+
+            field.setAccessible(true);
+            trgField.setAccessible(true);
+
+            Object srcVal = field.get(data);
+            Object trgVal = trgField.get(dataRdc);
+
+            if (String.class.equals(field.getType())) {
+              String srcStringVal = (String) srcVal;
+              if (srcStringVal == null) {
+                srcStringVal = "";
+              }
+              String trgStringVal = (String) trgVal;
+              if (trgStringVal == null) {
+                trgStringVal = "";
+              }
+              if (!StringUtils.equals(srcStringVal.trim(), trgStringVal.trim())) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            } else {
+              if (!ObjectUtils.equals(srcVal, trgVal)) {
+                LOG.trace(" - Field: " + srcName + " Not equal " + srcVal + " - " + trgVal);
+                return true;
+              }
+            }
+          } catch (NoSuchFieldException e) {
+            // noop
+            continue;
+          } catch (Exception e) {
+            LOG.trace("General error when trying to access field.", e);
+            // no stored value or field not on addr rdc, return null for no
+            // changes
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @param cmrIssuingCntry
+   */
+  public List<String> getDataFieldsForUpdate(String cmrIssuingCntry) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }
