@@ -83,7 +83,7 @@ div.cmr-sub {
         <cmr:gridCol width="55px" field="cntryCd" header="Issuing Country">
           <cmr:formatter functionName="countryFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="145px" field="custNm" header="Customer Name">
+        <cmr:gridCol width="190px" field="custNm" header="Customer Name">
           <cmr:formatter functionName="nameFormatter" />
         </cmr:gridCol>
         <cmr:gridCol width="auto" field="reqReason" header="Request Reason">
@@ -91,10 +91,10 @@ div.cmr-sub {
         <cmr:gridCol width="80px" field="dplChkResult" header="DPL Check">
           <cmr:formatter functionName="dplCheckFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="100px" field="approvalStatus" header="Approval Status">
+        <cmr:gridCol width="110px" field="approvalStatus" header="Approval Status">
           <cmr:formatter functionName="approvalStatusFormatter" />
         </cmr:gridCol>
-        <cmr:gridCol width="110px" field="approvalType" header="Approval Type">
+        <cmr:gridCol width="180px" field="approvalType" header="Approval Type">
         </cmr:gridCol>
         <cmr:gridCol width="120px" field="approverNm" header="Actions">
           <cmr:formatter functionName="actionsFormatter" />

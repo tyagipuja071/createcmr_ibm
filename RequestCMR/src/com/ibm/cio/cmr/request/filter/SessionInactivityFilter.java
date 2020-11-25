@@ -336,7 +336,7 @@ public class SessionInactivityFilter implements Filter {
     String path = req.getRequestURI();
 
     if (path.toLowerCase().endsWith("css") || path.toLowerCase().endsWith("js") || path.toLowerCase().endsWith("jpg")
-        || path.toLowerCase().endsWith("png")) {
+        || path.toLowerCase().endsWith("png") || path.toLowerCase().endsWith("ico")) {
       return false;
     }
 

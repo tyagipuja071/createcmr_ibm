@@ -22,7 +22,7 @@ function expediteFormatter(value, rowIndex) {
   if (source) {
     return '<span class="source-syst">' + source + '</span>';
 //  } else if (expediteInd == 'Y') {
-//    return '<img src="' + cmr.CONTEXT_ROOT + '/resources/images/check-icon.png" class="cmr-grid-check">';
+//    return '<img src="' + cmr.CONTEXT_ROOT + '/resources/images/rush.png" class="cmr-grid-check">';
   } else {
     return '';
   }
@@ -59,12 +59,15 @@ function countryFormatter(value, rowIndex) {
 function requestIdFormatter(value, rowIndex) {
   var rowData = this.grid.getItem(rowIndex);
   var reqType = rowData.reqType;
+  var expedite = rowData.expediteInd[0];
   if (typeof (_wfgrid) != 'undefined' && typeof (_wfrec) != 'undefined' && dojo.cookie(_wfgrid + '_rec') != null) {
     if (dojo.cookie(_wfgrid + '_rec') == value) {
       _wfrec = rowIndex;
     }
   }
-  return '<a class="reqIdLink" reqid="' + value + '" reqtype="' + reqType + '" title="Open Request Details for ' + value + '" href="' + cmr.CONTEXT_ROOT + '/request/' + value + '">' + value + '</a>';
+  var exp = expedite == 'Y' ? '<img title="Expedite Requested" src="' + cmr.CONTEXT_ROOT + '/resources/images/rush.png" class="cmr-grid-check" style="vertical-align:sub;padding-right:5px;cursor:help;width:16px;height:16px;">' : '';
+
+  return exp+'<a class="reqIdLink" reqid="' + value + '" reqtype="' + reqType + '" title="Open Request Details for ' + value + '" href="' + cmr.CONTEXT_ROOT + '/request/' + value + '">' + value + '</a>';
 }
 
 /**
