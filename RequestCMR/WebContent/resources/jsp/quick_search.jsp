@@ -217,7 +217,7 @@ form.ibm-column-form .dijitTextBox INPUT {
     border: 1px Solid #CCC !important;
     line-height: 20px !important;
     font-size: 14px !important;
-    font-family: HelvLightIBM, IBM Plex Sans, Calibri !important;
+    font-family: IBM Plex Sans, HelvLightIBM, Calibri !important;
   }
   #name::placeholder {
     font-style : italic;

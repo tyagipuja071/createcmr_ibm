@@ -12,6 +12,13 @@
     height: 20px;
     vertical-align: sub;
   }
+  div.cmr-message-box-error, #cmr-info-box p, #cmr-error-box p {
+    margin-left: 100px;
+  } 
+  
+div#ibm-top {
+  min-height: 450px;
+}  
 </style>
 <script src="${resourcesPath}/js/login.js?${cmrv}" type="text/javascript"></script>
 
@@ -22,6 +29,9 @@
       <div class="ibm-columns">
         <form:form method="POST" action="performLogin" id="login-form" name="frmCMR" class="ibm-column-form ibm-styled-form"
           modelAttribute="loginUser">
+          <div class="ibm-col-2-1" style="width:100px">
+            &nbsp;
+          </div>
           <div class="ibm-col-2-1">
             <form:hidden path="r" />
             <!-- Username Field -->
@@ -63,14 +73,14 @@
                 <img src="${resourcesPath}/images/question.png" class="key">
                   For support, please contact the help desk by sending an email to <a href="mailto:CCM Worldwide Support/Raleigh/Contr/IBM">CCM Worldwide Support/Raleigh/Contr/IBM</a>
                 </a>
-              </div>
             </div>
+          </div>
           </div>
         </form:form>
       </div>
 
 <%--
-    <div class="ibm-columns">
+      <div class="ibm-columns">
         <div class="ibm-col-6-1" style="width:500px">
           <p>
             <input id="cmr-login-btn" type="button" style="display: none" value="Login" class="ibm-btn-arrow-pri ibm-btn-small"

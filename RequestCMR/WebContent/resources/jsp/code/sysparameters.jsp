@@ -109,7 +109,7 @@ if (user != null){
       <cmr:row topPad="10" addBackground="false">
         <cmr:column span="6">
           <cmr:grid url="/code/systemparameterlisting.json" id="sysparameterlistingId" span="6">
-            <cmr:gridCol width="12%" field="parameterCd" header="Code" >
+            <cmr:gridCol width="14%" field="parameterCd" header="Code" >
              <cmr:formatter functionName="SysParameterService.suppFormatter" />
             </cmr:gridCol>
             <cmr:gridCol width="20%" field="parameterName" header="Name" />
@@ -117,7 +117,7 @@ if (user != null){
              <cmr:formatter functionName="SysParameterService.typeFormatter" />
             </cmr:gridCol>
             <cmr:gridCol width="auto" field="parameterValue" header="Value" />
-            <cmr:gridCol width="20%" field="cmdeMaintainableIndc" header="CMDE Maintainable" >
+            <cmr:gridCol width="14%" field="cmdeMaintainableIndc" header="CMDE Maintainable" >
               <cmr:formatter functionName="SysParameterService.autoProcFormatter" />
             </cmr:gridCol>
           </cmr:grid>
