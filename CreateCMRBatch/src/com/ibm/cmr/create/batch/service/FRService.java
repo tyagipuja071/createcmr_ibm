@@ -1449,7 +1449,7 @@ public class FRService extends TransConnService {
     MassProcessRequest request = new MassProcessRequest();
     // set the update mass record in request
     if (input.getInputReqType() != null && (input.getInputReqType().equalsIgnoreCase("D") || input.getInputReqType().equalsIgnoreCase("R"))) {
-      request = prepareReactivateDelRequestAT(entityManager, admin, data, input);
+      request = prepareReactivateDelRequestFR(entityManager, admin, data, input);
     }
 
     createComment(entityManager, "Processing started.", admin.getId().getReqId());
@@ -1622,12 +1622,12 @@ public class FRService extends TransConnService {
    * @throws IOException
    * @throws Exception
    */
-  public MassProcessRequest prepareReactivateDelRequestAT(EntityManager entityManager, Admin admin, Data data, MassUpdateServiceInput input)
+  public MassProcessRequest prepareReactivateDelRequestFR(EntityManager entityManager, Admin admin, Data data, MassUpdateServiceInput input)
       throws JsonGenerationException, JsonMappingException, IOException, Exception {
 
     MassProcessRequest request = new MassProcessRequest();
-    // request.setMandt(input.getInputMandt());
-    request.setMandt("100");
+    request.setMandt(input.getInputMandt());
+    // request.setMandt("100");
     request.setReqId(input.getInputReqId());
     request.setReqType(input.getInputReqType());
     request.setUserId(input.getInputUserId());
