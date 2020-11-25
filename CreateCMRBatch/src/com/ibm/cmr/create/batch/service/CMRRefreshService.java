@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -54,7 +53,9 @@ public class CMRRefreshService extends BaseBatchService {
     boolean useLogDir = !StringUtils.isBlank(logDir) && new File(logDir).exists() && new File(logDir).isDirectory();
     LOG.debug("Use Logging? " + useLogDir);
 
-    String sql = "select min(max(SHAD_UPDATE_TS), current timestamp) from SAPR3.KNA1 where MANDT = :MANDT";
+    // String sql = "select min(max(SHAD_UPDATE_TS), current timestamp) from
+    // SAPR3.KNA1 where MANDT = :MANDT";
+    String sql = "select current timestamp from SYSIBM.SYSDUMMY1";
     PreparedQuery query = new PreparedQuery(entityManager, sql);
     query.setParameter("MANDT", mandt);
     query.setForReadOnly(true);
@@ -98,8 +99,7 @@ public class CMRRefreshService extends BaseBatchService {
       IndexUpdateClient client = CmrServicesFactory.getInstance().createClient(SystemConfiguration.getValue("CMR_SERVICES_URL"),
           IndexUpdateClient.class);
 
-      try (OutputStream fos = useLogDir
-          ? new FileOutputStream(logDir + File.separator + "RefreshLog-" + LOG_FORMATTER.format(new Date()) + ".txt", true)
+      try (OutputStream fos = useLogDir ? new FileOutputStream(logDir + File.separator + "RefreshLog-" + LOG_FORMATTER.format(ts) + ".txt", true)
           : new EmptyOutputStream()) {
 
         try (PrintWriter pw = new PrintWriter(fos)) {
@@ -148,6 +148,11 @@ public class CMRRefreshService extends BaseBatchService {
     public void write(int b) throws IOException {
     }
 
+  }
+
+  @Override
+  protected boolean terminateOnLongExecution() {
+    return false;
   }
 
   @Override

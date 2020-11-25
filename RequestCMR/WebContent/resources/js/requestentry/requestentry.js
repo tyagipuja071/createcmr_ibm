@@ -473,7 +473,53 @@ function doSaveChangeComments() {
   if (action == YourActions.Reject && rejReason == '') {
     cmr.showAlert('Please specify the Reject Reason');
     return;
-  } else if (action == YourActions.Reject && (rejReason == 'DUPC' || rejReason == 'MAPP') && (FormManager.getActualValue('rejSupplInfo1') == '' || FormManager.getActualValue('rejSupplInfo2') == '')) {
+  } else if (action == YourActions.Reject && rejReason == 'DUPC') {
+	    if (dojo.byId('rejInfo1Label').innerText == "CMR No.") {
+	        var rej = FormManager.getActualValue('rejectReason');
+	        var isscntry = FormManager.getActualValue('cmrIssuingCntry');
+	        mandt = FormManager.getActualValue('mandt');
+	        var ktokd = "ZS01";
+	        var rejInfo1 = FormManager.getActualValue('rejSupplInfo1');
+	        if (rejInfo1 != '') {
+	          var qParams = {
+	            ZZKV_CUSNO : rejInfo1,
+	            KATR6 : isscntry,
+	            MANDT : mandt
+	          };
+	          var result = cmr.query('VALIDATECMR', qParams);
+	          var cmrExist = result.ret1;
+	          if (cmrExist != undefined) {
+	            var qParams1 = {
+	              ZZKV_CUSNO : rejInfo1,
+	              MANDT : mandt,
+	              KATR6 : isscntry
+	            };
+	            var kunnr = cmr.query('GET.KUNNR.SOLDTO', qParams1);
+	            var kunnr1 = kunnr.ret1;
+	            if (kunnr1 != null || kunnr1 != undefined ) {
+	              dojo.byId('rejSupplInfo2').value = kunnr1;
+	              console.log(dojo.byId('rejSupplInfo2').value);
+	            }
+	            else{
+	            	cmr.showAlert('No Sold-To Kunnr found for ' + rejInfo1 +".");
+	            	return;
+	            }
+	            var rejInfo2 = FormManager.getActualValue('rejSupplInfo2');
+	            var rejField = '<input type="hidden" name="rejectReason" value="' + rej + '">';
+	            rejField += '<input type="hidden" name="rejSupplInfo1" value="' + rejInfo1 + '">';
+	            rejField += '<input type="hidden" name="rejSupplInfo2" value="' + rejInfo2 + '">';
+	            dojo.place(rejField, document.forms['frmCMR'], 'last');
+	          } else {
+	          cmr.showAlert('The CMR Number is not correct');
+	          return;
+	          } 
+	        }
+	        else{
+	        	cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText +".");
+	        	return;
+	        }
+	      }
+	    } else if (action == YourActions.Reject && (rejReason == 'DUPC' || rejReason == 'MAPP') && (FormManager.getActualValue('rejSupplInfo1') == '' || FormManager.getActualValue('rejSupplInfo2') == '')) {
     cmr.showAlert('Please specify ' + dojo.byId('rejInfo1Label').innerText + " and " + dojo.byId('rejInfo2Label').innerText + ".");
     return;
   } else if (action == YourActions.Reject && (rejReason == 'MDOC' || rejReason == 'DUPR' || rejReason == 'TYPR') && FormManager.getActualValue('rejSupplInfo1') == '') {
@@ -1337,6 +1383,7 @@ function setRejSupplInfoFields(value) {
     cmr.showNode('rejInfo2Div');
     dojo.byId('rejInfo1Label').innerText = "CMR No.";
     dojo.byId('rejInfo2Label').innerText = "Sold-to KUNNR";
+    FormManager.readOnly('rejSupplInfo2');
     break;
   case "MDOC":
     cmr.showNode('rejInfo1Div');
