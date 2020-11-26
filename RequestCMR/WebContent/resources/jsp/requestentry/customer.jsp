@@ -255,7 +255,7 @@
         </cmr:column>
       </cmr:view>
     </cmr:view>
-    <cmr:view forGEO="MCO2,MCO1">
+    <cmr:view forGEO="MCO1,MCO2">
       <c:if test="${reqentry.reqType != 'U'}">
         <cmr:column span="1" containerForField="VATExempt">
           <p>
