@@ -34,7 +34,7 @@ public class USBPDevelopHandler extends USBPHandler {
 
   private static final Logger LOG = Logger.getLogger(USBPDevelopHandler.class);
   private static List<String> demoDev = Arrays.asList("DEMO DEVELOPMENT", "DEMO DEV", "DEVELOPMENT");
-  private static List<String> leaseDev = Arrays.asList("ICC LEASE DEVELOPMENT/DEV", "IDL LEASE DEVELOPMENT/DEV");
+  private static List<String> leaseDev = Arrays.asList("ICC LEASE DEV", "IDL LEASE DEV");
   private String cmrType;
   private static final String T1 = "T1";
   private static final String T2 = "T2";
@@ -288,8 +288,9 @@ public class USBPDevelopHandler extends USBPHandler {
 
     createAddressOverrides(entityManager, handler, requestData, engineData, details, overrides, childRequest, ibmCmr);
 
-    details.append(" - Dept/Attn: -----DEVELOPEMENT-----\n");
-    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-----DEVELOPMENT-----");
+    // details.append(" - Dept/Attn: -----DEVELOPEMENT-----\n");
+    // overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01",
+    // "DEPT", zs01.getDept(), "-----DEVELOPMENT-----");
     details.append(" - Restricted Ind: Y\n");
     overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "RESTRICT_IND", data.getRestrictInd(), "Y");
     details.append(" - Restricted to: BPQS\n");

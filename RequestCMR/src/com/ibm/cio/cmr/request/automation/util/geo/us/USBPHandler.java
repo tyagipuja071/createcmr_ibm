@@ -110,7 +110,7 @@ public abstract class USBPHandler {
   public static final String SUB_TYPE_LEASE_SVR_CONT = "SVR CONT";
 
   public static final List<String> DEPARTMENT_IDENTIFIERS = Arrays.asList("E-HOST", "EHOST", "DEMO DEVELOPMENT", "DEMO DEV", "DEVELOPMENT",
-      "ICC LEASE DEVELOPMENT/DEV", "IDL LEASE DEVELOPMENT/DEV", "POOL");
+      "ICC LEASE DEV", "IDL LEASE DEV", "POOL");
 
   private boolean waiting;
   private FindCMRRecordModel ibmCmr;
