@@ -2012,7 +2012,7 @@ public class FRService extends TransConnService {
     createHistory(entityManager, "Processing started.", "PCR", "Claim", admin.getId().getReqId());
     createComment(entityManager, "Processing started.", admin.getId().getReqId());
 
-    // partialCommit(entityManager);
+    partialCommit(entityManager);
   }
 
   /**
