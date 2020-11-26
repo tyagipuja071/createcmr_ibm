@@ -508,10 +508,14 @@ function configureCRNForUKI() {
 }
 
 function setISUCTCOnISIC() {
+  var reqType = FormManager.getActualValue('reqType');
   var custSubGrp = FormManager.getActualValue('custSubGrp');
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var isic = FormManager.getActualValue('isicCd');
+  if (reqType != 'C') {
+    return;
+  }
   var isicList = new Set([ '7230', '7240', '7290', '7210', '7221', '7229', '7250', '7123', '9802' ]);
   if (!(custSubGrp == 'INTER' || custSubGrp == 'PRICU' || custSubGrp == 'BUSPR')) {
     if ('32' == isuCd && 'S' == clientTier && isicList.has(isic)) {
@@ -803,7 +807,7 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
 
     if (_cityUKHandler == null) {
       _cityUKHandler = dojo.connect(FormManager.getField('city1'), 'onChange', function(value) {
-    	  autoSetAbbrevLocUKI();
+        autoSetAbbrevLocUKI();
       });
     }
 
@@ -813,7 +817,7 @@ function setUKIAbbrevNmLocnOnAddressSave(cntry, addressMode, saving, finalSave, 
 
     if (_postalCdUKHandler == null) {
       _postalCdUKHandler = dojo.connect(FormManager.getField('postCd'), 'onChange', function(value) {
-    	  autoSetAbbrevLocUKI();
+        autoSetAbbrevLocUKI();
       });
     }
 
@@ -827,36 +831,36 @@ function autoSetAbbrevLocnOnAddSaveUKI(cntry, addressMode, saving, finalSave, fo
   var reqType = null;
   var role = null;
   if (typeof (_pagemodel) != 'undefined') {
-		reqType = FormManager.getActualValue('reqType');
-		role = _pagemodel.userRole;
+    reqType = FormManager.getActualValue('reqType');
+    role = _pagemodel.userRole;
   }
   if (reqType != 'C') {
-		return;
+    return;
   }
-	if (role != 'Requester') {
-	  return;
-	}
-	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
-	  return;
-	}
-	var _custType = FormManager.getActualValue('custSubGrp');
-	var addressTyp = FormManager.getActualValue('addrType');
-	var _zs01ReqId = FormManager.getActualValue('reqId');
-	var copyTypes = document.getElementsByName('copyTypes');
-	var copyingToA = false;
-	if (copyTypes != null && copyTypes.length > 0) {
-	  copyTypes.forEach(function(input, i) {
-	    if ((input.value == 'ZI01' || input.value == 'ZS01') && input.checked) {
-	        copyingToA = true;
-	    }
-	  });
-	}
+  if (role != 'Requester') {
+    return;
+  }
+  if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var addressTyp = FormManager.getActualValue('addrType');
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var copyTypes = document.getElementsByName('copyTypes');
+  var copyingToA = false;
+  if (copyTypes != null && copyTypes.length > 0) {
+    copyTypes.forEach(function(input, i) {
+      if ((input.value == 'ZI01' || input.value == 'ZS01') && input.checked) {
+        copyingToA = true;
+      }
+    });
+  }
 
-	if (finalSave || force || copyingToA) {
+  if (finalSave || force || copyingToA) {
 
-	  if ((addressTyp == 'ZI01') || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
-	    autoSetAbbrevLocUKIOnAddrChange();
-	  }
+    if ((addressTyp == 'ZI01') || (addressTyp == 'ZS01' && (FormManager.getActualValue('custGrp') == 'CROSS'))) {
+      autoSetAbbrevLocUKIOnAddrChange();
+    }
   }
 }
 /*
@@ -1015,6 +1019,9 @@ function set32SBOLogicOnISIC() {
   var isicCdValue = FormManager.getActualValue('isicCd');
   var tierValue = FormManager.getActualValue('clientTier');
   var role = null;
+  if (reqType != 'C') {
+    return;
+  }
   if (typeof (_pagemodel) != 'undefined') {
     role = _pagemodel.userRole;
   }
@@ -1254,39 +1261,39 @@ function validateInternalDeptNumberLength() {
 }
 
 function autoSetAbbrevLocUKIOnAddrChange() {
-	var _custType = FormManager.getActualValue('custSubGrp');
-	var _custGrp = FormManager.getActualValue('custGrp');
-	var _zs01ReqId = FormManager.getActualValue('reqId');
-	var _abbrevLocn = null;
-	var _addrType = null;
-	var _result = null;
-	if (_custGrp == 'CROSS') {
-	  if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
-	    _addrType = 'ZS01';
-	  } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
-	    _addrType = 'ZI01';
-	  }
-	 var qParams = {
-	    REQ_ID : _zs01ReqId,
-	 	  ADDR_TYPE : _addrType,
-	  };
-	  _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
-	  _abbrevLocn = _result.ret1;
-	} else {
-	  if (_custType == 'SOFTL') {
-	    _abbrevLocn = "SOFTLAYER";
-	  } else {
-	    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
-	      _abbrevLocn = FormManager.getActualValue('postCd');
-	    } else {
-	      _abbrevLocn = FormManager.getActualValue('city1');
-	    }
-	  }
-	}
-	if (_abbrevLocn != null && _abbrevLocn.length > 12) {
-	  _abbrevLocn = _abbrevLocn.substr(0, 12);
-	}
-	FormManager.setValue('abbrevLocn', _abbrevLocn);
+  var _custType = FormManager.getActualValue('custSubGrp');
+  var _custGrp = FormManager.getActualValue('custGrp');
+  var _zs01ReqId = FormManager.getActualValue('reqId');
+  var _abbrevLocn = null;
+  var _addrType = null;
+  var _result = null;
+  if (_custGrp == 'CROSS') {
+    if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.IRELAND) {
+      _addrType = 'ZS01';
+    } else if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
+      _addrType = 'ZI01';
+    }
+    var qParams = {
+      REQ_ID : _zs01ReqId,
+      ADDR_TYPE : _addrType,
+    };
+    _result = cmr.query('ADDR.GET.LANDCNTRY.BY_REQID_ADDRTYP', qParams);
+    _abbrevLocn = _result.ret1;
+  } else {
+    if (_custType == 'SOFTL') {
+      _abbrevLocn = "SOFTLAYER";
+    } else {
+      if (FormManager.getActualValue('cmrIssuingCntry') == SysLoc.UK) {
+        _abbrevLocn = FormManager.getActualValue('postCd');
+      } else {
+        _abbrevLocn = FormManager.getActualValue('city1');
+      }
+    }
+  }
+  if (_abbrevLocn != null && _abbrevLocn.length > 12) {
+    _abbrevLocn = _abbrevLocn.substr(0, 12);
+  }
+  FormManager.setValue('abbrevLocn', _abbrevLocn);
 }
 
 function autoSetAbbrevNmOnChanageUKI() {

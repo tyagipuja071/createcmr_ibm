@@ -41,13 +41,7 @@ public class MassUpdateModel extends BaseModel {
 
   private String custNm3;
 
-  public String getCustNm3() {
-    return custNm3;
-  }
-
-  public void setCustNm3(String custNm3) {
-    this.custNm3 = custNm3;
-  }
+  private String military;
 
   private String restrictTo;
 
@@ -387,6 +381,14 @@ public class MassUpdateModel extends BaseModel {
 
   public void setCustNm2(String custNm2) {
     this.custNm2 = custNm2;
+  }
+
+  public String getCustNm3() {
+    return custNm3;
+  }
+
+  public void setCustNm3(String custNm3) {
+    this.custNm3 = custNm3;
   }
 
   public String getRestrictTo() {
@@ -771,6 +773,14 @@ public class MassUpdateModel extends BaseModel {
 
   public void setNewEntpName1(String newEntpName1) {
     this.newEntpName1 = newEntpName1;
+  }
+
+  public String getMilitary() {
+    return military;
+  }
+
+  public void setMilitary(String military) {
+    this.military = military;
   }
 
 }

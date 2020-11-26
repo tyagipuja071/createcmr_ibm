@@ -4,6 +4,7 @@
 package com.ibm.cio.cmr.request.util.geo;
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -825,6 +826,10 @@ public abstract class GEOHandler {
         if (nvalue > 0) {
           colVal = "" + nvalue;
         }
+
+        BigDecimal bd = new BigDecimal(colVal);
+        long val = bd.longValue();
+        colVal = Long.toString(val);
         break;
       default:
         break;
@@ -837,4 +842,18 @@ public abstract class GEOHandler {
     return null;
   }
 
+  /**
+   * Called while copying address, and checks whether the current address is to
+   * be copied to additional address or not
+   * 
+   * @param entityManager
+   * @param addr
+   * @param cmrIssuingCntry
+   * @return
+   * @throws Exception
+   */
+  public boolean checkCopyToAdditionalAddress(EntityManager entityManager, Addr addr, String cmrIssuingCntry) throws Exception {
+    // noop. override on converter if needed
+    return false;
+  }
 }
