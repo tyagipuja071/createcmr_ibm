@@ -23,8 +23,10 @@ import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.entity.Scorecard;
 import com.ibm.cio.cmr.request.entity.listeners.ChangeLogListener;
+import com.ibm.cio.cmr.request.model.ParamContainer;
 import com.ibm.cio.cmr.request.query.ExternalizedQuery;
 import com.ibm.cio.cmr.request.query.PreparedQuery;
+import com.ibm.cio.cmr.request.service.dpl.DPLSearchService;
 import com.ibm.cio.cmr.request.service.requestentry.AddressService;
 import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.MessageUtil;
@@ -333,7 +335,25 @@ public class DPLCheckElement extends ValidatingElement {
       scorecard.setDplChkUsrId(user.getIntranetId());
       scorecard.setDplChkUsrNm(user.getBluePagesName());
     }
+    if (failed > 0) {
+      log.debug("Performing DPL Search for Request " + reqId + " with DPL Status: " + scorecard.getDplChkResult());
+
+      ParamContainer params = new ParamContainer();
+      params.addParam("processType", "ATTACH");
+      params.addParam("reqId", reqId);
+      params.addParam("user", user);
+      params.addParam("filePrefix", "AutoDPLSearch_");
+
+      try {
+        DPLSearchService dplService = new DPLSearchService();
+        dplService.process(null, params);
+      } catch (Exception e) {
+        log.warn("DPL results not attached to the request", e);
+      }
+    }
+
     log.debug(" - DPL Status for Request ID " + reqId + " : " + scorecard.getDplChkResult());
+
     updateEntity(scorecard, entityManager);
   }
 

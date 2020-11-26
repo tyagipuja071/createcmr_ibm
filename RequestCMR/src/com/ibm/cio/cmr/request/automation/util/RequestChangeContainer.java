@@ -8,8 +8,10 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.ibm.cio.cmr.request.automation.RequestData;
 import com.ibm.cio.cmr.request.entity.Admin;
 import com.ibm.cio.cmr.request.entity.Data;
 import com.ibm.cio.cmr.request.model.ParamContainer;
@@ -36,7 +38,15 @@ public class RequestChangeContainer {
     this.country = country;
     this.reqId = reqId;
     this.admin = admin;
-    getAllChanges(entityManager, reqId);
+    RequestData requestData = new RequestData(entityManager, reqId);
+    getAllChanges(entityManager, requestData);
+  }
+
+  public RequestChangeContainer(EntityManager entityManager, String country, Admin admin, RequestData requestData) throws Exception {
+    this.country = country;
+    this.reqId = admin.getId().getReqId();
+    this.admin = admin;
+    getAllChanges(entityManager, requestData);
   }
 
   /**
@@ -44,16 +54,20 @@ public class RequestChangeContainer {
    * {@link RequestSummaryService}
    *
    * @param entityManager
-   * @param reqId
+   * @param requestData
    * @throws Exception
    */
-  private void getAllChanges(EntityManager entityManager, long reqId) throws Exception {
+  private void getAllChanges(EntityManager entityManager, RequestData requestData) throws Exception {
 
     RequestSummaryService summaryService = new RequestSummaryService();
     ParamContainer params = new ParamContainer();
     params.addParam("reqId", reqId);
     RequestSummaryModel summary = summaryService.doProcess(entityManager, null, params);
     Data newData = summary.getData();
+
+    if (requestData != null && requestData.getData() != null) {
+      PropertyUtils.copyProperties(newData, requestData.getData());
+    }
 
     this.dataUpdates = new ArrayList<>();
     List<UpdatedDataModel> ibmDataList = summaryService.getUpdatedData(newData, reqId, "IBM");

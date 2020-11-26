@@ -357,7 +357,8 @@ public class CEEProcessService extends LegacyDirectService {
 
   }
 
-  private String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
+  @Override
+  public String getLangCdLegacyMapping(EntityManager entityManager, Data data, String cntry) {
     if (entityManager == null) {
       return null;
     }
@@ -377,8 +378,8 @@ public class CEEProcessService extends LegacyDirectService {
     return res;
   }
 
-  private void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr,
-      boolean sharedSeq) {
+  @Override
+  public void updateAddrSeq(EntityManager entityManager, long reqId, String addrType, String oldSeq, String newSeq, String kunnr, boolean sharedSeq) {
     String updateSeq = ExternalizedQuery.getSql("LEGACYD.UPDATE_ADDR_SEQ");
     PreparedQuery q = new PreparedQuery(entityManager, updateSeq);
     q.setParameter("NEW_SEQ", newSeq);
@@ -401,7 +402,7 @@ public class CEEProcessService extends LegacyDirectService {
     }
   }
 
-  private static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
+  public static void modifyAddrUseFields(String seqNo, String addrUse, CmrtAddr legacyAddr) {
 
     for (String use : addrUse.split("")) {
       if (!StringUtils.isEmpty(use)) {
@@ -616,7 +617,7 @@ public class CEEProcessService extends LegacyDirectService {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
 
     // Setting status=A in case of single reactivation requests
     if (admin.getReqReason() != null && !StringUtils.isBlank(admin.getReqReason()) && CMR_REACTIVATION_REQUEST_REASON.equals(admin.getReqReason())) {
@@ -736,7 +737,9 @@ public class CEEProcessService extends LegacyDirectService {
               newAddrSeq = addr.getId().getAddrSeq();
             }
             // Fix for CEE Dup IGF seqno
+
             if (CEE_COUNTRY_LIST.contains(cntry)) {
+              newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
               if ("598".equals(addr.getId().getAddrSeq()) || "599".equals(addr.getId().getAddrSeq())) {
                 newAddrSeq = addr.getId().getAddrSeq();
               } else {
@@ -746,6 +749,7 @@ public class CEEProcessService extends LegacyDirectService {
               newAddrSeq = StringUtils.leftPad(newAddrSeq, 5, '0');
             }
             // Fix end
+
             LOG.debug("Assigning Sequence " + newAddrSeq + " to " + addr.getId().getAddrType() + " address");
             // Mukesh:Story 1698123
             legacyAddrPk.setAddrNo(newAddrSeq);

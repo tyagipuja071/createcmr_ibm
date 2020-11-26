@@ -182,7 +182,8 @@ public class UKIUtil extends AutomationUtil {
             matchesDnb = ifaddressCloselyMatchesDnb(matches, soldTo, admin, data.getCmrIssuingCntry());
           }
           if (!matchesDnb) {
-            resultCodes.add("R");// Reject
+            // resultCodes.add("R"); // commenting because of CMR-7134
+            cmdeReview = true;
             details.append("Company Registration Number on the request did not match D&B\n");
           } else {
             details.append("Company Registration Number on the request matches D&B\n");
@@ -225,21 +226,19 @@ public class UKIUtil extends AutomationUtil {
     }
 
     if (coverageFieldUpdtd > 0) {
-      String managerID = SystemParameters.getString("ES_UKI_MGR_COV_UPDT");
-      if (StringUtils.isNotBlank(managerID)) {
-        boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
-        if (!managerCheck) {
-          if (changes.isDataChanged("INAC/NAC Code") || changes.isDataChanged("Company Number")) {
-            cmdeReview = true;
-            admin.setScenarioVerifiedIndc("Y");
-          } else {
-            details.append("'Updates to coverage fields cannot be validated.\n");
-            admin.setScenarioVerifiedIndc("N");
-          }
-        } else {
+      List<String> managerID = SystemParameters.getList("ES_UKI_MGR_COV_UPDT");
+      boolean managerCheck = BluePagesHelper.isBluePagesHeirarchyManager(admin.getRequesterId(), managerID);
+      if (!managerCheck) {
+        if (changes.isDataChanged("INAC/NAC Code") || changes.isDataChanged("Company Number")) {
+          cmdeReview = true;
           admin.setScenarioVerifiedIndc("Y");
-          details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
+        } else {
+          details.append("Updates to coverage fields cannot be validated. An Approval wil be required.\n");
+          admin.setScenarioVerifiedIndc("N");
         }
+      } else {
+        admin.setScenarioVerifiedIndc("Y");
+        details.append("Skipping validation for coverage fields update for requester - " + admin.getRequesterId() + ".\n");
       }
     }
 
@@ -344,7 +343,7 @@ public class UKIUtil extends AutomationUtil {
                 }
                 if (!matchesDnb) {
                   LOG.debug("Update address for " + addrType + "(" + addr.getId().getAddrSeq() + ") does not match D&B");
-                  resultCodes.add("R");
+                  resultCodes.add("D");
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") did not match D&B records.\n");
                 } else {
                   checkDetails.append("Update address " + addrType + "(" + addr.getId().getAddrSeq() + ") matches D&B records. Matches:\n");
@@ -498,7 +497,7 @@ public class UKIUtil extends AutomationUtil {
         }
 
         for (DnBMatchingResponse dnbRecord : response) {
-          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord, custNmTrimmed);
+          boolean closelyMatches = DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zi01, admin, dnbRecord, custNmTrimmed, false);
           if (closelyMatches) {
             engineData.put("ZI01_DNB_MATCH", dnbRecord);
             highQualityMatchExists = true;

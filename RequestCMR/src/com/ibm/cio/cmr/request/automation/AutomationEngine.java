@@ -22,6 +22,7 @@ import com.ibm.cio.cmr.request.automation.impl.ProcessWaitingElement;
 import com.ibm.cio.cmr.request.automation.out.AutomationOutput;
 import com.ibm.cio.cmr.request.automation.out.AutomationResult;
 import com.ibm.cio.cmr.request.automation.util.AutomationConst;
+import com.ibm.cio.cmr.request.automation.util.AutomationUtil;
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 import com.ibm.cio.cmr.request.automation.util.ScenarioExceptionsUtil;
 import com.ibm.cio.cmr.request.config.SystemConfiguration;
@@ -42,7 +43,6 @@ import com.ibm.cio.cmr.request.user.AppUser;
 import com.ibm.cio.cmr.request.util.RequestUtils;
 import com.ibm.cio.cmr.request.util.SystemUtil;
 import com.ibm.cio.cmr.request.util.geo.GEOHandler;
-import com.ibm.cio.cmr.request.util.geo.impl.LAHandler;
 
 /**
  * The engine that runs a set of {@link AutomationElement} objects. This engine
@@ -174,12 +174,14 @@ public class AutomationEngine {
     // failsafes before engine run for any request
     requestData.getAdmin().setReviewReqIndc("N");
     requestData.getAdmin().setDisableAutoProc("N");
+    ScenarioExceptionsUtil scenarioExceptions = AutomationUtil.getScenarioExceptions(entityManager, requestData, engineData.get());
+    LOG.debug("Verifying PayGo Accreditation for " + requestData.getAdmin().getSourceSystId());
+    boolean payGoAddredited = RequestUtils.isPayGoAccredited(entityManager, requestData.getAdmin().getSourceSystId());
+    LOG.debug(" PayGo: " + payGoAddredited);
+    int nonCompanyVerificationErrorCount = 0;
 
     for (AutomationElement<?> element : this.elements) {
-      ScenarioExceptionsUtil scenarioExceptions = element.getScenarioExceptions(entityManager, requestData, engineData.get());
-
       // determine if element is to be skipped
-
       boolean skipChecks = scenarioExceptions != null ? scenarioExceptions.isSkipChecks() : false;
       boolean skipElement = (skipChecks || engineData.get().isSkipChecks())
           && (ProcessType.StandardProcess.equals(element.getProcessType()) || ProcessType.DataOverride.equals(element.getProcessType())
@@ -203,7 +205,7 @@ public class AutomationEngine {
         } else {
           try {
             ChangeLogListener.setManager(entityManager);
-            result = element.executeElement(entityManager, requestData, engineData.get());
+            result = element.executeAutomationElement(entityManager, requestData, engineData.get());
             ChangeLogListener.clearManager();
           } catch (Exception e) {
             LOG.warn("System error for element " + element.getProcessDesc(), e);
@@ -227,15 +229,23 @@ public class AutomationEngine {
           processWaiting = true;
           break;
         } else if (result.isOnError()) {
+          if (!(element instanceof CompanyVerifier)) {
+            nonCompanyVerificationErrorCount++;
+          }
           if (ActionOnError.Ignore.equals(element.getActionOnError())) {
             LOG.debug("Element " + element.getProcessDesc() + " encountered an error but was ignored.");
           } else {
             actionsOnError.add(element.getActionOnError());
             if (element.isStopOnError()) {
-              LOG.info("Stopping execution of other elements because of an error in " + element.getProcessDesc());
-              createComment(entityManager, "An error in execution of " + element.getProcessDesc() + " caused the process to stop.", reqId, appUser);
-              stopExecution = true;
-              break;
+              if ((element instanceof CompanyVerifier) && payGoAddredited) {
+                // don't stop for paygo accredited and verifier element
+                LOG.debug("Error in " + element.getProcessDesc() + " but continuing process for PayGo.");
+              } else {
+                LOG.info("Stopping execution of other elements because of an error in " + element.getProcessDesc());
+                createComment(entityManager, "An error in execution of " + element.getProcessDesc() + " caused the process to stop.", reqId, appUser);
+                stopExecution = true;
+                break;
+              }
             }
           }
         } else {
@@ -277,7 +287,6 @@ public class AutomationEngine {
     Data data = requestData.getData();
     String compInfoSrc = (String) engineData.get().get(AutomationEngineData.COMPANY_INFO_SOURCE);
     String scenarioVerifiedIndc = (String) engineData.get().get(AutomationEngineData.SCENARIO_VERIFIED_INDC);
-
     if (stopExecution) {
       createStopResult(entityManager, reqId, resultId, lastElementIndex, appUser);
     }
@@ -322,112 +331,120 @@ public class AutomationEngine {
         }
       } else {
         boolean moveToNextStep = true;
-        if (!actionsOnError.isEmpty()) {
-          // an error has occurred
-          if (actionsOnError.contains(ActionOnError.Reject)) {
-            moveToNextStep = false;
-            // reject the record
-            StringBuilder rejCmtBuilder = new StringBuilder();
-            rejCmtBuilder.append("The record has been rejected due to some system processing errors");
-            rejectInfo = (List<RejectionContainer>) engineData.get().get("rejections");
-            if (rejectInfo != null && !rejectInfo.isEmpty()) {
-              rejCmtBuilder.append(":");
-              for (RejectionContainer rejCont : rejectInfo) {
-                rejCmtBuilder.append("\n" + rejCont.getRejComment());
-              }
-            } else {
-              rejCmtBuilder.append(".");
-            }
-            String cmt = rejCmtBuilder.toString();
-            if (cmt.length() > 1000) {
-              cmt = cmt.substring(0, 1996) + "...";
-            }
-            admin.setReqStatus("PRJ");
-            for (RejectionContainer r : rejectInfo) {
-              createHistory(entityManager, admin, r.getRejComment(), "PRJ", "Automated Processing", reqId, appUser, null,
-                  "Errors in automated checks", true, r);
-            }
-            admin.setLastProcCenterNm(null);
-            admin.setLockInd("N");
-            admin.setLockByNm(null);
-            admin.setLockBy(null);
-            admin.setLockTs(null);
-            createComment(entityManager, cmt, reqId, appUser);
+        // get rejection comments
+        rejectInfo = engineData.get().getRejectionReasons();
+        HashMap<String, String> pendingChecks = engineData.get().getPendingChecks();
 
-          } else if (actionsOnError.contains(ActionOnError.Wait)) {
-            // do not change status
-            moveToNextStep = false;
-            String cmt = "";
-            StringBuilder rejectCmt = new StringBuilder();
-            List<RejectionContainer> rejectionInfo = (List<RejectionContainer>) engineData.get().get("rejections");
-            Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
-            if ((rejectionInfo != null && !rejectionInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
-              rejectCmt.append("Processor review is required for following issues");
-              rejectCmt.append(":");
-              if (rejectionInfo != null && !rejectionInfo.isEmpty()) {
-                for (RejectionContainer rejCont : rejectionInfo) {
-                  rejectCmt.append("\n" + rejCont.getRejComment());
-                }
-              }
-              // append pending checks
-              if (pendingChecks != null && !pendingChecks.isEmpty()) {
-                for (String pendingCheck : pendingChecks.values()) {
-                  rejectCmt.append("\n ");
-                  rejectCmt.append(pendingCheck);
-                }
-              }
-              cmt = rejectCmt.toString();
+        boolean moveForPayGo = false;
+        // CMR-5954 - paygo solution - move to next step if only company checks
+        // failed
+        LOG.debug("No. of Non-Verification Errors: " + nonCompanyVerificationErrorCount + ", No. of Non-Verification Negative Checks: "
+            + engineData.get().getTrackedNegativeCheckCount());
+        // added check that there was indeed an error somewhere before going the
+        // paygo route
+        if ((!actionsOnError.isEmpty() || (engineData.get().getNegativeChecks() != null && !engineData.get().getNegativeChecks().isEmpty()))
+            && nonCompanyVerificationErrorCount == 0 && engineData.get().getTrackedNegativeCheckCount() == 0 && payGoAddredited) {
+          moveForPayGo = true;
+        }
+        if (moveForPayGo) {
+          createComment(entityManager, "Pay-Go accredited partner. Request passed all other checks, moving to processing.", reqId, appUser);
+          admin.setPaygoProcessIndc("Y");
+        } else {
 
-              if (cmt.length() > 1930) {
-                cmt = cmt.substring(0, 1920) + "...";
+          if (!actionsOnError.isEmpty()) {
+            // an error has occurred
+            if (actionsOnError.contains(ActionOnError.Reject)) {
+              moveToNextStep = false;
+              // reject the record
+              StringBuilder rejCmtBuilder = new StringBuilder();
+              rejCmtBuilder.append("The record has been rejected due to some system processing errors");
+              if (rejectInfo != null && !rejectInfo.isEmpty()) {
+                rejCmtBuilder.append(":");
+                for (RejectionContainer rejCont : rejectInfo) {
+                  rejCmtBuilder.append("\n" + rejCont.getRejComment());
+                }
+              } else {
+                rejCmtBuilder.append(".");
               }
-              cmt += "\n\nPlease view system processing results for more details.";
-              admin.setReviewReqIndc("Y");
+              String cmt = rejCmtBuilder.toString();
+              if (cmt.length() > 1000) {
+                cmt = cmt.substring(0, 1996) + "...";
+              }
+              admin.setReqStatus("PRJ");
+              for (RejectionContainer r : rejectInfo) {
+                createHistory(entityManager, admin, r.getRejComment(), "PRJ", "Automated Processing", reqId, appUser, null,
+                    "Errors in automated checks", true, r);
+              }
+              admin.setLastProcCenterNm(null);
+              admin.setLockInd("N");
+              admin.setLockByNm(null);
+              admin.setLockBy(null);
+              admin.setLockTs(null);
               createComment(entityManager, cmt, reqId, appUser);
+
+            } else if (actionsOnError.contains(ActionOnError.Wait)) {
+              // do not change status
+              moveToNextStep = false;
+              String cmt = "";
+              StringBuilder rejectCmt = new StringBuilder();
+              if ((rejectInfo != null && !rejectInfo.isEmpty()) || (pendingChecks != null && !pendingChecks.isEmpty())) {
+                rejectCmt.append("Processor review is required for following issues");
+                rejectCmt.append(":");
+                if (rejectInfo != null && !rejectInfo.isEmpty()) {
+                  for (RejectionContainer rejCont : rejectInfo) {
+                    rejectCmt.append("\n" + rejCont.getRejComment());
+                  }
+                }
+                // append pending checks
+                if (pendingChecks != null && !pendingChecks.isEmpty()) {
+                  for (String pendingCheck : pendingChecks.values()) {
+                    rejectCmt.append("\n ");
+                    rejectCmt.append(pendingCheck);
+                  }
+                }
+                cmt = rejectCmt.toString();
+
+                if (cmt.length() > 1930) {
+                  cmt = cmt.substring(0, 1920) + "...";
+                }
+                cmt += "\n\nPlease view system processing results for more details.";
+                admin.setReviewReqIndc("Y");
+                createComment(entityManager, cmt, reqId, appUser);
+              }
+              if (actionsOnError.size() > 1) {
+                admin.setReviewReqIndc("Y");
+              }
+              cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
+              createComment(entityManager, cmt, reqId, appUser);
+              admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
+              createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,
+                  false, null);
             }
-            if (actionsOnError.size() > 1) {
-              admin.setReviewReqIndc("Y");
-            }
-            cmt = "Automated checks indicate that external processes are needed to move this request to the next step.";
-            createComment(entityManager, cmt, reqId, appUser);
-            admin.setReqStatus(AutomationConst.STATUS_AWAITING_REPLIES);
-            createHistory(entityManager, admin, cmt, AutomationConst.STATUS_AWAITING_REPLIES, "Automated Processing", reqId, appUser, null, null,
-                false, null);
           }
         }
         if (moveToNextStep) {
 
           // if there is anything that changed on the request via automated
-          // import
-          // of overrides/match/standard output, do a save
-
+          // import of overrides /match /standard output, do a save
           if (hasOverrideOrMatchingApplied) {
             GEOHandler geoHandler = RequestUtils.getGEOHandler(data.getCmrIssuingCntry());
             if (geoHandler != null) {
-
               LOG.debug("Performing GEO Handler saves on request..");
-
               geoHandler.doBeforeAdminSave(entityManager, admin, data.getCmrIssuingCntry());
-
-              if (LAHandler.isLACountry(data.getCmrIssuingCntry())) {
-                // TODO - check if this is needed
-                // geoHandler.setDataDefaultsOnCreate(data, entityManager);
-                // geoHandler.doBeforeDataSave(entityManager, admin, data,
-                // data.getCmrIssuingCntry());
-              } else {
-                // geoHandler.doBeforeDataSave(entityManager, admin, data,
-                // data.getCmrIssuingCntry());
-              }
             }
           }
 
           // check configured setting for what to do upon completion
           boolean processOnCompletion = isProcessOnCompletion(entityManager, data.getCmrIssuingCntry(), admin.getReqType());
 
-          // if any element reported an error, it should always be reviewed by
-          // processor
-          processOnCompletion = processOnCompletion && actionsOnError.isEmpty();
-
+          if (moveForPayGo) {
+            // for paygo, ignore errors
+            processOnCompletion = true;
+          } else {
+            processOnCompletion = processOnCompletion && actionsOnError.isEmpty() && !scenarioExceptions.isManualReviewIndc()
+                && (StringUtils.isBlank(admin.getSourceSystId()) || !scenarioExceptions.isReviewExtReqIndc());
+          }
+          LOG.debug("Process on Completion: " + processOnCompletion);
           String processingCenter = RequestUtils.getProcessingCenter(entityManager, data.getCmrIssuingCntry());
           admin.setLastProcCenterNm(processingCenter);
           admin.setLockInd("N");
@@ -435,16 +452,19 @@ public class AutomationEngine {
           admin.setLockBy(null);
           admin.setLockTs(null);
           admin.setProcessedFlag("N");
-          Map<String, String> pendingChecks = (Map<String, String>) engineData.get().get(AutomationEngineData.NEGATIVE_CHECKS);
-          pendingChecks = pendingChecks != null ? pendingChecks : new HashMap<String, String>();
+          if (moveForPayGo) {
+            pendingChecks.clear();
+          }
           if (processOnCompletion && (pendingChecks == null || pendingChecks.isEmpty())) {
             // move to PCP
+            LOG.debug("Moving Request " + reqId + " to PCP");
             admin.setReqStatus("PCP");
             String cmt = "Automated checks completed successfully. Request is ready for processing.";
             createComment(entityManager, cmt, reqId, appUser);
             createHistory(entityManager, admin, cmt, "PCP", "Automated Processing", reqId, appUser, processingCenter, null, true, null);
           } else {
             // move to PPN
+            LOG.debug("Moving Request " + reqId + " to PPN");
             String cmt = null;
             admin.setReqStatus("PPN");
             StringBuilder rejCmtBuilder = new StringBuilder();

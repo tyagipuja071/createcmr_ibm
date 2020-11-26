@@ -175,8 +175,8 @@ public abstract class MCOTransformer extends MessageTransformer {
       }
     } else if (!StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())) {
       // for correlated requests, add the CN
-      LOG.debug("Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. "
-          + handler.mqIntfReqQueue.getCmrNo());
+      LOG.debug(
+          "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
       messageHash.put("CustomerNo", handler.mqIntfReqQueue.getCmrNo());
 
       if (SystemLocation.KENYA.equals(handler.mqIntfReqQueue.getCmrIssuingCntry())) {
@@ -266,12 +266,12 @@ public abstract class MCOTransformer extends MessageTransformer {
   public void formatAddressLines(MQMessageHandler handler) {
     Map<String, String> messageHash = handler.messageHash;
     Addr addrData = handler.addrData;
-    
+
     // Story 1718889: Tanzania: new mandatory TIN number field
     Data cmrData = handler.cmrData;
     if (SystemLocation.TANZANIA.equals(cmrData.getCmrIssuingCntry())) {
       String tin = !StringUtils.isEmpty(addrData.getDept()) ? addrData.getDept() : "";
-      if (MQMsgConstants.ADDR_ZP01.equals(addrData.getId().getAddrType())){
+      if (MQMsgConstants.ADDR_ZP01.equals(addrData.getId().getAddrType())) {
         messageHash.put("TIN", tin);
       }
     }
@@ -391,10 +391,9 @@ public abstract class MCOTransformer extends MessageTransformer {
     // a. not a correlated request
     // b. create and scenario is GM LLC - ends with "LLC"
     // c. update and abbreviated name ends with GM
-    return StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())
-        && !SystemLocation.KENYA.equals(cmrData.getCmrIssuingCntry())
-        && ((create && !StringUtils.isEmpty(cmrData.getCustSubGrp()) && cmrData.getCustSubGrp().endsWith("LLC")) || (!create && cmrData != null
-            && cmrData.getAbbrevNm() != null && cmrData.getAbbrevNm().toUpperCase().endsWith(" GM")));
+    return StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId()) && !SystemLocation.KENYA.equals(cmrData.getCmrIssuingCntry())
+        && ((create && !StringUtils.isEmpty(cmrData.getCustSubGrp()) && cmrData.getCustSubGrp().endsWith("LLC"))
+            || (!create && cmrData != null && cmrData.getAbbrevNm() != null && cmrData.getAbbrevNm().toUpperCase().endsWith(" GM")));
   }
 
   /**

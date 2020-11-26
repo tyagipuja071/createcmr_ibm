@@ -137,6 +137,26 @@
                     </td>
                   </tr>
                   <tr>
+                    <th>Manual Review:</th>
+                    <td>
+                      <select ng-change="dirtyException(exc)" ng-model="exc.manualReviewIndc" ng-class="{'exc-deflt' : !exc.manualReviewIndc, 'exc-y' : exc.manualReviewIndc == 'Y'}">
+                        <option value="">Default</option>
+                        <option value="N">No</option>
+                        <option value="Y">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Review Ext Requests:</th>
+                    <td>
+                      <select ng-change="dirtyException(exc)" ng-model="exc.reviewExtReqIndc" ng-class="{'exc-deflt' : !exc.reviewExtReqIndc, 'exc-y' : exc.reviewExtReqIndc == 'Y'}">
+                        <option value="">Default</option>
+                        <option value="N">No</option>
+                        <option value="Y">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
                     <th colspan="2" style="font-weight:bold;padding-left:10px;padding-top:10px;text-align:left;">Duplicate Check Addresses:</th>
                   </tr>
                   <tr>
@@ -297,6 +317,34 @@
                     <option value="Y">Yes, SKIP automated processes and calculations</option>
                   </select>
                   <span title="Overrides default behavior" class="override" ng-show="exc.skipChecksIndc == 'Y'">&nbsp;</span>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <img class="exc-info" title="{{title.manualReviewIndc}}" src="${resourcesPath}/images/info-bubble-icon.png">
+                  Send Request for Manual Review:
+                </th>
+                <td>
+                  <select ng-change="dirtyException(exc)" ng-model="exc.manualReviewIndc" ng-class="{'exc-deflt' : !exc.manualReviewIndc, 'exc-y' : exc.manualReviewIndc == 'Y'}">
+                    <option value="">(use default, country or parent scenario setting)</option>
+                    <option value="N">No, proceed as per country configuration</option>
+                    <option value="Y">Yes, always send to CMDE queue for manual review</option>
+                  </select>
+                  <span title="Overrides default behavior" class="override" ng-show="exc.manualReviewIndc == 'Y'">&nbsp;</span>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <img class="exc-info" title="{{title.reviewExtReqIndc}}" src="${resourcesPath}/images/info-bubble-icon.png">
+                  Review Requests from External Systems:
+                </th>
+                <td>
+                  <select ng-change="dirtyException(exc)" ng-model="exc.reviewExtReqIndc" ng-class="{'exc-deflt' : !exc.reviewExtReqIndc, 'exc-y' : exc.reviewExtReqIndc == 'Y'}">
+                    <option value="">(use default, country or parent scenario setting)</option>
+                    <option value="N">No, proceed as per country configuration</option>
+                    <option value="Y">Yes, send to CMDE queue for manual review</option>
+                  </select>
+                  <span title="Overrides default behavior" class="override" ng-show="exc.reviewExtReqIndc == 'Y'">&nbsp;</span>
                 </td>
               </tr>
               <tr>

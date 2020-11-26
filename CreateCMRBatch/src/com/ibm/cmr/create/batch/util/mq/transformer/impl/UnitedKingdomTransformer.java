@@ -1464,7 +1464,7 @@ public class UnitedKingdomTransformer extends EMEATransformer {
     }
 
     cust.setUpdateTs(SystemUtil.getCurrentTimestamp());
-    cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
+    // cust.setUpdStatusTs(SystemUtil.getCurrentTimestamp());
   }
 
   @Override

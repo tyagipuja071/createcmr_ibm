@@ -424,6 +424,12 @@ function setISUCTCOnIMSChange() {
   var isuCd = FormManager.getActualValue('isuCd');
   var clientTier = FormManager.getActualValue('clientTier');
   var subIndustryCd = FormManager.getActualValue('subIndustryCd');
+	if (FormManager.getActualValue('reqType') != 'C') {
+    return;
+  }
+	if (FormManager.getActualValue('viewOnlyPage') == 'true') {
+    return;
+  }
   if (!(custSubGrp == 'CHINT' || custSubGrp == 'LIINT' || custSubGrp == 'CHPRI' || custSubGrp == 'LIPRI' || custSubGrp == 'CHIBM' || custSubGrp == 'LIIBM' || custSubGrp == 'CHBUS' || custSubGrp == 'LIBUS')) {
     if ('32' == isuCd && 'S' == clientTier && subIndustryCd.startsWith('B')) {
       FormManager.setValue('clientTier', 'N');
@@ -832,7 +838,9 @@ function addAddressTypeValidator() {
               installingCnt++;
             }
           }
-          if (contractCnt > 1) {
+          if(contractCnt == 0) {
+            return new ValidationResult(null, false, 'Contract(Sold-to) Address is mandatory.');
+          } else if (contractCnt > 1) {
             return new ValidationResult(null, false, 'Only one Contract address can be defined. Please remove the additional Contract address.');
           } else {
             return new ValidationResult(null, true);

@@ -121,14 +121,17 @@ public class SingaporeTransformer extends ASEANTransformer {
     String custSubType = !StringUtils.isEmpty(cmrData.getCustSubGrp()) ? cmrData.getCustSubGrp() : "";
     boolean create = "C".equalsIgnoreCase(handler.adminData.getReqType());
     if (!StringUtils.isEmpty(handler.mqIntfReqQueue.getCorrelationId())) {
-      LOG.debug("Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. "
-          + handler.mqIntfReqQueue.getCmrNo());
+      LOG.debug(
+          "Correlated request with MQ ID " + handler.mqIntfReqQueue.getCorrelationId() + ", setting CMR No. " + handler.mqIntfReqQueue.getCmrNo());
       handler.messageHash.put("CustNo", handler.mqIntfReqQueue.getCmrNo());
       handler.messageHash.put("TransCode", "N");
     } else if ("CROSS".equalsIgnoreCase(custType) && "SPOFF".equalsIgnoreCase(custSubType) && create) {
       handler.messageHash.put("CustNo", handler.cmrData.getCmrNo());
       handler.messageHash.put("TransCode", "N");
     }
+
+    // set CtryText blank for SG - CMR-4985
+    handler.messageHash.put("CtryText", "");
   }
 
   @Override

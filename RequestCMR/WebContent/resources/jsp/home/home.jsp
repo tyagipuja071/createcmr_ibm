@@ -208,7 +208,7 @@ function getRandomColor() {
                      <li>
                      The application also provides Web Service APIs for external systems to be able
                      to directly create requests without using the user interface. 
-                     Specifications can be found <a href="https://w3-connections.ibm.com/files/app/file/5a2ff1b0-0534-44fd-9abb-52ab4be41d72">here</a>.
+                     Specifications can be found <a href="https://w3-connections.ibm.com/files/app/file/5a2ff1b0-0534-44fd-9abb-52ab4be41d72" target="_blank">here</a>.
                      </li>
                    </ul>
                  </div>
@@ -226,7 +226,7 @@ function getRandomColor() {
                      Specific teams handle requests from different countries.
                      </li>
                      <li>
-                     To know more about the CMDE teams and processes, please visit the <a href="https://w3.ibm.com/w3publisher/cmde-cmr">CMDE Site</a>.
+                     To know more about the CMDE teams and processes, please visit the <a href="https://w3.ibm.com/w3publisher/cmde-cmr" target="_blank">CMDE Site</a>.
                      </li>
                    </ul>
                  </div>
