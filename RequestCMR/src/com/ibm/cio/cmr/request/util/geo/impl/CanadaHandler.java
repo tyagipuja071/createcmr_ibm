@@ -51,9 +51,13 @@ public class CanadaHandler extends GEOHandler {
     for (FindCMRRecordModel record : records) {
       // if address is usable, process and add to converted
       if (Arrays.asList(USABLE_ADDRESSES).contains(record.getCmrAddrTypeCode())) {
-        if ("ZS01".equals(record.getCmrAddrTypeCode()) || "ZI01".equals(record.getCmrAddrTypeCode())) {
+        if ("ZS01".equals(record.getCmrAddrTypeCode()) && StringUtils.isBlank(record.getCmrOrderBlock())) {
           // set the address type to Install At for CreateCMR
           record.setCmrAddrTypeCode("ZS01");
+        } else if ("ZS01".equals(record.getCmrAddrTypeCode()) && StringUtils.isNotBlank(record.getCmrOrderBlock())
+            && record.getCmrOrderBlock().equals("90")) {
+          // set the address type to HW/SW Billing At for CreateCMR
+          record.setCmrAddrTypeCode("ZP01");
         } else if ("ZP01".equals(record.getCmrAddrTypeCode())) {
           // set the address type to Invoice To for CreateCMR
           record.setCmrAddrTypeCode("ZI01");
