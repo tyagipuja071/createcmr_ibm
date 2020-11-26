@@ -217,6 +217,10 @@ public class CEWATransformer extends MCOTransformer {
     LOG.debug("transformLegacyAddressData CEWA Africa transformer...");
     if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
+    } else {
+      if (cmrObjects.getAdmin().getReqType().equals(CmrConstants.REQ_TYPE_CREATE)) {
+        legacyAddr.setAddrPhone("");
+      }
     }
     formatAddressLinesLD(dummyHandler, legacyAddr);
   }

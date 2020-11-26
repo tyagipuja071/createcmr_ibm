@@ -161,10 +161,10 @@ public class SouthAfricaTransformer extends MCOTransformer {
     LOG.debug("transformLegacyAddressData South Africa transformer...");
     formatAddressLines(dummyHandler);
 
-    if (DEFAULT_CLEAR_NUM.equals(currAddr.getId().getAddrType())) {
-      legacyAddr.setAddrPhone("");
-    } else if ("ZD01".equals(currAddr.getId().getAddrType())) {
+    if ("ZD01".equals(currAddr.getId().getAddrType())) {
       legacyAddr.setAddrPhone(currAddr.getCustPhone());
+    } else {
+      legacyAddr.setAddrPhone("");
     }
 
     String poBox = currAddr.getPoBox();
@@ -713,8 +713,7 @@ public class SouthAfricaTransformer extends MCOTransformer {
     }
 
     legacyAddr.setPoBox(poBox);
-    legacyAddr.setStreetNo(!StringUtils.isBlank(massUpdtAddr.getAddrTxt2()) ? massUpdtAddr.getAddrTxt2() : "");
-
+    legacyAddr.setStreetNo("");
     line5 = streetContPoBox;
 
     String cityPostalCode = massUpdtAddr.getCity1();

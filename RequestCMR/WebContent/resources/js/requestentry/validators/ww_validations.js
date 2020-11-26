@@ -172,18 +172,30 @@ function isSkipDnbMatching() {
       SUBREGION_CD : subRegionCd
     };
     var result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-    if (result.ret1 != null && result.ret1 == "Y") {
-      return true;
-    } else {
-      qParams.CUST_SUB_GRP = "*";
-      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-      if (result.ret1 != null && result.ret1 == 'Y') {
+    if (result.ret1 != null && result.ret1 != "") {
+      if(result.ret1=='Y'){
         return true;
+			} else if (result.ret1=='N'){
+				return false;
+			}
+    } else {
+      qParams.CUST_SUB_TYP = "*";
+      result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
+      if (result.ret1 != null && result.ret1 != '') {
+				if(result.ret1 == 'Y'){
+         return true;
+				} else if (result.ret1 == 'N'){
+					return false;
+				}
       } else {
-        qParams.CUST_GRP = "*";
+        qParams.CUST_TYP = "*";
         result = cmr.query("AUTO.SKIP_VERIFICATION_INDC", qParams);
-        if (result.ret1 != null && result.ret1 == 'Y') {
-          return true;
+        if (result.ret1 != null && result.ret1 != '') {
+          if(result.ret1=='Y'){
+            return true;
+					} else if (result.ret1=='N'){
+						return false;
+          }
         }
       }
     }
@@ -755,7 +767,7 @@ function validateExistingCMRNo() {
           var action = FormManager.getActualValue('yourAction');
           var _custSubGrp = FormManager.getActualValue('custSubGrp');
           if (reqType == 'C' && cmrNo) {
-            if (cmrNo.startsWith('P')) {
+            if (cmrNo.startsWith('P')) { 
               return new ValidationResult(null, true);
             }          
             var exists = cmr.query('LD.CHECK_CMR_EXIST_IN_RDC', {
@@ -901,7 +913,7 @@ function doubleByteCharacterValidator() {
     };
   })(), 'MAIN_CUST_TAB', 'frmCMR');
 }
-
+ 
 /**
  * Validator for the DPL Assessment
  */
@@ -981,7 +993,7 @@ dojo.addOnLoad(function() {
   // GEOHandler.registerWWValidator(addCovBGValidator,
   // GEOHandler.ROLE_PROCESSOR);
 
-  // For Legacy PT,CY,GR,SA
+    // For Legacy PT,CY,GR,SA
   GEOHandler.registerValidator(validateCMRNumberForLegacy, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , SysLoc.SOUTH_AFRICA, ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(validateExistingCMRNo, [ SysLoc.PORTUGAL, SysLoc.CYPRUS, SysLoc.GREECE , ...GEOHandler.AFRICA, SysLoc.MALTA ], GEOHandler.ROLE_PROCESSOR, true);
   GEOHandler.registerValidator(doubleByteCharacterValidator, [ SysLoc.CHINA ], null, true);

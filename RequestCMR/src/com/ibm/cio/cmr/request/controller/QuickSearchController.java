@@ -51,8 +51,7 @@ public class QuickSearchController extends BaseController {
 	}
 
 	@RequestMapping(value = "/quick_search/find")
-	public @ResponseBody ModelMap searchCompany(HttpServletRequest request, CompanyRecordModel search)
-			throws Exception {
+  public @ResponseBody ModelMap searchCompany(HttpServletRequest request, CompanyRecordModel search) throws Exception {
 		List<CompanyRecordModel> records = CompanyFinder.findCompanies(search);
 		return wrapAsPlainSearchResult(records);
 
@@ -74,10 +73,8 @@ public class QuickSearchController extends BaseController {
 					map.addAttribute("success", false);
 					map.addAttribute("msg", "Issuing Country must be specified to get CMR details.");
 				} else {
-					FindCMRResultModel findCmrResult = CompanyFinder.getCMRDetails(issuingCountry, cmrNo, 2000, null,
-							null);
-					if (findCmrResult == null || findCmrResult.getItems() == null
-							|| findCmrResult.getItems().isEmpty()) {
+          FindCMRResultModel findCmrResult = CompanyFinder.getCMRDetails(issuingCountry, cmrNo, 2000, null, null);
+          if (findCmrResult == null || findCmrResult.getItems() == null || findCmrResult.getItems().isEmpty()) {
 						map.addAttribute("success", false);
 						map.addAttribute("msg", "Error in retrieving CMR details. Please try again later.");
 					} else {
@@ -103,8 +100,7 @@ public class QuickSearchController extends BaseController {
 	}
 
 	@RequestMapping(value = "/quick_search/process")
-	public @ResponseBody ModelMap processRequest(HttpServletRequest request, CompanyRecordModel company)
-			throws Exception {
+  public @ResponseBody ModelMap processRequest(HttpServletRequest request, CompanyRecordModel company) throws Exception {
 		ModelMap map = new ModelMap();
 
 		ParamContainer params = new ParamContainer();
@@ -126,7 +122,7 @@ public class QuickSearchController extends BaseController {
 		return map;
 	}
 
-	// Changes for Update API Framework change- Start
+	// Changes for Update API Framework change- Start 
 	@RequestMapping(value = "/update", method = RequestMethod.POST, consumes = "application/json")
 	public @ResponseBody ModelMap getUpdate(@RequestBody CompanyRecordModel company,
 			@Context HttpServletRequest request) throws Exception {

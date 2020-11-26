@@ -539,6 +539,9 @@ public class TransConnService extends BaseBatchService {
           admin.setLockTs(null);
           admin.setLockBy(null);
           admin.setLockByNm(null);
+          admin.setDisableAutoProc("Y"); // added to send it to processing
+                                         // service 1020
+          admin.setRdcProcessingStatus(null);
           admin.setReqStatus("COM");
           admin.setPoolCmrIndc(CmrConstants.YES_NO.Y.toString());
           // set to aborted so the details can be sent to processing service on

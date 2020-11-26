@@ -360,18 +360,7 @@ public class LegacyCommonUtil {
     return oldData;
   }
 
-  public static Admin getAdminByReqId(EntityManager entityManager, long reqId) {
-    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADMIN.SEARCH_BY_REQID");
-    PreparedQuery query = new PreparedQuery(entityManager, sql);
-    query.setParameter("REQ_ID", reqId);
-    List<Admin> records = query.getResults(1, Admin.class);
-    if (records != null && records.size() > 0) {
-      return records.get(0);
-    }
-    return null;
-  }
-
-public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
+  public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
     boolean isDummy = true;
     if (!StringUtils.isBlank(massUpdtAddr.getCustNm1()) || !StringUtils.isBlank(massUpdtAddr.getCustNm2())
         || !StringUtils.isBlank(massUpdtAddr.getCounty()) || !StringUtils.isBlank(massUpdtAddr.getAddrTxt())
@@ -381,6 +370,17 @@ public static boolean isCheckDummyUpdate(MassUpdtAddr massUpdtAddr) {
       isDummy = false;
     }
     return isDummy;
+  }
+
+  public static Admin getAdminByReqId(EntityManager entityManager, long reqId) {
+    String sql = ExternalizedQuery.getSql("REQUESTENTRY.ADMIN.SEARCH_BY_REQID");
+    PreparedQuery query = new PreparedQuery(entityManager, sql);
+    query.setParameter("REQ_ID", reqId);
+    List<Admin> records = query.getResults(1, Admin.class);
+    if (records != null && records.size() > 0) {
+      return records.get(0);
+    }
+    return null;
   }
 
 }

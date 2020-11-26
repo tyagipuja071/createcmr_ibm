@@ -283,6 +283,9 @@ var DB_DATA_FIELDS = [ {
 }, {
   id : 'RequestingLOB',
   name : 'ADMIN.REQUESTING_LOB'
+}, {
+  id : 'CountryUse',
+  name : 'CNTRY_USE'
 }
 
 ];
