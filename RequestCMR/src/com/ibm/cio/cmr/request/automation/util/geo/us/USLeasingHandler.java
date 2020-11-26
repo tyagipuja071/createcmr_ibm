@@ -235,22 +235,26 @@ public class USLeasingHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
       details.append(" - CSO Site: " + ibmCmr.getUsCmrCsoSite() + "\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), ibmCmr.getUsCmrCsoSite());
+      details.append(" - Marketing A/R Dept: " + ibmCmr.getUsCmrCsoSite() + "\n");
+      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), ibmCmr.getUsCmrMktgArDept());
     }
 
-    if (childRequest == null) {
+    if (childRequest != null) {
+      if (!StringUtils.isBlank(childRequest.getData().getMktgDept())) {
+        details.append(" - Marketing Dept: " + childRequest.getData().getMktgDept() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), childRequest.getData().getMktgDept());
+      }
+      if (!StringUtils.isBlank(childRequest.getData().getSvcArOffice())) {
+        details.append(" - SVC A/R Office: " + childRequest.getData().getSvcArOffice() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(),
+            childRequest.getData().getSvcArOffice());
+      }
+    } else {
       try {
         getMktgSvcUsCmr(childRequest, overrides, data);
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
-      }
-    } else {
-      if (!StringUtils.isBlank(childRequest.getData().getMktgDept())) {
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), childRequest.getData().getMktgDept());
-      }
-      if (!StringUtils.isBlank(childRequest.getData().getSvcArOffice())) {
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(),
-            childRequest.getData().getSvcArOffice());
       }
     }
 
