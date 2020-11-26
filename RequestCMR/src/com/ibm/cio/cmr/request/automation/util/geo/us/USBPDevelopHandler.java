@@ -306,7 +306,7 @@ public class USBPDevelopHandler extends USBPHandler {
       }
     }
 
-    if (StringUtils.isNotBlank(addressCategory) && (addressCategory.equals("DEMO") || addressCategory.equals("LEASE"))) {
+    if (StringUtils.isNotBlank(addressCategory) && !(addressCategory.equals("DEMO") || addressCategory.equals("LEASE"))) {
       details.append(" - Dept/Attn: -----DEVELOPEMENT-----\n");
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", zs01.getDept(), "-----DEVELOPMENT-----");
     }
