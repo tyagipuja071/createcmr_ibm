@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.ibm.cio.cmr.request.automation.util.RejectionContainer;
 
 /**
@@ -122,14 +124,19 @@ public class AutomationEngineData extends HashMap<String, Object> {
     return checks.get(checkKey);
   }
 
-  @SuppressWarnings("unchecked")
   /**
    * Returns the map of negative check statuses
    * 
    * @return
    */
-  public Map<String, String> getNegativeChecks() {
-    return (Map<String, String>) get(NEGATIVE_CHECKS);
+  public HashMap<String, String> getNegativeChecks() {
+    @SuppressWarnings("unchecked")
+    HashMap<String, String> checks = (HashMap<String, String>) get(NEGATIVE_CHECKS);
+    if (checks == null) {
+      return new HashMap<String, String>();
+    } else {
+      return checks;
+    }
   }
 
   /**
@@ -137,14 +144,40 @@ public class AutomationEngineData extends HashMap<String, Object> {
    * 
    * @param checkKey
    */
-  @SuppressWarnings("unchecked")
   public void clearNegativeCheckStatus(String checkKey) {
-    Map<String, String> checks = (Map<String, String>) get(NEGATIVE_CHECKS);
+    Map<String, String> checks = getPendingChecks();
     if (checks == null) {
       return;
     }
-    checks = (Map<String, String>) get(NEGATIVE_CHECKS);
     checks.remove(checkKey);
+  }
+
+  /**
+   * Returns the map of positive check statuses
+   * 
+   * @return
+   */
+  public List<String> getPositiveChecks() {
+    @SuppressWarnings("unchecked")
+    List<String> checks = (List<String>) get(POSITIVE_CHECKS);
+    if (checks == null) {
+      return new ArrayList<String>();
+    } else {
+      return checks;
+    }
+  }
+
+  /**
+   * Clears the positive check status for a particular key
+   * 
+   * @param key
+   */
+  public void clearPositiveCheck(String key) {
+    List<String> checks = getPositiveChecks();
+    if (checks == null) {
+      return;
+    }
+    checks.remove(key);
   }
 
   /**
@@ -161,7 +194,9 @@ public class AutomationEngineData extends HashMap<String, Object> {
       put(POSITIVE_CHECKS, checks);
     }
     checks = (List<String>) get(POSITIVE_CHECKS);
-    checks.add(checkKey);
+    if (!checks.contains(checkKey)) {
+      checks.add(checkKey);
+    }
   }
 
   /**
@@ -233,14 +268,8 @@ public class AutomationEngineData extends HashMap<String, Object> {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public HashMap<String, String> getPendingChecks() {
-    HashMap<String, String> checks = (HashMap<String, String>) get(NEGATIVE_CHECKS);
-    if (checks == null) {
-      return new HashMap<String, String>();
-    } else {
-      return checks;
-    }
+    return getNegativeChecks();
   }
   public boolean isTrackNegativeChecks() {
     return trackNegativeChecks;
@@ -254,4 +283,31 @@ public class AutomationEngineData extends HashMap<String, Object> {
     return trackedNegativeCheckCount;
   }
 
+  /**
+   * Returns true if VAT has been verified for a request
+   * 
+   * @return
+   */
+  public boolean isVatVerified() {
+    return hasPositiveCheckStatus(VAT_VERIFIED);
+  }
+
+  /**
+   * Set VAT verified for the request. If false sets the message as a pending
+   * check
+   * 
+   * @param vatVerified
+   * @param message
+   */
+  public void setVatVerified(boolean vatVerified, String message) {
+    if (vatVerified) {
+      addPositiveCheckStatus(VAT_VERIFIED);
+      clearNegativeCheckStatus(VAT_VERIFIED);
+    } else {
+      if (hasPositiveCheckStatus(VAT_VERIFIED)) {
+        clearPositiveCheck(VAT_VERIFIED);
+      }
+      addNegativeCheckStatus(VAT_VERIFIED, StringUtils.isNotBlank(message) ? message : "");
+    }
+  }
 }
