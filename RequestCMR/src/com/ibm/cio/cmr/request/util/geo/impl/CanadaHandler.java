@@ -79,6 +79,16 @@ public class CanadaHandler extends GEOHandler {
 
   @Override
   public void setAdminValuesOnImport(Admin admin, FindCMRRecordModel currentRecord) throws Exception {
+    String[] parts = null;
+
+    String name1 = admin.getMainCustNm1();
+    String name2 = admin.getMainCustNm2();
+    parts = splitName(name1, name2, 28, 24);
+    admin.setMainCustNm1(parts[0]);
+    admin.setOldCustNm1(parts[0]);
+    admin.setMainCustNm2(parts[1]);
+    admin.setOldCustNm2(parts[1]);
+
   }
 
   @Override
