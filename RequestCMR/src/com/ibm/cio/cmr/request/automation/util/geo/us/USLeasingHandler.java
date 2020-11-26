@@ -145,6 +145,7 @@ public class USLeasingHandler extends USBPHandler {
       StringBuilder details, OverrideOutput overrides, RequestData childRequest, FindCMRRecordModel ibmCmr) {
 
     Data data = requestData.getData();
+    String custSubGroup = data.getCustSubGrp();
     if (ibmCmr != null) {
       if (!StringUtils.isBlank(ibmCmr.getCmrSapNumber())) {
         details.append(
@@ -233,12 +234,21 @@ public class USLeasingHandler extends USBPHandler {
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "ISIC_CD", data.getIsicCd(), ibmCmr.getCmrIsic());
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "US_SICMEN", data.getUsSicmen(), ibmCmr.getCmrIsic());
       overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SUB_INDUSTRY_CD", data.getSubIndustryCd(), ibmCmr.getCmrSubIndustry());
-      details.append(" - CSO Site: " + ibmCmr.getUsCmrCsoSite() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), ibmCmr.getUsCmrCsoSite());
-      details.append(" - Marketing A/R Dept: " + ibmCmr.getUsCmrCsoSite() + "\n");
-      overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), ibmCmr.getUsCmrMktgArDept());
+      if (SUB_TYPE_LEASE_3CC.equals(custSubGroup)) {
+        details.append(" - CSO Site: 3CC\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), "3CC");
+        details.append(" - Marketing A/R Dept: 3CC\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), "3CC");
+      } else {
+        details.append(" - CSO Site: " + ibmCmr.getUsCmrCsoSite() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "CSO_SITE", data.getCsoSite(), ibmCmr.getUsCmrCsoSite());
+        details.append(" - Marketing A/R Dept: " + ibmCmr.getUsCmrCsoSite() + "\n");
+        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MTKG_AR_DEPT", data.getMtkgArDept(), ibmCmr.getUsCmrMktgArDept());
+      }
     }
 
+    details.append(" - PCC A/R Dept: G8M\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
     if (childRequest != null) {
       if (!StringUtils.isBlank(childRequest.getData().getMktgDept())) {
         details.append(" - Marketing Dept: " + childRequest.getData().getMktgDept() + "\n");
