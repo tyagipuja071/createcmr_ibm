@@ -247,6 +247,8 @@ public class USLeasingHandler extends USBPHandler {
       }
     }
 
+    details.append(" - PCC A/R Dept: G8M\n");
+    overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "PCC_AR_DEPT", data.getPccArDept(), "G8M");
     if (childRequest != null) {
       if (!StringUtils.isBlank(childRequest.getData().getMktgDept())) {
         details.append(" - Marketing Dept: " + childRequest.getData().getMktgDept() + "\n");
