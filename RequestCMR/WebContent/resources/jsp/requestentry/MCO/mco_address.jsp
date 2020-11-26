@@ -194,6 +194,9 @@
              </cmr:view>
              <cmr:view forCountry="838">
                 <cmr:info text="${ui.info.postalCodeFormatES}" />
+             </cmr:view>    
+             <cmr:view forCountry="780">
+                <cmr:info text="${ui.info.postalCodeFormatPT}" />
              </cmr:view>             
       </cmr:label>
       <cmr:field fieldId="PostalCode" id="postCd" path="postCd" />
