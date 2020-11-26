@@ -1393,7 +1393,7 @@ public class RequestEntryService extends BaseService<RequestEntryModel, Compound
           if (response.getMatched() && (("Accepted".equals(scorecard.getFindDnbResult()) && !StringUtils.isBlank(requestData.getData().getDunsNo()))
               || "Rejected".equals(scorecard.getFindDnbResult()))) {
             for (DnBMatchingResponse record : response.getMatches()) {
-              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record)) {
+              if (record.getConfidenceCode() >= 8 && DnBUtil.closelyMatchesDnb(data.getCmrIssuingCntry(), zs01, admin, record, null, false, true)) {
                 match = true;
                 break;
               } else if (checkTradestyleNames && record.getConfidenceCode() >= 8 && record.getTradeStyleNames() != null && tradeStyleName == null
