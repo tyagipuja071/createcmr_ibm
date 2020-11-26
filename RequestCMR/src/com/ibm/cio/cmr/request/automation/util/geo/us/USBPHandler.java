@@ -396,7 +396,7 @@ public abstract class USBPHandler {
             StringUtils.isNotBlank(nameParts[0]) ? nameParts[0] : "");
         details.append("Updated Division to " + (StringUtils.isNotBlank(nameParts[0]) ? nameParts[0] : "-blank-")).append("\n");
 
-        if (!useDeptForMatching(requestData)) {
+        if (useDeptForMatching(requestData)) {
           overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", installAt.getDept(),
               StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "");
           details.append("Updated Department to " + (StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "-blank-")).append("\n");
