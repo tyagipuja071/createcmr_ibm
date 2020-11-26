@@ -1475,7 +1475,7 @@ function handleRequiredDnBSearch() {
   var reqStatus = FormManager.getActualValue('reqStatus');
   if (reqId != null && reqId != '' && reqType == 'C' && reqStatus == 'DRA' && _dnbSearchHandler == null) {
     _dnbSearchHandler = dojo.connect(FormManager.getField('custSubGrp'), 'onChange', function(value) {
-      if (!isSkipDnbMatching()) {
+      if (!isSkipDnbMatching() && FormManager.getActualValue('viewOnlyMode') != 'true') {
         cmr.showNode('dnbRequired');
         cmr.showNode('dnbRequiredIndc');
       } else {
@@ -1483,6 +1483,10 @@ function handleRequiredDnBSearch() {
         cmr.hideNode('dnbRequiredIndc');
       }
     });
+  }
+  
+  if(_dnbSearchHandler && _dnbSearchHandler[0]){
+    _dnbSearchHandler[0].onChange();
   }
 }
 
