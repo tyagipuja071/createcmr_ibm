@@ -259,12 +259,11 @@ public class USLeasingHandler extends USBPHandler {
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(),
             childRequest.getData().getSvcArOffice());
       }
-    } else {
+    } else if (ibmCmr != null) {
       try {
-        getMktgSvcUsCmr(childRequest, overrides, data);
+        getMktgSvcUsCmr(ibmCmr.getCmrNum(), details, overrides, data);
       } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        LOG.error("An error occurred while retrieving values from USCMR", e);
       }
     }
 
@@ -292,8 +291,7 @@ public class USLeasingHandler extends USBPHandler {
 
   }
 
-  private void getMktgSvcUsCmr(RequestData childRequest, OverrideOutput overrides, Data data) throws Exception {
-    String cmrNo = childRequest.getAdmin().getModelCmrNo();
+  private void getMktgSvcUsCmr(String cmrNo, StringBuilder details, OverrideOutput overrides, Data data) throws Exception {
     String url = SystemConfiguration.getValue("CMR_SERVICES_URL");
     String usSchema = SystemConfiguration.getValue("US_CMR_SCHEMA");
     String sql = ExternalizedQuery.getSql("AUTO.GET_MKTG_SVC_USCMR", usSchema);
@@ -313,9 +311,11 @@ public class USLeasingHandler extends USBPHandler {
       String mtkgDept = (String) record.get("MKTG_DEPT");
       String svcArDept = (String) record.get("SVC_AR_OFFICE");
       if (!StringUtils.isBlank(mtkgDept)) {
+        details.append(" - Marketing Dept: " + mtkgDept + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "MKTG_DEPT", data.getMktgDept(), mtkgDept);
       }
       if (!StringUtils.isBlank(svcArDept)) {
+        details.append(" - SVC A/R Office: " + svcArDept + "\n");
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "DATA", "SVC_AR_OFFICE", data.getSvcArOffice(), svcArDept);
       }
     }

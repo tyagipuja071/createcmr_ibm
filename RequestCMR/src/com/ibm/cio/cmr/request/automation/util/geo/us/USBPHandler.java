@@ -394,10 +394,13 @@ public abstract class USBPHandler {
 
         overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DIVN", installAt.getDivn(),
             StringUtils.isNotBlank(nameParts[0]) ? nameParts[0] : "");
-        overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", installAt.getDept(),
-            StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "");
         details.append("Updated Division to " + (StringUtils.isNotBlank(nameParts[0]) ? nameParts[0] : "-blank-")).append("\n");
-        details.append("Updated Department to " + (StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "-blank-")).append("\n");
+
+        if (!useDeptForMatching(requestData)) {
+          overrides.addOverride(AutomationElementRegistry.US_BP_PROCESS, "ZS01", "DEPT", installAt.getDept(),
+              StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "");
+          details.append("Updated Department to " + (StringUtils.isNotBlank(nameParts[1]) ? nameParts[1] : "-blank-")).append("\n");
+        }
       }
 
       // if (StringUtils.isBlank(installAt.getDept()) &&
