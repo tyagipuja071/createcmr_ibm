@@ -107,6 +107,7 @@ function afterConfigForFR() {
   }
 
   reqReasonOnChange();
+  filterCmrnoP();
 }
 
 function setINACOnScenario() {
@@ -537,8 +538,6 @@ function addFRAddressTypeValidator() {
               shippingCnt++;
             } else if (type == 'ZI01') {
               softwareCnt++;
-            } else if (type == 'ZD02') {
-              hAddressCnt++;
             }
           }
 
@@ -558,10 +557,6 @@ function addFRAddressTypeValidator() {
             return new ValidationResult(null, false, 'Only one Shipping address can be defined. Please remove the additional Shipping address.');
           } else if (softwareCnt > 1) {
             return new ValidationResult(null, false, 'Only one EPL/Software mailing address can be defined. Please remove the additional EPL/Software mailing address.');
-          } else if (hAddressCnt > 1) {
-            return new ValidationResult(null, false, 'Only one H Address (IGF) address can be defined. Please remove the additional H Address (IGF) address.');
-          } else if (hAddressCnt > 0 && FormManager.getActualValue('requestingLob') != 'IGF' && reqType != 'U') {
-            return new ValidationResult(null, false, 'H Address (IGF) available only for IGF LOB. Please remove the H Address (IGF) address.');
           } else {
             return new ValidationResult(null, true);
           }
@@ -624,26 +619,27 @@ function addALPHANUMSPACEValidatorFR() {
 /**
  * story 1567051 - Address H available only for IGF LOB
  */
-function toggleAddrTypesForFR(cntry, addressMode) {
-  var requestingLob = FormManager.getActualValue('requestingLob');
-  if (requestingLob == 'IGF') {
-    if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-      cmr.showNode('radiocont_ZD02');
-    }
-  } else {
-    cmr.hideNode('radiocont_ZD02');
-  }
-  dojo.connect(FormManager.getField('requestingLob'), 'onChange', function(value) {
-    var _requestingLob = FormManager.getActualValue('requestingLob');
-    if (_requestingLob == 'IGF') {
-      if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
-        cmr.showNode('radiocont_ZD02');
-      }
-    } else {
-      cmr.hideNode('radiocont_ZD02');
-    }
-  });
-}
+// function toggleAddrTypesForFR(cntry, addressMode) {
+// var requestingLob = FormManager.getActualValue('requestingLob');
+// if (requestingLob == 'IGF') {
+// if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+// cmr.showNode('radiocont_ZD02');
+// }
+// } else {
+// cmr.hideNode('radiocont_ZD02');
+// }
+// dojo.connect(FormManager.getField('requestingLob'), 'onChange',
+// function(value) {
+// var _requestingLob = FormManager.getActualValue('requestingLob');
+// if (_requestingLob == 'IGF') {
+// if (addressMode == 'newAddress' || addressMode == 'copyAddress') {
+// cmr.showNode('radiocont_ZD02');
+// }
+// } else {
+// cmr.hideNode('radiocont_ZD02');
+// }
+// });
+// }
 function included(cntryCd) {
   var includedCntryCd = [ 'AD', 'MC', 'MQ', 'GP', 'GF', 'PM', 'RE', 'TF', 'KM', 'YT', 'NC', 'VU', 'WF', 'PF' ];
   var includedInd = false;
@@ -2354,6 +2350,19 @@ function restrictDuplicateAddr(cntry, addressMode, saving, finalSave, force) {
       })(), null, 'frmCMR_addressModal');
 }
 
+function filterCmrnoP() {
+  var cmrNo = FormManager.getActualValue('cmrNo');
+  if (cmrNo.length > 0 && cmrNo.substr(0, 1).toUpperCase() == 'P') {
+    FormManager.setValue('cmrNo', '');
+  }
+
+  dojo.connect(FormManager.getField('cmrNo'), 'onChange', function(value) {
+    if (value.length > 0 && value.substr(0, 1).toUpperCase() == 'P') {
+      FormManager.setValue('cmrNo', '');
+    }
+  });
+}
+
 dojo.addOnLoad(function() {
   GEOHandler.FR = [ SysLoc.FRANCE ];
   console.log('adding FR functions...');
@@ -2380,7 +2389,7 @@ dojo.addOnLoad(function() {
   GEOHandler.registerValidator(addLengthValidatorForSIRET, [ '706' ], null, true);
   GEOHandler.registerValidator(addLengthValidatorForSR, [ '706' ], null, true);
   GEOHandler.registerValidator(addALPHANUMValidatorForSR, [ '706' ], null, true);
-  GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForFR, '706');
+  // GEOHandler.addToggleAddrTypeFunction(toggleAddrTypesForFR, '706');
   GEOHandler.addAddrFunction(addFRLandedCountryHandler, '706');
   GEOHandler.enableCopyAddress('706', validateFRCopy, [ 'ZD01' ]);
   GEOHandler.registerValidator(addGenericVATValidator('706', 'MAIN_CUST_TAB', 'frmCMR', 'ZP01'), [ '706' ], null, true);
@@ -2401,4 +2410,5 @@ dojo.addOnLoad(function() {
   GEOHandler.addAfterConfig(lockIBMTabForFR, '706');
   GEOHandler.addAfterTemplateLoad(lockIBMTabForFR, '706');
   GEOHandler.registerValidator(restrictDuplicateAddr, [ '706' ], null, true);
+  GEOHandler.addAfterTemplateLoad(filterCmrnoP, '706');
 });
