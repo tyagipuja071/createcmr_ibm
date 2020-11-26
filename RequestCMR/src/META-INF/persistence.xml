@@ -117,6 +117,7 @@
 
     <class>com.ibm.cio.cmr.request.model.system.RequestStatsModel</class>
     <class>com.ibm.cio.cmr.request.model.system.StatsPK</class>
+    <class>com.ibm.cio.cmr.request.model.system.AutomationStatsModel</class>
     <class>com.ibm.cio.cmr.request.model.system.SquadStatisticsModel</class>
     <class>com.ibm.cio.cmr.request.model.system.SquadStatsPK</class>
 
